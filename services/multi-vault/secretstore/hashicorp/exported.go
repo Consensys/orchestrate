@@ -4,6 +4,7 @@ import (
 	"context"
 	"sync"
 
+	healthz "github.com/heptiolabs/healthcheck"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 )
@@ -13,6 +14,7 @@ const component = "secret-store.hashicorp"
 var (
 	store    *SecretStore
 	initOnce = &sync.Once{}
+	checker  healthz.Check
 )
 
 // Init initialize Crafter Handler
@@ -30,6 +32,8 @@ func Init(ctx context.Context) {
 			log.Fatalf("KeyStore: Cannot init hashicorp vault got error: %q", err)
 		}
 
+		checker = vault.Client.Health
+
 		// Set store
 		store = vault
 	})
@@ -43,4 +47,8 @@ func SetGlobalStore(h *SecretStore) {
 // GlobalStore returns global mock SecretStore
 func GlobalStore() *SecretStore {
 	return store
+}
+
+func GlobalChecker() healthz.Check {
+	return checker
 }

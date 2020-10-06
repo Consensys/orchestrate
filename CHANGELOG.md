@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## v2.5.0-rc1 (unreleased)
+
+### 🆕 Features
+* Enhance service health check endpoint (/ready) to validate external dependencies 
+
 ## v2.4.0-rc2 (2020-10-05)
 
 ### 🛠 Bug fixes

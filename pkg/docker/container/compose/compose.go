@@ -46,7 +46,7 @@ func (gen *Compose) GenerateContainerConfig(ctx context.Context, configuration i
 	return gen.reflect.GenerateContainerConfig(ctx, field)
 }
 
-func (gen *Compose) WaitForService(configuration interface{}, timeout time.Duration) error {
+func (gen *Compose) WaitForService(ctx context.Context, configuration interface{}, timeout time.Duration) error {
 	cfg, ok := configuration.(*config.Container)
 	if !ok {
 		return fmt.Errorf("invalid configuration type (expected %T but got %T)", cfg, configuration)
@@ -57,5 +57,5 @@ func (gen *Compose) WaitForService(configuration interface{}, timeout time.Durat
 		return err
 	}
 
-	return gen.reflect.WaitForService(field, timeout)
+	return gen.reflect.WaitForService(ctx, field, timeout)
 }

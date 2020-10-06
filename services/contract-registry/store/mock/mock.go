@@ -8,7 +8,6 @@ import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
 	common "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/common"
-	store "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store"
 	models "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store/models"
 	reflect "reflect"
 )
@@ -375,48 +374,4 @@ func (m *MockTagDataAgent) FindAllByName(ctx context.Context, name string) ([]st
 func (mr *MockTagDataAgentMockRecorder) FindAllByName(ctx, name interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAllByName", reflect.TypeOf((*MockTagDataAgent)(nil).FindAllByName), ctx, name)
-}
-
-// MockBuilder is a mock of Builder interface
-type MockBuilder struct {
-	ctrl     *gomock.Controller
-	recorder *MockBuilderMockRecorder
-}
-
-// MockBuilderMockRecorder is the mock recorder for MockBuilder
-type MockBuilderMockRecorder struct {
-	mock *MockBuilder
-}
-
-// NewMockBuilder creates a new mock instance
-func NewMockBuilder(ctrl *gomock.Controller) *MockBuilder {
-	mock := &MockBuilder{ctrl: ctrl}
-	mock.recorder = &MockBuilderMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use
-func (m *MockBuilder) EXPECT() *MockBuilderMockRecorder {
-	return m.recorder
-}
-
-// Build mocks base method
-func (m *MockBuilder) Build(ctx context.Context, conf *store.Config) (store.ContractDataAgent, store.RepositoryDataAgent, store.TagDataAgent, store.ArtifactDataAgent, store.MethodDataAgent, store.EventDataAgent, store.CodeHashDataAgent, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Build", ctx, conf)
-	ret0, _ := ret[0].(store.ContractDataAgent)
-	ret1, _ := ret[1].(store.RepositoryDataAgent)
-	ret2, _ := ret[2].(store.TagDataAgent)
-	ret3, _ := ret[3].(store.ArtifactDataAgent)
-	ret4, _ := ret[4].(store.MethodDataAgent)
-	ret5, _ := ret[5].(store.EventDataAgent)
-	ret6, _ := ret[6].(store.CodeHashDataAgent)
-	ret7, _ := ret[7].(error)
-	return ret0, ret1, ret2, ret3, ret4, ret5, ret6, ret7
-}
-
-// Build indicates an expected call of Build
-func (mr *MockBuilderMockRecorder) Build(ctx, conf interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Build", reflect.TypeOf((*MockBuilder)(nil).Build), ctx, conf)
 }

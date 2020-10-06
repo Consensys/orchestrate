@@ -6,6 +6,7 @@ import (
 	"reflect"
 
 	traefikdynamic "github.com/containous/traefik/v2/pkg/config/dynamic"
+	healthz "github.com/heptiolabs/healthcheck"
 	prom "github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth"
@@ -204,7 +205,7 @@ func SwaggerOpt(specsFile string, middlewares ...string) Option {
 func MetricsOpt(middlewares ...string) Option {
 	registry := prom.NewRegistry()
 	return CombineOptions(
-		HealthcheckOpt(middlewares...),
+		HealthcheckOpt(healthz.NewMetricsHandler(registry, "prometheus"), middlewares...),
 		PrometheusOpt(registry, middlewares...),
 		DashboardOpt(middlewares...),
 		MetricsInterceptorOpt(),
@@ -250,7 +251,7 @@ func DashboardOpt(middlewares ...string) Option {
 	return ProviderOpt(staticprovider.New(dynamic.NewMessage("dashboard", cfg)))
 }
 
-func HealthcheckOpt(middlewares ...string) Option {
+func HealthcheckOpt(h healthz.Handler, middlewares ...string) Option {
 	// Provider injecting dynamic configuration
 	cfg := dynamic.NewConfig()
 
@@ -269,18 +270,25 @@ func HealthcheckOpt(middlewares ...string) Option {
 	cfg.HTTP.Services["healthcheck"] = &dynamic.Service{
 		HealthCheck: &dynamic.HealthCheck{},
 	}
+
 	providerOpt := ProviderOpt(staticprovider.New(dynamic.NewMessage("healthcheck", cfg)))
 
-	// Handler builder option
-	handlerOpt := HandlerOpt(
-		reflect.TypeOf(&dynamic.HealthCheck{}),
-		healthcheck.NewTraefikBuilder(),
-	)
+	return func(app *App) error {
+		for _, chk := range app.readinessCheck {
+			h.AddReadinessCheck(chk.Name, chk.Check)
+		}
 
-	return CombineOptions(
-		providerOpt,
-		handlerOpt,
-	)
+		// Handler builder option
+		handlerOpt := HandlerOpt(
+			reflect.TypeOf(&dynamic.HealthCheck{}),
+			healthcheck.NewBuilder(h),
+		)
+
+		return CombineOptions(
+			providerOpt,
+			handlerOpt,
+		)(app)
+	}
 }
 
 func PrometheusOpt(registry *prom.Registry, middlewares ...string) Option {
@@ -307,7 +315,7 @@ func PrometheusOpt(registry *prom.Registry, middlewares ...string) Option {
 
 	providerOpt := ProviderOpt(staticprovider.New(dynamic.NewMessage("prometheus", cfg)))
 
-	// Register Prometheus regstry
+	// Register Prometheus registry
 	promRegister := func(app *App) error {
 		// Register base Process and Golang runtime metrics
 		registry.MustRegister(prom.NewProcessCollector(prom.ProcessCollectorOpts{}))

@@ -10,5 +10,5 @@ import (
 
 type DockerContainerFactory interface {
 	GenerateContainerConfig(ctx context.Context, configuration interface{}) (*container.Config, *container.HostConfig, *network.NetworkingConfig, error)
-	WaitForService(configuration interface{}, timeout time.Duration) error
+	WaitForService(ctx context.Context, configuration interface{}, timeout time.Duration) error
 }

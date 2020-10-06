@@ -4,29 +4,31 @@ import (
 	"context"
 	"reflect"
 
+	"github.com/go-pg/pg/v9"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
+	pkgpg "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
 	grpcstatic "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/config/static"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/config/dynamic"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/abi"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/contract-registry/use-cases"
 	grpcservice "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/service/grpc"
 	httpservice "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/service/http"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store/multi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store/postgres"
 )
 
 func New(
 	cfg *Config,
-	pgmngr postgres.Manager,
+	pgmngr pkgpg.Manager,
 	jwt, key auth.Checker,
 ) (*app.App, error) {
-	// Create Store
-	storeBuilder := store.NewBuilder(pgmngr)
-	contractDA, repositoryDA, tagDA, artifactDA, methodDA, eventDA, codeHashDA, err := storeBuilder.Build(context.Background(), cfg.Store)
+	db, err := multi.Build(context.Background(), cfg.Store, pgmngr)
 	if err != nil {
 		return nil, err
 	}
+
+	contractDA, repositoryDA, tagDA, artifactDA, methodDA, eventDA, codeHashDA := postgres.Build(db)
 
 	registerContractUC := usecases.NewRegisterContract(contractDA)
 	getContractUC := usecases.NewGetContract(artifactDA)
@@ -55,6 +57,7 @@ func New(
 	appli, err := app.New(
 		cfg.App,
 		app.MultiTenancyOpt("auth", jwt, key, cfg.Multitenancy),
+		ReadinessOpt(db),
 		app.MetricsOpt(),
 		app.LoggerOpt("base"),
 		app.SwaggerOpt("./public/swagger-specs/services/contract-registry/proto/registry.swagger.json", "base@logger-base"),
@@ -82,4 +85,11 @@ func New(
 	}
 
 	return appli, nil
+}
+
+func ReadinessOpt(db *pg.DB) app.Option {
+	return func(ap *app.App) error {
+		ap.AddReadinessCheck("database", pkgpg.Checker(db))
+		return nil
+	}
 }

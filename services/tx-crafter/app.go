@@ -2,6 +2,10 @@ package txcrafter
 
 import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
+	pkgsarama "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
+	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce/redis"
+	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 )
 
 func New(
@@ -10,6 +14,7 @@ func New(
 ) (*app.App, error) {
 	appli, err := app.New(
 		config,
+		ReadinessOpt(),
 		app.MetricsOpt(),
 	)
 
@@ -20,4 +25,14 @@ func New(
 	appli.RegisterDaemon(consumer)
 
 	return appli, nil
+}
+
+func ReadinessOpt() app.Option {
+	return func(ap *app.App) error {
+		ap.AddReadinessCheck("chain-registry", chainregistry.GlobalChecker())
+		ap.AddReadinessCheck("transaction-scheduler", txscheduler.GlobalChecker())
+		ap.AddReadinessCheck("kafka", pkgsarama.GlobalClientChecker())
+		ap.AddReadinessCheck("redis", redis.GlobalChecker())
+		return nil
+	}
 }

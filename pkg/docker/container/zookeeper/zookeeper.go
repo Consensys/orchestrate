@@ -60,7 +60,7 @@ func (k *Zookeeper) GenerateContainerConfig(ctx context.Context, configuration i
 	return containerCfg, hostConfig, nil, nil
 }
 
-func (k *Zookeeper) WaitForService(configuration interface{}, timeout time.Duration) error {
+func (k *Zookeeper) WaitForService(_ context.Context, configuration interface{}, timeout time.Duration) error {
 	cfg, ok := configuration.(*Config)
 	if !ok {
 		return fmt.Errorf("invalid configuration type (expected %T but got %T)", cfg, configuration)

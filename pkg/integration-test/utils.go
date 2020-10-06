@@ -8,7 +8,7 @@ import (
 	"github.com/containous/traefik/v2/pkg/log"
 )
 
-func WaitForServiceReady(ctx context.Context, url, name string, timeout time.Duration) {
+func WaitForServiceLive(ctx context.Context, url, name string, timeout time.Duration) {
 	logger := log.FromContext(ctx)
 	rctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
@@ -18,16 +18,17 @@ func WaitForServiceReady(ctx context.Context, url, name string, timeout time.Dur
 		req = req.WithContext(rctx)
 
 		resp, err := http.DefaultClient.Do(req)
-		if err != nil {
-			logger.WithError(err).Warnf("cannot reach %s service", name)
-		}
+		if err == nil {
+			if resp != nil && resp.StatusCode == 200 {
+				logger.Infof("service %s is live", name)
+				return
+			}
 
-		if resp != nil && resp.StatusCode == 200 {
-			logger.Infof("service %s is ready", name)
-			return
+			logger.WithField("status", resp.StatusCode).Warnf("cannot reach %s service", name)
 		}
 
 		if rctx.Err() != nil {
+			logger.WithError(rctx.Err()).Warnf("cannot reach %s service", name)
 			return
 		}
 

@@ -20,7 +20,7 @@ func NewUseCases(
 	producer sarama.SyncProducer,
 	topicsCfg *pkgsarama.KafkaTopicConfig,
 ) usecases.UseCases {
-	txValidator := validators.NewTransactionValidator(db, chainRegistryClient, contractRegistryClient)
+	txValidator := validators.NewTransactionValidator(chainRegistryClient, contractRegistryClient)
 
 	createScheduleUC := schedules.NewCreateScheduleUseCase(db)
 	getScheduleUC := schedules.NewGetScheduleUseCase(db)

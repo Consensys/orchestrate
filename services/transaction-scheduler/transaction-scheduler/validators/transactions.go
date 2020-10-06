@@ -14,7 +14,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 )
 
 //go:generate mockgen -source=transactions.go -destination=mocks/transactions.go -package=mocks
@@ -29,18 +28,16 @@ type TransactionValidator interface {
 
 // transactionValidator is a validator for transaction requests (business logic)
 type transactionValidator struct {
-	db                     store.DB
 	chainRegistryClient    client.ChainRegistryClient
 	contractRegistryClient contractregistry.ContractRegistryClient
 }
 
 // NewTransactionValidator creates a new TransactionValidator
 func NewTransactionValidator(
-	db store.DB,
 	chainRegistryClient client.ChainRegistryClient,
 	contractRegistryClient contractregistry.ContractRegistryClient,
 ) TransactionValidator {
-	return &transactionValidator{db: db, chainRegistryClient: chainRegistryClient, contractRegistryClient: contractRegistryClient}
+	return &transactionValidator{chainRegistryClient: chainRegistryClient, contractRegistryClient: contractRegistryClient}
 }
 
 func (txValidator *transactionValidator) ValidateChainExists(ctx context.Context, chainUUID string) (string, error) {

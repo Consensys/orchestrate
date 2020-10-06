@@ -10,24 +10,23 @@ import (
 )
 
 func init() {
-	viper.SetDefault(TxSchedulerURLViperKey, TxSchedulerURLDefault)
-	_ = viper.BindEnv(TxSchedulerURLViperKey, txSchedulerURLEnv)
-	viper.SetDefault(TxSchedulerMetricsURLViperKey, TxSchedulerMetricsURLDefault)
-	_ = viper.BindEnv(TxSchedulerMetricsURLViperKey, txSchedulerMetricsURLEnv)
+	viper.SetDefault(URLViperKey, urlDefault)
+	_ = viper.BindEnv(URLViperKey, urlEnv)
+	viper.SetDefault(MetricsURLViperKey, metricsURLDefault)
+	_ = viper.BindEnv(MetricsURLViperKey, metricsURLEnv)
 }
 
 const (
-	txSchedulerURLFlag     = "transaction-scheduler-url"
-	TxSchedulerURLViperKey = "transaction.scheduler.url"
-	TxSchedulerURLDefault  = "localhost:8081"
-	txSchedulerURLEnv      = "TRANSACTION_SCHEDULER_URL"
+	urlFlag     = "transaction-scheduler-url"
+	URLViperKey = "transaction.scheduler.url"
+	urlDefault  = "localhost:8081"
+	urlEnv      = "TRANSACTION_SCHEDULER_URL"
 )
 
 const (
-	txSchedulerMetricsURLFlag     = "transaction.scheduler-metrics-url"
-	TxSchedulerMetricsURLViperKey = "transaction.scheduler.metrics.url"
-	TxSchedulerMetricsURLDefault  = "localhost:8082"
-	txSchedulerMetricsURLEnv      = "TRANSACTION_SCHEDULER_METRICS_URL"
+	MetricsURLViperKey = "transaction.scheduler.metrics.url"
+	metricsURLDefault  = "localhost:8082"
+	metricsURLEnv      = "TRANSACTION_SCHEDULER_METRICS_URL"
 )
 
 var defaultClientBackOff = backoff.WithMaxRetries(backoff.NewConstantBackOff(time.Second), 0)
@@ -35,34 +34,30 @@ var defaultClientBackOff = backoff.WithMaxRetries(backoff.NewConstantBackOff(tim
 // ChainRegistryURL register flag for the URL of the Chain Registry
 func URL(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`URL of the Transaction Scheduler HTTP endpoint. 
-Environment variable: %q`, txSchedulerURLEnv)
-	f.String(txSchedulerURLFlag, TxSchedulerURLDefault, desc)
-	_ = viper.BindPFlag(TxSchedulerURLViperKey, f.Lookup(txSchedulerURLFlag))
+Environment variable: %q`, urlEnv)
+	f.String(urlFlag, urlDefault, desc)
+	_ = viper.BindPFlag(URLViperKey, f.Lookup(urlFlag))
 }
 
-// ChainRegistryURL register flag for the URL of the Chain Registry
-func MetricsURL(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`URL of the Transaction Scheduler Metrics endpoint.
-Environment variable: %q`, txSchedulerMetricsURLEnv)
-	f.String(txSchedulerMetricsURLFlag, TxSchedulerMetricsURLDefault, desc)
-	_ = viper.BindPFlag(TxSchedulerMetricsURLViperKey, f.Lookup(txSchedulerMetricsURLFlag))
-}
 func Flags(f *pflag.FlagSet) {
 	URL(f)
 }
 
 type Config struct {
-	URL     string
-	backOff backoff.BackOff
+	URL        string
+	MetricsURL string
+	backOff    backoff.BackOff
 }
 
 func NewConfig(url string, backOff backoff.BackOff) *Config {
 	if backOff == nil {
 		backOff = defaultClientBackOff
 	}
+
 	return &Config{
-		URL:     url,
-		backOff: backOff,
+		URL:        url,
+		MetricsURL: metricsURLDefault,
+		backOff:    backOff,
 	}
 }
 
@@ -72,7 +67,8 @@ func NewConfigFromViper(vipr *viper.Viper, backOff backoff.BackOff) *Config {
 	}
 
 	return &Config{
-		URL:     vipr.GetString(TxSchedulerURLViperKey),
-		backOff: backOff,
+		URL:        vipr.GetString(URLViperKey),
+		MetricsURL: vipr.GetString(MetricsURLViperKey),
+		backOff:    backOff,
 	}
 }

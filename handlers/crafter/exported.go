@@ -4,7 +4,6 @@ import (
 	"context"
 	"sync"
 
-	"github.com/spf13/viper"
 	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethclient/rpc"
 
 	log "github.com/sirupsen/logrus"
@@ -28,7 +27,7 @@ func Init(ctx context.Context) {
 		}
 
 		// Initialize Registry Client
-		registryclient.Init(ctx, viper.GetString(registryclient.ContractRegistryURLViperKey))
+		registryclient.Init(ctx)
 
 		ec := ethclient.GlobalClient()
 

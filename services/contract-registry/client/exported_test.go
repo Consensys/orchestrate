@@ -11,7 +11,7 @@ import (
 )
 
 func TestInit(t *testing.T) {
-	Init(context.Background(), contractRegistryURLDefault)
+	Init(context.Background())
 	assert.NotNil(t, GlobalClient(), "Global should have been set")
 
 	var c svc.ContractRegistryClient

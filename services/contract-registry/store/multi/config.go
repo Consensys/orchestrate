@@ -1,4 +1,4 @@
-package store
+package multi
 
 import (
 	"github.com/spf13/pflag"

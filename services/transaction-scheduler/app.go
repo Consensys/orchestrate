@@ -5,7 +5,10 @@ import (
 	"reflect"
 
 	"github.com/Shopify/sarama"
+	"github.com/go-pg/pg/v9/orm"
 	pkgsarama "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database"
+	contractregistry2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/builder"
 
@@ -13,7 +16,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/config/dynamic"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
+	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/controllers"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/multi"
 )
@@ -22,7 +25,7 @@ func NewTxScheduler(
 	cfg *Config,
 	pgmngr postgres.Manager,
 	jwt, key auth.Checker,
-	chainRegistryClient client.ChainRegistryClient,
+	chainRegistryClient chainregistry.ChainRegistryClient,
 	contractRegistryClient contractregistry.ContractRegistryClient,
 	syncProducer sarama.SyncProducer,
 	topicCfg *pkgsarama.KafkaTopicConfig,
@@ -42,10 +45,21 @@ func NewTxScheduler(
 	return app.New(
 		cfg.App,
 		app.MultiTenancyOpt("auth", jwt, key, cfg.Multitenancy),
+		ReadinessOpt(db),
 		app.MetricsOpt(),
 		app.LoggerMiddlewareOpt("base"),
 		app.SwaggerOpt("./public/swagger-specs/services/transaction-scheduler/swagger.json", "base@logger-base"),
 		txSchedulerHandlerOpt,
 		app.ProviderOpt(NewProvider()),
 	)
+}
+
+func ReadinessOpt(db database.DB) app.Option {
+	return func(ap *app.App) error {
+		ap.AddReadinessCheck("database", postgres.Checker(db.(orm.DB)))
+		ap.AddReadinessCheck("chain-registry", chainregistry.GlobalChecker())
+		ap.AddReadinessCheck("contract-registry", contractregistry2.GlobalChecker())
+		ap.AddReadinessCheck("kafka", pkgsarama.GlobalClientChecker())
+		return nil
+	}
 }

@@ -8,6 +8,10 @@ x-default-variables: &default-variables
   CONTRACT_REGISTRY_METRICS_URL: ${CONTRACT_REGISTRY_METRICS_URL-http://contract-registry:8082}
   TRANSACTION_SCHEDULER_URL: ${TRANSACTION_SCHEDULER_URL-http://transaction-scheduler:8081}
   TRANSACTION_SCHEDULER_METRICS_URL: ${TRANSACTION_SCHEDULER_URL-http://transaction-scheduler:8082}
+  TX_CRAFTER_METRICS_URL: ${TX_CRAFTER_METRICS_URL-http://tx-crafter:8082}
+  TX_SIGNER_METRICS_URL: ${TX_SIGNER_METRICS_URL-http://tx-signer:8082}
+  TX_LISTENER_METRICS_URL: ${TX_LISTENER_METRICS_URL-http://tx-listener:8082}
+  TX_SENDER_METRICS_URL: ${TX_SENDER_METRICS_URL-http://tx-sender:8082}
   ETH_CLIENT_RETRY_MAX_ELAPSED_TIME: 5s
   LOG_LEVEL: ${LOG_LEVEL-debug}
   LOG_FORMAT: ${LOG_FORMAT-}
@@ -160,6 +164,8 @@ services:
 
   tx-crafter:
     <<: *container-common
+    ports:
+      - 8042:8082
     environment:
       <<: *default-variables
       JAEGER_SERVICE_NAME: TX-CRAFTER
@@ -181,6 +187,8 @@ services:
 
   tx-signer:
     <<: *container-common
+    ports:
+      - 8052:8082
     environment:
       <<: *default-variables
       JAEGER_SERVICE_NAME: TX-SIGNER
@@ -194,6 +202,8 @@ services:
     command: tx-signer run
 
   tx-sender:
+    ports:
+      - 8062:8082
     <<: *container-common
     environment:
       <<: *default-variables
@@ -203,6 +213,8 @@ services:
     command: tx-sender run
 
   tx-listener:
+    ports:
+      - 8072:8082
     <<: *container-common
     environment:
       <<: *default-variables
@@ -223,9 +235,9 @@ services:
       CUCUMBER_CONCURRENCY: ${CUCUMBER_CONCURRENCY-}
       TEST_GLOBAL_DATA: ${TEST_GLOBAL_DATA-}
       AUTH_JWT_PRIVATE_KEY: ${AUTH_JWT_PRIVATE_KEY-}
-#      CUCUMBER_STEPS_TIMEOUT: ${CUCUMBER_STEPS_TIMEOUT-500}
-# Uncomment CUCUMBER_TAGS if only run features and scenarios with @public-tx or @account tags ("," = OR, "&&" = AND, "~" = NOT)
-#      CUCUMBER_TAGS: "@besu"
+    #      CUCUMBER_STEPS_TIMEOUT: ${CUCUMBER_STEPS_TIMEOUT-500}
+    # Uncomment CUCUMBER_TAGS if only run features and scenarios with @public-tx or @account tags ("," = OR, "&&" = AND, "~" = NOT)
+    #      CUCUMBER_TAGS: "@besu"
     restart: "no"
     command: e2e
     volumes:

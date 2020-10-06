@@ -110,6 +110,15 @@ func (s *SecretStore) Load(ctx context.Context, rawKey string) (value string, ok
 	return "", false, e
 }
 
+func (s *SecretStore) Health() error {
+	if s.client == nil {
+		return errors.InternalError("client not set").SetComponent(component)
+	}
+
+	_, err := s.List()
+	return err
+}
+
 func (s *SecretStore) create(key, value string) (err error) {
 	if s.client == nil {
 		return errors.InternalError("client not set").SetComponent(component)

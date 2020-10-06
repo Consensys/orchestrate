@@ -68,13 +68,13 @@ func (g *Postgres) GenerateContainerConfig(ctx context.Context, configuration in
 	return containerCfg, hostConfig, nil, nil
 }
 
-func (g *Postgres) WaitForService(configuration interface{}, timeout time.Duration) error {
+func (g *Postgres) WaitForService(ctx context.Context, configuration interface{}, timeout time.Duration) error {
 	cfg, ok := configuration.(*Config)
 	if !ok {
 		return fmt.Errorf("invalid configuration type (expected %T but got %T)", cfg, configuration)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	rctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
 	pgCfg, _ := postgres.NewConfig(viper.GetViper()).PGOptions()
@@ -88,15 +88,15 @@ func (g *Postgres) WaitForService(configuration interface{}, timeout time.Durati
 waitForServiceLoop:
 	for {
 		select {
-		case <-ctx.Done():
-			cerr = ctx.Err()
+		case <-rctx.Done():
+			cerr = rctx.Err()
 			break waitForServiceLoop
 		case <-retryT.C:
 			_, err := db.Exec("SELECT 1")
 			if err != nil {
-				log.WithContext(ctx).WithError(err).Warnf("waiting for PostgreSQL service to start")
+				log.WithContext(rctx).WithError(err).Warnf("waiting for PostgreSQL service to start")
 			} else {
-				log.WithContext(ctx).Infof("PostgreSQL container service is ready")
+				log.WithContext(rctx).Infof("PostgreSQL container service is ready")
 				break waitForServiceLoop
 			}
 		}

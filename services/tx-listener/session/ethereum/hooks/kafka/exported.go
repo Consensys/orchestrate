@@ -6,7 +6,6 @@ import (
 
 	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 
-	"github.com/spf13/viper"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethclient/rpc"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
@@ -23,7 +22,7 @@ func initComponent(ctx context.Context) {
 		// Initialize Ethereum Client
 		func() { ethclient.Init(ctx) },
 		// Initialize Contract Registry Client
-		func() { crc.Init(ctx, viper.GetString(crc.ContractRegistryURLViperKey)) },
+		func() { crc.Init(ctx) },
 		// Initialize Sync Producer
 		func() { broker.InitSyncProducer(ctx) },
 		// Initialize transaction scheduler client

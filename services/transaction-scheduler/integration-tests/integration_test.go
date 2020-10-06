@@ -42,7 +42,6 @@ func (s *txSchedulerTestSuite) TearDownSuite() {
 func TestTxScheduler(t *testing.T) {
 	s := new(txSchedulerTestSuite)
 	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
 
 	s.env, s.err = NewIntegrationEnvironment(ctx)
 	if s.err != nil {

@@ -11,6 +11,10 @@ import (
 	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client"
 	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
+	txcrafter "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-crafter"
+	txlistener "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener"
+	txsender "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-sender"
+	txsigner "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-signer"
 )
 
 const GlobalAka = "global"
@@ -47,14 +51,18 @@ func importGlobalAlias(rawAliases string) {
 	}
 	// register internal aliases
 	internal := map[string]interface{}{
-		"chain-registry":            viper.GetString(chainregistry.ChainRegistryURLViperKey),
-		"chain-registry-metrics":    viper.GetString(chainregistry.ChainRegistryMetricsURLViperKey),
-		"contract-registry":         viper.GetString(contractregistry.ContractRegistryURLViperKey),
-		"contract-registry-metrics": viper.GetString(contractregistry.ContractRegistryMetricsURLViperKey),
-		"contract-registry-http":    viper.GetString(contractregistry.ContractRegistryHTTPURLViperKey),
-		"tx-scheduler":              viper.GetString(txscheduler.TxSchedulerURLViperKey),
-		"tx-scheduler-metrics":      viper.GetString(txscheduler.TxSchedulerMetricsURLViperKey),
+		"chain-registry":            viper.GetString(chainregistry.URLViperKey),
+		"chain-registry-metrics":    viper.GetString(chainregistry.MetricsURLViperKey),
+		"contract-registry":         viper.GetString(contractregistry.GRPCURLViperKey),
+		"contract-registry-metrics": viper.GetString(contractregistry.MetricsURLViperKey),
+		"contract-registry-http":    viper.GetString(contractregistry.HTTPURLViperKey),
+		"tx-scheduler":              viper.GetString(txscheduler.URLViperKey),
+		"tx-scheduler-metrics":      viper.GetString(txscheduler.MetricsURLViperKey),
 		"api-key":                   viper.GetString(key.APIKeyViperKey),
+		"tx-crafter-metrics":        viper.GetString(txcrafter.MetricsURLViperKey),
+		"tx-signer-metrics":         viper.GetString(txsigner.MetricsURLViperKey),
+		"tx-sender-metrics":         viper.GetString(txsender.MetricsURLViperKey),
+		"tx-listener-metrics":       viper.GetString(txlistener.MetricsURLViperKey),
 	}
 	for k, v := range internal {
 		if _, ok := global[k]; ok {

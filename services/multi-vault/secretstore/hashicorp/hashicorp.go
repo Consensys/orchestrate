@@ -137,3 +137,15 @@ func (v *Hashicorp) SetTokenFromConfig(c *Config) error {
 func (v *Hashicorp) Auth() *api.Auth {
 	return v.Client.Auth()
 }
+
+func (v *Hashicorp) Health() error {
+	resp, err := v.Client.Sys().Health()
+	if err != nil {
+		return err
+	}
+	if !resp.Initialized {
+		return errors.ServiceConnectionError("HashiCorp Vault service is not initialized")
+	}
+
+	return nil
+}

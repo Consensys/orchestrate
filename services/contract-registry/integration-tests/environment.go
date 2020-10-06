@@ -37,6 +37,7 @@ type IntegrationEnvironment struct {
 	envContract *abi.Contract
 	logger      log.Logger
 	baseHTTP    string
+	metricsURL  string
 	baseGRPC    string
 }
 
@@ -88,6 +89,7 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 		envContract: envContract,
 		logger:      logger,
 		baseHTTP:    "http://localhost:" + envHTTPPort,
+		metricsURL:  "http://localhost:" + envMetricsPort,
 		baseGRPC:    "localhost:" + envGRPCPort,
 	}, nil
 }
@@ -120,8 +122,8 @@ func (env *IntegrationEnvironment) Start(ctx context.Context) error {
 		return err
 	}
 
-	integrationtest.WaitForServiceReady(ctx,
-		fmt.Sprintf("http://localhost:%s/ready", envMetricsPort),
+	integrationtest.WaitForServiceLive(ctx,
+		fmt.Sprintf("http://localhost:%s/live", envMetricsPort),
 		"contract-registry",
 		10*time.Second)
 

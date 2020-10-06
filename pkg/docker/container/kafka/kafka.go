@@ -91,7 +91,7 @@ func (k *Kafka) GenerateContainerConfig(_ context.Context, configuration interfa
 	return containerCfg, hostConfig, nil, nil
 }
 
-func (k *Kafka) WaitForService(configuration interface{}, timeout time.Duration) error {
+func (k *Kafka) WaitForService(ctx context.Context, configuration interface{}, timeout time.Duration) error {
 	cfg, ok := configuration.(*Config)
 	if !ok {
 		return fmt.Errorf("invalid configuration type (expected %T but got %T)", cfg, configuration)
@@ -100,7 +100,7 @@ func (k *Kafka) WaitForService(configuration interface{}, timeout time.Duration)
 	saramaCfg, _ := pkgsarama.NewSaramaConfig()
 	addrs := []string{cfg.KafkaExternalHostname}
 
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	rctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
 	retryT := time.NewTicker(time.Second)
@@ -110,23 +110,23 @@ func (k *Kafka) WaitForService(configuration interface{}, timeout time.Duration)
 waitForServiceLoop:
 	for {
 		select {
-		case <-ctx.Done():
-			cerr = ctx.Err()
+		case <-rctx.Done():
+			cerr = rctx.Err()
 			break waitForServiceLoop
 		case <-retryT.C:
 			client, err := pkgsarama.NewClient(addrs, saramaCfg)
 			switch {
 			case err != nil:
-				log.WithContext(ctx).
+				log.WithContext(rctx).
 					WithError(err).
 					Warnf("waiting for kafka service to start: %s", cfg.KafkaExternalHostname)
 			case len(client.Brokers()) < 1:
 				err := fmt.Errorf("not available brokers")
-				log.WithContext(ctx).
+				log.WithContext(rctx).
 					WithError(err).
 					Warnf("waiting for kafka service to start: %s", cfg.KafkaExternalHostname)
 			default:
-				log.WithContext(ctx).Infof("kafka container service is ready")
+				log.WithContext(rctx).Infof("kafka container service is ready")
 				break waitForServiceLoop
 			}
 		}

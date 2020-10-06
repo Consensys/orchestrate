@@ -10,7 +10,7 @@ import (
 	grpcstatic "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/config/static"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store/multi"
 )
 
 func init() {
@@ -37,14 +37,14 @@ Environment variable: %q`, `<contract>:<abi>:<bytecode>:<deployedBytecode>`, abi
 // Flags register flags for Postgres database
 func Flags(f *pflag.FlagSet) {
 	ABIs(f)
-	store.Flags(f)
+	multi.Flags(f)
 	http.Flags(f)
 	grpc.Flags(f)
 }
 
 type Config struct {
 	App          *app.Config
-	Store        *store.Config
+	Store        *multi.Config
 	ABIs         []string // Chains defined in ENV
 	Multitenancy bool
 }
@@ -52,7 +52,7 @@ type Config struct {
 func NewConfig(vipr *viper.Viper) *Config {
 	cfg := &Config{
 		App:          app.NewConfig(vipr),
-		Store:        store.NewConfig(vipr),
+		Store:        multi.NewConfig(vipr),
 		ABIs:         viper.GetStringSlice(ABIViperKey),
 		Multitenancy: viper.GetBool(multitenancy.EnabledViperKey),
 	}

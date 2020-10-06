@@ -1,6 +1,6 @@
 // +build unit
 
-package store
+package multi
 
 import (
 	"testing"

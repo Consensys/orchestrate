@@ -3,6 +3,7 @@ package integrationtests
 import (
 	"context"
 	"fmt"
+	http2 "net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -16,6 +17,7 @@ import (
 	integrationtest "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/integration-test"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/integration-test/mocks"
 	chainClient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
+	contractClient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
 	transactionscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler"
 	"gopkg.in/h2non/gock.v1"
@@ -34,9 +36,10 @@ import (
 )
 
 const postgresContainerID = "postgres-transaction-scheduler"
-const kafkaContainerID = "kafka-transaction-scheduler"
+const kafkaContainerID = "Kafka-transaction-scheduler"
 const zookeeperContainerID = "zookeeper-transaction-scheduler"
 const ChainRegistryURL = "http://chain-registry:8081"
+const ContractRegistryURL = "http://contract-registry:8081"
 const networkName = "transaction-scheduler"
 
 var envPGHostPort string
@@ -52,6 +55,7 @@ type IntegrationEnvironment struct {
 	consumer                      *integrationtest.KafkaConsumer
 	pgmngr                        postgres.Manager
 	baseURL                       string
+	metricsURL                    string
 	contractRegistryResponseFaker *mocks.ContractRegistryFaker
 	kafkaTopicConfig              *sarama.KafkaTopicConfig
 }
@@ -116,11 +120,12 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 	}
 
 	return &IntegrationEnvironment{
-		ctx:     ctx,
-		logger:  logger,
-		client:  dockerClient,
-		pgmngr:  postgres.NewManager(),
-		baseURL: "http://localhost:" + envHTTPPort,
+		ctx:        ctx,
+		logger:     logger,
+		client:     dockerClient,
+		pgmngr:     postgres.NewManager(),
+		baseURL:    "http://localhost:" + envHTTPPort,
+		metricsURL: "http://localhost:" + envMetricsPort,
 	}, nil
 }
 
@@ -131,7 +136,7 @@ func (env *IntegrationEnvironment) Start(ctx context.Context) error {
 		return err
 	}
 
-	// Start postgres database
+	// Start postgres Database
 	err = env.client.Up(ctx, postgresContainerID, networkName)
 	if err != nil {
 		env.logger.WithError(err).Error("could not up postgres")
@@ -144,7 +149,7 @@ func (env *IntegrationEnvironment) Start(ctx context.Context) error {
 		return err
 	}
 
-	// Start kafka + zookeeper
+	// Start Kafka + zookeeper
 	err = env.client.Up(ctx, zookeeperContainerID, networkName)
 	if err != nil {
 		env.logger.WithError(err).Error("could not up zookeeper")
@@ -153,13 +158,13 @@ func (env *IntegrationEnvironment) Start(ctx context.Context) error {
 
 	err = env.client.Up(ctx, kafkaContainerID, networkName)
 	if err != nil {
-		env.logger.WithError(err).Error("could not up kafka")
+		env.logger.WithError(err).Error("could not up Kafka")
 		return err
 	}
 
 	err = env.client.WaitTillIsReady(ctx, kafkaContainerID, 20*time.Second)
 	if err != nil {
-		env.logger.WithError(err).Error("could not start kafka")
+		env.logger.WithError(err).Error("could not start Kafka")
 		return err
 	}
 
@@ -181,16 +186,16 @@ func (env *IntegrationEnvironment) Start(ctx context.Context) error {
 		return err
 	}
 
-	// Start kafka consumer
+	// Start Kafka consumer
 	env.consumer, err = integrationtest.NewKafkaTestConsumer(ctx, "tx-scheduler-group", sarama.GlobalClient(),
 		[]string{env.kafkaTopicConfig.Crafter, env.kafkaTopicConfig.Sender})
 	if err != nil {
-		env.logger.WithError(err).Error("could initialize kafka")
+		env.logger.WithError(err).Error("could initialize Kafka")
 		return err
 	}
 	err = env.consumer.Start(context.Background())
 	if err != nil {
-		env.logger.WithError(err).Error("could not run kafka consumer")
+		env.logger.WithError(err).Error("could not run Kafka consumer")
 		return err
 	}
 
@@ -201,11 +206,11 @@ func (env *IntegrationEnvironment) Start(ctx context.Context) error {
 		return err
 	}
 
-	integrationtest.WaitForServiceReady(
+	integrationtest.WaitForServiceLive(
 		ctx,
-		fmt.Sprintf("http://localhost:%s/ready", envMetricsPort),
+		fmt.Sprintf("%s/live", env.metricsURL),
 		"transaction-scheduler",
-		10*time.Second,
+		15*time.Second,
 	)
 
 	return nil
@@ -226,7 +231,7 @@ func (env *IntegrationEnvironment) Teardown(ctx context.Context) {
 
 	err = env.client.Down(ctx, kafkaContainerID)
 	if err != nil {
-		env.logger.WithError(err).Errorf("could not down kafka")
+		env.logger.WithError(err).Errorf("could not down Kafka")
 	}
 
 	err = env.client.Down(ctx, zookeeperContainerID)
@@ -241,20 +246,20 @@ func (env *IntegrationEnvironment) Teardown(ctx context.Context) {
 }
 
 func (env *IntegrationEnvironment) migrate(ctx context.Context) error {
-	// Set database connection
+	// Set Database connection
 	opts, err := postgres.NewConfig(viper.GetViper()).PGOptions()
 	if err != nil {
 		return err
 	}
 
 	db := env.pgmngr.Connect(ctx, opts)
-	env.logger.Debugf("initializing database migrations...")
+	env.logger.Debugf("initializing Database migrations...")
 	_, _, err = migrations.Run(db, "init")
 	if err != nil {
 		return err
 	}
 
-	env.logger.Debugf("running database migrations...")
+	env.logger.Debugf("running Database migrations...")
 	_, _, err = migrations.Run(db, "up")
 	if err != nil {
 		return err
@@ -286,6 +291,26 @@ func newTransactionScheduler(
 
 	pgmngr := postgres.GetManager()
 	txSchedulerConfig := transactionscheduler.NewConfig(viper.GetViper())
+
+	chainClient.SetGlobalChecker(func() error {
+		req, _ := http2.NewRequest("GET", fmt.Sprintf("%s/live", ChainRegistryURL), nil)
+		resp, _ := httpClient.Do(req)
+		if resp.StatusCode == 200 {
+			return nil
+		}
+
+		return fmt.Errorf("service chain-registry cannot be reach")
+	})
+
+	contractClient.SetGlobalChecker(func() error {
+		req, _ := http2.NewRequest("GET", fmt.Sprintf("%s/live", ContractRegistryURL), nil)
+		resp, _ := httpClient.Do(req)
+		if resp.StatusCode == 200 {
+			return nil
+		}
+
+		return fmt.Errorf("service contract-registry cannot be reach")
+	})
 
 	return transactionscheduler.NewTxScheduler(
 		txSchedulerConfig,

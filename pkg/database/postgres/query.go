@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-pg/pg/v9"
 	"github.com/go-pg/pg/v9/orm"
+	healthz "github.com/heptiolabs/healthcheck"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
@@ -107,4 +108,11 @@ func WhereAllowedTenants(query *orm.Query, field string, tenants []string) *orm.
 	}
 
 	return query.Where(fmt.Sprintf("%s IN (?)", field), pg.In(tenants))
+}
+
+func Checker(db orm.DB) healthz.Check {
+	return func() error {
+		_, err := db.Exec("SELECT 1")
+		return err
+	}
 }

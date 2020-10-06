@@ -34,7 +34,7 @@ func Init(ctx context.Context) {
 
 		// Create Handler
 		handler = engine.CombineHandlers(
-			ChainUUIDHandler(registry.GlobalClient(), viper.GetString(registry.ChainRegistryURLViperKey)),
+			ChainUUIDHandler(registry.GlobalClient(), viper.GetString(registry.URLViperKey)),
 			ChainIDInjectorHandler(ethclient.GlobalClient()),
 		)
 

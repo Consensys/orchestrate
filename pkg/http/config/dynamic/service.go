@@ -148,7 +148,8 @@ type Swagger struct {
 
 // +k8s:deepcopy-gen=true
 
-type HealthCheck struct{}
+type HealthCheck struct {
+}
 
 // +k8s:deepcopy-gen=true
 

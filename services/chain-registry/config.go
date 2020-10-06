@@ -13,7 +13,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/configwatcher"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/multi"
 )
 
 func init() {
@@ -42,7 +42,7 @@ type Config struct {
 	Cache            *ristretto.Config
 	ProxyCacheTTL    *time.Duration
 	ServersTransport *traefikstatic.ServersTransport
-	Store            *store.Config
+	Store            *multi.Config
 	EnvChains        []string // Chains defined in ENV
 	Multitenancy     bool
 }
@@ -63,14 +63,14 @@ Environment variable: %q`, cacheTTLEnv)
 func Flags(f *pflag.FlagSet) {
 	cmdFlags(f)
 	http.Flags(f)
-	store.Flags(f)
+	multi.Flags(f)
 	configwatcher.Flags(f)
 }
 
 func NewConfig(vipr *viper.Viper) *Config {
 	cfg := &Config{
 		App:   app.NewConfig(vipr),
-		Store: store.NewConfig(vipr),
+		Store: multi.NewConfig(vipr),
 		Cache: &ristretto.Config{
 			NumCounters: 1e7,     // number of keys to track frequency of (10M).
 			MaxCost:     1 << 30, // maximum cost of cache (1GB).

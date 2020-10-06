@@ -14,13 +14,13 @@ import (
 func TestChainRegistryTarget(t *testing.T) {
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	Flags(flgs)
-	expected := chainRegistryURLDefault
-	assert.Equal(t, expected, viper.GetString(ChainRegistryURLViperKey), "Default")
+	expected := urlDefault
+	assert.Equal(t, expected, viper.GetString(URLViperKey), "Default")
 
-	_ = os.Setenv(ChainRegistryURLEnv, "env-chain-registry")
+	_ = os.Setenv(urlEnv, "env-chain-registry")
 	expected = "env-chain-registry"
-	assert.Equal(t, expected, viper.GetString(ChainRegistryURLViperKey), "From Environment Variable")
-	_ = os.Unsetenv(ChainRegistryURLEnv)
+	assert.Equal(t, expected, viper.GetString(URLViperKey), "From Environment Variable")
+	_ = os.Unsetenv(urlEnv)
 
 	args := []string{
 		"--chain-registry-url=flag-chain-registry",
@@ -28,11 +28,11 @@ func TestChainRegistryTarget(t *testing.T) {
 	err := flgs.Parse(args)
 	assert.NoError(t, err, "Parse Chain Registry flags should not error")
 	expected = "flag-chain-registry"
-	assert.Equal(t, expected, viper.GetString(ChainRegistryURLViperKey), "From Flag")
+	assert.Equal(t, expected, viper.GetString(URLViperKey), "From Flag")
 }
 
 func TestFlags(t *testing.T) {
 	f := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	Flags(f)
-	assert.Equal(t, chainRegistryURLDefault, viper.GetString(ChainRegistryURLViperKey), "Default")
+	assert.Equal(t, urlDefault, viper.GetString(URLViperKey), "Default")
 }

@@ -35,7 +35,7 @@ func Init(ctx context.Context) {
 
 		// Create Handler
 		handler = engine.CombineHandlers(
-			chaininjector.ChainUUIDHandlerWithoutAbort(registry.GlobalClient(), viper.GetString(registry.ChainRegistryURLViperKey)),
+			chaininjector.ChainUUIDHandlerWithoutAbort(registry.GlobalClient(), viper.GetString(registry.URLViperKey)),
 			handlerfaucet.Faucet(registry.GlobalClient(), txscheduler.GlobalClient()),
 		)
 

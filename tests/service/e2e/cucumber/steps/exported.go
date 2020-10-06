@@ -3,7 +3,6 @@ package steps
 import (
 	"context"
 
-	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/jwt/generator"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethclient/rpc"
@@ -20,7 +19,7 @@ func Init(ctx context.Context) {
 	generator.Init(ctx)
 	chainregistry.Init(ctx)
 	alias.Init(ctx)
-	contractregistry.Init(ctx, viper.GetString(contractregistry.ContractRegistryURLViperKey))
+	contractregistry.Init(ctx)
 	txscheduler.Init()
 	noncememory.Init(ctx)
 	ethclient.Init(ctx)

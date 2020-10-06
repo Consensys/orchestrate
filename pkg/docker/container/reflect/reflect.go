@@ -30,13 +30,13 @@ func (gen *Reflect) GenerateContainerConfig(ctx context.Context, configuration i
 	return generator.GenerateContainerConfig(ctx, configuration)
 }
 
-func (gen *Reflect) WaitForService(configuration interface{}, timeout time.Duration) error {
+func (gen *Reflect) WaitForService(ctx context.Context, configuration interface{}, timeout time.Duration) error {
 	generator, ok := gen.generators[reflect.TypeOf(configuration)]
 	if !ok {
 		return fmt.Errorf("no container config generator for configuration of type %T (consider adding one)", configuration)
 	}
 
-	return generator.WaitForService(configuration, timeout)
+	return generator.WaitForService(ctx, configuration, timeout)
 }
 
 func (gen *Reflect) AddGenerator(typ reflect.Type, generator container.DockerContainerFactory) {

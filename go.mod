@@ -4,7 +4,6 @@ go 1.14
 
 require (
 	github.com/ConsenSys/golang-utils v0.0.0-20190722185538-95555d181804
-	github.com/DATA-DOG/go-sqlmock v1.3.3 // indirect
 	github.com/Shopify/sarama v1.26.1
 	github.com/alicebob/gopher-json v0.0.0-20180125190556-5a6b3ba71ee6 // indirect
 	github.com/alicebob/miniredis v2.5.0+incompatible
@@ -41,7 +40,7 @@ require (
 	github.com/hashicorp/go-retryablehttp v0.6.4
 	github.com/hashicorp/vault v1.3.4
 	github.com/hashicorp/vault/api v1.0.5-0.20200117231345-460d63e36490
-	github.com/julien-marchand/healthcheck v0.1.0
+	github.com/heptiolabs/healthcheck v0.0.0-20180807145615-6ff867650f40
 	github.com/justinas/alice v1.2.0
 	github.com/mitchellh/copystructure v1.0.0
 	github.com/mitchellh/mapstructure v1.2.2
@@ -67,6 +66,7 @@ require (
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0
 	google.golang.org/genproto v0.0.0-20200326112834-f447254575fd
 	google.golang.org/grpc v1.28.0
+	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0 // indirect
 	gopkg.in/h2non/gock.v1 v1.0.15
 	k8s.io/apimachinery v0.17.3
 )

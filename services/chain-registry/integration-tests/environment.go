@@ -27,10 +27,11 @@ var envHTTPPort string
 var envMetricsPort string
 
 type IntegrationEnvironment struct {
-	client  *docker.Client
-	pgmngr  postgres.Manager
-	logger  log.Logger
-	baseURL string
+	client     *docker.Client
+	pgmngr     postgres.Manager
+	logger     log.Logger
+	baseURL    string
+	metricsURL string
 }
 
 func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, error) {
@@ -73,10 +74,11 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 	viper.SetDefault(chainregistry.InitViperKey, initChains)
 
 	return &IntegrationEnvironment{
-		client:  dockerClient,
-		pgmngr:  postgres.NewManager(),
-		logger:  logger,
-		baseURL: "http://localhost:" + envHTTPPort,
+		client:     dockerClient,
+		pgmngr:     postgres.NewManager(),
+		logger:     logger,
+		baseURL:    "http://localhost:" + envHTTPPort,
+		metricsURL: "http://localhost:" + envMetricsPort,
 	}, nil
 }
 
@@ -107,8 +109,8 @@ func (env *IntegrationEnvironment) Start(ctx context.Context) error {
 		return err
 	}
 
-	integrationtest.WaitForServiceReady(ctx,
-		fmt.Sprintf("http://localhost:%s/ready", envMetricsPort),
+	integrationtest.WaitForServiceLive(ctx,
+		fmt.Sprintf("http://localhost:%s/live", envMetricsPort),
 		"chain-registry",
 		10*time.Second)
 

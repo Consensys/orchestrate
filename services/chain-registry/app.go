@@ -6,9 +6,10 @@ import (
 	"time"
 
 	"github.com/dgraph-io/ristretto"
+	"github.com/go-pg/pg/v9"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
+	pkgpg "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethclient/rpc"
@@ -22,21 +23,22 @@ import (
 	ctrl "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/service/controllers"
 	chainctrl "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/service/controllers/chains"
 	faucetctrl "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/service/controllers/faucets"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/multi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/postgres"
 )
 
 func New(
 	cfg *Config,
-	pgmngr postgres.Manager,
+	pgmngr pkgpg.Manager,
 	ec ethclient.Client,
 	jwt, key auth.Checker,
 ) (*app.App, error) {
-	//
-	storeBuilder := store.NewBuilder(pgmngr)
-	dataAgents, err := storeBuilder.Build(context.Background(), cfg.Store)
+	db, err := multi.Build(context.Background(), cfg.Store, pgmngr)
 	if err != nil {
 		return nil, err
 	}
+
+	dataAgents := postgres.Build(db)
 
 	getChainsUC := chainUCs.NewGetChains(dataAgents.Chain)
 	getChainUC := chainUCs.NewGetChain(dataAgents.Chain)
@@ -97,6 +99,7 @@ func New(
 	appli, err := app.New(
 		cfg.App,
 		app.MultiTenancyOpt("auth", jwt, key, cfg.Multitenancy),
+		ReadinessOpt(db),
 		app.MetricsOpt(),
 		app.LoggerMiddlewareOpt("base"),
 		rateLimitOpt,
@@ -126,4 +129,11 @@ func New(
 	}
 
 	return appli, nil
+}
+
+func ReadinessOpt(db *pg.DB) app.Option {
+	return func(ap *app.App) error {
+		ap.AddReadinessCheck("database", pkgpg.Checker(db))
+		return nil
+	}
 }

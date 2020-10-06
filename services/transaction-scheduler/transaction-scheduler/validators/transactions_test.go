@@ -43,14 +43,11 @@ func (s *transactionsTestSuite) SetupTest() {
 	ctrl := gomock.NewController(s.T())
 	defer ctrl.Finish()
 
-	mockDB := mocks.NewMockDB(ctrl)
 	s.mockTxRequestDA = mocks.NewMockTransactionRequestAgent(ctrl)
 	s.mockChainRegistryClient = mock.NewMockChainRegistryClient(ctrl)
 	s.mockContractRegistryClient = mock2.NewMockContractRegistryClient(ctrl)
 
-	mockDB.EXPECT().TransactionRequest().Return(s.mockTxRequestDA).AnyTimes()
-
-	s.validator = NewTransactionValidator(mockDB, s.mockChainRegistryClient, s.mockContractRegistryClient)
+	s.validator = NewTransactionValidator(s.mockChainRegistryClient, s.mockContractRegistryClient)
 }
 
 func (s *transactionsTestSuite) TestTransactionValidator_ValidateChainExists() {

@@ -6,8 +6,11 @@ import (
 	"crypto/x509"
 	"io/ioutil"
 	"sync"
+	"time"
 
 	"github.com/Shopify/sarama"
+	"github.com/hashicorp/go-multierror"
+	healthz "github.com/heptiolabs/healthcheck"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
@@ -23,6 +26,7 @@ var (
 	initProducerOnce      = &sync.Once{}
 	group                 sarama.ConsumerGroup
 	initConsumerGroupOnce = &sync.Once{}
+	checker               healthz.Check
 )
 
 // NewTLSConfig inspired by https://medium.com/processone/using-tls-authentication-for-your-go-kafka-client-3c5841f2a625
@@ -104,6 +108,16 @@ func InitClient(_ context.Context) (err error) {
 		for _, v := range client.Brokers() {
 			brokers[v.ID()] = v.Addr()
 		}
+
+		checker = func() error {
+			gr := &multierror.Group{}
+			for _, host := range hostnames {
+				gr.Go(healthz.TCPDialCheck(host, time.Second*3))
+			}
+
+			return gr.Wait().ErrorOrNil()
+		}
+
 		log.Infof("sarama: client ready (connected to brokers: %v) at host %v", brokers, hostnames)
 	})
 
@@ -113,6 +127,10 @@ func InitClient(_ context.Context) (err error) {
 // GlobalClient returns Sarama global client
 func GlobalClient() sarama.Client {
 	return client
+}
+
+func GlobalClientChecker() healthz.Check {
+	return checker
 }
 
 // SetGlobalClient sets Sarama global client

@@ -11,6 +11,7 @@ import (
 
 	traefiklog "github.com/containous/traefik/v2/pkg/log"
 	"github.com/hashicorp/go-multierror"
+	healthz "github.com/heptiolabs/healthcheck"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/configwatcher"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/configwatcher/provider"
@@ -23,6 +24,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/config/dynamic"
 	httphandler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/handler/dynamic"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/handler/healthcheck"
 	httpmid "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/middleware/dynamic"
 	metricsmid "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/middleware/metrics"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/router"
@@ -69,7 +71,8 @@ type App struct {
 
 	metrics metrics.Registry
 
-	daemons []Daemon
+	daemons        []Daemon
+	readinessCheck []*healthcheck.Checker
 
 	logger *logrus.Logger
 
@@ -214,6 +217,10 @@ func (app *App) AddListener(listener func(context.Context, interface{}) error) {
 
 func (app *App) RegisterDaemon(d Daemon) {
 	app.daemons = append(app.daemons, d)
+}
+
+func (app *App) AddReadinessCheck(name string, check healthz.Check) {
+	app.readinessCheck = append(app.readinessCheck, healthcheck.NewChecker(name, check))
 }
 
 func (app *App) Start(ctx context.Context) error {
@@ -384,5 +391,14 @@ func (app *App) Errors() <-chan error {
 }
 
 func (app *App) IsReady() bool {
-	return app.isReady
+	if !app.isReady {
+		return false
+	}
+
+	gr := &multierror.Group{}
+	for _, chk := range app.readinessCheck {
+		gr.Go(chk.Check)
+	}
+
+	return gr.Wait().ErrorOrNil() == nil
 }

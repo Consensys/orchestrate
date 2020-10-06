@@ -40,7 +40,7 @@ type Config struct {
 
 func NewConfig() *Config {
 	return &Config{
-		ChainRegistryURL: viper.GetString(chainregistry.ChainRegistryURLViperKey),
+		ChainRegistryURL: viper.GetString(chainregistry.URLViperKey),
 		RefreshInterval:  viper.GetDuration(ProviderRefreshIntervalViperKey),
 	}
 }

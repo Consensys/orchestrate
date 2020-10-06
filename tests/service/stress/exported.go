@@ -116,7 +116,7 @@ func initComponents(ctx context.Context) {
 		func() {
 			broker.InitSyncProducer(ctx)
 			chainregistry.Init(ctx)
-			contractregistry.Init(ctx, viper.GetString(contractregistry.ContractRegistryURLViperKey))
+			contractregistry.Init(ctx)
 			txscheduler.Init()
 		},
 		// Initialize ConsumerGroup

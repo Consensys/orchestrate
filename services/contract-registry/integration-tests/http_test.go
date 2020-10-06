@@ -4,13 +4,17 @@ package integrationtests
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	json2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
+	http2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
 	registry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
@@ -169,6 +173,55 @@ func (s *contractRegistryHTTPTestSuite) TestContractRegistry_Get() {
 		getValue(resp, body)
 
 		assert.Equal(t, body.GetDeployedBytecode(), contract0.GetDeployedBytecode())
+	})
+}
+
+func (s *contractRegistryHTTPTestSuite) TestTransactionScheduler_ZHealthCheck() {
+	type healthRes struct {
+		Database string `json:"Database,omitempty"`
+	}
+
+	httpClient := http2.NewClient(http2.NewDefaultConfig())
+	ctx := context.Background()
+	s.T().Run("should retrieve positive health check over service dependencies", func(t *testing.T) {
+		req, err := http.NewRequest("GET", fmt.Sprintf("%s/ready?full=1", s.env.metricsURL), nil)
+		assert.NoError(s.T(), err)
+
+		resp, err := httpClient.Do(req)
+		if err != nil {
+			assert.Fail(s.T(), err.Error())
+			return
+		}
+
+		assert.Equal(s.T(), 200, resp.StatusCode)
+		status := healthRes{}
+		err = json2.UnmarshalBody(resp.Body, &status)
+		assert.NoError(s.T(), err)
+		assert.Equal(s.T(), "OK", status.Database)
+	})
+
+	s.T().Run("should retrieve a negative health check over postgres service", func(t *testing.T) {
+		req, err := http.NewRequest("GET", fmt.Sprintf("%s/ready?full=1", s.env.metricsURL), nil)
+		assert.NoError(s.T(), err)
+
+		// Kill Kafka on first call so data is added in DB and status is CREATED but does not get updated to STARTED
+		err = s.env.client.Stop(ctx, postgresContainerID)
+		assert.NoError(t, err)
+
+		resp, err := httpClient.Do(req)
+		if err != nil {
+			assert.Fail(s.T(), err.Error())
+			return
+		}
+
+		err = s.env.client.StartServiceAndWait(ctx, postgresContainerID, 10*time.Second)
+		assert.NoError(s.T(), err)
+
+		assert.Equal(s.T(), 503, resp.StatusCode)
+		status := healthRes{}
+		err = json2.UnmarshalBody(resp.Body, &status)
+		assert.NoError(s.T(), err)
+		assert.NotEqual(s.T(), "OK", status.Database)
 	})
 }
 

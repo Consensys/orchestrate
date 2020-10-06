@@ -9,7 +9,7 @@ import (
 	authkey "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/key"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
+	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client"
 )
 
@@ -18,9 +18,9 @@ func New(ctx context.Context) (*app.App, error) {
 	// Initialize dependencies
 	authjwt.Init(ctx)
 	authkey.Init(ctx)
-	client.Init(ctx)
+	chainregistry.Init(ctx)
 	sarama.InitSyncProducer(ctx)
-	contractregistry.Init(ctx, viper.GetString(contractregistry.ContractRegistryURLViperKey))
+	contractregistry.Init(ctx)
 
 	config := NewConfig(viper.GetViper())
 	pgmngr := postgres.GetManager()
@@ -30,7 +30,7 @@ func New(ctx context.Context) (*app.App, error) {
 		pgmngr,
 		authjwt.GlobalChecker(),
 		authkey.GlobalChecker(),
-		client.GlobalClient(),
+		chainregistry.GlobalClient(),
 		contractregistry.GlobalClient(),
 		sarama.GlobalSyncProducer(),
 		sarama.NewKafkaTopicConfig(viper.GetViper()),
