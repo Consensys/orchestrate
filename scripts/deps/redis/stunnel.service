@@ -1,0 +1,100 @@
+#!/bin/sh
+#
+# stunnel      Start/Stop the stunnel daemons
+#
+# description: stunnel is a script that runs stunnel daemons
+#              version 1.00
+#
+# chkconfig: 345 40 60
+#
+# processname: stunnel
+# pidfile: /tmp/stunnel.pid
+#
+
+progname=stunnel
+pidfile=/tmp/stunnel.pid
+
+do_start() {
+
+        if [ -f $pidfile ]
+        then
+                echo "$progname already running!";
+                exit 1;
+        fi
+
+        /usr/bin/stunnel /etc/stunnel/stunnel.conf
+
+        if [ $? -gt 0 ]; then
+                echo "Start failed with exit code $?"
+                exit $?;
+        fi
+
+        pid=`cat $pidfile`
+
+        if [ `ps --pid $pid 2> /dev/null | grep -c $pid 2> /dev/null` -eq '0' ]; then
+                echo "Process did not start!"
+                rm -f $pidfile
+                exit 1;
+        fi
+
+        echo "Started with PID: $pid"
+
+        exit 0;
+}
+
+do_stop() {
+
+        if [ -f $pidfile ]
+        then
+                pid=`cat $pidfile`
+                echo "Stopping $pid"
+
+                kill -s TERM $pid > /dev/null
+                rm -f $pidfile
+
+                count=0;
+                until [ `ps --pid $pid 2> /dev/null | grep -c $pid 2> /dev/null` -eq '0' ] || [ $count -gt 10 ]
+        do
+                sleep 1
+                let count=$count+1;
+        done
+
+        if [ $count -gt 10 ]; then
+                echo "Force stop of $progname"
+                kill -9 $pid
+        fi
+
+        echo "Stopped"
+
+                exit 0;
+        fi
+}
+
+do_status() {
+
+        if [ -f $pidfile ]
+        then
+                pid=`cat $pidfile`
+                echo "$progname is running with PID $pid"
+        else
+                echo "$progname is not running"
+        fi
+
+}
+
+
+case "$1" in
+start)  echo "Starting $progname"
+        do_start
+        ;;
+stop)  echo "Stopping $progname"
+        do_stop
+        ;;
+status)
+        do_status
+        ;;
+*)      echo "Usage: service $progname start|stop|status"
+        exit 1
+        ;;
+esac
+exit 0

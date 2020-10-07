@@ -21,10 +21,14 @@ var testKey = "test-key"
 
 func TestNonceManager(t *testing.T) {
 	mredis := NewRedisMock()
-	conf := &Configuration{
+	conf := &Config{
 		Expiration: 1,
+		Host:       mredis.Host(),
+		Port:       mredis.Port(),
 	}
-	nm = NewNonceManager(NewPool(mredis.Addr()), conf)
+
+	pool, _ := NewPool(conf)
+	nm = NewNonceManager(pool, conf)
 
 	n, ok, err := nm.GetLastAttributed(testKey)
 	assert.NoError(t, err, "When manager is empty: GetLastAttributed should not error")
@@ -48,10 +52,14 @@ func TestNonceManager(t *testing.T) {
 
 func TestNonceNonceSender(t *testing.T) {
 	mredis := NewRedisMock()
-	conf := &Configuration{
+	conf := &Config{
 		Expiration: 1,
+		Host:       mredis.Host(),
+		Port:       mredis.Port(),
 	}
-	nm = NewNonceManager(NewPool(mredis.Addr()), conf)
+
+	pool, _ := NewPool(conf)
+	nm = NewNonceManager(pool, conf)
 
 	n, ok, err := nm.GetLastSent(testKey)
 	assert.NoError(t, err, "When manager is empty: GetLastSent should not error")

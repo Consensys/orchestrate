@@ -3,8 +3,10 @@ package redis
 import (
 	"time"
 
+	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/gomodule/redigo/redis"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tls"
 )
 
 // Conn is a wrapper around a redis.Conn that handles internal errors
@@ -30,11 +32,36 @@ func (conn Conn) Do(commandName string, args ...interface{}) (interface{}, error
 }
 
 // Creates a new redis pool
-func NewPool(address string, options ...redis.DialOption) *redis.Pool {
+func NewPool(cfg *Config) (*redis.Pool, error) {
+	options := []redis.DialOption{}
+	if cfg.Database != databaseDefault {
+		options = append(options, redis.DialDatabase(cfg.Database))
+	}
+
+	if cfg.User != "" {
+		options = append(options, redis.DialUsername(cfg.User))
+	}
+
+	if cfg.Password != "" {
+		options = append(options, redis.DialPassword(cfg.Password))
+	}
+
+	if cfg.TLS != nil {
+		c, err := tls.NewConfig(cfg.TLS)
+		if err != nil {
+			return nil, err
+		}
+
+		options = append(options, redis.DialTLSConfig(c), redis.DialUseTLS(true))
+		log.WithoutContext().Debug("Redis TLS is enabled")
+	}
+
 	return &redis.Pool{
 		// TODO Fine tune those parameters or make them accessible in config file
 		MaxIdle:     10000,
 		IdleTimeout: 240 * time.Second,
-		Dial:        func() (redis.Conn, error) { return Dial("tcp", address, options...) },
-	}
+		Dial: func() (redis.Conn, error) {
+			return Dial("tcp", cfg.URL(), options...)
+		},
+	}, nil
 }

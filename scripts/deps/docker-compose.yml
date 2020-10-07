@@ -50,6 +50,19 @@ services:
     volumes:
       - ./config/redis/redis.conf:/usr/local/etc/redis/redis.conf
 
+#  redis:
+#    <<: *container-common
+#    build: ./redis
+#    user: root
+#    ports:
+#      - 6379:6379
+#      - 6378:6378
+#    volumes:
+#      - ./config/redis/stunnel.conf:/etc/stunnel/stunnel.conf
+#      - ./config/redis/redis-auth.conf:/etc/redis/redis.conf
+#      - ./redis/init.sh:/init.sh
+#    command: sh /init.sh
+
   postgres-unit:
     <<: *container-common
     <<: *postgres-common

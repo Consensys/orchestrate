@@ -6,6 +6,15 @@ All notable changes to this project will be documented in this file.
 
 ### 🆕 Features
 * Enhance service health check endpoint (/ready) to validate external dependencies 
+* Add support for TLS connection to Redis. Add flags and environment variables:
+    * `REDIS_TLS_CERT`: PEM certificate to connect to the database
+    * `REDIS_TLS_KEY`: PEM key to connect to the database
+    * `REDIS_TLS_CA`: PEM trusted CA that issued certificate
+    * `REDIS_TLS_SKIP_VERIFY`: TLS host verification should be enabled/disabled
+* Add Redis AUTH credential and database selection. Add flags and environment variables:
+    * `REDIS_USERNAME`: Redis AUTH username
+    * `REDIS_PASSWORD`: Redis AUTH password
+    * `REDIS_DATABASE`: Redis CLI database number
 
 ## v2.4.0-rc2 (2020-10-05)
 

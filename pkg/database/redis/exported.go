@@ -24,13 +24,16 @@ func Init() {
 			return
 		}
 
-		redisURL := viper.GetString(URLViperKey)
-		pool := NewPool(redisURL)
+		cfg := NewConfig(viper.GetViper())
+		pool, err := NewPool(cfg)
+		if err != nil {
+			log.WithError(err).Fatalf("could not connect to redis server")
+		}
 
 		// Initialize Nonce
-		nm = NewNonceManager(pool, NewConfig())
+		nm = NewNonceManager(pool, cfg)
 
-		checker = healthz.TCPDialCheck(redisURL, time.Second*2)
+		checker = healthz.Timeout(nm.Ping, time.Second*2)
 
 		log.WithFields(log.Fields{
 			"type": "redis",

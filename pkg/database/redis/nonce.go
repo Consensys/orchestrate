@@ -11,11 +11,11 @@ import (
 // NonceManager manages nonce using an underlying redis cache
 type NonceManager struct {
 	pool *redis.Pool
-	conf *Configuration
+	conf *Config
 }
 
 // NewNonceManager creates a new NonceManager using an underlying redis cache
-func NewNonceManager(pool *redis.Pool, conf *Configuration) *NonceManager {
+func NewNonceManager(pool *redis.Pool, conf *Config) *NonceManager {
 	return &NonceManager{
 		pool: pool,
 		conf: conf,
@@ -23,6 +23,10 @@ func NewNonceManager(pool *redis.Pool, conf *Configuration) *NonceManager {
 }
 
 const lastAttributedSuf = "last-attributed"
+
+func (nm *NonceManager) Ping() error {
+	return nm.ping()
+}
 
 // GetLastAttributed loads last attributed nonce from state
 func (nm *NonceManager) GetLastAttributed(key string) (nonce uint64, ok bool, err error) {
@@ -77,6 +81,24 @@ func (nm *NonceManager) IsRecovering(key string) (bool, error) {
 // SetRecovering set recovery status
 func (nm *NonceManager) SetRecovering(key string, status bool) error {
 	return nm.set(computeKey(key, recoveringSuf), status)
+}
+
+func (nm *NonceManager) ping() error {
+	conn := nm.pool.Get()
+
+	defer func() {
+		closeErr := conn.Close()
+		if closeErr != nil {
+			log.WithError(closeErr).Warn("could not close redis connection")
+		}
+	}()
+
+	_, err := conn.Do("PING")
+	if err != nil {
+		return errors.FromError(err).SetComponent(component)
+	}
+
+	return nil
 }
 
 func (nm *NonceManager) load(key string) (value interface{}, ok bool, err error) {

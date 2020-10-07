@@ -263,7 +263,7 @@ func NewConfig(vipr *viper.Viper) *Config {
 	if vipr.GetString(DBTLSCertViperKey) != "" {
 		cfg.TLS = &tls.Option{
 			Certificates: []*certificate.KeyPair{
-				&certificate.KeyPair{
+				{
 					Cert: []byte(vipr.GetString(DBTLSCertViperKey)),
 					Key:  []byte(vipr.GetString(DBTLSKeyViperKey)),
 				},
