@@ -100,6 +100,15 @@ services:
     ports:
       - 5432
 
+  postgres-identity-manager:
+    <<: *container-common
+    <<: *postgres-common
+    image: postgres:10.12-alpine
+    volumes:
+      - db-data-identity-manager:/var/lib/postgresql/data
+    ports:
+      - 5432
+
   vault:
     <<: *container-common
     image: library/vault:1.1.1
@@ -147,6 +156,8 @@ volumes:
   db-data-contract-registry:
     driver: local
   db-data-transaction-scheduler:
+    driver: local
+  db-data-identity-manager:
     driver: local
   vault-token:
     driver: local

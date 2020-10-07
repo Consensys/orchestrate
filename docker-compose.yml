@@ -8,6 +8,8 @@ x-default-variables: &default-variables
   CONTRACT_REGISTRY_METRICS_URL: ${CONTRACT_REGISTRY_METRICS_URL-http://contract-registry:8082}
   TRANSACTION_SCHEDULER_URL: ${TRANSACTION_SCHEDULER_URL-http://transaction-scheduler:8081}
   TRANSACTION_SCHEDULER_METRICS_URL: ${TRANSACTION_SCHEDULER_URL-http://transaction-scheduler:8082}
+  IDENTITY_MANAGER_URL: ${IDENTITY_MANAGER_URL-http://identity-manager:8081}
+  IDENTITY_MANAGER_METRICS_URL: ${IDENTITY_MANAGER_URL-http://identity-manager:8082}
   TX_CRAFTER_METRICS_URL: ${TX_CRAFTER_METRICS_URL-http://tx-crafter:8082}
   TX_SIGNER_METRICS_URL: ${TX_SIGNER_METRICS_URL-http://tx-signer:8082}
   TX_LISTENER_METRICS_URL: ${TX_LISTENER_METRICS_URL-http://tx-listener:8082}
@@ -70,6 +72,10 @@ x-contract-registry-common: &contract-registry-common
 x-transaction-scheduler-common: &transaction-scheduler-common
   TRANSACTION_SCHEDULER_TYPE: ${TRANSACTION_SCHEDULER_TYPE-}
   DB_HOST: postgres-transaction-scheduler
+
+x-identity-manager-common: &identity-manager-common
+  IDENTITY_MANAGER_TYPE: ${IDENTITY_MANAGER_TYPE-}
+  DB_HOST: postgres-identity-manager
 
 services:
   chain-registry-migration-init:
@@ -170,10 +176,40 @@ services:
       - chain-registry
     command: transaction-scheduler run
 
+  identity-manager-migration-init:
+    <<: *container-common
+    environment:
+      <<: *default-variables
+      <<: *identity-manager-common
+    restart: "no"
+    command: identity-manager migrate init
+
+  identity-manager-migration:
+    <<: *container-common
+    environment:
+      <<: *default-variables
+      <<: *identity-manager-common
+    restart: "no"
+    depends_on:
+      - identity-manager-migration-init
+    command: identity-manager migrate up
+
+  identity-manager:
+    <<: *container-common
+    ports:
+      - 8041:8081
+      - 8042:8082
+    environment:
+      <<: *default-variables
+      <<: *identity-manager-common
+    depends_on:
+      - identity-manager-migration
+    command: identity-manager run
+
   tx-crafter:
     <<: *container-common
     ports:
-      - 8042:8082
+      - 8052:8082
     environment:
       <<: *default-variables
       JAEGER_SERVICE_NAME: TX-CRAFTER
@@ -196,7 +232,7 @@ services:
   tx-signer:
     <<: *container-common
     ports:
-      - 8052:8082
+      - 8062:8082
     environment:
       <<: *default-variables
       JAEGER_SERVICE_NAME: TX-SIGNER
@@ -211,7 +247,7 @@ services:
 
   tx-sender:
     ports:
-      - 8062:8082
+      - 8072:8082
     <<: *container-common
     environment:
       <<: *default-variables
@@ -222,7 +258,7 @@ services:
 
   tx-listener:
     ports:
-      - 8072:8082
+      - 8082:8082
     <<: *container-common
     environment:
       <<: *default-variables

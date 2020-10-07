@@ -47,7 +47,7 @@ func (uc *updateJobUseCase) Execute(ctx context.Context, job *entities.Job, next
 	retrievedJob := parsers.NewJobEntityFromModels(jobModel)
 	status := retrievedJob.GetStatus()
 
-	if status == utils.StatusMined || status == utils.StatusFailed || status == utils.StatusStored {
+	if status == utils.StatusMined || status == utils.StatusFailed || status == utils.StatusStored || status == utils.StatusNeverMined {
 		errMessage := "job status is final, cannot be updated"
 		logger.WithField("status", status).Error(errMessage)
 		return nil, errors.InvalidParameterError(errMessage).ExtendComponent(updateJobComponent)
