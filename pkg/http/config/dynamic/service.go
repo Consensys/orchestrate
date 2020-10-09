@@ -19,6 +19,7 @@ type Service struct {
 	Contracts    *Contracts    `json:"contracts,omitempty" toml:"contracts,omitempty" yaml:"contracts,omitempty"`
 	Transactions *Transactions `json:"transactions,omitempty" toml:"transactions,omitempty" yaml:"transactions,omitempty"`
 	Identity     *Identity     `json:"identity,omitempty" toml:"identity,omitempty" yaml:"identity,omitempty"`
+	Signer       *Signer       `json:"signer,omitempty" toml:"signer,omitempty" yaml:"signer,omitempty"`
 	Mock         *Mock         `json:"mock,omitempty" toml:"mock,omitempty" yaml:"mock,omitempty"`
 }
 
@@ -178,6 +179,10 @@ type Transactions struct{}
 // +k8s:deepcopy-gen=true
 
 type Identity struct{}
+
+// +k8s:deepcopy-gen=true
+
+type Signer struct{}
 
 // +k8s:deepcopy-gen=true
 

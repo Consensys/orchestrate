@@ -1,0 +1,30 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "PegaSys Orchestrate Identity API. Enables dynamic management of identities.\nIdentities correspond to an Ethereum accounts. It can be a user account or a deployed smart contract. By usage of the generated cryptographic key pair, identities can be used to sign/verify and to encrypt/decrypt messages.",
+        "title": "Identity Manager API",
+        "contact": {
+            "name": "Contact PegaSys Orchestrate",
+            "url": "https://pegasys.tech/contact/",
+            "email": "support@pegasys.tech"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "2.0"
+    },
+    "paths": {},
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "X-API-Key",
+            "in": "header"
+        },
+        "JWTAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

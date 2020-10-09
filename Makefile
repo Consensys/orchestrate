@@ -1,6 +1,6 @@
 GOFILES := $(shell find . -name '*.go' -not -path "./vendor/*" | grep -v pkg/http/handler/dashboard/genstatic/gen.go | grep -v pkg/http/handler/swagger/genstatic/gen.go | egrep -v "^\./\.go" | grep -v _test.go)
 PACKAGES ?= $(shell go list ./... | grep -Fv -e e2e -e examples -e genstatic -e mock )
-CMD_RUN = tx-crafter tx-signer tx-sender tx-listener contract-registry chain-registry transaction-scheduler identity-manager
+CMD_RUN = tx-crafter tx-signer tx-sender tx-listener contract-registry chain-registry transaction-scheduler identity-manager key-manager
 CMD_PERSISTENT = redis postgres-chain-registry postgres-contract-registry postgres-transaction-scheduler postgres-identity-manager vault-init vault jaeger
 CMD_KAFKA = zookeeper kafka
 CMD_MIGRATE = contract-registry chain-registry transaction-scheduler identity-manager
