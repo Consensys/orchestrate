@@ -54,6 +54,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 		jobModel := testutils2.FakeJobModel(0)
 		jobModel.Schedule.TenantID = tenantID
 
+		mockJobDA.EXPECT().LockOneByUUID(ctx, jobEntity.UUID).Return(nil)
 		mockJobDA.EXPECT().FindOneByUUID(ctx, jobEntity.UUID, []string{tenantID}).Return(jobModel, nil).Times(2)
 		mockTransactionDA.EXPECT().Update(ctx, jobModel.Transaction).Return(nil)
 		mockJobDA.EXPECT().Update(ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, jobModelUpdate *models.Job) error {
@@ -79,6 +80,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 		jobModel := testutils2.FakeJobModel(0)
 		jobModel.Schedule.TenantID = tenantID
 
+		mockJobDA.EXPECT().LockOneByUUID(ctx, jobEntity.UUID).Return(nil)
 		mockJobDA.EXPECT().FindOneByUUID(ctx, jobEntity.UUID, []string{tenantID}).Return(jobModel, nil).Times(2)
 		mockJobDA.EXPECT().Update(ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, jobModelUpdate *models.Job) error {
 			assert.Equal(t, jobModelUpdate.InternalData, jobEntity.InternalData)
@@ -102,6 +104,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 		jobModel := testutils2.FakeJobModel(0)
 		jobModel.Schedule.TenantID = tenantID
 
+		mockJobDA.EXPECT().LockOneByUUID(ctx, jobEntity.UUID).Return(nil)
 		mockJobDA.EXPECT().FindOneByUUID(ctx, jobEntity.UUID, []string{tenantID}).Return(jobModel, nil).Times(2)
 		mockTransactionDA.EXPECT().Update(ctx, jobModel.Transaction).Return(nil)
 		mockJobDA.EXPECT().Update(ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, jobModelUpdate *models.Job) error {
@@ -124,6 +127,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 		jobModel.Schedule.TenantID = tenantID
 		jobModel.Logs[0].Status = utils.StatusStarted
 
+		mockJobDA.EXPECT().LockOneByUUID(ctx, jobEntity.UUID).Return(nil)
 		mockJobDA.EXPECT().FindOneByUUID(ctx, jobEntity.UUID, []string{tenantID}).Return(jobModel, nil).Times(2)
 		mockJobDA.EXPECT().Update(ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, jobModelUpdate *models.Job) error {
 			assert.Equal(t, jobModelUpdate.InternalData, jobEntity.InternalData)
@@ -150,6 +154,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 		jobModel.Schedule.TenantID = tenantID
 		jobModel.Logs[0].Status = utils.StatusPending
 
+		mockJobDA.EXPECT().LockOneByUUID(ctx, jobEntity.UUID).Return(nil)
 		mockJobDA.EXPECT().FindOneByUUID(ctx, jobEntity.UUID, []string{tenantID}).Return(jobModel, nil).Times(2)
 		mockJobDA.EXPECT().Update(ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, jobModelUpdate *models.Job) error {
 			assert.Equal(t, jobModelUpdate.InternalData, jobEntity.InternalData)
@@ -177,6 +182,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 		jobModel.Logs[0].Status = utils.StatusMined
 		jobModel.Schedule.TenantID = tenantID
 
+		mockJobDA.EXPECT().LockOneByUUID(ctx, jobEntity.UUID).Return(nil)
 		mockJobDA.EXPECT().FindOneByUUID(ctx, jobEntity.UUID, []string{tenantID}).Return(jobModel, nil)
 
 		_, err := usecase.Execute(ctx, jobEntity, nextStatus, logMessage, []string{tenantID})
@@ -189,6 +195,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 		jobModel := testutils2.FakeJobModel(0)
 		jobModel.Schedule.TenantID = tenantID
 
+		mockJobDA.EXPECT().LockOneByUUID(ctx, jobEntity.UUID).Return(nil)
 		mockJobDA.EXPECT().FindOneByUUID(ctx, gomock.Any(), gomock.Any()).Return(jobModel, nil)
 		mockTransactionDA.EXPECT().Update(ctx, gomock.Any()).Return(expectedErr)
 
@@ -202,6 +209,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 		jobModel := testutils2.FakeJobModel(0)
 		jobModel.Schedule.TenantID = tenantID
 
+		mockJobDA.EXPECT().LockOneByUUID(ctx, jobEntity.UUID).Return(nil)
 		mockJobDA.EXPECT().FindOneByUUID(ctx, gomock.Any(), gomock.Any()).Return(jobModel, nil)
 		mockTransactionDA.EXPECT().Update(ctx, gomock.Any()).Return(nil)
 		mockJobDA.EXPECT().Update(ctx, gomock.Any()).Return(expectedErr)
@@ -217,6 +225,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 		jobModel.Schedule.TenantID = tenantID
 		jobModel.Logs[0].Status = utils.StatusCreated
 
+		mockJobDA.EXPECT().LockOneByUUID(ctx, jobEntity.UUID).Return(nil)
 		mockJobDA.EXPECT().FindOneByUUID(ctx, gomock.Any(), gomock.Any()).Return(jobModel, nil)
 
 		_, err := usecase.Execute(ctx, jobEntity, utils.StatusPending, logMessage, []string{tenantID})
@@ -230,6 +239,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 		jobModel.Schedule.TenantID = tenantID
 		jobModel.Logs[0].Status = utils.StatusStarted
 
+		mockJobDA.EXPECT().LockOneByUUID(ctx, jobEntity.UUID).Return(nil)
 		mockJobDA.EXPECT().FindOneByUUID(ctx, gomock.Any(), gomock.Any()).Return(jobModel, nil)
 
 		_, err := usecase.Execute(ctx, jobEntity, utils.StatusMined, logMessage, []string{tenantID})
@@ -243,6 +253,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 		jobModel.Schedule.TenantID = tenantID
 		jobModel.Logs[0].Status = utils.StatusPending
 
+		mockJobDA.EXPECT().LockOneByUUID(ctx, jobEntity.UUID).Return(nil)
 		mockJobDA.EXPECT().FindOneByUUID(ctx, gomock.Any(), gomock.Any()).Return(jobModel, nil)
 
 		_, err := usecase.Execute(ctx, jobEntity, utils.StatusStarted, logMessage, []string{tenantID})
@@ -256,6 +267,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 		jobModel.Schedule.TenantID = tenantID
 		jobModel.Logs[0].Status = utils.StatusCreated
 
+		mockJobDA.EXPECT().LockOneByUUID(ctx, jobEntity.UUID).Return(nil)
 		mockJobDA.EXPECT().FindOneByUUID(ctx, gomock.Any(), gomock.Any()).Return(jobModel, nil)
 
 		_, err := usecase.Execute(ctx, jobEntity, utils.StatusFailed, logMessage, []string{tenantID})
@@ -269,6 +281,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 		jobModel := testutils2.FakeJobModel(0)
 		jobModel.Schedule.TenantID = tenantID
 
+		mockJobDA.EXPECT().LockOneByUUID(ctx, jobEntity.UUID).Return(nil)
 		mockJobDA.EXPECT().FindOneByUUID(ctx, gomock.Any(), gomock.Any()).Return(jobModel, nil)
 		mockJobDA.EXPECT().Update(ctx, gomock.Any()).Return(nil)
 		mockLogDA.EXPECT().Insert(ctx, gomock.Any()).Return(expectedErr)
@@ -284,6 +297,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 		jobModel := testutils2.FakeJobModel(0)
 		jobModel.Schedule.TenantID = tenantID
 
+		mockJobDA.EXPECT().LockOneByUUID(ctx, jobEntity.UUID).Return(nil)
 		mockJobDA.EXPECT().FindOneByUUID(ctx, gomock.Any(), gomock.Any()).Return(jobModel, nil)
 		mockJobDA.EXPECT().Update(ctx, gomock.Any()).Return(nil)
 		mockLogDA.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
@@ -301,6 +315,8 @@ func TestUpdateJob_Execute(t *testing.T) {
 		jobModel.NextJobUUID = nextJobModel.UUID
 
 		tenants := []string{tenantID}
+
+		mockJobDA.EXPECT().LockOneByUUID(ctx, jobModel.UUID).Return(nil)
 		mockJobDA.EXPECT().FindOneByUUID(ctx, jobModel.UUID, tenants).Return(jobModel, nil)
 		mockJobDA.EXPECT().Update(ctx, gomock.Any()).Return(nil)
 		mockTransactionDA.EXPECT().Update(ctx, jobModel.Transaction).Return(nil)

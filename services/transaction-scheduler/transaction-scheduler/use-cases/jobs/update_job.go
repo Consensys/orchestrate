@@ -39,28 +39,34 @@ func (uc *updateJobUseCase) Execute(ctx context.Context, job *entities.Job, next
 	logger := log.WithContext(ctx).WithField("tenants", tenants).WithField("job_uuid", job.UUID)
 	logger.Debug("updating job entity")
 
-	jobModel, err := uc.db.Job().FindOneByUUID(ctx, job.UUID, tenants)
-	if err != nil {
-		return nil, errors.FromError(err).ExtendComponent(updateJobComponent)
-	}
+	var retrievedJob *entities.Job
+	err := database.ExecuteInDBTx(uc.db, func(tx database.Tx) error {
+		der := tx.(store.Tx).Job().LockOneByUUID(ctx, job.UUID)
+		if der != nil {
+			return der
+		}
 
-	retrievedJob := parsers.NewJobEntityFromModels(jobModel)
-	status := retrievedJob.GetStatus()
+		jobModel, der := tx.(store.Tx).Job().FindOneByUUID(ctx, job.UUID, tenants)
+		if der != nil {
+			return der
+		}
 
-	if status == utils.StatusMined || status == utils.StatusFailed || status == utils.StatusStored || status == utils.StatusNeverMined {
-		errMessage := "job status is final, cannot be updated"
-		logger.WithField("status", status).Error(errMessage)
-		return nil, errors.InvalidParameterError(errMessage).ExtendComponent(updateJobComponent)
-	}
+		retrievedJob = parsers.NewJobEntityFromModels(jobModel)
+		status := retrievedJob.GetStatus()
 
-	// We are not forced to update the status
-	if nextStatus != "" && !canUpdateStatus(nextStatus, status) {
-		errMessage := "invalid status update for the current job state"
-		logger.WithField("status", status).WithField("next_status", nextStatus).Error(errMessage)
-		return nil, errors.InvalidStateError(errMessage).ExtendComponent(updateJobComponent)
-	}
+		if isFinalStatus(status) {
+			errMessage := "job status is final, cannot be updated"
+			logger.WithField("status", status).Error(errMessage)
+			return errors.InvalidParameterError(errMessage)
+		}
 
-	err = database.ExecuteInDBTx(uc.db, func(tx database.Tx) error {
+		// We are not forced to update the status
+		if nextStatus != "" && !canUpdateStatus(nextStatus, status) {
+			errMessage := "invalid status update for the current job state"
+			logger.WithField("status", status).WithField("next_status", nextStatus).Error(errMessage)
+			return errors.InvalidStateError(errMessage)
+		}
+
 		// We are not forced to update the transaction
 		if job.Transaction != nil {
 			parsers.UpdateTransactionModelFromEntities(jobModel.Transaction, job.Transaction)
@@ -111,7 +117,7 @@ func (uc *updateJobUseCase) Execute(ctx context.Context, job *entities.Job, next
 		}
 	}
 
-	jobModel, err = uc.db.Job().FindOneByUUID(ctx, job.UUID, tenants)
+	jobModel, err := uc.db.Job().FindOneByUUID(ctx, job.UUID, tenants)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(updateJobComponent)
 	}
@@ -120,6 +126,10 @@ func (uc *updateJobUseCase) Execute(ctx context.Context, job *entities.Job, next
 		WithField("status", nextStatus).
 		Info("job updated successfully")
 	return parsers.NewJobEntityFromModels(jobModel), nil
+}
+
+func isFinalStatus(status string) bool {
+	return status == utils.StatusMined || status == utils.StatusFailed || status == utils.StatusStored || status == utils.StatusNeverMined
 }
 
 func updateJobModel(jobModel *models.Job, job *entities.Job) {
