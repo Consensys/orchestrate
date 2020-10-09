@@ -14,8 +14,6 @@ import (
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases"
 )
 
-//go:generate mockgen -source=update_job.go -destination=mocks/update_job.go -package=mocks
-
 const updateJobComponent = "use-cases.update-job"
 
 // updateJobUseCase is a use case to create a new transaction job

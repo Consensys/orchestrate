@@ -12,8 +12,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/parsers"
 )
 
-//go:generate mockgen -source=get_job.go -destination=mocks/get_job.go -package=mocks
-
 const getJobComponent = "use-cases.get-job"
 
 // getJobUseCase is a use case to get a job

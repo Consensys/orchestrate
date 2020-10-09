@@ -21,8 +21,6 @@ import (
 // IMPORTANT: Mock is created in a separated folder because of cycle deps
 // https://app.zenhub.com/workspaces/orchestrate-5ea70772b186e10067f57842/issues/pegasyseng/orchestrate/296
 
-//go:generate mockgen -source=create_job.go -destination=mocks/create_job.go -package=mocks
-
 const createJobComponent = "use-cases.create-job"
 
 // createJobUseCase is a use case to create a new transaction job

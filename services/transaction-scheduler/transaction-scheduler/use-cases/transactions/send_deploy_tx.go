@@ -11,8 +11,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/validators"
 )
 
-//go:generate mockgen -source=send_deploy_tx.go -destination=mocks/send_deploy_tx.go -package=mocks
-
 const sendDeployTxComponent = "use-cases.send-deploy-tx"
 
 // sendDeployTxUsecase is a use case to create a new contract deployment transaction

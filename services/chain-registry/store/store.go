@@ -6,7 +6,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 )
 
-//go:generate mockgen -source=data-agents.go -destination=mock/data-agents.go -package=mock
+//go:generate mockgen -source=store.go -destination=mock/data-agents.go -package=mock
 
 type DataAgents struct {
 	Chain  ChainAgent

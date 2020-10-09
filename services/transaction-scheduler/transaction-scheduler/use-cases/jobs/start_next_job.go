@@ -14,8 +14,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 )
 
-//go:generate mockgen -source=start_next_job.go -destination=mocks/start_next_job.go -package=mocks
-
 const startNextJobComponent = "use-cases.next-job-start"
 
 // startNextJobUseCase is a use case to get a job

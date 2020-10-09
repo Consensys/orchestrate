@@ -13,8 +13,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/parsers"
 )
 
-//go:generate mockgen -source=search_jobs.go -destination=mocks/search_jobs.go -package=mocks
-
 const searchJobsComponent = "use-cases.search-jobs"
 
 // searchJobsUseCase is a use case to search jobs

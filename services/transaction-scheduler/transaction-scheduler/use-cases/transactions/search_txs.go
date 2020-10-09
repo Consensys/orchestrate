@@ -12,8 +12,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 )
 
-//go:generate mockgen -source=search_txs.go -destination=mocks/search_txs.go -package=mocks
-
 const searchTxsComponent = "use-cases.search-txs"
 
 // searchTransactionsUseCase is a use case to get transaction requests by filter (or all)

@@ -11,8 +11,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 )
 
-//go:generate mockgen -source=get_tx.go -destination=mocks/get_tx.go -package=mocks
-
 const getTxComponent = "use-cases.get-tx"
 
 // getTxUseCase is a use case to get a transaction request

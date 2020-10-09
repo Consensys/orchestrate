@@ -12,8 +12,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/parsers"
 )
 
-//go:generate mockgen -source=create_schedule.go -destination=mocks/create_schedule.go -package=mocks
-
 const createScheduleComponent = "use-cases.create-schedule"
 
 // createScheduleUseCase is a use case to create a new transaction schedule

@@ -497,18 +497,18 @@ func (mr *MockTransactionRequestAgentMockRecorder) FindOneByIdempotencyKey(ctx, 
 }
 
 // FindOneByUUID mocks base method
-func (m *MockTransactionRequestAgent) FindOneByUUID(ctx context.Context, uuid string, tenants []string) (*models.TransactionRequest, error) {
+func (m *MockTransactionRequestAgent) FindOneByUUID(ctx context.Context, scheduleUUID string, tenants []string) (*models.TransactionRequest, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindOneByUUID", ctx, uuid, tenants)
+	ret := m.ctrl.Call(m, "FindOneByUUID", ctx, scheduleUUID, tenants)
 	ret0, _ := ret[0].(*models.TransactionRequest)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // FindOneByUUID indicates an expected call of FindOneByUUID
-func (mr *MockTransactionRequestAgentMockRecorder) FindOneByUUID(ctx, uuid, tenants interface{}) *gomock.Call {
+func (mr *MockTransactionRequestAgentMockRecorder) FindOneByUUID(ctx, scheduleUUID, tenants interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneByUUID", reflect.TypeOf((*MockTransactionRequestAgent)(nil).FindOneByUUID), ctx, uuid, tenants)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneByUUID", reflect.TypeOf((*MockTransactionRequestAgent)(nil).FindOneByUUID), ctx, scheduleUUID, tenants)
 }
 
 // Search mocks base method

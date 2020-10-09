@@ -15,8 +15,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/parsers"
 )
 
-//go:generate mockgen -source=resend_job_tx.go -destination=mocks/resend_job_tx.go -package=mocks
-
 const resendJobTxComponent = "use-cases.resend-job-tx"
 
 // resendJobTxUseCase is a use case to start a transaction job

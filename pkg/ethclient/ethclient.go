@@ -12,7 +12,7 @@ import (
 	proto "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/ethereum"
 )
 
-//go:generate mockgen -source=exported.go -destination=mock/mock.go -package=mock
+//go:generate mockgen -source=ethclient.go -destination=mock/mock.go -package=mock
 
 // TransactionSender is a service for sending transaction to a blockchain
 type TransactionSender interface {
