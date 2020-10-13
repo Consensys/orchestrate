@@ -35,15 +35,25 @@ func FormatJobResponse(job *entities.Job) *types.JobResponse {
 }
 
 func FormatJobCreateRequest(request *types.CreateJobRequest) *entities.Job {
-	return &entities.Job{
+	job := &entities.Job{
 		ChainUUID:    request.ChainUUID,
 		ScheduleUUID: request.ScheduleUUID,
 		NextJobUUID:  request.NextJobUUID,
 		Type:         request.Type,
 		Labels:       request.Labels,
-		InternalData: types.FormatAnnotationsToInternalData(request.Annotations, request.ParentJobUUID),
+		InternalData: types.FormatAnnotationsToInternalData(request.Annotations),
 		Transaction:  &request.Transaction,
 	}
+
+	if request.ParentJobUUID != "" {
+		job.InternalData.ParentJobUUID = request.ParentJobUUID
+	}
+
+	if job.InternalData.Priority == "" {
+		job.InternalData.Priority = utils.PriorityMedium
+	}
+
+	return job
 }
 
 func FormatJobUpdateRequest(request *types.UpdateJobRequest) *entities.Job {
@@ -53,17 +63,7 @@ func FormatJobUpdateRequest(request *types.UpdateJobRequest) *entities.Job {
 	}
 
 	if request.Annotations != nil {
-		job.InternalData = &entities.InternalData{
-			OneTimeKey:        request.Annotations.OneTimeKey,
-			Priority:          request.Annotations.GasPricePolicy.Priority,
-			GasPriceIncrement: request.Annotations.GasPricePolicy.RetryPolicy.Increment,
-			GasPriceLimit:     request.Annotations.GasPricePolicy.RetryPolicy.Limit,
-		}
-
-		if request.Annotations.GasPricePolicy.RetryPolicy.Interval != "" {
-			// we can skip the error check as at this point we know the interval is a duration as it already passed validation
-			job.InternalData.RetryInterval, _ = time.ParseDuration(request.Annotations.GasPricePolicy.RetryPolicy.Interval)
-		}
+		job.InternalData = types.FormatAnnotationsToInternalData(*request.Annotations)
 	}
 
 	return job

@@ -4,10 +4,9 @@ import (
 	"time"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 )
 
-func FormatAnnotationsToInternalData(annotations Annotations, parentJobUUID string) *entities.InternalData {
+func FormatAnnotationsToInternalData(annotations Annotations) *entities.InternalData {
 	internalData := &entities.InternalData{
 		OneTimeKey:        annotations.OneTimeKey,
 		Priority:          annotations.GasPricePolicy.Priority,
@@ -16,17 +15,9 @@ func FormatAnnotationsToInternalData(annotations Annotations, parentJobUUID stri
 		HasBeenRetried:    annotations.HasBeenRetried,
 	}
 
-	if parentJobUUID != "" {
-		internalData.ParentJobUUID = parentJobUUID
-	}
-
 	if annotations.GasPricePolicy.RetryPolicy.Interval != "" {
 		// we can skip the error check as at this point we know the interval is a duration as it already passed validation
 		internalData.RetryInterval, _ = time.ParseDuration(annotations.GasPricePolicy.RetryPolicy.Interval)
-	}
-
-	if internalData.Priority == "" {
-		internalData.Priority = utils.PriorityMedium
 	}
 
 	return internalData

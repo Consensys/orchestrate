@@ -229,3 +229,68 @@ Feature: Deploy ERC20 contract using tx-sentry
     And Response should have the following fields
       | jobs[0].status | jobs[1].status | jobs[2].status | jobs[3].status |
       | NEVER_MINED    | NEVER_MINED    | NEVER_MINED    | MINED          |
+
+
+  Scenario: Deploy ERC20 using retry policy with zero gas increment to retry limit
+    Given I register the following alias
+      | alias               | value           |
+      | preBesuContractTxID | {{random.uuid}} |
+      | besuContractTxID    | {{random.uuid}} |
+    Given I set the headers
+      | Key           | Value                    |
+      | Authorization | Bearer {{tenant1.token}} |
+    Then I track the following envelopes
+      | ID                      |
+      | {{preBesuContractTxID}} |
+    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
+  """
+{
+    "chain": "besu-{{scenarioID}}",
+    "params": {
+        "contractName": "SimpleToken",
+        "from": "{{account1}}"
+    },
+    "labels": {
+    	"scenario.id": "{{scenarioID}}",
+    	"id": "{{preBesuContractTxID}}"
+    }
+}
+  """
+    Then the response code should be 202
+    Then Envelopes should be in topic "tx.decoded"
+    Then Set nonce manager records
+      | Account      | ChainID          | Nonce |
+      | {{account1}} | {{besu.ChainID}} | 1     |
+    Then I track the following envelopes
+      | ID                   |
+      | {{besuContractTxID}} |
+    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
+  """
+{
+    "chain": "besu-{{scenarioID}}",
+    "params": {
+        "contractName": "SimpleToken",
+        "from": "{{account1}}",
+        "gasPricePolicy": {
+          "retryPolicy": {
+            "interval": "1s"
+          }
+        }
+    },
+    "labels": {
+    	"scenario.id": "{{scenarioID}}",
+    	"id": "{{besuContractTxID}}"
+    }
+}
+  """
+    Then the response code should be 202
+    Then I register the following response fields
+      | alias      | path         |
+      | jobOneUUID | jobs[0].uuid |
+    Then Envelopes should be in topic "tx.sender"
+    Then I sleep "15s"
+    When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobOneUUID}}"
+    Then the response code should be 200
+    And Response should have the following fields
+      | status  | logs.length | annotations.hasBeenRetried |
+      | PENDING | 23          | true                       |

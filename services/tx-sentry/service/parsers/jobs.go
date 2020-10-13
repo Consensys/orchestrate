@@ -1,19 +1,12 @@
 package parsers
 
 import (
-	"time"
-
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/txscheduler"
 )
 
 func JobResponseToEntity(jobResponse *txschedulertypes.JobResponse) *entities.Job {
 	// Cannot fail as the duration coming from a response is expected to be valid
-	var retryInterval time.Duration
-	if jobResponse.Annotations.GasPricePolicy.RetryPolicy.Interval != "" {
-		retryInterval, _ = time.ParseDuration(jobResponse.Annotations.GasPricePolicy.RetryPolicy.Interval)
-	}
-
 	return &entities.Job{
 		UUID:         jobResponse.UUID,
 		ChainUUID:    jobResponse.ChainUUID,
@@ -21,17 +14,10 @@ func JobResponseToEntity(jobResponse *txschedulertypes.JobResponse) *entities.Jo
 		Type:         jobResponse.Type,
 		Labels:       jobResponse.Labels,
 		TenantID:     jobResponse.TenantID,
-		InternalData: &entities.InternalData{
-			OneTimeKey:        jobResponse.Annotations.OneTimeKey,
-			Priority:          jobResponse.Annotations.GasPricePolicy.Priority,
-			RetryInterval:     retryInterval,
-			GasPriceIncrement: jobResponse.Annotations.GasPricePolicy.RetryPolicy.Increment,
-			GasPriceLimit:     jobResponse.Annotations.GasPricePolicy.RetryPolicy.Limit,
-			ParentJobUUID:     jobResponse.ParentJobUUID,
-		},
-		Transaction: &jobResponse.Transaction,
-		Logs:        jobResponse.Logs,
-		CreatedAt:   jobResponse.CreatedAt,
-		UpdatedAt:   jobResponse.UpdatedAt,
+		InternalData: txschedulertypes.FormatAnnotationsToInternalData(jobResponse.Annotations),
+		Transaction:  &jobResponse.Transaction,
+		Logs:         jobResponse.Logs,
+		CreatedAt:    jobResponse.CreatedAt,
+		UpdatedAt:    jobResponse.UpdatedAt,
 	}
 }
