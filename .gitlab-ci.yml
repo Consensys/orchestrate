@@ -139,7 +139,7 @@ services:
   # Create a PR with release note changes in doc repos
   image: debian:stable-slim
   variables:
-    - BRANCH-NAME: "changelog-${CI_COMMIT_SHORT_SHA}""
+    BRANCH-NAME: "changelog-${CI_COMMIT_SHORT_SHA}""
   before_script:
     - apt-get update -y && apt-get install -yqqf openssh-client git unzip sshpass rsync --fix-missing
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client git -y )'
