@@ -142,7 +142,7 @@ services:
     - apt-get update -y && apt-get install -yqqf openssh-client git unzip sshpass rsync --fix-missing
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client git -y )'
     - eval $(ssh-agent -s)
-    - chmod 644 ${DOC_GITHUB_SSH_PRIV}
+    - chmod 666 ${DOC_GITHUB_SSH_PRIV}
     - ssh-add ${DOC_GITHUB_SSH_PRIV}
 
     - mkdir -p ~/.ssh
