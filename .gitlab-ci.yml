@@ -138,7 +138,7 @@ services:
 
 .release-notes: &release-notes
   # Create a PR with release note changes in doc repos
-  image: debian:stable-slim
+  image: node:12.16.2-stretch-slim
   before_script:
     - apt-get update -y && apt-get install -yqqf openssh-client git unzip sshpass rsync --fix-missing
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client git -y )'
