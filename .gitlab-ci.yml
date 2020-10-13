@@ -138,10 +138,21 @@ services:
 .release-notes: &release-notes
   # Create a PR with release note changes in doc repos
   image: debian:stable-slim
-  # before_script:
-  #   - eval 'ssh-agent -s'
-  script:
-    - eval 'ssh-agent -s'
+  before_script:
+    - apt-get update -y && apt-get install -yqqf openssh-client git unzip sshpass rsync --fix-missing
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client git -y )'
+    - eval $(ssh-agent -s)
+    - ssh-add ${DOC_GITHUB_SSH_PRIV}
+
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+
+    - ssh-keyscan github.com >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+    - cat ~/.ssh/known_hosts
+
+    - git config --global user.email "ops-quorum@consensys.net"
+    - git config --global user.name "Orchestrate CI"
 
 # test:
 #   <<: *go-setup
