@@ -149,10 +149,11 @@ services:
 
     - ssh-keyscan github.com >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
-    - cat ~/.ssh/known_hosts
 
     - git config --global user.email "ops-quorum@consensys.net"
     - git config --global user.name "Orchestrate CI"
+  script:
+    - cat ~/.ssh/known_hosts
 
 # test:
 #   <<: *go-setup
