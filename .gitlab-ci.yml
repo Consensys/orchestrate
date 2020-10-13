@@ -153,7 +153,8 @@ services:
     - git config --global user.email "ops-quorum@consensys.net"
     - git config --global user.name "Orchestrate CI"
   script:
-    - cat ~/.ssh/known_hosts
+    - git clone git@github.com:NicolasMassart/doc.orchestrate.git
+    - ls -la
 
 # test:
 #   <<: *go-setup
