@@ -158,7 +158,7 @@ services:
     - git checkout -b changelog-${CI_COMMIT_SHORT_SHA}
     - cp ../CHANGELOG.md docs/
     - git add docs/CHANGELOG.md
-    - |
+    - >
       git commit -m "Automatic changelog update for Orchestrate"
       -m "From ${CI_COMMIT_SHORT_SHA} on ${CI_COMMIT_BRANCH}:${CI_COMMIT_TAG}."
       -m "See ${CI_JOB_URL} for job detail."
