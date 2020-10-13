@@ -138,6 +138,8 @@ services:
 .release-notes: &release-notes
   # Create a PR with release note changes in doc repos
   image: debian:stable-slim
+  variables:
+    - BRANCH-NAME: "changelog-${CI_COMMIT_SHORT_SHA}""
   before_script:
     - apt-get update -y && apt-get install -yqqf openssh-client git unzip sshpass rsync --fix-missing
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client git -y )'
@@ -155,14 +157,14 @@ services:
   script:
     - git clone git@github.com:ConsenSys/doc.orchestrate.git
     - cd doc.orchestrate
-    - git checkout -b changelog-${CI_COMMIT_SHORT_SHA}
+    - git checkout -b ${BRANCH-NAME}
     - cp ../CHANGELOG.md docs/
     - git add docs/CHANGELOG.md
     - >
       git commit -m "Automatic changelog update for Orchestrate"
       -m "From ${CI_COMMIT_SHORT_SHA} on ${CI_COMMIT_BRANCH}:${CI_COMMIT_TAG}."
       -m "See ${CI_JOB_URL} for job detail."
-    - git push origin
+    - git push --set-upstream origin ${BRANCH-NAME}
 
 # test:
 #   <<: *go-setup
