@@ -28,7 +28,7 @@ func NewInternalProvider() provider.Provider {
 func NewInternalConfig() *dynamic.Configuration {
 	cfg := dynamic.NewConfig()
 
-	// Router to Identity API
+	// Router to Key management API
 	cfg.HTTP.Routers["ethereum"] = &dynamic.Router{
 		Router: &traefikdynamic.Router{
 			EntryPoints: []string{http.DefaultHTTPEntryPoint},

@@ -14,5 +14,103 @@
         },
         "version": "2.0"
     },
-    "paths": {}
+    "paths": {
+        "/jobs": {
+            "post": {
+                "description": "Creates a new private key, stores it in the Vault and generates a public key given a chosen elliptic curve",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Creates a new Ethereum Account",
+                "parameters": [
+                    {
+                        "description": "Ethereum account creation request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ethereum.CreateETHAccountRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Created Ethereum account",
+                        "schema": {
+                            "$ref": "#/definitions/ethereum.ETHAccountResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "ethereum.CreateETHAccountRequest": {
+            "type": "object",
+            "required": [
+                "keyType"
+            ],
+            "properties": {
+                "keyType": {
+                    "type": "string",
+                    "example": "Secp256k1"
+                },
+                "namespace": {
+                    "type": "string",
+                    "example": "tenant_id"
+                }
+            }
+        },
+        "ethereum.ETHAccountResponse": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string",
+                    "example": "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"
+                },
+                "compressedPublicKey": {
+                    "type": "string"
+                },
+                "keyType": {
+                    "type": "string",
+                    "example": "Secp256k1"
+                },
+                "namespace": {
+                    "type": "string",
+                    "example": "tenant_id"
+                },
+                "publicKey": {
+                    "type": "string"
+                }
+            }
+        },
+        "httputil.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 24000
+                },
+                "message": {
+                    "type": "string",
+                    "example": "invalid status update for the current job state"
+                }
+            }
+        }
+    }
 }

@@ -47,6 +47,13 @@ func FakeETHTransactionParams() *entities.ETHTransactionParams {
 	}
 }
 
+func FakeETHAccount() *entities.ETHAccount {
+	return &entities.ETHAccount{
+		Namespace: "_",
+		KeyType:   utils.Secp256k1,
+	}
+}
+
 func FakeTesseraTransactionParams() *entities.ETHTransactionParams {
 	tx := FakeETHTransactionParams()
 	tx.PrivateFrom = "ROAZBWtSacxXQrOe3FGAqJDyJjFePR5ce4TSIzmJ0Bc="

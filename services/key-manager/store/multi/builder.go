@@ -2,7 +2,10 @@ package multi
 
 import (
 	"context"
-	"fmt"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	hashicorpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/key-manager/store/hashicorp"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/secretstore/hashicorp"
 
 	log "github.com/sirupsen/logrus"
 
@@ -13,17 +16,18 @@ func Build(ctx context.Context, cfg *Config) (store.Vault, error) {
 	switch cfg.Type {
 	case azureKeyVaultType:
 		// TODO: Configure azure key vault
-		log.WithContext(ctx).Info("Azure key vault initialized")
-		return nil, nil
+		return nil, errors.ConfigError("Azure key vault support not implemented yet")
 	case hashicorpVaultType:
-		// TODO: Configure hashicorp Vault
+		// TODO: Refactor Initialization and move to this MS or pkg if reused
+		hashicorp.Init(ctx)
+		vault := hashicorpstore.NewHashicorpVault(hashicorp.GlobalStore(), hashicorp.GlobalChecker())
+
 		log.WithContext(ctx).Info("Hashicorp vault initialized")
-		return nil, nil
-	case unboundType:
+		return vault, nil
+	case ukcVaultType:
 		// TODO: Configure Unbound key vault
-		log.WithContext(ctx).Info("Unbound key vault initialized")
-		return nil, nil
+		return nil, errors.ConfigError("UKC key vault support not implemented yet")
 	default:
-		return nil, fmt.Errorf("invalid tx-signer vault type %q", cfg.Type)
+		return nil, errors.ConfigError("invalid key manager vault type %q", cfg.Type)
 	}
 }

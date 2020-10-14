@@ -2,6 +2,8 @@ package services
 
 import "context"
 
+//go:generate mockgen -source=secret_store.go -destination=mocks/secret_store.go -package=mocks
+
 // SecretStore is an interface implemented by helpers that store and retrieve secrets
 type SecretStore interface {
 	// Store secret

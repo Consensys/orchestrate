@@ -4,7 +4,7 @@ import (
 	"context"
 	"reflect"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/key-manager/store"
+	healthz "github.com/heptiolabs/healthcheck"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/key-manager/key-manager/builder"
 
@@ -14,31 +14,34 @@ import (
 	multistore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/key-manager/store/multi"
 )
 
-func NewTxSigner(cfg *Config) (*app.App, error) {
+func NewKeyManager(ctx context.Context, cfg *Config) (*app.App, error) {
 	// Create Data agents
-	vault, err := multistore.Build(context.Background(), cfg.Store)
+	vault, err := multistore.Build(ctx, cfg.Store)
 	if err != nil {
 		return nil, err
 	}
 
-	// Option for identity manager handler
-	txSignerHandlerOpt := app.HandlerOpt(reflect.TypeOf(&dynamic.Signer{}), controllers.NewBuilder(builder.NewUseCases(vault)))
+	// Create UCs
+	ethUCs := builder.NewEthereumUseCases(vault)
+
+	// Option for key manager handler
+	keyManagerHandlerOpt := app.HandlerOpt(reflect.TypeOf(&dynamic.Signer{}), controllers.NewBuilder(ethUCs))
 
 	// Create app
 	return app.New(
 		cfg.App,
-		ReadinessOpt(vault),
+		ReadinessOpt(vault.HealthCheck()),
 		app.MetricsOpt(),
 		app.LoggerMiddlewareOpt("base"),
-		app.SwaggerOpt("./public/swagger-specs/services/tx-signer/swagger.json", "base@logger-base"),
-		txSignerHandlerOpt,
+		app.SwaggerOpt("./public/swagger-specs/services/key-manager/swagger.json", "base@logger-base"),
+		keyManagerHandlerOpt,
 		app.ProviderOpt(NewProvider()),
 	)
 }
 
-func ReadinessOpt(vault store.Vault) app.Option {
+func ReadinessOpt(checker healthz.Check) app.Option {
 	return func(ap *app.App) error {
-		// TODO: Add readiness check for the Vault
+		ap.AddReadinessCheck("vault", checker)
 		return nil
 	}
 }

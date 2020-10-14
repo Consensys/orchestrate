@@ -15,10 +15,10 @@ func init() {
 const (
 	hashicorpVaultType = "hashicorp-vault"
 	azureKeyVaultType  = "azure-key-vault"
-	unboundType        = "unbound-key-vault"
+	ukcVaultType       = "ukc-key-vault"
 )
 
-var availableTypes = []string{hashicorpVaultType, azureKeyVaultType, unboundType}
+var availableTypes = []string{hashicorpVaultType, azureKeyVaultType, ukcVaultType}
 
 const (
 	typeFlag     = "key-manager-type"

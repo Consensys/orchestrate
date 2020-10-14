@@ -12,7 +12,7 @@ func New(ctx context.Context) (*app.App, error) {
 	// Initialize dependencies
 	config := NewConfig(viper.GetViper())
 
-	return NewTxSigner(config)
+	return NewKeyManager(ctx, config)
 }
 
 func Run(ctx context.Context) error {

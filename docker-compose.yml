@@ -211,6 +211,17 @@ services:
       - identity-manager-migration
     command: identity-manager run
 
+  key-vault-init:
+    build: ./scripts/deps/config/hashicorp
+    environment:
+      VAULT_ADDR: ${VAULT_ADDR-http://vault:8200}
+    networks:
+      - orchestrate
+    volumes:
+      - vault-token:/vault/token
+      - ./scripts/deps/config/hashicorp/renew.sh:/renew.sh
+    command: sh /renew.sh
+
   key-manager:
     <<: *container-common
     ports:
@@ -219,7 +230,12 @@ services:
     environment:
       <<: *default-variables
       <<: *key-manager-common
+    depends_on:
+      - key-vault-init
     command: key-manager run
+    volumes:
+      - vault-token:/vault/token
+      - ./build/bin/orchestrate:/bin/main
 
   tx-crafter:
     <<: *container-common
@@ -232,17 +248,6 @@ services:
       - contract-registry
       - transaction-scheduler
     command: tx-crafter run
-
-  tx-signer-init:
-    build: ./scripts/deps/config/hashicorp
-    environment:
-      VAULT_ADDR: ${VAULT_ADDR-http://vault:8200}
-    networks:
-      - orchestrate
-    volumes:
-      - vault-token:/vault/token
-      - ./scripts/deps/config/hashicorp/renew.sh:/renew.sh
-    command: sh /renew.sh
 
   tx-signer:
     <<: *container-common
@@ -257,7 +262,7 @@ services:
       - vault-token:/vault/token
       - ./build/bin/orchestrate:/bin/main
     depends_on:
-      - tx-signer-init
+      - key-vault-init
     command: tx-signer run
 
   tx-sender:
