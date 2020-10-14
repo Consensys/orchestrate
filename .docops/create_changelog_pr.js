@@ -10,12 +10,11 @@ const octokit = new Octokit({
 });
 
 console.log(process.argv);
-console.log(octokit);
 
-// octokit.pulls.create({
-//   'ConsenSys',
-//   'doc.orchestrate',
-//   process.argv[2],
-//   process.argv[3],
-//   'master',
-// });
+octokit.pulls.create({
+  'ConsenSys',
+  'doc.orchestrate',
+  process.argv[2],
+  process.argv[3],
+  'master',
+});
