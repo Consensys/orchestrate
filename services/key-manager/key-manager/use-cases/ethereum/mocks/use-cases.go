@@ -73,16 +73,16 @@ func (m *MockCreateAccountUseCase) EXPECT() *MockCreateAccountUseCaseMockRecorde
 }
 
 // Execute mocks base method
-func (m *MockCreateAccountUseCase) Execute(ctx context.Context, account *entities.ETHAccount) (*entities.ETHAccount, error) {
+func (m *MockCreateAccountUseCase) Execute(ctx context.Context, namespace, importedPrivKey string) (*entities.ETHAccount, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, account)
+	ret := m.ctrl.Call(m, "Execute", ctx, namespace, importedPrivKey)
 	ret0, _ := ret[0].(*entities.ETHAccount)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Execute indicates an expected call of Execute
-func (mr *MockCreateAccountUseCaseMockRecorder) Execute(ctx, account interface{}) *gomock.Call {
+func (mr *MockCreateAccountUseCaseMockRecorder) Execute(ctx, namespace, importedPrivKey interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockCreateAccountUseCase)(nil).Execute), ctx, account)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockCreateAccountUseCase)(nil).Execute), ctx, namespace, importedPrivKey)
 }

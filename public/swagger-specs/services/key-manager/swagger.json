@@ -15,7 +15,7 @@
         "version": "2.0"
     },
     "paths": {
-        "/jobs": {
+        "/ethereum/accounts": {
             "post": {
                 "description": "Creates a new private key, stores it in the Vault and generates a public key given a chosen elliptic curve",
                 "consumes": [
@@ -45,6 +45,55 @@
                     },
                     "400": {
                         "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/ethereum/accounts/import": {
+            "post": {
+                "description": "Imports a private key, stores it in the Vault and generates a public key given a chosen elliptic curve",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Imports an Ethereum Account",
+                "parameters": [
+                    {
+                        "description": "Ethereum account import request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ethereum.ImportETHAccountRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Imported Ethereum account",
+                        "schema": {
+                            "$ref": "#/definitions/ethereum.ETHAccountResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Invalid private key",
                         "schema": {
                             "$ref": "#/definitions/httputil.ErrorResponse"
                         }
@@ -96,6 +145,27 @@
                 },
                 "publicKey": {
                     "type": "string"
+                }
+            }
+        },
+        "ethereum.ImportETHAccountRequest": {
+            "type": "object",
+            "required": [
+                "keyType",
+                "privateKey"
+            ],
+            "properties": {
+                "keyType": {
+                    "type": "string",
+                    "example": "Secp256k1"
+                },
+                "namespace": {
+                    "type": "string",
+                    "example": "tenant_id"
+                },
+                "privateKey": {
+                    "type": "string",
+                    "example": "fa88c4a5912f80503d6b5503880d0745f4b88a1ff90ce8f64cdd8f32cc3bc249"
                 }
             }
         },

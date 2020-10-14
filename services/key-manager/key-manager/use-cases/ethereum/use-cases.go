@@ -16,5 +16,5 @@ type UseCases interface {
 }
 
 type CreateAccountUseCase interface {
-	Execute(ctx context.Context, account *entities.ETHAccount) (*entities.ETHAccount, error)
+	Execute(ctx context.Context, namespace, importedPrivKey string) (*entities.ETHAccount, error)
 }
