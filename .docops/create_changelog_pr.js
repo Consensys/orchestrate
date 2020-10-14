@@ -12,9 +12,11 @@ const octokit = new Octokit({
 console.log(process.argv);
 
 octokit.pulls.create({
-  'ConsenSys',
-  'doc.orchestrate',
-  process.argv[2],
-  process.argv[3],
-  'master',
+  owner:'ConsenSys',
+  repo:'doc.orchestrate',
+  title:process.argv[2],
+  head:process.argv[3],
+  base:'master',
+  maintainer_can_modify:true,
+  draft:true
 });
