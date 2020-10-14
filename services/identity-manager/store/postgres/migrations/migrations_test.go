@@ -62,7 +62,7 @@ func (s *MigrationsTestSuite) TestAddRequestsColumns() {
 		Count()
 
 	s.Assert().NoError(err, "Query failed")
-	s.Assert().Equal(4, n, "Identities table should have correct number of columns")
+	s.Assert().Equal(10, n, "Identities table should have correct number of columns")
 }
 
 func TestMigrations(t *testing.T) {

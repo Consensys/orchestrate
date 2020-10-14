@@ -5,6 +5,7 @@ import (
 	"reflect"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/identity-manager/identity-manager/builder"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/key-manager/client"
 
 	"github.com/go-pg/pg/v9/orm"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
@@ -16,14 +17,14 @@ import (
 	store "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/identity-manager/store/multi"
 )
 
-func NewIdentityManager(cfg *Config, pgmngr postgres.Manager, jwt, key auth.Checker) (*app.App, error) {
+func NewIdentityManager(cfg *Config, pgmngr postgres.Manager, jwt, key auth.Checker, clt client.KeyManagerClient) (*app.App, error) {
 	// Create Data agents
 	db, err := store.Build(context.Background(), cfg.Store, pgmngr)
 	if err != nil {
 		return nil, err
 	}
 
-	ucs := builder.NewUseCases(db)
+	ucs := builder.NewUseCases(db, clt)
 
 	// Option for identity manager handler
 	identityManagerHandlerOpt := app.HandlerOpt(reflect.TypeOf(&dynamic.Identity{}), controllers.NewBuilder(ucs))
@@ -32,7 +33,7 @@ func NewIdentityManager(cfg *Config, pgmngr postgres.Manager, jwt, key auth.Chec
 	return app.New(
 		cfg.App,
 		app.MultiTenancyOpt("auth", jwt, key, cfg.Multitenancy),
-		ReadinessOpt(db),
+		ReadinessOpt(db, clt),
 		app.MetricsOpt(),
 		app.LoggerMiddlewareOpt("base"),
 		app.SwaggerOpt("./public/swagger-specs/services/identity-manager/swagger.json", "base@logger-base"),
@@ -41,10 +42,10 @@ func NewIdentityManager(cfg *Config, pgmngr postgres.Manager, jwt, key auth.Chec
 	)
 }
 
-func ReadinessOpt(db database.DB) app.Option {
+func ReadinessOpt(db database.DB, clt client.KeyManagerClient) app.Option {
 	return func(ap *app.App) error {
 		ap.AddReadinessCheck("database", postgres.Checker(db.(orm.DB)))
-		// TODO: Add tx-signer API dependency
+		ap.AddReadinessCheck("key-manager", clt.Checker())
 		return nil
 	}
 }

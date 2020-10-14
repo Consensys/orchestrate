@@ -3,6 +3,7 @@ package testutils
 import (
 	"time"
 
+	ethcommon "github.com/ethereum/go-ethereum/common"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
@@ -51,6 +52,8 @@ func FakeETHAccount() *entities.ETHAccount {
 	return &entities.ETHAccount{
 		Namespace: "_",
 		KeyType:   utils.Secp256k1,
+		Address:   ethcommon.HexToAddress("0x" + utils.RandHexString(12)).String(),
+		PublicKey: ethcommon.HexToHash("0x" + utils.RandHexString(12)).String(),
 	}
 }
 

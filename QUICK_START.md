@@ -41,7 +41,7 @@ $> cp -r ${GOPATH}/src/github.com/ethereum/go-ethereum/crypto/secp256k1/libsecp2
 Orchestrate requires a bunch of services to persist data and exchange message such as:
 - Kafka
 - Postgres
-- Hasicorp vault
+- HashiCorp vault
 - Redis
 
 To launch those service execute the next command:

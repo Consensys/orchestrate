@@ -2,7 +2,6 @@ package client
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -17,10 +16,6 @@ import (
 	"github.com/containous/traefik/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	clientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/client-utils"
-)
-
-const (
-	invalidResponseBody = "failed to decode response body"
 )
 
 type HTTPClient struct {
@@ -367,25 +362,10 @@ func callWithBackOff(ctx context.Context, backOff backoff.BackOff, requestCall f
 }
 
 func parseResponse(ctx context.Context, response *http.Response, resp interface{}) error {
-	if response.StatusCode == http.StatusAccepted || response.StatusCode == http.StatusOK {
-		if resp == nil {
-			return nil
-		}
-
-		if err := json.NewDecoder(response.Body).Decode(resp); err != nil {
-			log.FromContext(ctx).WithError(err).Error(invalidResponseBody)
-			return errors.ServiceConnectionError(invalidResponseBody).ExtendComponent(component)
-		}
-
-		return nil
+	err := httputil.ParseResponse(ctx, response, resp)
+	if err != nil {
+		return errors.FromError(err).ExtendComponent(component)
 	}
 
-	errResp := httputil.ErrorResponse{}
-	if err := json.NewDecoder(response.Body).Decode(&errResp); err != nil {
-		log.FromContext(ctx).WithError(err).Error(invalidResponseBody)
-		return errors.ServiceConnectionError(invalidResponseBody).ExtendComponent(component)
-	}
-
-	log.FromContext(ctx).Error(errResp.Message)
-	return errors.Errorf(errResp.Code, errResp.Message)
+	return nil
 }

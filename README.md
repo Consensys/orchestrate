@@ -74,6 +74,7 @@ Error codes are `uint64` that maps to five hex character code
 | F0XXX |          |    F0000   | invalid_config                | Invalid configuration                      |
 | FFXXX |          |    FF000   | internal_error                | Internal error                             |
 | FFXXX |   FF1XX  |    FF100   | data_corrupted                | Data is corrupted                          |
+| BEXXX |   BEXXX  |    BE1000  | ethereum_nonce_too_low        | Nonce is too low                           |
 
 ## Local Development Interfaces
 

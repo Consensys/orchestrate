@@ -37,13 +37,13 @@ type Builder struct {
 	identitiesCtrl *IdentitiesController
 }
 
-func NewBuilder(ucs usecases.UseCases) *Builder {
+func NewBuilder(ucs usecases.IdentityUseCases) *Builder {
 	return &Builder{
-		identitiesCtrl: NewIdentitiesController(),
+		identitiesCtrl: NewIdentitiesController(ucs),
 	}
 }
 
-func (b *Builder) Build(ctx context.Context, _ string, configuration interface{}, respModifier func(response *http.Response) error) (http.Handler, error) {
+func (b *Builder) Build(ctx context.Context, _ string, configuration interface{}, _ func(response *http.Response) error) (http.Handler, error) {
 	cfg, ok := configuration.(*dynamic.Identity)
 	if !ok {
 		return nil, fmt.Errorf("invalid configuration type (expected %T but got %T)", cfg, configuration)

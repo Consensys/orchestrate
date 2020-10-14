@@ -7,12 +7,14 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	store "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/identity-manager/store/multi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/key-manager/client"
 )
 
 // Flags register flags for tx scheduler
 func Flags(f *pflag.FlagSet) {
 	store.Flags(f)
 	http.Flags(f)
+	client.Flags(f)
 }
 
 type Config struct {

@@ -8,7 +8,6 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 )
 
@@ -31,10 +30,6 @@ func NewSearchTransactionsUseCase(db store.DB, getTxUseCase usecases.GetTxUseCas
 // Execute gets a transaction requests by filter (or all)
 func (uc *searchTransactionsUseCase) Execute(ctx context.Context, filters *entities.TransactionFilters, tenants []string) ([]*entities.TxRequest, error) {
 	log.WithContext(ctx).WithField("filters", filters).Debug("search transaction requests")
-
-	if err := utils.GetValidator().Struct(filters); err != nil {
-		return nil, errors.InvalidParameterError(err.Error()).ExtendComponent(searchTxsComponent)
-	}
 
 	txRequestModels, err := uc.db.TransactionRequest().Search(ctx, filters, tenants)
 	if err != nil {
