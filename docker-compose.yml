@@ -234,7 +234,7 @@ services:
       - key-vault-init
     command: key-manager run
     volumes:
-      - vault-token:/vault/token
+      - vault-token:/vault/token:ro
       - ./build/bin/orchestrate:/bin/main
 
   tx-crafter:
@@ -300,7 +300,7 @@ services:
       CUCUMBER_TAGS: ${CUCUMBER_TAGS-}
       TEST_GLOBAL_DATA: ${TEST_GLOBAL_DATA-}
       AUTH_JWT_PRIVATE_KEY: ${AUTH_JWT_PRIVATE_KEY-}
-    #      CUCUMBER_STEPS_TIMEOUT: ${CUCUMBER_STEPS_TIMEOUT-500}
+      CUCUMBER_STEPS_TIMEOUT: ${CUCUMBER_STEPS_TIMEOUT-20s}
     # Uncomment CUCUMBER_TAGS if only run features and scenarios with @public-tx or @account tags ("," = OR, "&&" = AND, "~" = NOT)
     #      CUCUMBER_TAGS: "@besu"
     restart: "no"

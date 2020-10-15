@@ -18,11 +18,11 @@ Feature: Faucet funding
     And I have created the following accounts
       | alias    | ID              | ChainName           | Headers.Authorization    |
       | account1 | {{random.uuid}} | besu-{{scenarioID}} | Bearer {{tenant1.token}} |
-    Given I sleep "5s"
+    Given I sleep "6s"
     Given I set the headers
-      | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
-      | X-Cache-Control | no-cache            |
+      | Key             | Value                    |
+      | Authorization   | Bearer {{tenant1.token}} |
+      | X-Cache-Control | no-cache                 |
     When I send "POST" request to "{{global.chain-registry}}/{{besu.UUID}}" with json:
       """
       {
@@ -74,7 +74,7 @@ Feature: Faucet funding
       """
     Then the response code should be 202
     Then I register the following response fields
-      | alias         | path                  |
+      | alias         | path         |
       | txJobUUID     | jobs[0].uuid |
       | faucetJobUUID | jobs[1].uuid |
     Then Envelopes should be in topic "tx.recover"
@@ -83,7 +83,7 @@ Feature: Faucet funding
     And Response should have the following fields
       | status | logs[0].status | logs[1].status | logs[2].status |
       | FAILED | CREATED        | STARTED        | FAILED         |
-    Given I sleep "5s"
+    Given I sleep "6s"
     When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{faucetJobUUID}}"
     Then the response code should be 200
     And Response should have the following fields

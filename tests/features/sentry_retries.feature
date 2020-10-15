@@ -88,6 +88,7 @@ Feature: Deploy ERC20 contract using tx-sentry
     Then I track the following envelopes
       | ID                       |
       | {{postBesuContractTxID}} |
+      | {{besuContractTxID}}     |
     When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
   """
 {
@@ -104,7 +105,6 @@ Feature: Deploy ERC20 contract using tx-sentry
   """
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
-    Then I sleep "1s"
     When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobOneUUID}}"
     Then the response code should be 200
     And Response should have the following fields
@@ -207,6 +207,7 @@ Feature: Deploy ERC20 contract using tx-sentry
     Then I track the following envelopes
       | ID                       |
       | {{postGethContractTxID}} |
+      | {{gethContractTxID}}     |
     When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
   """
 {
@@ -223,7 +224,6 @@ Feature: Deploy ERC20 contract using tx-sentry
   """
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
-    Then I sleep "1s"
     When I send "GET" request to "{{global.tx-scheduler}}/schedules/{{scheduleUUID}}"
     Then the response code should be 200
     And Response should have the following fields
