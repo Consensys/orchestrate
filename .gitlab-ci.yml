@@ -1,11 +1,11 @@
 ---
 
 stages:
-  - test
-  - integration
-  - e2e
-  - build
-  - release
+  # - test
+  # - integration
+  # - e2e
+  # - build
+  # - release
   - doc
 
 variables:
@@ -166,214 +166,214 @@ services:
       -m "See ${CI_JOB_URL} for job detail."
     - git push --set-upstream origin ${GITHUB_BRANCH_NAME}
     - node ../.docops/create_changelog_pr.js "CHANGELOG update for ${CI_COMMIT_BRANCH}:${CI_COMMIT_TAG}:${CI_COMMIT_SHORT_SHA}" "${GITHUB_BRANCH_NAME}"
-
-test:
-  <<: *go-setup
-  <<: *rules
-  coverage: /^total:.*\s(\d+.\d+)%/
-  services:
-    - postgres:10.12-alpine
-  variables:
-    POSTGRES_PASSWORD: "postgres"
-    DB_HOST: "postgres"
-  script:
-    - make run-coverage
-
-integration:
-  <<: *go-setup
-  <<: *rules
-  services:
-    - docker:19.03-dind
-  variables:
-    DOCKER_HOST: tcp://docker:2375
-    DOCKER_TLS_CERTDIR: ""
-    DB_HOST: "docker"
-    KAFKA_HOST: "docker"
-    KAFKA_URL: "docker:9092"
-  script:
-    - make run-integration
-
-lint:
-  <<: *go-setup
-  <<: *rules
-  script:
-    - make lint-tools
-    - make lint-ci
-
-race:
-  <<: *go-setup
-  <<: *rules
-  script:
-    - make race
-
-gobuild:
-  <<: *go-setup
-  <<: *rules
-  script:
-    - make gobuild
-    - make gobuild-e2e
-  cache:
-    key: "$CI_COMMIT_REF_SLUG"
-    paths:
-      - build/bin/
-
-test-e2e:
-  <<: *docker-compose-e2e
-  <<: *rules
-  script:
-    - mv -f .env.ci .env
-    - make up-ci
-    - make e2e-ci
-    - exit $(docker inspect orchestrate_e2e_1 --format='{{.State.ExitCode}}')
-
-test-multitenancy-e2e:
-  <<: *docker-compose-e2e
-  <<: *rules
-  script:
-    - mv -f .env.multitenancy .env
-    - make up-ci
-    - make e2e-ci
-    - exit $(docker inspect orchestrate_e2e_1 --format='{{.State.ExitCode}}')
-
-test-stress:
-  <<: *docker-compose-e2e
-  only:
-    refs:
-      - master
-  script:
-    - mv -f .env.ci .env
-    - make up-ci
-    - make stress-ci
-    - exit $(docker inspect orchestrate_stress_1 --format='{{.State.ExitCode}}')
-
-#Build orchestrate
-build-orchestrate-on-branch:
-  <<: *docker-setup
-  script:
-    - *build-orchestrate
-  only:
-    - /^dev\/[a-zA-Z0-9\/\-.]*$/
-    - /^feature\/[a-zA-Z0-9\/\-.]*$/
-    - /^fix\/[a-zA-Z0-9\/\-.]*$/
-    - /^maintenance\/[a-zA-Z0-9\/\-.]*$/
-    - /^release\/[a-zA-Z0-9\/\-.]*$/
-
-build-orchestrate-on-master:
-  <<: *docker-setup
-  script:
-    - *build-orchestrate
-    - docker tag ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA} ${CI_REGISTRY_IMAGE}:latest
-    - docker push ${CI_REGISTRY_IMAGE}:latest
-  only:
-    - master
-
-build-orchestrate-on-tag:
-  <<: *docker-setup
-  script:
-    # `tag` doesnt build a new image, just applies tag existing commit on master
-    - docker pull ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}
-    - docker tag ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA} ${CI_REGISTRY_IMAGE}:${CI_COMMIT_TAG}
-    - docker push ${CI_REGISTRY_IMAGE}:${CI_COMMIT_TAG}
-  only:
-    refs:
-      - tags
-
-release-orchestrate:
-  image: docker:19.03
-  stage: release
-  before_script:
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - docker login -u ${DOCKER_REGISTRY_USER} -p ${DOCKER_REGISTRY_KEY} ${DOCKER_REGISTRY}
-    - docker login -u ${DOCKER_REGISTRY_USER_2} -p ${DOCKER_REGISTRY_KEY_2} ${DOCKER_REGISTRY_2}
-  script:
-    - docker pull ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}
-    - docker tag ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA} ${DOCKER_REGISTRY}/orchestrate:${CI_COMMIT_TAG}
-    - docker push ${DOCKER_REGISTRY}/orchestrate:${CI_COMMIT_TAG}
-    - docker tag ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA} ${DOCKER_REGISTRY_2}${DOCKER_REPOSITORY_2}/orchestrate:${CI_COMMIT_TAG}
-    - docker push ${DOCKER_REGISTRY_2}${DOCKER_REPOSITORY_2}/orchestrate:${CI_COMMIT_TAG}
-  after_script:
-    - docker logout $CI_REGISTRY
-    - docker logout ${DOCKER_REGISTRY}
-    - docker logout ${DOCKER_REGISTRY_2}
-  only:
-    refs:
-      - tags
-  when: manual
-
-#Build e2e
-build-e2e-on-branch:
-  <<: *docker-setup
-  script:
-    - *build-e2e
-  only:
-    - /^dev\/[a-zA-Z0-9\/\-.]*$/
-    - /^feature\/[a-zA-Z0-9\/\-.]*$/
-    - /^fix\/[a-zA-Z0-9\/\-.]*$/
-    - /^maintenance\/[a-zA-Z0-9\/\-.]*$/
-    - /^release\/[a-zA-Z0-9\/\-.]*$/
-
-build-e2e-on-master:
-  <<: *docker-setup
-  script:
-    - *build-e2e
-    - docker tag ${CI_REGISTRY_IMAGE}/e2e:${CI_COMMIT_SHORT_SHA} ${CI_REGISTRY_IMAGE}/e2e:latest
-    - docker push ${CI_REGISTRY_IMAGE}/e2e:latest
-  only:
-    refs:
-      - master
-
-build-e2e-on-tag:
-  <<: *docker-setup
-  script:
-    # `tag` doesnt build a new image, just applies tag existing commit on master
-    - docker pull ${CI_REGISTRY_IMAGE}/e2e:${CI_COMMIT_SHORT_SHA}
-    - docker tag ${CI_REGISTRY_IMAGE}/e2e:${CI_COMMIT_SHORT_SHA} ${CI_REGISTRY_IMAGE}/e2e:${CI_COMMIT_TAG}
-    - docker push ${CI_REGISTRY_IMAGE}/e2e:${CI_COMMIT_TAG}
-  only:
-    refs:
-      - tags
-
-release-e2e:
-  image: docker:19.03
-  stage: release
-  before_script:
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - docker login -u ${DOCKER_REGISTRY_USER} -p ${DOCKER_REGISTRY_KEY} ${DOCKER_REGISTRY}
-    - docker login -u ${DOCKER_REGISTRY_USER_2} -p ${DOCKER_REGISTRY_KEY_2} ${DOCKER_REGISTRY_2}
-  script:
-    - docker pull ${CI_REGISTRY_IMAGE}/e2e:${CI_COMMIT_SHORT_SHA}
-    - docker tag ${CI_REGISTRY_IMAGE}/e2e:${CI_COMMIT_SHORT_SHA} ${DOCKER_REGISTRY}/e2e:${CI_COMMIT_TAG}
-    - docker push ${DOCKER_REGISTRY}/e2e:${CI_COMMIT_TAG}
-    - docker tag ${CI_REGISTRY_IMAGE}/e2e:${CI_COMMIT_SHORT_SHA} ${DOCKER_REGISTRY_2}${DOCKER_REPOSITORY_2}/orchestrate-e2e:${CI_COMMIT_TAG}
-    - docker push ${DOCKER_REGISTRY_2}${DOCKER_REPOSITORY_2}/orchestrate-e2e:${CI_COMMIT_TAG}
-  after_script:
-    - docker logout $CI_REGISTRY
-    - docker logout ${DOCKER_REGISTRY}
-    - docker logout ${DOCKER_REGISTRY_2}
-  only:
-    refs:
-      - tags
-  when: manual
-
-# IMPORTANT: this job name can't be changed!
-# It has to be "pages" for GitlabCI to recognize it.
-# see https://docs.gitlab.com/ee/user/project/pages/introduction.html#gitlab-pages-requirements
-pages:
-  <<: *build-pages
-  # must be on the last stage to make sure the doc is updated only if everything passed
-  stage: doc
-  #  cache:
-  #    paths:
-  #      - public
-  artifacts:
-    when: always
-    paths:
-      - public/${DOC_VERSION}
-    # no need to keep the artifact more than required to check for an issue
-    expire_in: 1 day
-  only:
-    refs:
-      - tags
+#
+# test:
+#   <<: *go-setup
+#   <<: *rules
+#   coverage: /^total:.*\s(\d+.\d+)%/
+#   services:
+#     - postgres:10.12-alpine
+#   variables:
+#     POSTGRES_PASSWORD: "postgres"
+#     DB_HOST: "postgres"
+#   script:
+#     - make run-coverage
+#
+# integration:
+#   <<: *go-setup
+#   <<: *rules
+#   services:
+#     - docker:19.03-dind
+#   variables:
+#     DOCKER_HOST: tcp://docker:2375
+#     DOCKER_TLS_CERTDIR: ""
+#     DB_HOST: "docker"
+#     KAFKA_HOST: "docker"
+#     KAFKA_URL: "docker:9092"
+#   script:
+#     - make run-integration
+#
+# lint:
+#   <<: *go-setup
+#   <<: *rules
+#   script:
+#     - make lint-tools
+#     - make lint-ci
+#
+# race:
+#   <<: *go-setup
+#   <<: *rules
+#   script:
+#     - make race
+#
+# gobuild:
+#   <<: *go-setup
+#   <<: *rules
+#   script:
+#     - make gobuild
+#     - make gobuild-e2e
+#   cache:
+#     key: "$CI_COMMIT_REF_SLUG"
+#     paths:
+#       - build/bin/
+#
+# test-e2e:
+#   <<: *docker-compose-e2e
+#   <<: *rules
+#   script:
+#     - mv -f .env.ci .env
+#     - make up-ci
+#     - make e2e-ci
+#     - exit $(docker inspect orchestrate_e2e_1 --format='{{.State.ExitCode}}')
+#
+# test-multitenancy-e2e:
+#   <<: *docker-compose-e2e
+#   <<: *rules
+#   script:
+#     - mv -f .env.multitenancy .env
+#     - make up-ci
+#     - make e2e-ci
+#     - exit $(docker inspect orchestrate_e2e_1 --format='{{.State.ExitCode}}')
+#
+# test-stress:
+#   <<: *docker-compose-e2e
+#   only:
+#     refs:
+#       - master
+#   script:
+#     - mv -f .env.ci .env
+#     - make up-ci
+#     - make stress-ci
+#     - exit $(docker inspect orchestrate_stress_1 --format='{{.State.ExitCode}}')
+#
+# #Build orchestrate
+# build-orchestrate-on-branch:
+#   <<: *docker-setup
+#   script:
+#     - *build-orchestrate
+#   only:
+#     - /^dev\/[a-zA-Z0-9\/\-.]*$/
+#     - /^feature\/[a-zA-Z0-9\/\-.]*$/
+#     - /^fix\/[a-zA-Z0-9\/\-.]*$/
+#     - /^maintenance\/[a-zA-Z0-9\/\-.]*$/
+#     - /^release\/[a-zA-Z0-9\/\-.]*$/
+#
+# build-orchestrate-on-master:
+#   <<: *docker-setup
+#   script:
+#     - *build-orchestrate
+#     - docker tag ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA} ${CI_REGISTRY_IMAGE}:latest
+#     - docker push ${CI_REGISTRY_IMAGE}:latest
+#   only:
+#     - master
+#
+# build-orchestrate-on-tag:
+#   <<: *docker-setup
+#   script:
+#     # `tag` doesnt build a new image, just applies tag existing commit on master
+#     - docker pull ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}
+#     - docker tag ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA} ${CI_REGISTRY_IMAGE}:${CI_COMMIT_TAG}
+#     - docker push ${CI_REGISTRY_IMAGE}:${CI_COMMIT_TAG}
+#   only:
+#     refs:
+#       - tags
+#
+# release-orchestrate:
+#   image: docker:19.03
+#   stage: release
+#   before_script:
+#     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+#     - docker login -u ${DOCKER_REGISTRY_USER} -p ${DOCKER_REGISTRY_KEY} ${DOCKER_REGISTRY}
+#     - docker login -u ${DOCKER_REGISTRY_USER_2} -p ${DOCKER_REGISTRY_KEY_2} ${DOCKER_REGISTRY_2}
+#   script:
+#     - docker pull ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}
+#     - docker tag ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA} ${DOCKER_REGISTRY}/orchestrate:${CI_COMMIT_TAG}
+#     - docker push ${DOCKER_REGISTRY}/orchestrate:${CI_COMMIT_TAG}
+#     - docker tag ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA} ${DOCKER_REGISTRY_2}${DOCKER_REPOSITORY_2}/orchestrate:${CI_COMMIT_TAG}
+#     - docker push ${DOCKER_REGISTRY_2}${DOCKER_REPOSITORY_2}/orchestrate:${CI_COMMIT_TAG}
+#   after_script:
+#     - docker logout $CI_REGISTRY
+#     - docker logout ${DOCKER_REGISTRY}
+#     - docker logout ${DOCKER_REGISTRY_2}
+#   only:
+#     refs:
+#       - tags
+#   when: manual
+#
+# #Build e2e
+# build-e2e-on-branch:
+#   <<: *docker-setup
+#   script:
+#     - *build-e2e
+#   only:
+#     - /^dev\/[a-zA-Z0-9\/\-.]*$/
+#     - /^feature\/[a-zA-Z0-9\/\-.]*$/
+#     - /^fix\/[a-zA-Z0-9\/\-.]*$/
+#     - /^maintenance\/[a-zA-Z0-9\/\-.]*$/
+#     - /^release\/[a-zA-Z0-9\/\-.]*$/
+#
+# build-e2e-on-master:
+#   <<: *docker-setup
+#   script:
+#     - *build-e2e
+#     - docker tag ${CI_REGISTRY_IMAGE}/e2e:${CI_COMMIT_SHORT_SHA} ${CI_REGISTRY_IMAGE}/e2e:latest
+#     - docker push ${CI_REGISTRY_IMAGE}/e2e:latest
+#   only:
+#     refs:
+#       - master
+#
+# build-e2e-on-tag:
+#   <<: *docker-setup
+#   script:
+#     # `tag` doesnt build a new image, just applies tag existing commit on master
+#     - docker pull ${CI_REGISTRY_IMAGE}/e2e:${CI_COMMIT_SHORT_SHA}
+#     - docker tag ${CI_REGISTRY_IMAGE}/e2e:${CI_COMMIT_SHORT_SHA} ${CI_REGISTRY_IMAGE}/e2e:${CI_COMMIT_TAG}
+#     - docker push ${CI_REGISTRY_IMAGE}/e2e:${CI_COMMIT_TAG}
+#   only:
+#     refs:
+#       - tags
+#
+# release-e2e:
+#   image: docker:19.03
+#   stage: release
+#   before_script:
+#     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+#     - docker login -u ${DOCKER_REGISTRY_USER} -p ${DOCKER_REGISTRY_KEY} ${DOCKER_REGISTRY}
+#     - docker login -u ${DOCKER_REGISTRY_USER_2} -p ${DOCKER_REGISTRY_KEY_2} ${DOCKER_REGISTRY_2}
+#   script:
+#     - docker pull ${CI_REGISTRY_IMAGE}/e2e:${CI_COMMIT_SHORT_SHA}
+#     - docker tag ${CI_REGISTRY_IMAGE}/e2e:${CI_COMMIT_SHORT_SHA} ${DOCKER_REGISTRY}/e2e:${CI_COMMIT_TAG}
+#     - docker push ${DOCKER_REGISTRY}/e2e:${CI_COMMIT_TAG}
+#     - docker tag ${CI_REGISTRY_IMAGE}/e2e:${CI_COMMIT_SHORT_SHA} ${DOCKER_REGISTRY_2}${DOCKER_REPOSITORY_2}/orchestrate-e2e:${CI_COMMIT_TAG}
+#     - docker push ${DOCKER_REGISTRY_2}${DOCKER_REPOSITORY_2}/orchestrate-e2e:${CI_COMMIT_TAG}
+#   after_script:
+#     - docker logout $CI_REGISTRY
+#     - docker logout ${DOCKER_REGISTRY}
+#     - docker logout ${DOCKER_REGISTRY_2}
+#   only:
+#     refs:
+#       - tags
+#   when: manual
+#
+# # IMPORTANT: this job name can't be changed!
+# # It has to be "pages" for GitlabCI to recognize it.
+# # see https://docs.gitlab.com/ee/user/project/pages/introduction.html#gitlab-pages-requirements
+# pages:
+#   <<: *build-pages
+#   # must be on the last stage to make sure the doc is updated only if everything passed
+#   stage: doc
+#   #  cache:
+#   #    paths:
+#   #      - public
+#   artifacts:
+#     when: always
+#     paths:
+#       - public/${DOC_VERSION}
+#     # no need to keep the artifact more than required to check for an issue
+#     expire_in: 1 day
+#   only:
+#     refs:
+#       - tags
 
 release-notes:
   <<: *release-notes
