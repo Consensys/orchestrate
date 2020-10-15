@@ -18,5 +18,6 @@ octokit.pulls.create({
   head:process.argv[3],
   base:'master',
   maintainer_can_modify:true,
-  draft:true
+  draft:true,
+  body: 'Automatic PR to update changelog by importing it from Orchestrate Gitlab code repos when tag was created.'
 });
