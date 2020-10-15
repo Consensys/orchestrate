@@ -104,7 +104,7 @@ func NewProxyConfig(chains []*models.Chain, proxyCacheTTL *time.Duration) *dynam
 	cfg := dynamic.NewConfig()
 
 	for _, chain := range chains {
-		multitenancyMid := fmt.Sprintf("multitenancy-%v", chain.TenantID)
+		multitenancyMid := fmt.Sprintf("auth-%v@multitenancy", chain.TenantID)
 		middlewares := []string{
 			"chain-proxy-accesslog@internal",
 			"auth@multitenancy",
@@ -119,8 +119,9 @@ func NewProxyConfig(chains []*models.Chain, proxyCacheTTL *time.Duration) *dynam
 		}
 
 		if proxyCacheTTL != nil {
-			middlewares = append(middlewares, "http-cache")
-			cfg.HTTP.Middlewares["http-cache"] = &dynamic.Middleware{
+			httpCacheMid := fmt.Sprintf("%s@http-cache", chain.UUID)
+			middlewares = append(middlewares, httpCacheMid)
+			cfg.HTTP.Middlewares[httpCacheMid] = &dynamic.Middleware{
 				HTTPCache: &dynamic.HTTPCache{
 					TTL:       *proxyCacheTTL,
 					KeySuffix: httpCacheGenerateChainKey(chain),

@@ -50,7 +50,7 @@ x-quorum-def:
       cat $${DDIR}/static-nodes.json
       GENESIS_FILE="/examples/genesis.json"
       NETWORK_ID=$$(cat $${GENESIS_FILE} | grep chainId | awk -F " " '{print $$2}' | awk -F "," '{print $$1}')
-      GETH_ARGS_ISTANBUL="--emitcheckpoints --istanbul.blockperiod 1 --mine --minerthreads 1 --syncmode full"
+      GETH_ARGS_ISTANBUL="--emitcheckpoints --istanbul.blockperiod 5 --mine --minerthreads 1 --syncmode full"
       geth --datadir $${DDIR} init $${GENESIS_FILE}
       geth \
         --identity node$${NODE_ID}-${QUORUM_CONSENSUS:-istanbul} \

@@ -90,7 +90,7 @@ func TestNewChainsProxyConfig(t *testing.T) {
 						Middlewares: []string{
 							"chain-proxy-accesslog@internal",
 							"auth@multitenancy",
-							"multitenancy-testTenantId",
+							"auth-testTenantId@multitenancy",
 							"strip-path@internal",
 							"ratelimit@internal",
 						},
@@ -108,7 +108,7 @@ func TestNewChainsProxyConfig(t *testing.T) {
 					},
 				}
 
-				cfg.HTTP.Middlewares["multitenancy-testTenantId"] = &dynamic.Middleware{
+				cfg.HTTP.Middlewares["auth-testTenantId@multitenancy"] = &dynamic.Middleware{
 					MultiTenancy: &dynamic.MultiTenancy{
 						Tenant: "testTenantId",
 					},
@@ -153,7 +153,7 @@ func TestNewChainsProxyConfig(t *testing.T) {
 						Middlewares: []string{
 							"chain-proxy-accesslog@internal",
 							"auth@multitenancy",
-							"multitenancy-testTenantId",
+							"auth-testTenantId@multitenancy",
 							"strip-path@internal",
 							"ratelimit@internal",
 						},
@@ -168,7 +168,7 @@ func TestNewChainsProxyConfig(t *testing.T) {
 						Middlewares: []string{
 							"chain-proxy-accesslog@internal",
 							"auth@multitenancy",
-							"multitenancy-testTenantId",
+							"auth-testTenantId@multitenancy",
 							"strip-path@internal",
 							"ratelimit@internal",
 						},
@@ -183,7 +183,7 @@ func TestNewChainsProxyConfig(t *testing.T) {
 						Middlewares: []string{
 							"chain-proxy-accesslog@internal",
 							"auth@multitenancy",
-							"multitenancy-testTenantId",
+							"auth-testTenantId@multitenancy",
 							"strip-path@internal",
 							"ratelimit@internal",
 						},
@@ -224,7 +224,7 @@ func TestNewChainsProxyConfig(t *testing.T) {
 					},
 				}
 
-				cfg.HTTP.Middlewares["multitenancy-testTenantId"] = &dynamic.Middleware{
+				cfg.HTTP.Middlewares["auth-testTenantId@multitenancy"] = &dynamic.Middleware{
 					MultiTenancy: &dynamic.MultiTenancy{
 						Tenant: "testTenantId",
 					},

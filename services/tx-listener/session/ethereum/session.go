@@ -312,7 +312,7 @@ func (s *Session) fetchBlock(ctx context.Context, blockPosition uint64) *Future 
 
 		for _, tx := range blck.Transactions() {
 			log.FromContext(ctx).WithField("txHash", tx.Hash().String()).
-				WithField("block", blck.Nonce()).Debug("found transaction in block")
+				WithField("block", blck.NumberU64()).Debug("found transaction in block")
 		}
 
 		jobMap, err := s.fetchJobs(ctx, blck.Transactions())
