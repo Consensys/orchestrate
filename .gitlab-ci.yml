@@ -190,6 +190,7 @@ integration:
     DB_HOST: "docker"
     KAFKA_HOST: "docker"
     KAFKA_URL: "docker:9092"
+    VAULT_HOST: "docker"
   script:
     - make run-integration
 
