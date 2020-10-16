@@ -49,6 +49,23 @@ func (s *identityManagerTransactionTestSuite) TestTransactionScheduler_Transacti
 		assert.Equal(t, resp.Alias, txRequest.Alias)
 		assert.Equal(t, resp.TenantID, "_")
 	})
+	
+	s.T().Run("should import identity successfully by querying key-manager API", func(t *testing.T) {
+		defer gock.Off()
+		txRequest := testutils.FakeImportIdentityRequest()
+		gock.New(KeyManagerURL).Post("/ethereum/accounts/import").Reply(200).JSON(ethAccRes)
+
+		resp, err := s.client.ImportIdentity(ctx, txRequest)
+		if err != nil {
+			assert.Fail(t, err.Error())
+			return
+		}
+
+		assert.Equal(t, resp.Address, ethAccRes.Address)
+		assert.Equal(t, resp.PublicKey, ethAccRes.PublicKey)
+		assert.Equal(t, resp.Alias, txRequest.Alias)
+		assert.Equal(t, resp.TenantID, "_")
+	})
 
 	s.T().Run("should fail to create identity if key-manager API fails", func(t *testing.T) {
 		defer gock.Off()

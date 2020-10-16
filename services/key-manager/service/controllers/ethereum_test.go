@@ -70,18 +70,6 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_Create() {
 		assert.Equal(t, http.StatusOK, rw.Code)
 	})
 
-	s.T().Run("should fail with 400 if bad request", func(t *testing.T) {
-		createAccountRequest := testutils.FakeCreateETHAccountRequest()
-		createAccountRequest.KeyType = "InvalidKeyType"
-		requestBytes, _ := json.Marshal(createAccountRequest)
-
-		rw := httptest.NewRecorder()
-		httpRequest := httptest.NewRequest(http.MethodPost, "/ethereum/accounts", bytes.NewReader(requestBytes))
-
-		s.router.ServeHTTP(rw, httpRequest)
-		assert.Equal(t, http.StatusBadRequest, rw.Code)
-	})
-
 	// Sufficient test to check that the mapping to HTTP errors is working. All other status code tests are done in integration tests
 	s.T().Run("should fail with correct error code if use case fails", func(t *testing.T) {
 		createAccountRequest := testutils.FakeCreateETHAccountRequest()
@@ -121,17 +109,6 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_Import() {
 		assert.Equal(t, http.StatusOK, rw.Code)
 	})
 
-	s.T().Run("should fail with 400 if bad request", func(t *testing.T) {
-		importAccountRequest := testutils.FakeImportETHAccountRequest()
-		importAccountRequest.KeyType = "InvalidKeyType"
-		requestBytes, _ := json.Marshal(importAccountRequest)
-
-		rw := httptest.NewRecorder()
-		httpRequest := httptest.NewRequest(http.MethodPost, "/ethereum/accounts/import", bytes.NewReader(requestBytes))
-
-		s.router.ServeHTTP(rw, httpRequest)
-		assert.Equal(t, http.StatusBadRequest, rw.Code)
-	})
 
 	// Sufficient test to check that the mapping to HTTP errors is working. All other status code tests are done in integration tests
 	s.T().Run("should fail with correct error code if use case fails", func(t *testing.T) {

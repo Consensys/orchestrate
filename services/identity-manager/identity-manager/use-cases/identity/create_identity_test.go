@@ -12,7 +12,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/keymanager/ethereum"
 	testutils3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	mocks2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/identity-manager/identity-manager/use-cases/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/identity-manager/store/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/key-manager/client/mock"
@@ -34,24 +33,47 @@ func TestCreateIdentity_Execute(t *testing.T) {
 	tenantID := "tenantID"
 	tenants := []string{tenantID}
 
-	t.Run("should execute use case successfully", func(t *testing.T) {
+	t.Run("should create account successfully", func(t *testing.T) {
 		idenEntity := testutils3.FakeIdentity()
 		idenEntity.TenantID = tenantID
 
 		mockSearchUC.EXPECT().Execute(ctx, &entities.IdentityFilters{Aliases: []string{idenEntity.Alias}}, tenants)
-		mockClient.EXPECT().CreateAccount(ctx, &types.CreateETHAccountRequest{
+		mockClient.EXPECT().CreateETHAccount(ctx, &types.CreateETHAccountRequest{
 			Namespace: tenantID,
-			KeyType:   utils.Secp256k1,
 		}).Return(&types.ETHAccountResponse{
 			Address:   idenEntity.Address,
 			PublicKey: idenEntity.PublicKey,
-			KeyType:   utils.Secp256k1,
 			Namespace: tenantID,
 		}, nil)
 
 		identityAgent.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
 
-		resp, err := usecase.Execute(ctx, idenEntity, tenantID)
+		resp, err := usecase.Execute(ctx, idenEntity, "", tenantID)
+
+		assert.NoError(t, err)
+		assert.Equal(t, resp.PublicKey, idenEntity.PublicKey)
+		assert.Equal(t, resp.Address, idenEntity.Address)
+		assert.Equal(t, resp.Active, true)
+	})
+	
+	t.Run("should import account successfully", func(t *testing.T) {
+		idenEntity := testutils3.FakeIdentity()
+		idenEntity.TenantID = tenantID
+		privateKey := "ETHPrivateKey"
+
+		mockSearchUC.EXPECT().Execute(ctx, &entities.IdentityFilters{Aliases: []string{idenEntity.Alias}}, tenants)
+		mockClient.EXPECT().ImportETHAccount(ctx, &types.ImportETHAccountRequest{
+			Namespace: tenantID,
+			PrivateKey: privateKey,
+		}).Return(&types.ETHAccountResponse{
+			Address:   idenEntity.Address,
+			PublicKey: idenEntity.PublicKey,
+			Namespace: tenantID,
+		}, nil)
+
+		identityAgent.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
+
+		resp, err := usecase.Execute(ctx, idenEntity, privateKey, tenantID)
 
 		assert.NoError(t, err)
 		assert.Equal(t, resp.PublicKey, idenEntity.PublicKey)
@@ -66,7 +88,7 @@ func TestCreateIdentity_Execute(t *testing.T) {
 
 		mockSearchUC.EXPECT().Execute(ctx, &entities.IdentityFilters{Aliases: []string{idenEntity.Alias}}, tenants).Return(nil, expectedErr)
 
-		_, err := usecase.Execute(ctx, idenEntity, tenantID)
+		_, err := usecase.Execute(ctx, idenEntity, "", tenantID)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createIdentityComponent), err)
 	})
 
@@ -78,7 +100,7 @@ func TestCreateIdentity_Execute(t *testing.T) {
 		mockSearchUC.EXPECT().Execute(ctx, &entities.IdentityFilters{Aliases: []string{idenEntity.Alias}}, tenants).
 			Return([]*entities.Identity{foundIdenEntity}, nil)
 
-		_, err := usecase.Execute(ctx, idenEntity, tenantID)
+		_, err := usecase.Execute(ctx, idenEntity, "", tenantID)
 		assert.Error(t, err)
 		assert.True(t, errors.IsInvalidParameterError(err))
 	})
@@ -89,12 +111,11 @@ func TestCreateIdentity_Execute(t *testing.T) {
 		idenEntity.TenantID = tenantID
 
 		mockSearchUC.EXPECT().Execute(ctx, &entities.IdentityFilters{Aliases: []string{idenEntity.Alias}}, tenants)
-		mockClient.EXPECT().CreateAccount(ctx, &types.CreateETHAccountRequest{
+		mockClient.EXPECT().CreateETHAccount(ctx, &types.CreateETHAccountRequest{
 			Namespace: tenantID,
-			KeyType:   utils.Secp256k1,
 		}).Return(nil, expectedErr)
 
-		_, err := usecase.Execute(ctx, idenEntity, tenantID)
+		_, err := usecase.Execute(ctx, idenEntity, "", tenantID)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createIdentityComponent), err)
 	})
 
@@ -104,19 +125,17 @@ func TestCreateIdentity_Execute(t *testing.T) {
 		idenEntity.TenantID = tenantID
 
 		mockSearchUC.EXPECT().Execute(ctx, &entities.IdentityFilters{Aliases: []string{idenEntity.Alias}}, tenants)
-		mockClient.EXPECT().CreateAccount(ctx, &types.CreateETHAccountRequest{
+		mockClient.EXPECT().CreateETHAccount(ctx, &types.CreateETHAccountRequest{
 			Namespace: tenantID,
-			KeyType:   utils.Secp256k1,
 		}).Return(&types.ETHAccountResponse{
 			Address:   idenEntity.Address,
 			PublicKey: idenEntity.PublicKey,
-			KeyType:   utils.Secp256k1,
 			Namespace: tenantID,
 		}, nil)
 
 		identityAgent.EXPECT().Insert(ctx, gomock.Any()).Return(expectedErr)
 
-		_, err := usecase.Execute(ctx, idenEntity, tenantID)
+		_, err := usecase.Execute(ctx, idenEntity, "", tenantID)
 
 		assert.Error(t, err)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createIdentityComponent), err)
