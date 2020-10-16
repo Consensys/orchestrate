@@ -7,12 +7,12 @@ Feature: Transaction Scheduler Jobs
     Given I have the following tenants
       | alias   | tenantID        |
       | tenant1 | {{random.uuid}} |
-    Then I register the following contracts
-      | name        | artifacts        | Headers.Authorization    |
-      | SimpleToken | SimpleToken.json | Bearer {{tenant1.token}} |
     Then I register the following chains
       | alias | Name                | URLs                         | Headers.Authorization    |
       | besu  | besu-{{scenarioID}} | {{global.nodes.besu_1.URLs}} | Bearer {{tenant1.token}} |
+
+  @besu
+  Scenario: Execute transfer transaction using jobs, step by step
     And I have created the following accounts
       | alias    | ID              | Headers.Authorization    |
       | account1 | {{random.uuid}} | Bearer {{tenant1.token}} |
@@ -40,9 +40,6 @@ Feature: Transaction Scheduler Jobs
     Then the response code should be 202
     Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
-
-  @besu
-  Scenario: Execute transfer transaction using jobs, step by step
     Given I register the following alias
       | alias | value              |
       | to1   | {{random.account}} |
@@ -79,7 +76,7 @@ Feature: Transaction Scheduler Jobs
       | alias        | path |
       | txOneJobUUID | uuid |
     Then I track the following envelopes
-      | ID               |
+      | ID                  |
       | {{scheduleOneUUID}} |
     When I send "PATCH" request to "{{global.tx-scheduler}}/jobs/{{txOneJobUUID}}" with json:
       """
@@ -123,9 +120,12 @@ Feature: Transaction Scheduler Jobs
 
   @besu
   Scenario: Execute raw transaction using jobs, step by step
+    Given I register the following alias
+      | alias          | value              |
+      | random_account | {{random.account}} |
     Given I sign the following transactions
-      | alias | ID              | Value              | Gas   | To           | privateKey                                   | ChainUUID     | Headers.Authorization    |
-      | rawTx | {{random.uuid}} | 100000000000000000 | 21000 | {{account1}} | {{global.nodes.besu_1.fundedPrivateKeys[0]}} | {{besu.UUID}} | Bearer {{tenant1.token}} |
+      | alias | ID              | Data | Gas   | To                 | Nonce | privateKey             | ChainUUID     | Headers.Authorization    |
+      | rawTx | {{random.uuid}} | 0x   | 21000 | {{random_account}} | 0     | {{random.private_key}} | {{besu.UUID}} | Bearer {{tenant1.token}} |
     Then  I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
@@ -156,15 +156,15 @@ Feature: Transaction Scheduler Jobs
       | alias        | path |
       | txTwoJobUUID | uuid |
     Then I track the following envelopes
-      | ID               |
+      | ID                  |
       | {{scheduleTwoUUID}} |
     Then the response code should be 200
     When I send "PUT" request to "{{global.tx-scheduler}}/jobs/{{txTwoJobUUID}}/start"
     Then the response code should be 202
     Then Envelopes should be in topic "tx.sender"
     And Envelopes should have the following fields
-      | Raw | To           |
-      | ~   | {{account1}} |
+      | Raw | To                 |
+      | ~   | {{random_account}} |
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
       | Receipt.Status |
