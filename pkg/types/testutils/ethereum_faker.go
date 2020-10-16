@@ -50,10 +50,10 @@ func FakeETHTransactionParams() *entities.ETHTransactionParams {
 
 func FakeETHAccount() *entities.ETHAccount {
 	return &entities.ETHAccount{
-		Namespace: "_",
-		KeyType:   utils.Secp256k1,
-		Address:   ethcommon.HexToAddress("0x" + utils.RandHexString(12)).String(),
-		PublicKey: ethcommon.HexToHash("0x" + utils.RandHexString(12)).String(),
+		Namespace:           "_",
+		Address:             ethcommon.HexToAddress(utils.RandHexString(12)).String(),
+		PublicKey:           ethcommon.HexToHash(utils.RandHexString(12)).String(),
+		CompressedPublicKey: ethcommon.HexToHash(utils.RandHexString(12)).String(),
 	}
 }
 

@@ -7,7 +7,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/keymanager/ethereum"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/identity-manager/identity-manager/parsers"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/identity-manager/identity-manager/use-cases"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/identity-manager/store"
@@ -30,7 +29,7 @@ func NewCreateIdentityUseCase(db store.DB, searchUC usecases.SearchIdentitiesUse
 	}
 }
 
-func (uc *createIdentityUseCase) Execute(ctx context.Context, identity *entities.Identity, tenantID string) (*entities.Identity, error) {
+func (uc *createIdentityUseCase) Execute(ctx context.Context, identity *entities.Identity, privateKey, tenantID string) (*entities.Identity, error) {
 	logger := log.WithContext(ctx).
 		WithField("alias", identity.Alias)
 
@@ -44,10 +43,18 @@ func (uc *createIdentityUseCase) Execute(ctx context.Context, identity *entities
 		return nil, errors.InvalidParameterError("alias %s already exists", identity.Alias)
 	}
 
-	resp, err := uc.keyManagerClient.CreateAccount(ctx, &types.CreateETHAccountRequest{
-		Namespace: tenantID,
-		KeyType:   utils.Secp256k1,
-	})
+	// REMINDER: For now, Identity API only support ETH accounts
+	var resp *types.ETHAccountResponse
+	if privateKey != "" {
+		resp, err = uc.keyManagerClient.ImportETHAccount(ctx, &types.ImportETHAccountRequest{
+			Namespace:  tenantID,
+			PrivateKey: privateKey,
+		})
+	} else {
+		resp, err = uc.keyManagerClient.CreateETHAccount(ctx, &types.CreateETHAccountRequest{
+			Namespace: tenantID,
+		})
+	}
 
 	if err != nil {
 		return nil, err

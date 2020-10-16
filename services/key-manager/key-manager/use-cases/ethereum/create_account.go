@@ -5,8 +5,6 @@ import (
 	"crypto/ecdsa"
 	"encoding/hex"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
-
 	"github.com/ethereum/go-ethereum/crypto"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
@@ -30,7 +28,7 @@ func NewCreateAccountUseCase(vault store.Vault) CreateAccountUseCase {
 
 // Execute creates a new Ethereum account and stores it in the Vault
 func (uc *createAccountUseCase) Execute(ctx context.Context, namespace, importedPrivKey string) (*entities.ETHAccount, error) {
-	logger := log.WithContext(ctx).WithField("key_type", utils.Secp256k1).WithField("namespace", namespace)
+	logger := log.WithContext(ctx).WithField("namespace", namespace)
 	logger.Debug("creating new Ethereum account")
 
 	var privKey = new(ecdsa.PrivateKey)
@@ -49,7 +47,6 @@ func (uc *createAccountUseCase) Execute(ctx context.Context, namespace, imported
 		PublicKey:           hex.EncodeToString(crypto.FromECDSAPub(&privKey.PublicKey)),
 		CompressedPublicKey: hex.EncodeToString(crypto.CompressPubkey(&privKey.PublicKey)),
 		Namespace:           namespace,
-		KeyType:             utils.Secp256k1,
 	}
 
 	err = uc.vault.Ethereum().Insert(ctx, account.Address, hex.EncodeToString(crypto.FromECDSA(privKey)), account.Namespace)

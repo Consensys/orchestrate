@@ -48,3 +48,22 @@ func (c HTTPClient) CreateIdentity(ctx context.Context, req *types.CreateIdentit
 
 	return resp, nil
 }
+
+func (c HTTPClient) ImportIdentity(ctx context.Context, req *types.ImportIdentityRequest) (*types.IdentityResponse, error) {
+	reqURL := fmt.Sprintf("%v/identities/import", c.config.URL)
+	resp := &types.IdentityResponse{}
+
+	response, err := clientutils.PostRequest(ctx, c.client, reqURL, req)
+	if err != nil {
+		errMessage := "error while importing identity"
+		log.FromContext(ctx).WithError(err).Error(errMessage)
+		return nil, errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+	}
+
+	defer clientutils.CloseResponse(response)
+	if err := httputil.ParseResponse(ctx, response, resp); err != nil {
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
+
+	return resp, nil
+}

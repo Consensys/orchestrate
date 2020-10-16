@@ -259,7 +259,7 @@ services:
       SECRET_PKEY: ${SECRET_PKEY-}
       SECRET_STORE: ${SECRET_STORE-hashicorp}
     volumes:
-      - vault-token:/vault/token
+      - vault-token:/vault/token:ro
       - ./build/bin/orchestrate:/bin/main
     depends_on:
       - key-vault-init

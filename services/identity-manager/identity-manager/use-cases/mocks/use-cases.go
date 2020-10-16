@@ -87,18 +87,18 @@ func (m *MockCreateIdentityUseCase) EXPECT() *MockCreateIdentityUseCaseMockRecor
 }
 
 // Execute mocks base method
-func (m *MockCreateIdentityUseCase) Execute(ctx context.Context, identity *entities.Identity, tenantID string) (*entities.Identity, error) {
+func (m *MockCreateIdentityUseCase) Execute(ctx context.Context, identity *entities.Identity, privateKey, tenantID string) (*entities.Identity, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, identity, tenantID)
+	ret := m.ctrl.Call(m, "Execute", ctx, identity, privateKey, tenantID)
 	ret0, _ := ret[0].(*entities.Identity)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Execute indicates an expected call of Execute
-func (mr *MockCreateIdentityUseCaseMockRecorder) Execute(ctx, identity, tenantID interface{}) *gomock.Call {
+func (mr *MockCreateIdentityUseCaseMockRecorder) Execute(ctx, identity, privateKey, tenantID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockCreateIdentityUseCase)(nil).Execute), ctx, identity, tenantID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockCreateIdentityUseCase)(nil).Execute), ctx, identity, privateKey, tenantID)
 }
 
 // MockSearchIdentitiesUseCase is a mock of SearchIdentitiesUseCase interface

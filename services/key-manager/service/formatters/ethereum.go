@@ -10,7 +10,6 @@ func FormatETHAccountResponse(account *entities.ETHAccount) *types.ETHAccountRes
 		Address:             account.Address,
 		PublicKey:           account.PublicKey,
 		CompressedPublicKey: account.CompressedPublicKey,
-		KeyType:             account.KeyType,
 		Namespace:           account.Namespace,
 	}
 }

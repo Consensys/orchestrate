@@ -14,7 +14,7 @@ type IdentityUseCases interface {
 }
 
 type CreateIdentityUseCase interface {
-	Execute(ctx context.Context, identity *entities.Identity, tenantID string) (*entities.Identity, error)
+	Execute(ctx context.Context, identity *entities.Identity, privateKey, tenantID string) (*entities.Identity, error)
 }
 
 type SearchIdentitiesUseCase interface {

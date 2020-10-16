@@ -12,4 +12,5 @@ import (
 type IdentityManagerClient interface {
 	Checker() healthz.Check
 	CreateIdentity(ctx context.Context, request *types.CreateIdentityRequest) (*types.IdentityResponse, error)
+	ImportIdentity(ctx context.Context, request *types.ImportIdentityRequest) (*types.IdentityResponse, error)
 }

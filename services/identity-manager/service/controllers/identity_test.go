@@ -74,7 +74,27 @@ func (s *identityCtrlTestSuite) TestJobsController_Create() {
 			NewRequest(http.MethodPost, "/identities", bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 
-		s.createIdentityUC.EXPECT().Execute(gomock.Any(), gomock.Any(), s.tenants[0]).Return(idenResp, nil)
+		s.createIdentityUC.EXPECT().Execute(gomock.Any(), gomock.Any(), "", s.tenants[0]).Return(idenResp, nil)
+
+		s.router.ServeHTTP(rw, httpRequest)
+
+		response := formatters.FormatIdentityResponse(idenResp)
+		expectedBody, _ := json.Marshal(response)
+		assert.Equal(t, string(expectedBody)+"\n", rw.Body.String())
+		assert.Equal(t, http.StatusOK, rw.Code)
+	})
+	
+	s.T().Run("should execute import identity request successfully", func(t *testing.T) {
+		req := testutils.FakeImportIdentityRequest()
+		requestBytes, _ := json.Marshal(req)
+		idenResp := testutils.FakeIdentity()
+		rw := httptest.NewRecorder()
+
+		httpRequest := httptest.
+			NewRequest(http.MethodPost, "/identities/import", bytes.NewReader(requestBytes)).
+			WithContext(s.ctx)
+
+		s.createIdentityUC.EXPECT().Execute(gomock.Any(), gomock.Any(), req.PrivateKey, s.tenants[0]).Return(idenResp, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -106,7 +126,7 @@ func (s *identityCtrlTestSuite) TestJobsController_Create() {
 			NewRequest(http.MethodPost, "/identities", bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 	
-		s.createIdentityUC.EXPECT().Execute(gomock.Any(), gomock.Any(), s.tenants[0]).Return(nil, errors.InvalidParameterError("error"))
+		s.createIdentityUC.EXPECT().Execute(gomock.Any(), gomock.Any(), "", s.tenants[0]).Return(nil, errors.InvalidParameterError("error"))
 	
 		s.router.ServeHTTP(rw, httpRequest)
 		assert.Equal(t, http.StatusUnprocessableEntity, rw.Code)

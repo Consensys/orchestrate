@@ -35,18 +35,18 @@ func (m *MockUseCases) EXPECT() *MockUseCasesMockRecorder {
 	return m.recorder
 }
 
-// CreateAccount mocks base method
+// CreateETHAccount mocks base method
 func (m *MockUseCases) CreateAccount() ethereum.CreateAccountUseCase {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateAccount")
+	ret := m.ctrl.Call(m, "CreateETHAccount")
 	ret0, _ := ret[0].(ethereum.CreateAccountUseCase)
 	return ret0
 }
 
-// CreateAccount indicates an expected call of CreateAccount
+// CreateETHAccount indicates an expected call of CreateETHAccount
 func (mr *MockUseCasesMockRecorder) CreateAccount() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateAccount", reflect.TypeOf((*MockUseCases)(nil).CreateAccount))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateETHAccount", reflect.TypeOf((*MockUseCases)(nil).CreateAccount))
 }
 
 // MockCreateAccountUseCase is a mock of CreateAccountUseCase interface

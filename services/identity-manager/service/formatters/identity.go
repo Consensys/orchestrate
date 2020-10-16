@@ -12,6 +12,13 @@ func FormatCreateIdentityRequest(req *types.CreateIdentityRequest) *entities.Ide
 	}
 }
 
+func FormatImportIdentityRequest(req *types.ImportIdentityRequest) *entities.Identity {
+	return &entities.Identity{
+		Alias:      req.Alias,
+		Attributes: req.Attributes,
+	}
+}
+
 func FormatIdentityResponse(iden *entities.Identity) *types.IdentityResponse {
 	return &types.IdentityResponse{
 		Alias:               iden.Alias,

@@ -43,7 +43,7 @@ func NewBuilder(ucs usecases.IdentityUseCases) *Builder {
 	}
 }
 
-func (b *Builder) Build(ctx context.Context, _ string, configuration interface{}, _ func(response *http.Response) error) (http.Handler, error) {
+func (b *Builder) Build(_ context.Context, _ string, configuration interface{}, _ func(response *http.Response) error) (http.Handler, error) {
 	cfg, ok := configuration.(*dynamic.Identity)
 	if !ok {
 		return nil, fmt.Errorf("invalid configuration type (expected %T but got %T)", cfg, configuration)
