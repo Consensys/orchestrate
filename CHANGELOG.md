@@ -1,6 +1,6 @@
 # Codefi Orchestrate Release Notes
 
-## v2.5.0-rc1 (unreleased)
+## v2.5.0 (2020-10-19)
 
 ### 🆕 Features
 
@@ -15,22 +15,7 @@
     * `REDIS_PASSWORD`: Redis AUTH password
     * `REDIS_DATABASE`: Redis CLI database number
 
-## v2.4.0-rc3 (2020-10-09)
-
-### 🛠 Bug fixes
-
-* Fix a bug updating status of a jobs in NEVER_MINED
-
-## v2.4.0-rc2 (2020-10-05)
-
-### 🛠 Bug fixes
-
-* Fix a bug with quorum's private transaction signature where the payload is sign with v=37,38 instead of 27,28
-* Fix a bug with besu's gas estimation for private transaction on Besu>=1.5.4
-* Fix a bug with infinitive loop on job retries when gas increment is zero
-* Fix a bug with missing envelope message ID on `account-generated` topic
-
-## v2.4.0-rc1 (2020-09-29)
+## v2.4.0 (2020-10-19)
 
 ### 🆕 Features
 
@@ -52,6 +37,9 @@
 * Fix a bug when registering an overloaded & rate-limited chain with a configuration starting block to "latest", the synchronization could start from block 0.
 * Fix a bug where the process was not failing when DB migration failed
 * Improve retry policy on Eth Clients, it's now failing quicker in some cases and more accurately
+* Fix a bug with quorum's private transaction signature where the payload is sign with v=37,38 instead of 27,28
+* Fix a bug with besu's gas estimation for private transaction on Besu>=1.5.4
+* Fix a bug with missing envelope message ID on `account-generated` topic
 
 ## v2.3.2 (2020-09-22)
 

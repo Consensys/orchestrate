@@ -172,7 +172,7 @@
                         "type": "string"
                     }
                 },
-                "chainUUID": {
+                "chain": {
                     "type": "string",
                     "example": "besu"
                 }
@@ -237,7 +237,7 @@
                         "type": "string"
                     }
                 },
-                "chainUUID": {
+                "chain": {
                     "type": "string",
                     "example": "quorum"
                 },
