@@ -20,4 +20,5 @@ type Agents interface {
 // Interfaces data agents
 type EthereumAgent interface {
 	Insert(ctx context.Context, address, privKey, namespace string) error
+	FindOne(ctx context.Context, address, namespace string) (string, error)
 }

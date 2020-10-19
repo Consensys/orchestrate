@@ -73,7 +73,7 @@ func (c *IdentitiesController) create(rw http.ResponseWriter, request *http.Requ
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 422 {object} httputil.ErrorResponse "Unprocessable entity"
 // @Failure 401 {object} httputil.ErrorResponse "Unauthorized"
-// @Failure 405 {object} httputil.ErrorResponse "Now allowed"
+// @Failure 405 {object} httputil.ErrorResponse "Not allowed"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /identities/import [post]
 func (c *IdentitiesController) importKey(rw http.ResponseWriter, request *http.Request) {

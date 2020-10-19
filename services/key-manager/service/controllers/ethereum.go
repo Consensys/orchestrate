@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/keymanager"
+
 	"github.com/gorilla/mux"
 	jsonutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/httputil"
@@ -24,8 +26,9 @@ func NewEthereumController(ucs ethereum.UseCases) *EthereumController {
 
 // Add routes to router
 func (c *EthereumController) Append(router *mux.Router) {
-	router.Methods(http.MethodPost).Path(Path).HandlerFunc(c.create)
+	router.Methods(http.MethodPost).Path(Path).HandlerFunc(c.createAccount)
 	router.Methods(http.MethodPost).Path(Path + "/import").HandlerFunc(c.importAccount)
+	router.Methods(http.MethodPost).Path(Path + "/{address}/sign").HandlerFunc(c.signPayload)
 }
 
 // @Summary Creates a new Ethereum Account
@@ -37,7 +40,7 @@ func (c *EthereumController) Append(router *mux.Router) {
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /ethereum/accounts [post]
-func (c *EthereumController) create(rw http.ResponseWriter, request *http.Request) {
+func (c *EthereumController) createAccount(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	ctx := request.Context()
 
@@ -48,13 +51,13 @@ func (c *EthereumController) create(rw http.ResponseWriter, request *http.Reques
 		return
 	}
 
-	jobRes, err := c.ucs.CreateAccount().Execute(ctx, ethAccountRequest.Namespace, "")
+	accountResponse, err := c.ucs.CreateAccount().Execute(ctx, ethAccountRequest.Namespace, "")
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
 	}
 
-	_ = json.NewEncoder(rw).Encode(formatters.FormatETHAccountResponse(jobRes))
+	_ = json.NewEncoder(rw).Encode(formatters.FormatETHAccountResponse(accountResponse))
 }
 
 // @Summary Imports an Ethereum Account
@@ -78,11 +81,41 @@ func (c *EthereumController) importAccount(rw http.ResponseWriter, request *http
 		return
 	}
 
-	jobRes, err := c.ucs.CreateAccount().Execute(ctx, ethAccountRequest.Namespace, ethAccountRequest.PrivateKey)
+	accountResponse, err := c.ucs.CreateAccount().Execute(ctx, ethAccountRequest.Namespace, ethAccountRequest.PrivateKey)
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
 	}
 
-	_ = json.NewEncoder(rw).Encode(formatters.FormatETHAccountResponse(jobRes))
+	_ = json.NewEncoder(rw).Encode(formatters.FormatETHAccountResponse(accountResponse))
+}
+
+// @Summary Signs an arbitrary message using an existing Ethereum account
+// @Description Signs an arbitrary message using ECDSA and the private key of an existing Ethereum account
+// @Accept json
+// @Produce json
+// @Param request body keymanager.PayloadRequest true "Payload to sign"
+// @Success 200 {object} ethereum.ETHSignedPayloadResponse "Signed payload"
+// @Failure 400 {object} httputil.ErrorResponse "Invalid request"
+// @Failure 404 {object} httputil.ErrorResponse "Account not found"
+// @Failure 500 {object} httputil.ErrorResponse "Internal server error"
+// @Router /ethereum/accounts/{address}/sign [post]
+func (c *EthereumController) signPayload(rw http.ResponseWriter, request *http.Request) {
+	ctx := request.Context()
+
+	signRequest := &keymanager.PayloadRequest{}
+	err := jsonutils.UnmarshalBody(request.Body, signRequest)
+	if err != nil {
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	address := mux.Vars(request)["address"]
+	signature, err := c.ucs.SignPayload().Execute(ctx, address, signRequest.Namespace, signRequest.Data)
+	if err != nil {
+		httputil.WriteHTTPErrorResponse(rw, err)
+		return
+	}
+
+	_, _ = rw.Write([]byte(signature))
 }

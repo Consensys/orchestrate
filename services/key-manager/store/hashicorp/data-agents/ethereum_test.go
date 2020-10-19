@@ -63,3 +63,46 @@ func (s *ethereumDATestSuite) TestEthereumDataAgent_Insert() {
 		assert.Equal(t, errors.HashicorpVaultConnectionError("failed to store privateKey in Hashicorp Vault").ExtendComponent(ethereumDAComponent), err)
 	})
 }
+
+func (s *ethereumDATestSuite) TestEthereumDataAgent_FindOne() {
+	ctx := context.Background()
+	address := "0xaddress"
+	privKey := "privKey"
+	namespace := "namespace"
+
+	s.T().Run("should insert private key successfully without namespace", func(t *testing.T) {
+		s.mockSecretStore.EXPECT().Load(ctx, address).Return(privKey, true, nil)
+
+		privKeyResponse, err := s.dataAgent.FindOne(ctx, address, "")
+
+		assert.NoError(t, err)
+		assert.Equal(t, privKey, privKeyResponse)
+	})
+
+	s.T().Run("should insert private key successfully with namespace", func(t *testing.T) {
+		s.mockSecretStore.EXPECT().Load(ctx, "namespace_0xaddress").Return(privKey, true, nil)
+
+		privKeyResponse, err := s.dataAgent.FindOne(ctx, address, namespace)
+
+		assert.NoError(t, err)
+		assert.Equal(t, privKey, privKeyResponse)
+	})
+
+	s.T().Run("should fail with HashicorpVaultConnectionError if Load fails", func(t *testing.T) {
+		s.mockSecretStore.EXPECT().Load(ctx, gomock.Any()).Return("", false, fmt.Errorf("error"))
+
+		privKeyResponse, err := s.dataAgent.FindOne(ctx, address, namespace)
+
+		assert.Empty(t, privKeyResponse)
+		assert.Equal(t, errors.HashicorpVaultConnectionError("failed to load privateKey from Hashicorp Vault").ExtendComponent(ethereumDAComponent), err)
+	})
+
+	s.T().Run("should fail with NotFoundError if Load succeeds but nothing is returned", func(t *testing.T) {
+		s.mockSecretStore.EXPECT().Load(ctx, gomock.Any()).Return("", false, nil)
+
+		privKeyResponse, err := s.dataAgent.FindOne(ctx, address, namespace)
+
+		assert.Empty(t, privKeyResponse)
+		assert.Equal(t, errors.NotFoundError("account does not exist").ExtendComponent(ethereumDAComponent), err)
+	})
+}
