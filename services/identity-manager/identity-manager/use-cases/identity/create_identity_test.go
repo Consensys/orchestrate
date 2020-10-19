@@ -39,7 +39,7 @@ func TestCreateIdentity_Execute(t *testing.T) {
 		idenEntity.TenantID = tenantID
 
 		mockSearchUC.EXPECT().Execute(ctx, &entities.IdentityFilters{Aliases: []string{idenEntity.Alias}}, tenants)
-		mockClient.EXPECT().CreateETHAccount(ctx, &types.CreateETHAccountRequest{
+		mockClient.EXPECT().ETHCreateAccount(ctx, &types.CreateETHAccountRequest{
 			Namespace: tenantID,
 		}).Return(&types.ETHAccountResponse{
 			Address:   idenEntity.Address,
@@ -63,7 +63,7 @@ func TestCreateIdentity_Execute(t *testing.T) {
 		privateKey := "ETHPrivateKey"
 
 		mockSearchUC.EXPECT().Execute(ctx, &entities.IdentityFilters{Aliases: []string{idenEntity.Alias}}, tenants)
-		mockClient.EXPECT().ImportETHAccount(ctx, &types.ImportETHAccountRequest{
+		mockClient.EXPECT().ETHImportAccount(ctx, &types.ImportETHAccountRequest{
 			Namespace:  tenantID,
 			PrivateKey: privateKey,
 		}).Return(&types.ETHAccountResponse{
@@ -89,7 +89,7 @@ func TestCreateIdentity_Execute(t *testing.T) {
 
 		mockSearchUC.EXPECT().Execute(ctx, &entities.IdentityFilters{Aliases: []string{idenEntity.Alias}}, tenants)
 		mockFundingUC.EXPECT().Execute(ctx, gomock.Any(), chainName).Return(nil)
-		mockClient.EXPECT().CreateETHAccount(ctx, &types.CreateETHAccountRequest{
+		mockClient.EXPECT().ETHCreateAccount(ctx, &types.CreateETHAccountRequest{
 			Namespace: tenantID,
 		}).Return(&types.ETHAccountResponse{
 			Address:   idenEntity.Address,
@@ -137,7 +137,7 @@ func TestCreateIdentity_Execute(t *testing.T) {
 		idenEntity.TenantID = tenantID
 
 		mockSearchUC.EXPECT().Execute(ctx, &entities.IdentityFilters{Aliases: []string{idenEntity.Alias}}, tenants)
-		mockClient.EXPECT().CreateETHAccount(ctx, &types.CreateETHAccountRequest{
+		mockClient.EXPECT().ETHCreateAccount(ctx, &types.CreateETHAccountRequest{
 			Namespace: tenantID,
 		}).Return(nil, expectedErr)
 
@@ -151,7 +151,7 @@ func TestCreateIdentity_Execute(t *testing.T) {
 		idenEntity.TenantID = tenantID
 
 		mockSearchUC.EXPECT().Execute(ctx, &entities.IdentityFilters{Aliases: []string{idenEntity.Alias}}, tenants)
-		mockClient.EXPECT().CreateETHAccount(ctx, &types.CreateETHAccountRequest{
+		mockClient.EXPECT().ETHCreateAccount(ctx, &types.CreateETHAccountRequest{
 			Namespace: tenantID,
 		}).Return(&types.ETHAccountResponse{
 			Address:   idenEntity.Address,
@@ -174,7 +174,7 @@ func TestCreateIdentity_Execute(t *testing.T) {
 		chainName := "besu"
 
 		mockSearchUC.EXPECT().Execute(ctx, &entities.IdentityFilters{Aliases: []string{idenEntity.Alias}}, tenants)
-		mockClient.EXPECT().CreateETHAccount(ctx, &types.CreateETHAccountRequest{
+		mockClient.EXPECT().ETHCreateAccount(ctx, &types.CreateETHAccountRequest{
 			Namespace: tenantID,
 		}).Return(&types.ETHAccountResponse{}, nil)
 

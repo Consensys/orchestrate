@@ -3,6 +3,8 @@ package client
 import (
 	"context"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/keymanager"
+
 	healthz "github.com/heptiolabs/healthcheck"
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/keymanager/ethereum"
 )
@@ -10,8 +12,9 @@ import (
 //go:generate mockgen -source=client.go -destination=mock/mock.go -package=mock
 
 type EthereumAccountClient interface {
-	CreateETHAccount(ctx context.Context, request *types.CreateETHAccountRequest) (*types.ETHAccountResponse, error)
-	ImportETHAccount(ctx context.Context, request *types.ImportETHAccountRequest) (*types.ETHAccountResponse, error)
+	ETHCreateAccount(ctx context.Context, request *types.CreateETHAccountRequest) (*types.ETHAccountResponse, error)
+	ETHImportAccount(ctx context.Context, request *types.ImportETHAccountRequest) (*types.ETHAccountResponse, error)
+	ETHSign(ctx context.Context, address string, request *keymanager.PayloadRequest) (string, error)
 }
 
 type KeyManagerClient interface {

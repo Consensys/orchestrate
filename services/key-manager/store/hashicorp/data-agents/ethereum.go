@@ -34,6 +34,26 @@ func (agent *HashicorpEthereum) Insert(ctx context.Context, address, privKey, na
 	return nil
 }
 
+func (agent *HashicorpEthereum) FindOne(ctx context.Context, address, namespace string) (string, error) {
+	key := agent.generateKey(address, namespace)
+	logger := log.WithContext(ctx).WithField("key", key)
+
+	privKey, ok, err := agent.vault.Load(ctx, key)
+	if err != nil {
+		errMessage := "failed to load privateKey from Hashicorp Vault"
+		logger.WithError(err).Error(errMessage)
+		return "", errors.HashicorpVaultConnectionError(errMessage).ExtendComponent(ethereumDAComponent)
+	}
+
+	if !ok {
+		warnMessage := "account does not exist"
+		logger.Warn(warnMessage)
+		return "", errors.NotFoundError(warnMessage).ExtendComponent(ethereumDAComponent)
+	}
+
+	return privKey, nil
+}
+
 func generateKey(address, namespace string) string {
 	key := address
 	if namespace != "" {

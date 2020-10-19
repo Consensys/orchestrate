@@ -49,12 +49,12 @@ func (uc *createIdentityUseCase) Execute(ctx context.Context, identity *entities
 	// REMINDER: For now, Identity API only support ETH accounts
 	var resp *types.ETHAccountResponse
 	if privateKey != "" {
-		resp, err = uc.keyManagerClient.ImportETHAccount(ctx, &types.ImportETHAccountRequest{
+		resp, err = uc.keyManagerClient.ETHImportAccount(ctx, &types.ImportETHAccountRequest{
 			Namespace:  tenantID,
 			PrivateKey: privateKey,
 		})
 	} else {
-		resp, err = uc.keyManagerClient.CreateETHAccount(ctx, &types.CreateETHAccountRequest{
+		resp, err = uc.keyManagerClient.ETHCreateAccount(ctx, &types.CreateETHAccountRequest{
 			Namespace: tenantID,
 		})
 	}

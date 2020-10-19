@@ -35,18 +35,32 @@ func (m *MockUseCases) EXPECT() *MockUseCasesMockRecorder {
 	return m.recorder
 }
 
-// CreateETHAccount mocks base method
+// CreateAccount mocks base method
 func (m *MockUseCases) CreateAccount() ethereum.CreateAccountUseCase {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateETHAccount")
+	ret := m.ctrl.Call(m, "CreateAccount")
 	ret0, _ := ret[0].(ethereum.CreateAccountUseCase)
 	return ret0
 }
 
-// CreateETHAccount indicates an expected call of CreateETHAccount
+// CreateAccount indicates an expected call of CreateAccount
 func (mr *MockUseCasesMockRecorder) CreateAccount() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateETHAccount", reflect.TypeOf((*MockUseCases)(nil).CreateAccount))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateAccount", reflect.TypeOf((*MockUseCases)(nil).CreateAccount))
+}
+
+// Sign mocks base method
+func (m *MockUseCases) Sign() ethereum.SignUseCase {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Sign")
+	ret0, _ := ret[0].(ethereum.SignUseCase)
+	return ret0
+}
+
+// Sign indicates an expected call of Sign
+func (mr *MockUseCasesMockRecorder) Sign() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Sign", reflect.TypeOf((*MockUseCases)(nil).Sign))
 }
 
 // MockCreateAccountUseCase is a mock of CreateAccountUseCase interface
@@ -85,4 +99,42 @@ func (m *MockCreateAccountUseCase) Execute(ctx context.Context, namespace, impor
 func (mr *MockCreateAccountUseCaseMockRecorder) Execute(ctx, namespace, importedPrivKey interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockCreateAccountUseCase)(nil).Execute), ctx, namespace, importedPrivKey)
+}
+
+// MockSignUseCase is a mock of SignUseCase interface
+type MockSignUseCase struct {
+	ctrl     *gomock.Controller
+	recorder *MockSignUseCaseMockRecorder
+}
+
+// MockSignUseCaseMockRecorder is the mock recorder for MockSignUseCase
+type MockSignUseCaseMockRecorder struct {
+	mock *MockSignUseCase
+}
+
+// NewMockSignUseCase creates a new mock instance
+func NewMockSignUseCase(ctrl *gomock.Controller) *MockSignUseCase {
+	mock := &MockSignUseCase{ctrl: ctrl}
+	mock.recorder = &MockSignUseCaseMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockSignUseCase) EXPECT() *MockSignUseCaseMockRecorder {
+	return m.recorder
+}
+
+// Execute mocks base method
+func (m *MockSignUseCase) Execute(ctx context.Context, address, namespace, data string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Execute", ctx, address, namespace, data)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Execute indicates an expected call of Execute
+func (mr *MockSignUseCaseMockRecorder) Execute(ctx, address, namespace, data interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSignUseCase)(nil).Execute), ctx, address, namespace, data)
 }

@@ -5,6 +5,8 @@ import (
 	"crypto/ecdsa"
 	"encoding/hex"
 
+	"github.com/consensys/quorum/common/hexutil"
+
 	"github.com/ethereum/go-ethereum/crypto"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
@@ -44,8 +46,8 @@ func (uc *createAccountUseCase) Execute(ctx context.Context, namespace, imported
 
 	account := &entities.ETHAccount{
 		Address:             crypto.PubkeyToAddress(privKey.PublicKey).Hex(),
-		PublicKey:           hex.EncodeToString(crypto.FromECDSAPub(&privKey.PublicKey)),
-		CompressedPublicKey: hex.EncodeToString(crypto.CompressPubkey(&privKey.PublicKey)),
+		PublicKey:           hexutil.Encode(crypto.FromECDSAPub(&privKey.PublicKey)),
+		CompressedPublicKey: hexutil.Encode(crypto.CompressPubkey(&privKey.PublicKey)),
 		Namespace:           namespace,
 	}
 

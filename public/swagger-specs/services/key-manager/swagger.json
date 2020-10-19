@@ -106,19 +106,61 @@
                     }
                 }
             }
+        },
+        "/ethereum/accounts/{address}/sign": {
+            "post": {
+                "description": "Signs an arbitrary message using ECDSA and the private key of an existing Ethereum account",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Signs an arbitrary message using an existing Ethereum account",
+                "parameters": [
+                    {
+                        "description": "Payload to sign",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/keymanager.PayloadRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Signed payload",
+                        "schema": {
+                            "$ref": "#/definitions/ethereum.ETHSignedPayloadResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Account not found",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
         "ethereum.CreateETHAccountRequest": {
             "type": "object",
-            "required": [
-                "keyType"
-            ],
             "properties": {
-                "keyType": {
-                    "type": "string",
-                    "example": "Secp256k1"
-                },
                 "namespace": {
                     "type": "string",
                     "example": "tenant_id"
@@ -133,32 +175,38 @@
                     "example": "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"
                 },
                 "compressedPublicKey": {
-                    "type": "string"
-                },
-                "keyType": {
                     "type": "string",
-                    "example": "Secp256k1"
+                    "example": "0x037c25564c1b6a1553fa8f204be4229439e02b728ca28697003dc1c96ae51ff2c4"
                 },
                 "namespace": {
                     "type": "string",
                     "example": "tenant_id"
                 },
                 "publicKey": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "0x047c25564c1b6a1553fa8f204be4229439e02b728ca28697003dc1c96ae51ff2c4d686e8494b3c1aeab21d7c3e88f0e0b418744e3bfb747581e8a68a97503add03"
+                }
+            }
+        },
+        "ethereum.ETHSignedPayloadResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "string",
+                    "example": "my data to sign"
+                },
+                "signature": {
+                    "type": "string",
+                    "example": "0xe5aaab1ad3f02b5bbc9b174fc26455b5cea9bf7e9e2a474facfffe9d126ada146ee931e50dd1607baaa7bc776f7919b3cc03608ac0851d0722a51d757ba85e6901"
                 }
             }
         },
         "ethereum.ImportETHAccountRequest": {
             "type": "object",
             "required": [
-                "keyType",
                 "privateKey"
             ],
             "properties": {
-                "keyType": {
-                    "type": "string",
-                    "example": "Secp256k1"
-                },
                 "namespace": {
                     "type": "string",
                     "example": "tenant_id"
@@ -179,6 +227,22 @@
                 "message": {
                     "type": "string",
                     "example": "invalid status update for the current job state"
+                }
+            }
+        },
+        "keymanager.PayloadRequest": {
+            "type": "object",
+            "required": [
+                "data"
+            ],
+            "properties": {
+                "data": {
+                    "type": "string",
+                    "example": "my data to sign"
+                },
+                "namespace": {
+                    "type": "string",
+                    "example": "tenant_id"
                 }
             }
         }

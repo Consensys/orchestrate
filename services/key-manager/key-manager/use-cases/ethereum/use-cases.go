@@ -13,8 +13,13 @@ Ethereum Use Cases
 */
 type UseCases interface {
 	CreateAccount() CreateAccountUseCase
+	SignPayload() SignUseCase
 }
 
 type CreateAccountUseCase interface {
 	Execute(ctx context.Context, namespace, importedPrivKey string) (*entities.ETHAccount, error)
+}
+
+type SignUseCase interface {
+	Execute(ctx context.Context, address, namespace, data string) (string, error)
 }

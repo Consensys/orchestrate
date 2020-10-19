@@ -8,6 +8,7 @@ import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
 	healthcheck "github.com/heptiolabs/healthcheck"
+	keymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/keymanager"
 	ethereum "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/keymanager/ethereum"
 	reflect "reflect"
 )
@@ -35,34 +36,49 @@ func (m *MockEthereumAccountClient) EXPECT() *MockEthereumAccountClientMockRecor
 	return m.recorder
 }
 
-// CreateETHAccount mocks base method
-func (m *MockEthereumAccountClient) CreateETHAccount(ctx context.Context, request *ethereum.CreateETHAccountRequest) (*ethereum.ETHAccountResponse, error) {
+// ETHCreateAccount mocks base method
+func (m *MockEthereumAccountClient) ETHCreateAccount(ctx context.Context, request *ethereum.CreateETHAccountRequest) (*ethereum.ETHAccountResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateETHAccount", ctx, request)
+	ret := m.ctrl.Call(m, "ETHCreateAccount", ctx, request)
 	ret0, _ := ret[0].(*ethereum.ETHAccountResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// CreateETHAccount indicates an expected call of CreateETHAccount
-func (mr *MockEthereumAccountClientMockRecorder) CreateETHAccount(ctx, request interface{}) *gomock.Call {
+// ETHCreateAccount indicates an expected call of ETHCreateAccount
+func (mr *MockEthereumAccountClientMockRecorder) ETHCreateAccount(ctx, request interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateETHAccount", reflect.TypeOf((*MockEthereumAccountClient)(nil).CreateETHAccount), ctx, request)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHCreateAccount", reflect.TypeOf((*MockEthereumAccountClient)(nil).ETHCreateAccount), ctx, request)
 }
 
-// ImportETHAccount mocks base method
-func (m *MockEthereumAccountClient) ImportETHAccount(ctx context.Context, request *ethereum.ImportETHAccountRequest) (*ethereum.ETHAccountResponse, error) {
+// ETHImportAccount mocks base method
+func (m *MockEthereumAccountClient) ETHImportAccount(ctx context.Context, request *ethereum.ImportETHAccountRequest) (*ethereum.ETHAccountResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ImportETHAccount", ctx, request)
+	ret := m.ctrl.Call(m, "ETHImportAccount", ctx, request)
 	ret0, _ := ret[0].(*ethereum.ETHAccountResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// ImportETHAccount indicates an expected call of ImportETHAccount
-func (mr *MockEthereumAccountClientMockRecorder) ImportETHAccount(ctx, request interface{}) *gomock.Call {
+// ETHImportAccount indicates an expected call of ETHImportAccount
+func (mr *MockEthereumAccountClientMockRecorder) ETHImportAccount(ctx, request interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ImportETHAccount", reflect.TypeOf((*MockEthereumAccountClient)(nil).ImportETHAccount), ctx, request)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHImportAccount", reflect.TypeOf((*MockEthereumAccountClient)(nil).ETHImportAccount), ctx, request)
+}
+
+// ETHSign mocks base method
+func (m *MockEthereumAccountClient) ETHSign(ctx context.Context, address string, request *keymanager.PayloadRequest) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ETHSign", ctx, address, request)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ETHSign indicates an expected call of ETHSign
+func (mr *MockEthereumAccountClientMockRecorder) ETHSign(ctx, address, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHSign", reflect.TypeOf((*MockEthereumAccountClient)(nil).ETHSign), ctx, address, request)
 }
 
 // MockKeyManagerClient is a mock of KeyManagerClient interface
@@ -102,32 +118,47 @@ func (mr *MockKeyManagerClientMockRecorder) Checker() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Checker", reflect.TypeOf((*MockKeyManagerClient)(nil).Checker))
 }
 
-// CreateETHAccount mocks base method
-func (m *MockKeyManagerClient) CreateETHAccount(ctx context.Context, request *ethereum.CreateETHAccountRequest) (*ethereum.ETHAccountResponse, error) {
+// ETHCreateAccount mocks base method
+func (m *MockKeyManagerClient) ETHCreateAccount(ctx context.Context, request *ethereum.CreateETHAccountRequest) (*ethereum.ETHAccountResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateETHAccount", ctx, request)
+	ret := m.ctrl.Call(m, "ETHCreateAccount", ctx, request)
 	ret0, _ := ret[0].(*ethereum.ETHAccountResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// CreateETHAccount indicates an expected call of CreateETHAccount
-func (mr *MockKeyManagerClientMockRecorder) CreateETHAccount(ctx, request interface{}) *gomock.Call {
+// ETHCreateAccount indicates an expected call of ETHCreateAccount
+func (mr *MockKeyManagerClientMockRecorder) ETHCreateAccount(ctx, request interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateETHAccount", reflect.TypeOf((*MockKeyManagerClient)(nil).CreateETHAccount), ctx, request)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHCreateAccount", reflect.TypeOf((*MockKeyManagerClient)(nil).ETHCreateAccount), ctx, request)
 }
 
-// ImportETHAccount mocks base method
-func (m *MockKeyManagerClient) ImportETHAccount(ctx context.Context, request *ethereum.ImportETHAccountRequest) (*ethereum.ETHAccountResponse, error) {
+// ETHImportAccount mocks base method
+func (m *MockKeyManagerClient) ETHImportAccount(ctx context.Context, request *ethereum.ImportETHAccountRequest) (*ethereum.ETHAccountResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ImportETHAccount", ctx, request)
+	ret := m.ctrl.Call(m, "ETHImportAccount", ctx, request)
 	ret0, _ := ret[0].(*ethereum.ETHAccountResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// ImportETHAccount indicates an expected call of ImportETHAccount
-func (mr *MockKeyManagerClientMockRecorder) ImportETHAccount(ctx, request interface{}) *gomock.Call {
+// ETHImportAccount indicates an expected call of ETHImportAccount
+func (mr *MockKeyManagerClientMockRecorder) ETHImportAccount(ctx, request interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ImportETHAccount", reflect.TypeOf((*MockKeyManagerClient)(nil).ImportETHAccount), ctx, request)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHImportAccount", reflect.TypeOf((*MockKeyManagerClient)(nil).ETHImportAccount), ctx, request)
+}
+
+// ETHSign mocks base method
+func (m *MockKeyManagerClient) ETHSign(ctx context.Context, address string, request *keymanager.PayloadRequest) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ETHSign", ctx, address, request)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ETHSign indicates an expected call of ETHSign
+func (mr *MockKeyManagerClientMockRecorder) ETHSign(ctx, address, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHSign", reflect.TypeOf((*MockKeyManagerClient)(nil).ETHSign), ctx, address, request)
 }

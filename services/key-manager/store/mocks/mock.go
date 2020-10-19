@@ -136,3 +136,18 @@ func (mr *MockEthereumAgentMockRecorder) Insert(ctx, address, privKey, namespace
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*MockEthereumAgent)(nil).Insert), ctx, address, privKey, namespace)
 }
+
+// FindOne mocks base method
+func (m *MockEthereumAgent) FindOne(ctx context.Context, address, namespace string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindOne", ctx, address, namespace)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindOne indicates an expected call of FindOne
+func (mr *MockEthereumAgentMockRecorder) FindOne(ctx, address, namespace interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOne", reflect.TypeOf((*MockEthereumAgent)(nil).FindOne), ctx, address, namespace)
+}
