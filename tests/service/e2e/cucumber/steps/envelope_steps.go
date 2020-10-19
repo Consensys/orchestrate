@@ -15,10 +15,11 @@ import (
 	"github.com/cucumber/godog"
 	gherkin "github.com/cucumber/messages-go/v10"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/gofrs/uuid"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	nonceUtils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/nonce/utils"
 	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/sarama"
@@ -379,6 +380,11 @@ func (sc *ScenarioContext) replace(s string) (string, error) {
 				w := account.NewAccount()
 				_ = w.Generate()
 				s = strings.Replace(s, matchedAlias[0], w.Address().Hex(), 1)
+			case "private_key":
+				w := account.NewAccount()
+				_ = w.Generate()
+				privBytes := crypto.FromECDSA(w.Priv())
+				s = strings.Replace(s, matchedAlias[0], hexutil.Encode(privBytes)[2:], 1)
 			case "int":
 				s = strings.Replace(s, matchedAlias[0], fmt.Sprintf("%d", rand.Int()), 1)
 			}
@@ -564,26 +570,7 @@ func (sc *ScenarioContext) craftAndSignEnvelope(ctx context.Context, e *tx.Envel
 	_ = e.SetFrom(a.Address())
 
 	if e.GetNonce() == nil {
-		nonceKey := e.PartitionKey()
-		lastAttributed, ok, errNonce := sc.nonceManager.GetLastAttributed(nonceKey)
-		if errNonce != nil {
-			return errNonce
-		}
-		var n uint64
-		if !ok {
-			pendingNonce, errNonce := nonceUtils.GetNonce(ctx, sc.ec, e, endpoint)
-			if errNonce != nil {
-				return errNonce
-			}
-			n = pendingNonce
-		} else {
-			n = lastAttributed + 1
-		}
-		_ = e.SetNonce(n)
-		err = sc.nonceManager.SetLastAttributed(nonceKey, n)
-		if err != nil {
-			return err
-		}
+		return errors.DataError("Need a nonce")
 	}
 
 	if e.GetGasPrice() == nil {

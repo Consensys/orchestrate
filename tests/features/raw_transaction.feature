@@ -10,14 +10,14 @@ Feature: Send raw transfer transaction
     And I register the following chains
       | alias | Name                | URLs                         | Headers.Authorization    |
       | besu  | besu-{{scenarioID}} | {{global.nodes.besu_1.URLs}} | Bearer {{tenant1.token}} |
-    And I have created the following accounts
-      | alias    | ID              | Headers.Authorization    |
-      | account1 | {{random.uuid}} | Bearer {{tenant1.token}} |
 
   Scenario: Send raw transaction
+    Given I register the following alias
+      | alias          | value              |
+      | random_account | {{random.account}} |
     Given I sign the following transactions
-      | alias  | ID              | Value              | Gas   | To           | privateKey                                   | ChainUUID     | Headers.Authorization    |
-      | rawTx1 | {{random.uuid}} | 100000000000000000 | 21000 | {{account1}} | {{global.nodes.besu_1.fundedPrivateKeys[1]}} | {{besu.UUID}} | Bearer {{tenant1.token}} |
+      | alias  | ID              | Data | Gas   | To                 | Nonce | privateKey             | ChainUUID     | Headers.Authorization    |
+      | rawTx1 | {{random.uuid}} | 0x   | 21000 | {{random_account}} | 0     | {{random.private_key}} | {{besu.UUID}} | Bearer {{tenant1.token}} |
     Then I track the following envelopes
       | ID            |
       | {{rawTx1.ID}} |
@@ -39,7 +39,7 @@ Feature: Send raw transfer transaction
       """
     Then the response code should be 202
     Then I register the following response fields
-      | alias   | path                  |
+      | alias   | path         |
       | jobUUID | jobs[0].uuid |
     Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
@@ -51,19 +51,3 @@ Feature: Send raw transfer transaction
     And Response should have the following fields
       | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status |
       | MINED  | CREATED        | STARTED        | PENDING        | MINED          |
-    When I send "POST" request to "{{global.chain-registry}}/{{besu.UUID}}" with json:
-      """
-      {
-        "jsonrpc": "2.0",
-        "method": "eth_getBalance",
-        "params": [
-          "{{account1}}",
-          "latest"
-        ],
-        "id": 1
-      }
-      """
-    Then the response code should be 200
-    And Response should have the following fields
-      | result            |
-      | 0x16345785d8a0000 |
