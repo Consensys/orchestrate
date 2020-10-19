@@ -200,18 +200,14 @@ func (uc *sendTxUsecase) startFaucetJob(ctx context.Context, account, chainUUID,
 
 	fct, err := uc.chainRegistryClient.GetFaucetCandidate(multitenancy.WithTenantID(ctx, tenantID), ethcommon.HexToAddress(account), chainUUID)
 	if err != nil {
+		if errors.IsNotFoundError(err) {
+			return nil
+		}
+
 		return err
 	}
 
-	if fct == nil {
-		errMsg := "could not find a candidate faucets"
-		logger.Debugf(errMsg)
-		return nil
-	}
-
-	logger.WithFields(log.Fields{
-		"faucet.amount": fct.Amount,
-	}).Infof("faucet: credit approved")
+	logger.WithFields(log.Fields{"faucet.amount": fct.Amount}).Infof("faucet: credit approved")
 
 	txJob := generateFaucetJob(fct, scheduleUUID, chainUUID, account)
 

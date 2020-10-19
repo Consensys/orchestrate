@@ -171,6 +171,10 @@
                     "additionalProperties": {
                         "type": "string"
                     }
+                },
+                "chainUUID": {
+                    "type": "string",
+                    "example": "besu"
                 }
             }
         },
@@ -232,6 +236,10 @@
                     "additionalProperties": {
                         "type": "string"
                     }
+                },
+                "chainUUID": {
+                    "type": "string",
+                    "example": "quorum"
                 },
                 "privateKey": {
                     "type": "string",

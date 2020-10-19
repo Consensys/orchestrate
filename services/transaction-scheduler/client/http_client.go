@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	healthz "github.com/heptiolabs/healthcheck"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 
 	"github.com/cenkalti/backoff/v4"
@@ -28,6 +29,10 @@ func NewHTTPClient(h *http.Client, c *Config) TransactionSchedulerClient {
 		client: h,
 		config: c,
 	}
+}
+
+func (c HTTPClient) Checker() healthz.Check {
+	return healthz.HTTPGetCheck(fmt.Sprintf("%s/live", c.config.MetricsURL), time.Second)
 }
 
 func (c *HTTPClient) SendContractTransaction(ctx context.Context, txRequest *types.SendTransactionRequest) (*types.TransactionResponse, error) {

@@ -16,20 +16,23 @@ import (
 const createIdentityComponent = "use-cases.create-identity"
 
 type createIdentityUseCase struct {
-	db               store.DB
-	searchUC         usecases.SearchIdentitiesUseCase
-	keyManagerClient client.KeyManagerClient
+	db                store.DB
+	searchUC          usecases.SearchIdentitiesUseCase
+	fundingIdentityUC usecases.FundingIdentityUseCase
+	keyManagerClient  client.KeyManagerClient
 }
 
-func NewCreateIdentityUseCase(db store.DB, searchUC usecases.SearchIdentitiesUseCase, keyManagerClient client.KeyManagerClient) usecases.CreateIdentityUseCase {
+func NewCreateIdentityUseCase(db store.DB, searchUC usecases.SearchIdentitiesUseCase, fundingIdentityUC usecases.FundingIdentityUseCase,
+	keyManagerClient client.KeyManagerClient) usecases.CreateIdentityUseCase {
 	return &createIdentityUseCase{
-		db:               db,
-		searchUC:         searchUC,
-		keyManagerClient: keyManagerClient,
+		db:                db,
+		searchUC:          searchUC,
+		keyManagerClient:  keyManagerClient,
+		fundingIdentityUC: fundingIdentityUC,
 	}
 }
 
-func (uc *createIdentityUseCase) Execute(ctx context.Context, identity *entities.Identity, privateKey, tenantID string) (*entities.Identity, error) {
+func (uc *createIdentityUseCase) Execute(ctx context.Context, identity *entities.Identity, privateKey, chainName, tenantID string) (*entities.Identity, error) {
 	logger := log.WithContext(ctx).
 		WithField("alias", identity.Alias)
 
@@ -71,6 +74,15 @@ func (uc *createIdentityUseCase) Execute(ctx context.Context, identity *entities
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(createIdentityComponent)
 	}
+
+	if chainName != "" {
+		err = uc.fundingIdentityUC.Execute(ctx, identity, chainName)
+		if err != nil {
+			logger.WithError(err).Error("cannot trigger funding identity")
+		}
+	}
+
+	logger.WithField("address", identity.Address).Info("identity was created successfully")
 
 	return parsers.NewIdentityEntityFromModels(identityModel), nil
 }

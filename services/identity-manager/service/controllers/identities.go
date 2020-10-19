@@ -53,7 +53,7 @@ func (c *IdentitiesController) create(rw http.ResponseWriter, request *http.Requ
 	}
 
 	iden := formatters.FormatCreateIdentityRequest(req)
-	iden, err = c.identityUCs.CreateIdentity().Execute(ctx, iden, "", multitenancy.TenantIDFromContext(ctx))
+	iden, err = c.identityUCs.CreateIdentity().Execute(ctx, iden, "", req.Chain, multitenancy.TenantIDFromContext(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -88,7 +88,7 @@ func (c *IdentitiesController) importKey(rw http.ResponseWriter, request *http.R
 	}
 
 	iden := formatters.FormatImportIdentityRequest(req)
-	iden, err = c.identityUCs.CreateIdentity().Execute(ctx, iden, req.PrivateKey, multitenancy.TenantIDFromContext(ctx))
+	iden, err = c.identityUCs.CreateIdentity().Execute(ctx, iden, req.PrivateKey, req.Chain, multitenancy.TenantIDFromContext(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return

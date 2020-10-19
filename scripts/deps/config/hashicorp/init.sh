@@ -12,6 +12,8 @@ rm init.json
 
 echo $VAULT_TOKEN > /vault/token/.root
 
+echo "ROOT_TOKEN: $VAULT_TOKEN"
+
 # Unseal Vault
 curl --request POST --data '{"key": '${UNSEAL_KEY}'}' ${VAULT_ADDR}/v1/sys/unseal
 

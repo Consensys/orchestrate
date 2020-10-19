@@ -26,9 +26,10 @@ func TestCreateIdentity_Execute(t *testing.T) {
 	identityAgent := mocks.NewMockIdentityAgent(ctrl)
 	mockDB.EXPECT().Identity().Return(identityAgent).AnyTimes()
 	mockSearchUC := mocks2.NewMockSearchIdentitiesUseCase(ctrl)
+	mockFundingUC := mocks2.NewMockFundingIdentityUseCase(ctrl)
 	mockClient := mock.NewMockKeyManagerClient(ctrl)
 
-	usecase := NewCreateIdentityUseCase(mockDB, mockSearchUC, mockClient)
+	usecase := NewCreateIdentityUseCase(mockDB, mockSearchUC, mockFundingUC, mockClient)
 
 	tenantID := "tenantID"
 	tenants := []string{tenantID}
@@ -48,14 +49,14 @@ func TestCreateIdentity_Execute(t *testing.T) {
 
 		identityAgent.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
 
-		resp, err := usecase.Execute(ctx, idenEntity, "", tenantID)
+		resp, err := usecase.Execute(ctx, idenEntity, "", "", tenantID)
 
 		assert.NoError(t, err)
 		assert.Equal(t, resp.PublicKey, idenEntity.PublicKey)
 		assert.Equal(t, resp.Address, idenEntity.Address)
 		assert.Equal(t, resp.Active, true)
 	})
-	
+
 	t.Run("should import account successfully", func(t *testing.T) {
 		idenEntity := testutils3.FakeIdentity()
 		idenEntity.TenantID = tenantID
@@ -63,7 +64,7 @@ func TestCreateIdentity_Execute(t *testing.T) {
 
 		mockSearchUC.EXPECT().Execute(ctx, &entities.IdentityFilters{Aliases: []string{idenEntity.Alias}}, tenants)
 		mockClient.EXPECT().ImportETHAccount(ctx, &types.ImportETHAccountRequest{
-			Namespace: tenantID,
+			Namespace:  tenantID,
 			PrivateKey: privateKey,
 		}).Return(&types.ETHAccountResponse{
 			Address:   idenEntity.Address,
@@ -73,7 +74,32 @@ func TestCreateIdentity_Execute(t *testing.T) {
 
 		identityAgent.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
 
-		resp, err := usecase.Execute(ctx, idenEntity, privateKey, tenantID)
+		resp, err := usecase.Execute(ctx, idenEntity, privateKey, "", tenantID)
+
+		assert.NoError(t, err)
+		assert.Equal(t, resp.PublicKey, idenEntity.PublicKey)
+		assert.Equal(t, resp.Address, idenEntity.Address)
+		assert.Equal(t, resp.Active, true)
+	})
+
+	t.Run("should create account and trigger funding successfully", func(t *testing.T) {
+		idenEntity := testutils3.FakeIdentity()
+		idenEntity.TenantID = tenantID
+		chainName := "besu"
+
+		mockSearchUC.EXPECT().Execute(ctx, &entities.IdentityFilters{Aliases: []string{idenEntity.Alias}}, tenants)
+		mockFundingUC.EXPECT().Execute(ctx, gomock.Any(), chainName).Return(nil)
+		mockClient.EXPECT().CreateETHAccount(ctx, &types.CreateETHAccountRequest{
+			Namespace: tenantID,
+		}).Return(&types.ETHAccountResponse{
+			Address:   idenEntity.Address,
+			PublicKey: idenEntity.PublicKey,
+			Namespace: tenantID,
+		}, nil)
+
+		identityAgent.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
+
+		resp, err := usecase.Execute(ctx, idenEntity, "", chainName, tenantID)
 
 		assert.NoError(t, err)
 		assert.Equal(t, resp.PublicKey, idenEntity.PublicKey)
@@ -88,7 +114,7 @@ func TestCreateIdentity_Execute(t *testing.T) {
 
 		mockSearchUC.EXPECT().Execute(ctx, &entities.IdentityFilters{Aliases: []string{idenEntity.Alias}}, tenants).Return(nil, expectedErr)
 
-		_, err := usecase.Execute(ctx, idenEntity, "", tenantID)
+		_, err := usecase.Execute(ctx, idenEntity, "", "", tenantID)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createIdentityComponent), err)
 	})
 
@@ -100,7 +126,7 @@ func TestCreateIdentity_Execute(t *testing.T) {
 		mockSearchUC.EXPECT().Execute(ctx, &entities.IdentityFilters{Aliases: []string{idenEntity.Alias}}, tenants).
 			Return([]*entities.Identity{foundIdenEntity}, nil)
 
-		_, err := usecase.Execute(ctx, idenEntity, "", tenantID)
+		_, err := usecase.Execute(ctx, idenEntity, "", "", tenantID)
 		assert.Error(t, err)
 		assert.True(t, errors.IsInvalidParameterError(err))
 	})
@@ -115,7 +141,7 @@ func TestCreateIdentity_Execute(t *testing.T) {
 			Namespace: tenantID,
 		}).Return(nil, expectedErr)
 
-		_, err := usecase.Execute(ctx, idenEntity, "", tenantID)
+		_, err := usecase.Execute(ctx, idenEntity, "", "", tenantID)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createIdentityComponent), err)
 	})
 
@@ -135,9 +161,28 @@ func TestCreateIdentity_Execute(t *testing.T) {
 
 		identityAgent.EXPECT().Insert(ctx, gomock.Any()).Return(expectedErr)
 
-		_, err := usecase.Execute(ctx, idenEntity, "", tenantID)
+		_, err := usecase.Execute(ctx, idenEntity, "", "", tenantID)
 
 		assert.Error(t, err)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createIdentityComponent), err)
+	})
+
+	t.Run("should ignore error on trigger funding identity", func(t *testing.T) {
+		expectedErr := errors.ConnectionError("error")
+		idenEntity := testutils3.FakeIdentity()
+		idenEntity.TenantID = tenantID
+		chainName := "besu"
+
+		mockSearchUC.EXPECT().Execute(ctx, &entities.IdentityFilters{Aliases: []string{idenEntity.Alias}}, tenants)
+		mockClient.EXPECT().CreateETHAccount(ctx, &types.CreateETHAccountRequest{
+			Namespace: tenantID,
+		}).Return(&types.ETHAccountResponse{}, nil)
+
+		identityAgent.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
+		mockFundingUC.EXPECT().Execute(ctx, gomock.Any(), chainName).Return(expectedErr)
+		resp, err := usecase.Execute(ctx, idenEntity, "", chainName, tenantID)
+
+		assert.NoError(t, err)
+		assert.Equal(t, resp.Active, true)
 	})
 }

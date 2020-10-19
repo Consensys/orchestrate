@@ -45,7 +45,7 @@ func NewTxScheduler(
 	return app.New(
 		cfg.App,
 		app.MultiTenancyOpt("auth", jwt, key, cfg.Multitenancy),
-		ReadinessOpt(db),
+		ReadinessOpt(db, chainRegistryClient),
 		app.MetricsOpt(),
 		app.LoggerMiddlewareOpt("base"),
 		app.SwaggerOpt("./public/swagger-specs/services/transaction-scheduler/swagger.json", "base@logger-base"),
@@ -54,10 +54,10 @@ func NewTxScheduler(
 	)
 }
 
-func ReadinessOpt(db database.DB) app.Option {
+func ReadinessOpt(db database.DB, chainRegistryClient chainregistry.ChainRegistryClient) app.Option {
 	return func(ap *app.App) error {
 		ap.AddReadinessCheck("database", postgres.Checker(db.(orm.DB)))
-		ap.AddReadinessCheck("chain-registry", chainregistry.GlobalChecker())
+		ap.AddReadinessCheck("chain-registry", chainRegistryClient.Checker())
 		ap.AddReadinessCheck("contract-registry", contractregistry2.GlobalChecker())
 		ap.AddReadinessCheck("kafka", pkgsarama.GlobalClientChecker())
 		return nil

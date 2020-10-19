@@ -63,6 +63,20 @@ func (mr *MockIdentityUseCasesMockRecorder) SearchIdentity() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchIdentity", reflect.TypeOf((*MockIdentityUseCases)(nil).SearchIdentity))
 }
 
+// FundingIdentity mocks base method
+func (m *MockIdentityUseCases) FundingIdentity() usecases.FundingIdentityUseCase {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FundingIdentity")
+	ret0, _ := ret[0].(usecases.FundingIdentityUseCase)
+	return ret0
+}
+
+// FundingIdentity indicates an expected call of FundingIdentity
+func (mr *MockIdentityUseCasesMockRecorder) FundingIdentity() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FundingIdentity", reflect.TypeOf((*MockIdentityUseCases)(nil).FundingIdentity))
+}
+
 // MockCreateIdentityUseCase is a mock of CreateIdentityUseCase interface
 type MockCreateIdentityUseCase struct {
 	ctrl     *gomock.Controller
@@ -87,18 +101,18 @@ func (m *MockCreateIdentityUseCase) EXPECT() *MockCreateIdentityUseCaseMockRecor
 }
 
 // Execute mocks base method
-func (m *MockCreateIdentityUseCase) Execute(ctx context.Context, identity *entities.Identity, privateKey, tenantID string) (*entities.Identity, error) {
+func (m *MockCreateIdentityUseCase) Execute(ctx context.Context, identity *entities.Identity, privateKey, chainName, tenantID string) (*entities.Identity, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, identity, privateKey, tenantID)
+	ret := m.ctrl.Call(m, "Execute", ctx, identity, privateKey, chainName, tenantID)
 	ret0, _ := ret[0].(*entities.Identity)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Execute indicates an expected call of Execute
-func (mr *MockCreateIdentityUseCaseMockRecorder) Execute(ctx, identity, privateKey, tenantID interface{}) *gomock.Call {
+func (mr *MockCreateIdentityUseCaseMockRecorder) Execute(ctx, identity, privateKey, chainName, tenantID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockCreateIdentityUseCase)(nil).Execute), ctx, identity, privateKey, tenantID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockCreateIdentityUseCase)(nil).Execute), ctx, identity, privateKey, chainName, tenantID)
 }
 
 // MockSearchIdentitiesUseCase is a mock of SearchIdentitiesUseCase interface
@@ -137,4 +151,41 @@ func (m *MockSearchIdentitiesUseCase) Execute(ctx context.Context, filters *enti
 func (mr *MockSearchIdentitiesUseCaseMockRecorder) Execute(ctx, filters, tenants interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSearchIdentitiesUseCase)(nil).Execute), ctx, filters, tenants)
+}
+
+// MockFundingIdentityUseCase is a mock of FundingIdentityUseCase interface
+type MockFundingIdentityUseCase struct {
+	ctrl     *gomock.Controller
+	recorder *MockFundingIdentityUseCaseMockRecorder
+}
+
+// MockFundingIdentityUseCaseMockRecorder is the mock recorder for MockFundingIdentityUseCase
+type MockFundingIdentityUseCaseMockRecorder struct {
+	mock *MockFundingIdentityUseCase
+}
+
+// NewMockFundingIdentityUseCase creates a new mock instance
+func NewMockFundingIdentityUseCase(ctrl *gomock.Controller) *MockFundingIdentityUseCase {
+	mock := &MockFundingIdentityUseCase{ctrl: ctrl}
+	mock.recorder = &MockFundingIdentityUseCaseMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockFundingIdentityUseCase) EXPECT() *MockFundingIdentityUseCaseMockRecorder {
+	return m.recorder
+}
+
+// Execute mocks base method
+func (m *MockFundingIdentityUseCase) Execute(ctx context.Context, identity *entities.Identity, chainName string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Execute", ctx, identity, chainName)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Execute indicates an expected call of Execute
+func (mr *MockFundingIdentityUseCaseMockRecorder) Execute(ctx, identity, chainName interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockFundingIdentityUseCase)(nil).Execute), ctx, identity, chainName)
 }

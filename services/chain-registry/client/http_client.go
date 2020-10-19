@@ -7,8 +7,10 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
+	healthz "github.com/heptiolabs/healthcheck"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/httputil"
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/chainregistry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
@@ -35,6 +37,10 @@ func NewHTTPClient(h *http.Client, c *Config) *HTTPClient {
 		client: h,
 		config: c,
 	}
+}
+
+func (c HTTPClient) Checker() healthz.Check {
+	return healthz.HTTPGetCheck(fmt.Sprintf("%s/live", c.config.MetricsURL), time.Second)
 }
 
 func (c *HTTPClient) GetChains(ctx context.Context) ([]*models.Chain, error) {
@@ -305,7 +311,7 @@ func (c *HTTPClient) GetFaucetCandidate(ctx context.Context, account ethcommon.A
 
 		return faucetsResult, nil
 	case http.StatusNotFound:
-		return nil, nil
+		return nil, errors.NotFoundError("not available faucet candidates").ExtendComponent(component)
 	default:
 		errResp := httputil.ErrorResponse{}
 		if err = json.NewDecoder(response.Body).Decode(&errResp); err != nil {

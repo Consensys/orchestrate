@@ -8,6 +8,7 @@ import (
 	context "context"
 	common "github.com/ethereum/go-ethereum/common"
 	gomock "github.com/golang/mock/gomock"
+	healthcheck "github.com/heptiolabs/healthcheck"
 	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/chainregistry"
 	models "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 	reflect "reflect"
@@ -271,6 +272,20 @@ func NewMockChainRegistryClient(ctrl *gomock.Controller) *MockChainRegistryClien
 // EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockChainRegistryClient) EXPECT() *MockChainRegistryClientMockRecorder {
 	return m.recorder
+}
+
+// Checker mocks base method
+func (m *MockChainRegistryClient) Checker() healthcheck.Check {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Checker")
+	ret0, _ := ret[0].(healthcheck.Check)
+	return ret0
+}
+
+// Checker indicates an expected call of Checker
+func (mr *MockChainRegistryClientMockRecorder) Checker() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Checker", reflect.TypeOf((*MockChainRegistryClient)(nil).Checker))
 }
 
 // GetChains mocks base method

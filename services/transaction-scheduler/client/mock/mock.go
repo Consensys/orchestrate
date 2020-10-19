@@ -7,6 +7,7 @@ package mock
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
+	healthcheck "github.com/heptiolabs/healthcheck"
 	entities "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/txscheduler"
 	reflect "reflect"
@@ -325,6 +326,20 @@ func NewMockTransactionSchedulerClient(ctrl *gomock.Controller) *MockTransaction
 // EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockTransactionSchedulerClient) EXPECT() *MockTransactionSchedulerClientMockRecorder {
 	return m.recorder
+}
+
+// Checker mocks base method
+func (m *MockTransactionSchedulerClient) Checker() healthcheck.Check {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Checker")
+	ret0, _ := ret[0].(healthcheck.Check)
+	return ret0
+}
+
+// Checker indicates an expected call of Checker
+func (mr *MockTransactionSchedulerClientMockRecorder) Checker() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Checker", reflect.TypeOf((*MockTransactionSchedulerClient)(nil).Checker))
 }
 
 // SendContractTransaction mocks base method
