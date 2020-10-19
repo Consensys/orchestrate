@@ -13,7 +13,7 @@ func New(
 ) (*app.App, error) {
 	appli, err := app.New(
 		config,
-		ReadinessOpt(),
+		ReadinessOpt(txscheduler.GlobalClient()),
 		app.MetricsOpt(),
 	)
 
@@ -26,9 +26,9 @@ func New(
 	return appli, nil
 }
 
-func ReadinessOpt() app.Option {
+func ReadinessOpt(txSchedulerClient txscheduler.TransactionSchedulerClient) app.Option {
 	return func(ap *app.App) error {
-		ap.AddReadinessCheck("transaction-scheduler", txscheduler.GlobalChecker())
+		ap.AddReadinessCheck("transaction-scheduler", txSchedulerClient.Checker())
 		ap.AddReadinessCheck("kafka", pkgsarama.GlobalClientChecker())
 		ap.AddReadinessCheck("redis", redis.GlobalChecker())
 		return nil

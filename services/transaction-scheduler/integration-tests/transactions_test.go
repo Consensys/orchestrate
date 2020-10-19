@@ -64,16 +64,16 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Validation() 
 			controllers.IdempotencyKeyHeader: utils.RandomString(16),
 		})
 
-		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
-		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
-		gock.New(ChainRegistryURL).
-			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", ChainRegistryURL, chain.UUID, txRequest.Params.From)).
+		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
+		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
+		gock.New(chainRegistryURL).
+			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", chainRegistryURL, chain.UUID, txRequest.Params.From)).
 			Reply(404).Done()
 		_, err := s.client.SendContractTransaction(rctx, txRequest)
 		assert.NoError(t, err)
 
-		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
-		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
+		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
+		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
 		txRequest.Params.MethodSignature = "differentMethodSignature()"
 		_, err = s.client.SendContractTransaction(rctx, txRequest)
 		assert.True(t, errors.IsConstraintViolatedError(err))
@@ -81,7 +81,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Validation() 
 
 	s.T().Run("should fail with 422 if chains cannot be fetched", func(t *testing.T) {
 		defer gock.Off()
-		gock.New(ChainRegistryURL).Get("/chains").Reply(404)
+		gock.New(chainRegistryURL).Get("/chains").Reply(404)
 		txRequest := testutils.FakeSendTransactionRequest()
 
 		_, err := s.client.SendContractTransaction(ctx, txRequest)
@@ -92,10 +92,10 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Validation() 
 	s.T().Run("should fail with 422 if chainUUID does not exist", func(t *testing.T) {
 		defer gock.Off()
 		txRequest := testutils.FakeSendTransactionRequest()
-		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
-		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(404)
-		gock.New(ChainRegistryURL).
-			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", ChainRegistryURL, chain.UUID, txRequest.Params.From)).
+		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
+		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Reply(404)
+		gock.New(chainRegistryURL).
+			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", chainRegistryURL, chain.UUID, txRequest.Params.From)).
 			Reply(404).Done()
 
 		_, err := s.client.SendContractTransaction(ctx, txRequest)
@@ -105,8 +105,8 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Validation() 
 
 	s.T().Run("should fail with 422 if from account is set and oneTimeKeyEnabled", func(t *testing.T) {
 		defer gock.Off()
-		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
-		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200)
+		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
+		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Reply(200)
 		txRequest := testutils.FakeSendTransactionRequest()
 		txRequest.Params.OneTimeKey = true
 
@@ -124,10 +124,10 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 	s.T().Run("should send a transaction successfully to the transaction crafter topic", func(t *testing.T) {
 		defer gock.Off()
 		txRequest := testutils.FakeSendTransactionRequest()
-		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
-		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
-		gock.New(ChainRegistryURL).
-			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", ChainRegistryURL, chain.UUID, ethcommon.HexToAddress("0x").Hex())).
+		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
+		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
+		gock.New(chainRegistryURL).
+			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", chainRegistryURL, chain.UUID, ethcommon.HexToAddress("0x").Hex())).
 			Reply(404).Done()
 		txRequest.Params.From = ""
 		txRequest.Params.OneTimeKey = true
@@ -175,10 +175,10 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 	s.T().Run("should send a transaction, with an additional faucet job, successfully to the transaction crafter topic in parallel", func(t *testing.T) {
 		defer gock.Off()
 		txRequest := testutils.FakeSendTransferTransactionRequest()
-		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
-		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Times(2).Reply(200).JSON(chain)
-		gock.New(ChainRegistryURL).
-			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", ChainRegistryURL, chain.UUID, txRequest.Params.From)).
+		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
+		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Times(2).Reply(200).JSON(chain)
+		gock.New(chainRegistryURL).
+			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", chainRegistryURL, chain.UUID, txRequest.Params.From)).
 			Reply(200).JSON(faucet)
 		IdempotencyKey := utils.RandomString(16)
 		rctx := context.WithValue(ctx, clientutils.RequestHeaderKey, map[string]string{
@@ -236,10 +236,10 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 	s.T().Run("should send a tessera transaction successfully to the transaction crafter topic", func(t *testing.T) {
 		defer gock.Off()
 		txRequest := testutils.FakeSendTesseraRequest()
-		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
-		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Times(2).Reply(200).JSON(chain)
-		gock.New(ChainRegistryURL).
-			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", ChainRegistryURL, chain.UUID, txRequest.Params.From)).
+		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
+		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Times(2).Reply(200).JSON(chain)
+		gock.New(chainRegistryURL).
+			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", chainRegistryURL, chain.UUID, txRequest.Params.From)).
 			Reply(404).Done()
 		IdempotencyKey := utils.RandomString(16)
 		rctx := context.WithValue(ctx, clientutils.RequestHeaderKey, map[string]string{
@@ -292,10 +292,10 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 	s.T().Run("should send an orion transaction successfully to the transaction crafter topic", func(t *testing.T) {
 		defer gock.Off()
 		txRequest := testutils.FakeSendOrionRequest()
-		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
-		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Times(2).Reply(200).JSON(chain)
-		gock.New(ChainRegistryURL).
-			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", ChainRegistryURL, chain.UUID, txRequest.Params.From)).
+		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
+		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Times(2).Reply(200).JSON(chain)
+		gock.New(chainRegistryURL).
+			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", chainRegistryURL, chain.UUID, txRequest.Params.From)).
 			Reply(404).Done()
 
 		txResponse, err := s.client.SendContractTransaction(ctx, txRequest)
@@ -344,10 +344,10 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 	s.T().Run("should send a deploy contract successfully to the transaction crafter topic", func(t *testing.T) {
 		defer gock.Off()
 		txRequest := testutils.FakeDeployContractRequest()
-		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
-		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
-		gock.New(ChainRegistryURL).
-			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", ChainRegistryURL, chain.UUID, txRequest.Params.From)).
+		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
+		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
+		gock.New(chainRegistryURL).
+			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", chainRegistryURL, chain.UUID, txRequest.Params.From)).
 			Reply(404).Done()
 		txRequest.Params.Args = testutils.ParseIArray(123) // FakeContract arguments
 
@@ -393,8 +393,8 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 	s.T().Run("should send a raw transaction successfully to the transaction sender topic", func(t *testing.T) {
 		defer gock.Off()
 		txRequest := testutils.FakeSendRawTransactionRequest()
-		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
-		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
+		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
+		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
 
 		IdempotencyKey := utils.RandomString(16)
 		rctx := context.WithValue(ctx, clientutils.RequestHeaderKey, map[string]string{
@@ -436,10 +436,10 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 	s.T().Run("should send a transfer transaction successfully to the transaction sender topic", func(t *testing.T) {
 		defer gock.Off()
 		txRequest := testutils.FakeSendTransferTransactionRequest()
-		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
-		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
-		gock.New(ChainRegistryURL).
-			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", ChainRegistryURL, chain.UUID, txRequest.Params.From)).
+		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
+		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
+		gock.New(chainRegistryURL).
+			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", chainRegistryURL, chain.UUID, txRequest.Params.From)).
 			Reply(404).Done()
 
 		txResponse, err := s.client.SendTransferTransaction(ctx, txRequest)
@@ -491,10 +491,10 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 			return
 		}
 
-		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
-		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
-		gock.New(ChainRegistryURL).
-			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", ChainRegistryURL, chain.UUID, txRequest.Params.From)).
+		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
+		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
+		gock.New(chainRegistryURL).
+			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", chainRegistryURL, chain.UUID, txRequest.Params.From)).
 			Reply(404).Done()
 		_, err = s.client.SendContractTransaction(rctx, txRequest)
 		assert.Error(t, err)
@@ -505,10 +505,10 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 			return
 		}
 
-		gock.New(ChainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
-		gock.New(ChainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
-		gock.New(ChainRegistryURL).
-			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", ChainRegistryURL, chain.UUID, txRequest.Params.From)).
+		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
+		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
+		gock.New(chainRegistryURL).
+			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", chainRegistryURL, chain.UUID, txRequest.Params.From)).
 			Reply(404).Done()
 		txResponse, err := s.client.SendContractTransaction(rctx, txRequest)
 		if err != nil {
@@ -534,8 +534,8 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_ZHealthCheck(
 		req, err := http2.NewRequest("GET", fmt.Sprintf("%s/ready?full=1", s.env.metricsURL), nil)
 		assert.NoError(s.T(), err)
 
-		gock.New(ChainRegistryURL).Get("/live").Reply(200)
-		gock.New(ContractRegistryURL).Get("/live").Reply(200)
+		gock.New(chainRegistryMetricsURL).Get("/live").Reply(200)
+		gock.New(contractRegistryMetricsURL).Get("/live").Reply(200)
 		defer gock.Off()
 
 		resp, err := httpClient.Do(req)
@@ -558,8 +558,8 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_ZHealthCheck(
 		req, err := http2.NewRequest("GET", fmt.Sprintf("%s/ready?full=1", s.env.metricsURL), nil)
 		assert.NoError(s.T(), err)
 
-		gock.New(ChainRegistryURL).Get("/live").Reply(500)
-		gock.New(ContractRegistryURL).Get("/live").Reply(500)
+		gock.New(chainRegistryMetricsURL).Get("/live").Reply(500)
+		gock.New(contractRegistryMetricsURL).Get("/live").Reply(500)
 		defer gock.Off()
 
 		resp, err := httpClient.Do(req)
@@ -582,8 +582,8 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_ZHealthCheck(
 		req, err := http2.NewRequest("GET", fmt.Sprintf("%s/ready?full=1", s.env.metricsURL), nil)
 		assert.NoError(s.T(), err)
 
-		gock.New(ChainRegistryURL).Get("/live").Reply(200)
-		gock.New(ContractRegistryURL).Get("/live").Reply(200)
+		gock.New(chainRegistryMetricsURL).Get("/live").Reply(200)
+		gock.New(contractRegistryMetricsURL).Get("/live").Reply(200)
 		defer gock.Off()
 
 		// Kill Kafka on first call so data is added in DB and status is CREATED but does not get updated to STARTED
@@ -613,8 +613,8 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_ZHealthCheck(
 		req, err := http2.NewRequest("GET", fmt.Sprintf("%s/ready?full=1", s.env.metricsURL), nil)
 		assert.NoError(s.T(), err)
 
-		gock.New(ChainRegistryURL).Get("/live").Reply(200)
-		gock.New(ContractRegistryURL).Get("/live").Reply(200)
+		gock.New(chainRegistryMetricsURL).Get("/live").Reply(200)
+		gock.New(contractRegistryMetricsURL).Get("/live").Reply(200)
 		defer gock.Off()
 
 		// Kill Kafka on first call so data is added in DB and status is CREATED but does not get updated to STARTED

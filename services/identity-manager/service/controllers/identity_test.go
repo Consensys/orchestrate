@@ -25,11 +25,12 @@ import (
 
 type identityCtrlTestSuite struct {
 	suite.Suite
-	createIdentityUC *mocks.MockCreateIdentityUseCase
-	searchIdentityUC *mocks.MockSearchIdentitiesUseCase
-	ctx              context.Context
-	tenants          []string
-	router           *mux.Router
+	createIdentityUC  *mocks.MockCreateIdentityUseCase
+	searchIdentityUC  *mocks.MockSearchIdentitiesUseCase
+	fundingIdentityUC *mocks.MockFundingIdentityUseCase
+	ctx               context.Context
+	tenants           []string
+	router            *mux.Router
 }
 
 func (s *identityCtrlTestSuite) CreateIdentity() usecases.CreateIdentityUseCase {
@@ -38,6 +39,9 @@ func (s *identityCtrlTestSuite) CreateIdentity() usecases.CreateIdentityUseCase 
 
 func (s *identityCtrlTestSuite) SearchIdentity() usecases.SearchIdentitiesUseCase {
 	return s.searchIdentityUC
+}
+func (s *identityCtrlTestSuite) FundingIdentity() usecases.FundingIdentityUseCase {
+	return s.fundingIdentityUC
 }
 
 var _ usecases.IdentityUseCases = &identityCtrlTestSuite{}
@@ -66,6 +70,7 @@ func (s *identityCtrlTestSuite) SetupTest() {
 func (s *identityCtrlTestSuite) TestJobsController_Create() {
 	s.T().Run("should execute create identity request successfully", func(t *testing.T) {
 		req := testutils.FakeCreateIdentityRequest()
+		req.Chain = "besu"
 		requestBytes, _ := json.Marshal(req)
 		idenResp := testutils.FakeIdentity()
 		rw := httptest.NewRecorder()
@@ -74,7 +79,7 @@ func (s *identityCtrlTestSuite) TestJobsController_Create() {
 			NewRequest(http.MethodPost, "/identities", bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 
-		s.createIdentityUC.EXPECT().Execute(gomock.Any(), gomock.Any(), "", s.tenants[0]).Return(idenResp, nil)
+		s.createIdentityUC.EXPECT().Execute(gomock.Any(), gomock.Any(), "", req.Chain, s.tenants[0]).Return(idenResp, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -83,9 +88,10 @@ func (s *identityCtrlTestSuite) TestJobsController_Create() {
 		assert.Equal(t, string(expectedBody)+"\n", rw.Body.String())
 		assert.Equal(t, http.StatusOK, rw.Code)
 	})
-	
+
 	s.T().Run("should execute import identity request successfully", func(t *testing.T) {
 		req := testutils.FakeImportIdentityRequest()
+		req.Chain = "qourum"
 		requestBytes, _ := json.Marshal(req)
 		idenResp := testutils.FakeIdentity()
 		rw := httptest.NewRecorder()
@@ -94,7 +100,7 @@ func (s *identityCtrlTestSuite) TestJobsController_Create() {
 			NewRequest(http.MethodPost, "/identities/import", bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 
-		s.createIdentityUC.EXPECT().Execute(gomock.Any(), gomock.Any(), req.PrivateKey, s.tenants[0]).Return(idenResp, nil)
+		s.createIdentityUC.EXPECT().Execute(gomock.Any(), gomock.Any(), req.PrivateKey, req.Chain, s.tenants[0]).Return(idenResp, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -103,21 +109,21 @@ func (s *identityCtrlTestSuite) TestJobsController_Create() {
 		assert.Equal(t, string(expectedBody)+"\n", rw.Body.String())
 		assert.Equal(t, http.StatusOK, rw.Code)
 	})
-	
+
 	s.T().Run("should fail with Bad request if invalid format", func(t *testing.T) {
 		jobRequest := testutils.FakeCreateIdentityRequest()
 		jobRequest.Alias = ""
 		requestBytes, _ := json.Marshal(jobRequest)
-	
+
 		rw := httptest.NewRecorder()
 		httpRequest := httptest.
 			NewRequest(http.MethodPost, "/identities", bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
-	
+
 		s.router.ServeHTTP(rw, httpRequest)
 		assert.Equal(t, http.StatusBadRequest, rw.Code)
 	})
-	
+
 	s.T().Run("should fail with 422 if use case fails with InvalidParameterError", func(t *testing.T) {
 		rw := httptest.NewRecorder()
 		jobRequest := testutils.FakeCreateIdentityRequest()
@@ -125,9 +131,9 @@ func (s *identityCtrlTestSuite) TestJobsController_Create() {
 		httpRequest := httptest.
 			NewRequest(http.MethodPost, "/identities", bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
-	
-		s.createIdentityUC.EXPECT().Execute(gomock.Any(), gomock.Any(), "", s.tenants[0]).Return(nil, errors.InvalidParameterError("error"))
-	
+
+		s.createIdentityUC.EXPECT().Execute(gomock.Any(), gomock.Any(), "", "", s.tenants[0]).Return(nil, errors.InvalidParameterError("error"))
+
 		s.router.ServeHTTP(rw, httpRequest)
 		assert.Equal(t, http.StatusUnprocessableEntity, rw.Code)
 	})

@@ -36,7 +36,7 @@ func (s *identityManagerTransactionTestSuite) TestTransactionScheduler_Transacti
 	s.T().Run("should create identity successfully by querying key-manager API", func(t *testing.T) {
 		defer gock.Off()
 		txRequest := testutils.FakeCreateIdentityRequest()
-		gock.New(KeyManagerURL).Post("/ethereum/accounts").Reply(200).JSON(ethAccRes)
+		gock.New(keyManagerURL).Post("/ethereum/accounts").Reply(200).JSON(ethAccRes)
 
 		resp, err := s.client.CreateIdentity(ctx, txRequest)
 		if err != nil {
@@ -49,13 +49,36 @@ func (s *identityManagerTransactionTestSuite) TestTransactionScheduler_Transacti
 		assert.Equal(t, resp.Alias, txRequest.Alias)
 		assert.Equal(t, resp.TenantID, "_")
 	})
-	
+
 	s.T().Run("should import identity successfully by querying key-manager API", func(t *testing.T) {
 		defer gock.Off()
 		txRequest := testutils.FakeImportIdentityRequest()
-		gock.New(KeyManagerURL).Post("/ethereum/accounts/import").Reply(200).JSON(ethAccRes)
+		gock.New(keyManagerURL).Post("/ethereum/accounts/import").Reply(200).JSON(ethAccRes)
 
 		resp, err := s.client.ImportIdentity(ctx, txRequest)
+		if err != nil {
+			assert.Fail(t, err.Error())
+			return
+		}
+
+		assert.Equal(t, resp.Address, ethAccRes.Address)
+		assert.Equal(t, resp.PublicKey, ethAccRes.PublicKey)
+		assert.Equal(t, resp.Alias, txRequest.Alias)
+		assert.Equal(t, resp.TenantID, "_")
+	})
+
+	s.T().Run("should create identity successfully and trigger funding transaction", func(t *testing.T) {
+		defer gock.Off()
+		txRequest := testutils.FakeCreateIdentityRequest()
+		txRequest.Chain = "besu"
+		faucet := testutils.FakeFaucet()
+		chain := testutils.FakeChain()
+		gock.New(keyManagerURL).Post("/ethereum/accounts").Reply(200).JSON(ethAccRes)
+		gock.New(chainRegistryURL).Post(fmt.Sprintf("/chains?name=%s", txRequest.Chain)).Reply(200).JSON(chain)
+		gock.New(chainRegistryURL).Post(fmt.Sprintf("/faucets/candidate?chain_uuid=%s&account=%s", chain.UUID, ethAccRes.Address)).Reply(200).JSON(faucet)
+		gock.New(chainRegistryURL).Post("/transactions/transfer").Reply(200)
+
+		resp, err := s.client.CreateIdentity(ctx, txRequest)
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
@@ -70,7 +93,7 @@ func (s *identityManagerTransactionTestSuite) TestTransactionScheduler_Transacti
 	s.T().Run("should fail to create identity if key-manager API fails", func(t *testing.T) {
 		defer gock.Off()
 		txRequest := testutils.FakeCreateIdentityRequest()
-		gock.New(KeyManagerURL).Post("/ethereum/accounts").Reply(500).JSON(ethAccRes)
+		gock.New(keyManagerURL).Post("/ethereum/accounts").Reply(500).JSON(ethAccRes)
 
 		_, err := s.client.CreateIdentity(ctx, txRequest)
 		assert.Error(s.T(), err)
@@ -79,7 +102,7 @@ func (s *identityManagerTransactionTestSuite) TestTransactionScheduler_Transacti
 	s.T().Run("should fail to create identity if postgres is down", func(t *testing.T) {
 		defer gock.Off()
 		txRequest := testutils.FakeCreateIdentityRequest()
-		gock.New(KeyManagerURL).Post("/ethereum/accounts").Reply(200).JSON(ethAccRes)
+		gock.New(keyManagerURL).Post("/ethereum/accounts").Reply(200).JSON(ethAccRes)
 
 		err := s.env.client.Stop(ctx, postgresContainerID)
 		assert.NoError(t, err)
@@ -94,8 +117,10 @@ func (s *identityManagerTransactionTestSuite) TestTransactionScheduler_Transacti
 
 func (s *identityManagerTransactionTestSuite) TestTransactionScheduler_ZHealthCheck() {
 	type healthRes struct {
-		KeyManager string `json:"key-manager,omitempty"`
-		Database   string `json:"Database,omitempty"`
+		KeyManager    string `json:"key-manager,omitempty"`
+		ChainRegistry string `json:"chain-registry,omitempty"`
+		TxScheduler   string `json:"transaction-scheduler,omitempty"`
+		Database      string `json:"database,omitempty"`
 	}
 
 	httpClient := http.NewClient(http.NewDefaultConfig())
@@ -105,7 +130,9 @@ func (s *identityManagerTransactionTestSuite) TestTransactionScheduler_ZHealthCh
 		req, err := http2.NewRequest("GET", fmt.Sprintf("%s/ready?full=1", s.env.metricsURL), nil)
 		assert.NoError(s.T(), err)
 
-		gock.New(KeyManagerMetricsURL).Get("/live").Reply(200)
+		gock.New(keyManagerMetricsURL).Get("/live").Reply(200)
+		gock.New(txSchedulerMetricsURL).Get("/live").Reply(200)
+		gock.New(chainRegistryMetricsURL).Get("/live").Reply(200)
 		defer gock.Off()
 
 		resp, err := httpClient.Do(req)
@@ -120,13 +147,17 @@ func (s *identityManagerTransactionTestSuite) TestTransactionScheduler_ZHealthCh
 		assert.NoError(s.T(), err)
 		assert.Equal(s.T(), "OK", status.Database)
 		assert.Equal(s.T(), "OK", status.KeyManager)
+		assert.Equal(s.T(), "OK", status.ChainRegistry)
+		assert.Equal(s.T(), "OK", status.TxScheduler)
 	})
-	
+
 	s.T().Run("should retrieve a negative health check over key-manager API service", func(t *testing.T) {
 		req, err := http2.NewRequest("GET", fmt.Sprintf("%s/ready?full=1", s.env.metricsURL), nil)
 		assert.NoError(s.T(), err)
 
-		gock.New(KeyManagerMetricsURL).Get("/live").Reply(500)
+		gock.New(keyManagerMetricsURL).Get("/live").Reply(500)
+		gock.New(txSchedulerMetricsURL).Get("/live").Reply(200)
+		gock.New(chainRegistryMetricsURL).Get("/live").Reply(200)
 		defer gock.Off()
 
 		resp, err := httpClient.Do(req)
@@ -141,13 +172,67 @@ func (s *identityManagerTransactionTestSuite) TestTransactionScheduler_ZHealthCh
 		assert.NoError(s.T(), err)
 		assert.Equal(s.T(), "OK", status.Database)
 		assert.NotEqual(s.T(), "OK", status.KeyManager)
+		assert.Equal(s.T(), "OK", status.ChainRegistry)
+		assert.Equal(s.T(), "OK", status.TxScheduler)
+	})
+
+	s.T().Run("should retrieve a negative health check over chain-registry API service", func(t *testing.T) {
+		req, err := http2.NewRequest("GET", fmt.Sprintf("%s/ready?full=1", s.env.metricsURL), nil)
+		assert.NoError(s.T(), err)
+
+		gock.New(keyManagerMetricsURL).Get("/live").Reply(200)
+		gock.New(txSchedulerMetricsURL).Get("/live").Reply(200)
+		gock.New(chainRegistryMetricsURL).Get("/live").Reply(500)
+		defer gock.Off()
+
+		resp, err := httpClient.Do(req)
+		if err != nil {
+			assert.Fail(s.T(), err.Error())
+			return
+		}
+
+		assert.Equal(s.T(), 503, resp.StatusCode)
+		status := healthRes{}
+		err = json.UnmarshalBody(resp.Body, &status)
+		assert.NoError(s.T(), err)
+		assert.Equal(s.T(), "OK", status.Database)
+		assert.Equal(s.T(), "OK", status.KeyManager)
+		assert.NotEqual(s.T(), "OK", status.ChainRegistry)
+		assert.Equal(s.T(), "OK", status.TxScheduler)
+	})
+
+	s.T().Run("should retrieve a negative health check over tx-scheduler API service", func(t *testing.T) {
+		req, err := http2.NewRequest("GET", fmt.Sprintf("%s/ready?full=1", s.env.metricsURL), nil)
+		assert.NoError(s.T(), err)
+
+		gock.New(keyManagerMetricsURL).Get("/live").Reply(200)
+		gock.New(txSchedulerMetricsURL).Get("/live").Reply(500)
+		gock.New(chainRegistryMetricsURL).Get("/live").Reply(200)
+		defer gock.Off()
+
+		resp, err := httpClient.Do(req)
+		if err != nil {
+			assert.Fail(s.T(), err.Error())
+			return
+		}
+
+		assert.Equal(s.T(), 503, resp.StatusCode)
+		status := healthRes{}
+		err = json.UnmarshalBody(resp.Body, &status)
+		assert.NoError(s.T(), err)
+		assert.Equal(s.T(), "OK", status.Database)
+		assert.Equal(s.T(), "OK", status.KeyManager)
+		assert.Equal(s.T(), "OK", status.ChainRegistry)
+		assert.NotEqual(s.T(), "OK", status.TxScheduler)
 	})
 
 	s.T().Run("should retrieve a negative health check over postgres service", func(t *testing.T) {
 		req, err := http2.NewRequest("GET", fmt.Sprintf("%s/ready?full=1", s.env.metricsURL), nil)
 		assert.NoError(s.T(), err)
 
-		gock.New(KeyManagerMetricsURL).Get("/live").Reply(200)
+		gock.New(keyManagerMetricsURL).Get("/live").Reply(200)
+		gock.New(txSchedulerMetricsURL).Get("/live").Reply(200)
+		gock.New(chainRegistryMetricsURL).Get("/live").Reply(200)
 		defer gock.Off()
 
 		// Kill Kafka on first call so data is added in DB and status is CREATED but does not get updated to STARTED
@@ -169,5 +254,7 @@ func (s *identityManagerTransactionTestSuite) TestTransactionScheduler_ZHealthCh
 		assert.NoError(s.T(), err)
 		assert.NotEqual(s.T(), "OK", status.Database)
 		assert.Equal(s.T(), "OK", status.KeyManager)
+		assert.Equal(s.T(), "OK", status.ChainRegistry)
+		assert.Equal(s.T(), "OK", status.TxScheduler)
 	})
 }

@@ -50,11 +50,13 @@ func Faucet(registryClient client.ChainRegistryClient, txSchedulerClient client2
 
 		fct, err := registryClient.GetFaucetCandidate(txctx.Context(), txctx.Envelope.MustGetFromAddress(), chain.UUID)
 		if err != nil {
+			if errors.IsNotFoundError(err) {
+				logger.WithError(err).Debugf("could not get any faucet candidate")
+				return
+			}
+
 			logger.WithError(err).Error("failed to fetch faucet candidate")
 			_ = txctx.Error(err).ExtendComponent(component)
-		}
-		if fct == nil {
-			logger.Debugf("could not get faucet candidate")
 			return
 		}
 

@@ -4,8 +4,10 @@ import (
 	"context"
 	"reflect"
 
+	client2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/identity-manager/identity-manager/builder"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/key-manager/client"
+	client3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 
 	"github.com/go-pg/pg/v9/orm"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
@@ -17,14 +19,15 @@ import (
 	store "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/identity-manager/store/multi"
 )
 
-func NewIdentityManager(cfg *Config, pgmngr postgres.Manager, jwt, key auth.Checker, clt client.KeyManagerClient) (*app.App, error) {
+func NewIdentityManager(cfg *Config, pgmngr postgres.Manager, jwt, key auth.Checker, keyManagerClient client.KeyManagerClient,
+	registryClient client2.ChainRegistryClient, txSchedulerClient client3.TransactionSchedulerClient) (*app.App, error) {
 	// Create Data agents
 	db, err := store.Build(context.Background(), cfg.Store, pgmngr)
 	if err != nil {
 		return nil, err
 	}
 
-	ucs := builder.NewUseCases(db, clt)
+	ucs := builder.NewUseCases(db, keyManagerClient, registryClient, txSchedulerClient)
 
 	// Option for identity manager handler
 	identityManagerHandlerOpt := app.HandlerOpt(reflect.TypeOf(&dynamic.Identity{}), controllers.NewBuilder(ucs))
@@ -33,7 +36,7 @@ func NewIdentityManager(cfg *Config, pgmngr postgres.Manager, jwt, key auth.Chec
 	return app.New(
 		cfg.App,
 		app.MultiTenancyOpt("auth", jwt, key, cfg.Multitenancy),
-		ReadinessOpt(db, clt),
+		ReadinessOpt(db, keyManagerClient, registryClient, txSchedulerClient),
 		app.MetricsOpt(),
 		app.LoggerMiddlewareOpt("base"),
 		app.SwaggerOpt("./public/swagger-specs/services/identity-manager/swagger.json", "base@logger-base"),
@@ -42,10 +45,13 @@ func NewIdentityManager(cfg *Config, pgmngr postgres.Manager, jwt, key auth.Chec
 	)
 }
 
-func ReadinessOpt(db database.DB, clt client.KeyManagerClient) app.Option {
+func ReadinessOpt(db database.DB, keyManagerClient client.KeyManagerClient, registryClient client2.ChainRegistryClient,
+	txSchedulerClient client3.TransactionSchedulerClient) app.Option {
 	return func(ap *app.App) error {
 		ap.AddReadinessCheck("database", postgres.Checker(db.(orm.DB)))
-		ap.AddReadinessCheck("key-manager", clt.Checker())
+		ap.AddReadinessCheck("key-manager", keyManagerClient.Checker())
+		ap.AddReadinessCheck("transaction-scheduler", txSchedulerClient.Checker())
+		ap.AddReadinessCheck("chain-registry", registryClient.Checker())
 		return nil
 	}
 }

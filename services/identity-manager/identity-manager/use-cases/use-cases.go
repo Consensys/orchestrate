@@ -11,12 +11,17 @@ import (
 type IdentityUseCases interface {
 	CreateIdentity() CreateIdentityUseCase
 	SearchIdentity() SearchIdentitiesUseCase
+	FundingIdentity() FundingIdentityUseCase
 }
 
 type CreateIdentityUseCase interface {
-	Execute(ctx context.Context, identity *entities.Identity, privateKey, tenantID string) (*entities.Identity, error)
+	Execute(ctx context.Context, identity *entities.Identity, privateKey, chainName, tenantID string) (*entities.Identity, error)
 }
 
 type SearchIdentitiesUseCase interface {
 	Execute(ctx context.Context, filters *entities.IdentityFilters, tenants []string) ([]*entities.Identity, error)
+}
+
+type FundingIdentityUseCase interface {
+	Execute(ctx context.Context, identity *entities.Identity, chainName string) error
 }

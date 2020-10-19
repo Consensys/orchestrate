@@ -26,15 +26,18 @@ func TestApp(t *testing.T) {
 	keyChecker := mockauth.NewMockChecker(ctrl)
 	mockSyncProducer := mocks.NewSyncProducer(t, nil)
 
+	chainRegistryClient := mockclient.NewMockChainRegistryClient(ctrl)
 	cfg := NewConfig(viper.New())
 	cfg.Store.Type = "postgres"
+
+	chainRegistryClient.EXPECT().Checker().Return(func() error {return nil})
 
 	kCfg := sarama.NewKafkaTopicConfig(viper.New())
 	_, err := NewTxScheduler(
 		cfg,
 		postgres.GetManager(),
 		jwtChecker, keyChecker,
-		mockclient.NewMockChainRegistryClient(ctrl),
+		chainRegistryClient,
 		mock.NewMockContractRegistryClient(ctrl),
 		mockSyncProducer,
 		kCfg,

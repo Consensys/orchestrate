@@ -38,8 +38,9 @@ import (
 const postgresContainerID = "postgres-transaction-scheduler"
 const kafkaContainerID = "Kafka-transaction-scheduler"
 const zookeeperContainerID = "zookeeper-transaction-scheduler"
-const ChainRegistryURL = "http://chain-registry:8081"
-const ContractRegistryURL = "http://contract-registry:8081"
+const chainRegistryURL = "http://chain-registry:8081"
+const chainRegistryMetricsURL = "http://chain-registry:8082"
+const contractRegistryMetricsURL = "http://contract-registry:8082"
 const networkName = "transaction-scheduler"
 
 var envPGHostPort string
@@ -283,28 +284,23 @@ func newTransactionScheduler(
 	authkey.Init(ctx)
 	sarama.InitSyncProducer(ctx)
 
-	// We mock the calls to the chain registry
-	conf := chainClient.NewConfig(ChainRegistryURL)
 	httpClient := httputils.NewClient(httputils.NewDefaultConfig())
 	gock.InterceptClient(httpClient)
+
+	// We mock the calls to the chain registry
+	conf := chainClient.NewConfig(chainRegistryURL)
+	conf.MetricsURL = chainRegistryMetricsURL
 	chainRegistryClient := chainClient.NewHTTPClient(httpClient, conf)
 
 	pgmngr := postgres.GetManager()
 	txSchedulerConfig := transactionscheduler.NewConfig(viper.GetViper())
-
-	chainClient.SetGlobalChecker(func() error {
-		req, _ := http2.NewRequest("GET", fmt.Sprintf("%s/live", ChainRegistryURL), nil)
-		resp, _ := httpClient.Do(req)
-		if resp.StatusCode == 200 {
-			return nil
+	contractClient.SetGlobalChecker(func() error {
+		req, _ := http2.NewRequest("GET", fmt.Sprintf("%s/live", contractRegistryMetricsURL), nil)
+		resp, err := httpClient.Do(req)
+		if err != nil {
+			return err
 		}
 
-		return fmt.Errorf("service chain-registry cannot be reach")
-	})
-
-	contractClient.SetGlobalChecker(func() error {
-		req, _ := http2.NewRequest("GET", fmt.Sprintf("%s/live", ContractRegistryURL), nil)
-		resp, _ := httpClient.Do(req)
 		if resp.StatusCode == 200 {
 			return nil
 		}

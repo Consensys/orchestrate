@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 
+	healthz "github.com/heptiolabs/healthcheck"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/txscheduler"
 )
@@ -34,6 +35,7 @@ type JobClient interface {
 }
 
 type TransactionSchedulerClient interface {
+	Checker() healthz.Check
 	TransactionClient
 	ScheduleClient
 	JobClient

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
+	healthz "github.com/heptiolabs/healthcheck"
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/chainregistry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 )
@@ -30,6 +31,7 @@ type FaucetClient interface {
 }
 
 type ChainRegistryClient interface {
+	Checker() healthz.Check
 	ChainClient
 	FaucetClient
 }

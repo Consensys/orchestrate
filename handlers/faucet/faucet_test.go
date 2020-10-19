@@ -32,7 +32,10 @@ var candidate = &types.Faucet{
 	Creditor:   ethcommon.HexToAddress("0xab"),
 }
 
-var testSenderAddr = ethcommon.HexToAddress("0xac")
+var (
+	testSenderAddr = ethcommon.HexToAddress("0xac")
+	faucetNotFoundErr = errors.NotFoundError("not found faucet candidate")
+)
 
 func newTestTxEnvelope(chainUUID, chainName string, sender ethcommon.Address) *engine.TxContext {
 	txctx := engine.NewTxContext()
@@ -119,7 +122,7 @@ func TestMaxBalanceControl_Execute(t *testing.T) {
 			Name: testChainName,
 		}, nil)
 
-		chainRegistryClient.EXPECT().GetFaucetCandidate(gomock.Any(), testSenderAddr, testChainUUID).Return(nil, nil)
+		chainRegistryClient.EXPECT().GetFaucetCandidate(gomock.Any(), testSenderAddr, testChainUUID).Return(nil, faucetNotFoundErr)
 
 		h(txctx)
 
