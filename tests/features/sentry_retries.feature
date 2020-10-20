@@ -76,7 +76,7 @@ Feature: Deploy ERC20 contract using tx-sentry
       | alias      | path         |
       | jobOneUUID | jobs[0].uuid |
     Then Envelopes should be in topic "tx.sender"
-    Then I sleep "2s"
+    Then I sleep "5s"
     When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobOneUUID}}"
     Then the response code should be 200
     And Response should have the following fields

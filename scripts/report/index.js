@@ -11,8 +11,8 @@ const metadata = Object.keys(process.env)
 const options = {
     brandTitle: 'PegaSys Orchestrate end-to-end tests',
     theme: 'bootstrap',
-    jsonFile: 'in/report.json',
-    output: 'out/report.html',
+    jsonFile: process.env.CUCUMBER_INPUT ? process.env.CUCUMBER_INPUT : 'report.json',
+    output: process.env.CUCUMBER_OUTPUT ? process.env.CUCUMBER_OUTPUT : 'report.html',
     reportSuiteAsScenarios: true,
     metadata
 };

@@ -12,6 +12,8 @@ services:
       METADATA_RUNNER: ${CI_RUNNER_DESCRIPTION-}
       METADATA_RUNNER_ID: ${CI_RUNNER_ID-}
       METADATA_RUNNER_VERSION: ${CI_RUNNER_REVISION-}
+      CUCUMBER_INPUT: in/report.json
+      CUCUMBER_OUTPUT: out/report.html
     volumes:
-      - ../../build/report:/use/src/app/in
-      - ../../build/report:/use/src/app/out
+      - ../../build/report:/usr/src/app/in
+      - ../../build/report:/usr/src/app/out
