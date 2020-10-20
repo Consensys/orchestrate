@@ -10,8 +10,8 @@ x-default-variables: &default-variables
   TRANSACTION_SCHEDULER_METRICS_URL: ${TRANSACTION_SCHEDULER_URL-http://transaction-scheduler:8082}
   IDENTITY_MANAGER_URL: ${IDENTITY_MANAGER_URL-http://identity-manager:8081}
   IDENTITY_MANAGER_METRICS_URL: ${IDENTITY_MANAGER_URL-http://identity-manager:8082}
-  KEY_MANAGER_URL: ${KEY_MANAGER_URL-http://tx-signer-api:8081}
-  KEY_MANAGER_METRICS_URL: ${KEY_MANAGER_URL-http://tx-signer-api:8082}
+  KEY_MANAGER_URL: ${KEY_MANAGER_URL-http://key-manager:8081}
+  KEY_MANAGER_METRICS_URL: ${KEY_MANAGER_URL-http://key-manager:8082}
   TX_CRAFTER_METRICS_URL: ${TX_CRAFTER_METRICS_URL-http://tx-crafter:8082}
   TX_SIGNER_METRICS_URL: ${TX_SIGNER_METRICS_URL-http://tx-signer:8082}
   TX_LISTENER_METRICS_URL: ${TX_LISTENER_METRICS_URL-http://tx-listener:8082}
