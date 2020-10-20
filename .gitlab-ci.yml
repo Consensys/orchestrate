@@ -5,6 +5,7 @@ stages:
   - integration
   - e2e
   - build
+  - staging-e2e
   - release
   - doc
 
@@ -108,14 +109,6 @@ services:
   # Release static swagger doc for latest version on Gitlab pages
   image: node:12.16.2-stretch-slim
   before_script:
-    #    - |
-    #      if [ -z "$CI_COMMIT_TAG" ]; then
-    #        exit 1
-    #      elif [[ $CI_COMMIT_TAG == *"-rc"* ]]; then
-    #        DOC_VERSION="latest"
-    #      else
-    #        DOC_VERSION="stable"
-    #      fi
     - DOC_VERSION="latest"
     - npm install swagger-combine@1.1.2
     - npm install redoc-cli@0.9.10
@@ -220,7 +213,14 @@ gobuild:
 
 test-e2e:
   <<: *docker-compose-e2e
-  <<: *rules
+  rules:
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
+      when: on_success
+      allow_failure: false
+    - if: $CI_COMMIT_TAG
+      when: never
+    - if: '$CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^maintenance/'
+      when: manual
   script:
     - mv -f .env.ci .env
     - make up-ci
@@ -229,7 +229,14 @@ test-e2e:
 
 test-multitenancy-e2e:
   <<: *docker-compose-e2e
-  <<: *rules
+  rules:
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
+      when: on_success
+      allow_failure: false
+    - if: $CI_COMMIT_TAG
+      when: never
+    - if: '$CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^maintenance/'
+      when: manual
   script:
     - mv -f .env.multitenancy .env
     - make up-ci
@@ -383,3 +390,17 @@ release-notes:
   only:
     refs:
       - tags
+
+e2e-staging:
+  stage: staging-e2e
+  before_script:
+    - apk update
+    - apk add bash jq curl
+  script:
+    - ORCHESTRATE_TAG=${CI_COMMIT_TAG}
+    - E2E_TAG=${CI_COMMIT_TAG}
+    - bash ./scripts/circleci-e2e.sh
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: on_success
+      allow_failure: false
