@@ -3,6 +3,7 @@ package httputil
 import (
 	"context"
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/containous/traefik/v2/pkg/log"
@@ -35,4 +36,26 @@ func ParseResponse(ctx context.Context, response *http.Response, resp interface{
 
 	log.FromContext(ctx).Error(errResp.Message)
 	return errors.Errorf(errResp.Code, errResp.Message)
+}
+
+func ParseStringResponse(ctx context.Context, response *http.Response) (string, error) {
+	if response.StatusCode != http.StatusOK {
+		errResp := ErrorResponse{}
+		if err := json.NewDecoder(response.Body).Decode(&errResp); err != nil {
+			errMessage := "failed to decode error response body"
+			log.FromContext(ctx).WithError(err).Error(errMessage)
+			return "", errors.ServiceConnectionError(errMessage)
+		}
+
+		return "", errors.Errorf(errResp.Code, errResp.Message)
+	}
+
+	responseData, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		errMessage := "failed to decode response body"
+		log.FromContext(ctx).WithError(err).Error(errMessage)
+		return "", errors.ServiceConnectionError(errMessage)
+	}
+
+	return string(responseData), nil
 }

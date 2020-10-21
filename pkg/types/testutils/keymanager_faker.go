@@ -19,6 +19,18 @@ func FakeImportETHAccountRequest() *types.ImportETHAccountRequest {
 	}
 }
 
+func FakeSignETHTransactionRequest() *types.SignETHTransactionRequest {
+	return &types.SignETHTransactionRequest{
+		Namespace: "_",
+		Nonce:     0,
+		To:        "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18",
+		Amount:    "10000000000",
+		GasPrice:  "10000000000",
+		GasLimit:  21000,
+		ChainID:   "1",
+	}
+}
+
 func FakeETHAccountResponse() *types.ETHAccountResponse {
 	return &types.ETHAccountResponse{
 		Namespace: "_",
