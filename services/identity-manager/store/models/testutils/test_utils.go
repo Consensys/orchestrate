@@ -6,8 +6,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/identity-manager/store/models"
 )
 
-func FakeIdentityModel() *models.Identity {
-	return &models.Identity{
+func FakeAccountModel() *models.Account {
+	return &models.Account{
 		Alias:               utils.RandomString(10),
 		Active:              true,
 		TenantID:            "tenantID",

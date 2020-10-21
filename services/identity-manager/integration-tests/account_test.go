@@ -8,11 +8,16 @@ import (
 	"testing"
 	"time"
 
+	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
+	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/identitymanager"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/txscheduler"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/identity-manager/client"
 	"gopkg.in/h2non/gock.v1"
 )
@@ -29,16 +34,16 @@ func (s *identityManagerTransactionTestSuite) SetupSuite() {
 	s.client = client.NewHTTPClient(http.NewClient(http.NewDefaultConfig()), conf)
 }
 
-func (s *identityManagerTransactionTestSuite) TestTransactionScheduler_Transactions() {
+func (s *identityManagerTransactionTestSuite) TestIdentityManager_CreateAccounts() {
 	ctx := s.env.ctx
-	ethAccRes := testutils.FakeETHAccountResponse()
 
-	s.T().Run("should create identity successfully by querying key-manager API", func(t *testing.T) {
+	s.T().Run("should create account successfully by querying key-manager API", func(t *testing.T) {
+		ethAccRes := testutils.FakeETHAccountResponse()
 		defer gock.Off()
-		txRequest := testutils.FakeCreateIdentityRequest()
+		txRequest := testutils.FakeCreateAccountRequest()
 		gock.New(keyManagerURL).Post("/ethereum/accounts").Reply(200).JSON(ethAccRes)
 
-		resp, err := s.client.CreateIdentity(ctx, txRequest)
+		resp, err := s.client.CreateAccount(ctx, txRequest)
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
@@ -50,12 +55,13 @@ func (s *identityManagerTransactionTestSuite) TestTransactionScheduler_Transacti
 		assert.Equal(t, resp.TenantID, "_")
 	})
 
-	s.T().Run("should import identity successfully by querying key-manager API", func(t *testing.T) {
+	s.T().Run("should import account successfully by querying key-manager API", func(t *testing.T) {
+		ethAccRes := testutils.FakeETHAccountResponse()
 		defer gock.Off()
-		txRequest := testutils.FakeImportIdentityRequest()
+		txRequest := testutils.FakeImportAccountRequest()
 		gock.New(keyManagerURL).Post("/ethereum/accounts/import").Reply(200).JSON(ethAccRes)
 
-		resp, err := s.client.ImportIdentity(ctx, txRequest)
+		resp, err := s.client.ImportAccount(ctx, txRequest)
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
@@ -67,18 +73,19 @@ func (s *identityManagerTransactionTestSuite) TestTransactionScheduler_Transacti
 		assert.Equal(t, resp.TenantID, "_")
 	})
 
-	s.T().Run("should create identity successfully and trigger funding transaction", func(t *testing.T) {
+	s.T().Run("should create account successfully and trigger funding transaction", func(t *testing.T) {
+		ethAccRes := testutils.FakeETHAccountResponse()
 		defer gock.Off()
-		txRequest := testutils.FakeCreateIdentityRequest()
-		txRequest.Chain = "besu"
+		txRequest := testutils.FakeCreateAccountRequest()
 		faucet := testutils.FakeFaucet()
 		chain := testutils.FakeChain()
+		txRequest.Chain = chain.Name
 		gock.New(keyManagerURL).Post("/ethereum/accounts").Reply(200).JSON(ethAccRes)
-		gock.New(chainRegistryURL).Post(fmt.Sprintf("/chains?name=%s", txRequest.Chain)).Reply(200).JSON(chain)
-		gock.New(chainRegistryURL).Post(fmt.Sprintf("/faucets/candidate?chain_uuid=%s&account=%s", chain.UUID, ethAccRes.Address)).Reply(200).JSON(faucet)
-		gock.New(chainRegistryURL).Post("/transactions/transfer").Reply(200)
+		gock.New(chainRegistryURL).URL(fmt.Sprintf("%s/chains?name=%s", chainRegistryURL, chain.Name)).Reply(200).JSON([]*models.Chain{chain})
+		gock.New(chainRegistryURL).URL(fmt.Sprintf("%s/faucets/candidate?chain_uuid=%s&account=%s", chainRegistryURL, chain.UUID, ethAccRes.Address)).Reply(200).JSON(faucet)
+		gock.New(txSchedulerURL).Post("/transactions/transfer").Reply(200).JSON(txscheduler.TransactionResponse{})
 
-		resp, err := s.client.CreateIdentity(ctx, txRequest)
+		resp, err := s.client.CreateAccount(ctx, txRequest)
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
@@ -90,24 +97,26 @@ func (s *identityManagerTransactionTestSuite) TestTransactionScheduler_Transacti
 		assert.Equal(t, resp.TenantID, "_")
 	})
 
-	s.T().Run("should fail to create identity if key-manager API fails", func(t *testing.T) {
+	s.T().Run("should fail to create account if key-manager API fails", func(t *testing.T) {
+		ethAccRes := testutils.FakeETHAccountResponse()
 		defer gock.Off()
-		txRequest := testutils.FakeCreateIdentityRequest()
+		txRequest := testutils.FakeCreateAccountRequest()
 		gock.New(keyManagerURL).Post("/ethereum/accounts").Reply(500).JSON(ethAccRes)
 
-		_, err := s.client.CreateIdentity(ctx, txRequest)
+		_, err := s.client.CreateAccount(ctx, txRequest)
 		assert.Error(s.T(), err)
 	})
 
-	s.T().Run("should fail to create identity if postgres is down", func(t *testing.T) {
+	s.T().Run("should fail to create account if postgres is down", func(t *testing.T) {
+		ethAccRes := testutils.FakeETHAccountResponse()
 		defer gock.Off()
-		txRequest := testutils.FakeCreateIdentityRequest()
+		txRequest := testutils.FakeCreateAccountRequest()
 		gock.New(keyManagerURL).Post("/ethereum/accounts").Reply(200).JSON(ethAccRes)
 
 		err := s.env.client.Stop(ctx, postgresContainerID)
 		assert.NoError(t, err)
 
-		_, err = s.client.CreateIdentity(ctx, txRequest)
+		_, err = s.client.CreateAccount(ctx, txRequest)
 		assert.Error(s.T(), err)
 
 		err = s.env.client.StartServiceAndWait(ctx, postgresContainerID, 10*time.Second)
@@ -115,7 +124,118 @@ func (s *identityManagerTransactionTestSuite) TestTransactionScheduler_Transacti
 	})
 }
 
-func (s *identityManagerTransactionTestSuite) TestTransactionScheduler_ZHealthCheck() {
+func (s *identityManagerTransactionTestSuite) TestIdentityManager_SearchIdentities() {
+	ctx := s.env.ctx
+
+	s.T().Run("should create account and search for it by alias successfully", func(t *testing.T) {
+		defer gock.Off()
+		ethAccRes := testutils.FakeETHAccountResponse()
+		txRequest := testutils.FakeCreateAccountRequest()
+		gock.New(keyManagerURL).Post("/ethereum/accounts").Reply(200).JSON(ethAccRes)
+
+		_, err := s.client.CreateAccount(ctx, txRequest)
+		if err != nil {
+			assert.Fail(t, err.Error())
+			return
+		}
+		
+		resp, err := s.client.SearchAccounts(ctx, &entities.AccountFilters{
+			Aliases: []string{txRequest.Alias},
+		})
+		if err != nil {
+			assert.Fail(t, err.Error())
+			return
+		}
+
+		assert.Len(t, resp, 1)
+		assert.Equal(t, resp[0].Address, ethAccRes.Address)
+		assert.Equal(t, resp[0].PublicKey, ethAccRes.PublicKey)
+		assert.Equal(t, resp[0].Alias, txRequest.Alias)
+		assert.Equal(t, resp[0].TenantID, "_")
+	})
+}
+
+func (s *identityManagerTransactionTestSuite) TestIdentityManager_GetAccount() {
+	ctx := s.env.ctx
+
+	s.T().Run("should create account and get it by address successfully", func(t *testing.T) {
+		defer gock.Off()
+		ethAccRes := testutils.FakeETHAccountResponse()
+		txRequest := testutils.FakeCreateAccountRequest()
+		gock.New(keyManagerURL).Post("/ethereum/accounts").Reply(200).JSON(ethAccRes)
+
+		_, err := s.client.CreateAccount(ctx, txRequest)
+		if err != nil {
+			assert.Fail(t, err.Error())
+			return
+		}
+		
+		resp, err := s.client.GetAccount(ctx, ethAccRes.Address)
+		if err != nil {
+			assert.Fail(t, err.Error())
+			return
+		}
+
+		assert.Equal(t, resp.Address, ethAccRes.Address)
+		assert.Equal(t, resp.PublicKey, ethAccRes.PublicKey)
+		assert.Equal(t, resp.Alias, txRequest.Alias)
+		assert.Equal(t, resp.TenantID, "_")
+	})
+}
+
+func (s *identityManagerTransactionTestSuite) TestIdentityManager_UpdateAccount() {
+	ctx := s.env.ctx
+
+	s.T().Run("should create account and update it successfully", func(t *testing.T) {
+		defer gock.Off()
+		ethAccRes := testutils.FakeETHAccountResponse()
+		txRequest := testutils.FakeCreateAccountRequest()
+		gock.New(keyManagerURL).Post("/ethereum/accounts").Reply(200).JSON(ethAccRes)
+
+		_, err := s.client.CreateAccount(ctx, txRequest)
+		if err != nil {
+			assert.Fail(t, err.Error())
+			return
+		}
+		
+		txRequest2 := testutils.FakeUpdateAccountRequest()
+		resp, err := s.client.UpdateAccount(ctx, ethAccRes.Address, txRequest2)
+		if err != nil {
+			assert.Fail(t, err.Error())
+			return
+		}
+
+		assert.Equal(t, resp.Alias, txRequest2.Alias)
+		assert.Equal(t, resp.Attributes, txRequest2.Attributes)
+		assert.Equal(t, resp.TenantID, "_")
+	})
+}
+
+func (s *identityManagerTransactionTestSuite) TestIdentityManager_SignPayload() {
+	ctx := s.env.ctx
+
+	s.T().Run("should create account and update it successfully", func(t *testing.T) {
+		defer gock.Off()
+		address := ethcommon.HexToAddress("0x123").String()
+		payload := "messageToSign"
+		signedPayload := ethcommon.HexToHash("0xABCDEF01234").String()
+		gock.New(keyManagerURL).Post(fmt.Sprintf("/ethereum/accounts/%s/sign", address)).
+			Reply(200).BodyString(signedPayload)
+
+		response, err := s.client.SignPayload(ctx, address, &types.SignPayloadRequest{
+			Data: payload,
+		})
+
+		if err != nil {
+			assert.Fail(t, err.Error())
+			return
+		}
+
+		assert.Equal(t, signedPayload, response)
+	})
+}
+
+func (s *identityManagerTransactionTestSuite) TestIdentityManager_ZHealthCheck() {
 	type healthRes struct {
 		KeyManager    string `json:"key-manager,omitempty"`
 		ChainRegistry string `json:"chain-registry,omitempty"`

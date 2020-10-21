@@ -27,7 +27,7 @@ func newRunCommand() *cobra.Command {
 		},
 	}
 
-	// Identity manager flags
+	// Identity Manager flags
 	identitymanager.Flags(runCmd.Flags())
 
 	return runCmd

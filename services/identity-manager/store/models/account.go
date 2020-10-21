@@ -4,8 +4,8 @@ import (
 	"time"
 )
 
-type Identity struct {
-	tableName struct{} `pg:"identities"` // nolint:unused,structcheck // reason
+type Account struct {
+	tableName struct{} `pg:"accounts"` // nolint:unused,structcheck // reason
 
 	ID                  int
 	Alias               string

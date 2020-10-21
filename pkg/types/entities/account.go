@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-type Identity struct {
+type Account struct {
 	Alias               string
 	Address             string
 	PublicKey           string

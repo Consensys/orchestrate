@@ -1,5 +1,5 @@
 package entities
 
-type IdentityFilters struct {
+type AccountFilters struct {
 	Aliases []string `validate:"omitempty,unique"`
 }

@@ -19,7 +19,7 @@ func TestSetCodeHash_Execute(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	account := testutils.FakeAccount()
+	account := testutils.FakeAccountInstance()
 	codeHash := "codeHash"
 	codeHashModel := &models.CodehashModel{
 		ChainID:  account.ChainId,

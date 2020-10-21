@@ -6,15 +6,15 @@ import (
 )
 
 type PGAgents struct {
-	identity *PGIdentity
+	identity *PGAccount
 }
 
 func New(db pg.DB) *PGAgents {
 	return &PGAgents{
-		identity: NewPGIdentity(db),
+		identity: NewPGAccount(db),
 	}
 }
 
-func (a *PGAgents) Identity() store.IdentityAgent {
+func (a *PGAgents) Account() store.AccountAgent {
 	return a.identity
 }

@@ -12,172 +12,290 @@ import (
 	reflect "reflect"
 )
 
-// MockIdentityUseCases is a mock of IdentityUseCases interface
-type MockIdentityUseCases struct {
+// MockAccountUseCases is a mock of AccountUseCases interface
+type MockAccountUseCases struct {
 	ctrl     *gomock.Controller
-	recorder *MockIdentityUseCasesMockRecorder
+	recorder *MockAccountUseCasesMockRecorder
 }
 
-// MockIdentityUseCasesMockRecorder is the mock recorder for MockIdentityUseCases
-type MockIdentityUseCasesMockRecorder struct {
-	mock *MockIdentityUseCases
+// MockAccountUseCasesMockRecorder is the mock recorder for MockAccountUseCases
+type MockAccountUseCasesMockRecorder struct {
+	mock *MockAccountUseCases
 }
 
-// NewMockIdentityUseCases creates a new mock instance
-func NewMockIdentityUseCases(ctrl *gomock.Controller) *MockIdentityUseCases {
-	mock := &MockIdentityUseCases{ctrl: ctrl}
-	mock.recorder = &MockIdentityUseCasesMockRecorder{mock}
+// NewMockAccountUseCases creates a new mock instance
+func NewMockAccountUseCases(ctrl *gomock.Controller) *MockAccountUseCases {
+	mock := &MockAccountUseCases{ctrl: ctrl}
+	mock.recorder = &MockAccountUseCasesMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use
-func (m *MockIdentityUseCases) EXPECT() *MockIdentityUseCasesMockRecorder {
+func (m *MockAccountUseCases) EXPECT() *MockAccountUseCasesMockRecorder {
 	return m.recorder
 }
 
-// CreateIdentity mocks base method
-func (m *MockIdentityUseCases) CreateIdentity() usecases.CreateIdentityUseCase {
+// SignPayload mocks base method
+func (m *MockAccountUseCases) SignPayload() usecases.SignPayloadUseCase {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateIdentity")
-	ret0, _ := ret[0].(usecases.CreateIdentityUseCase)
+	ret := m.ctrl.Call(m, "SignPayload")
+	ret0, _ := ret[0].(usecases.SignPayloadUseCase)
 	return ret0
 }
 
-// CreateIdentity indicates an expected call of CreateIdentity
-func (mr *MockIdentityUseCasesMockRecorder) CreateIdentity() *gomock.Call {
+// SignPayload indicates an expected call of SignPayload
+func (mr *MockAccountUseCasesMockRecorder) SignPayload() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateIdentity", reflect.TypeOf((*MockIdentityUseCases)(nil).CreateIdentity))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignPayload", reflect.TypeOf((*MockAccountUseCases)(nil).SignPayload))
 }
 
-// SearchIdentity mocks base method
-func (m *MockIdentityUseCases) SearchIdentity() usecases.SearchIdentitiesUseCase {
+// GetAccount mocks base method
+func (m *MockAccountUseCases) GetAccount() usecases.GetAccountUseCase {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SearchIdentity")
-	ret0, _ := ret[0].(usecases.SearchIdentitiesUseCase)
+	ret := m.ctrl.Call(m, "GetAccount")
+	ret0, _ := ret[0].(usecases.GetAccountUseCase)
 	return ret0
 }
 
-// SearchIdentity indicates an expected call of SearchIdentity
-func (mr *MockIdentityUseCasesMockRecorder) SearchIdentity() *gomock.Call {
+// GetAccount indicates an expected call of GetAccount
+func (mr *MockAccountUseCasesMockRecorder) GetAccount() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchIdentity", reflect.TypeOf((*MockIdentityUseCases)(nil).SearchIdentity))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccount", reflect.TypeOf((*MockAccountUseCases)(nil).GetAccount))
 }
 
-// FundingIdentity mocks base method
-func (m *MockIdentityUseCases) FundingIdentity() usecases.FundingIdentityUseCase {
+// CreateAccount mocks base method
+func (m *MockAccountUseCases) CreateAccount() usecases.CreateAccountUseCase {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FundingIdentity")
-	ret0, _ := ret[0].(usecases.FundingIdentityUseCase)
+	ret := m.ctrl.Call(m, "CreateAccount")
+	ret0, _ := ret[0].(usecases.CreateAccountUseCase)
 	return ret0
 }
 
-// FundingIdentity indicates an expected call of FundingIdentity
-func (mr *MockIdentityUseCasesMockRecorder) FundingIdentity() *gomock.Call {
+// CreateAccount indicates an expected call of CreateAccount
+func (mr *MockAccountUseCasesMockRecorder) CreateAccount() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FundingIdentity", reflect.TypeOf((*MockIdentityUseCases)(nil).FundingIdentity))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateAccount", reflect.TypeOf((*MockAccountUseCases)(nil).CreateAccount))
 }
 
-// MockCreateIdentityUseCase is a mock of CreateIdentityUseCase interface
-type MockCreateIdentityUseCase struct {
+// UpdateAccount mocks base method
+func (m *MockAccountUseCases) UpdateAccount() usecases.UpdateAccountUseCase {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateAccount")
+	ret0, _ := ret[0].(usecases.UpdateAccountUseCase)
+	return ret0
+}
+
+// UpdateAccount indicates an expected call of UpdateAccount
+func (mr *MockAccountUseCasesMockRecorder) UpdateAccount() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAccount", reflect.TypeOf((*MockAccountUseCases)(nil).UpdateAccount))
+}
+
+// SearchAccounts mocks base method
+func (m *MockAccountUseCases) SearchAccounts() usecases.SearchAccountsUseCase {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SearchAccounts")
+	ret0, _ := ret[0].(usecases.SearchAccountsUseCase)
+	return ret0
+}
+
+// SearchAccounts indicates an expected call of SearchAccounts
+func (mr *MockAccountUseCasesMockRecorder) SearchAccounts() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchAccounts", reflect.TypeOf((*MockAccountUseCases)(nil).SearchAccounts))
+}
+
+// FundingAccount mocks base method
+func (m *MockAccountUseCases) FundingAccount() usecases.FundingAccountUseCase {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FundingAccount")
+	ret0, _ := ret[0].(usecases.FundingAccountUseCase)
+	return ret0
+}
+
+// FundingAccount indicates an expected call of FundingAccount
+func (mr *MockAccountUseCasesMockRecorder) FundingAccount() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FundingAccount", reflect.TypeOf((*MockAccountUseCases)(nil).FundingAccount))
+}
+
+// MockGetAccountUseCase is a mock of GetAccountUseCase interface
+type MockGetAccountUseCase struct {
 	ctrl     *gomock.Controller
-	recorder *MockCreateIdentityUseCaseMockRecorder
+	recorder *MockGetAccountUseCaseMockRecorder
 }
 
-// MockCreateIdentityUseCaseMockRecorder is the mock recorder for MockCreateIdentityUseCase
-type MockCreateIdentityUseCaseMockRecorder struct {
-	mock *MockCreateIdentityUseCase
+// MockGetAccountUseCaseMockRecorder is the mock recorder for MockGetAccountUseCase
+type MockGetAccountUseCaseMockRecorder struct {
+	mock *MockGetAccountUseCase
 }
 
-// NewMockCreateIdentityUseCase creates a new mock instance
-func NewMockCreateIdentityUseCase(ctrl *gomock.Controller) *MockCreateIdentityUseCase {
-	mock := &MockCreateIdentityUseCase{ctrl: ctrl}
-	mock.recorder = &MockCreateIdentityUseCaseMockRecorder{mock}
+// NewMockGetAccountUseCase creates a new mock instance
+func NewMockGetAccountUseCase(ctrl *gomock.Controller) *MockGetAccountUseCase {
+	mock := &MockGetAccountUseCase{ctrl: ctrl}
+	mock.recorder = &MockGetAccountUseCaseMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use
-func (m *MockCreateIdentityUseCase) EXPECT() *MockCreateIdentityUseCaseMockRecorder {
+func (m *MockGetAccountUseCase) EXPECT() *MockGetAccountUseCaseMockRecorder {
 	return m.recorder
 }
 
 // Execute mocks base method
-func (m *MockCreateIdentityUseCase) Execute(ctx context.Context, identity *entities.Identity, privateKey, chainName, tenantID string) (*entities.Identity, error) {
+func (m *MockGetAccountUseCase) Execute(ctx context.Context, address string, tenants []string) (*entities.Account, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Execute", ctx, address, tenants)
+	ret0, _ := ret[0].(*entities.Account)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Execute indicates an expected call of Execute
+func (mr *MockGetAccountUseCaseMockRecorder) Execute(ctx, address, tenants interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockGetAccountUseCase)(nil).Execute), ctx, address, tenants)
+}
+
+// MockCreateAccountUseCase is a mock of CreateAccountUseCase interface
+type MockCreateAccountUseCase struct {
+	ctrl     *gomock.Controller
+	recorder *MockCreateAccountUseCaseMockRecorder
+}
+
+// MockCreateAccountUseCaseMockRecorder is the mock recorder for MockCreateAccountUseCase
+type MockCreateAccountUseCaseMockRecorder struct {
+	mock *MockCreateAccountUseCase
+}
+
+// NewMockCreateAccountUseCase creates a new mock instance
+func NewMockCreateAccountUseCase(ctrl *gomock.Controller) *MockCreateAccountUseCase {
+	mock := &MockCreateAccountUseCase{ctrl: ctrl}
+	mock.recorder = &MockCreateAccountUseCaseMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockCreateAccountUseCase) EXPECT() *MockCreateAccountUseCaseMockRecorder {
+	return m.recorder
+}
+
+// Execute mocks base method
+func (m *MockCreateAccountUseCase) Execute(ctx context.Context, identity *entities.Account, privateKey, chainName, tenantID string) (*entities.Account, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Execute", ctx, identity, privateKey, chainName, tenantID)
-	ret0, _ := ret[0].(*entities.Identity)
+	ret0, _ := ret[0].(*entities.Account)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Execute indicates an expected call of Execute
-func (mr *MockCreateIdentityUseCaseMockRecorder) Execute(ctx, identity, privateKey, chainName, tenantID interface{}) *gomock.Call {
+func (mr *MockCreateAccountUseCaseMockRecorder) Execute(ctx, identity, privateKey, chainName, tenantID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockCreateIdentityUseCase)(nil).Execute), ctx, identity, privateKey, chainName, tenantID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockCreateAccountUseCase)(nil).Execute), ctx, identity, privateKey, chainName, tenantID)
 }
 
-// MockSearchIdentitiesUseCase is a mock of SearchIdentitiesUseCase interface
-type MockSearchIdentitiesUseCase struct {
+// MockSearchAccountsUseCase is a mock of SearchAccountsUseCase interface
+type MockSearchAccountsUseCase struct {
 	ctrl     *gomock.Controller
-	recorder *MockSearchIdentitiesUseCaseMockRecorder
+	recorder *MockSearchAccountsUseCaseMockRecorder
 }
 
-// MockSearchIdentitiesUseCaseMockRecorder is the mock recorder for MockSearchIdentitiesUseCase
-type MockSearchIdentitiesUseCaseMockRecorder struct {
-	mock *MockSearchIdentitiesUseCase
+// MockSearchAccountsUseCaseMockRecorder is the mock recorder for MockSearchAccountsUseCase
+type MockSearchAccountsUseCaseMockRecorder struct {
+	mock *MockSearchAccountsUseCase
 }
 
-// NewMockSearchIdentitiesUseCase creates a new mock instance
-func NewMockSearchIdentitiesUseCase(ctrl *gomock.Controller) *MockSearchIdentitiesUseCase {
-	mock := &MockSearchIdentitiesUseCase{ctrl: ctrl}
-	mock.recorder = &MockSearchIdentitiesUseCaseMockRecorder{mock}
+// NewMockSearchAccountsUseCase creates a new mock instance
+func NewMockSearchAccountsUseCase(ctrl *gomock.Controller) *MockSearchAccountsUseCase {
+	mock := &MockSearchAccountsUseCase{ctrl: ctrl}
+	mock.recorder = &MockSearchAccountsUseCaseMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use
-func (m *MockSearchIdentitiesUseCase) EXPECT() *MockSearchIdentitiesUseCaseMockRecorder {
+func (m *MockSearchAccountsUseCase) EXPECT() *MockSearchAccountsUseCaseMockRecorder {
 	return m.recorder
 }
 
 // Execute mocks base method
-func (m *MockSearchIdentitiesUseCase) Execute(ctx context.Context, filters *entities.IdentityFilters, tenants []string) ([]*entities.Identity, error) {
+func (m *MockSearchAccountsUseCase) Execute(ctx context.Context, filters *entities.AccountFilters, tenants []string) ([]*entities.Account, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Execute", ctx, filters, tenants)
-	ret0, _ := ret[0].([]*entities.Identity)
+	ret0, _ := ret[0].([]*entities.Account)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Execute indicates an expected call of Execute
-func (mr *MockSearchIdentitiesUseCaseMockRecorder) Execute(ctx, filters, tenants interface{}) *gomock.Call {
+func (mr *MockSearchAccountsUseCaseMockRecorder) Execute(ctx, filters, tenants interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSearchIdentitiesUseCase)(nil).Execute), ctx, filters, tenants)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSearchAccountsUseCase)(nil).Execute), ctx, filters, tenants)
 }
 
-// MockFundingIdentityUseCase is a mock of FundingIdentityUseCase interface
-type MockFundingIdentityUseCase struct {
+// MockUpdateAccountUseCase is a mock of UpdateAccountUseCase interface
+type MockUpdateAccountUseCase struct {
 	ctrl     *gomock.Controller
-	recorder *MockFundingIdentityUseCaseMockRecorder
+	recorder *MockUpdateAccountUseCaseMockRecorder
 }
 
-// MockFundingIdentityUseCaseMockRecorder is the mock recorder for MockFundingIdentityUseCase
-type MockFundingIdentityUseCaseMockRecorder struct {
-	mock *MockFundingIdentityUseCase
+// MockUpdateAccountUseCaseMockRecorder is the mock recorder for MockUpdateAccountUseCase
+type MockUpdateAccountUseCaseMockRecorder struct {
+	mock *MockUpdateAccountUseCase
 }
 
-// NewMockFundingIdentityUseCase creates a new mock instance
-func NewMockFundingIdentityUseCase(ctrl *gomock.Controller) *MockFundingIdentityUseCase {
-	mock := &MockFundingIdentityUseCase{ctrl: ctrl}
-	mock.recorder = &MockFundingIdentityUseCaseMockRecorder{mock}
+// NewMockUpdateAccountUseCase creates a new mock instance
+func NewMockUpdateAccountUseCase(ctrl *gomock.Controller) *MockUpdateAccountUseCase {
+	mock := &MockUpdateAccountUseCase{ctrl: ctrl}
+	mock.recorder = &MockUpdateAccountUseCaseMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use
-func (m *MockFundingIdentityUseCase) EXPECT() *MockFundingIdentityUseCaseMockRecorder {
+func (m *MockUpdateAccountUseCase) EXPECT() *MockUpdateAccountUseCaseMockRecorder {
 	return m.recorder
 }
 
 // Execute mocks base method
-func (m *MockFundingIdentityUseCase) Execute(ctx context.Context, identity *entities.Identity, chainName string) error {
+func (m *MockUpdateAccountUseCase) Execute(ctx context.Context, identity *entities.Account, tenants []string) (*entities.Account, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Execute", ctx, identity, tenants)
+	ret0, _ := ret[0].(*entities.Account)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Execute indicates an expected call of Execute
+func (mr *MockUpdateAccountUseCaseMockRecorder) Execute(ctx, identity, tenants interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockUpdateAccountUseCase)(nil).Execute), ctx, identity, tenants)
+}
+
+// MockFundingAccountUseCase is a mock of FundingAccountUseCase interface
+type MockFundingAccountUseCase struct {
+	ctrl     *gomock.Controller
+	recorder *MockFundingAccountUseCaseMockRecorder
+}
+
+// MockFundingAccountUseCaseMockRecorder is the mock recorder for MockFundingAccountUseCase
+type MockFundingAccountUseCaseMockRecorder struct {
+	mock *MockFundingAccountUseCase
+}
+
+// NewMockFundingAccountUseCase creates a new mock instance
+func NewMockFundingAccountUseCase(ctrl *gomock.Controller) *MockFundingAccountUseCase {
+	mock := &MockFundingAccountUseCase{ctrl: ctrl}
+	mock.recorder = &MockFundingAccountUseCaseMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockFundingAccountUseCase) EXPECT() *MockFundingAccountUseCaseMockRecorder {
+	return m.recorder
+}
+
+// Execute mocks base method
+func (m *MockFundingAccountUseCase) Execute(ctx context.Context, identity *entities.Account, chainName string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Execute", ctx, identity, chainName)
 	ret0, _ := ret[0].(error)
@@ -185,7 +303,45 @@ func (m *MockFundingIdentityUseCase) Execute(ctx context.Context, identity *enti
 }
 
 // Execute indicates an expected call of Execute
-func (mr *MockFundingIdentityUseCaseMockRecorder) Execute(ctx, identity, chainName interface{}) *gomock.Call {
+func (mr *MockFundingAccountUseCaseMockRecorder) Execute(ctx, identity, chainName interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockFundingIdentityUseCase)(nil).Execute), ctx, identity, chainName)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockFundingAccountUseCase)(nil).Execute), ctx, identity, chainName)
+}
+
+// MockSignPayloadUseCase is a mock of SignPayloadUseCase interface
+type MockSignPayloadUseCase struct {
+	ctrl     *gomock.Controller
+	recorder *MockSignPayloadUseCaseMockRecorder
+}
+
+// MockSignPayloadUseCaseMockRecorder is the mock recorder for MockSignPayloadUseCase
+type MockSignPayloadUseCaseMockRecorder struct {
+	mock *MockSignPayloadUseCase
+}
+
+// NewMockSignPayloadUseCase creates a new mock instance
+func NewMockSignPayloadUseCase(ctrl *gomock.Controller) *MockSignPayloadUseCase {
+	mock := &MockSignPayloadUseCase{ctrl: ctrl}
+	mock.recorder = &MockSignPayloadUseCaseMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockSignPayloadUseCase) EXPECT() *MockSignPayloadUseCaseMockRecorder {
+	return m.recorder
+}
+
+// Execute mocks base method
+func (m *MockSignPayloadUseCase) Execute(ctx context.Context, address, payload, tenantID string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Execute", ctx, address, payload, tenantID)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Execute indicates an expected call of Execute
+func (mr *MockSignPayloadUseCaseMockRecorder) Execute(ctx, address, payload, tenantID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSignPayloadUseCase)(nil).Execute), ctx, address, payload, tenantID)
 }

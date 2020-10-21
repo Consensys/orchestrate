@@ -1,6 +1,6 @@
 // +build unit
 
-package identity
+package account
 
 import (
 	"context"
@@ -16,47 +16,47 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/identity-manager/store/models/testutils"
 )
 
-func TestSearchIdentity_Execute(t *testing.T) {
+func TestSearchAccounts_Execute(t *testing.T) {
 	ctx := context.Background()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
 	mockDB := mocks.NewMockDB(ctrl)
-	identityAgent := mocks.NewMockIdentityAgent(ctrl)
-	mockDB.EXPECT().Identity().Return(identityAgent).AnyTimes()
+	accountAgent := mocks.NewMockAccountAgent(ctrl)
+	mockDB.EXPECT().Account().Return(accountAgent).AnyTimes()
 
-	usecase := NewSearchIdentitiesUseCase(mockDB)
+	usecase := NewSearchAccountsUseCase(mockDB)
 
 	tenantID := "tenantID"
 	tenants := []string{tenantID}
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
-		iden := testutils.FakeIdentityModel()
+		acc := testutils.FakeAccountModel()
 		
-		filter := &entities.IdentityFilters{
+		filter := &entities.AccountFilters{
 			Aliases: []string{"alias1"},
 		}
 		
-		identityAgent.EXPECT().Search(ctx, filter, tenants).Return([]*models.Identity{iden}, nil)
+		accountAgent.EXPECT().Search(ctx, filter, tenants).Return([]*models.Account{acc}, nil)
 
 		resp, err := usecase.Execute(ctx, filter, tenants)
 
 		assert.NoError(t, err)
-		assert.Equal(t, parsers.NewIdentityEntityFromModels(iden), resp[0])
+		assert.Equal(t, parsers.NewAccountEntityFromModels(acc), resp[0])
 	})
 	
 	t.Run("should fail with same error if search identities fails", func(t *testing.T) {
 		expectedErr := errors.NotFoundError("error")
 		
-		filter := &entities.IdentityFilters{
+		filter := &entities.AccountFilters{
 			Aliases: []string{"alias1"},
 		}
 		
-		identityAgent.EXPECT().Search(ctx, filter, tenants).Return(nil, expectedErr)
+		accountAgent.EXPECT().Search(ctx, filter, tenants).Return(nil, expectedErr)
 
 		_, err := usecase.Execute(ctx, filter, tenants)
 
 		assert.Error(t, err)
-		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createIdentityComponent), err)
+		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createAccountComponent), err)
 	})
 }

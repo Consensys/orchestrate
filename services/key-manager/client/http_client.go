@@ -75,6 +75,7 @@ func (c HTTPClient) ETHImportAccount(ctx context.Context, req *types.ImportETHAc
 func (c HTTPClient) ETHSign(ctx context.Context, address string, req *keymanager.PayloadRequest) (string, error) {
 	reqURL := fmt.Sprintf("%v/ethereum/accounts/%v/sign", c.config.URL, address)
 
+	log.FromContext(ctx).Errorf("reqURL: %v", reqURL)
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, req)
 	if err != nil {
 		errMessage := "error while signing data with Ethereum account"

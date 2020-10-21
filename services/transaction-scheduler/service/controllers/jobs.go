@@ -45,7 +45,7 @@ func (c *JobsController) Append(router *mux.Router) {
 // @Security JWTAuth
 // @Param tx_hashes query []string false "List of transaction hashes" collectionFormat(csv)
 // @Param chain_uuid query string false "Chain UUID"
-// @Success 200 {object} txscheduler.JobResponse{annotations=txscheduler.Annotations{gasPricePolicy=txscheduler.GasPriceParams{retryPolicy=txscheduler.RetryParams}},transaction=entities.ETHTransaction,logs=[]entities.Log} "List of Jobs found"
+// @Success 200 {array} txscheduler.JobResponse{annotations=txscheduler.Annotations{gasPricePolicy=txscheduler.GasPriceParams{retryPolicy=txscheduler.RetryParams}},transaction=entities.ETHTransaction,logs=[]entities.Log} "List of Jobs found"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid filter in the request"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /jobs [get]
