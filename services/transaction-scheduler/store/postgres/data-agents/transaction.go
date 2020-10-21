@@ -3,6 +3,7 @@ package dataagents
 import (
 	"context"
 
+	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 
 	"github.com/gofrs/uuid"
@@ -39,7 +40,9 @@ func (agent *PGTransaction) Insert(ctx context.Context, txModel *models.Transact
 // Insert Inserts a new log in DB
 func (agent *PGTransaction) Update(ctx context.Context, txModel *models.Transaction) error {
 	if txModel.ID == 0 {
-		return errors.InvalidArgError("cannot update transaction with missing ID")
+		errMsg := "cannot update transaction with missing ID"
+		log.WithContext(ctx).Error(errMsg)
+		return errors.InvalidArgError(errMsg)
 	}
 
 	err := pg.Update(ctx, agent.db, txModel)

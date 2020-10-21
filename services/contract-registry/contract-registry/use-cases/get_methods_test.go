@@ -18,7 +18,7 @@ func TestGetMethods_Execute(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	account := testutils.FakeAccount()
+	account := testutils.FakeAccountInstance()
 	selector := []byte{58, 56}
 	method := &models.MethodModel{
 		ABI: "eventABI",

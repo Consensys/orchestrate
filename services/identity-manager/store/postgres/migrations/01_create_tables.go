@@ -8,19 +8,21 @@ import (
 func createContextTable(db migrations.DB) error {
 	log.Debug("Creating tables...")
 	_, err := db.Exec(`
-CREATE TABLE identities (
+CREATE TABLE accounts (
 	id SERIAL PRIMARY KEY,
     tenant_id TEXT NOT NULL,
-    alias TEXT NOT NULL,
+    alias TEXT,
     address CHAR(42) NOT NULL,
     public_key TEXT NOT NULL,
     compressed_public_key TEXT,
     active BOOLEAN default true,
 	attributes JSONB,
 	created_at TIMESTAMPTZ DEFAULT (now() at time zone 'utc') NOT NULL, 
-	updated_at TIMESTAMPTZ DEFAULT (now() at time zone 'utc') NOT NULL,
-	UNIQUE(tenant_id, alias)
+	updated_at TIMESTAMPTZ DEFAULT (now() at time zone 'utc') NOT NULL
 );
+
+CREATE UNIQUE INDEX account_unique_alias_idx ON accounts (tenant_id, alias) WHERE alias IS NOT NULL;
+CREATE UNIQUE INDEX account_unique_address_idx ON accounts (address);
 
 CREATE OR REPLACE FUNCTION updated() RETURNS TRIGGER AS 
 	$$
@@ -30,8 +32,8 @@ CREATE OR REPLACE FUNCTION updated() RETURNS TRIGGER AS
 	END;
 	$$ LANGUAGE plpgsql;
 
-CREATE TRIGGER identities_trigger
-	BEFORE UPDATE ON identities
+CREATE TRIGGER accounts_trigger
+	BEFORE UPDATE ON accounts
 	FOR EACH ROW 
 	EXECUTE PROCEDURE updated();
 `)
@@ -47,11 +49,11 @@ CREATE TRIGGER identities_trigger
 func dropContextTable(db migrations.DB) error {
 	log.Debug("Dropping tables")
 	_, err := db.Exec(`
-DROP TRIGGER identities_trigger ON identities;
+DROP TRIGGER accounts_trigger ON accounts;
 
 DROP FUNCTION updated();
 
-DROP TABLE identities;
+DROP TABLE accounts;
 `)
 	if err != nil {
 		log.WithError(err).Error("Could not drop tables")

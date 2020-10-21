@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 
 	"github.com/go-pg/pg/v9/orm"
@@ -53,7 +54,9 @@ func (agent *PGJob) Insert(ctx context.Context, job *models.Job) error {
 // Insert Inserts a new job in DB
 func (agent *PGJob) Update(ctx context.Context, job *models.Job) error {
 	if job.ID == 0 {
-		return errors.InvalidArgError("cannot update job with missing ID")
+		errMsg := "cannot update job with missing ID"
+		log.WithContext(ctx).Error(errMsg)
+		return errors.InvalidArgError(errMsg)
 	}
 
 	if job.Transaction != nil && job.TransactionID == nil {

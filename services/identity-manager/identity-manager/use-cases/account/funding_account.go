@@ -1,4 +1,4 @@
-package identity
+package account
 
 import (
 	"context"
@@ -14,38 +14,38 @@ import (
 	client3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 )
 
-const fundingIdentityComponent = "use-cases.funding-identity"
+const fundingAccountComponent = "use-cases.funding-account"
 
-type fundingIdentityUseCase struct {
+type fundingAccountUseCase struct {
 	registryClient    client2.ChainRegistryClient
 	txSchedulerClient client3.TransactionSchedulerClient
 }
 
-func NewFundingIdentityUseCase(registryClient client2.ChainRegistryClient, txSchedulerClient client3.TransactionSchedulerClient) usecases.FundingIdentityUseCase {
-	return &fundingIdentityUseCase{
+func NewFundingAccountUseCase(registryClient client2.ChainRegistryClient, txSchedulerClient client3.TransactionSchedulerClient) usecases.FundingAccountUseCase {
+	return &fundingAccountUseCase{
 		registryClient:    registryClient,
 		txSchedulerClient: txSchedulerClient,
 	}
 }
 
-func (uc *fundingIdentityUseCase) Execute(ctx context.Context, identity *entities.Identity, chainName string) error {
+func (uc *fundingAccountUseCase) Execute(ctx context.Context, account *entities.Account, chainName string) error {
 	logger := log.WithContext(ctx).
-		WithField("alias", identity.Alias)
+		WithField("alias", account.Alias)
 
-	logger.Debug("creating new identity...")
+	logger.Debug("creating new account...")
 
 	chain, err := uc.registryClient.GetChainByName(ctx, chainName)
 	if err != nil {
-		return errors.FromError(err).ExtendComponent(fundingIdentityComponent)
+		return errors.FromError(err).ExtendComponent(fundingAccountComponent)
 	}
 
-	fct, err := uc.registryClient.GetFaucetCandidate(ctx, ethcommon.HexToAddress(identity.Address), chain.UUID)
+	fct, err := uc.registryClient.GetFaucetCandidate(ctx, ethcommon.HexToAddress(account.Address), chain.UUID)
 	if err != nil {
 		if errors.IsNotFoundError(err) {
 			return nil
 		}
 
-		return errors.FromError(err).ExtendComponent(fundingIdentityComponent)
+		return errors.FromError(err).ExtendComponent(fundingAccountComponent)
 	}
 
 	_, err = uc.txSchedulerClient.SendTransferTransaction(ctx,
@@ -53,14 +53,14 @@ func (uc *fundingIdentityUseCase) Execute(ctx context.Context, identity *entitie
 			ChainName: chain.Name,
 			Params: txscheduler.TransferParams{
 				From:  fct.Creditor.Hex(),
-				To:    identity.PublicKey,
+				To:    account.PublicKey,
 				Value: fct.Amount.String(),
 			},
 			Labels: chainregistry.FaucetToJobLabels(fct),
 		})
 
 	if err != nil {
-		return errors.FromError(err).ExtendComponent(fundingIdentityComponent)
+		return errors.FromError(err).ExtendComponent(fundingAccountComponent)
 	}
 
 	logger.WithField("faucet", fct.UUID).WithField("value", fct.Amount.String()).

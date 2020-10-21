@@ -21,7 +21,7 @@ func TestNewInternalConfig(t *testing.T) {
 						EntryPoints: []string{"http"},
 						Service:     "identities",
 						Priority:    math.MaxInt32,
-						Rule:        "PathPrefix(`/identities`)",
+						Rule:        "PathPrefix(`/accounts`)",
 						Middlewares: []string{"base@logger-base", "auth@multitenancy"},
 					},
 				},

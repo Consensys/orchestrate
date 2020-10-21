@@ -9,8 +9,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 )
 
-func FakeIdentity() *entities.Identity {
-	return &entities.Identity{
+func FakeAccount() *entities.Account {
+	return &entities.Account{
 		Alias:               uuid.Must(uuid.NewV4()).String(),
 		TenantID:            utils.RandomString(6),
 		Attributes:          make(map[string]string),

@@ -13,9 +13,9 @@ import (
 //go:generate swag init --dir . --generalInfo builder.go --output ../../../../public/swagger-specs/services/identity-manager
 //go:generate rm ../../../../public/swagger-specs/services/identity-manager/docs.go ../../../../public/swagger-specs/services/identity-manager/swagger.yaml
 
-// @title Identity Manager API
+// @title Account Manager API
 // @version 2.0
-// @description PegaSys Orchestrate Identity API. Enables dynamic management of identities.
+// @description PegaSys Orchestrate Account API. Enables dynamic management of identities.
 // @description Identities correspond to an Ethereum accounts. It can be a user account or a deployed smart contract. By usage of the generated cryptographic key pair, identities can be used to sign/verify and to encrypt/decrypt messages.
 
 // @contact.name Contact PegaSys Orchestrate
@@ -37,7 +37,7 @@ type Builder struct {
 	identitiesCtrl *IdentitiesController
 }
 
-func NewBuilder(ucs usecases.IdentityUseCases) *Builder {
+func NewBuilder(ucs usecases.AccountUseCases) *Builder {
 	return &Builder{
 		identitiesCtrl: NewIdentitiesController(ucs),
 	}

@@ -37,18 +37,18 @@ func (m *MockAgents) EXPECT() *MockAgentsMockRecorder {
 	return m.recorder
 }
 
-// Identity mocks base method
-func (m *MockAgents) Identity() store.IdentityAgent {
+// Account mocks base method
+func (m *MockAgents) Account() store.AccountAgent {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Identity")
-	ret0, _ := ret[0].(store.IdentityAgent)
+	ret := m.ctrl.Call(m, "Account")
+	ret0, _ := ret[0].(store.AccountAgent)
 	return ret0
 }
 
-// Identity indicates an expected call of Identity
-func (mr *MockAgentsMockRecorder) Identity() *gomock.Call {
+// Account indicates an expected call of Account
+func (mr *MockAgentsMockRecorder) Account() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Identity", reflect.TypeOf((*MockAgents)(nil).Identity))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Account", reflect.TypeOf((*MockAgents)(nil).Account))
 }
 
 // MockDB is a mock of DB interface
@@ -89,45 +89,45 @@ func (mr *MockDBMockRecorder) Begin() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Begin", reflect.TypeOf((*MockDB)(nil).Begin))
 }
 
-// Identity mocks base method
-func (m *MockDB) Identity() store.IdentityAgent {
+// Account mocks base method
+func (m *MockDB) Account() store.AccountAgent {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Identity")
-	ret0, _ := ret[0].(store.IdentityAgent)
+	ret := m.ctrl.Call(m, "Account")
+	ret0, _ := ret[0].(store.AccountAgent)
 	return ret0
 }
 
-// Identity indicates an expected call of Identity
-func (mr *MockDBMockRecorder) Identity() *gomock.Call {
+// Account indicates an expected call of Account
+func (mr *MockDBMockRecorder) Account() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Identity", reflect.TypeOf((*MockDB)(nil).Identity))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Account", reflect.TypeOf((*MockDB)(nil).Account))
 }
 
-// MockIdentityAgent is a mock of IdentityAgent interface
-type MockIdentityAgent struct {
+// MockAccountAgent is a mock of AccountAgent interface
+type MockAccountAgent struct {
 	ctrl     *gomock.Controller
-	recorder *MockIdentityAgentMockRecorder
+	recorder *MockAccountAgentMockRecorder
 }
 
-// MockIdentityAgentMockRecorder is the mock recorder for MockIdentityAgent
-type MockIdentityAgentMockRecorder struct {
-	mock *MockIdentityAgent
+// MockAccountAgentMockRecorder is the mock recorder for MockAccountAgent
+type MockAccountAgentMockRecorder struct {
+	mock *MockAccountAgent
 }
 
-// NewMockIdentityAgent creates a new mock instance
-func NewMockIdentityAgent(ctrl *gomock.Controller) *MockIdentityAgent {
-	mock := &MockIdentityAgent{ctrl: ctrl}
-	mock.recorder = &MockIdentityAgentMockRecorder{mock}
+// NewMockAccountAgent creates a new mock instance
+func NewMockAccountAgent(ctrl *gomock.Controller) *MockAccountAgent {
+	mock := &MockAccountAgent{ctrl: ctrl}
+	mock.recorder = &MockAccountAgentMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use
-func (m *MockIdentityAgent) EXPECT() *MockIdentityAgentMockRecorder {
+func (m *MockAccountAgent) EXPECT() *MockAccountAgentMockRecorder {
 	return m.recorder
 }
 
 // Insert mocks base method
-func (m *MockIdentityAgent) Insert(ctx context.Context, identity *models.Identity) error {
+func (m *MockAccountAgent) Insert(ctx context.Context, identity *models.Account) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Insert", ctx, identity)
 	ret0, _ := ret[0].(error)
@@ -135,22 +135,51 @@ func (m *MockIdentityAgent) Insert(ctx context.Context, identity *models.Identit
 }
 
 // Insert indicates an expected call of Insert
-func (mr *MockIdentityAgentMockRecorder) Insert(ctx, identity interface{}) *gomock.Call {
+func (mr *MockAccountAgentMockRecorder) Insert(ctx, identity interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*MockIdentityAgent)(nil).Insert), ctx, identity)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*MockAccountAgent)(nil).Insert), ctx, identity)
+}
+
+// Update mocks base method
+func (m *MockAccountAgent) Update(ctx context.Context, identity *models.Account) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Update", ctx, identity)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Update indicates an expected call of Update
+func (mr *MockAccountAgentMockRecorder) Update(ctx, identity interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockAccountAgent)(nil).Update), ctx, identity)
+}
+
+// FindOneByAddress mocks base method
+func (m *MockAccountAgent) FindOneByAddress(ctx context.Context, address string, tenants []string) (*models.Account, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindOneByAddress", ctx, address, tenants)
+	ret0, _ := ret[0].(*models.Account)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindOneByAddress indicates an expected call of FindOneByAddress
+func (mr *MockAccountAgentMockRecorder) FindOneByAddress(ctx, address, tenants interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneByAddress", reflect.TypeOf((*MockAccountAgent)(nil).FindOneByAddress), ctx, address, tenants)
 }
 
 // Search mocks base method
-func (m *MockIdentityAgent) Search(ctx context.Context, filters *entities.IdentityFilters, tenants []string) ([]*models.Identity, error) {
+func (m *MockAccountAgent) Search(ctx context.Context, filters *entities.AccountFilters, tenants []string) ([]*models.Account, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Search", ctx, filters, tenants)
-	ret0, _ := ret[0].([]*models.Identity)
+	ret0, _ := ret[0].([]*models.Account)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Search indicates an expected call of Search
-func (mr *MockIdentityAgentMockRecorder) Search(ctx, filters, tenants interface{}) *gomock.Call {
+func (mr *MockAccountAgentMockRecorder) Search(ctx, filters, tenants interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Search", reflect.TypeOf((*MockIdentityAgent)(nil).Search), ctx, filters, tenants)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Search", reflect.TypeOf((*MockAccountAgent)(nil).Search), ctx, filters, tenants)
 }

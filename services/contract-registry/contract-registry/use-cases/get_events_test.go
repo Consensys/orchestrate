@@ -18,7 +18,7 @@ func TestGetEvents_Execute(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	account := testutils.FakeAccount()
+	account := testutils.FakeAccountInstance()
 	sigHash := "sigHash"
 	indexedInputCount := uint32(1)
 	eventModel := &models.EventModel{

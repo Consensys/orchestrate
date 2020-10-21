@@ -5,8 +5,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/identity-manager/store/models"
 )
 
-func NewIdentityModelFromEntities(iden *entities.Identity) *models.Identity {
-	return &models.Identity{
+func NewAccountModelFromEntities(iden *entities.Account) *models.Account {
+	return &models.Account{
 		Alias:               iden.Alias,
 		Address:             iden.Address,
 		PublicKey:           iden.PublicKey,
@@ -19,8 +19,8 @@ func NewIdentityModelFromEntities(iden *entities.Identity) *models.Identity {
 	}
 }
 
-func NewIdentityEntityFromModels(iden *models.Identity) *entities.Identity {
-	return &entities.Identity{
+func NewAccountEntityFromModels(iden *models.Account) *entities.Account {
+	return &entities.Account{
 		Alias:               iden.Alias,
 		Address:             iden.Address,
 		PublicKey:           iden.PublicKey,

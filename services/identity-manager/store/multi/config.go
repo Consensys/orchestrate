@@ -28,9 +28,9 @@ const (
 	typeEnv      = "IDENTITY_MANAGER_TYPE"
 )
 
-// Type register flag for the Identity manager to select
+// Type register flag for the Account manager to select
 func Type(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Type of Identity manager Store (one of %q)
+	desc := fmt.Sprintf(`Type of Account manager Store (one of %q)
 Environment variable: %q`, availableTypes, typeEnv)
 	f.String(typeFlag, typeDefault, desc)
 	_ = viper.BindPFlag(TypeViperKey, f.Lookup(typeFlag))

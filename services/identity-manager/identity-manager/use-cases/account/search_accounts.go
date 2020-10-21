@@ -1,4 +1,4 @@
-package identity
+package account
 
 import (
 	"context"
@@ -11,36 +11,34 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/identity-manager/store"
 )
 
-const searchJobsComponent = "use-cases.search-identities"
+const searchAccountsComponent = "use-cases.search-accounts"
 
-// searchJobsUseCase is a use case to search jobs
-type searchIdentitiesUseCase struct {
+type searchAccountsUseCase struct {
 	db store.DB
 }
 
-func NewSearchIdentitiesUseCase(db store.DB) usecases.SearchIdentitiesUseCase {
-	return &searchIdentitiesUseCase{
+func NewSearchAccountsUseCase(db store.DB) usecases.SearchAccountsUseCase {
+	return &searchAccountsUseCase{
 		db: db,
 	}
 }
 
-// Execute search jobs
-func (uc *searchIdentitiesUseCase) Execute(ctx context.Context, filters *entities.IdentityFilters, tenants []string) ([]*entities.Identity, error) {
+func (uc *searchAccountsUseCase) Execute(ctx context.Context, filters *entities.AccountFilters, tenants []string) ([]*entities.Account, error) {
 	log.WithContext(ctx).WithField("filters", filters).
 		WithField("tenants", tenants).
-		Debug("searching identities")
+		Debug("searching accounts")
 
-	models, err := uc.db.Identity().Search(ctx, filters, tenants)
+	models, err := uc.db.Account().Search(ctx, filters, tenants)
 	if err != nil {
-		return nil, errors.FromError(err).ExtendComponent(searchJobsComponent)
+		return nil, errors.FromError(err).ExtendComponent(searchAccountsComponent)
 	}
 
-	var resp []*entities.Identity
+	var resp []*entities.Account
 	for _, model := range models {
-		iden := parsers.NewIdentityEntityFromModels(model)
+		iden := parsers.NewAccountEntityFromModels(model)
 		resp = append(resp, iden)
 	}
 
-	log.WithContext(ctx).Debug("identities found successfully")
+	log.WithContext(ctx).Debug("accounts found successfully")
 	return resp, nil
 }
