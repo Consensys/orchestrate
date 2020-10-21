@@ -132,7 +132,56 @@
                     "200": {
                         "description": "Signed payload",
                         "schema": {
-                            "$ref": "#/definitions/ethereum.ETHSignedPayloadResponse"
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Account not found",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/ethereum/accounts/{address}/sign-transaction": {
+            "post": {
+                "description": "Signs an Ethereum transaction using ECDSA and the private key of an existing account",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Signs an Ethereum transaction using an existing account",
+                "parameters": [
+                    {
+                        "description": "Ethereum transaction to sign",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ethereum.SignETHTransactionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Signed payload",
+                        "schema": {
+                            "type": "string"
                         }
                     },
                     "400": {
@@ -188,19 +237,6 @@
                 }
             }
         },
-        "ethereum.ETHSignedPayloadResponse": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "type": "string",
-                    "example": "my data to sign"
-                },
-                "signature": {
-                    "type": "string",
-                    "example": "0xe5aaab1ad3f02b5bbc9b174fc26455b5cea9bf7e9e2a474facfffe9d126ada146ee931e50dd1607baaa7bc776f7919b3cc03608ac0851d0722a51d757ba85e6901"
-                }
-            }
-        },
         "ethereum.ImportETHAccountRequest": {
             "type": "object",
             "required": [
@@ -214,6 +250,50 @@
                 "privateKey": {
                     "type": "string",
                     "example": "fa88c4a5912f80503d6b5503880d0745f4b88a1ff90ce8f64cdd8f32cc3bc249"
+                }
+            }
+        },
+        "ethereum.SignETHTransactionRequest": {
+            "type": "object",
+            "required": [
+                "chainID",
+                "gasLimit",
+                "gasPrice",
+                "nonce",
+                "to"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "string",
+                    "example": "100000000000"
+                },
+                "chainID": {
+                    "type": "string",
+                    "example": "1 (mainnet)"
+                },
+                "data": {
+                    "type": "string",
+                    "example": "0xfeaeee..."
+                },
+                "gasLimit": {
+                    "type": "integer",
+                    "example": 21000
+                },
+                "gasPrice": {
+                    "type": "string",
+                    "example": "100000000000"
+                },
+                "namespace": {
+                    "type": "string",
+                    "example": "tenant_id"
+                },
+                "nonce": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "to": {
+                    "type": "string",
+                    "example": "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"
                 }
             }
         },

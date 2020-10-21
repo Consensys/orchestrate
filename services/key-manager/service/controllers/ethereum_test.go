@@ -9,6 +9,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/keymanager"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/key-manager/key-manager/use-cases/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/key-manager/key-manager/use-cases/ethereum/mocks"
+	"math/big"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -26,6 +27,7 @@ type ethereumCtrlTestSuite struct {
 	suite.Suite
 	createAccountUC *mocks.MockCreateAccountUseCase
 	signUC          *mocks.MockSignUseCase
+	signTxUC        *mocks.MockSignTransactionUseCase
 	router          *mux.Router
 }
 
@@ -35,6 +37,10 @@ func (s *ethereumCtrlTestSuite) CreateAccount() ethereum.CreateAccountUseCase {
 
 func (s *ethereumCtrlTestSuite) SignPayload() ethereum.SignUseCase {
 	return s.signUC
+}
+
+func (s *ethereumCtrlTestSuite) SignTransaction() ethereum.SignTransactionUseCase {
+	return s.signTxUC
 }
 
 var _ ethereum.UseCases = &ethereumCtrlTestSuite{}
@@ -50,6 +56,7 @@ func (s *ethereumCtrlTestSuite) SetupTest() {
 
 	s.createAccountUC = mocks.NewMockCreateAccountUseCase(ctrl)
 	s.signUC = mocks.NewMockSignUseCase(ctrl)
+	s.signTxUC = mocks.NewMockSignTransactionUseCase(ctrl)
 	s.router = mux.NewRouter()
 
 	controller := NewEthereumController(s)
@@ -177,5 +184,47 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_Sign() {
 
 		s.router.ServeHTTP(rw, httpRequest)
 		assert.Equal(t, http.StatusUnprocessableEntity, rw.Code)
+	})
+}
+
+func (s *ethereumCtrlTestSuite) TestEthereumController_SignTransaction() {
+	address := "0xaddress"
+	url := fmt.Sprintf("/ethereum/accounts/%v/sign-transaction", address)
+
+	s.T().Run("should execute request successfully", func(t *testing.T) {
+		signature := "0xsignature"
+		signRequest := testutils.FakeSignETHTransactionRequest()
+		requestBytes, _ := json.Marshal(signRequest)
+
+		rw := httptest.NewRecorder()
+		httpRequest := httptest.NewRequest(http.MethodPost, url, bytes.NewReader(requestBytes))
+
+		expectedTx := formatters.FormatSignETHTransactionRequest(signRequest)
+		expectedChainID, _ := new(big.Int).SetString(signRequest.ChainID, 10)
+		s.signTxUC.EXPECT().
+			Execute(gomock.Any(), address, signRequest.Namespace, expectedChainID, expectedTx).
+			Return(signature, nil)
+
+		s.router.ServeHTTP(rw, httpRequest)
+
+		assert.Equal(t, signature, rw.Body.String())
+		assert.Equal(t, http.StatusOK, rw.Code)
+	})
+
+	// Sufficient test to check that the mapping to HTTP errors is working. All other status code tests are done in integration tests
+	s.T().Run("should fail with correct error code if use case fails", func(t *testing.T) {
+		address := "0xaddress"
+		signRequest := testutils.FakeSignETHTransactionRequest()
+		requestBytes, _ := json.Marshal(signRequest)
+
+		rw := httptest.NewRecorder()
+		httpRequest := httptest.NewRequest(http.MethodPost, url, bytes.NewReader(requestBytes))
+
+		s.signTxUC.EXPECT().
+			Execute(gomock.Any(), address, signRequest.Namespace, gomock.Any(), gomock.Any()).
+			Return("", errors.ServiceConnectionError("error"))
+
+		s.router.ServeHTTP(rw, httpRequest)
+		assert.Equal(t, http.StatusInternalServerError, rw.Code)
 	})
 }

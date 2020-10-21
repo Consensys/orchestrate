@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"math/big"
 	"net/http"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/keymanager"
@@ -29,6 +30,7 @@ func (c *EthereumController) Append(router *mux.Router) {
 	router.Methods(http.MethodPost).Path(Path).HandlerFunc(c.createAccount)
 	router.Methods(http.MethodPost).Path(Path + "/import").HandlerFunc(c.importAccount)
 	router.Methods(http.MethodPost).Path(Path + "/{address}/sign").HandlerFunc(c.signPayload)
+	router.Methods(http.MethodPost).Path(Path + "/{address}/sign-transaction").HandlerFunc(c.signTransaction)
 }
 
 // @Summary Creates a new Ethereum Account
@@ -93,9 +95,9 @@ func (c *EthereumController) importAccount(rw http.ResponseWriter, request *http
 // @Summary Signs an arbitrary message using an existing Ethereum account
 // @Description Signs an arbitrary message using ECDSA and the private key of an existing Ethereum account
 // @Accept json
-// @Produce json
+// @Produce text/plain
 // @Param request body keymanager.PayloadRequest true "Payload to sign"
-// @Success 200 {object} ethereum.ETHSignedPayloadResponse "Signed payload"
+// @Success 200 {string} string "Signed payload"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 404 {object} httputil.ErrorResponse "Account not found"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
@@ -112,6 +114,38 @@ func (c *EthereumController) signPayload(rw http.ResponseWriter, request *http.R
 
 	address := mux.Vars(request)["address"]
 	signature, err := c.ucs.SignPayload().Execute(ctx, address, signRequest.Namespace, signRequest.Data)
+	if err != nil {
+		httputil.WriteHTTPErrorResponse(rw, err)
+		return
+	}
+
+	_, _ = rw.Write([]byte(signature))
+}
+
+// @Summary Signs an Ethereum transaction using an existing account
+// @Description Signs an Ethereum transaction using ECDSA and the private key of an existing account
+// @Accept json
+// @Produce text/plain
+// @Param request body ethereum.SignETHTransactionRequest true "Ethereum transaction to sign"
+// @Success 200 {string} string "Signed payload"
+// @Failure 400 {object} httputil.ErrorResponse "Invalid request"
+// @Failure 404 {object} httputil.ErrorResponse "Account not found"
+// @Failure 500 {object} httputil.ErrorResponse "Internal server error"
+// @Router /ethereum/accounts/{address}/sign-transaction [post]
+func (c *EthereumController) signTransaction(rw http.ResponseWriter, request *http.Request) {
+	ctx := request.Context()
+
+	signRequest := &types.SignETHTransactionRequest{}
+	err := jsonutils.UnmarshalBody(request.Body, signRequest)
+	if err != nil {
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	address := mux.Vars(request)["address"]
+	chainID, _ := new(big.Int).SetString(signRequest.ChainID, 10)
+	tx := formatters.FormatSignETHTransactionRequest(signRequest)
+	signature, err := c.ucs.SignTransaction().Execute(ctx, address, signRequest.Namespace, chainID, tx)
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return

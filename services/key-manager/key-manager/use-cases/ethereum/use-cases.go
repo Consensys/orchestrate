@@ -2,6 +2,9 @@ package ethereum
 
 import (
 	"context"
+	"math/big"
+
+	ethtypes "github.com/ethereum/go-ethereum/core/types"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 )
@@ -14,6 +17,7 @@ Ethereum Use Cases
 type UseCases interface {
 	CreateAccount() CreateAccountUseCase
 	SignPayload() SignUseCase
+	SignTransaction() SignTransactionUseCase
 }
 
 type CreateAccountUseCase interface {
@@ -22,4 +26,8 @@ type CreateAccountUseCase interface {
 
 type SignUseCase interface {
 	Execute(ctx context.Context, address, namespace, data string) (string, error)
+}
+
+type SignTransactionUseCase interface {
+	Execute(ctx context.Context, address, namespace string, chainID *big.Int, tx *ethtypes.Transaction) (string, error)
 }

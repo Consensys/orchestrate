@@ -25,7 +25,7 @@ func NewSignUseCase(vault store.Vault) SignUseCase {
 	}
 }
 
-// Execute creates a new Ethereum account and stores it in the Vault
+// Execute signs an arbitrary payload using an existing Ethereum account
 func (uc *signPayloadUseCase) Execute(ctx context.Context, address, namespace, data string) (string, error) {
 	logger := log.WithContext(ctx).WithField("namespace", namespace).WithField("address", address)
 	logger.Debug("signing message")
@@ -35,11 +35,9 @@ func (uc *signPayloadUseCase) Execute(ctx context.Context, address, namespace, d
 		return "", errors.FromError(err).ExtendComponent(signPayloadComponent)
 	}
 
-	privKey, err := crypto.HexToECDSA(retrievedPrivKey)
+	privKey, err := NewECDSAFromPrivKey(retrievedPrivKey)
 	if err != nil {
-		errMessage := "failed to generate a public key from the retrieved private key using ECDSA"
-		log.WithContext(ctx).WithError(err).Error(errMessage)
-		return "", errors.CryptoOperationError(errMessage).ExtendComponent(signPayloadComponent)
+		return "", errors.FromError(err).ExtendComponent(signPayloadComponent)
 	}
 
 	signature, err := crypto.Sign(crypto.Keccak256([]byte(data)), privKey)

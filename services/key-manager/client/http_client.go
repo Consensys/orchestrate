@@ -105,3 +105,18 @@ func (c HTTPClient) ETHSign(ctx context.Context, address string, req *keymanager
 
 	return string(responseData), nil
 }
+
+func (c HTTPClient) ETHSignTransaction(ctx context.Context, address string, req *types.SignETHTransactionRequest) (string, error) {
+	reqURL := fmt.Sprintf("%v/ethereum/accounts/%v/sign-transaction", c.config.URL, address)
+
+	log.FromContext(ctx).Errorf("reqURL: %v", reqURL)
+	response, err := clientutils.PostRequest(ctx, c.client, reqURL, req)
+	if err != nil {
+		errMessage := "error while signing transaction with Ethereum account"
+		log.FromContext(ctx).WithError(err).Error(errMessage)
+		return "", errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+	}
+
+	defer clientutils.CloseResponse(response)
+	return httputil.ParseStringResponse(ctx, response)
+}

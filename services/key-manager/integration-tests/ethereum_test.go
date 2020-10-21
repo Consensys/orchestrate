@@ -76,7 +76,7 @@ func (s *keyManagerEthereumTestSuite) TestKeyManager_Ethereum_Sign() {
 		assert.True(t, errors.IsInvalidFormatError(err))
 	})
 
-	s.T().Run("should create a new account successfully", func(t *testing.T) {
+	s.T().Run("should sign payload successfully", func(t *testing.T) {
 		expectedAddress := "0xeca84382E0f1dDdE22EedCd0D803442972EC7BE5"
 
 		accountRequest := testutils.FakeImportETHAccountRequest()
@@ -92,5 +92,33 @@ func (s *keyManagerEthereumTestSuite) TestKeyManager_Ethereum_Sign() {
 		signature, err := s.client.ETHSign(ctx, expectedAddress, signRequest)
 		assert.NoError(t, err)
 		assert.Equal(t, "0x9a0a890215ea6e79d06f9665297996ab967db117f36c2090d6d6ead5a2d32d5265bc4bc766b5a833cb58b3319e44e952487559b9b939cb5268c0409398214c8b00", signature)
+	})
+}
+
+func (s *keyManagerEthereumTestSuite) TestKeyManager_Ethereum_SignTransaction() {
+	ctx := s.env.ctx
+
+	s.T().Run("should fail if payload is invalid", func(t *testing.T) {
+		signRequest := testutils.FakeSignETHTransactionRequest()
+		signRequest.ChainID = ""
+
+		_, err := s.client.ETHSignTransaction(ctx, "0xaddress", signRequest)
+
+		assert.True(t, errors.IsInvalidFormatError(err))
+	})
+
+	s.T().Run("should sign transaction successfully", func(t *testing.T) {
+		expectedAddress := "0xeca84382E0f1dDdE22EedCd0D803442972EC7BE5"
+
+		accountRequest := testutils.FakeImportETHAccountRequest()
+		accountRequest.PrivateKey = "fa88c4a5912f80503d6b5503880d0745f4b88a1ff90ce8f64cdd8f32cc3bc249"
+		account, err := s.client.ETHImportAccount(ctx, accountRequest)
+		assert.NoError(t, err)
+		assert.Equal(t, expectedAddress, account.Address)
+
+		signRequest := testutils.FakeSignETHTransactionRequest()
+		signature, err := s.client.ETHSignTransaction(ctx, expectedAddress, signRequest)
+		assert.NoError(t, err)
+		assert.Equal(t, "0x3dcedc00acdd28aab04c2b352608fc6a3cbb17a82935c9168f434ee6d85ddbdd6c75f3299b37977796c019825c9ef49626fd805daa46efc495c5abb2e836446a01", signature)
 	})
 }

@@ -6,9 +6,11 @@ package mocks
 
 import (
 	context "context"
+	types "github.com/ethereum/go-ethereum/core/types"
 	gomock "github.com/golang/mock/gomock"
 	entities "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 	ethereum "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/key-manager/key-manager/use-cases/ethereum"
+	big "math/big"
 	reflect "reflect"
 )
 
@@ -49,18 +51,32 @@ func (mr *MockUseCasesMockRecorder) CreateAccount() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateAccount", reflect.TypeOf((*MockUseCases)(nil).CreateAccount))
 }
 
-// Sign mocks base method
-func (m *MockUseCases) Sign() ethereum.SignUseCase {
+// SignPayload mocks base method
+func (m *MockUseCases) SignPayload() ethereum.SignUseCase {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Sign")
+	ret := m.ctrl.Call(m, "SignPayload")
 	ret0, _ := ret[0].(ethereum.SignUseCase)
 	return ret0
 }
 
-// Sign indicates an expected call of Sign
-func (mr *MockUseCasesMockRecorder) Sign() *gomock.Call {
+// SignPayload indicates an expected call of SignPayload
+func (mr *MockUseCasesMockRecorder) SignPayload() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Sign", reflect.TypeOf((*MockUseCases)(nil).Sign))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignPayload", reflect.TypeOf((*MockUseCases)(nil).SignPayload))
+}
+
+// SignTransaction mocks base method
+func (m *MockUseCases) SignTransaction() ethereum.SignTransactionUseCase {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SignTransaction")
+	ret0, _ := ret[0].(ethereum.SignTransactionUseCase)
+	return ret0
+}
+
+// SignTransaction indicates an expected call of SignTransaction
+func (mr *MockUseCasesMockRecorder) SignTransaction() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignTransaction", reflect.TypeOf((*MockUseCases)(nil).SignTransaction))
 }
 
 // MockCreateAccountUseCase is a mock of CreateAccountUseCase interface
@@ -137,4 +153,42 @@ func (m *MockSignUseCase) Execute(ctx context.Context, address, namespace, data 
 func (mr *MockSignUseCaseMockRecorder) Execute(ctx, address, namespace, data interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSignUseCase)(nil).Execute), ctx, address, namespace, data)
+}
+
+// MockSignTransactionUseCase is a mock of SignTransactionUseCase interface
+type MockSignTransactionUseCase struct {
+	ctrl     *gomock.Controller
+	recorder *MockSignTransactionUseCaseMockRecorder
+}
+
+// MockSignTransactionUseCaseMockRecorder is the mock recorder for MockSignTransactionUseCase
+type MockSignTransactionUseCaseMockRecorder struct {
+	mock *MockSignTransactionUseCase
+}
+
+// NewMockSignTransactionUseCase creates a new mock instance
+func NewMockSignTransactionUseCase(ctrl *gomock.Controller) *MockSignTransactionUseCase {
+	mock := &MockSignTransactionUseCase{ctrl: ctrl}
+	mock.recorder = &MockSignTransactionUseCaseMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockSignTransactionUseCase) EXPECT() *MockSignTransactionUseCaseMockRecorder {
+	return m.recorder
+}
+
+// Execute mocks base method
+func (m *MockSignTransactionUseCase) Execute(ctx context.Context, address, namespace string, chainID *big.Int, tx *types.Transaction) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Execute", ctx, address, namespace, chainID, tx)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Execute indicates an expected call of Execute
+func (mr *MockSignTransactionUseCaseMockRecorder) Execute(ctx, address, namespace, chainID, tx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSignTransactionUseCase)(nil).Execute), ctx, address, namespace, chainID, tx)
 }
