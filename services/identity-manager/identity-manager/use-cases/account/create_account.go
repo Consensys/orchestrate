@@ -34,8 +34,7 @@ func NewCreateAccountUseCase(db store.DB, searchUC usecases.SearchAccountsUseCas
 }
 
 func (uc *createAccountUseCase) Execute(ctx context.Context, account *entities.Account, privateKey, chainName, tenantID string) (*entities.Account, error) {
-	logger := log.WithContext(ctx).
-		WithField("alias", account.Alias)
+	logger := log.WithContext(ctx).WithField("alias", account.Alias).WithField("chain", "chainName")
 
 	logger.Debug("creating new account...")
 	idens, err := uc.searchUC.Execute(ctx, &entities.AccountFilters{Aliases: []string{account.Alias}}, []string{tenantID})

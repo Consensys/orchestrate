@@ -24,17 +24,9 @@ Feature: Account management
       | generateAccID    | {{random.uuid}} |
       | fooSendTxID      | {{random.uuid}} |
       | wildcardSendTxID | {{random.uuid}} |
-    When I send envelopes to topic "account.generator"
-      | ID                | Headers.Authorization     |
-      | {{generateAccID}} | Bearer {{wildcard.token}} |
-    Then Envelopes should be in topic "account.generator"
-    Then Envelopes should be in topic "account.generated"
-    And Envelopes should have the following fields
-      | From |
-      | ~    |
-    And I register the following envelope fields
-      | id                | alias            | path |
-      | {{generateAccID}} | generatedAccAddr | From |
+    And I have created the following accounts
+      | alias            | ID              | Headers.Authorization     |
+      | generatedAccAddr | {{random.uuid}} | Bearer {{wildcard.token}} |
     Then I track the following envelopes
       | ID              |
       | {{fooSendTxID}} |
@@ -101,7 +93,7 @@ Feature: Account management
       """
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
-
+    
   Scenario: Generate account as tenant foo
     Given I register the following alias
       | alias            | value           |
@@ -109,17 +101,9 @@ Feature: Account management
       | fooSendTxID      | {{random.uuid}} |
       | barSendTxID      | {{random.uuid}} |
       | wildcardSendTxID | {{random.uuid}} |
-    When I send envelopes to topic "account.generator"
-      | ID                | Headers.Authorization      |
-      | {{generateAccID}} | Bearer {{tenantFoo.token}} |
-    Then Envelopes should be in topic "account.generator"
-    Then Envelopes should be in topic "account.generated"
-    And Envelopes should have the following fields
-      | From |
-      | ~    |
-    And I register the following envelope fields
-      | id                | alias            | path |
-      | {{generateAccID}} | generatedAccAddr | From |
+    And I have created the following accounts
+      | alias            | ID              | Headers.Authorization      |
+      | generatedAccAddr | {{random.uuid}} | Bearer {{tenantFoo.token}} |
     Then I track the following envelopes
       | ID              |
       | {{fooSendTxID}} |

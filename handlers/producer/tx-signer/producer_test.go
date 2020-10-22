@@ -33,24 +33,3 @@ func TestPrepareMsgSigner(t *testing.T) {
 	_ = PrepareMsg(txctx, msg)
 	assert.Equal(t, "topic-tx-recover", msg.Topic, "If error out topic should be recovery")
 }
-
-func TestPrepareMsgGenerateAccount(t *testing.T) {
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-	m := mock.NewMockMsg(mockCtrl)
-	m.EXPECT().Key().Return([]byte(`test`)).AnyTimes()
-	m.EXPECT().Entrypoint().Return("topic-account-generator").AnyTimes()
-
-	// No error
-	txctx := engine.NewTxContext()
-
-	txctx.In = m
-	msg := &sarama.ProducerMessage{}
-	_ = PrepareMsg(txctx, msg)
-	assert.Equal(t, "topic-account-generated", msg.Topic, "If no error out topic should be account-generated")
-
-	// Classic error
-	_ = txctx.Error(errors.ConnectionError("Connection error"))
-	_ = PrepareMsg(txctx, msg)
-	assert.Equal(t, "topic-account-generated", msg.Topic, "If error out topic should be recovery")
-}

@@ -55,10 +55,5 @@ func (agent *HashicorpEthereum) FindOne(ctx context.Context, address, namespace 
 }
 
 func generateKey(address, namespace string) string {
-	key := address
-	if namespace != "" {
-		key = fmt.Sprintf("%s_%s", namespace, address)
-	}
-
-	return key
+	return fmt.Sprintf("%v%v", namespace, address)
 }

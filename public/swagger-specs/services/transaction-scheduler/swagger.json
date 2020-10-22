@@ -55,52 +55,55 @@
                     "200": {
                         "description": "List of Jobs found",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/txscheduler.JobResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "annotations": {
-                                            "allOf": [
-                                                {
-                                                    "$ref": "#/definitions/txscheduler.Annotations"
-                                                },
-                                                {
-                                                    "type": "object",
-                                                    "properties": {
-                                                        "gasPricePolicy": {
-                                                            "allOf": [
-                                                                {
-                                                                    "$ref": "#/definitions/txscheduler.GasPriceParams"
-                                                                },
-                                                                {
-                                                                    "type": "object",
-                                                                    "properties": {
-                                                                        "retryPolicy": {
-                                                                            "$ref": "#/definitions/txscheduler.RetryParams"
+                            "type": "array",
+                            "items": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/definitions/txscheduler.JobResponse"
+                                    },
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "annotations": {
+                                                "allOf": [
+                                                    {
+                                                        "$ref": "#/definitions/txscheduler.Annotations"
+                                                    },
+                                                    {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "gasPricePolicy": {
+                                                                "allOf": [
+                                                                    {
+                                                                        "$ref": "#/definitions/txscheduler.GasPriceParams"
+                                                                    },
+                                                                    {
+                                                                        "type": "object",
+                                                                        "properties": {
+                                                                            "retryPolicy": {
+                                                                                "$ref": "#/definitions/txscheduler.RetryParams"
+                                                                            }
                                                                         }
                                                                     }
-                                                                }
-                                                            ]
+                                                                ]
+                                                            }
                                                         }
                                                     }
+                                                ]
+                                            },
+                                            "logs": {
+                                                "type": "array",
+                                                "items": {
+                                                    "$ref": "#/definitions/entities.Log"
                                                 }
-                                            ]
-                                        },
-                                        "logs": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/entities.Log"
+                                            },
+                                            "transaction": {
+                                                "$ref": "#/definitions/entities.ETHTransaction"
                                             }
-                                        },
-                                        "transaction": {
-                                            "$ref": "#/definitions/entities.ETHTransaction"
                                         }
                                     }
-                                }
-                            ]
+                                ]
+                            }
                         }
                     },
                     "400": {

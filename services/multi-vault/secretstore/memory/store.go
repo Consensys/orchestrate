@@ -6,7 +6,6 @@ import (
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
-	ierror "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/error"
 )
 
 // SecretStore holds a pool of private keys in memory
@@ -24,11 +23,7 @@ func NewSecretStore(keyBuilder *multitenancy.KeyBuilder) *SecretStore {
 }
 
 // Store secret
-func (s *SecretStore) Store(ctx context.Context, rawKey, value string) error {
-	key, err := s.KeyBuilder.BuildKey(ctx, rawKey)
-	if err != nil {
-		return err.(*ierror.Error).ExtendComponent(component)
-	}
+func (s *SecretStore) Store(ctx context.Context, key, value string) error {
 	v, ok := s.secrets.Load(key)
 
 	if ok {
@@ -43,27 +38,17 @@ func (s *SecretStore) Store(ctx context.Context, rawKey, value string) error {
 }
 
 // Load secret
-func (s *SecretStore) Load(ctx context.Context, rawKey string) (value string, ok bool, e error) {
-	allowedTenantIDs := multitenancy.AllowedTenantsFromContext(ctx)
-
-	for _, tenant := range allowedTenantIDs {
-		key := s.KeyBuilder.BuildKeyWithTenant(tenant, rawKey)
-
-		v, ok := s.secrets.Load(key)
-		if ok {
-			return v.(string), true, nil
-		}
+func (s *SecretStore) Load(ctx context.Context, key string) (value string, ok bool, e error) {
+	v, ok := s.secrets.Load(key)
+	if ok {
+		return v.(string), true, nil
 	}
 
 	return "", false, nil
 }
 
 // Delete secret
-func (s *SecretStore) Delete(ctx context.Context, rawKey string) error {
-	key, err := s.KeyBuilder.BuildKey(ctx, rawKey)
-	if err != nil {
-		return err.(*ierror.Error).ExtendComponent(component)
-	}
+func (s *SecretStore) Delete(ctx context.Context, key string) error {
 	s.secrets.Delete(key)
 	return nil
 }

@@ -19,17 +19,9 @@ Feature: Account management
       | alias         | value           |
       | generateAccID | {{random.uuid}} |
       | sendTxID      | {{random.uuid}} |
-    When I send envelopes to topic "account.generator"
-      | ID                | Headers.Authorization    |
-      | {{generateAccID}} | Bearer {{tenant1.token}} |
-    Then Envelopes should be in topic "account.generator"
-    Then Envelopes should be in topic "account.generated"
-    And Envelopes should have the following fields
-      | From | ID                |
-      | ~    | {{generateAccID}} |
-    And I register the following envelope fields
-      | id                | alias            | path |
-      | {{generateAccID}} | generatedAccAddr | From |
+    And I have created the following accounts
+      | alias            | ID              | Headers.Authorization    |
+      | generatedAccAddr | {{random.uuid}} | Bearer {{tenant1.token}} |
     Then I track the following envelopes
       | ID           |
       | {{sendTxID}} |

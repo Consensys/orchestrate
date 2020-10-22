@@ -15,8 +15,7 @@ func PrepareMsg(txctx *engine.TxContext, msg *sarama.ProducerMessage) error {
 	var p proto.Message
 
 	// Marshal Envelope into sarama Message
-	switch txctx.In.Entrypoint() {
-	case viper.GetString(broker.TxSignerViperKey):
+	if txctx.In.Entrypoint() == viper.GetString(broker.TxSignerViperKey) {
 		switch {
 		case !txctx.Envelope.OnlyWarnings():
 			msg.Topic = viper.GetString(broker.TxRecoverViperKey)
@@ -30,12 +29,6 @@ func PrepareMsg(txctx *engine.TxContext, msg *sarama.ProducerMessage) error {
 		if partitionKey := txctx.Envelope.PartitionKey(); partitionKey != "" {
 			msg.Key = sarama.StringEncoder(partitionKey)
 		}
-	case viper.GetString(broker.AccountGeneratorViperKey):
-		msg.Topic = viper.GetString(broker.AccountGeneratedViperKey)
-		p = txctx.Envelope.TxResponse()
-
-		// Set key for Kafka partitions
-		msg.Key = sarama.StringEncoder(txctx.Envelope.GetFromString())
 	}
 
 	err := encoding.Marshal(p, msg)

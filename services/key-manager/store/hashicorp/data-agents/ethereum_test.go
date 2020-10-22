@@ -50,7 +50,7 @@ func (s *ethereumDATestSuite) TestEthereumDataAgent_Insert() {
 	})
 
 	s.T().Run("should insert private key successfully with namespace", func(t *testing.T) {
-		s.mockSecretStore.EXPECT().Store(ctx, "namespace_0xaddress", privKey).Return(nil)
+		s.mockSecretStore.EXPECT().Store(ctx, "namespace0xaddress", privKey).Return(nil)
 
 		err := s.dataAgent.Insert(ctx, address, privKey, namespace)
 		assert.NoError(t, err)
@@ -80,7 +80,7 @@ func (s *ethereumDATestSuite) TestEthereumDataAgent_FindOne() {
 	})
 
 	s.T().Run("should insert private key successfully with namespace", func(t *testing.T) {
-		s.mockSecretStore.EXPECT().Load(ctx, "namespace_0xaddress").Return(privKey, true, nil)
+		s.mockSecretStore.EXPECT().Load(ctx, "namespace0xaddress").Return(privKey, true, nil)
 
 		privKeyResponse, err := s.dataAgent.FindOne(ctx, address, namespace)
 

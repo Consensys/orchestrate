@@ -71,7 +71,7 @@ func (c *IdentitiesController) create(rw http.ResponseWriter, request *http.Requ
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Param address string true "address of fetched account"
+// @Param address path string true "selected account address"
 // @Success 200 {object} identitymanager.AccountResponse "Account found"
 // @Failure 404 {object} httputil.ErrorResponse "Account not found"
 // @Failure 401 {object} httputil.ErrorResponse "Unauthorized"
@@ -169,7 +169,7 @@ func (c *IdentitiesController) importKey(rw http.ResponseWriter, request *http.R
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Param request body txscheduler.UpdateAccountRequest{} true "Account update request"
+// @Param request body identitymanager.UpdateAccountRequest{} true "Account update request"
 // @Success 200 {object} identitymanager.AccountResponse "Account found"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 401 {object} httputil.ErrorResponse "Unauthorized"
@@ -202,10 +202,10 @@ func (c *IdentitiesController) update(rw http.ResponseWriter, request *http.Requ
 // @Summary Sign arbitrary data
 // @Description Sign sent data using provided address
 // @Accept json
-// @Produce json
+// @Produce text/plain
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Param address string true "Address of account to sign with"
+// @Param address path string true "selected account address"
 // @Success 200 {object} identitymanager.SignPayloadRequest "Data signature"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 401 {object} httputil.ErrorResponse "Unauthorized"

@@ -19,6 +19,7 @@ import (
 	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client"
 	registry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
+	identitymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/identity-manager/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce"
 	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/e2e/cucumber/alias"
@@ -57,6 +58,9 @@ type ScenarioContext struct {
 	// Transaction Schedule
 	TransactionScheduler txscheduler.TransactionSchedulerClient
 
+	// Identity Manager
+	IdentityManager identitymanager.IdentityManagerClient
+
 	// Producer to producer envelopes in topics
 	producer sarama.SyncProducer
 
@@ -77,6 +81,7 @@ func NewScenarioContext(
 	chainReg chainregistry.ChainRegistryClient,
 	contractRegistry registry.ContractRegistryClient,
 	txScheduler txscheduler.TransactionSchedulerClient,
+	identityManager identitymanager.IdentityManagerClient,
 	producer sarama.SyncProducer,
 	aliasesReg *alias.Registry,
 	jwtGenerator *generator.JWTGenerator,
@@ -90,6 +95,7 @@ func NewScenarioContext(
 		ChainRegistry:        chainReg,
 		ContractRegistry:     contractRegistry,
 		TransactionScheduler: txScheduler,
+		IdentityManager:      identityManager,
 		producer:             producer,
 		logger:               log.NewEntry(log.StandardLogger()),
 		jwtGenerator:         jwtGenerator,
@@ -202,6 +208,7 @@ func InitializeScenario(s *godog.ScenarioContext) {
 		chainregistry.GlobalClient(),
 		contractregistry.GlobalClient(),
 		txscheduler.GlobalClient(),
+		identitymanager.GlobalClient(),
 		broker.GlobalSyncProducer(),
 		alias.GlobalAliasRegistry(),
 		generator.GlobalJWTGenerator(),
