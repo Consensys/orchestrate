@@ -112,7 +112,22 @@ func (c HTTPClient) ETHSignTransaction(ctx context.Context, address string, req 
 	log.FromContext(ctx).Errorf("reqURL: %v", reqURL)
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, req)
 	if err != nil {
-		errMessage := "error while signing transaction with Ethereum account"
+		errMessage := "error while signing transaction"
+		log.FromContext(ctx).WithError(err).Error(errMessage)
+		return "", errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+	}
+
+	defer clientutils.CloseResponse(response)
+	return httputil.ParseStringResponse(ctx, response)
+}
+
+func (c HTTPClient) ETHSignTesseraTransaction(ctx context.Context, address string, req *types.SignTesseraTransactionRequest) (string, error) {
+	reqURL := fmt.Sprintf("%v/ethereum/accounts/%v/sign-tessera-transaction", c.config.URL, address)
+
+	log.FromContext(ctx).Errorf("reqURL: %v", reqURL)
+	response, err := clientutils.PostRequest(ctx, c.client, reqURL, req)
+	if err != nil {
+		errMessage := "error while signing tessera transaction"
 		log.FromContext(ctx).WithError(err).Error(errMessage)
 		return "", errors.ServiceConnectionError(errMessage).ExtendComponent(component)
 	}

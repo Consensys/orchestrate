@@ -31,6 +31,8 @@ func (c *EthereumController) Append(router *mux.Router) {
 	router.Methods(http.MethodPost).Path(Path + "/import").HandlerFunc(c.importAccount)
 	router.Methods(http.MethodPost).Path(Path + "/{address}/sign").HandlerFunc(c.signPayload)
 	router.Methods(http.MethodPost).Path(Path + "/{address}/sign-transaction").HandlerFunc(c.signTransaction)
+	router.Methods(http.MethodPost).Path(Path + "/{address}/sign-eea-transaction").HandlerFunc(c.signEEA)
+	router.Methods(http.MethodPost).Path(Path + "/{address}/sign-tessera-transaction").HandlerFunc(c.signTessera)
 }
 
 // @Summary Creates a new Ethereum Account
@@ -146,6 +148,69 @@ func (c *EthereumController) signTransaction(rw http.ResponseWriter, request *ht
 	chainID, _ := new(big.Int).SetString(signRequest.ChainID, 10)
 	tx := formatters.FormatSignETHTransactionRequest(signRequest)
 	signature, err := c.ucs.SignTransaction().Execute(ctx, address, signRequest.Namespace, chainID, tx)
+	if err != nil {
+		httputil.WriteHTTPErrorResponse(rw, err)
+		return
+	}
+
+	_, _ = rw.Write([]byte(signature))
+}
+
+// @Summary Signs an EEA transaction using an existing account
+// @Description Signs an EEA transaction using ECDSA and the private key of an existing account
+// @Accept json
+// @Produce text/plain
+// @Param request body ethereum.SignETHTransactionRequest true "EEA transaction to sign"
+// @Success 200 {string} string "Signed payload"
+// @Failure 400 {object} httputil.ErrorResponse "Invalid request"
+// @Failure 404 {object} httputil.ErrorResponse "Account not found"
+// @Failure 500 {object} httputil.ErrorResponse "Internal server error"
+// @Router /ethereum/accounts/{address}/sign-eea-transaction [post]
+func (c *EthereumController) signEEA(rw http.ResponseWriter, request *http.Request) {
+	ctx := request.Context()
+
+	signRequest := &types.SignETHTransactionRequest{}
+	err := jsonutils.UnmarshalBody(request.Body, signRequest)
+	if err != nil {
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	address := mux.Vars(request)["address"]
+	chainID, _ := new(big.Int).SetString(signRequest.ChainID, 10)
+	tx := formatters.FormatSignETHTransactionRequest(signRequest)
+	signature, err := c.ucs.SignTransaction().Execute(ctx, address, signRequest.Namespace, chainID, tx)
+	if err != nil {
+		httputil.WriteHTTPErrorResponse(rw, err)
+		return
+	}
+
+	_, _ = rw.Write([]byte(signature))
+}
+
+// @Summary Signs a Tessera transaction using an existing account
+// @Description Signs a Tessera transaction using ECDSA and the private key of an existing account
+// @Accept json
+// @Produce text/plain
+// @Param request body ethereum.SignTesseraTransactionRequest true "Private Tessera transaction to sign"
+// @Success 200 {string} string "Signed payload"
+// @Failure 400 {object} httputil.ErrorResponse "Invalid request"
+// @Failure 404 {object} httputil.ErrorResponse "Account not found"
+// @Failure 500 {object} httputil.ErrorResponse "Internal server error"
+// @Router /ethereum/accounts/{address}/sign-tessera-transaction [post]
+func (c *EthereumController) signTessera(rw http.ResponseWriter, request *http.Request) {
+	ctx := request.Context()
+
+	signRequest := &types.SignTesseraTransactionRequest{}
+	err := jsonutils.UnmarshalBody(request.Body, signRequest)
+	if err != nil {
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	address := mux.Vars(request)["address"]
+	tx := formatters.FormatSignTesseraTransactionRequest(signRequest)
+	signature, err := c.ucs.SignTesseraTransaction().Execute(ctx, address, signRequest.Namespace, tx)
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return

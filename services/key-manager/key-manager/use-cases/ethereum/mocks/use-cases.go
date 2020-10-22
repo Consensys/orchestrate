@@ -6,7 +6,8 @@ package mocks
 
 import (
 	context "context"
-	types "github.com/ethereum/go-ethereum/core/types"
+	types "github.com/consensys/quorum/core/types"
+	types0 "github.com/ethereum/go-ethereum/core/types"
 	gomock "github.com/golang/mock/gomock"
 	entities "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 	ethereum "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/key-manager/key-manager/use-cases/ethereum"
@@ -77,6 +78,20 @@ func (m *MockUseCases) SignTransaction() ethereum.SignTransactionUseCase {
 func (mr *MockUseCasesMockRecorder) SignTransaction() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignTransaction", reflect.TypeOf((*MockUseCases)(nil).SignTransaction))
+}
+
+// SignTesseraTransaction mocks base method
+func (m *MockUseCases) SignTesseraTransaction() ethereum.SignTesseraTransactionUseCase {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SignTesseraTransaction")
+	ret0, _ := ret[0].(ethereum.SignTesseraTransactionUseCase)
+	return ret0
+}
+
+// SignTesseraTransaction indicates an expected call of SignTesseraTransaction
+func (mr *MockUseCasesMockRecorder) SignTesseraTransaction() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignTesseraTransaction", reflect.TypeOf((*MockUseCases)(nil).SignTesseraTransaction))
 }
 
 // MockCreateAccountUseCase is a mock of CreateAccountUseCase interface
@@ -179,7 +194,7 @@ func (m *MockSignTransactionUseCase) EXPECT() *MockSignTransactionUseCaseMockRec
 }
 
 // Execute mocks base method
-func (m *MockSignTransactionUseCase) Execute(ctx context.Context, address, namespace string, chainID *big.Int, tx *types.Transaction) (string, error) {
+func (m *MockSignTransactionUseCase) Execute(ctx context.Context, address, namespace string, chainID *big.Int, tx *types0.Transaction) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Execute", ctx, address, namespace, chainID, tx)
 	ret0, _ := ret[0].(string)
@@ -191,4 +206,42 @@ func (m *MockSignTransactionUseCase) Execute(ctx context.Context, address, names
 func (mr *MockSignTransactionUseCaseMockRecorder) Execute(ctx, address, namespace, chainID, tx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSignTransactionUseCase)(nil).Execute), ctx, address, namespace, chainID, tx)
+}
+
+// MockSignTesseraTransactionUseCase is a mock of SignTesseraTransactionUseCase interface
+type MockSignTesseraTransactionUseCase struct {
+	ctrl     *gomock.Controller
+	recorder *MockSignTesseraTransactionUseCaseMockRecorder
+}
+
+// MockSignTesseraTransactionUseCaseMockRecorder is the mock recorder for MockSignTesseraTransactionUseCase
+type MockSignTesseraTransactionUseCaseMockRecorder struct {
+	mock *MockSignTesseraTransactionUseCase
+}
+
+// NewMockSignTesseraTransactionUseCase creates a new mock instance
+func NewMockSignTesseraTransactionUseCase(ctrl *gomock.Controller) *MockSignTesseraTransactionUseCase {
+	mock := &MockSignTesseraTransactionUseCase{ctrl: ctrl}
+	mock.recorder = &MockSignTesseraTransactionUseCaseMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockSignTesseraTransactionUseCase) EXPECT() *MockSignTesseraTransactionUseCaseMockRecorder {
+	return m.recorder
+}
+
+// Execute mocks base method
+func (m *MockSignTesseraTransactionUseCase) Execute(ctx context.Context, address, namespace string, tx *types.Transaction) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Execute", ctx, address, namespace, tx)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Execute indicates an expected call of Execute
+func (mr *MockSignTesseraTransactionUseCaseMockRecorder) Execute(ctx, address, namespace, tx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSignTesseraTransactionUseCase)(nil).Execute), ctx, address, namespace, tx)
 }

@@ -122,3 +122,31 @@ func (s *keyManagerEthereumTestSuite) TestKeyManager_Ethereum_SignTransaction() 
 		assert.Equal(t, "0x3dcedc00acdd28aab04c2b352608fc6a3cbb17a82935c9168f434ee6d85ddbdd6c75f3299b37977796c019825c9ef49626fd805daa46efc495c5abb2e836446a01", signature)
 	})
 }
+
+func (s *keyManagerEthereumTestSuite) TestKeyManager_Ethereum_SignTesseraTransaction() {
+	ctx := s.env.ctx
+
+	s.T().Run("should fail if payload is invalid", func(t *testing.T) {
+		signRequest := testutils.FakeSignTesseraTransactionRequest()
+		signRequest.GasLimit = 0
+
+		_, err := s.client.ETHSignTesseraTransaction(ctx, "0xaddress", signRequest)
+
+		assert.True(t, errors.IsInvalidFormatError(err))
+	})
+
+	s.T().Run("should sign transaction successfully", func(t *testing.T) {
+		expectedAddress := "0xeca84382E0f1dDdE22EedCd0D803442972EC7BE5"
+
+		accountRequest := testutils.FakeImportETHAccountRequest()
+		accountRequest.PrivateKey = "fa88c4a5912f80503d6b5503880d0745f4b88a1ff90ce8f64cdd8f32cc3bc249"
+		account, err := s.client.ETHImportAccount(ctx, accountRequest)
+		assert.NoError(t, err)
+		assert.Equal(t, expectedAddress, account.Address)
+
+		signRequest := testutils.FakeSignTesseraTransactionRequest()
+		signature, err := s.client.ETHSignTesseraTransaction(ctx, expectedAddress, signRequest)
+		assert.NoError(t, err)
+		assert.Equal(t, "0x956f2768faa93fbee46bac2fa357c6966401ba7f1b1041125aeb6a4a707088dd6b4d7f697cb456ac2fe58f984da18c03277d53fb67fd429f8f5ba056f5f858ba01", signature)
+	})
+}

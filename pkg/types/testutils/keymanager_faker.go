@@ -31,6 +31,17 @@ func FakeSignETHTransactionRequest() *types.SignETHTransactionRequest {
 	}
 }
 
+func FakeSignTesseraTransactionRequest() *types.SignTesseraTransactionRequest {
+	return &types.SignTesseraTransactionRequest{
+		Namespace: "_",
+		Nonce:     0,
+		To:        "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18",
+		Amount:    "10000000000",
+		GasPrice:  "10000000000",
+		GasLimit:  21000,
+	}
+}
+
 func FakeETHAccountResponse() *types.ETHAccountResponse {
 	return &types.ETHAccountResponse{
 		Namespace: "_",

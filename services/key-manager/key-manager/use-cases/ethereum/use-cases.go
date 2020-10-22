@@ -4,6 +4,8 @@ import (
 	"context"
 	"math/big"
 
+	quorumtypes "github.com/consensys/quorum/core/types"
+
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
@@ -18,6 +20,7 @@ type UseCases interface {
 	CreateAccount() CreateAccountUseCase
 	SignPayload() SignUseCase
 	SignTransaction() SignTransactionUseCase
+	SignTesseraTransaction() SignTesseraTransactionUseCase
 }
 
 type CreateAccountUseCase interface {
@@ -30,4 +33,8 @@ type SignUseCase interface {
 
 type SignTransactionUseCase interface {
 	Execute(ctx context.Context, address, namespace string, chainID *big.Int, tx *ethtypes.Transaction) (string, error)
+}
+
+type SignTesseraTransactionUseCase interface {
+	Execute(ctx context.Context, address, namespace string, tx *quorumtypes.Transaction) (string, error)
 }

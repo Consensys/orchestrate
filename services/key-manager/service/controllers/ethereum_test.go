@@ -28,6 +28,7 @@ type ethereumCtrlTestSuite struct {
 	createAccountUC *mocks.MockCreateAccountUseCase
 	signUC          *mocks.MockSignUseCase
 	signTxUC        *mocks.MockSignTransactionUseCase
+	signTesseraTxUC *mocks.MockSignTesseraTransactionUseCase
 	router          *mux.Router
 }
 
@@ -41,6 +42,10 @@ func (s *ethereumCtrlTestSuite) SignPayload() ethereum.SignUseCase {
 
 func (s *ethereumCtrlTestSuite) SignTransaction() ethereum.SignTransactionUseCase {
 	return s.signTxUC
+}
+
+func (s *ethereumCtrlTestSuite) SignTesseraTransaction() ethereum.SignTesseraTransactionUseCase {
+	return s.signTesseraTxUC
 }
 
 var _ ethereum.UseCases = &ethereumCtrlTestSuite{}
@@ -57,6 +62,7 @@ func (s *ethereumCtrlTestSuite) SetupTest() {
 	s.createAccountUC = mocks.NewMockCreateAccountUseCase(ctrl)
 	s.signUC = mocks.NewMockSignUseCase(ctrl)
 	s.signTxUC = mocks.NewMockSignTransactionUseCase(ctrl)
+	s.signTesseraTxUC = mocks.NewMockSignTesseraTransactionUseCase(ctrl)
 	s.router = mux.NewRouter()
 
 	controller := NewEthereumController(s)
@@ -222,6 +228,47 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_SignTransaction() {
 
 		s.signTxUC.EXPECT().
 			Execute(gomock.Any(), address, signRequest.Namespace, gomock.Any(), gomock.Any()).
+			Return("", errors.ServiceConnectionError("error"))
+
+		s.router.ServeHTTP(rw, httpRequest)
+		assert.Equal(t, http.StatusInternalServerError, rw.Code)
+	})
+}
+
+func (s *ethereumCtrlTestSuite) TestEthereumController_SignTesseraTransaction() {
+	address := "0xaddress"
+	url := fmt.Sprintf("/ethereum/accounts/%v/sign-tessera-transaction", address)
+
+	s.T().Run("should execute request successfully", func(t *testing.T) {
+		signature := "0xsignature"
+		signRequest := testutils.FakeSignTesseraTransactionRequest()
+		requestBytes, _ := json.Marshal(signRequest)
+
+		rw := httptest.NewRecorder()
+		httpRequest := httptest.NewRequest(http.MethodPost, url, bytes.NewReader(requestBytes))
+
+		expectedTx := formatters.FormatSignTesseraTransactionRequest(signRequest)
+		s.signTesseraTxUC.EXPECT().
+			Execute(gomock.Any(), address, signRequest.Namespace, expectedTx).
+			Return(signature, nil)
+
+		s.router.ServeHTTP(rw, httpRequest)
+
+		assert.Equal(t, signature, rw.Body.String())
+		assert.Equal(t, http.StatusOK, rw.Code)
+	})
+
+	// Sufficient test to check that the mapping to HTTP errors is working. All other status code tests are done in integration tests
+	s.T().Run("should fail with correct error code if use case fails", func(t *testing.T) {
+		address := "0xaddress"
+		signRequest := testutils.FakeSignTesseraTransactionRequest()
+		requestBytes, _ := json.Marshal(signRequest)
+
+		rw := httptest.NewRecorder()
+		httpRequest := httptest.NewRequest(http.MethodPost, url, bytes.NewReader(requestBytes))
+
+		s.signTesseraTxUC.EXPECT().
+			Execute(gomock.Any(), address, signRequest.Namespace, gomock.Any()).
 			Return("", errors.ServiceConnectionError("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)

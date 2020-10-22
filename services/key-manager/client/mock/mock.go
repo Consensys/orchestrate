@@ -96,6 +96,21 @@ func (mr *MockEthereumAccountClientMockRecorder) ETHSignTransaction(ctx, address
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHSignTransaction", reflect.TypeOf((*MockEthereumAccountClient)(nil).ETHSignTransaction), ctx, address, request)
 }
 
+// ETHSignTesseraTransaction mocks base method
+func (m *MockEthereumAccountClient) ETHSignTesseraTransaction(ctx context.Context, address string, request *ethereum.SignTesseraTransactionRequest) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ETHSignTesseraTransaction", ctx, address, request)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ETHSignTesseraTransaction indicates an expected call of ETHSignTesseraTransaction
+func (mr *MockEthereumAccountClientMockRecorder) ETHSignTesseraTransaction(ctx, address, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHSignTesseraTransaction", reflect.TypeOf((*MockEthereumAccountClient)(nil).ETHSignTesseraTransaction), ctx, address, request)
+}
+
 // MockKeyManagerClient is a mock of KeyManagerClient interface
 type MockKeyManagerClient struct {
 	ctrl     *gomock.Controller
@@ -191,4 +206,19 @@ func (m *MockKeyManagerClient) ETHSignTransaction(ctx context.Context, address s
 func (mr *MockKeyManagerClientMockRecorder) ETHSignTransaction(ctx, address, request interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHSignTransaction", reflect.TypeOf((*MockKeyManagerClient)(nil).ETHSignTransaction), ctx, address, request)
+}
+
+// ETHSignTesseraTransaction mocks base method
+func (m *MockKeyManagerClient) ETHSignTesseraTransaction(ctx context.Context, address string, request *ethereum.SignTesseraTransactionRequest) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ETHSignTesseraTransaction", ctx, address, request)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ETHSignTesseraTransaction indicates an expected call of ETHSignTesseraTransaction
+func (mr *MockKeyManagerClientMockRecorder) ETHSignTesseraTransaction(ctx, address, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHSignTesseraTransaction", reflect.TypeOf((*MockKeyManagerClient)(nil).ETHSignTesseraTransaction), ctx, address, request)
 }
