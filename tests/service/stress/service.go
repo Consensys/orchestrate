@@ -13,6 +13,7 @@ import (
 	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 	registry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
+	identitymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/identity-manager/client"
 	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/stress/units"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/stress/utils"
@@ -26,6 +27,7 @@ type WorkLoadService struct {
 	chainRegistryClient    chainregistry.ChainRegistryClient
 	contractRegistryClient registry.ContractRegistryClient
 	txSchedulerClient      txscheduler.TransactionSchedulerClient
+	identityClient         identitymanager.IdentityManagerClient
 	producer               sarama.SyncProducer
 	chanReg                *chanregistry.ChanRegistry
 	items                  []*workLoadItem
@@ -45,6 +47,7 @@ func NewService(cfg *Config,
 	chainRegistryClient chainregistry.ChainRegistryClient,
 	contractRegistryClient registry.ContractRegistryClient,
 	txSchedulerClient txscheduler.TransactionSchedulerClient,
+	identityClient identitymanager.IdentityManagerClient,
 	producer sarama.SyncProducer,
 ) *WorkLoadService {
 	return &WorkLoadService{
@@ -53,6 +56,7 @@ func NewService(cfg *Config,
 		chainRegistryClient:    chainRegistryClient,
 		contractRegistryClient: contractRegistryClient,
 		txSchedulerClient:      txSchedulerClient,
+		identityClient:         identityClient,
 		producer:               producer,
 		items: []*workLoadItem{
 			{cfg.Iterations, cfg.Concurrency, "BatchDeployContract", units.BatchDeployContractTest},
@@ -93,7 +97,7 @@ func (c *WorkLoadService) Stop() {
 func (c *WorkLoadService) preRun(ctx context.Context) (context.Context, error) {
 	accounts := []string{}
 	for idx := 0; idx <= utils.NAccounts; idx++ {
-		acc, err := utils.CreateNewAccount(ctx, c.chanReg, c.producer)
+		acc, err := utils.CreateNewAccount(ctx, c.identityClient)
 		if err != nil {
 			return ctx, err
 		}

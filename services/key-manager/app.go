@@ -4,7 +4,7 @@ import (
 	"context"
 	"reflect"
 
-	healthz "github.com/heptiolabs/healthcheck"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/key-manager/store"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/key-manager/key-manager/builder"
 
@@ -30,7 +30,7 @@ func NewKeyManager(ctx context.Context, cfg *Config) (*app.App, error) {
 	// Create app
 	return app.New(
 		cfg.App,
-		ReadinessOpt(vault.HealthCheck()),
+		ReadinessOpt(vault),
 		app.MetricsOpt(),
 		app.LoggerMiddlewareOpt("base"),
 		app.SwaggerOpt("./public/swagger-specs/services/key-manager/swagger.json", "base@logger-base"),
@@ -39,9 +39,9 @@ func NewKeyManager(ctx context.Context, cfg *Config) (*app.App, error) {
 	)
 }
 
-func ReadinessOpt(checker healthz.Check) app.Option {
+func ReadinessOpt(vault store.Vault) app.Option {
 	return func(ap *app.App) error {
-		ap.AddReadinessCheck("vault", checker)
+		ap.AddReadinessCheck("vault", vault.HealthCheck())
 		return nil
 	}
 }

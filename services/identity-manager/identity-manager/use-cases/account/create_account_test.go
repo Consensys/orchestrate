@@ -54,7 +54,6 @@ func TestCreateAccount_Execute(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, resp.PublicKey, accountEntity.PublicKey)
 		assert.Equal(t, resp.Address, accountEntity.Address)
-		assert.Equal(t, resp.Active, true)
 	})
 
 	t.Run("should import new account account successfully", func(t *testing.T) {
@@ -79,7 +78,6 @@ func TestCreateAccount_Execute(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, resp.PublicKey, accEntity.PublicKey)
 		assert.Equal(t, resp.Address, accEntity.Address)
-		assert.Equal(t, resp.Active, true)
 	})
 
 	t.Run("should create account and trigger funding successfully", func(t *testing.T) {
@@ -104,7 +102,6 @@ func TestCreateAccount_Execute(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, resp.PublicKey, accEntity.PublicKey)
 		assert.Equal(t, resp.Address, accEntity.Address)
-		assert.Equal(t, resp.Active, true)
 	})
 
 	t.Run("should fail with same error if search identities fails", func(t *testing.T) {

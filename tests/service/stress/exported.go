@@ -16,6 +16,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client"
+	identitymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/identity-manager/client"
 	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/handlers"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/handlers/consumer"
@@ -51,6 +52,7 @@ func Start(ctx context.Context) error {
 		chainregistry.GlobalClient(),
 		contractregistry.GlobalClient(),
 		txscheduler.GlobalClient(),
+		identitymanager.GlobalClient(),
 		broker.GlobalSyncProducer())
 
 	// Start consuming on every topics of interest
@@ -118,6 +120,7 @@ func initComponents(ctx context.Context) {
 			chainregistry.Init(ctx)
 			contractregistry.Init(ctx)
 			txscheduler.Init()
+			identitymanager.Init()
 		},
 		// Initialize ConsumerGroup
 		func() {

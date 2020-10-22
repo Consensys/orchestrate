@@ -9,7 +9,6 @@ type Account struct {
 	Address             string
 	PublicKey           string
 	CompressedPublicKey string
-	Active              bool
 	TenantID            string
 	Attributes          map[string]string
 	CreatedAt           time.Time

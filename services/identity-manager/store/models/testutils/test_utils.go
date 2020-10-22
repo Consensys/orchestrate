@@ -9,7 +9,6 @@ import (
 func FakeAccountModel() *models.Account {
 	return &models.Account{
 		Alias:               utils.RandomString(10),
-		Active:              true,
 		TenantID:            "tenantID",
 		Address:             ethcommon.HexToAddress(utils.RandHexString(12)).String(),
 		PublicKey:           ethcommon.HexToHash(utils.RandHexString(12)).String(),

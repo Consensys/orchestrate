@@ -38,7 +38,6 @@ func FormatAccountResponse(iden *entities.Account) *types.AccountResponse {
 		PublicKey:           iden.PublicKey,
 		CompressedPublicKey: iden.CompressedPublicKey,
 		TenantID:            iden.TenantID,
-		Active:              iden.Active,
 		CreatedAt:           iden.CreatedAt,
 		UpdatedAt:           iden.UpdatedAt,
 	}

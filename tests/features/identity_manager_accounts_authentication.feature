@@ -17,22 +17,50 @@ Feature: Account management
       | alias | Name                | URLs                         | Headers.Authorization     |
       | besu  | besu-{{scenarioID}} | {{global.nodes.besu_1.URLs}} | Bearer {{wildcard.token}} |
 
-
-  Scenario: Generate account as default tenant
+  Scenario: Accounts own by default tenant can be used by other authorized tenants
     Given I register the following alias
       | alias            | value           |
       | generateAccID    | {{random.uuid}} |
+      | generateAccID2   | {{random.uuid}} |
       | fooSendTxID      | {{random.uuid}} |
       | wildcardSendTxID | {{random.uuid}} |
-    And I have created the following accounts
-      | alias            | ID              | Headers.Authorization     |
-      | generatedAccAddr | {{random.uuid}} | Bearer {{wildcard.token}} |
+    Given I set the headers
+      | Key           | Value                     |
+      | Authorization | Bearer {{wildcard.token}} |
+    When I send "POST" request to "{{global.identity-manager}}/accounts" with json:
+  """
+{
+    "alias": "{{generateAccID}}", 
+    "attributes": {
+    	"scenario_id": "{{scenarioID}}"
+    }
+}
+      """
+    Then the response code should be 200
+    And Response should have the following fields
+      | alias             | attributes.scenario_id | tenantID |
+      | {{generateAccID}} | {{scenarioID}}         | _        |
+    Then I register the following response fields
+      | alias            | path    |
+      | generatedAccAddr | address |
     Then I track the following envelopes
       | ID              |
       | {{fooSendTxID}} |
     Given I set the headers
       | Key           | Value                      |
       | Authorization | Bearer {{tenantFoo.token}} |
+    When I send "PATCH" request to "{{global.identity-manager}}/accounts/{{generatedAccAddr}}" with json:
+  """
+{
+    "alias": "{{generateAccID2}}"
+}
+      """
+    Then the response code should be 200
+    Then I send "GET" request to "{{global.identity-manager}}/accounts/{{generatedAccAddr}}"
+    Then the response code should be 200
+    And Response should have the following fields
+      | alias              |
+      | {{generateAccID2}} |
     When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
   """
 {
@@ -93,17 +121,34 @@ Feature: Account management
       """
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
-    
-  Scenario: Generate account as tenant foo
+
+  Scenario: Accounts own by tenant foo can be access only by tenant foo
     Given I register the following alias
       | alias            | value           |
       | generateAccID    | {{random.uuid}} |
+      | generateAccID2   | {{random.uuid}} |
       | fooSendTxID      | {{random.uuid}} |
       | barSendTxID      | {{random.uuid}} |
       | wildcardSendTxID | {{random.uuid}} |
-    And I have created the following accounts
-      | alias            | ID              | Headers.Authorization      |
-      | generatedAccAddr | {{random.uuid}} | Bearer {{tenantFoo.token}} |
+    Given I set the headers
+      | Key           | Value                      |
+      | Authorization | Bearer {{tenantFoo.token}} |
+    When I send "POST" request to "{{global.identity-manager}}/accounts" with json:
+  """
+{
+    "alias": "{{generateAccID}}", 
+    "attributes": {
+    	"scenario_id": "{{scenarioID}}"
+    }
+}
+      """
+    Then the response code should be 200
+    And Response should have the following fields
+      | alias             | attributes.scenario_id | tenantID               |
+      | {{generateAccID}} | {{scenarioID}}         | {{tenantFoo.tenantID}} |
+    Then I register the following response fields
+      | alias            | path    |
+      | generatedAccAddr | address |
     Then I track the following envelopes
       | ID              |
       | {{fooSendTxID}} |
@@ -132,6 +177,13 @@ Feature: Account management
     Given I set the headers
       | Key           | Value                      |
       | Authorization | Bearer {{tenantBar.token}} |
+    When I send "PATCH" request to "{{global.identity-manager}}/accounts/{{generatedAccAddr}}" with json:
+  """
+{
+    "alias": "{{generateAccID2}}"
+}
+      """
+    Then the response code should be 404
     When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
   """
 {

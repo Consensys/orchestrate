@@ -68,7 +68,6 @@ func (uc *createAccountUseCase) Execute(ctx context.Context, account *entities.A
 	account.Address = resp.Address
 	account.PublicKey = resp.PublicKey
 	account.CompressedPublicKey = resp.CompressedPublicKey
-	account.Active = true
 
 	accountModel := parsers.NewAccountModelFromEntities(account)
 	accountModel.TenantID = tenantID

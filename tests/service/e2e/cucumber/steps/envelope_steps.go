@@ -246,6 +246,36 @@ func (sc *ScenarioContext) iHaveTheFollowingTenant(table *gherkin.PickleStepArgu
 	return nil
 }
 
+func (sc *ScenarioContext) iHaveTheFollowingAccount(table *gherkin.PickleStepArgument_PickleTable) error {
+	headers := table.Rows[0]
+	for _, row := range table.Rows[1:] {
+		accountMap := make(map[string]interface{})
+		var aliass string
+
+		for i, cell := range row.Cells {
+			switch v := headers.Cells[i].Value; {
+			case v == aliasHeaderValue:
+				aliass = cell.Value
+			default:
+				accountMap[v] = cell.Value
+			}
+		}
+
+		if aliass == "" {
+			return errors.DataError("need an alias")
+		}
+
+		w := account.NewAccount()
+		_ = w.Generate()
+		privBytes := crypto.FromECDSA(w.Priv())
+		accountMap["address"] = w.Address().Hex()
+		accountMap["private_key"] = hexutil.Encode(privBytes)[2:]
+		sc.aliases.Set(accountMap, sc.Pickle.Id, aliass)
+	}
+
+	return nil
+}
+
 func (sc *ScenarioContext) iHaveCreatedTheFollowingAccounts(table *gherkin.PickleStepArgument_PickleTable) error {
 	tokenCol := utils.ExtractColumns(table, []string{"Headers.Authorization"})
 	accIDCol := utils.ExtractColumns(table, []string{"ID"})
@@ -580,6 +610,7 @@ func initEnvelopeSteps(s *godog.ScenarioContext, sc *ScenarioContext) {
 	s.Step(`^I register the following chains$`, sc.preProcessTableStep(sc.iRegisterTheFollowingChains))
 	s.Step(`^I register the following faucets$`, sc.preProcessTableStep(sc.iRegisterTheFollowingFaucets))
 	s.Step(`^I have the following tenants$`, sc.preProcessTableStep(sc.iHaveTheFollowingTenant))
+	s.Step(`^I have the following account`, sc.preProcessTableStep(sc.iHaveTheFollowingAccount))
 	s.Step(`^I register the following alias$`, sc.preProcessTableStep(sc.iRegisterTheFollowingAliasAs))
 	s.Step(`^Set nonce manager records$`, sc.preProcessTableStep(sc.iSetNonceRecords))
 	s.Step(`^I have created the following accounts$`, sc.preProcessTableStep(sc.iHaveCreatedTheFollowingAccounts))

@@ -3,10 +3,6 @@ Feature: Verify HTTP Endpoints
   ###################
   # CHAIN REGISTRY
   ###################
-  Scenario: Get Chain Registry Swagger
-    When I send "GET" request to "{{global.chain-registry}}/swagger/"
-    Then the response code should be 200
-
   Scenario: Get Chain Registry Swagger JSON file
     When I send "GET" request to "{{global.chain-registry}}/swagger/swagger.json"
     Then the response code should be 200
@@ -29,10 +25,6 @@ Feature: Verify HTTP Endpoints
   ###################
   # CONTRACT REGISTRY
   ###################
-  Scenario: Get Contract Registry Swagger
-    When I send "GET" request to "{{global.contract-registry-http}}/swagger/"
-    Then the response code should be 200
-
   Scenario: Get Contract Registry Swagger JSON file
     When I send "GET" request to "{{global.contract-registry-http}}/swagger/swagger.json"
     Then the response code should be 200
@@ -56,10 +48,6 @@ Feature: Verify HTTP Endpoints
   ###################
   # TRANSACTION SCHEDULER
   ###################
-  Scenario: Get Transaction Scheduler Swagger
-    When I send "GET" request to "{{global.tx-scheduler}}/swagger/"
-    Then the response code should be 200
-
   Scenario: Get Transaction Scheduler Swagger JSON file
     When I send "GET" request to "{{global.tx-scheduler}}/swagger/swagger.json"
     Then the response code should be 200
@@ -136,4 +124,40 @@ Feature: Verify HTTP Endpoints
 
   Scenario: Get tx-listener liveness
     When I send "GET" request to "{{global.tx-listener-metrics}}/live"
+    Then the response code should be 200
+    
+  ###################
+  # Key Manager
+  ###################
+  Scenario: Get key-manager liveness
+    When I send "GET" request to "{{global.key-manager-metrics}}/live"
+    Then the response code should be 200
+    
+  Scenario: Get key-manager readiness
+    When I send "GET" request to "{{global.key-manager-metrics}}/ready?full=1"
+    Then the response code should be 200
+    And Response should have the following fields
+      | vault |
+      | OK    |
+
+  ###################
+  # Identity Manager
+  ###################
+  Scenario: Get Identity Manager Swagger JSON file
+    When I send "GET" request to "{{global.identity-manager}}/swagger/swagger.json"
+    Then the response code should be 200
+
+  Scenario: Get Identity Manager metrics
+    When I send "GET" request to "{{global.identity-manager-metrics}}/metrics"
+    Then the response code should be 200
+
+  Scenario: Get Identity Manager readiness
+    When I send "GET" request to "{{global.identity-manager-metrics}}/ready?full=1"
+    Then the response code should be 200
+    And Response should have the following fields
+      | chain-registry | transaction-scheduler | database | key-manager |
+      | OK             | OK                    | OK       | OK          |
+
+  Scenario: Get Identity Manager liveness
+    When I send "GET" request to "{{global.identity-manager-metrics}}/live"
     Then the response code should be 200

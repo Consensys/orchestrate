@@ -22,3 +22,11 @@ apis:
     tags:
       add:
         - "Transaction Scheduler"
+  - url: 'public/swagger-specs/services/key-manager/swagger.json'
+    tags:
+      add:
+        - "Key Manager"
+  - url: 'public/swagger-specs/services/identity-manager/swagger.json'
+    tags:
+      add:
+        - "Identity Manager"

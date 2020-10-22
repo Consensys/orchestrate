@@ -68,7 +68,7 @@ func importGlobalAlias(rawAliases string) {
 		"identity-manager":          viper.GetString(identitymanager.URLViperKey),
 		"identity-manager-metrics":  viper.GetString(identitymanager.MetricsURLViperKey),
 		"key-manager":               viper.GetString(keymanager.URLViperKey),
-		"key-manager-metrics":       viper.GetString(txscheduler.MetricsURLViperKey),
+		"key-manager-metrics":       viper.GetString(keymanager.MetricsURLViperKey),
 	}
 
 	for k, v := range internal {

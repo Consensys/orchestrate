@@ -17,7 +17,6 @@ func FakeAccount() *entities.Account {
 		Address:             ethcommon.HexToAddress(utils.RandHexString(12)).String(),
 		PublicKey:           ethcommon.HexToHash(utils.RandHexString(12)).String(),
 		CompressedPublicKey: ethcommon.HexToHash(utils.RandHexString(12)).String(),
-		Active:              true,
 		CreatedAt:           time.Now(),
 		UpdatedAt:           time.Now(),
 	}
