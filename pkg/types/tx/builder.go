@@ -149,6 +149,10 @@ func (e *Envelope) IsOneTimeKeySignature() bool {
 	return false
 }
 
+func (e *Envelope) IsParentJob() bool {
+	return e.GetParentJobUUID() == ""
+}
+
 func (e *Envelope) IsChildJob() bool {
 	return e.GetParentJobUUID() != ""
 }

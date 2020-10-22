@@ -1,3 +1,4 @@
+@tx-sentry
 Feature: Deploy ERC20 contract using tx-sentry
   As an external developer
   I want to deploy a contract using tx-sentry retry feature

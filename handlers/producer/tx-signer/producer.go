@@ -17,12 +17,14 @@ func PrepareMsg(txctx *engine.TxContext, msg *sarama.ProducerMessage) error {
 	// Marshal Envelope into sarama Message
 	if txctx.In.Entrypoint() == viper.GetString(broker.TxSignerViperKey) {
 		switch {
-		case !txctx.Envelope.OnlyWarnings():
+		case txctx.Envelope.OnlyWarnings():
+			msg.Topic = viper.GetString(broker.TxSenderViperKey)
+			p = txctx.Envelope.TxEnvelopeAsRequest()
+		case !txctx.Envelope.OnlyWarnings() && txctx.Envelope.IsParentJob():
 			msg.Topic = viper.GetString(broker.TxRecoverViperKey)
 			p = txctx.Envelope.TxResponse()
 		default:
-			msg.Topic = viper.GetString(broker.TxSenderViperKey)
-			p = txctx.Envelope.TxEnvelopeAsRequest()
+			return nil
 		}
 
 		// Set key for Kafka partitions
