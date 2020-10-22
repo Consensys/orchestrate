@@ -58,13 +58,16 @@ func Init(ctx context.Context) {
 }
 
 func listTagCucumber() string {
-	tags := viper.GetString(TagsViperKey)
-
-	if !viper.GetBool(multitenancy.EnabledViperKey) {
-		tags += " ~@multi-tenancy"
+	tags := []string{}
+	if viper.GetString(TagsViperKey) != "" {
+		tags = append(tags, strings.Split(viper.GetString(TagsViperKey), " ")...)
 	}
 
-	return strings.TrimSpace(tags)
+	if !viper.GetBool(multitenancy.EnabledViperKey) {
+		tags = append(tags, "~@multi-tenancy")
+	}
+
+	return strings.Join(tags, " && ")
 }
 
 // SetGlobalOptions sets global Cucumber Handler

@@ -1,6 +1,8 @@
 @http-endpoints
 Feature: Verify HTTP Endpoints
-
+  ###################
+  # CHAIN REGISTRY
+  ###################
   Scenario: Get Chain Registry Swagger
     When I send "GET" request to "{{global.chain-registry}}/swagger/"
     Then the response code should be 200
@@ -24,6 +26,9 @@ Feature: Verify HTTP Endpoints
     When I send "GET" request to "{{global.chain-registry-metrics}}/live"
     Then the response code should be 200
 
+  ###################
+  # CONTRACT REGISTRY
+  ###################
   Scenario: Get Contract Registry Swagger
     When I send "GET" request to "{{global.contract-registry-http}}/swagger/"
     Then the response code should be 200
@@ -48,6 +53,9 @@ Feature: Verify HTTP Endpoints
     Then the response code should be 200
 
 
+  ###################
+  # TRANSACTION SCHEDULER
+  ###################
   Scenario: Get Transaction Scheduler Swagger
     When I send "GET" request to "{{global.tx-scheduler}}/swagger/"
     Then the response code should be 200
@@ -72,6 +80,9 @@ Feature: Verify HTTP Endpoints
     Then the response code should be 200
 
 
+  ###################
+  # TX-CRAFTER
+  ###################
   Scenario: Get tx-crafter readiness
     When I send "GET" request to "{{global.tx-crafter-metrics}}/ready?full=1"
     Then the response code should be 200
@@ -83,6 +94,9 @@ Feature: Verify HTTP Endpoints
     When I send "GET" request to "{{global.tx-crafter-metrics}}/live"
 
 
+  ###################
+  # TX-SIGNER
+  ###################
   Scenario: Get tx-signer readiness
     When I send "GET" request to "{{global.tx-signer-metrics}}/ready?full=1"
     Then the response code should be 200
@@ -95,6 +109,9 @@ Feature: Verify HTTP Endpoints
     Then the response code should be 200
 
 
+  ###################
+  # TX-SENDER
+  ###################
   Scenario: Get tx-sender readiness
     When I send "GET" request to "{{global.tx-sender-metrics}}/ready?full=1"
     Then the response code should be 200
@@ -107,6 +124,9 @@ Feature: Verify HTTP Endpoints
     Then the response code should be 200
 
 
+  ###################
+  # TX-LISTENER
+  ###################
   Scenario: Get tx-listener readiness
     When I send "GET" request to "{{global.tx-listener-metrics}}/ready?full=1"
     Then the response code should be 200

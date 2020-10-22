@@ -8,6 +8,7 @@ import (
 	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethclient/rpc"
 	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client"
+	identitymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/identity-manager/client"
 	noncememory "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce/memory"
 	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/e2e/cucumber/alias"
@@ -21,6 +22,7 @@ func Init(ctx context.Context) {
 	alias.Init(ctx)
 	contractregistry.Init(ctx)
 	txscheduler.Init()
+	identitymanager.Init()
 	noncememory.Init(ctx)
 	ethclient.Init(ctx)
 }

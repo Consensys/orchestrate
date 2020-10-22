@@ -27,6 +27,7 @@ import (
 	utils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethclient/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/account"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/keystore/session"
+	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/identitymanager"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/e2e/cucumber/alias"
@@ -246,62 +247,40 @@ func (sc *ScenarioContext) iHaveTheFollowingTenant(table *gherkin.PickleStepArgu
 }
 
 func (sc *ScenarioContext) iHaveCreatedTheFollowingAccounts(table *gherkin.PickleStepArgument_PickleTable) error {
-	aliasTable := utils.ExtractColumns(table, []string{aliasHeaderValue})
-	if aliasTable == nil {
+	tokenCol := utils.ExtractColumns(table, []string{"Headers.Authorization"})
+	accIDCol := utils.ExtractColumns(table, []string{"ID"})
+	accChainCol := utils.ExtractColumns(table, []string{"ChainName"})
+	aliasCol := utils.ExtractColumns(table, []string{aliasHeaderValue})
+	if aliasCol == nil {
 		return errors.DataError("alias column is mandatory")
 	}
 
-	envelopes, err := utils.ParseEnvelope(table)
-	if err != nil {
-		return err
-	}
-
-	var childEnvelopes []*tx.Envelope
-	for _, e := range envelopes {
-		if childTxID := e.GetContextLabelsValue("faucetChildTxID"); childTxID != "" {
-			childEvlp := tx.NewEnvelope().SetID(childTxID).SetContextLabelsValue("id", childTxID)
-			childEnvelopes = append(childEnvelopes, childEvlp)
+	for idx := range tokenCol.Rows[1:] {
+		ctx := context.Background()
+		token := tokenCol.Rows[idx+1].Cells[0].Value
+		if token != "" {
+			ctx = authutils.WithAuthorization(ctx, token)
 		}
-	}
 
-	trackers := sc.newTrackers(envelopes)
-	sc.setTrackers(sc.newTrackers(childEnvelopes))
+		req := &types.CreateAccountRequest{}
 
-	// Send envelopes
-	for _, t := range trackers {
-		if sc.sendEnvelope("account.generator", t.Current) != nil {
-			return errors.InternalError("could not send tx request - got %v", err)
+		if accIDCol != nil {
+			req.Alias = accIDCol.Rows[idx+1].Cells[0].Value
 		}
-	}
 
-	// TODO: Should we able to delete keys after the scenario complete?
-
-	// Catch envelope after it has been decoded
-	for i, t := range trackers {
-		accAlias := aliasTable.Rows[i+1].Cells[0].Value
-		if t.Load("account.generated", 30*time.Second) != nil {
-			return errors.DataError("could not generate account for %s - got %v", accAlias, err)
-		} else if t.Current.GetFrom() == nil {
-			return errors.DataError("no address found")
+		if accChainCol != nil {
+			req.Chain = accChainCol.Rows[idx+1].Cells[0].Value
 		}
-		sc.aliases.Set(t.Current.GetFrom().Hex(), sc.Pickle.Id, accAlias)
-	}
 
-	// Check that accounts has been funded
-	err = sc.envelopeShouldBeInTopic("tx.decoded")
-	if err != nil {
-		return err
-	}
+		accRes, err := sc.IdentityManager.CreateAccount(ctx, req)
 
-	for i, t := range sc.trackers {
-		if t.Current.Receipt.Status != 1 {
-			a, _ := sc.aliases.Get(sc.Pickle.Id, aliasTable.Rows[i+1].Cells[0].Value)
-			return errors.EthereumError("Account '%s' has been created but not funded", a)
+		if err != nil {
+			return err
 		}
+
+		sc.aliases.Set(accRes.Address, sc.Pickle.Id, aliasCol.Rows[idx+1].Cells[0].Value)
 	}
 
-	// If accounts are well funded reset tracker
-	sc.trackers = nil
 	return nil
 }
 

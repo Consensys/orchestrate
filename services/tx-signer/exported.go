@@ -98,7 +98,6 @@ func Run(ctx context.Context) error {
 
 		topics := []string{
 			viper.GetString(broker.TxSignerViperKey),
-			viper.GetString(broker.AccountGeneratorViperKey),
 		}
 
 		// Create appli to expose metrics

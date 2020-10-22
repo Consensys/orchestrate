@@ -91,11 +91,7 @@ func (store *SecretStore) ManageToken() error {
 }
 
 // Store writes in the vault
-func (store *SecretStore) Store(ctx context.Context, rawKey, value string) error {
-	key, err := store.KeyBuilder.BuildKey(ctx, rawKey)
-	if err != nil {
-		return errors.FromError(err).ExtendComponent(component)
-	}
+func (store *SecretStore) Store(ctx context.Context, key, value string) error {
 	storedValue, ok, err := store.Client.Logical.Read(key)
 	if err != nil {
 		return errors.ConnectionError(err.Error()).ExtendComponent(component)
@@ -112,34 +108,26 @@ func (store *SecretStore) Store(ctx context.Context, rawKey, value string) error
 	if err != nil {
 		return errors.ConnectionError(err.Error()).ExtendComponent(component)
 	}
+
+	log.WithField("key", key).Info("HashiCorp: secret has been stored successfully")
 	return nil
 }
 
 // Load reads in the vault
-func (store *SecretStore) Load(ctx context.Context, rawKey string) (value string, ok bool, e error) {
-	allowedTenantIDs := multitenancy.AllowedTenantsFromContext(ctx)
-
-	for _, tenant := range allowedTenantIDs {
-		key := store.KeyBuilder.BuildKeyWithTenant(tenant, rawKey)
-
-		v, ok, err := store.Client.Logical.Read(key)
-		if err != nil {
-			e = errors.ConnectionError(err.Error()).ExtendComponent(component)
-		} else if ok {
-			return v, ok, nil
-		}
+func (store *SecretStore) Load(_ context.Context, key string) (value string, ok bool, e error) {
+	v, ok, err := store.Client.Logical.Read(key)
+	if err != nil {
+		e = errors.ConnectionError(err.Error()).ExtendComponent(component)
+	} else if ok {
+		return v, ok, nil
 	}
 
 	return "", false, e
 }
 
 // Delete removes a path in the vault
-func (store *SecretStore) Delete(ctx context.Context, rawKey string) error {
-	key, err := store.KeyBuilder.BuildKey(ctx, rawKey)
-	if err != nil {
-		return errors.FromError(err).ExtendComponent(component)
-	}
-	err = store.Client.Logical.Delete(key)
+func (store *SecretStore) Delete(ctx context.Context, key string) error {
+	err := store.Client.Logical.Delete(key)
 	if err != nil {
 		return errors.ConnectionError(err.Error()).ExtendComponent(component)
 	}

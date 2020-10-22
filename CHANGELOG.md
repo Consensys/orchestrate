@@ -1,5 +1,11 @@
 # Codefi Orchestrate Release Notes
 
+## v2.6.0 (Unreleased)
+
+### ⚠ BREAKING CHANGES
+
+* Remove account-generator and account-generated topic
+
 ## v2.5.0 (2020-10-19)
 
 ### 🆕 Features

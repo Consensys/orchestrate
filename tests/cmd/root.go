@@ -28,8 +28,6 @@ func main() {
 	broker.KafkaTopicTxSigner(command.Flags())
 	broker.KafkaTopicTxSender(command.Flags())
 	broker.KafkaTopicTxDecoded(command.Flags())
-	broker.KafkaTopicAccountGenerator(command.Flags())
-	broker.KafkaTopicAccountGenerated(command.Flags())
 
 	command.AddCommand(NewRunE2ECommand())
 	command.AddCommand(NewRunStressTestCommand())

@@ -10,6 +10,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/key"
 	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client"
+	identitymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/identity-manager/client"
+	keymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/key-manager/client"
 	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 	txcrafter "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-crafter"
 	txlistener "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener"
@@ -63,7 +65,12 @@ func importGlobalAlias(rawAliases string) {
 		"tx-signer-metrics":         viper.GetString(txsigner.MetricsURLViperKey),
 		"tx-sender-metrics":         viper.GetString(txsender.MetricsURLViperKey),
 		"tx-listener-metrics":       viper.GetString(txlistener.MetricsURLViperKey),
+		"identity-manager":          viper.GetString(identitymanager.URLViperKey),
+		"identity-manager-metrics":  viper.GetString(identitymanager.MetricsURLViperKey),
+		"key-manager":               viper.GetString(keymanager.URLViperKey),
+		"key-manager-metrics":       viper.GetString(txscheduler.MetricsURLViperKey),
 	}
+
 	for k, v := range internal {
 		if _, ok := global[k]; ok {
 			log.Fatalf("the key '%s' is not allowed in global alias", k)

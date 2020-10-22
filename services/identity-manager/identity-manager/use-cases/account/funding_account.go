@@ -53,7 +53,7 @@ func (uc *fundingAccountUseCase) Execute(ctx context.Context, account *entities.
 			ChainName: chain.Name,
 			Params: txscheduler.TransferParams{
 				From:  fct.Creditor.Hex(),
-				To:    account.PublicKey,
+				To:    account.Address,
 				Value: fct.Amount.String(),
 			},
 			Labels: chainregistry.FaucetToJobLabels(fct),
@@ -63,8 +63,8 @@ func (uc *fundingAccountUseCase) Execute(ctx context.Context, account *entities.
 		return errors.FromError(err).ExtendComponent(fundingAccountComponent)
 	}
 
-	logger.WithField("faucet", fct.UUID).WithField("value", fct.Amount.String()).
-		Info("funding transaction was sent")
+	logger.WithField("faucet", fct.UUID).WithField("address", account.Address).
+		WithField("value", fct.Amount.String()).Info("funding transaction was sent")
 
 	return nil
 }

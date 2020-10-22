@@ -8,7 +8,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/secretsmanager"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
-	ierror "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/error"
 )
 
 // SecretStore can manage secrets on AWS secret manager
@@ -27,11 +26,7 @@ func NewSecretStore(keyBuilder *multitenancy.KeyBuilder) *SecretStore {
 }
 
 // Store set the new string value in the AWS secrets manager
-func (s *SecretStore) Store(ctx context.Context, rawKey, value string) (err error) {
-	key, err := s.KeyBuilder.BuildKey(ctx, rawKey)
-	if err != nil {
-		return err.(*ierror.Error).ExtendComponent(component)
-	}
+func (s *SecretStore) Store(ctx context.Context, key, value string) (err error) {
 	err = s.create(key, value)
 	if err != nil {
 		err = s.update(key, value)
@@ -44,14 +39,9 @@ func (s *SecretStore) Store(ctx context.Context, rawKey, value string) (err erro
 }
 
 // Delete removes a secret from the secret store
-func (s *SecretStore) Delete(ctx context.Context, rawKey string) (err error) {
+func (s *SecretStore) Delete(ctx context.Context, key string) (err error) {
 	if s.client == nil {
 		return errors.InternalError("client not set").SetComponent(component)
-	}
-
-	key, err := s.KeyBuilder.BuildKey(ctx, rawKey)
-	if err != nil {
-		return err.(*ierror.Error).ExtendComponent(component)
 	}
 
 	input := secretsmanager.DeleteSecretInput{
@@ -89,22 +79,17 @@ func (s *SecretStore) List() ([]string, error) {
 }
 
 // Load the secret value from the secret manager of AWS
-func (s *SecretStore) Load(ctx context.Context, rawKey string) (value string, ok bool, e error) {
-	allowedTenantIDs := multitenancy.AllowedTenantsFromContext(ctx)
+func (s *SecretStore) Load(ctx context.Context, key string) (value string, ok bool, e error) {
+	input := secretsmanager.GetSecretValueInput{
+		SecretId:     aws.String(key),
+		VersionStage: aws.String("AWSCURRENT"),
+	}
 
-	for _, tenant := range allowedTenantIDs {
-		key := s.KeyBuilder.BuildKeyWithTenant(tenant, rawKey)
-		input := secretsmanager.GetSecretValueInput{
-			SecretId:     aws.String(key),
-			VersionStage: aws.String("AWSCURRENT"),
-		}
-
-		res, err := s.client.GetSecretValue(&input)
-		if err != nil {
-			e = FromAWSError(err).SetComponent(component)
-		} else {
-			return *res.SecretString, true, nil
-		}
+	res, err := s.client.GetSecretValue(&input)
+	if err != nil {
+		e = FromAWSError(err).SetComponent(component)
+	} else {
+		return *res.SecretString, true, nil
 	}
 
 	return "", false, e

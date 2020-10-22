@@ -6,6 +6,4 @@ var TOPICS = [...]string{
 	"tx.sender",
 	"tx.decoded",
 	"tx.recover",
-	"account.generator",
-	"account.generated",
 }

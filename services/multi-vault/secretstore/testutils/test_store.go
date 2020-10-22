@@ -37,7 +37,7 @@ func (s *SecretStoreTestSuite) TestSecretStore() {
 
 	list, err := s.Store.List()
 	assert.NoError(s.T(), err, "List should be retrieved properly")
-	assert.Equal(s.T(), []string{"_test-key"}, list, "Secret list should be correct")
+	assert.Equal(s.T(), []string{"test-key"}, list, "Secret list should be correct")
 
 	err = s.Store.Delete(context.Background(), "test-key")
 	assert.NoError(s.T(), err, "Delete should have happened properly")

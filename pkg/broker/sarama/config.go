@@ -26,12 +26,6 @@ func init() {
 	viper.SetDefault(TxRecoverViperKey, txRecoverTopicDefault)
 	_ = viper.BindEnv(TxRecoverViperKey, txRecoverTopicEnv)
 
-	// Kafka topics for the account generation workflow
-	viper.SetDefault(AccountGeneratorViperKey, accountGeneratorDefault)
-	_ = viper.BindEnv(AccountGeneratorViperKey, accountGeneratorTopicEnv)
-	viper.SetDefault(AccountGeneratedViperKey, accountGeneratedDefault)
-	_ = viper.BindEnv(AccountGeneratedViperKey, accountGeneratedTopicEnv)
-
 	// Kafka consumer groups for tx workflow
 	viper.SetDefault(CrafterGroupViperKey, crafterGroupDefault)
 	_ = viper.BindEnv(CrafterGroupViperKey, crafterGroupEnv)
@@ -41,12 +35,6 @@ func init() {
 	_ = viper.BindEnv(SenderGroupViperKey, senderGroupEnv)
 	viper.SetDefault(DecoderGroupViperKey, decoderGroupDefault)
 	_ = viper.BindEnv(DecoderGroupViperKey, decoderGroupEnv)
-
-	// Kafka consumer group for account generation workflow
-	viper.SetDefault(AccountGeneratorGroupViperKey, accountGeneratorGroupDefault)
-	_ = viper.BindEnv(AccountGeneratorGroupViperKey, accountGeneratorGroupEnv)
-	viper.SetDefault(AccountGeneratedGroupViperKey, accountGeneratedGroupDefault)
-	_ = viper.BindEnv(AccountGeneratedGroupViperKey, accountGeneratedGroupEnv)
 
 	// Kafka SASL
 	viper.SetDefault(kafkaSASLEnabledViperKey, kafkaSASLEnabledDefault)
@@ -143,16 +131,6 @@ const (
 	TxRecoverViperKey     = "topic.tx.recover"
 	txRecoverTopicEnv     = "TOPIC_TX_RECOVER"
 	txRecoverTopicDefault = "topic-tx-recover"
-
-	accountGeneratorFlag     = "topic-account-generator"
-	AccountGeneratorViperKey = "topic.account.generator"
-	accountGeneratorTopicEnv = "TOPIC_ACCOUNT_GENERATOR"
-	accountGeneratorDefault  = "topic-account-generator"
-
-	accountGeneratedFlag     = "topic-account-generated"
-	AccountGeneratedViperKey = "topic.account.generated"
-	accountGeneratedTopicEnv = "TOPIC_ACCOUNT_GENERATED"
-	accountGeneratedDefault  = "topic-account-generated"
 )
 
 type KafkaTopicConfig struct {
@@ -215,22 +193,6 @@ Environment variable: %q`, txDecodedTopicEnv)
 	_ = viper.BindPFlag(TxDecodedViperKey, f.Lookup(txDecodedFlag))
 }
 
-// KafkaTopicAccountGenerator register flag for Kafka topic
-func KafkaTopicAccountGenerator(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Kafka topic for generating new accounts
-Environment variable: %q`, accountGeneratorTopicEnv)
-	f.String(accountGeneratorFlag, accountGeneratorDefault, desc)
-	_ = viper.BindPFlag(AccountGeneratorViperKey, f.Lookup(accountGeneratorFlag))
-}
-
-// KafkaTopicAccountGenerated register flag for Kafka topic
-func KafkaTopicAccountGenerated(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Kafka topic for newly generated accounts
-Environment variable: %q`, accountGeneratedTopicEnv)
-	f.String(accountGeneratedFlag, accountGeneratedDefault, desc)
-	_ = viper.BindPFlag(AccountGeneratedViperKey, f.Lookup(accountGeneratedFlag))
-}
-
 // Kafka Consumer group environment variables
 const (
 	crafterGroupFlag     = "group-crafter"
@@ -252,16 +214,6 @@ const (
 	DecoderGroupViperKey = "kafka.group.decoder"
 	decoderGroupEnv      = "KAFKA_GROUP_DECODER"
 	decoderGroupDefault  = "group-decoder"
-
-	accountGeneratorGroupFlag     = "group-account-generator"
-	AccountGeneratorGroupViperKey = "kafka.group.account.generator"
-	accountGeneratorGroupEnv      = "KAFKA_GROUP_ACCOUNT_GENERATOR"
-	accountGeneratorGroupDefault  = "group-account-generator"
-
-	accountGeneratedGroupFlag     = "group-account-generated"
-	AccountGeneratedGroupViperKey = "kafka.group.account.generated"
-	accountGeneratedGroupEnv      = "KAFKA_GROUP_ACCOUNT_GENERATED"
-	accountGeneratedGroupDefault  = "group-account-generated"
 )
 
 // consumerGroupFlag register flag for a kafka consumer group
@@ -290,16 +242,6 @@ func SenderGroup(f *pflag.FlagSet) {
 // DecoderGroup register flag for kafka decoder group
 func DecoderGroup(f *pflag.FlagSet) {
 	consumerGroupFlag(f, decoderGroupFlag, DecoderGroupViperKey, decoderGroupEnv, decoderGroupDefault)
-}
-
-// AccountGeneratorGroup register flag for kafka decoder group
-func AccountGeneratorGroup(f *pflag.FlagSet) {
-	consumerGroupFlag(f, accountGeneratorGroupFlag, AccountGeneratorGroupViperKey, accountGeneratorGroupEnv, accountGeneratorGroupDefault)
-}
-
-// AccountGeneratedGroup register flag for kafka decoder group
-func AccountGeneratedGroup(f *pflag.FlagSet) {
-	consumerGroupFlag(f, accountGeneratedGroupFlag, AccountGeneratedGroupViperKey, accountGeneratedGroupEnv, accountGeneratedGroupDefault)
 }
 
 // InitKafkaSASLFlags register flags for SASL authentication

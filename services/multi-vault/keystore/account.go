@@ -3,11 +3,13 @@ package keystore
 import (
 	"context"
 	"encoding/hex"
+	"fmt"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/account"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/secretstore/services"
 )
 
@@ -29,7 +31,7 @@ func NewAccount(sec services.SecretStore) *Account {
 func (w *Account) Store(ctx context.Context) error {
 	if err := w.sec.Store(
 		ctx,
-		w.Address().Hex(),
+		w.buildSecretKey(multitenancy.TenantIDFromContext(ctx), w.Address().Hex()),
 		hex.EncodeToString(crypto.FromECDSA(w.Priv())),
 	); err != nil {
 		return errors.FromError(err).ExtendComponent(component)
@@ -41,9 +43,16 @@ func (w *Account) Store(ctx context.Context) error {
 // Load accounts values by fetching account secret store
 func (w *Account) Load(ctx context.Context, a ethcommon.Address) (err error) {
 	w.SetAddress(a)
-	priv, ok, err := w.sec.Load(ctx, a.Hex())
-	if err != nil {
-		return errors.FromError(err).ExtendComponent(component)
+	allowedTenantIDs := multitenancy.AllowedTenantsFromContext(ctx)
+	var priv string
+	var ok bool
+	for _, tenantID := range allowedTenantIDs {
+		priv, ok, err = w.sec.Load(ctx, w.buildSecretKey(tenantID, w.Address().Hex()))
+		if err != nil {
+			return errors.FromError(err).ExtendComponent(component)
+		} else if ok {
+			break
+		}
 	}
 
 	if !ok {
@@ -57,4 +66,8 @@ func (w *Account) Load(ctx context.Context, a ethcommon.Address) (err error) {
 	w.SetPriv(npriv)
 
 	return nil
+}
+
+func (w *Account) buildSecretKey(tenantID, address string) string {
+	return fmt.Sprintf("%v%v", tenantID, address)
 }

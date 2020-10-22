@@ -42,8 +42,6 @@ func newRunCommand() *cobra.Command {
 	broker.InitKafkaFlags(runCmd.Flags())
 	broker.KafkaTopicTxSigner(runCmd.Flags())
 	broker.KafkaTopicTxSender(runCmd.Flags())
-	broker.KafkaTopicAccountGenerator(runCmd.Flags())
-	broker.KafkaTopicAccountGenerated(runCmd.Flags())
 	broker.KafkaTopicTxRecover(runCmd.Flags())
 
 	// Internal API clients
