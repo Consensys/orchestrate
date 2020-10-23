@@ -8,8 +8,6 @@ import (
 	identitymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/identity-manager/client"
 )
 
-const NAccounts = 10
-
 type ctxKey string
 
 var accountCtxKey ctxKey = "accounts"
@@ -21,6 +19,7 @@ func CreateNewAccount(ctx context.Context, identity identitymanager.IdentityMana
 		return "", nil
 	}
 
+	log.FromContext(ctx).WithField("address", resp.Address).Info("Account has been registered")
 	return resp.Address, nil
 }
 

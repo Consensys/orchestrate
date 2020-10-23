@@ -3,7 +3,6 @@ package units
 import (
 	"context"
 	"math/rand"
-	"time"
 
 	"github.com/containous/traefik/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
@@ -14,17 +13,13 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/utils/chanregistry"
 )
 
-var (
-	timeout = time.Second * 10
-)
-
-func BatchDeployContractTest(ctx context.Context, client txscheduler.TransactionSchedulerClient, chanReg *chanregistry.ChanRegistry) error {
+func BatchDeployContractTest(ctx context.Context, cfg *WorkloadConfig, client txscheduler.TransactionSchedulerClient, chanReg *chanregistry.ChanRegistry) error {
 	accounts := utils2.ContextAccounts(ctx)
 	chains := utils2.ContextChains(ctx)
 	log.FromContext(ctx).Debugf("Running batchDeployContract()...")
 
-	nAcc := rand.Intn(utils2.NAccounts)
-	idempotency := utils.RandomString(17)
+	nAcc := rand.Intn(cfg.nAccounts)
+	idempotency := utils.RandomString(30)
 	evlp := tx.NewEnvelope()
 	t := utils2.NewEnvelopeTracker(chanReg, evlp, idempotency)
 
@@ -43,7 +38,7 @@ func BatchDeployContractTest(ctx context.Context, client txscheduler.Transaction
 		return err
 	}
 
-	err = t.Load("tx.decoded", timeout)
+	err = t.Load("tx.decoded", cfg.waitForEnvelopeTimeout)
 	if err != nil {
 		return err
 	}

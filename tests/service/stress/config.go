@@ -2,6 +2,7 @@ package stress
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
@@ -18,6 +19,8 @@ func init() {
 	_ = viper.BindEnv(ConcurrencyViperKey, concurrencyEnv)
 	viper.SetDefault(globalDataViperKey, globalDataDefault)
 	_ = viper.BindEnv(globalDataViperKey, globalDataEnv)
+	viper.SetDefault(TimeoutViperKey, timeoutDefault)
+	_ = viper.BindEnv(TimeoutViperKey, timeoutEnv)
 }
 
 // InitFlags register Cucumber flags
@@ -26,6 +29,7 @@ func InitFlags(f *pflag.FlagSet) {
 	Concurrency(f)
 	ArtifactPath(f)
 	GlobalData(f)
+	Timeout(f)
 }
 
 const (
@@ -88,10 +92,26 @@ Environment variable: %q`, globalDataEnv)
 	_ = viper.BindPFlag(globalDataViperKey, f.Lookup(globalDataFlag))
 }
 
+const (
+	timeoutFlag     = "stress-timeout"
+	TimeoutViperKey = "stress.timeout"
+	timeoutDefault  = time.Minute
+	timeoutEnv      = "STRESS_TIMEOUT"
+)
+
+// Randomize register flag for randomize feature tests
+func Timeout(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Stress test maximum execution time
+Environment variable: %q`, timeoutEnv)
+	f.Duration(timeoutFlag, timeoutDefault, desc)
+	_ = viper.BindPFlag(TimeoutViperKey, f.Lookup(timeoutFlag))
+}
+
 type Config struct {
 	ArtifactPath string
 	Iterations   int
 	Concurrency  int
+	Timeout      time.Duration
 	gData        utils.GlobalData
 }
 
@@ -107,6 +127,7 @@ func InitConfig(vipr *viper.Viper) (*Config, error) {
 		ArtifactPath: vipr.GetString(ArtifactPathViperKey),
 		Iterations:   vipr.GetInt(IterationViperKey),
 		Concurrency:  vipr.GetInt(ConcurrencyViperKey),
+		Timeout:      vipr.GetDuration(TimeoutViperKey),
 		gData:        gd,
 	}, nil
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/Shopify/sarama"
 	"github.com/containous/traefik/v2/pkg/log"
@@ -20,7 +21,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/utils/chanregistry"
 )
 
-type WorkLoadTest func(context.Context, txscheduler.TransactionSchedulerClient, *chanregistry.ChanRegistry) error
+type WorkLoadTest func(context.Context, *units.WorkloadConfig, txscheduler.TransactionSchedulerClient, *chanregistry.ChanRegistry) error
 
 type WorkLoadService struct {
 	cfg                    *Config
@@ -40,6 +41,11 @@ type workLoadItem struct {
 	name      string
 	call      WorkLoadTest
 }
+
+const (
+	nAccounts              = 20
+	waitForEnvelopeTimeout = time.Second * 20
+)
 
 // Init initialize Cucumber service
 func NewService(cfg *Config,
@@ -65,7 +71,12 @@ func NewService(cfg *Config,
 }
 
 func (c *WorkLoadService) Run(ctx context.Context) error {
-	ctx, c.cancel = context.WithCancel(ctx)
+	log.FromContext(ctx).WithField("iteration", c.cfg.Iterations).
+		WithField("concurrency", c.cfg.Concurrency).
+		WithField("timeout", c.cfg.Timeout.String()).
+		Info("Stress test started")
+
+	ctx, c.cancel = context.WithTimeout(ctx, c.cfg.Timeout)
 
 	cctx, err := c.preRun(ctx)
 	if err != nil {
@@ -96,7 +107,7 @@ func (c *WorkLoadService) Stop() {
 
 func (c *WorkLoadService) preRun(ctx context.Context) (context.Context, error) {
 	accounts := []string{}
-	for idx := 0; idx <= utils.NAccounts; idx++ {
+	for idx := 0; idx <= nAccounts; idx++ {
 		acc, err := utils.CreateNewAccount(ctx, c.identityClient)
 		if err != nil {
 			return ctx, err
@@ -122,23 +133,33 @@ func (c *WorkLoadService) preRun(ctx context.Context) (context.Context, error) {
 }
 
 func (c *WorkLoadService) run(ctx context.Context, test *workLoadItem) error {
-	log.FromContext(ctx).Debugf("Started \"%s\": (%d/%d)", strings.ToUpper(test.name), test.iteration, test.threads)
+	log.FromContext(ctx).Debugf("Started \"%s\"", strings.ToUpper(test.name))
 	var wg sync.WaitGroup
 	wg.Add(test.iteration)
+	started := time.Now()
 	buffer := make(chan bool, test.threads)
+	unitCfg := units.NewWorkloadConfig(nAccounts, waitForEnvelopeTimeout)
+
 	var gerr error
 	for idx := 1; idx <= test.iteration && gerr == nil; idx++ {
 		buffer <- true
-		go func() {
-			err := test.call(ctx, c.txSchedulerClient, c.chanReg)
+		go func(idx int) {
+			err := test.call(ctx, unitCfg, c.txSchedulerClient, c.chanReg)
 			if err != nil {
 				gerr = errors.CombineErrors(gerr, err)
 			}
 			wg.Done()
 			<-buffer
-		}()
+			if idx%100 == 0 {
+				log.FromContext(ctx).Infof("iteration %d completed. Time %s", idx, time.Since(started).String())
+			}
+		}(idx)
+	}
+
+	if gerr != nil {
+		return gerr
 	}
 
 	wg.Wait()
-	return gerr
+	return nil
 }

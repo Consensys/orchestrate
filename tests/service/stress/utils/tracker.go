@@ -3,7 +3,6 @@ package utils
 import (
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
-	utils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/e2e/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/utils/chanregistry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/utils/tracker"
@@ -21,7 +20,7 @@ func NewEnvelopeTracker(chanReg *chanregistry.ChanRegistry, e *tx.Envelope, test
 	t.Current = e
 
 	// Initialize output channels on tracker and register channels on channel registry
-	for _, topic := range utils2.TOPICS {
+	for _, topic := range TOPICS {
 		ckey := utils.LongKeyOf(topic, testID)
 		var ch = make(chan *tx.Envelope, 10)
 		// Register channel on channel registry
