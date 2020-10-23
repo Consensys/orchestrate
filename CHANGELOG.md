@@ -6,18 +6,21 @@
 
 * Remove account-generator and account-generated topic
 
-## v2.5.1 (Unreleased)
+## v2.5.1 (2020-10-23)
 
 ### 🆕 Features
 
 * Add the `CHAIN_REGISTRY_MAXIDLECONNSPERHOST` to control the maximum of open HTTP connections to a chain proxied 
-* Ability to cache gzip HTTP responses
+
+### 🛠 Bug fixes
+
+* Ability to cache gzip HTTP responses in the chain-registry
 
 ## v2.5.0 (2020-10-19)
 
 ### 🆕 Features
 
-* Enhance service health check endpoint (/ready) to validate external dependencies
+* Enhance service health check endpoint (/ready) to validate external and internal dependencies
 * Add support for TLS connection to Redis. Add flags and environment variables:
     * `REDIS_TLS_CERT`: PEM certificate to connect to the database
     * `REDIS_TLS_KEY`: PEM key to connect to the database

@@ -213,12 +213,7 @@ gobuild:
 
 test-e2e:
   <<: *docker-compose-e2e
-  rules:
-    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
-      when: on_success
-      allow_failure: false
-    - if: $CI_COMMIT_TAG
-      when: never
+  <<: *rules
   script:
     - mv -f .env.ci .env
     - make up-ci
@@ -227,12 +222,7 @@ test-e2e:
 
 test-multitenancy-e2e:
   <<: *docker-compose-e2e
-  rules:
-    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
-      when: on_success
-      allow_failure: false
-    - if: $CI_COMMIT_TAG
-      when: never
+  <<: *rules
   script:
     - mv -f .env.multitenancy .env
     - make up-ci
