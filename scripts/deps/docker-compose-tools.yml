@@ -37,6 +37,48 @@ services:
     networks:
       - orchestrate
 
+  prometheus:
+    image: prom/prometheus:v2.22.0
+    ports:
+      - 9090:9090
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    volumes:
+      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    networks:
+      - orchestrate
+
+  grafana:
+    image: grafana/grafana:7.2.2
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    ports:
+      - 3000:3000
+    networks:
+      - orchestrate
+
+  nginx:
+    image: nginx:1.19
+    ports:
+      - 4545:4545
+    volumes:
+      - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf
+    networks:
+      - orchestrate
+
+  nginx-prometheus-exporter:
+    image: nginx/nginx-prometheus-exporter:0.8.0
+    ports:
+      - 9113:9113
+    environment:
+      SCRAPE_URI: "http://nginx:4545/nginx_status"
+      TELEMETRY_PATH: "/prometheus"
+    networks:
+      - orchestrate
+    depends_on:
+      - nginx
+
 volumes:
   portainer_data:
   pgadmin:

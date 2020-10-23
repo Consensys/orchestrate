@@ -219,8 +219,6 @@ test-e2e:
       allow_failure: false
     - if: $CI_COMMIT_TAG
       when: never
-    - if: '$CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^maintenance/'
-      when: manual
   script:
     - mv -f .env.ci .env
     - make up-ci
@@ -235,8 +233,6 @@ test-multitenancy-e2e:
       allow_failure: false
     - if: $CI_COMMIT_TAG
       when: never
-    - if: '$CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^maintenance/'
-      when: manual
   script:
     - mv -f .env.multitenancy .env
     - make up-ci

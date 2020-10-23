@@ -21,6 +21,8 @@ func init() {
 	viper.SetDefault(InitViperKey, initDefault)
 	_ = viper.BindEnv(CacheTTLViperKey, cacheTTLEnv)
 	viper.SetDefault(CacheTTLViperKey, cacheDefault)
+	_ = viper.BindEnv(MaxIdleConnsPerHostViperKey, maxIdleConnsPerHostEnv)
+	viper.SetDefault(MaxIdleConnsPerHostViperKey, maxIdleConnsPerHostDefault)
 }
 
 var (
@@ -35,6 +37,13 @@ var (
 	CacheTTLViperKey = "chain-registry.cache.ttl"
 	cacheDefault     = 0 * time.Second
 	cacheTTLEnv      = "CHAIN_REGISTRY_CACHE_TTL"
+)
+
+var (
+	maxIdleConnsPerHostFlag     = "chain-registry-max-idle-connections-per-host"
+	MaxIdleConnsPerHostViperKey = "chain-registry.max-idle-connections-per-host"
+	maxIdleConnsPerHostDefault  = 50
+	maxIdleConnsPerHostEnv      = "CHAIN_REGISTRY_MAXIDLECONNSPERHOST"
 )
 
 type Config struct {
@@ -58,6 +67,11 @@ Environment variable: %q`, initEnv)
 Environment variable: %q`, cacheTTLEnv)
 	f.Duration(cacheTTLFlag, cacheDefault, cacheDesc)
 	_ = viper.BindPFlag(CacheTTLViperKey, f.Lookup(cacheTTLFlag))
+
+	maxIdleConnsPerHostDesc := fmt.Sprintf(`Maximum number of open HTTP connections to a chain proxied
+Environment variable: %q`, maxIdleConnsPerHostEnv)
+	f.Int(maxIdleConnsPerHostFlag, maxIdleConnsPerHostDefault, maxIdleConnsPerHostDesc)
+	_ = viper.BindPFlag(MaxIdleConnsPerHostViperKey, f.Lookup(maxIdleConnsPerHostFlag))
 }
 
 func Flags(f *pflag.FlagSet) {
@@ -77,7 +91,7 @@ func NewConfig(vipr *viper.Viper) *Config {
 			BufferItems: 64,      // number of keys per Get buffer.
 		},
 		ServersTransport: &traefikstatic.ServersTransport{
-			MaxIdleConnsPerHost: 200,
+			MaxIdleConnsPerHost: viper.GetInt(MaxIdleConnsPerHostViperKey),
 			InsecureSkipVerify:  true,
 		},
 		EnvChains:    viper.GetStringSlice(InitViperKey),

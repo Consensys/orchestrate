@@ -111,6 +111,7 @@ services:
       <<: *chain-registry-common
       CHAIN_REGISTRY_INIT: ${CHAIN_REGISTRY_INIT-}
       CHAIN_REGISTRY_CACHE_TTL: ${CHAIN_REGISTRY_CACHE_TTL-}
+      CHAIN_REGISTRY_MAXIDLECONNSPERHOST: ${CHAIN_REGISTRY_MAXIDLECONNSPERHOST-}
     depends_on:
       - chain-registry-migration
     command: chain-registry run
@@ -331,7 +332,7 @@ services:
     environment:
       <<: *default-variables
       AUTH_JWT_PRIVATE_KEY: ${AUTH_JWT_PRIVATE_KEY-}
-    command: utils generate-jwt --tenant=${TENANT_ID-_}
+    command: utils generate-jwt --tenant=${TENANT_ID-_} --expiration=${EXPIRATION-24h}
     restart: "no"
 
 volumes:

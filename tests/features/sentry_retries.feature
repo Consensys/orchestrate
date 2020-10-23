@@ -112,6 +112,7 @@ Feature: Deploy ERC20 contract using tx-sentry
       | status |
       | MINED  |
 
+  @geth
   Scenario: Deploy ERC20 using retry policy with gas increment
     Given I set the headers
       | Key           | Value                    |

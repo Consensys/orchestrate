@@ -2,8 +2,10 @@ package chainregistry
 
 import (
 	"bytes"
+	"compress/gzip"
 	"context"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"sort"
@@ -65,7 +67,16 @@ func httpCacheRequest(req *http.Request) (c bool, k string, ttl time.Duration, e
 
 func httpCacheResponse(resp *http.Response) bool {
 	var msg ethclient.JSONRpcMessage
-	err := json.UnmarshalBody(resp.Body, &msg)
+	// Check that the server actually sent compressed data
+	var reader io.ReadCloser
+	switch resp.Header.Get("Content-Encoding") {
+	case "gzip":
+		reader, _ = gzip.NewReader(resp.Body)
+		defer reader.Close()
+	default:
+		reader = resp.Body
+	}
+	err := json.UnmarshalBody(reader, &msg)
 	if err != nil {
 		log.WithError(err).Debugf("HTTPCache: cannot decode response")
 		return false

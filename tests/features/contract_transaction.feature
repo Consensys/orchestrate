@@ -108,7 +108,7 @@ Feature: Send contract transactions
       | {{besuContractTxID}} | besuContractAddr | Receipt.ContractAddress |
       | {{gethContractTxID}} | gethContractAddr | Receipt.ContractAddress |
 
-
+  @geth
   Scenario: Send contract transactions
     Given I register the following alias
       | alias             | value           |

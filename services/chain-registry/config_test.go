@@ -56,6 +56,38 @@ func TestProxyCacheTTLRegistryFlag(t *testing.T) {
 	assert.Equal(t, expected.Milliseconds(), cfg.ProxyCacheTTL.Milliseconds())
 }
 
+func TestMaxIdleConnsPerHostDefault(t *testing.T) {
+	flgs := pflag.NewFlagSet("test-max-idle-connections-per-host-1", pflag.ContinueOnError)
+	cmdFlags(flgs)
+
+	assert.Equal(t, 50, viper.GetInt(MaxIdleConnsPerHostViperKey))
+
+	cfg := NewConfig(viper.New())
+	assert.Equal(t, 50, cfg.ServersTransport.MaxIdleConnsPerHost)
+}
+
+func TestMaxIdleConnsPerHostENV(t *testing.T) {
+	flgs := pflag.NewFlagSet("test-max-idle-connections-per-host-1", pflag.ContinueOnError)
+	cmdFlags(flgs)
+
+	_ = os.Setenv(maxIdleConnsPerHostEnv, "2")
+	assert.Equal(t, 2, viper.GetInt(MaxIdleConnsPerHostViperKey))
+	cfg := NewConfig(viper.New())
+	assert.Equal(t, 2, cfg.ServersTransport.MaxIdleConnsPerHost)
+	_ = os.Unsetenv(maxIdleConnsPerHostEnv)
+}
+
+func TestMaxIdleConnsPerHostFlag(t *testing.T) {
+	flgs := pflag.NewFlagSet("test-max-idle-connections-per-host-1", pflag.ContinueOnError)
+	cmdFlags(flgs)
+	args := []string{fmt.Sprintf("--%s=%s", maxIdleConnsPerHostFlag, "3")}
+	err := flgs.Parse(args)
+	assert.NoError(t, err, "No error expected")
+	assert.Equal(t, 3, viper.GetInt(MaxIdleConnsPerHostViperKey))
+	cfg := NewConfig(viper.New())
+	assert.Equal(t, 3, cfg.ServersTransport.MaxIdleConnsPerHost)
+}
+
 func TestFlags(t *testing.T) {
 	f := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	Flags(f)

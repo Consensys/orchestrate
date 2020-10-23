@@ -233,3 +233,15 @@ down-redisinsight:
 up-all: efk pgadmin redisinsight up
 
 down-all: down-efk down-pgadmin down-redisinsight down
+
+observability:
+	@docker-compose -f scripts/deps/docker-compose-tools.yml up -d prometheus grafana
+
+down-observability:
+	@docker-compose -f scripts/deps/docker-compose-tools.yml rm --force -s -v prometheus grafana
+
+nginx:
+	@docker-compose -f scripts/deps/docker-compose-tools.yml up -d nginx nginx-prometheus-exporter
+
+down-nginx:
+	@docker-compose -f scripts/deps/docker-compose-tools.yml rm --force -s -v nginx nginx-prometheus-exporter

@@ -57,6 +57,7 @@ Feature: Deploy ERC20 contract
     Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
 
+  @besu @geth
   Scenario: Deploy ERC20
     Given I register the following contracts
       | name        | artifacts        | Headers.Authorization    |

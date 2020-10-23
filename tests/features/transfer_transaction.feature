@@ -57,7 +57,7 @@ Feature: Send transfer transaction
     Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
 
-
+  @geth
   Scenario: Send transfer transaction
     Given I register the following alias
       | alias           | value              |

@@ -6,6 +6,13 @@
 
 * Remove account-generator and account-generated topic
 
+## v2.5.1 (Unreleased)
+
+### 🆕 Features
+
+* Add the `CHAIN_REGISTRY_MAXIDLECONNSPERHOST` to control the maximum of open HTTP connections to a chain proxied 
+* Ability to cache gzip HTTP responses
+
 ## v2.5.0 (2020-10-19)
 
 ### 🆕 Features

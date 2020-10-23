@@ -4,6 +4,7 @@ Feature: Chain-Registry Authentication
   As as external developer
   I want to register new chains and protect them under expected permission rules
 
+  @geth
   Scenario: Create chain using X-API-Key
     Given I set the headers
       | Key       | Value              |
@@ -32,6 +33,7 @@ Feature: Chain-Registry Authentication
     When I send "DELETE" request to "{{global.chain-registry}}/chains/{{chainUUID}}"
     Then the response code should be 204
 
+  @geth
   Scenario: Create chain using X-API-Key and X-Tenant-ID
     Given I set the headers
       | Key         | Value              |
@@ -54,6 +56,7 @@ Feature: Chain-Registry Authentication
     When I send "DELETE" request to "{{global.chain-registry}}/chains/{{chainUUID}}"
     Then the response code should be 204
 
+  @geth
   Scenario: Create chain with Wildcard JWT token
     Given I have the following tenants
       | alias    | tenantID |
@@ -85,6 +88,7 @@ Feature: Chain-Registry Authentication
     When I send "DELETE" request to "{{global.chain-registry}}/chains/{{chainUUID}}"
     Then the response code should be 204
 
+  @geth
   Scenario:  Create chain with Wildcard JWT and X-Tenant-ID
     Given I have the following tenants
       | alias    | tenantID |
@@ -110,6 +114,7 @@ Feature: Chain-Registry Authentication
     When I send "DELETE" request to "{{global.chain-registry}}/chains/{{chainUUID}}"
     Then the response code should be 204
 
+  @geth
   Scenario:  Create chain with with tenant foo and valid permissions
     Given I have the following tenants
       | alias     | tenantID |
@@ -150,6 +155,7 @@ Feature: Chain-Registry Authentication
     When I send "DELETE" request to "{{global.chain-registry}}/chains/{{chainUUID}}"
     Then the response code should be 204
 
+  @geth
   Scenario:  Create chain with with default tenant valid permissions
     Given I have the following tenants
       | alias     | tenantID |
@@ -190,6 +196,7 @@ Feature: Chain-Registry Authentication
     When I send "DELETE" request to "{{global.chain-registry}}/chains/{{chainUUID}}"
     Then the response code should be 204
 
+  @geth
   Scenario: Invalid X-API-Key
     Given I set the headers
       | Key       | Value              |
@@ -225,6 +232,7 @@ Feature: Chain-Registry Authentication
     When I send "DELETE" request to "{{global.chain-registry}}/chains/{{chainUUID}}"
     Then the response code should be 204
 
+  @geth
   Scenario: Invalid JWT token
     Given I have the following tenants
       | alias   | tenantID           |
