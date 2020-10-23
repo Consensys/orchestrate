@@ -3,6 +3,8 @@ package formatters
 import (
 	"math/big"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+
 	quorumtypes "github.com/consensys/quorum/core/types"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -35,7 +37,7 @@ func FormatSignETHTransactionRequest(request *types.SignETHTransactionRequest) *
 	return ethtypes.NewTransaction(request.Nonce, common.HexToAddress(request.To), amount, request.GasLimit, gasPrice, data)
 }
 
-func FormatSignTesseraTransactionRequest(request *types.SignTesseraTransactionRequest) *quorumtypes.Transaction {
+func FormatSignQuorumPrivateTransactionRequest(request *types.SignQuorumPrivateTransactionRequest) *quorumtypes.Transaction {
 	// No need to check the "ok" values because we know that at the fields are valid big ints and hex string,
 	// this also avoids this function returning an error
 	amount, _ := new(big.Int).SetString(request.Amount, 10)
@@ -47,4 +49,24 @@ func FormatSignTesseraTransactionRequest(request *types.SignTesseraTransactionRe
 	}
 
 	return quorumtypes.NewTransaction(request.Nonce, common.HexToAddress(request.To), amount, request.GasLimit, gasPrice, data)
+}
+
+func FormatSignEEATransactionRequest(request *types.SignEEATransactionRequest) (*ethtypes.Transaction, *entities.PrivateETHTransactionParams) {
+	// No need to check the "ok" values because we know that at the fields are valid big ints and hex string,
+	// this also avoids this function returning an error
+	amount, _ := new(big.Int).SetString(request.Amount, 10)
+	gasPrice, _ := new(big.Int).SetString(request.GasPrice, 10)
+	data, _ := hexutil.Decode(request.Data)
+
+	privateArgs := &entities.PrivateETHTransactionParams{
+		PrivateFrom:    request.PrivateFrom,
+		PrivateFor:     request.PrivateFor,
+		PrivacyGroupID: request.PrivacyGroupID,
+		PrivateTxType:  utils.PrivateTxTypeRestricted,
+	}
+	if request.To == "" {
+		return ethtypes.NewContractCreation(request.Nonce, amount, request.GasLimit, gasPrice, data), privateArgs
+	}
+
+	return ethtypes.NewTransaction(request.Nonce, common.HexToAddress(request.To), amount, request.GasLimit, gasPrice, data), privateArgs
 }

@@ -114,7 +114,7 @@
                     "application/json"
                 ],
                 "produces": [
-                    "application/json"
+                    "text/plain"
                 ],
                 "summary": "Signs an arbitrary message using an existing Ethereum account",
                 "parameters": [
@@ -156,6 +156,104 @@
                 }
             }
         },
+        "/ethereum/accounts/{address}/sign-eea-transaction": {
+            "post": {
+                "description": "Signs an EEA private transaction using ECDSA and the private key of an existing account",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/plain"
+                ],
+                "summary": "Signs an EEA private transaction using an existing account",
+                "parameters": [
+                    {
+                        "description": "EEA private transaction to sign",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ethereum.SignQuorumPrivateTransactionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Signed payload",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Account not found",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/ethereum/accounts/{address}/sign-quorum-private-transaction": {
+            "post": {
+                "description": "Signs a Quorum private transaction using ECDSA and the private key of an existing account",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/plain"
+                ],
+                "summary": "Signs a Quorum private transaction using an existing account",
+                "parameters": [
+                    {
+                        "description": "Quorum private transaction to sign",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ethereum.SignQuorumPrivateTransactionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Signed payload",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Account not found",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/ethereum/accounts/{address}/sign-transaction": {
             "post": {
                 "description": "Signs an Ethereum transaction using ECDSA and the private key of an existing account",
@@ -163,7 +261,7 @@
                     "application/json"
                 ],
                 "produces": [
-                    "application/json"
+                    "text/plain"
                 ],
                 "summary": "Signs an Ethereum transaction using an existing account",
                 "parameters": [
@@ -258,9 +356,7 @@
             "required": [
                 "chainID",
                 "gasLimit",
-                "gasPrice",
-                "nonce",
-                "to"
+                "gasPrice"
             ],
             "properties": {
                 "amount": {
@@ -270,6 +366,43 @@
                 "chainID": {
                     "type": "string",
                     "example": "1 (mainnet)"
+                },
+                "data": {
+                    "type": "string",
+                    "example": "0xfeaeee..."
+                },
+                "gasLimit": {
+                    "type": "integer",
+                    "example": 21000
+                },
+                "gasPrice": {
+                    "type": "string",
+                    "example": "100000000000"
+                },
+                "namespace": {
+                    "type": "string",
+                    "example": "tenant_id"
+                },
+                "nonce": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "to": {
+                    "type": "string",
+                    "example": "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"
+                }
+            }
+        },
+        "ethereum.SignQuorumPrivateTransactionRequest": {
+            "type": "object",
+            "required": [
+                "gasLimit",
+                "gasPrice"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "string",
+                    "example": "100000000000"
                 },
                 "data": {
                     "type": "string",

@@ -15,7 +15,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 )
 
-func TestSignTesseraTransaction_Execute(t *testing.T) {
+func TestSignQuorumPrivateTransaction_Execute(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -35,7 +35,7 @@ func TestSignTesseraTransaction_Execute(t *testing.T) {
 
 	mockVault.EXPECT().Ethereum().Return(mockEthereumDA).AnyTimes()
 
-	usecase := NewSignTesseraTransactionUseCase(mockVault)
+	usecase := NewSignQuorumPrivateTransactionUseCase(mockVault)
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		privKey := "5385714a2f6d69ca034f56a5268833216ffb8fba7229c39569bc4c5f42cde97c"
@@ -64,6 +64,6 @@ func TestSignTesseraTransaction_Execute(t *testing.T) {
 		signature, err := usecase.Execute(ctx, address, namespace, tx)
 
 		assert.Empty(t, signature)
-		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(signTesseraTransactionComponent), err)
+		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(signQuorumPrivateTransactionComponent), err)
 	})
 }

@@ -16,7 +16,8 @@ type EthereumAccountClient interface {
 	ETHImportAccount(ctx context.Context, request *types.ImportETHAccountRequest) (*types.ETHAccountResponse, error)
 	ETHSign(ctx context.Context, address string, request *keymanager.PayloadRequest) (string, error)
 	ETHSignTransaction(ctx context.Context, address string, request *types.SignETHTransactionRequest) (string, error)
-	ETHSignTesseraTransaction(ctx context.Context, address string, request *types.SignTesseraTransactionRequest) (string, error)
+	ETHSignQuorumPrivateTransaction(ctx context.Context, address string, request *types.SignQuorumPrivateTransactionRequest) (string, error)
+	ETHSignEEATransaction(ctx context.Context, address string, request *types.SignEEATransactionRequest) (string, error)
 }
 
 type KeyManagerClient interface {

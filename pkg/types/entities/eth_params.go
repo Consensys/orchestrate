@@ -1,5 +1,7 @@
 package entities
 
+import "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+
 type ETHTransactionParams struct {
 	From            string        `json:"from,omitempty"  example:"0x1abae27a0cbfb02945720425d3b80c7e09728534"`
 	To              string        `json:"to,omitempty" example:"0x1abae27a0cbfb02945720425d3b80c7e09728534"`
@@ -16,4 +18,11 @@ type ETHTransactionParams struct {
 	PrivateFrom     string        `json:"privateFrom,omitempty" example:"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="`
 	PrivateFor      []string      `json:"privateFor,omitempty" example:"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=,B1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="`
 	PrivacyGroupID  string        `json:"privacyGroupId,omitempty" example:"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="`
+}
+
+type PrivateETHTransactionParams struct {
+	PrivateFrom    string
+	PrivateFor     []string
+	PrivacyGroupID string
+	PrivateTxType  utils.PrivateTxType
 }

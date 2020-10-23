@@ -48,6 +48,14 @@ func FakeETHTransactionParams() *entities.ETHTransactionParams {
 	}
 }
 
+func FakePrivateETHTransactionParams() *entities.PrivateETHTransactionParams {
+	return &entities.PrivateETHTransactionParams{
+		PrivateFrom:   "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=",
+		PrivateFor:    []string{"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="},
+		PrivateTxType: "restricted",
+	}
+}
+
 func FakeETHAccount() *entities.ETHAccount {
 	return &entities.ETHAccount{
 		Namespace:           "_",

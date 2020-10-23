@@ -20,7 +20,8 @@ type UseCases interface {
 	CreateAccount() CreateAccountUseCase
 	SignPayload() SignUseCase
 	SignTransaction() SignTransactionUseCase
-	SignTesseraTransaction() SignTesseraTransactionUseCase
+	SignQuorumPrivateTransaction() SignQuorumPrivateTransactionUseCase
+	SignEEATransaction() SignEEATransactionUseCase
 }
 
 type CreateAccountUseCase interface {
@@ -35,6 +36,16 @@ type SignTransactionUseCase interface {
 	Execute(ctx context.Context, address, namespace string, chainID *big.Int, tx *ethtypes.Transaction) (string, error)
 }
 
-type SignTesseraTransactionUseCase interface {
+type SignQuorumPrivateTransactionUseCase interface {
 	Execute(ctx context.Context, address, namespace string, tx *quorumtypes.Transaction) (string, error)
+}
+
+type SignEEATransactionUseCase interface {
+	Execute(
+		ctx context.Context,
+		address, namespace string,
+		chainID *big.Int,
+		tx *ethtypes.Transaction,
+		privateArgs *entities.PrivateETHTransactionParams,
+	) (string, error)
 }

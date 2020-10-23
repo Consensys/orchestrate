@@ -96,19 +96,34 @@ func (mr *MockEthereumAccountClientMockRecorder) ETHSignTransaction(ctx, address
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHSignTransaction", reflect.TypeOf((*MockEthereumAccountClient)(nil).ETHSignTransaction), ctx, address, request)
 }
 
-// ETHSignTesseraTransaction mocks base method
-func (m *MockEthereumAccountClient) ETHSignTesseraTransaction(ctx context.Context, address string, request *ethereum.SignTesseraTransactionRequest) (string, error) {
+// ETHSignQuorumPrivateTransaction mocks base method
+func (m *MockEthereumAccountClient) ETHSignQuorumPrivateTransaction(ctx context.Context, address string, request *ethereum.SignQuorumPrivateTransactionRequest) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ETHSignTesseraTransaction", ctx, address, request)
+	ret := m.ctrl.Call(m, "ETHSignQuorumPrivateTransaction", ctx, address, request)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// ETHSignTesseraTransaction indicates an expected call of ETHSignTesseraTransaction
-func (mr *MockEthereumAccountClientMockRecorder) ETHSignTesseraTransaction(ctx, address, request interface{}) *gomock.Call {
+// ETHSignQuorumPrivateTransaction indicates an expected call of ETHSignQuorumPrivateTransaction
+func (mr *MockEthereumAccountClientMockRecorder) ETHSignQuorumPrivateTransaction(ctx, address, request interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHSignTesseraTransaction", reflect.TypeOf((*MockEthereumAccountClient)(nil).ETHSignTesseraTransaction), ctx, address, request)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHSignQuorumPrivateTransaction", reflect.TypeOf((*MockEthereumAccountClient)(nil).ETHSignQuorumPrivateTransaction), ctx, address, request)
+}
+
+// ETHSignEEATransaction mocks base method
+func (m *MockEthereumAccountClient) ETHSignEEATransaction(ctx context.Context, address string, request *ethereum.SignEEATransactionRequest) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ETHSignEEATransaction", ctx, address, request)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ETHSignEEATransaction indicates an expected call of ETHSignEEATransaction
+func (mr *MockEthereumAccountClientMockRecorder) ETHSignEEATransaction(ctx, address, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHSignEEATransaction", reflect.TypeOf((*MockEthereumAccountClient)(nil).ETHSignEEATransaction), ctx, address, request)
 }
 
 // MockKeyManagerClient is a mock of KeyManagerClient interface
@@ -208,17 +223,32 @@ func (mr *MockKeyManagerClientMockRecorder) ETHSignTransaction(ctx, address, req
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHSignTransaction", reflect.TypeOf((*MockKeyManagerClient)(nil).ETHSignTransaction), ctx, address, request)
 }
 
-// ETHSignTesseraTransaction mocks base method
-func (m *MockKeyManagerClient) ETHSignTesseraTransaction(ctx context.Context, address string, request *ethereum.SignTesseraTransactionRequest) (string, error) {
+// ETHSignQuorumPrivateTransaction mocks base method
+func (m *MockKeyManagerClient) ETHSignQuorumPrivateTransaction(ctx context.Context, address string, request *ethereum.SignQuorumPrivateTransactionRequest) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ETHSignTesseraTransaction", ctx, address, request)
+	ret := m.ctrl.Call(m, "ETHSignQuorumPrivateTransaction", ctx, address, request)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// ETHSignTesseraTransaction indicates an expected call of ETHSignTesseraTransaction
-func (mr *MockKeyManagerClientMockRecorder) ETHSignTesseraTransaction(ctx, address, request interface{}) *gomock.Call {
+// ETHSignQuorumPrivateTransaction indicates an expected call of ETHSignQuorumPrivateTransaction
+func (mr *MockKeyManagerClientMockRecorder) ETHSignQuorumPrivateTransaction(ctx, address, request interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHSignTesseraTransaction", reflect.TypeOf((*MockKeyManagerClient)(nil).ETHSignTesseraTransaction), ctx, address, request)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHSignQuorumPrivateTransaction", reflect.TypeOf((*MockKeyManagerClient)(nil).ETHSignQuorumPrivateTransaction), ctx, address, request)
+}
+
+// ETHSignEEATransaction mocks base method
+func (m *MockKeyManagerClient) ETHSignEEATransaction(ctx context.Context, address string, request *ethereum.SignEEATransactionRequest) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ETHSignEEATransaction", ctx, address, request)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ETHSignEEATransaction indicates an expected call of ETHSignEEATransaction
+func (mr *MockKeyManagerClientMockRecorder) ETHSignEEATransaction(ctx, address, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHSignEEATransaction", reflect.TypeOf((*MockKeyManagerClient)(nil).ETHSignEEATransaction), ctx, address, request)
 }

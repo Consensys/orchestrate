@@ -32,7 +32,7 @@ func (c *EthereumController) Append(router *mux.Router) {
 	router.Methods(http.MethodPost).Path(Path + "/{address}/sign").HandlerFunc(c.signPayload)
 	router.Methods(http.MethodPost).Path(Path + "/{address}/sign-transaction").HandlerFunc(c.signTransaction)
 	router.Methods(http.MethodPost).Path(Path + "/{address}/sign-eea-transaction").HandlerFunc(c.signEEA)
-	router.Methods(http.MethodPost).Path(Path + "/{address}/sign-tessera-transaction").HandlerFunc(c.signTessera)
+	router.Methods(http.MethodPost).Path(Path + "/{address}/sign-quorum-private-transaction").HandlerFunc(c.signQuorumPrivate)
 }
 
 // @Summary Creates a new Ethereum Account
@@ -156,20 +156,20 @@ func (c *EthereumController) signTransaction(rw http.ResponseWriter, request *ht
 	_, _ = rw.Write([]byte(signature))
 }
 
-// @Summary Signs an EEA transaction using an existing account
-// @Description Signs an EEA transaction using ECDSA and the private key of an existing account
+// @Summary Signs a Quorum private transaction using an existing account
+// @Description Signs a Quorum private transaction using ECDSA and the private key of an existing account
 // @Accept json
 // @Produce text/plain
-// @Param request body ethereum.SignETHTransactionRequest true "EEA transaction to sign"
+// @Param request body ethereum.SignQuorumPrivateTransactionRequest true "Quorum private transaction to sign"
 // @Success 200 {string} string "Signed payload"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 404 {object} httputil.ErrorResponse "Account not found"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
-// @Router /ethereum/accounts/{address}/sign-eea-transaction [post]
-func (c *EthereumController) signEEA(rw http.ResponseWriter, request *http.Request) {
+// @Router /ethereum/accounts/{address}/sign-quorum-private-transaction [post]
+func (c *EthereumController) signQuorumPrivate(rw http.ResponseWriter, request *http.Request) {
 	ctx := request.Context()
 
-	signRequest := &types.SignETHTransactionRequest{}
+	signRequest := &types.SignQuorumPrivateTransactionRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, signRequest)
 	if err != nil {
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
@@ -177,9 +177,8 @@ func (c *EthereumController) signEEA(rw http.ResponseWriter, request *http.Reque
 	}
 
 	address := mux.Vars(request)["address"]
-	chainID, _ := new(big.Int).SetString(signRequest.ChainID, 10)
-	tx := formatters.FormatSignETHTransactionRequest(signRequest)
-	signature, err := c.ucs.SignTransaction().Execute(ctx, address, signRequest.Namespace, chainID, tx)
+	tx := formatters.FormatSignQuorumPrivateTransactionRequest(signRequest)
+	signature, err := c.ucs.SignQuorumPrivateTransaction().Execute(ctx, address, signRequest.Namespace, tx)
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -188,29 +187,36 @@ func (c *EthereumController) signEEA(rw http.ResponseWriter, request *http.Reque
 	_, _ = rw.Write([]byte(signature))
 }
 
-// @Summary Signs a Tessera transaction using an existing account
-// @Description Signs a Tessera transaction using ECDSA and the private key of an existing account
+// @Summary Signs an EEA private transaction using an existing account
+// @Description Signs an EEA private transaction using ECDSA and the private key of an existing account
 // @Accept json
 // @Produce text/plain
-// @Param request body ethereum.SignTesseraTransactionRequest true "Private Tessera transaction to sign"
+// @Param request body ethereum.SignQuorumPrivateTransactionRequest true "EEA private transaction to sign"
 // @Success 200 {string} string "Signed payload"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 404 {object} httputil.ErrorResponse "Account not found"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
-// @Router /ethereum/accounts/{address}/sign-tessera-transaction [post]
-func (c *EthereumController) signTessera(rw http.ResponseWriter, request *http.Request) {
+// @Router /ethereum/accounts/{address}/sign-eea-transaction [post]
+func (c *EthereumController) signEEA(rw http.ResponseWriter, request *http.Request) {
 	ctx := request.Context()
 
-	signRequest := &types.SignTesseraTransactionRequest{}
+	signRequest := &types.SignEEATransactionRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, signRequest)
 	if err != nil {
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
 
+	err = signRequest.Validate()
+	if err != nil {
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
 	address := mux.Vars(request)["address"]
-	tx := formatters.FormatSignTesseraTransactionRequest(signRequest)
-	signature, err := c.ucs.SignTesseraTransaction().Execute(ctx, address, signRequest.Namespace, tx)
+	chainID, _ := new(big.Int).SetString(signRequest.ChainID, 10)
+	tx, privateArgs := formatters.FormatSignEEATransactionRequest(signRequest)
+	signature, err := c.ucs.SignEEATransaction().Execute(ctx, address, signRequest.Namespace, chainID, tx, privateArgs)
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return

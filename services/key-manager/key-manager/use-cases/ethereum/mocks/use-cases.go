@@ -80,18 +80,32 @@ func (mr *MockUseCasesMockRecorder) SignTransaction() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignTransaction", reflect.TypeOf((*MockUseCases)(nil).SignTransaction))
 }
 
-// SignTesseraTransaction mocks base method
-func (m *MockUseCases) SignTesseraTransaction() ethereum.SignTesseraTransactionUseCase {
+// SignQuorumPrivateTransaction mocks base method
+func (m *MockUseCases) SignQuorumPrivateTransaction() ethereum.SignQuorumPrivateTransactionUseCase {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SignTesseraTransaction")
-	ret0, _ := ret[0].(ethereum.SignTesseraTransactionUseCase)
+	ret := m.ctrl.Call(m, "SignQuorumPrivateTransaction")
+	ret0, _ := ret[0].(ethereum.SignQuorumPrivateTransactionUseCase)
 	return ret0
 }
 
-// SignTesseraTransaction indicates an expected call of SignTesseraTransaction
-func (mr *MockUseCasesMockRecorder) SignTesseraTransaction() *gomock.Call {
+// SignQuorumPrivateTransaction indicates an expected call of SignQuorumPrivateTransaction
+func (mr *MockUseCasesMockRecorder) SignQuorumPrivateTransaction() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignTesseraTransaction", reflect.TypeOf((*MockUseCases)(nil).SignTesseraTransaction))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignQuorumPrivateTransaction", reflect.TypeOf((*MockUseCases)(nil).SignQuorumPrivateTransaction))
+}
+
+// SignEEATransaction mocks base method
+func (m *MockUseCases) SignEEATransaction() ethereum.SignEEATransactionUseCase {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SignEEATransaction")
+	ret0, _ := ret[0].(ethereum.SignEEATransactionUseCase)
+	return ret0
+}
+
+// SignEEATransaction indicates an expected call of SignEEATransaction
+func (mr *MockUseCasesMockRecorder) SignEEATransaction() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignEEATransaction", reflect.TypeOf((*MockUseCases)(nil).SignEEATransaction))
 }
 
 // MockCreateAccountUseCase is a mock of CreateAccountUseCase interface
@@ -208,31 +222,31 @@ func (mr *MockSignTransactionUseCaseMockRecorder) Execute(ctx, address, namespac
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSignTransactionUseCase)(nil).Execute), ctx, address, namespace, chainID, tx)
 }
 
-// MockSignTesseraTransactionUseCase is a mock of SignTesseraTransactionUseCase interface
-type MockSignTesseraTransactionUseCase struct {
+// MockSignQuorumPrivateTransactionUseCase is a mock of SignQuorumPrivateTransactionUseCase interface
+type MockSignQuorumPrivateTransactionUseCase struct {
 	ctrl     *gomock.Controller
-	recorder *MockSignTesseraTransactionUseCaseMockRecorder
+	recorder *MockSignQuorumPrivateTransactionUseCaseMockRecorder
 }
 
-// MockSignTesseraTransactionUseCaseMockRecorder is the mock recorder for MockSignTesseraTransactionUseCase
-type MockSignTesseraTransactionUseCaseMockRecorder struct {
-	mock *MockSignTesseraTransactionUseCase
+// MockSignQuorumPrivateTransactionUseCaseMockRecorder is the mock recorder for MockSignQuorumPrivateTransactionUseCase
+type MockSignQuorumPrivateTransactionUseCaseMockRecorder struct {
+	mock *MockSignQuorumPrivateTransactionUseCase
 }
 
-// NewMockSignTesseraTransactionUseCase creates a new mock instance
-func NewMockSignTesseraTransactionUseCase(ctrl *gomock.Controller) *MockSignTesseraTransactionUseCase {
-	mock := &MockSignTesseraTransactionUseCase{ctrl: ctrl}
-	mock.recorder = &MockSignTesseraTransactionUseCaseMockRecorder{mock}
+// NewMockSignQuorumPrivateTransactionUseCase creates a new mock instance
+func NewMockSignQuorumPrivateTransactionUseCase(ctrl *gomock.Controller) *MockSignQuorumPrivateTransactionUseCase {
+	mock := &MockSignQuorumPrivateTransactionUseCase{ctrl: ctrl}
+	mock.recorder = &MockSignQuorumPrivateTransactionUseCaseMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use
-func (m *MockSignTesseraTransactionUseCase) EXPECT() *MockSignTesseraTransactionUseCaseMockRecorder {
+func (m *MockSignQuorumPrivateTransactionUseCase) EXPECT() *MockSignQuorumPrivateTransactionUseCaseMockRecorder {
 	return m.recorder
 }
 
 // Execute mocks base method
-func (m *MockSignTesseraTransactionUseCase) Execute(ctx context.Context, address, namespace string, tx *types.Transaction) (string, error) {
+func (m *MockSignQuorumPrivateTransactionUseCase) Execute(ctx context.Context, address, namespace string, tx *types.Transaction) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Execute", ctx, address, namespace, tx)
 	ret0, _ := ret[0].(string)
@@ -241,7 +255,45 @@ func (m *MockSignTesseraTransactionUseCase) Execute(ctx context.Context, address
 }
 
 // Execute indicates an expected call of Execute
-func (mr *MockSignTesseraTransactionUseCaseMockRecorder) Execute(ctx, address, namespace, tx interface{}) *gomock.Call {
+func (mr *MockSignQuorumPrivateTransactionUseCaseMockRecorder) Execute(ctx, address, namespace, tx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSignTesseraTransactionUseCase)(nil).Execute), ctx, address, namespace, tx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSignQuorumPrivateTransactionUseCase)(nil).Execute), ctx, address, namespace, tx)
+}
+
+// MockSignEEATransactionUseCase is a mock of SignEEATransactionUseCase interface
+type MockSignEEATransactionUseCase struct {
+	ctrl     *gomock.Controller
+	recorder *MockSignEEATransactionUseCaseMockRecorder
+}
+
+// MockSignEEATransactionUseCaseMockRecorder is the mock recorder for MockSignEEATransactionUseCase
+type MockSignEEATransactionUseCaseMockRecorder struct {
+	mock *MockSignEEATransactionUseCase
+}
+
+// NewMockSignEEATransactionUseCase creates a new mock instance
+func NewMockSignEEATransactionUseCase(ctrl *gomock.Controller) *MockSignEEATransactionUseCase {
+	mock := &MockSignEEATransactionUseCase{ctrl: ctrl}
+	mock.recorder = &MockSignEEATransactionUseCaseMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockSignEEATransactionUseCase) EXPECT() *MockSignEEATransactionUseCaseMockRecorder {
+	return m.recorder
+}
+
+// Execute mocks base method
+func (m *MockSignEEATransactionUseCase) Execute(ctx context.Context, address, namespace string, chainID *big.Int, tx *types0.Transaction, privateArgs *entities.PrivateETHTransactionParams) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Execute", ctx, address, namespace, chainID, tx, privateArgs)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Execute indicates an expected call of Execute
+func (mr *MockSignEEATransactionUseCaseMockRecorder) Execute(ctx, address, namespace, chainID, tx, privateArgs interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSignEEATransactionUseCase)(nil).Execute), ctx, address, namespace, chainID, tx, privateArgs)
 }

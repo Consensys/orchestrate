@@ -24,7 +24,7 @@ type TransactionParams struct {
 	OneTimeKey      bool           `json:"oneTimeKey,omitempty" example:"true"`
 	GasPricePolicy  GasPriceParams `json:"gasPricePolicy,omitempty"`
 	Protocol        string         `json:"protocol,omitempty" validate:"omitempty,isPrivateTxManagerType" example:"Tessera"`
-	PrivateFrom     string         `json:"privateFrom,omitempty" validate:"omitempty,base64" example:"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="`
+	PrivateFrom     string         `json:"privateFrom,omitempty" validate:"omitempty,base64,required_with=PrivateFor PrivacyGroupID" example:"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="`
 	PrivateFor      []string       `json:"privateFor,omitempty" validate:"omitempty,min=1,unique,dive,base64" example:"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=,B1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="`
 	PrivacyGroupID  string         `json:"privacyGroupId,omitempty" validate:"omitempty,base64" example:"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="`
 }
