@@ -45,7 +45,7 @@ func (uc *createAccountUseCase) Execute(ctx context.Context, account *entities.A
 	if len(idens) > 0 {
 		errMsg := fmt.Sprintf("alias %s already exists", account.Alias)
 		logger.Error(errMsg)
-		return nil, errors.InvalidParameterError(errMsg)
+		return nil, errors.AlreadyExistsError(errMsg)
 	}
 
 	// REMINDER: For now, Account API only support ETH accounts
@@ -71,6 +71,16 @@ func (uc *createAccountUseCase) Execute(ctx context.Context, account *entities.A
 
 	accountModel := parsers.NewAccountModelFromEntities(account)
 	accountModel.TenantID = tenantID
+
+	_, err = uc.db.Account().FindOneByAddress(ctx, account.Address, []string{tenantID})
+	if err == nil {
+		errMsg := fmt.Sprintf("account address %s already exists", account.Address)
+		logger.Error(errMsg)
+		return nil, errors.AlreadyExistsError(errMsg)
+	} else if !errors.IsNotFoundError(err) {
+		return nil, errors.FromError(err).ExtendComponent(createAccountComponent)
+	}
+
 	err = uc.db.Account().Insert(ctx, accountModel)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(createAccountComponent)

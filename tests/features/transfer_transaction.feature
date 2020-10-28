@@ -247,17 +247,4 @@ Feature: Send transfer transaction
     }
 }
       """
-    Then the response code should be 202
-    Then I register the following response fields
-      | alias      | path                  |
-      | jobOneUUID | jobs[0].uuid |
-    Then Envelopes should be in topic "tx.crafter"
-    Then Envelopes should be in topic "tx.recover"
-    And Envelopes should have the following fields
-      | Errors.0.Message                  |
-      | no key for account "{{account3}}" |
-    When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobOneUUID}}"
-    Then the response code should be 200
-    And Response should have the following fields
-      | status | logs[0].status | logs[1].status | logs[2].status |
-      | FAILED | CREATED        | STARTED        | FAILED         |
+    Then the response code should be 422

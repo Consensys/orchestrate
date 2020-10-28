@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
+	identitymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/identity-manager/client"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	log "github.com/sirupsen/logrus"
@@ -24,32 +25,42 @@ type TransactionValidator interface {
 	ValidateChainExists(ctx context.Context, chainUUID string) (string, error)
 	ValidateMethodSignature(methodSignature string, args []interface{}) (string, error)
 	ValidateContract(ctx context.Context, params *entities.ETHTransactionParams) (string, error)
+	ValidateAccount(ctx context.Context, address string) error
 }
 
 // transactionValidator is a validator for transaction requests (business logic)
 type transactionValidator struct {
 	chainRegistryClient    client.ChainRegistryClient
 	contractRegistryClient contractregistry.ContractRegistryClient
+	identityManagerClient  identitymanager.IdentityManagerClient
 }
 
 // NewTransactionValidator creates a new TransactionValidator
 func NewTransactionValidator(
 	chainRegistryClient client.ChainRegistryClient,
 	contractRegistryClient contractregistry.ContractRegistryClient,
+	identityManagerClient identitymanager.IdentityManagerClient,
 ) TransactionValidator {
-	return &transactionValidator{chainRegistryClient: chainRegistryClient, contractRegistryClient: contractRegistryClient}
+	return &transactionValidator{
+		chainRegistryClient:    chainRegistryClient,
+		contractRegistryClient: contractRegistryClient,
+		identityManagerClient:  identityManagerClient,
+	}
 }
 
 func (txValidator *transactionValidator) ValidateChainExists(ctx context.Context, chainUUID string) (string, error) {
 	// Validate that the chainUUID exists
 	chain, err := txValidator.chainRegistryClient.GetChainByUUID(ctx, chainUUID)
-	if err != nil {
+	if err == nil {
+		return chain.ChainID, nil
+	}
+
+	if errors.IsNotFoundError(err) {
 		errMessage := "failed to get chain"
 		log.WithError(err).WithField("chain_uuid", chainUUID).Error(errMessage)
 		return "", errors.InvalidParameterError(errMessage)
 	}
-
-	return chain.ChainID, nil
+	return "", errors.FromError(err).ExtendComponent(txValidatorComponent)
 }
 
 func (txValidator *transactionValidator) ValidateMethodSignature(method string, args []interface{}) (string, error) {
@@ -125,4 +136,19 @@ func (txValidator *transactionValidator) ValidateContract(ctx context.Context, p
 	}
 
 	return hexutil.Encode(txDataBytes), nil
+}
+
+func (txValidator *transactionValidator) ValidateAccount(ctx context.Context, address string) error {
+	_, err := txValidator.identityManagerClient.GetAccount(ctx, address)
+	if err == nil {
+		return nil
+	}
+
+	if errors.IsNotFoundError(err) {
+		errMessage := "failed to get account"
+		log.WithError(err).WithField("account", address).Error(errMessage)
+		return errors.InvalidParameterError(errMessage)
+	}
+
+	return errors.FromError(err).ExtendComponent(txValidatorComponent)
 }

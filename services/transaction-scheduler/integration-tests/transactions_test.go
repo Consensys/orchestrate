@@ -16,6 +16,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
 	clientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/client-utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/identitymanager"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
@@ -66,6 +67,8 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Validation() 
 
 		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
 		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
+		gock.New(identityManagerURL).Get("/accounts/" + txRequest.Params.From).Reply(200).JSON(&identitymanager.AccountResponse{})
+
 		gock.New(chainRegistryURL).
 			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", chainRegistryURL, chain.UUID, txRequest.Params.From)).
 			Reply(404).Done()
@@ -89,6 +92,18 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Validation() 
 		assert.True(t, errors.IsInvalidParameterError(err))
 	})
 
+	s.T().Run("should fail with 422 if account does not exist", func(t *testing.T) {
+		defer gock.Off()
+		txRequest := testutils.FakeSendTransactionRequest()
+		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
+		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
+		gock.New(identityManagerURL).Get("/accounts/" + txRequest.Params.From).Reply(404)
+
+		_, err := s.client.SendContractTransaction(ctx, txRequest)
+
+		assert.True(t, errors.IsInvalidParameterError(err))
+	})
+
 	s.T().Run("should fail with 422 if chainUUID does not exist", func(t *testing.T) {
 		defer gock.Off()
 		txRequest := testutils.FakeSendTransactionRequest()
@@ -105,11 +120,12 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Validation() 
 
 	s.T().Run("should fail with 422 if from account is set and oneTimeKeyEnabled", func(t *testing.T) {
 		defer gock.Off()
-		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
-		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Reply(200)
 		txRequest := testutils.FakeSendTransactionRequest()
 		txRequest.Params.OneTimeKey = true
 
+		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
+		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Reply(200)
+		gock.New(identityManagerURL).Get("/accounts/" + txRequest.Params.From).Reply(200).JSON(&identitymanager.AccountResponse{})
 		_, err := s.client.SendContractTransaction(ctx, txRequest)
 
 		assert.True(t, errors.IsInvalidFormatError(err))
@@ -126,6 +142,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		txRequest := testutils.FakeSendTransactionRequest()
 		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
 		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
+		gock.New(identityManagerURL).Get("/accounts/" + txRequest.Params.From).Reply(200).JSON(&identitymanager.AccountResponse{})
 		gock.New(chainRegistryURL).
 			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", chainRegistryURL, chain.UUID, ethcommon.HexToAddress("0x").Hex())).
 			Reply(404).Done()
@@ -177,9 +194,11 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		txRequest := testutils.FakeSendTransferTransactionRequest()
 		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
 		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Times(2).Reply(200).JSON(chain)
+		gock.New(identityManagerURL).Get("/accounts/" + txRequest.Params.From).Reply(200).JSON(&identitymanager.AccountResponse{})
 		gock.New(chainRegistryURL).
 			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", chainRegistryURL, chain.UUID, txRequest.Params.From)).
 			Reply(200).JSON(faucet)
+		gock.New(identityManagerURL).Get("/accounts/" + faucet.Creditor.String()).Reply(200).JSON(&identitymanager.AccountResponse{})
 		IdempotencyKey := utils.RandomString(16)
 		rctx := context.WithValue(ctx, clientutils.RequestHeaderKey, map[string]string{
 			controllers.IdempotencyKeyHeader: IdempotencyKey,
@@ -238,6 +257,8 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		txRequest := testutils.FakeSendTesseraRequest()
 		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
 		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Times(2).Reply(200).JSON(chain)
+		gock.New(identityManagerURL).Get("/accounts/" + txRequest.Params.From).Times(2).Reply(200).
+			JSON(&identitymanager.AccountResponse{})
 		gock.New(chainRegistryURL).
 			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", chainRegistryURL, chain.UUID, txRequest.Params.From)).
 			Reply(404).Done()
@@ -294,6 +315,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		txRequest := testutils.FakeSendOrionRequest()
 		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
 		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Times(2).Reply(200).JSON(chain)
+		gock.New(identityManagerURL).Get("/accounts/" + txRequest.Params.From).Reply(200).JSON(&identitymanager.AccountResponse{})
 		gock.New(chainRegistryURL).
 			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", chainRegistryURL, chain.UUID, txRequest.Params.From)).
 			Reply(404).Done()
@@ -346,6 +368,8 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		txRequest := testutils.FakeDeployContractRequest()
 		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
 		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
+		gock.New(identityManagerURL).Get("/accounts/" + txRequest.Params.From).Reply(200).
+			JSON(&identitymanager.AccountResponse{})
 		gock.New(chainRegistryURL).
 			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", chainRegistryURL, chain.UUID, txRequest.Params.From)).
 			Reply(404).Done()
@@ -395,7 +419,6 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		txRequest := testutils.FakeSendRawTransactionRequest()
 		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
 		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
-
 		IdempotencyKey := utils.RandomString(16)
 		rctx := context.WithValue(ctx, clientutils.RequestHeaderKey, map[string]string{
 			controllers.IdempotencyKeyHeader: IdempotencyKey,
@@ -438,6 +461,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		txRequest := testutils.FakeSendTransferTransactionRequest()
 		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
 		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
+		gock.New(identityManagerURL).Get("/accounts/" + txRequest.Params.From).Reply(200).JSON(&identitymanager.AccountResponse{})
 		gock.New(chainRegistryURL).
 			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", chainRegistryURL, chain.UUID, txRequest.Params.From)).
 			Reply(404).Done()
@@ -493,6 +517,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 
 		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
 		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
+		gock.New(identityManagerURL).Get("/accounts/" + txRequest.Params.From).Reply(200).JSON(&identitymanager.AccountResponse{})
 		gock.New(chainRegistryURL).
 			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", chainRegistryURL, chain.UUID, txRequest.Params.From)).
 			Reply(404).Done()
@@ -524,6 +549,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_ZHealthCheck(
 	type healthRes struct {
 		ChainRegistry    string `json:"chain-registry,omitempty"`
 		ContractRegistry string `json:"contract-registry,omitempty"`
+		IdentityManager  string `json:"identity-manager,omitempty"`
 		Database         string `json:"Database,omitempty"`
 		Kafka            string `json:"Kafka,omitempty"`
 	}
@@ -536,6 +562,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_ZHealthCheck(
 
 		gock.New(chainRegistryMetricsURL).Get("/live").Reply(200)
 		gock.New(contractRegistryMetricsURL).Get("/live").Reply(200)
+		gock.New(identityManagerMetricsURL).Get("/live").Reply(200)
 		defer gock.Off()
 
 		resp, err := httpClient.Do(req)
@@ -551,6 +578,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_ZHealthCheck(
 		assert.Equal(s.T(), "OK", status.Database)
 		assert.Equal(s.T(), "OK", status.ChainRegistry)
 		assert.Equal(s.T(), "OK", status.ContractRegistry)
+		assert.Equal(s.T(), "OK", status.IdentityManager)
 		assert.Equal(s.T(), "OK", status.Kafka)
 	})
 
@@ -560,6 +588,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_ZHealthCheck(
 
 		gock.New(chainRegistryMetricsURL).Get("/live").Reply(500)
 		gock.New(contractRegistryMetricsURL).Get("/live").Reply(500)
+		gock.New(identityManagerMetricsURL).Get("/live").Reply(500)
 		defer gock.Off()
 
 		resp, err := httpClient.Do(req)
@@ -576,6 +605,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_ZHealthCheck(
 		assert.Equal(s.T(), "OK", status.Kafka)
 		assert.NotEqual(s.T(), "OK", status.ChainRegistry)
 		assert.NotEqual(s.T(), "OK", status.ContractRegistry)
+		assert.NotEqual(s.T(), "OK", status.IdentityManager)
 	})
 
 	s.T().Run("should retrieve a negative health check over kafka service", func(t *testing.T) {
@@ -584,6 +614,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_ZHealthCheck(
 
 		gock.New(chainRegistryMetricsURL).Get("/live").Reply(200)
 		gock.New(contractRegistryMetricsURL).Get("/live").Reply(200)
+		gock.New(identityManagerMetricsURL).Get("/live").Reply(200)
 		defer gock.Off()
 
 		// Kill Kafka on first call so data is added in DB and status is CREATED but does not get updated to STARTED
@@ -607,6 +638,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_ZHealthCheck(
 		assert.NotEqual(s.T(), "OK", status.Kafka)
 		assert.Equal(s.T(), "OK", status.ChainRegistry)
 		assert.Equal(s.T(), "OK", status.ContractRegistry)
+		assert.Equal(s.T(), "OK", status.IdentityManager)
 	})
 
 	s.T().Run("should retrieve a negative health check over postgres service", func(t *testing.T) {
@@ -615,6 +647,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_ZHealthCheck(
 
 		gock.New(chainRegistryMetricsURL).Get("/live").Reply(200)
 		gock.New(contractRegistryMetricsURL).Get("/live").Reply(200)
+		gock.New(identityManagerMetricsURL).Get("/live").Reply(200)
 		defer gock.Off()
 
 		// Kill Kafka on first call so data is added in DB and status is CREATED but does not get updated to STARTED
@@ -638,5 +671,6 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_ZHealthCheck(
 		assert.Equal(s.T(), "OK", status.Kafka)
 		assert.Equal(s.T(), "OK", status.ChainRegistry)
 		assert.Equal(s.T(), "OK", status.ContractRegistry)
+		assert.Equal(s.T(), "OK", status.IdentityManager)
 	})
 }

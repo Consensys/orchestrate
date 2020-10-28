@@ -47,6 +47,8 @@ func TestCreateAccount_Execute(t *testing.T) {
 			Namespace: tenantID,
 		}, nil)
 
+		accountAgent.EXPECT().FindOneByAddress(ctx, accountEntity.Address, []string{tenantID}).
+			Return(nil, errors.NotFoundError("not found"))
 		accountAgent.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
 
 		resp, err := usecase.Execute(ctx, accountEntity, "", "", tenantID)
@@ -71,6 +73,8 @@ func TestCreateAccount_Execute(t *testing.T) {
 			Namespace: tenantID,
 		}, nil)
 
+		accountAgent.EXPECT().FindOneByAddress(ctx, accEntity.Address, []string{tenantID}).
+			Return(nil, errors.NotFoundError("not found"))
 		accountAgent.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
 
 		resp, err := usecase.Execute(ctx, accEntity, privateKey, "", tenantID)
@@ -95,6 +99,8 @@ func TestCreateAccount_Execute(t *testing.T) {
 			Namespace: tenantID,
 		}, nil)
 
+		accountAgent.EXPECT().FindOneByAddress(ctx, accEntity.Address, []string{tenantID}).
+			Return(nil, errors.NotFoundError("not found"))
 		accountAgent.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
 
 		resp, err := usecase.Execute(ctx, accEntity, "", chainName, tenantID)
@@ -125,7 +131,7 @@ func TestCreateAccount_Execute(t *testing.T) {
 
 		_, err := usecase.Execute(ctx, accEntity, "", "", tenantID)
 		assert.Error(t, err)
-		assert.True(t, errors.IsInvalidParameterError(err))
+		assert.True(t, errors.IsAlreadyExistsError(err))
 	})
 
 	t.Run("should fail with same error create account fails", func(t *testing.T) {
@@ -140,6 +146,51 @@ func TestCreateAccount_Execute(t *testing.T) {
 
 		_, err := usecase.Execute(ctx, accEntity, "", "", tenantID)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createAccountComponent), err)
+	})
+	
+	t.Run("should fail with same error if cannot findOneByAddress account", func(t *testing.T) {
+		expectedErr := errors.ConnectionError("error")
+		accEntity := testutils3.FakeAccount()
+		accEntity.TenantID = tenantID
+
+		mockSearchUC.EXPECT().Execute(ctx, &entities.AccountFilters{Aliases: []string{accEntity.Alias}}, tenants)
+		mockClient.EXPECT().ETHCreateAccount(ctx, &types.CreateETHAccountRequest{
+			Namespace: tenantID,
+		}).Return(&types.ETHAccountResponse{
+			Address:   accEntity.Address,
+			PublicKey: accEntity.PublicKey,
+			Namespace: tenantID,
+		}, nil)
+
+		accountAgent.EXPECT().FindOneByAddress(ctx, accEntity.Address, []string{tenantID}).
+			Return(nil, expectedErr)
+
+		_, err := usecase.Execute(ctx, accEntity, "", "", tenantID)
+
+		assert.Error(t, err)
+		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createAccountComponent), err)
+	})
+	
+	t.Run("should fail with AlreadyExistsError if account already exists", func(t *testing.T) {
+		accEntity := testutils3.FakeAccount()
+		accEntity.TenantID = tenantID
+
+		mockSearchUC.EXPECT().Execute(ctx, &entities.AccountFilters{Aliases: []string{accEntity.Alias}}, tenants)
+		mockClient.EXPECT().ETHCreateAccount(ctx, &types.CreateETHAccountRequest{
+			Namespace: tenantID,
+		}).Return(&types.ETHAccountResponse{
+			Address:   accEntity.Address,
+			PublicKey: accEntity.PublicKey,
+			Namespace: tenantID,
+		}, nil)
+
+		accountAgent.EXPECT().FindOneByAddress(ctx, accEntity.Address, []string{tenantID}).
+			Return(nil, nil)
+
+		_, err := usecase.Execute(ctx, accEntity, "", "", tenantID)
+
+		assert.Error(t, err)
+		assert.True(t, errors.IsAlreadyExistsError(err))
 	})
 
 	t.Run("should fail with same error if cannot insert account", func(t *testing.T) {
@@ -156,6 +207,8 @@ func TestCreateAccount_Execute(t *testing.T) {
 			Namespace: tenantID,
 		}, nil)
 
+		accountAgent.EXPECT().FindOneByAddress(ctx, accEntity.Address, []string{tenantID}).
+			Return(nil, errors.NotFoundError("not found"))
 		accountAgent.EXPECT().Insert(ctx, gomock.Any()).Return(expectedErr)
 
 		_, err := usecase.Execute(ctx, accEntity, "", "", tenantID)
@@ -173,8 +226,13 @@ func TestCreateAccount_Execute(t *testing.T) {
 		mockSearchUC.EXPECT().Execute(ctx, &entities.AccountFilters{Aliases: []string{accEntity.Alias}}, tenants)
 		mockClient.EXPECT().ETHCreateAccount(ctx, &types.CreateETHAccountRequest{
 			Namespace: tenantID,
-		}).Return(&types.ETHAccountResponse{}, nil)
+		}).Return(&types.ETHAccountResponse{
+			Address:   accEntity.Address,
+			PublicKey: accEntity.PublicKey,
+		}, nil)
 
+		accountAgent.EXPECT().FindOneByAddress(ctx, accEntity.Address, []string{tenantID}).
+			Return(nil, errors.NotFoundError("not found"))
 		accountAgent.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
 		mockFundingUC.EXPECT().Execute(ctx, gomock.Any(), chainName).Return(expectedErr)
 		_, err := usecase.Execute(ctx, accEntity, "", chainName, tenantID)

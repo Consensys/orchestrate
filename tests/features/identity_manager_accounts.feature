@@ -144,9 +144,5 @@ Feature: Account management
     }
 }
       """
-    Then the response code should be 202
-    Then Envelopes should be in topic "tx.recover"
-    And Envelopes should have the following fields
-      | Errors.0.Message                 |
-      | no key for account "{{fromAcc}}" |
+    Then the response code should be 422
 

@@ -15,7 +15,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	mockauth "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
-	mockclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client/mock"
+	mockchainregistryclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client/mock"
+	mockidentitymanagerclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/identity-manager/client/mock"
 )
 
 func TestApp(t *testing.T) {
@@ -26,11 +27,14 @@ func TestApp(t *testing.T) {
 	keyChecker := mockauth.NewMockChecker(ctrl)
 	mockSyncProducer := mocks.NewSyncProducer(t, nil)
 
-	chainRegistryClient := mockclient.NewMockChainRegistryClient(ctrl)
+	chainRegistryClient := mockchainregistryclient.NewMockChainRegistryClient(ctrl)
+	identityManagerClient := mockidentitymanagerclient.NewMockIdentityManagerClient(ctrl)
+	
 	cfg := NewConfig(viper.New())
 	cfg.Store.Type = "postgres"
 
 	chainRegistryClient.EXPECT().Checker().Return(func() error {return nil})
+	identityManagerClient.EXPECT().Checker().Return(func() error {return nil})
 
 	kCfg := sarama.NewKafkaTopicConfig(viper.New())
 	_, err := NewTxScheduler(
@@ -39,6 +43,7 @@ func TestApp(t *testing.T) {
 		jwtChecker, keyChecker,
 		chainRegistryClient,
 		mock.NewMockContractRegistryClient(ctrl),
+		identityManagerClient,
 		mockSyncProducer,
 		kCfg,
 	)

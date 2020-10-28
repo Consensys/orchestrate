@@ -11,6 +11,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
 	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client"
+	identitymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/identity-manager/client"
 )
 
 // New Utility function used to initialize a new service
@@ -19,6 +20,7 @@ func New(ctx context.Context) (*app.App, error) {
 	authjwt.Init(ctx)
 	authkey.Init(ctx)
 	chainregistry.Init(ctx)
+	identitymanager.Init()
 	sarama.InitSyncProducer(ctx)
 	contractregistry.Init(ctx)
 
@@ -32,6 +34,7 @@ func New(ctx context.Context) (*app.App, error) {
 		authkey.GlobalChecker(),
 		chainregistry.GlobalClient(),
 		contractregistry.GlobalClient(),
+		identitymanager.GlobalClient(),
 		sarama.GlobalSyncProducer(),
 		sarama.NewKafkaTopicConfig(viper.GetViper()),
 	)

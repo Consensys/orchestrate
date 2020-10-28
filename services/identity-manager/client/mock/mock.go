@@ -112,18 +112,18 @@ func (mr *MockAccountClientMockRecorder) UpdateAccount(ctx, address, request int
 }
 
 // SignPayload mocks base method
-func (m *MockAccountClient) SignPayload(ctx context.Context, address, payload string) (string, error) {
+func (m *MockAccountClient) SignPayload(ctx context.Context, address string, request *identitymanager.SignPayloadRequest) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SignPayload", ctx, address, payload)
+	ret := m.ctrl.Call(m, "SignPayload", ctx, address, request)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // SignPayload indicates an expected call of SignPayload
-func (mr *MockAccountClientMockRecorder) SignPayload(ctx, address, payload interface{}) *gomock.Call {
+func (mr *MockAccountClientMockRecorder) SignPayload(ctx, address, request interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignPayload", reflect.TypeOf((*MockAccountClient)(nil).SignPayload), ctx, address, payload)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignPayload", reflect.TypeOf((*MockAccountClient)(nil).SignPayload), ctx, address, request)
 }
 
 // MockIdentityManagerClient is a mock of IdentityManagerClient interface
@@ -239,16 +239,16 @@ func (mr *MockIdentityManagerClientMockRecorder) UpdateAccount(ctx, address, req
 }
 
 // SignPayload mocks base method
-func (m *MockIdentityManagerClient) SignPayload(ctx context.Context, address, payload string) (string, error) {
+func (m *MockIdentityManagerClient) SignPayload(ctx context.Context, address string, request *identitymanager.SignPayloadRequest) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SignPayload", ctx, address, payload)
+	ret := m.ctrl.Call(m, "SignPayload", ctx, address, request)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // SignPayload indicates an expected call of SignPayload
-func (mr *MockIdentityManagerClientMockRecorder) SignPayload(ctx, address, payload interface{}) *gomock.Call {
+func (mr *MockIdentityManagerClientMockRecorder) SignPayload(ctx, address, request interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignPayload", reflect.TypeOf((*MockIdentityManagerClient)(nil).SignPayload), ctx, address, payload)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignPayload", reflect.TypeOf((*MockIdentityManagerClient)(nil).SignPayload), ctx, address, request)
 }

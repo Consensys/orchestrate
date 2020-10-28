@@ -17,6 +17,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/config/dynamic"
 	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
+	identitymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/identity-manager/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/service/controllers"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/multi"
 )
@@ -27,6 +28,7 @@ func NewTxScheduler(
 	jwt, key auth.Checker,
 	chainRegistryClient chainregistry.ChainRegistryClient,
 	contractRegistryClient contractregistry.ContractRegistryClient,
+	identityManagerClient identitymanager.IdentityManagerClient,
 	syncProducer sarama.SyncProducer,
 	topicCfg *pkgsarama.KafkaTopicConfig,
 ) (*app.App, error) {
@@ -36,7 +38,7 @@ func NewTxScheduler(
 		return nil, err
 	}
 
-	ucs := builder.NewUseCases(db, chainRegistryClient, contractRegistryClient, syncProducer, topicCfg)
+	ucs := builder.NewUseCases(db, chainRegistryClient, contractRegistryClient, identityManagerClient, syncProducer, topicCfg)
 
 	// Option for transaction handler
 	txSchedulerHandlerOpt := app.HandlerOpt(reflect.TypeOf(&dynamic.Transactions{}), controllers.NewBuilder(ucs))
@@ -45,7 +47,7 @@ func NewTxScheduler(
 	return app.New(
 		cfg.App,
 		app.MultiTenancyOpt("auth", jwt, key, cfg.Multitenancy),
-		ReadinessOpt(db, chainRegistryClient),
+		ReadinessOpt(db, chainRegistryClient, identityManagerClient),
 		app.MetricsOpt(),
 		app.LoggerMiddlewareOpt("base"),
 		app.SwaggerOpt("./public/swagger-specs/services/transaction-scheduler/swagger.json", "base@logger-base"),
@@ -54,11 +56,12 @@ func NewTxScheduler(
 	)
 }
 
-func ReadinessOpt(db database.DB, chainRegistryClient chainregistry.ChainRegistryClient) app.Option {
+func ReadinessOpt(db database.DB, chainRegistryClient chainregistry.ChainRegistryClient, identitymanagerClient identitymanager.IdentityManagerClient) app.Option {
 	return func(ap *app.App) error {
 		ap.AddReadinessCheck("database", postgres.Checker(db.(orm.DB)))
 		ap.AddReadinessCheck("chain-registry", chainRegistryClient.Checker())
 		ap.AddReadinessCheck("contract-registry", contractregistry2.GlobalChecker())
+		ap.AddReadinessCheck("identity-manager", identitymanagerClient.Checker())
 		ap.AddReadinessCheck("kafka", pkgsarama.GlobalClientChecker())
 		return nil
 	}

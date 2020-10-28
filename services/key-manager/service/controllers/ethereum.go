@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/keymanager"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 
 	"github.com/gorilla/mux"
 	jsonutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
@@ -114,7 +115,11 @@ func (c *EthereumController) signPayload(rw http.ResponseWriter, request *http.R
 		return
 	}
 
-	address := mux.Vars(request)["address"]
+	address, err := utils.ParseHexToMixedCaseEthAddress(mux.Vars(request)["address"])
+	if err != nil {
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
 	signature, err := c.ucs.SignPayload().Execute(ctx, address, signRequest.Namespace, signRequest.Data)
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
@@ -144,7 +149,11 @@ func (c *EthereumController) signTransaction(rw http.ResponseWriter, request *ht
 		return
 	}
 
-	address := mux.Vars(request)["address"]
+	address, err := utils.ParseHexToMixedCaseEthAddress(mux.Vars(request)["address"])
+	if err != nil {
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
 	chainID, _ := new(big.Int).SetString(signRequest.ChainID, 10)
 	tx := formatters.FormatSignETHTransactionRequest(signRequest)
 	signature, err := c.ucs.SignTransaction().Execute(ctx, address, signRequest.Namespace, chainID, tx)
@@ -176,7 +185,11 @@ func (c *EthereumController) signQuorumPrivate(rw http.ResponseWriter, request *
 		return
 	}
 
-	address := mux.Vars(request)["address"]
+	address, err := utils.ParseHexToMixedCaseEthAddress(mux.Vars(request)["address"])
+	if err != nil {
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
 	tx := formatters.FormatSignQuorumPrivateTransactionRequest(signRequest)
 	signature, err := c.ucs.SignQuorumPrivateTransaction().Execute(ctx, address, signRequest.Namespace, tx)
 	if err != nil {
@@ -213,7 +226,11 @@ func (c *EthereumController) signEEA(rw http.ResponseWriter, request *http.Reque
 		return
 	}
 
-	address := mux.Vars(request)["address"]
+	address, err := utils.ParseHexToMixedCaseEthAddress(mux.Vars(request)["address"])
+	if err != nil {
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
 	chainID, _ := new(big.Int).SetString(signRequest.ChainID, 10)
 	tx, privateArgs := formatters.FormatSignEEATransactionRequest(signRequest)
 	signature, err := c.ucs.SignEEATransaction().Execute(ctx, address, signRequest.Namespace, chainID, tx, privateArgs)

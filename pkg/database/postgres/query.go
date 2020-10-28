@@ -26,7 +26,7 @@ func Insert(ctx context.Context, db DB, models ...interface{}) *ierror.Error {
 		} else if ok && pgErr.IntegrityViolation() {
 			errMsg := "insert integrity violation"
 			logger.WithError(err).Error(errMsg)
-			return errors.PostgresConnectionError(errMsg)
+			return errors.ConstraintViolatedError(errMsg)
 		}
 
 		errMsg := "error executing insert"

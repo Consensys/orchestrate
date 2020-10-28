@@ -8,15 +8,18 @@ import (
 	"testing"
 	"time"
 
+	"github.com/containous/traefik/v2/pkg/log"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/identitymanager"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/txscheduler"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/identity-manager/client"
 	"gopkg.in/h2non/gock.v1"
@@ -55,22 +58,22 @@ func (s *identityManagerTransactionTestSuite) TestIdentityManager_CreateAccounts
 		assert.Equal(t, resp.TenantID, "_")
 	})
 
-	s.T().Run("should import account successfully by querying key-manager API", func(t *testing.T) {
+	s.T().Run("should failt to create account with same alias", func(t *testing.T) {
 		ethAccRes := testutils.FakeETHAccountResponse()
 		defer gock.Off()
-		txRequest := testutils.FakeImportAccountRequest()
-		gock.New(keyManagerURL).Post("/ethereum/accounts/import").Reply(200).JSON(ethAccRes)
+		txRequest := testutils.FakeCreateAccountRequest()
+		gock.New(keyManagerURL).Post("/ethereum/accounts").Times(2).Reply(200).JSON(ethAccRes)
 
-		resp, err := s.client.ImportAccount(ctx, txRequest)
+		_, err := s.client.CreateAccount(ctx, txRequest)
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
 		}
 
-		assert.Equal(t, resp.Address, ethAccRes.Address)
-		assert.Equal(t, resp.PublicKey, ethAccRes.PublicKey)
-		assert.Equal(t, resp.Alias, txRequest.Alias)
-		assert.Equal(t, resp.TenantID, "_")
+		_, err = s.client.CreateAccount(ctx, txRequest)
+		assert.Error(t, err)
+		log.WithoutContext().Errorf("%v", err)
+		assert.True(t, errors.IsAlreadyExistsError(err))
 	})
 
 	s.T().Run("should create account successfully and trigger funding transaction", func(t *testing.T) {
@@ -124,6 +127,47 @@ func (s *identityManagerTransactionTestSuite) TestIdentityManager_CreateAccounts
 	})
 }
 
+func (s *identityManagerTransactionTestSuite) TestIdentityManager_ImportAccounts() {
+	ctx := s.env.ctx
+
+	s.T().Run("should import account successfully by querying key-manager API", func(t *testing.T) {
+		ethAccRes := testutils.FakeETHAccountResponse()
+		defer gock.Off()
+		txRequest := testutils.FakeImportAccountRequest()
+		gock.New(keyManagerURL).Post("/ethereum/accounts/import").Reply(200).JSON(ethAccRes)
+
+		resp, err := s.client.ImportAccount(ctx, txRequest)
+		if err != nil {
+			assert.Fail(t, err.Error())
+			return
+		}
+
+		assert.Equal(t, resp.Address, ethAccRes.Address)
+		assert.Equal(t, resp.PublicKey, ethAccRes.PublicKey)
+		assert.Equal(t, resp.Alias, txRequest.Alias)
+		assert.Equal(t, resp.TenantID, "_")
+	})
+	
+	s.T().Run("should fail to import same account twice", func(t *testing.T) {
+		ethAccRes := testutils.FakeETHAccountResponse()
+		defer gock.Off()
+		txRequest := testutils.FakeImportAccountRequest()
+		gock.New(keyManagerURL).Post("/ethereum/accounts/import").Times(2).Reply(200).JSON(ethAccRes)
+
+		_, err := s.client.ImportAccount(ctx, txRequest)
+		if err != nil {
+			assert.Fail(t, err.Error())
+			return
+		}
+
+		txRequest.Alias = fmt.Sprintf("Alias_%s", utils.RandomString(5))
+		_, err = s.client.ImportAccount(ctx, txRequest)
+		assert.Error(t, err)
+		log.WithoutContext().Errorf("%v", err)
+		assert.True(t, errors.IsAlreadyExistsError(err))
+	})
+}
+
 func (s *identityManagerTransactionTestSuite) TestIdentityManager_SearchIdentities() {
 	ctx := s.env.ctx
 
@@ -138,7 +182,7 @@ func (s *identityManagerTransactionTestSuite) TestIdentityManager_SearchIdentiti
 			assert.Fail(t, err.Error())
 			return
 		}
-		
+
 		resp, err := s.client.SearchAccounts(ctx, &entities.AccountFilters{
 			Aliases: []string{txRequest.Alias},
 		})
@@ -169,7 +213,7 @@ func (s *identityManagerTransactionTestSuite) TestIdentityManager_GetAccount() {
 			assert.Fail(t, err.Error())
 			return
 		}
-		
+
 		resp, err := s.client.GetAccount(ctx, ethAccRes.Address)
 		if err != nil {
 			assert.Fail(t, err.Error())
@@ -197,7 +241,7 @@ func (s *identityManagerTransactionTestSuite) TestIdentityManager_UpdateAccount(
 			assert.Fail(t, err.Error())
 			return
 		}
-		
+
 		txRequest2 := testutils.FakeUpdateAccountRequest()
 		resp, err := s.client.UpdateAccount(ctx, ethAccRes.Address, txRequest2)
 		if err != nil {

@@ -198,11 +198,7 @@ Feature: Account management
     }
 }
       """
-    Then the response code should be 202
-    Then Envelopes should be in topic "tx.recover"
-    And Envelopes should have the following fields
-      | Errors.0.Message                          |
-      | no key for account "{{generatedAccAddr}}" |
+    Then the response code should be 422
     Then I track the following envelopes
       | ID                   |
       | {{wildcardSendTxID}} |

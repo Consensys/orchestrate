@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"testing"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/identitymanager"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
 
 	abi2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/abi"
@@ -14,6 +15,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client/mock"
 	mock2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client/mock"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
+	mock3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/identity-manager/client/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store/mocks"
 
 	"github.com/golang/mock/gomock"
@@ -32,6 +34,7 @@ type transactionsTestSuite struct {
 	mockTxRequestDA            *mocks.MockTransactionRequestAgent
 	mockChainRegistryClient    *mock.MockChainRegistryClient
 	mockContractRegistryClient *mock2.MockContractRegistryClient
+	mockIdentityManagerClient  *mock3.MockIdentityManagerClient
 }
 
 func TestTransactionValidator(t *testing.T) {
@@ -46,8 +49,9 @@ func (s *transactionsTestSuite) SetupTest() {
 	s.mockTxRequestDA = mocks.NewMockTransactionRequestAgent(ctrl)
 	s.mockChainRegistryClient = mock.NewMockChainRegistryClient(ctrl)
 	s.mockContractRegistryClient = mock2.NewMockContractRegistryClient(ctrl)
+	s.mockIdentityManagerClient = mock3.NewMockIdentityManagerClient(ctrl)
 
-	s.validator = NewTransactionValidator(s.mockChainRegistryClient, s.mockContractRegistryClient)
+	s.validator = NewTransactionValidator(s.mockChainRegistryClient, s.mockContractRegistryClient, s.mockIdentityManagerClient)
 }
 
 func (s *transactionsTestSuite) TestTransactionValidator_ValidateChainExists() {
@@ -61,11 +65,23 @@ func (s *transactionsTestSuite) TestTransactionValidator_ValidateChainExists() {
 		assert.Equal(t, chainID, chainModel.ChainID)
 	})
 
-	s.T().Run("should fail with InvalidParameterError if ChainRegistryClient fails", func(t *testing.T) {
-		s.mockChainRegistryClient.EXPECT().GetChainByUUID(gomock.Any(), chainUUID).Return(nil, fmt.Errorf("error"))
+	s.T().Run("should fail with InvalidParameterError if ChainRegistryClient returns NotFound", func(t *testing.T) {
+		s.mockChainRegistryClient.EXPECT().GetChainByUUID(gomock.Any(), chainUUID).
+			Return(nil, errors.NotFoundError(("error")))
 		_, err := s.validator.ValidateChainExists(context.Background(), chainUUID)
 
+		assert.Error(t, err)
 		assert.True(t, errors.IsInvalidParameterError(err))
+	})
+	
+	s.T().Run("should fail with same error if ChainRegistryClient fails", func(t *testing.T) {
+		expectedErr := errors.ServiceConnectionError(("error"))
+		s.mockChainRegistryClient.EXPECT().GetChainByUUID(gomock.Any(), chainUUID).
+			Return(nil, expectedErr)
+		_, err := s.validator.ValidateChainExists(context.Background(), chainUUID)
+
+		assert.Error(t, err)
+		assert.Equal(t, expectedErr, errors.FromError(err).ExtendComponent(txValidatorComponent))
 	})
 }
 
@@ -188,5 +204,41 @@ func (s *transactionsTestSuite) TestTransactionValidator_ValidateContract() {
 
 		assert.Empty(t, txData)
 		assert.True(t, errors.IsInvalidParameterError(err))
+	})
+}
+
+func (s *transactionsTestSuite) TestTransactionValidator_ValidateAccount() {
+	ctx := context.Background()
+
+	s.T().Run("should validate account successfully", func(t *testing.T) {
+		txRequest := testutils3.FakeTxRequest()
+
+		s.mockIdentityManagerClient.EXPECT().GetAccount(ctx, txRequest.Params.From).
+			Return(&identitymanager.AccountResponse{}, nil)
+
+		err := s.validator.ValidateAccount(ctx, txRequest.Params.From)
+		assert.NoError(t, err)
+	})
+
+	s.T().Run("should fail with InvalidParameter error if IdentityManagerClient returns a NotFound error", func(t *testing.T) {
+		txRequest := testutils3.FakeTxRequest()
+		expectedErr := errors.NotFoundError("not found")
+		s.mockIdentityManagerClient.EXPECT().GetAccount(ctx, txRequest.Params.From).
+			Return(&identitymanager.AccountResponse{}, expectedErr)
+
+		err := s.validator.ValidateAccount(ctx, txRequest.Params.From)
+		assert.Error(t, err)
+		assert.True(t, errors.IsInvalidParameterError(err))
+	})
+	
+	s.T().Run("should fail with same error if IdentityManagerClient returns an error", func(t *testing.T) {
+		txRequest := testutils3.FakeTxRequest()
+		expectedErr := errors.ConnectionError("not found")
+		s.mockIdentityManagerClient.EXPECT().GetAccount(ctx, txRequest.Params.From).
+			Return(&identitymanager.AccountResponse{}, expectedErr)
+
+		err := s.validator.ValidateAccount(ctx, txRequest.Params.From)
+		assert.Error(t, err)
+		assert.Equal(t, expectedErr, errors.FromError(err).ExtendComponent(txValidatorComponent))
 	})
 }

@@ -66,6 +66,11 @@ func (s *identityCtrlTestSuite) SignPayload() usecases.SignPayloadUseCase {
 
 var _ usecases.AccountUseCases = &identityCtrlTestSuite{}
 
+const (
+	inputTestAddress     = "0x7e654d251da770a068413677967f6d3ea2feA9e4"
+	mixedCaseTestAddress = "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4"
+)
+
 func TestAccountController(t *testing.T) {
 	s := new(identityCtrlTestSuite)
 	suite.Run(t, s)
@@ -168,13 +173,12 @@ func (s *identityCtrlTestSuite) TestAccountController_GetAccount() {
 	s.T().Run("should execute get identity request successfully", func(t *testing.T) {
 		accResp := testutils.FakeAccount()
 		rw := httptest.NewRecorder()
-		address := ethcommon.HexToAddress("0x123").String()
 
 		httpRequest := httptest.
-			NewRequest(http.MethodGet, "/accounts/"+address, nil).
+			NewRequest(http.MethodGet, "/accounts/"+inputTestAddress, nil).
 			WithContext(s.ctx)
 
-		s.getIdentityUC.EXPECT().Execute(gomock.Any(), address, s.tenants).Return(accResp, nil)
+		s.getIdentityUC.EXPECT().Execute(gomock.Any(), mixedCaseTestAddress, s.tenants).Return(accResp, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -204,16 +208,15 @@ func (s *identityCtrlTestSuite) TestAccountController_UpdateAccount() {
 		req := testutils.FakeUpdateAccountRequest()
 		rw := httptest.NewRecorder()
 		requestBytes, _ := json.Marshal(req)
-		address := ethcommon.HexToAddress("0x123").String()
 
 		httpRequest := httptest.
-			NewRequest(http.MethodPatch, "/accounts/"+address, bytes.NewReader(requestBytes)).
+			NewRequest(http.MethodPatch, "/accounts/"+inputTestAddress, bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 
 		acc := &entities.Account{
 			Attributes: req.Attributes,
 			Alias:      req.Alias,
-			Address:    address,
+			Address:    mixedCaseTestAddress,
 		}
 
 		s.updateIdentityUC.EXPECT().Execute(gomock.Any(), acc, s.tenants).Return(acc, nil)
@@ -267,6 +270,7 @@ func (s *identityCtrlTestSuite) TestAccountController_SearchIdentity() {
 func (s *identityCtrlTestSuite) TestAccountController_SignPayload() {
 	s.T().Run("should execute sign payload request successfully", func(t *testing.T) {
 		acc := testutils.FakeAccount()
+		acc.Address = inputTestAddress
 		rw := httptest.NewRecorder()
 		payload := "payloadMessage"
 		signedPayload := ethcommon.HexToHash("0xABCDEF").String()
@@ -279,7 +283,7 @@ func (s *identityCtrlTestSuite) TestAccountController_SignPayload() {
 			NewRequest(http.MethodPost, fmt.Sprintf("/accounts/%v/sign", acc.Address), bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 
-		s.signPayloadUC.EXPECT().Execute(gomock.Any(), acc.Address, payload, s.tenants[0]).Return(signedPayload, nil)
+		s.signPayloadUC.EXPECT().Execute(gomock.Any(), mixedCaseTestAddress, payload, s.tenants[0]).Return(signedPayload, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 

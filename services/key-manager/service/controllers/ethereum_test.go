@@ -5,14 +5,15 @@ package controllers
 import (
 	"bytes"
 	"fmt"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/keymanager"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/key-manager/key-manager/use-cases/ethereum"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/key-manager/key-manager/use-cases/ethereum/mocks"
 	"math/big"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/keymanager"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/key-manager/key-manager/use-cases/ethereum"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/key-manager/key-manager/use-cases/ethereum/mocks"
 
 	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"
@@ -54,6 +55,11 @@ func (s *ethereumCtrlTestSuite) SignEEATransaction() ethereum.SignEEATransaction
 }
 
 var _ ethereum.UseCases = &ethereumCtrlTestSuite{}
+
+const (
+	inputTestAddress     = "0x7e654d251da770a068413677967f6d3ea2feA9e4"
+	mixedCaseTestAddress = "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4"
+)
 
 func TestEthereumController(t *testing.T) {
 	s := new(ethereumCtrlTestSuite)
@@ -154,8 +160,7 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_Import() {
 }
 
 func (s *ethereumCtrlTestSuite) TestEthereumController_Sign() {
-	address := "0xaddress"
-	url := fmt.Sprintf("/ethereum/accounts/%v/sign", address)
+	url := fmt.Sprintf("/ethereum/accounts/%v/sign", inputTestAddress)
 
 	s.T().Run("should execute request successfully", func(t *testing.T) {
 		signature := "0xsignature"
@@ -169,7 +174,7 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_Sign() {
 		httpRequest := httptest.NewRequest(http.MethodPost, url, bytes.NewReader(requestBytes))
 
 		s.signUC.EXPECT().
-			Execute(gomock.Any(), address, payloadRequest.Namespace, payloadRequest.Data).
+			Execute(gomock.Any(), mixedCaseTestAddress, payloadRequest.Namespace, payloadRequest.Data).
 			Return(signature, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -180,7 +185,6 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_Sign() {
 
 	// Sufficient test to check that the mapping to HTTP errors is working. All other status code tests are done in integration tests
 	s.T().Run("should fail with correct error code if use case fails", func(t *testing.T) {
-		address := "0xaddress"
 		payloadRequest := &keymanager.PayloadRequest{
 			Data:      "my data to sign",
 			Namespace: "namespace",
@@ -191,7 +195,7 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_Sign() {
 		httpRequest := httptest.NewRequest(http.MethodPost, url, bytes.NewReader(requestBytes))
 
 		s.signUC.EXPECT().
-			Execute(gomock.Any(), address, payloadRequest.Namespace, payloadRequest.Data).
+			Execute(gomock.Any(), mixedCaseTestAddress, payloadRequest.Namespace, payloadRequest.Data).
 			Return("", errors.InvalidParameterError("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -200,8 +204,7 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_Sign() {
 }
 
 func (s *ethereumCtrlTestSuite) TestEthereumController_SignTransaction() {
-	address := "0xaddress"
-	url := fmt.Sprintf("/ethereum/accounts/%v/sign-transaction", address)
+	url := fmt.Sprintf("/ethereum/accounts/%v/sign-transaction", inputTestAddress)
 
 	s.T().Run("should execute request successfully", func(t *testing.T) {
 		signature := "0xsignature"
@@ -214,7 +217,7 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_SignTransaction() {
 		expectedTx := formatters.FormatSignETHTransactionRequest(signRequest)
 		expectedChainID, _ := new(big.Int).SetString(signRequest.ChainID, 10)
 		s.signTxUC.EXPECT().
-			Execute(gomock.Any(), address, signRequest.Namespace, expectedChainID, expectedTx).
+			Execute(gomock.Any(), mixedCaseTestAddress, signRequest.Namespace, expectedChainID, expectedTx).
 			Return(signature, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -225,7 +228,6 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_SignTransaction() {
 
 	// Sufficient test to check that the mapping to HTTP errors is working. All other status code tests are done in integration tests
 	s.T().Run("should fail with correct error code if use case fails", func(t *testing.T) {
-		address := "0xaddress"
 		signRequest := testutils.FakeSignETHTransactionRequest()
 		requestBytes, _ := json.Marshal(signRequest)
 
@@ -233,7 +235,7 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_SignTransaction() {
 		httpRequest := httptest.NewRequest(http.MethodPost, url, bytes.NewReader(requestBytes))
 
 		s.signTxUC.EXPECT().
-			Execute(gomock.Any(), address, signRequest.Namespace, gomock.Any(), gomock.Any()).
+			Execute(gomock.Any(), mixedCaseTestAddress, signRequest.Namespace, gomock.Any(), gomock.Any()).
 			Return("", errors.ServiceConnectionError("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -242,8 +244,7 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_SignTransaction() {
 }
 
 func (s *ethereumCtrlTestSuite) TestEthereumController_SignQuorumPrivateTransaction() {
-	address := "0xaddress"
-	url := fmt.Sprintf("/ethereum/accounts/%v/sign-quorum-private-transaction", address)
+	url := fmt.Sprintf("/ethereum/accounts/%v/sign-quorum-private-transaction", inputTestAddress)
 
 	s.T().Run("should execute request successfully", func(t *testing.T) {
 		signature := "0xsignature"
@@ -255,7 +256,7 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_SignQuorumPrivateTransact
 
 		expectedTx := formatters.FormatSignQuorumPrivateTransactionRequest(signRequest)
 		s.signQuorumPrivateTxUC.EXPECT().
-			Execute(gomock.Any(), address, signRequest.Namespace, expectedTx).
+			Execute(gomock.Any(), mixedCaseTestAddress, signRequest.Namespace, expectedTx).
 			Return(signature, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -266,7 +267,6 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_SignQuorumPrivateTransact
 
 	// Sufficient test to check that the mapping to HTTP errors is working. All other status code tests are done in integration tests
 	s.T().Run("should fail with correct error code if use case fails", func(t *testing.T) {
-		address := "0xaddress"
 		signRequest := testutils.FakeSignQuorumPrivateTransactionRequest()
 		requestBytes, _ := json.Marshal(signRequest)
 
@@ -274,7 +274,7 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_SignQuorumPrivateTransact
 		httpRequest := httptest.NewRequest(http.MethodPost, url, bytes.NewReader(requestBytes))
 
 		s.signQuorumPrivateTxUC.EXPECT().
-			Execute(gomock.Any(), address, signRequest.Namespace, gomock.Any()).
+			Execute(gomock.Any(), mixedCaseTestAddress, signRequest.Namespace, gomock.Any()).
 			Return("", errors.ServiceConnectionError("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -283,8 +283,7 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_SignQuorumPrivateTransact
 }
 
 func (s *ethereumCtrlTestSuite) TestEthereumController_SignEEATransaction() {
-	address := "0xaddress"
-	url := fmt.Sprintf("/ethereum/accounts/%v/sign-eea-transaction", address)
+	url := fmt.Sprintf("/ethereum/accounts/%v/sign-eea-transaction", inputTestAddress)
 
 	s.T().Run("should execute request successfully", func(t *testing.T) {
 		signature := "0xsignature"
@@ -297,7 +296,7 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_SignEEATransaction() {
 		expectedTx, expectedPrivateArgs := formatters.FormatSignEEATransactionRequest(signRequest)
 		expectedChainID, _ := new(big.Int).SetString(signRequest.ChainID, 10)
 		s.signEEATxUC.EXPECT().
-			Execute(gomock.Any(), address, signRequest.Namespace, expectedChainID, expectedTx, expectedPrivateArgs).
+			Execute(gomock.Any(), mixedCaseTestAddress, signRequest.Namespace, expectedChainID, expectedTx, expectedPrivateArgs).
 			Return(signature, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -308,7 +307,6 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_SignEEATransaction() {
 
 	// Sufficient test to check that the mapping to HTTP errors is working. All other status code tests are done in integration tests
 	s.T().Run("should fail with correct error code if use case fails", func(t *testing.T) {
-		address := "0xaddress"
 		signRequest := testutils.FakeSignEEATransactionRequest()
 		requestBytes, _ := json.Marshal(signRequest)
 
@@ -316,7 +314,7 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_SignEEATransaction() {
 		httpRequest := httptest.NewRequest(http.MethodPost, url, bytes.NewReader(requestBytes))
 
 		s.signEEATxUC.EXPECT().
-			Execute(gomock.Any(), address, signRequest.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).
+			Execute(gomock.Any(), mixedCaseTestAddress, signRequest.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).
 			Return("", errors.InvalidParameterError("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)

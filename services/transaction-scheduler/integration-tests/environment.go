@@ -19,6 +19,7 @@ import (
 	chainClient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	contractClient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
+	identityClient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/identity-manager/client"
 	transactionscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler"
 	"gopkg.in/h2non/gock.v1"
 	"k8s.io/apimachinery/pkg/util/rand"
@@ -40,6 +41,8 @@ const kafkaContainerID = "Kafka-transaction-scheduler"
 const zookeeperContainerID = "zookeeper-transaction-scheduler"
 const chainRegistryURL = "http://chain-registry:8081"
 const chainRegistryMetricsURL = "http://chain-registry:8082"
+const identityManagerURL = "http://identity-manager:8081"
+const identityManagerMetricsURL = "http://identity-manager:8082"
 const contractRegistryMetricsURL = "http://contract-registry:8082"
 const networkName = "transaction-scheduler"
 
@@ -292,6 +295,10 @@ func newTransactionScheduler(
 	conf.MetricsURL = chainRegistryMetricsURL
 	chainRegistryClient := chainClient.NewHTTPClient(httpClient, conf)
 
+	conf2 := identityClient.NewConfig(identityManagerURL, nil)
+	conf2.MetricsURL = identityManagerMetricsURL
+	identityManagerClient := identityClient.NewHTTPClient(httpClient, conf2)
+
 	pgmngr := postgres.GetManager()
 	txSchedulerConfig := transactionscheduler.NewConfig(viper.GetViper())
 	contractClient.SetGlobalChecker(func() error {
@@ -314,6 +321,7 @@ func newTransactionScheduler(
 		authjwt.GlobalChecker(), authkey.GlobalChecker(),
 		chainRegistryClient,
 		contractRegistryClient,
+		identityManagerClient,
 		sarama.GlobalSyncProducer(),
 		topicCfg,
 	)

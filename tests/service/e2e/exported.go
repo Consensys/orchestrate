@@ -13,12 +13,16 @@ import (
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/redis"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	pkglog "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/log"
+	identitymanager2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/identitymanager"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+	identitymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/identity-manager/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/handlers"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/handlers/consumer"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/handlers/dispatcher"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/e2e/cucumber"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/e2e/cucumber/alias"
 	utils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/e2e/utils"
 )
 
@@ -37,6 +41,9 @@ func Start(ctx context.Context) error {
 
 	initComponents(ctx)
 	registerHandlers()
+	if err := importTestIdentities(ctx); err != nil {
+		return err
+	}
 
 	// Start consuming on every topics of interest
 	var topics []string
@@ -133,4 +140,43 @@ func initComponents(ctx context.Context) {
 			cucumber.Init(ctx)
 		},
 	)
+}
+
+// We import account define at Global Aliases
+func importTestIdentities(ctx context.Context) error {
+	client := identitymanager.GlobalClient()
+	aliases := alias.GlobalAliasRegistry()
+
+	privKeys := []interface{}{}
+
+	if besuPrivKeys, ok := aliases.Get("global.nodes.besu_1.fundedPrivateKeys"); ok {
+		privKeys = append(privKeys, besuPrivKeys.([]interface{})...)
+	}
+
+	if quorumPrivKeys, ok := aliases.Get("global.nodes.quorum_1.fundedPrivateKeys"); ok {
+		privKeys = append(privKeys, quorumPrivKeys.([]interface{})...)
+	}
+
+	if gethPrivKeys, ok := aliases.Get("global.nodes.geth.fundedPrivateKeys"); ok {
+		privKeys = append(privKeys, gethPrivKeys.([]interface{})...)
+	}
+
+	for _, privKey := range privKeys {
+		resp, err := client.ImportAccount(ctx, &identitymanager2.ImportAccountRequest{
+			PrivateKey: privKey.(string),
+		})
+
+		if err != nil {
+			if errors.IsInvalidParameterError(err) {
+				log.FromContext(ctx).WithError(err).Warn("Cannot import account")
+				continue
+			}
+
+			return err
+		}
+
+		log.FromContext(ctx).WithField("address", resp.Address).Info("Account imported successfully")
+	}
+
+	return nil
 }

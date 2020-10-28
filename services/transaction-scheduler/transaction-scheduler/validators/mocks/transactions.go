@@ -78,3 +78,17 @@ func (mr *MockTransactionValidatorMockRecorder) ValidateContract(ctx, params int
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateContract", reflect.TypeOf((*MockTransactionValidator)(nil).ValidateContract), ctx, params)
 }
+
+// ValidateAccount mocks base method
+func (m *MockTransactionValidator) ValidateAccount(ctx context.Context, address string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ValidateAccount", ctx, address)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ValidateAccount indicates an expected call of ValidateAccount
+func (mr *MockTransactionValidatorMockRecorder) ValidateAccount(ctx, address interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateAccount", reflect.TypeOf((*MockTransactionValidator)(nil).ValidateAccount), ctx, address)
+}

@@ -9,6 +9,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/httputil"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/identitymanager"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/identity-manager/identity-manager/use-cases"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/identity-manager/service/formatters"
 )
@@ -81,7 +82,11 @@ func (c *IdentitiesController) getOne(rw http.ResponseWriter, request *http.Requ
 	rw.Header().Set("Content-Type", "application/json")
 	ctx := request.Context()
 
-	address := mux.Vars(request)["address"]
+	address, err := utils.ParseHexToMixedCaseEthAddress(mux.Vars(request)["address"])
+	if err != nil {
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	acc, err := c.accountUCs.GetAccount().Execute(ctx, address, multitenancy.AllowedTenantsFromContext(ctx))
 	if err != nil {
@@ -188,7 +193,12 @@ func (c *IdentitiesController) update(rw http.ResponseWriter, request *http.Requ
 	}
 
 	acc := formatters.FormatUpdateAccountRequest(accRequest)
-	acc.Address = mux.Vars(request)["address"]
+	acc.Address, err = utils.ParseHexToMixedCaseEthAddress(mux.Vars(request)["address"])
+	if err != nil {
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
 	accRes, err := c.accountUCs.UpdateAccount().Execute(ctx, acc, multitenancy.AllowedTenantsFromContext(ctx))
 
 	if err != nil {
@@ -221,7 +231,12 @@ func (c *IdentitiesController) signPayload(rw http.ResponseWriter, request *http
 		return
 	}
 
-	address := mux.Vars(request)["address"]
+	address, err := utils.ParseHexToMixedCaseEthAddress(mux.Vars(request)["address"])
+	if err != nil {
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
 	signature, err := c.accountUCs.SignPayload().Execute(ctx, address, payloadRequest.Data, multitenancy.TenantIDFromContext(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)

@@ -56,6 +56,13 @@ func (uc *createJobUseCase) Execute(ctx context.Context, job *entities.Job, tena
 	}
 	job.InternalData.ChainID = chainID
 
+	if job.Transaction.From != "" {
+		err = uc.validator.ValidateAccount(ctx, job.Transaction.From)
+		if err != nil {
+			return nil, errors.FromError(err).ExtendComponent(createJobComponent)
+		}
+	}
+
 	schedule, err := uc.db.Schedule().FindOneByUUID(ctx, job.ScheduleUUID, tenants)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(createJobComponent)
