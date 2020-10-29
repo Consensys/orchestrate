@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"math/big"
 	"net/http"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/keymanager"
@@ -154,9 +153,9 @@ func (c *EthereumController) signTransaction(rw http.ResponseWriter, request *ht
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
-	chainID, _ := new(big.Int).SetString(signRequest.ChainID, 10)
+
 	tx := formatters.FormatSignETHTransactionRequest(signRequest)
-	signature, err := c.ucs.SignTransaction().Execute(ctx, address, signRequest.Namespace, chainID, tx)
+	signature, err := c.ucs.SignTransaction().Execute(ctx, address, signRequest.Namespace, signRequest.ChainID, tx)
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -231,9 +230,8 @@ func (c *EthereumController) signEEA(rw http.ResponseWriter, request *http.Reque
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
-	chainID, _ := new(big.Int).SetString(signRequest.ChainID, 10)
 	tx, privateArgs := formatters.FormatSignEEATransactionRequest(signRequest)
-	signature, err := c.ucs.SignEEATransaction().Execute(ctx, address, signRequest.Namespace, chainID, tx, privateArgs)
+	signature, err := c.ucs.SignEEATransaction().Execute(ctx, address, signRequest.Namespace, signRequest.ChainID, tx, privateArgs)
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return

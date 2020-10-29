@@ -2,9 +2,9 @@ package ethereum
 
 import (
 	"context"
-	"math/big"
 
 	"github.com/ethereum/go-ethereum/crypto"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/crypto/ethereum/signing"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-signer-new/tx-signer/parsers"
 
@@ -12,7 +12,6 @@ import (
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/rlp"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/keymanager/ethereum"
@@ -38,7 +37,7 @@ func (uc *signTransactionUseCase) Execute(ctx context.Context, job *entities.Job
 	logger := log.WithContext(ctx).WithField("job_uuid", job.UUID)
 	logger.Debug("signing ethereum transaction")
 
-	signer := getSigner(job.InternalData.ChainID)
+	signer := signing.GetEIP155Signer(job.InternalData.ChainID)
 	transaction := parsers.ETHTransactionToTransaction(job.Transaction)
 
 	var decodedSignature []byte
@@ -51,29 +50,14 @@ func (uc *signTransactionUseCase) Execute(ctx context.Context, job *entities.Job
 		return "", "", errors.FromError(err).ExtendComponent(signTransactionComponent)
 	}
 
-	signedTx, err := transaction.WithSignature(signer, decodedSignature)
+	signedRaw, err := GetSignedRawTransaction(transaction, decodedSignature, signer)
 	if err != nil {
-		errMessage := "failed to set transaction signature"
-		logger.WithError(err).Error(errMessage)
-		return "", "", errors.InvalidParameterError(errMessage).ExtendComponent(signTransactionComponent)
-	}
-
-	signedRaw, err := rlp.EncodeToBytes(signedTx)
-	if err != nil {
-		errMessage := "failed to RLP encode signed transaction"
-		logger.WithError(err).Error(errMessage)
-		return "", "", errors.CryptoOperationError(errMessage).ExtendComponent(signTransactionComponent)
+		return "", "", errors.FromError(err).ExtendComponent(signEEATransactionComponent)
 	}
 	txHash = transaction.Hash().Hex()
 
 	logger.WithField("txHash", txHash).Info("ethereum transaction signed successfully")
-	return hexutil.Encode(signedRaw), txHash, nil
-}
-
-func getSigner(chainID string) types.Signer {
-	chainIDBigInt := new(big.Int)
-	chainIDBigInt, _ = chainIDBigInt.SetString(chainID, 10)
-	return types.NewEIP155Signer(chainIDBigInt)
+	return signedRaw, txHash, nil
 }
 
 func signWithOneTimeKey(transaction *types.Transaction, signer types.Signer) ([]byte, error) {
@@ -84,15 +68,7 @@ func signWithOneTimeKey(transaction *types.Transaction, signer types.Signer) ([]
 		return nil, errors.CryptoOperationError(errMessage)
 	}
 
-	h := signer.Hash(transaction)
-	decodedSignature, err := crypto.Sign(h[:], privKey)
-	if err != nil {
-		errMessage := "failed to sign ethereum transaction"
-		log.WithError(err).Error(errMessage)
-		return nil, errors.CryptoOperationError(errMessage)
-	}
-
-	return decodedSignature, nil
+	return signing.SignETHTransaction(transaction, privKey, signer)
 }
 
 func (uc *signTransactionUseCase) signWithAccount(ctx context.Context, job *entities.Job, tx *types.Transaction) ([]byte, error) {

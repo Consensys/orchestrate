@@ -25,7 +25,7 @@ func TestSignEEATransaction_Execute(t *testing.T) {
 	ctx := context.Background()
 	address := "0xaddress"
 	namespace := "namespace"
-	chainID := big.NewInt(1)
+	chainID := "1"
 	tx := ethtypes.NewTransaction(
 		0,
 		common.HexToAddress("0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"),

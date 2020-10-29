@@ -50,6 +50,20 @@ func (mr *MockEthereumUseCasesMockRecorder) SignTransaction() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignTransaction", reflect.TypeOf((*MockEthereumUseCases)(nil).SignTransaction))
 }
 
+// SignEEATransaction mocks base method
+func (m *MockEthereumUseCases) SignEEATransaction() usecases.SignEEATransactionUseCase {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SignEEATransaction")
+	ret0, _ := ret[0].(usecases.SignEEATransactionUseCase)
+	return ret0
+}
+
+// SignEEATransaction indicates an expected call of SignEEATransaction
+func (mr *MockEthereumUseCasesMockRecorder) SignEEATransaction() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignEEATransaction", reflect.TypeOf((*MockEthereumUseCases)(nil).SignEEATransaction))
+}
+
 // SendEnvelope mocks base method
 func (m *MockEthereumUseCases) SendEnvelope() usecases.SendEnvelopeUseCase {
 	m.ctrl.T.Helper()
@@ -101,6 +115,45 @@ func (m *MockSignTransactionUseCase) Execute(ctx context.Context, job *entities.
 func (mr *MockSignTransactionUseCaseMockRecorder) Execute(ctx, job interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSignTransactionUseCase)(nil).Execute), ctx, job)
+}
+
+// MockSignEEATransactionUseCase is a mock of SignEEATransactionUseCase interface
+type MockSignEEATransactionUseCase struct {
+	ctrl     *gomock.Controller
+	recorder *MockSignEEATransactionUseCaseMockRecorder
+}
+
+// MockSignEEATransactionUseCaseMockRecorder is the mock recorder for MockSignEEATransactionUseCase
+type MockSignEEATransactionUseCaseMockRecorder struct {
+	mock *MockSignEEATransactionUseCase
+}
+
+// NewMockSignEEATransactionUseCase creates a new mock instance
+func NewMockSignEEATransactionUseCase(ctrl *gomock.Controller) *MockSignEEATransactionUseCase {
+	mock := &MockSignEEATransactionUseCase{ctrl: ctrl}
+	mock.recorder = &MockSignEEATransactionUseCaseMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockSignEEATransactionUseCase) EXPECT() *MockSignEEATransactionUseCaseMockRecorder {
+	return m.recorder
+}
+
+// Execute mocks base method
+func (m *MockSignEEATransactionUseCase) Execute(ctx context.Context, job *entities.Job) (string, string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Execute", ctx, job)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(string)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// Execute indicates an expected call of Execute
+func (mr *MockSignEEATransactionUseCaseMockRecorder) Execute(ctx, job interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSignEEATransactionUseCase)(nil).Execute), ctx, job)
 }
 
 // MockSendEnvelopeUseCase is a mock of SendEnvelopeUseCase interface

@@ -127,8 +127,7 @@ func (listener *MessageListener) processEnvelope(ctx context.Context, envelope *
 		// TODO: Send quorum private
 		return "", "", nil
 	case envelope.IsEeaSendPrivateTransaction():
-		// TODO: Send EEA
-		return "", "", nil
+		return listener.useCases.SignEEATransaction().Execute(ctx, job)
 	default:
 		return listener.useCases.SignTransaction().Execute(ctx, job)
 	}

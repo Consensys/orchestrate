@@ -11,7 +11,6 @@ import (
 	gomock "github.com/golang/mock/gomock"
 	entities "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 	ethereum "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/key-manager/key-manager/use-cases/ethereum"
-	big "math/big"
 	reflect "reflect"
 )
 
@@ -208,7 +207,7 @@ func (m *MockSignTransactionUseCase) EXPECT() *MockSignTransactionUseCaseMockRec
 }
 
 // Execute mocks base method
-func (m *MockSignTransactionUseCase) Execute(ctx context.Context, address, namespace string, chainID *big.Int, tx *types0.Transaction) (string, error) {
+func (m *MockSignTransactionUseCase) Execute(ctx context.Context, address, namespace, chainID string, tx *types0.Transaction) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Execute", ctx, address, namespace, chainID, tx)
 	ret0, _ := ret[0].(string)
@@ -284,7 +283,7 @@ func (m *MockSignEEATransactionUseCase) EXPECT() *MockSignEEATransactionUseCaseM
 }
 
 // Execute mocks base method
-func (m *MockSignEEATransactionUseCase) Execute(ctx context.Context, address, namespace string, chainID *big.Int, tx *types0.Transaction, privateArgs *entities.PrivateETHTransactionParams) (string, error) {
+func (m *MockSignEEATransactionUseCase) Execute(ctx context.Context, address, namespace, chainID string, tx *types0.Transaction, privateArgs *entities.PrivateETHTransactionParams) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Execute", ctx, address, namespace, chainID, tx, privateArgs)
 	ret0, _ := ret[0].(string)

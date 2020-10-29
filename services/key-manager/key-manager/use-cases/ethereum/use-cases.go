@@ -2,7 +2,6 @@ package ethereum
 
 import (
 	"context"
-	"math/big"
 
 	quorumtypes "github.com/consensys/quorum/core/types"
 
@@ -33,7 +32,7 @@ type SignUseCase interface {
 }
 
 type SignTransactionUseCase interface {
-	Execute(ctx context.Context, address, namespace string, chainID *big.Int, tx *ethtypes.Transaction) (string, error)
+	Execute(ctx context.Context, address, namespace, chainID string, tx *ethtypes.Transaction) (string, error)
 }
 
 type SignQuorumPrivateTransactionUseCase interface {
@@ -43,8 +42,7 @@ type SignQuorumPrivateTransactionUseCase interface {
 type SignEEATransactionUseCase interface {
 	Execute(
 		ctx context.Context,
-		address, namespace string,
-		chainID *big.Int,
+		address, namespace string, chainID string,
 		tx *ethtypes.Transaction,
 		privateArgs *entities.PrivateETHTransactionParams,
 	) (string, error)

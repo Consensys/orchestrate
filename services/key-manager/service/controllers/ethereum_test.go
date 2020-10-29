@@ -5,7 +5,6 @@ package controllers
 import (
 	"bytes"
 	"fmt"
-	"math/big"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -215,9 +214,8 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_SignTransaction() {
 		httpRequest := httptest.NewRequest(http.MethodPost, url, bytes.NewReader(requestBytes))
 
 		expectedTx := formatters.FormatSignETHTransactionRequest(signRequest)
-		expectedChainID, _ := new(big.Int).SetString(signRequest.ChainID, 10)
 		s.signTxUC.EXPECT().
-			Execute(gomock.Any(), mixedCaseTestAddress, signRequest.Namespace, expectedChainID, expectedTx).
+			Execute(gomock.Any(), mixedCaseTestAddress, signRequest.Namespace, signRequest.ChainID, expectedTx).
 			Return(signature, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -294,9 +292,8 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_SignEEATransaction() {
 		httpRequest := httptest.NewRequest(http.MethodPost, url, bytes.NewReader(requestBytes))
 
 		expectedTx, expectedPrivateArgs := formatters.FormatSignEEATransactionRequest(signRequest)
-		expectedChainID, _ := new(big.Int).SetString(signRequest.ChainID, 10)
 		s.signEEATxUC.EXPECT().
-			Execute(gomock.Any(), mixedCaseTestAddress, signRequest.Namespace, expectedChainID, expectedTx, expectedPrivateArgs).
+			Execute(gomock.Any(), mixedCaseTestAddress, signRequest.Namespace, signRequest.ChainID, expectedTx, expectedPrivateArgs).
 			Return(signature, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)

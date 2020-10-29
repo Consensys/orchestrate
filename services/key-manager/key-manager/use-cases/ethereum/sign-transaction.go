@@ -2,12 +2,11 @@ package ethereum
 
 import (
 	"context"
-	"math/big"
 
 	"github.com/consensys/quorum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/crypto/ethereum/signing"
 
-	"github.com/ethereum/go-ethereum/crypto"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/key-manager/store"
@@ -28,7 +27,7 @@ func NewSignTransactionUseCase(vault store.Vault) SignTransactionUseCase {
 }
 
 // Execute signs an ethereum transaction
-func (uc *signTxUseCase) Execute(ctx context.Context, address, namespace string, chainID *big.Int, tx *ethtypes.Transaction) (string, error) {
+func (uc *signTxUseCase) Execute(ctx context.Context, address, namespace, chainID string, tx *ethtypes.Transaction) (string, error) {
 	logger := log.WithContext(ctx).WithField("namespace", namespace).WithField("address", address)
 	logger.Debug("signing ethereum transaction")
 
@@ -42,13 +41,9 @@ func (uc *signTxUseCase) Execute(ctx context.Context, address, namespace string,
 		return "", errors.FromError(err).ExtendComponent(signTransactionComponent)
 	}
 
-	signer := ethtypes.NewEIP155Signer(chainID)
-	h := signer.Hash(tx)
-	signature, err := crypto.Sign(h[:], privKey)
+	signature, err := signing.SignETHTransaction(tx, privKey, signing.GetEIP155Signer(chainID))
 	if err != nil {
-		errMessage := "failed to sign ethereum transaction"
-		log.WithContext(ctx).WithError(err).Error(errMessage)
-		return "", errors.CryptoOperationError(errMessage).ExtendComponent(signTransactionComponent)
+		return "", errors.FromError(err).ExtendComponent(signTransactionComponent)
 	}
 
 	logger.Info("ethereum transaction signed successfully")
