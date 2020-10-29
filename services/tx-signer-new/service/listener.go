@@ -118,7 +118,7 @@ func decodeMessage(msg *sarama.ConsumerMessage) (*tx.Envelope, error) {
 func (listener *MessageListener) processEnvelope(ctx context.Context, envelope *tx.Envelope) (raw, txHash string, err error) {
 	job := EnvelopeToJob(envelope, envelope.GetHeadersValue(multitenancy.TenantIDMetadata))
 	switch {
-	case job.Transaction.Raw != "":
+	case envelope.IsEthSendRawTransaction():
 		return job.Transaction.Raw, "", nil
 	case envelope.IsEthSendTesseraPrivateTransaction():
 		// Do nothing as we do not sign storeRaw payload

@@ -154,11 +154,12 @@ func (s *messageListenerCtrlTestSuite) TestMessageListener_PublicEthereum() {
 		mockClaim := mock.NewConsumerGroupClaim("topic", 0, 0)
 		envelope := fakeEnvelope()
 		_ = envelope.SetRawString("0xf851018227108252088082c35080820713a09a0a890215ea6e79d06f9665297996ab967db117f36c2090d6d6ead5a2d32d52a065bc4bc766b5a833cb58b3319e44e952487559b9b939cb5268c0409398214c8b")
+		_ = envelope.SetJobType(tx.JobType_ETH_RAW_TX)
 		msg := &sarama.ConsumerMessage{}
 		msg.Value, _ = proto.Marshal(envelope.TxEnvelopeAsRequest())
 
 		s.sendEnvelopeUC.EXPECT().
-			Execute(ctx, gomock.Any(), s.senderTopic, "0xeca84382E0f1dDdE22EedCd0D803442972EC7BE5@1").
+			Execute(ctx, gomock.Any(), s.senderTopic, "").
 			Return(nil)
 
 		cerr := make(chan error)
