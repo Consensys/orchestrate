@@ -177,7 +177,7 @@ func SetGlobalSyncProducer(p sarama.SyncProducer) {
 }
 
 // InitConsumerGroup initialize consumer group
-func InitConsumerGroup(ctx context.Context) {
+func InitConsumerGroup(ctx context.Context, kafkaGroup string) {
 	initConsumerGroupOnce.Do(func() {
 		if group != nil {
 			return
@@ -190,13 +190,13 @@ func InitConsumerGroup(ctx context.Context) {
 		}
 
 		// Create group
-		group, err = NewConsumerGroupFromClient(viper.GetString(KafkaGroupViperKey), client)
+		group, err = NewConsumerGroupFromClient(kafkaGroup, client)
 		if err != nil {
 			log.WithError(err).Fatalf("sarama: could not create consumer group")
 			return
 		}
 		log.WithFields(log.Fields{
-			"group": viper.GetString(KafkaGroupViperKey),
+			"group": kafkaGroup,
 		}).Infof("sarama: consumer group ready")
 	})
 }

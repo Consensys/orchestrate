@@ -75,7 +75,6 @@ func (c HTTPClient) ETHImportAccount(ctx context.Context, req *types.ImportETHAc
 func (c HTTPClient) ETHSign(ctx context.Context, address string, req *keymanager.PayloadRequest) (string, error) {
 	reqURL := fmt.Sprintf("%v/ethereum/accounts/%v/sign", c.config.URL, address)
 
-	log.FromContext(ctx).Errorf("reqURL: %v", reqURL)
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, req)
 	if err != nil {
 		errMessage := "error while signing data with Ethereum account"
@@ -109,7 +108,6 @@ func (c HTTPClient) ETHSign(ctx context.Context, address string, req *keymanager
 func (c HTTPClient) ETHSignTransaction(ctx context.Context, address string, req *types.SignETHTransactionRequest) (string, error) {
 	reqURL := fmt.Sprintf("%v/ethereum/accounts/%v/sign-transaction", c.config.URL, address)
 
-	log.FromContext(ctx).Errorf("reqURL: %v", reqURL)
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, req)
 	if err != nil {
 		errMessage := "error while signing transaction"
@@ -124,7 +122,6 @@ func (c HTTPClient) ETHSignTransaction(ctx context.Context, address string, req 
 func (c HTTPClient) ETHSignQuorumPrivateTransaction(ctx context.Context, address string, req *types.SignQuorumPrivateTransactionRequest) (string, error) {
 	reqURL := fmt.Sprintf("%v/ethereum/accounts/%v/sign-quorum-private-transaction", c.config.URL, address)
 
-	log.FromContext(ctx).Errorf("reqURL: %v", reqURL)
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, req)
 	if err != nil {
 		errMessage := "error while signing quorum private transaction"
@@ -139,7 +136,6 @@ func (c HTTPClient) ETHSignQuorumPrivateTransaction(ctx context.Context, address
 func (c HTTPClient) ETHSignEEATransaction(ctx context.Context, address string, req *types.SignEEATransactionRequest) (string, error) {
 	reqURL := fmt.Sprintf("%v/ethereum/accounts/%v/sign-eea-transaction", c.config.URL, address)
 
-	log.FromContext(ctx).Errorf("reqURL: %v", reqURL)
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, req)
 	if err != nil {
 		errMessage := "error while signing eea private transaction"

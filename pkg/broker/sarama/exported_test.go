@@ -123,7 +123,7 @@ func (s *ExportedTestSuite) TestSetConsumerGroup() {
 
 	SetGlobalConsumerGroup(cg)
 
-	InitConsumerGroup(context.Background())
+	InitConsumerGroup(context.Background(), "group-name")
 	assert.NotNil(s.T(), GlobalConsumerGroup(), "ConsumerGroup should have been set")
 }
 
