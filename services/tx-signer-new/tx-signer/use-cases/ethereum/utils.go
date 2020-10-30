@@ -13,14 +13,14 @@ func GetSignedRawTransaction(transaction *types.Transaction, signature []byte, s
 	if err != nil {
 		errMessage := "failed to set transaction signature"
 		log.WithError(err).Error(errMessage)
-		return "", errors.InvalidParameterError(errMessage).ExtendComponent(signEEATransactionComponent)
+		return "", errors.InvalidParameterError(errMessage)
 	}
 
 	signedRaw, err := rlp.Encode(signedTx)
 	if err != nil {
 		errMessage := "failed to RLP encode signed transaction"
 		log.WithError(err).Error(errMessage)
-		return "", errors.CryptoOperationError(errMessage).ExtendComponent(signEEATransactionComponent)
+		return "", errors.CryptoOperationError(errMessage)
 	}
 
 	return hexutil.Encode(signedRaw), nil

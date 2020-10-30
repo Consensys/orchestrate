@@ -13,6 +13,7 @@ import (
 type EthereumUseCases interface {
 	SignTransaction() SignTransactionUseCase
 	SignEEATransaction() SignEEATransactionUseCase
+	SignQuorumPrivateTransaction() SignQuorumPrivateTransactionUseCase
 	SendEnvelope() SendEnvelopeUseCase
 }
 
@@ -21,6 +22,10 @@ type SignTransactionUseCase interface {
 }
 
 type SignEEATransactionUseCase interface {
+	Execute(ctx context.Context, job *entities.Job) (signedRaw string, txHash string, err error)
+}
+
+type SignQuorumPrivateTransactionUseCase interface {
 	Execute(ctx context.Context, job *entities.Job) (signedRaw string, txHash string, err error)
 }
 

@@ -5,6 +5,8 @@ import (
 	"encoding/base64"
 	"math/big"
 
+	quorumtypes "github.com/consensys/quorum/core/types"
+
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	log "github.com/sirupsen/logrus"
@@ -19,11 +21,27 @@ func GetEIP155Signer(chainID string) types.Signer {
 	return types.NewEIP155Signer(chainIDBigInt)
 }
 
-func SignETHTransaction(tx *types.Transaction, privKey *ecdsa.PrivateKey, signer types.Signer) ([]byte, error) {
+func GetQuorumPrivateTxSigner() quorumtypes.Signer {
+	return quorumtypes.QuorumPrivateTxSigner{}
+}
+
+func SignTransaction(tx *types.Transaction, privKey *ecdsa.PrivateKey, signer types.Signer) ([]byte, error) {
 	h := signer.Hash(tx)
 	decodedSignature, err := crypto.Sign(h[:], privKey)
 	if err != nil {
 		errMessage := "failed to sign ethereum transaction"
+		log.WithError(err).Error(errMessage)
+		return nil, errors.CryptoOperationError(errMessage)
+	}
+
+	return decodedSignature, nil
+}
+
+func SignQuorumPrivateTransaction(tx *quorumtypes.Transaction, privKey *ecdsa.PrivateKey, signer quorumtypes.Signer) ([]byte, error) {
+	h := signer.Hash(tx)
+	decodedSignature, err := crypto.Sign(h[:], privKey)
+	if err != nil {
+		errMessage := "failed to sign quorum private transaction"
 		log.WithError(err).Error(errMessage)
 		return nil, errors.CryptoOperationError(errMessage)
 	}

@@ -26,14 +26,15 @@ import (
 
 type messageListenerCtrlTestSuite struct {
 	suite.Suite
-	listener          *MessageListener
-	signTxUC          *mocks.MockSignTransactionUseCase
-	signEEATxUC       *mocks.MockSignEEATransactionUseCase
-	sendEnvelopeUC    *mocks.MockSendEnvelopeUseCase
-	txSchedulerClient *mock2.MockTransactionSchedulerClient
-	tenants           []string
-	senderTopic       string
-	recoverTopic      string
+	listener              *MessageListener
+	signTxUC              *mocks.MockSignTransactionUseCase
+	signEEATxUC           *mocks.MockSignEEATransactionUseCase
+	signQuorumPrivateTxUC *mocks.MockSignQuorumPrivateTransactionUseCase
+	sendEnvelopeUC        *mocks.MockSendEnvelopeUseCase
+	txSchedulerClient     *mock2.MockTransactionSchedulerClient
+	tenants               []string
+	senderTopic           string
+	recoverTopic          string
 }
 
 var _ usecases.EthereumUseCases = &messageListenerCtrlTestSuite{}
@@ -44,6 +45,10 @@ func (s messageListenerCtrlTestSuite) SignTransaction() usecases.SignTransaction
 
 func (s messageListenerCtrlTestSuite) SignEEATransaction() usecases.SignEEATransactionUseCase {
 	return s.signEEATxUC
+}
+
+func (s messageListenerCtrlTestSuite) SignQuorumPrivateTransaction() usecases.SignQuorumPrivateTransactionUseCase {
+	return s.signQuorumPrivateTxUC
 }
 
 func (s messageListenerCtrlTestSuite) SendEnvelope() usecases.SendEnvelopeUseCase {
@@ -62,6 +67,7 @@ func (s *messageListenerCtrlTestSuite) SetupTest() {
 	s.tenants = []string{"tenantID"}
 	s.signTxUC = mocks.NewMockSignTransactionUseCase(ctrl)
 	s.signEEATxUC = mocks.NewMockSignEEATransactionUseCase(ctrl)
+	s.signQuorumPrivateTxUC = mocks.NewMockSignQuorumPrivateTransactionUseCase(ctrl)
 	s.sendEnvelopeUC = mocks.NewMockSendEnvelopeUseCase(ctrl)
 	s.txSchedulerClient = mock2.NewMockTransactionSchedulerClient(ctrl)
 	s.senderTopic = "sender-topic"
@@ -98,7 +104,7 @@ func (s *messageListenerCtrlTestSuite) TestMessageListener_PublicEthereum() {
 		assert.NoError(t, <-cerr)
 	})
 
-	s.T().Run("should execute use case for multiple public eea transactions", func(t *testing.T) {
+	s.T().Run("should execute use case for multiple eea transactions", func(t *testing.T) {
 		var claims map[string][]int32
 		ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 		defer cancel()
@@ -114,6 +120,35 @@ func (s *messageListenerCtrlTestSuite) TestMessageListener_PublicEthereum() {
 		expectedPartitionKey := "0xeca84382E0f1dDdE22EedCd0D803442972EC7BE5@orion-d24bc1408ff6fb773a0d30588f37553e@1"
 
 		s.signEEATxUC.EXPECT().Execute(ctx, gomock.Any()).Return(raw, txHash, nil).Times(2)
+		s.sendEnvelopeUC.EXPECT().Execute(ctx, gomock.Any(), s.senderTopic, expectedPartitionKey).Return(nil).Times(2)
+
+		cerr := make(chan error)
+		go func() {
+			cerr <- s.listener.ConsumeClaim(mockSession, mockClaim)
+		}()
+
+		mockClaim.ExpectMessage(msg)
+		mockClaim.ExpectMessage(msg)
+
+		assert.NoError(t, <-cerr)
+	})
+
+	s.T().Run("should execute use case for multiple quorum private transactions", func(t *testing.T) {
+		var claims map[string][]int32
+		ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+		defer cancel()
+
+		mockSession := mock.NewConsumerGroupSession(ctx, "kafka-consumer-group", claims)
+		mockClaim := mock.NewConsumerGroupClaim("topic", 0, 0)
+		envelope := fakeEnvelope()
+		_ = envelope.SetJobType(tx.JobType_ETH_TESSERA_MARKING_TX)
+		msg := &sarama.ConsumerMessage{}
+		msg.Value, _ = proto.Marshal(envelope.TxEnvelopeAsRequest())
+		raw := "0xraw"
+		txHash := "0xhash"
+		expectedPartitionKey := "0xeca84382E0f1dDdE22EedCd0D803442972EC7BE5@1"
+
+		s.signQuorumPrivateTxUC.EXPECT().Execute(ctx, gomock.Any()).Return(raw, txHash, nil).Times(2)
 		s.sendEnvelopeUC.EXPECT().Execute(ctx, gomock.Any(), s.senderTopic, expectedPartitionKey).Return(nil).Times(2)
 
 		cerr := make(chan error)

@@ -41,7 +41,7 @@ func (uc *signTxUseCase) Execute(ctx context.Context, address, namespace, chainI
 		return "", errors.FromError(err).ExtendComponent(signTransactionComponent)
 	}
 
-	signature, err := signing.SignETHTransaction(tx, privKey, signing.GetEIP155Signer(chainID))
+	signature, err := signing.SignTransaction(tx, privKey, signing.GetEIP155Signer(chainID))
 	if err != nil {
 		return "", errors.FromError(err).ExtendComponent(signTransactionComponent)
 	}

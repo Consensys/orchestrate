@@ -33,7 +33,6 @@ func TestSignEEATransaction_Execute(t *testing.T) {
 			Namespace:      job.TenantID,
 			Nonce:          nonce,
 			To:             job.Transaction.To,
-			Amount:         job.Transaction.Value,
 			GasPrice:       job.Transaction.GasPrice,
 			GasLimit:       gasLimit,
 			Data:           job.Transaction.Data,
@@ -60,11 +59,9 @@ func TestSignEEATransaction_Execute(t *testing.T) {
 		expectedRequest := &ethereum.SignEEATransactionRequest{
 			Namespace:      job.TenantID,
 			Nonce:          nonce,
-			Amount:         job.Transaction.Value,
 			GasPrice:       job.Transaction.GasPrice,
 			GasLimit:       gasLimit,
 			Data:           job.Transaction.Data,
-			To:             job.Transaction.To,
 			ChainID:        job.InternalData.ChainID,
 			PrivateFrom:    job.Transaction.PrivateFrom,
 			PrivateFor:     job.Transaction.PrivateFor,
@@ -92,13 +89,13 @@ func TestSignEEATransaction_Execute(t *testing.T) {
 		assert.NotEmpty(t, txHash)
 	})
 
-	t.Run("should fail with same error if ETHSignTransaction fails", func(t *testing.T) {
+	t.Run("should fail with same error if ETHSignEEATransaction fails", func(t *testing.T) {
 		expectedErr := errors.NotFoundError("error")
 		mockKeyManagerClient.EXPECT().ETHSignEEATransaction(ctx, gomock.Any(), gomock.Any()).Return("", expectedErr)
 
 		raw, txHash, err := usecase.Execute(ctx, testutils.FakeJob())
 
-		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(signTransactionComponent), err)
+		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(signEEATransactionComponent), err)
 		assert.Empty(t, raw)
 		assert.Empty(t, txHash)
 	})

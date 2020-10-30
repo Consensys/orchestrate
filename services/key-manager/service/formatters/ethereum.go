@@ -54,9 +54,9 @@ func FormatSignQuorumPrivateTransactionRequest(request *types.SignQuorumPrivateT
 func FormatSignEEATransactionRequest(request *types.SignEEATransactionRequest) (*ethtypes.Transaction, *entities.PrivateETHTransactionParams) {
 	// No need to check the "ok" values because we know that at the fields are valid big ints and hex string,
 	// this also avoids this function returning an error
-	amount, _ := new(big.Int).SetString(request.Amount, 10)
 	gasPrice, _ := new(big.Int).SetString(request.GasPrice, 10)
 	data, _ := hexutil.Decode(request.Data)
+	amount := big.NewInt(0)
 
 	privateArgs := &entities.PrivateETHTransactionParams{
 		PrivateFrom:    request.PrivateFrom,

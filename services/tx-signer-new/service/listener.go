@@ -124,8 +124,7 @@ func (listener *MessageListener) processEnvelope(ctx context.Context, envelope *
 		// Do nothing as we do not sign storeRaw payload
 		return "", "", nil
 	case envelope.IsEthSendTesseraMarkingTransaction():
-		// TODO: Send quorum private
-		return "", "", nil
+		return listener.useCases.SignQuorumPrivateTransaction().Execute(ctx, job)
 	case envelope.IsEeaSendPrivateTransaction():
 		return listener.useCases.SignEEATransaction().Execute(ctx, job)
 	default:

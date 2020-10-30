@@ -186,7 +186,7 @@ func (s *keyManagerEthereumTestSuite) TestKeyManager_Ethereum_SignEEATransaction
 		signature, err := s.client.ETHSignEEATransaction(ctx, expectedAddress, signRequest)
 
 		assert.NoError(t, err)
-		assert.Equal(t, "0x4e530dd64df36709bd9f1c4d8b39c53474a75a48bf757b0a254fea379968acc30ec156d9442772bc04a61decc7f3fc803139c70f7fc80b343088dcdf436ff26e00", signature)
+		assert.Equal(t, "0xe340907e408f4538d030aa618fc725bc841d12c7ef860f4487d22162497efe4d5b6284d00c7520a4f2a0e0dbe758d69e0d09e3221395b8b74b9b68c2b2959c9601", signature)
 	})
 
 	s.T().Run("should sign transaction successfully with privacyGroupID", func(t *testing.T) {
@@ -197,6 +197,6 @@ func (s *keyManagerEthereumTestSuite) TestKeyManager_Ethereum_SignEEATransaction
 		signature, err := s.client.ETHSignEEATransaction(ctx, expectedAddress, signRequest)
 
 		assert.NoError(t, err)
-		assert.Equal(t, "0x623f140e821b6138cdb083662b784daf572d6040bd85046ae78862d11d50e9501390ae624360208249b97bbb8ba46ce813b8bc611d6e59bf96dd7e30c57287ea00", signature)
+		assert.Equal(t, "0x7e34bf84159619d3b446d1ca8db11a6361a486ed8925260c37374e6c093334f531235f22c6955a8348d66074d3729d8e4dd6b79466dc28cab4715409231e694500", signature)
 	})
 }

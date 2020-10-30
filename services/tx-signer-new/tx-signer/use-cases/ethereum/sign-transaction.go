@@ -42,7 +42,7 @@ func (uc *signTransactionUseCase) Execute(ctx context.Context, job *entities.Job
 
 	var decodedSignature []byte
 	if job.InternalData.OneTimeKey {
-		decodedSignature, err = signWithOneTimeKey(transaction, signer)
+		decodedSignature, err = uc.signWithOneTimeKey(transaction, signer)
 	} else {
 		decodedSignature, err = uc.signWithAccount(ctx, job, transaction)
 	}
@@ -52,7 +52,7 @@ func (uc *signTransactionUseCase) Execute(ctx context.Context, job *entities.Job
 
 	signedRaw, err := GetSignedRawTransaction(transaction, decodedSignature, signer)
 	if err != nil {
-		return "", "", errors.FromError(err).ExtendComponent(signEEATransactionComponent)
+		return "", "", errors.FromError(err).ExtendComponent(signTransactionComponent)
 	}
 	txHash = transaction.Hash().Hex()
 
@@ -60,7 +60,7 @@ func (uc *signTransactionUseCase) Execute(ctx context.Context, job *entities.Job
 	return signedRaw, txHash, nil
 }
 
-func signWithOneTimeKey(transaction *types.Transaction, signer types.Signer) ([]byte, error) {
+func (*signTransactionUseCase) signWithOneTimeKey(transaction *types.Transaction, signer types.Signer) ([]byte, error) {
 	privKey, err := crypto.GenerateKey()
 	if err != nil {
 		errMessage := "failed to generate Ethereum private key"
@@ -68,7 +68,7 @@ func signWithOneTimeKey(transaction *types.Transaction, signer types.Signer) ([]
 		return nil, errors.CryptoOperationError(errMessage)
 	}
 
-	return signing.SignETHTransaction(transaction, privKey, signer)
+	return signing.SignTransaction(transaction, privKey, signer)
 }
 
 func (uc *signTransactionUseCase) signWithAccount(ctx context.Context, job *entities.Job, tx *types.Transaction) ([]byte, error) {
@@ -88,14 +88,14 @@ func (uc *signTransactionUseCase) signWithAccount(ctx context.Context, job *enti
 	sig, err := uc.keyManagerClient.ETHSignTransaction(ctx, job.Transaction.From, request)
 	if err != nil {
 		log.WithError(err).Error("failed to sign ethereum transaction using key manager")
-		return nil, errors.FromError(err).ExtendComponent(signTransactionComponent)
+		return nil, errors.FromError(err)
 	}
 
 	decodedSignature, err := hexutil.Decode(sig)
 	if err != nil {
 		errMessage := "failed to decode signature"
 		log.WithField("encoded_signature", sig).WithError(err).Error(errMessage)
-		return nil, errors.EncodingError(errMessage).ExtendComponent(signTransactionComponent)
+		return nil, errors.EncodingError(errMessage)
 	}
 
 	return decodedSignature, nil

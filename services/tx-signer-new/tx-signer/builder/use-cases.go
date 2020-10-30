@@ -8,16 +8,18 @@ import (
 )
 
 type useCases struct {
-	signTransaction    usecases.SignTransactionUseCase
-	signEEATransaction usecases.SignEEATransactionUseCase
-	sendEnvelope       usecases.SendEnvelopeUseCase
+	signTransaction              usecases.SignTransactionUseCase
+	signEEATransaction           usecases.SignEEATransactionUseCase
+	signQuorumPrivateTransaction usecases.SignQuorumPrivateTransactionUseCase
+	sendEnvelope                 usecases.SendEnvelopeUseCase
 }
 
 func NewUseCases(keyManagerClient client.KeyManagerClient, producer sarama.SyncProducer) usecases.UseCases {
 	return &useCases{
-		signTransaction:    ethereum.NewSignTransactionUseCase(keyManagerClient),
-		signEEATransaction: ethereum.NewSignEEATransactionUseCase(keyManagerClient),
-		sendEnvelope:       ethereum.NewSendEnvelopeUseCase(producer),
+		signTransaction:              ethereum.NewSignTransactionUseCase(keyManagerClient),
+		signEEATransaction:           ethereum.NewSignEEATransactionUseCase(keyManagerClient),
+		signQuorumPrivateTransaction: ethereum.NewSignQuorumPrivateTransactionUseCase(keyManagerClient),
+		sendEnvelope:                 ethereum.NewSendEnvelopeUseCase(producer),
 	}
 }
 
@@ -27,6 +29,10 @@ func (u *useCases) SignTransaction() usecases.SignTransactionUseCase {
 
 func (u *useCases) SignEEATransaction() usecases.SignEEATransactionUseCase {
 	return u.signEEATransaction
+}
+
+func (u *useCases) SignQuorumPrivateTransaction() usecases.SignQuorumPrivateTransactionUseCase {
+	return u.signQuorumPrivateTransaction
 }
 
 func (u *useCases) SendEnvelope() usecases.SendEnvelopeUseCase {

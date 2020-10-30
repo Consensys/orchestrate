@@ -64,6 +64,20 @@ func (mr *MockEthereumUseCasesMockRecorder) SignEEATransaction() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignEEATransaction", reflect.TypeOf((*MockEthereumUseCases)(nil).SignEEATransaction))
 }
 
+// SignQuorumPrivateTransaction mocks base method
+func (m *MockEthereumUseCases) SignQuorumPrivateTransaction() usecases.SignQuorumPrivateTransactionUseCase {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SignQuorumPrivateTransaction")
+	ret0, _ := ret[0].(usecases.SignQuorumPrivateTransactionUseCase)
+	return ret0
+}
+
+// SignQuorumPrivateTransaction indicates an expected call of SignQuorumPrivateTransaction
+func (mr *MockEthereumUseCasesMockRecorder) SignQuorumPrivateTransaction() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignQuorumPrivateTransaction", reflect.TypeOf((*MockEthereumUseCases)(nil).SignQuorumPrivateTransaction))
+}
+
 // SendEnvelope mocks base method
 func (m *MockEthereumUseCases) SendEnvelope() usecases.SendEnvelopeUseCase {
 	m.ctrl.T.Helper()
@@ -154,6 +168,45 @@ func (m *MockSignEEATransactionUseCase) Execute(ctx context.Context, job *entiti
 func (mr *MockSignEEATransactionUseCaseMockRecorder) Execute(ctx, job interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSignEEATransactionUseCase)(nil).Execute), ctx, job)
+}
+
+// MockSignQuorumPrivateTransactionUseCase is a mock of SignQuorumPrivateTransactionUseCase interface
+type MockSignQuorumPrivateTransactionUseCase struct {
+	ctrl     *gomock.Controller
+	recorder *MockSignQuorumPrivateTransactionUseCaseMockRecorder
+}
+
+// MockSignQuorumPrivateTransactionUseCaseMockRecorder is the mock recorder for MockSignQuorumPrivateTransactionUseCase
+type MockSignQuorumPrivateTransactionUseCaseMockRecorder struct {
+	mock *MockSignQuorumPrivateTransactionUseCase
+}
+
+// NewMockSignQuorumPrivateTransactionUseCase creates a new mock instance
+func NewMockSignQuorumPrivateTransactionUseCase(ctrl *gomock.Controller) *MockSignQuorumPrivateTransactionUseCase {
+	mock := &MockSignQuorumPrivateTransactionUseCase{ctrl: ctrl}
+	mock.recorder = &MockSignQuorumPrivateTransactionUseCaseMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockSignQuorumPrivateTransactionUseCase) EXPECT() *MockSignQuorumPrivateTransactionUseCaseMockRecorder {
+	return m.recorder
+}
+
+// Execute mocks base method
+func (m *MockSignQuorumPrivateTransactionUseCase) Execute(ctx context.Context, job *entities.Job) (string, string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Execute", ctx, job)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(string)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// Execute indicates an expected call of Execute
+func (mr *MockSignQuorumPrivateTransactionUseCaseMockRecorder) Execute(ctx, job interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSignQuorumPrivateTransactionUseCase)(nil).Execute), ctx, job)
 }
 
 // MockSendEnvelopeUseCase is a mock of SendEnvelopeUseCase interface

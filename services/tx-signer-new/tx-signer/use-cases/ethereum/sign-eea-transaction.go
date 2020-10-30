@@ -87,7 +87,6 @@ func (uc *signEEATransactionUseCase) signWithAccount(ctx context.Context, job *e
 	request := &ethereum.SignEEATransactionRequest{
 		Namespace:      job.TenantID,
 		Nonce:          tx.Nonce(),
-		Amount:         tx.Value().String(),
 		GasPrice:       tx.GasPrice().String(),
 		GasLimit:       tx.Gas(),
 		Data:           hexutil.Encode(tx.Data()),
