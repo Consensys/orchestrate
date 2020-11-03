@@ -12,7 +12,8 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 	mockserver "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/server/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/generic"
+	mock2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tcp/metrics/mock"
 	"google.golang.org/grpc"
 )
 
@@ -29,8 +30,28 @@ func TestEntryPoint(t *testing.T) {
 	}
 
 	builder := mockserver.NewMockBuilder(ctrlr)
-	ep := NewEntryPoint("", cfg, builder, generic.NewTCP())
 
+	reg := mock.NewMockTPCMetrics(ctrlr)
+	acceptConnsCounter := mock2.NewMockCounter(ctrlr)
+	closedConnsCounter := mock2.NewMockCounter(ctrlr)
+	openConnsGauce := mock2.NewMockGauge(ctrlr)
+	connsLatencyHisto := mock2.NewMockHistogram(ctrlr)
+	ep := NewEntryPoint("", cfg, builder, reg)
+
+	reg.EXPECT().AcceptedConnsCounter().Return(acceptConnsCounter)
+	acceptConnsCounter.EXPECT().With(gomock.Any()).Return(acceptConnsCounter)
+	acceptConnsCounter.EXPECT().Add(gomock.Any())
+
+	reg.EXPECT().OpenConnsGauge().Return(openConnsGauce)
+	openConnsGauce.EXPECT().With(gomock.Any()).Return(openConnsGauce)
+	openConnsGauce.EXPECT().Add(gomock.Any())
+
+	reg.EXPECT().ClosedConnsCounter().Return(closedConnsCounter)
+	closedConnsCounter.EXPECT().With(gomock.Any()).Return(closedConnsCounter)
+
+	reg.EXPECT().ConnsLatencyHistogram().Return(connsLatencyHisto)
+	connsLatencyHisto.EXPECT().With(gomock.Any()).Return(connsLatencyHisto)
+	
 	builder.EXPECT().Build(gomock.Any(), gomock.Any(), gomock.Any()).Return(grpc.NewServer(), nil)
 	_ = ep.BuildServer(context.Background(), nil)
 

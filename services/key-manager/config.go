@@ -5,6 +5,9 @@ import (
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
+	httpmetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/metrics"
+	metricregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/registry"
+	tcpmetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tcp/metrics"
 	store "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/key-manager/store/multi"
 )
 
@@ -12,6 +15,7 @@ import (
 func Flags(f *pflag.FlagSet) {
 	store.Flags(f)
 	http.Flags(f)
+	metricregistry.Flags(f, httpmetrics.ModuleName, tcpmetrics.ModuleName)
 }
 
 type Config struct {

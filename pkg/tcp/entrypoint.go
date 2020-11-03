@@ -12,7 +12,7 @@ import (
 	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tcp/metrics"
 )
 
 // EntryPoint is a TCP server
@@ -27,7 +27,7 @@ type EntryPoint struct {
 	timeouts  *traefikstatic.RespondingTimeouts
 	lifecycle *traefikstatic.LifeCycle
 
-	metrics metrics.TCP
+	metrics metrics.TPCMetrics
 
 	doneOnce sync.Once
 	done     chan struct{}
@@ -38,7 +38,7 @@ type listenerValue struct {
 }
 
 // NewEntryPoint creates a new EntryPoint
-func NewEntryPoint(name string, config *traefikstatic.EntryPoint, handler Handler, reg metrics.TCP) *EntryPoint {
+func NewEntryPoint(name string, config *traefikstatic.EntryPoint, handler Handler, reg metrics.TPCMetrics) *EntryPoint {
 	return &EntryPoint{
 		name:      name,
 		addr:      config.Address,

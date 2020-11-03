@@ -31,7 +31,7 @@ func NewInternalConfig() *dynamic.Configuration {
 	// Router to Key management API
 	cfg.HTTP.Routers["ethereum"] = &dynamic.Router{
 		Router: &traefikdynamic.Router{
-			EntryPoints: []string{http.DefaultHTTPEntryPoint},
+			EntryPoints: []string{http.DefaultHTTPAppEntryPoint},
 			Service:     "ethereum",
 			Priority:    math.MaxInt32,
 			Rule:        "PathPrefix(`/ethereum/accounts`)",

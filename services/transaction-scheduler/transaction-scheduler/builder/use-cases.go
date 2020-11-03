@@ -6,6 +6,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
 	identitymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/identity-manager/client"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/metrics"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/store"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/use-cases/jobs"
@@ -16,6 +17,7 @@ import (
 
 func NewUseCases(
 	db store.DB,
+	appMetrics metrics.TransactionSchedulerMetrics,
 	chainRegistryClient client.ChainRegistryClient,
 	contractRegistryClient contractregistry.ContractRegistryClient,
 	identityManagerClient identitymanager.IdentityManagerClient,
@@ -26,7 +28,7 @@ func NewUseCases(
 
 	createScheduleUC := schedules.NewCreateScheduleUseCase(db)
 	getScheduleUC := schedules.NewGetScheduleUseCase(db)
-	createJobUC := jobs.NewCreateJobUseCase(db, txValidator)
+	createJobUC := jobs.NewCreateJobUseCase(db, txValidator, appMetrics)
 	startJobUC := jobs.NewStartJobUseCase(db, producer, topicsCfg)
 	resendJobUC := jobs.NewResendJobTxUseCase(db, producer, topicsCfg)
 	updateChildrenUC := jobs.NewUpdateChildrenUseCase(db)

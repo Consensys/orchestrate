@@ -7,26 +7,26 @@ import (
 	"time"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/httputil"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/metrics"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 )
 
 type Builder struct {
-	registry metrics.HTTP
+	metrics metrics.HTTPMetrics
 }
 
-func NewBuilder(registry metrics.HTTP) *Builder {
+func NewBuilder(reg metrics.HTTPMetrics) *Builder {
 	return &Builder{
-		registry: registry,
+		metrics: reg,
 	}
 }
 
-func (b *Builder) Build(ctx context.Context, name string, configuration interface{}) (mid func(http.Handler) http.Handler, respModifier func(resp *http.Response) error, err error) {
+func (b *Builder) Build(ctx context.Context, _ string, _ interface{}) (mid func(http.Handler) http.Handler, respModifier func(resp *http.Response) error, err error) {
 	entrypoint := httputil.EntryPointFromContext(ctx)
 	service := httputil.ServiceFromContext(ctx)
 
 	m := New(
-		b.registry,
+		b.metrics,
 		[]string{"entrypoint", entrypoint, "service", service},
 	)
 
@@ -34,11 +34,11 @@ func (b *Builder) Build(ctx context.Context, name string, configuration interfac
 }
 
 type Metrics struct {
-	registry   metrics.HTTP
+	registry   metrics.HTTPMetrics
 	baseLabels []string
 }
 
-func New(registry metrics.HTTP, baseLabels []string) *Metrics {
+func New(registry metrics.HTTPMetrics, baseLabels []string) *Metrics {
 	return &Metrics{
 		registry:   registry,
 		baseLabels: baseLabels,

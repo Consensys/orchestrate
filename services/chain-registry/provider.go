@@ -57,7 +57,7 @@ func NewInternalConfig() *dynamic.Configuration {
 	// Router to Chains API
 	dynamicCfg.HTTP.Routers["chains"] = &dynamic.Router{
 		Router: &traefikdynamic.Router{
-			EntryPoints: []string{http.DefaultHTTPEntryPoint},
+			EntryPoints: []string{http.DefaultHTTPAppEntryPoint},
 			Service:     "chains",
 			Priority:    math.MaxInt32,
 			Rule:        "PathPrefix(`/chains`) || PathPrefix(`/faucets`)",
@@ -150,7 +150,7 @@ func appendChainServices(cfg *dynamic.Configuration, chain *models.Chain, middle
 
 	cfg.HTTP.Routers[chainService] = &dynamic.Router{
 		Router: &traefikdynamic.Router{
-			EntryPoints: []string{http.DefaultHTTPEntryPoint},
+			EntryPoints: []string{http.DefaultHTTPAppEntryPoint},
 			Priority:    math.MaxInt32,
 			Service:     chainService,
 			Rule:        fmt.Sprintf("Path(`/%s`)", chain.UUID),
@@ -186,7 +186,7 @@ func appendTesseraPrivateTxServices(cfg *dynamic.Configuration, chain *models.Ch
 	chainService := fmt.Sprintf("tessera-chain-%v", chain.UUID)
 	cfg.HTTP.Routers[chainService] = &dynamic.Router{
 		Router: &traefikdynamic.Router{
-			EntryPoints: []string{http.DefaultHTTPEntryPoint},
+			EntryPoints: []string{http.DefaultHTTPAppEntryPoint},
 			Priority:    math.MaxInt32,
 			Service:     chainService,
 			Rule:        fmt.Sprintf("PathPrefix(`/tessera/%s`)", chain.UUID),

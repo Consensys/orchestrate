@@ -8,8 +8,12 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc"
 	grpcstatic "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/config/static"
+	grpcmetrics2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/metrics"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
+	httpmetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/metrics"
+	metricregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/registry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
+	tcpmetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tcp/metrics"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store/multi"
 )
 
@@ -40,6 +44,7 @@ func Flags(f *pflag.FlagSet) {
 	multi.Flags(f)
 	http.Flags(f)
 	grpc.Flags(f)
+	metricregistry.Flags(f, httpmetrics.ModuleName, grpcmetrics2.ModuleName, tcpmetrics.ModuleName)
 }
 
 type Config struct {

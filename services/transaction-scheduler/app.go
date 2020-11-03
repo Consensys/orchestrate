@@ -10,6 +10,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database"
 	contractregistry2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/client"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/metrics"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/transaction-scheduler/builder"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
@@ -38,7 +39,14 @@ func NewTxScheduler(
 		return nil, err
 	}
 
-	ucs := builder.NewUseCases(db, chainRegistryClient, contractRegistryClient, identityManagerClient, syncProducer, topicCfg)
+	var appMetrics metrics.TransactionSchedulerMetrics
+	if cfg.App.Metrics.IsActive(metrics.ModuleName) {
+		appMetrics = metrics.NewTransactionSchedulerMetrics()
+	} else {
+		appMetrics = metrics.NewTransactionSchedulerNopMetrics()
+	}
+
+	ucs := builder.NewUseCases(db, appMetrics, chainRegistryClient, contractRegistryClient, identityManagerClient, syncProducer, topicCfg)
 
 	// Option for transaction handler
 	txSchedulerHandlerOpt := app.HandlerOpt(reflect.TypeOf(&dynamic.Transactions{}), controllers.NewBuilder(ucs))
@@ -48,7 +56,7 @@ func NewTxScheduler(
 		cfg.App,
 		app.MultiTenancyOpt("auth", jwt, key, cfg.Multitenancy),
 		ReadinessOpt(db, chainRegistryClient, identityManagerClient),
-		app.MetricsOpt(),
+		app.MetricsOpt(appMetrics),
 		app.LoggerMiddlewareOpt("base"),
 		app.SwaggerOpt("./public/swagger-specs/services/transaction-scheduler/swagger.json", "base@logger-base"),
 		txSchedulerHandlerOpt,

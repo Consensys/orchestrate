@@ -18,7 +18,6 @@ import (
 	mockhandler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/handler/mock"
 	mockmid "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/middleware/mock"
 	dynrouter "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/router/dynamic"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/prometheus"
 )
 
 func TestProviderOpt(t *testing.T) {
@@ -191,7 +190,6 @@ func TestMetricsOpt(t *testing.T) {
 	opt := MetricsOpt()
 
 	testCfg := newTestConfig()
-	testCfg.Metrics.Prometheus = prometheus.NewConfig(nil)
 	_, err := New(testCfg, opt)
 	assert.NoError(t, err, "Creating app should not error")
 }

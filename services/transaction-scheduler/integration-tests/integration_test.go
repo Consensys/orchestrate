@@ -68,3 +68,16 @@ func (s *txSchedulerTestSuite) TestTxScheduler_Transactions() {
 	testSuite.baseURL = s.env.baseURL
 	suite.Run(s.T(), testSuite)
 }
+
+func (s *txSchedulerTestSuite) TestTxScheduler_Metrics() {
+	if s.err != nil {
+		s.env.logger.Warn("skipping test...")
+		return
+	}
+
+	testSuite := new(txSchedulerMetricsTestSuite)
+	testSuite.env = s.env
+	testSuite.baseURL = s.env.baseURL
+	testSuite.metricsURL = s.env.metricsURL
+	suite.Run(s.T(), testSuite)
+}

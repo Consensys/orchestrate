@@ -5,7 +5,7 @@ import (
 	"time"
 
 	kitmetrics "github.com/go-kit/kit/metrics"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tcp/metrics"
 )
 
 func Listen(network, addr string, opts ...ListenerOpt) (net.Listener, error) {
@@ -59,7 +59,7 @@ func (l *KeepAliveListener) Close() error {
 	return l.TCPListener.Close()
 }
 
-func MetricsOpt(name string, registry metrics.TCP) ListenerOpt {
+func MetricsOpt(name string, registry metrics.TPCMetrics) ListenerOpt {
 	return func(l net.Listener) (net.Listener, error) {
 		return &MetricsListener{
 			Listener: l,
@@ -72,7 +72,7 @@ func MetricsOpt(name string, registry metrics.TCP) ListenerOpt {
 type MetricsListener struct {
 	net.Listener
 	labels   []string
-	registry metrics.TCP
+	registry metrics.TPCMetrics
 }
 
 func (l *MetricsListener) Accept() (net.Conn, error) {

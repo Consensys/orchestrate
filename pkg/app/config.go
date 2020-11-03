@@ -9,15 +9,15 @@ import (
 	grpcstatic "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/config/static"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/log"
-	metrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/multi"
+	metricsregister "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/registry"
 )
 
 type Config struct {
 	HTTP    *HTTP
 	GRPC    *GRPC
 	Watcher *configwatcher.Config
-	Metrics *metrics.Config
 	Log     *traefiktypes.TraefikLog
+	Metrics *metricsregister.Config
 }
 
 type HTTP struct {
@@ -49,8 +49,8 @@ func NewConfig(vipr *viper.Viper) *Config {
 			EntryPoint: grpc.NewConfig(vipr),
 		},
 		Watcher: configwatcher.NewConfig(vipr),
-		Metrics: metrics.NewConfig(vipr),
 		Log:     log.NewConfig(vipr),
+		Metrics: metricsregister.NewConfig(vipr),
 	}
 }
 

@@ -11,7 +11,7 @@ import (
 func AddDynamicConfig(cfg *dynamic.Configuration, middlewares []string) {
 	cfg.HTTP.Routers["dashboard"] = &dynamic.Router{
 		Router: &traefikdynamic.Router{
-			EntryPoints: []string{http.DefaultHTTPEntryPoint},
+			EntryPoints: []string{http.DefaultHTTPAppEntryPoint},
 			Service:     "dashboard",
 			Priority:    math.MaxInt32,
 			Rule:        "PathPrefix(`/api`) || PathPrefix(`/dashboard`)",

@@ -1,3 +1,5 @@
+// +build unit
+
 package tcp
 
 import (
@@ -13,12 +15,15 @@ import (
 
 	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
 	traefiktypes "github.com/containous/traefik/v2/pkg/types"
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	metrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/generic"
+	mock3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tcp/metrics"
+	mock2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tcp/metrics/mock"
 )
 
-func prepareEntryPoint(handler Handler) *EntryPoint {
+func prepareEntryPoint(t *testing.T, handler Handler, reg metrics.TPCMetrics) *EntryPoint {
 	ep := NewEntryPoint(
 		"test",
 		&traefikstatic.EntryPoint{
@@ -32,7 +37,7 @@ func prepareEntryPoint(handler Handler) *EntryPoint {
 			},
 		},
 		handler,
-		metrics.NewTCP(),
+		reg,
 	)
 
 	return ep
@@ -62,7 +67,32 @@ func firstConn(ep *EntryPoint) (net.Conn, error) {
 }
 
 func testServing(t *testing.T, handler Handler, test func(t *testing.T, ep *EntryPoint, firstConn net.Conn)) {
-	ep := prepareEntryPoint(handler)
+	ctrlr := gomock.NewController(t)
+	defer ctrlr.Finish()
+
+	reg := mock2.NewMockTPCMetrics(ctrlr)
+	acceptConnsCounter := mock3.NewMockCounter(ctrlr)
+	closedConnsCounter := mock3.NewMockCounter(ctrlr)
+	openConnsGauce := mock3.NewMockGauge(ctrlr)
+	connsLatencyHisto := mock3.NewMockHistogram(ctrlr)
+
+	reg.EXPECT().AcceptedConnsCounter().AnyTimes().Return(acceptConnsCounter)
+	acceptConnsCounter.EXPECT().With(gomock.Any()).AnyTimes().Return(acceptConnsCounter)
+	acceptConnsCounter.EXPECT().Add(gomock.Any()).AnyTimes()
+	
+	reg.EXPECT().OpenConnsGauge().AnyTimes().Return(openConnsGauce)
+	openConnsGauce.EXPECT().With(gomock.Any()).AnyTimes().Return(openConnsGauce)
+	openConnsGauce.EXPECT().Add(gomock.Any()).AnyTimes()
+
+	reg.EXPECT().ClosedConnsCounter().AnyTimes().Return(closedConnsCounter)
+	closedConnsCounter.EXPECT().With(gomock.Any()).AnyTimes().Return(closedConnsCounter)
+	closedConnsCounter.EXPECT().Add(gomock.Any()).AnyTimes()
+
+	reg.EXPECT().ConnsLatencyHistogram().AnyTimes().Return(connsLatencyHisto)
+	connsLatencyHisto.EXPECT().With(gomock.Any()).AnyTimes().Return(connsLatencyHisto)
+	connsLatencyHisto.EXPECT().Observe(gomock.Any()).AnyTimes()
+
+	ep := prepareEntryPoint(t, handler, reg)
 
 	done := make(chan struct{})
 	go func() {

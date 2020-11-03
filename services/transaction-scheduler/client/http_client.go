@@ -8,6 +8,8 @@ import (
 	"time"
 
 	healthz "github.com/heptiolabs/healthcheck"
+	dto "github.com/prometheus/client_model/go"
+	promcli "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 
 	"github.com/cenkalti/backoff/v4"
@@ -33,6 +35,24 @@ func NewHTTPClient(h *http.Client, c *Config) TransactionSchedulerClient {
 
 func (c HTTPClient) Checker() healthz.Check {
 	return healthz.HTTPGetCheck(fmt.Sprintf("%s/live", c.config.MetricsURL), time.Second)
+}
+
+func (c HTTPClient) Prometheus(ctx context.Context) (map[string]*dto.MetricFamily, error) {
+	resp, err := clientutils.GetRequest(ctx, c.client, fmt.Sprintf("%s/metrics", c.config.MetricsURL))
+	if err != nil {
+		errMessage := "error while getting prometheus metrics"
+		log.FromContext(ctx).WithError(err).Error(errMessage)
+		return nil, errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+	}
+
+	mf, err := promcli.ParseResponse(resp)
+	if err != nil {
+		errMessage := "error while parsing prometheus metric response"
+		log.FromContext(ctx).WithError(err).Error(errMessage)
+		return nil, errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+	}
+
+	return mf, nil
 }
 
 func (c *HTTPClient) SendContractTransaction(ctx context.Context, txRequest *types.SendTransactionRequest) (*types.TransactionResponse, error) {

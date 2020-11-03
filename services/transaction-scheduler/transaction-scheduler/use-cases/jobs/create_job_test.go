@@ -4,7 +4,10 @@ package jobs
 
 import (
 	"context"
+	mock2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/metrics/mock"
+
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -29,6 +32,10 @@ func TestCreateJob_Execute(t *testing.T) {
 	mockJobDA := mocks.NewMockJobAgent(ctrl)
 	mockLogDA := mocks.NewMockLogAgent(ctrl)
 	mockTxValidator := mocks2.NewMockTransactionValidator(ctrl)
+	mockMetrics := mock.NewMockTransactionSchedulerMetrics(ctrl)
+	
+	createdJobsCounter := mock2.NewMockCounter(ctrl)
+	mockMetrics.EXPECT().CreatedJobsCounter().AnyTimes().Return(createdJobsCounter)
 
 	mockDB.EXPECT().Begin().Return(mockDBTX, nil).AnyTimes()
 	mockDBTX.EXPECT().Transaction().Return(mockTransactionDA).AnyTimes()
@@ -39,12 +46,12 @@ func TestCreateJob_Execute(t *testing.T) {
 	mockDBTX.EXPECT().Rollback().Return(nil).AnyTimes()
 	mockDBTX.EXPECT().Close().Return(nil).AnyTimes()
 
-	usecase := NewCreateJobUseCase(mockDB, mockTxValidator)
+	usecase := NewCreateJobUseCase(mockDB, mockTxValidator, mockMetrics)
 
 	tenantID := "tenantID"
 	tenants := []string{tenantID}
 	chainID := "888"
-
+	
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		jobEntity := testutils3.FakeJob()
 		fakeSchedule := testutils2.FakeSchedule(tenantID)
@@ -58,6 +65,8 @@ func TestCreateJob_Execute(t *testing.T) {
 		mockTransactionDA.EXPECT().Insert(gomock.Any(), jobModel.Transaction).Return(nil)
 		mockJobDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(nil)
 		mockLogDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(nil)
+		createdJobsCounter.EXPECT().With(gomock.Any()).Return(createdJobsCounter)
+		createdJobsCounter.EXPECT().Add(gomock.Any())
 
 		_, err := usecase.Execute(context.Background(), jobEntity, tenants)
 
@@ -82,6 +91,9 @@ func TestCreateJob_Execute(t *testing.T) {
 		mockTransactionDA.EXPECT().Insert(gomock.Any(), jobModel.Transaction).Return(nil)
 		mockJobDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(nil)
 		mockLogDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(nil)
+
+		createdJobsCounter.EXPECT().With(gomock.Any()).Return(createdJobsCounter)
+		createdJobsCounter.EXPECT().Add(gomock.Any())
 
 		_, err := usecase.Execute(context.Background(), jobEntity, tenants)
 

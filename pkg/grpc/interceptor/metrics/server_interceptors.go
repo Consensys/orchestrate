@@ -8,32 +8,33 @@ import (
 	kitmetrics "github.com/go-kit/kit/metrics"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/config/static"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/grpcutil"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/metrics"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/status"
 )
 
 type Builder struct {
-	registry metrics.GRPCServer
+	registry metrics.GRPCMetrics
 }
 
-func NewBuilder(registry metrics.GRPCServer) *Builder {
+func NewBuilder(registry metrics.GRPCMetrics) *Builder {
 	return &Builder{
 		registry: registry,
 	}
 }
 
-func (b *Builder) Build(ctx context.Context, name string, configuration interface{}) (grpc.UnaryServerInterceptor, grpc.StreamServerInterceptor, func(srv *grpc.Server), error) {
+func (b *Builder) Build(ctx context.Context, _ string, configuration interface{}) (grpc.UnaryServerInterceptor, grpc.StreamServerInterceptor, func(srv *grpc.Server), error) {
 	cfg, ok := configuration.(*static.Metrics)
 	if !ok {
 		return nil, nil, nil, fmt.Errorf("invalid interceptor configuration type (expected %T but got %T)", cfg, configuration)
 	}
+
 	return UnaryServerInterceptor(b.registry), StreamServerInterceptor(b.registry), nil, nil
 }
 
 // UnaryServerInterceptor is a gRPC server-side interceptor that provides Prometheus monitoring for Unary RPCs.
-func UnaryServerInterceptor(registry metrics.GRPCServer) func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+func UnaryServerInterceptor(registry metrics.GRPCMetrics) func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		service, method := grpcutil.SplitMethodName(info.FullMethod)
 		baseLabels := []string{
@@ -62,7 +63,7 @@ func UnaryServerInterceptor(registry metrics.GRPCServer) func(ctx context.Contex
 }
 
 // StreamServerInterceptor is a gRPC server-side interceptor that provides Prometheus monitoring for Streaming RPCs.
-func StreamServerInterceptor(registry metrics.GRPCServer) func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+func StreamServerInterceptor(registry metrics.GRPCMetrics) func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
 	return func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
 		service, method := grpcutil.SplitMethodName(info.FullMethod)
 		baseLabels := []string{

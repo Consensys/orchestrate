@@ -1,3 +1,5 @@
+// +build unit
+
 package http
 
 import (
@@ -15,7 +17,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/handler/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/router"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/router/static"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/generic"
+	mock3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/mock"
+	mock2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tcp/metrics/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tls/generate"
 )
 
@@ -52,6 +55,28 @@ func TestEntryPoints(t *testing.T) {
 		},
 	}
 
+	reg := mock2.NewMockTPCMetrics(ctrlr)
+	acceptConnsCounter := mock3.NewMockCounter(ctrlr)
+	closedConnsCounter := mock3.NewMockCounter(ctrlr)
+	openConnsGauce := mock3.NewMockGauge(ctrlr)
+	connsLatencyHisto := mock3.NewMockHistogram(ctrlr)
+
+	reg.EXPECT().AcceptedConnsCounter().Times(2).Return(acceptConnsCounter)
+	acceptConnsCounter.EXPECT().With(gomock.Any()).Times(2).Return(acceptConnsCounter)
+	acceptConnsCounter.EXPECT().Add(gomock.Any()).Times(2)
+
+	reg.EXPECT().OpenConnsGauge().Times(2).Return(openConnsGauce)
+	openConnsGauce.EXPECT().With(gomock.Any()).Times(2).Return(openConnsGauce)
+	openConnsGauce.EXPECT().Add(gomock.Any()).AnyTimes()
+
+	reg.EXPECT().ClosedConnsCounter().Times(2).Return(closedConnsCounter)
+	closedConnsCounter.EXPECT().With(gomock.Any()).Times(2).Return(closedConnsCounter)
+	closedConnsCounter.EXPECT().Add(gomock.Any()).AnyTimes()
+	
+	reg.EXPECT().ConnsLatencyHistogram().Times(2).Return(connsLatencyHisto)
+	connsLatencyHisto.EXPECT().With(gomock.Any()).Times(2).Return(connsLatencyHisto)
+	connsLatencyHisto.EXPECT().Observe(gomock.Any()).AnyTimes()
+
 	eps := NewEntryPoints(
 		map[string]*traefikstatic.EntryPoint{
 			"test-ep": {
@@ -63,7 +88,7 @@ func TestEntryPoints(t *testing.T) {
 			},
 		},
 		static.NewBuilder(confs),
-		generic.NewTCP(),
+		reg,
 	)
 	_ = eps.Switch(context.Background(), nil)
 
@@ -135,7 +160,7 @@ func TestEntryPointsError(t *testing.T) {
 			},
 		},
 		static.NewBuilder(confs),
-		generic.NewTCP(),
+		mock2.NewMockTPCMetrics(ctrlr),
 	)
 	_ = eps.Switch(context.Background(), nil)
 

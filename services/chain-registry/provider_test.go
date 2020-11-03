@@ -8,6 +8,7 @@ import (
 
 	traefikdynamic "github.com/containous/traefik/v2/pkg/config/dynamic"
 	"github.com/stretchr/testify/assert"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/config/dynamic"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
@@ -19,7 +20,7 @@ func TestNewInternalConfig(t *testing.T) {
 			Routers: map[string]*dynamic.Router{
 				"chains": {
 					Router: &traefikdynamic.Router{
-						EntryPoints: []string{"http"},
+						EntryPoints: []string{http.DefaultHTTPAppEntryPoint},
 						Service:     "chains",
 						Priority:    math.MaxInt32,
 						Rule:        "PathPrefix(`/chains`) || PathPrefix(`/faucets`)",
@@ -83,7 +84,7 @@ func TestNewChainsProxyConfig(t *testing.T) {
 			func(cfg *dynamic.Configuration) *dynamic.Configuration {
 				cfg.HTTP.Routers["chain-0d60a85e-0b90-4482-a14c-108aea2557aa"] = &dynamic.Router{
 					Router: &traefikdynamic.Router{
-						EntryPoints: []string{"http"},
+						EntryPoints: []string{http.DefaultHTTPAppEntryPoint},
 						Priority:    math.MaxInt32,
 						Service:     "chain-0d60a85e-0b90-4482-a14c-108aea2557aa",
 						Rule:        "Path(`/0d60a85e-0b90-4482-a14c-108aea2557aa`)",
@@ -146,7 +147,7 @@ func TestNewChainsProxyConfig(t *testing.T) {
 			func(cfg *dynamic.Configuration) *dynamic.Configuration {
 				cfg.HTTP.Routers["chain-0d60a85e-0b90-4482-a14c-108aea2557aa"] = &dynamic.Router{
 					Router: &traefikdynamic.Router{
-						EntryPoints: []string{"http"},
+						EntryPoints: []string{http.DefaultHTTPAppEntryPoint},
 						Priority:    math.MaxInt32,
 						Service:     "chain-0d60a85e-0b90-4482-a14c-108aea2557aa",
 						Rule:        "Path(`/0d60a85e-0b90-4482-a14c-108aea2557aa`)",
@@ -161,7 +162,7 @@ func TestNewChainsProxyConfig(t *testing.T) {
 				}
 				cfg.HTTP.Routers["chain-39240e9f-ae09-4e95-9fd0-a712035c8ad7"] = &dynamic.Router{
 					Router: &traefikdynamic.Router{
-						EntryPoints: []string{"http"},
+						EntryPoints: []string{http.DefaultHTTPAppEntryPoint},
 						Priority:    math.MaxInt32,
 						Service:     "chain-39240e9f-ae09-4e95-9fd0-a712035c8ad7",
 						Rule:        "Path(`/39240e9f-ae09-4e95-9fd0-a712035c8ad7`)",
@@ -176,7 +177,7 @@ func TestNewChainsProxyConfig(t *testing.T) {
 				}
 				cfg.HTTP.Routers["tessera-chain-39240e9f-ae09-4e95-9fd0-a712035c8ad7"] = &dynamic.Router{
 					Router: &traefikdynamic.Router{
-						EntryPoints: []string{"http"},
+						EntryPoints: []string{http.DefaultHTTPAppEntryPoint},
 						Priority:    math.MaxInt32,
 						Service:     "tessera-chain-39240e9f-ae09-4e95-9fd0-a712035c8ad7",
 						Rule:        "PathPrefix(`/tessera/39240e9f-ae09-4e95-9fd0-a712035c8ad7`)",

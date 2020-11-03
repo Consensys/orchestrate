@@ -6,8 +6,8 @@ import (
 	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
 	"github.com/hashicorp/go-multierror"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/server"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tcp"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tcp/metrics"
 	"google.golang.org/grpc"
 )
 
@@ -25,7 +25,7 @@ type EntryPoint struct {
 	server  *grpc.Server
 }
 
-func NewEntryPoint(name string, ep *traefikstatic.EntryPoint, builder server.Builder, reg metrics.TCP) *EntryPoint {
+func NewEntryPoint(name string, ep *traefikstatic.EntryPoint, builder server.Builder, reg metrics.TPCMetrics) *EntryPoint {
 	forwarder := tcp.NewForwarder(nil)
 	rt := &tcp.Router{}
 	rt.TCPForwarder(forwarder)

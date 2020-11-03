@@ -25,14 +25,16 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/config/dynamic"
 	httphandler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/handler/dynamic"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/handler/healthcheck"
+	httpmetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/metrics"
 	httpmid "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/middleware/dynamic"
 	metricsmid "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/middleware/metrics"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/router"
 	httprouter "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/router/dynamic"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/multi"
+	metricsregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/registry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tcp"
+	tcpmetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tcp/metrics"
 )
 
 // Daemon are structures exposing a long time running function
@@ -69,7 +71,7 @@ type App struct {
 	provider *aggregator.Provider
 	watcher  configwatcher.Watcher
 
-	metrics metrics.Registry
+	metricReg metrics.Registry
 
 	daemons        []Daemon
 	readinessCheck []*healthcheck.Checker
@@ -96,12 +98,21 @@ func New(cfg *Config, opts ...Option) (*App, error) {
 		return nil, err
 	}
 
-	reg := multi.New(cfg.Metrics)
+	reg := metricsregistry.NewMetricRegistry()
 
 	httpBuilder := httprouter.NewBuilder(cfg.HTTP.TraefikStatic(), nil)
 	httpBuilder.Handler = httphandler.NewBuilder()
 	httpBuilder.Middleware = httpmid.NewBuilder()
-	httpBuilder.Metrics = metricsmid.NewBuilder(reg.HTTP())
+
+	var httpMidMetrics httpmetrics.HTTPMetrics
+	if cfg.Metrics.IsActive(httpmetrics.ModuleName) {
+		httpMidMetrics = httpmetrics.NewHTTPMetrics(nil)
+	} else {
+		httpMidMetrics = httpmetrics.NewHTTPNopMetrics(nil)
+	}
+
+	reg.Add(httpMidMetrics)
+	httpBuilder.Metrics = metricsmid.NewBuilder(httpMidMetrics)
 
 	grpcBuilder := grpcstaticserver.NewBuilder()
 	grpcBuilder.Interceptor = grpcinterceptor.NewBuilder()
@@ -150,8 +161,8 @@ func newApp(
 		httpBuilder: httpBuilder,
 		grpcBuilder: grpcBuilder,
 		watcher:     watcher,
-		metrics:     reg,
 		logger:      logger,
+		metricReg:   reg,
 		errors:      make(chan error),
 	}
 }
@@ -162,17 +173,31 @@ func (app *App) init(ctx context.Context) error {
 		return err
 	}
 	traefiklog.FromContext(ctx).Infof("loaded app configuration %s", string(conf))
+	traefiklog.FromContext(ctx).Infof("activated metric modules: %v", app.cfg.Metrics.Modules())
+
+	var tcpreg tcpmetrics.TPCMetrics
+	if app.cfg.HTTP != nil || (app.cfg.GRPC != nil && app.cfg.GRPC.Static != nil) {
+		if app.cfg.Metrics.IsActive(tcpmetrics.ModuleName) {
+			tcpreg = tcpmetrics.NewTCPMetrics(nil)
+		} else {
+			tcpreg = tcpmetrics.NewTCPNopMetrics(nil)
+		}
+
+		app.metricReg.Add(tcpreg)
+	}
 
 	// Create HTTP EntryPoints
 	if app.cfg.HTTP != nil {
-		app.http = http.NewEntryPoints(app.cfg.HTTP.EntryPoints, app.httpBuilder, app.metrics.TCP())
+		app.http = http.NewEntryPoints(app.cfg.HTTP.EntryPoints, app.httpBuilder, tcpreg)
 
 		// Add Listeners for HTTP
 		app.watcher.AddListener(app.http.Switch)
 		app.watcher.AddListener(
 			func(_ context.Context, cfg interface{}) error {
 				if dynCfg, ok := cfg.(*dynamic.Configuration); ok {
-					return app.metrics.HTTP().Switch(dynCfg)
+					if err := app.metricReg.SwitchDynConfig(dynCfg); err != nil {
+						return err
+					}
 				}
 				return nil
 			},
@@ -181,7 +206,7 @@ func (app *App) init(ctx context.Context) error {
 
 	// Create GRPC EntryPoint
 	if app.cfg.GRPC != nil && app.cfg.GRPC.Static != nil {
-		app.grpc = grpc.NewEntryPoint("", app.cfg.GRPC.EntryPoint, app.grpcBuilder, app.metrics.TCP())
+		app.grpc = grpc.NewEntryPoint("", app.cfg.GRPC.EntryPoint, app.grpcBuilder, tcpreg)
 		err := app.grpc.BuildServer(ctx, app.cfg.GRPC.Static)
 		if err != nil {
 			return err
@@ -199,8 +224,8 @@ func (app *App) GRPC() grpcserver.Builder {
 	return app.grpcBuilder
 }
 
-func (app *App) Metrics() metrics.Registry {
-	return app.metrics
+func (app *App) MetricRegistry() metrics.Registry {
+	return app.metricReg
 }
 
 func (app *App) Logger() *logrus.Logger {

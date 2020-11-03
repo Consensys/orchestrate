@@ -1,4 +1,5 @@
 // +build unit
+// +build !race
 
 package grpcmetrics
 
@@ -11,6 +12,7 @@ import (
 	testproto "github.com/grpc-ecosystem/go-grpc-middleware/testing/testproto"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/metrics/mock"
 	mockmetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 	"google.golang.org/grpc"
@@ -20,12 +22,12 @@ type errorInterceptorsSuite struct {
 	suite.Suite
 	InterceptorTestSuite *grpctesting.InterceptorTestSuite
 	ctrlr                *gomock.Controller
-	registry             *mockmetrics.MockGRPCServer
+	registry             *mock.MockGRPCServerMetrics
 }
 
 func (s *errorInterceptorsSuite) SetupTest() {
 	s.ctrlr = gomock.NewController(s.T())
-	s.registry = mockmetrics.NewMockGRPCServer(s.ctrlr)
+	s.registry = mock.NewMockGRPCServerMetrics(s.ctrlr)
 	s.InterceptorTestSuite = &grpctesting.InterceptorTestSuite{
 		TestService: &grpctesting.TestPingService{T: s.T()},
 		ServerOpts: []grpc.ServerOption{

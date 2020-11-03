@@ -111,7 +111,7 @@ func NewEPsConfig(vipr *viper.Viper) traefikstatic.EntryPoints {
 	metricsEp.SetDefaults()
 
 	return traefikstatic.EntryPoints{
-		DefaultHTTPEntryPoint:    httpEp,
+		DefaultHTTPAppEntryPoint: httpEp,
 		DefaultMetricsEntryPoint: metricsEp,
 	}
 }

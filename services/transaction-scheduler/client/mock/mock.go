@@ -8,6 +8,7 @@ import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
 	healthcheck "github.com/heptiolabs/healthcheck"
+	io_prometheus_client "github.com/prometheus/client_model/go"
 	entities "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/txscheduler"
 	reflect "reflect"
@@ -305,6 +306,58 @@ func (mr *MockJobClientMockRecorder) SearchJob(ctx, filters interface{}) *gomock
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchJob", reflect.TypeOf((*MockJobClient)(nil).SearchJob), ctx, filters)
 }
 
+// MockMetricClient is a mock of MetricClient interface
+type MockMetricClient struct {
+	ctrl     *gomock.Controller
+	recorder *MockMetricClientMockRecorder
+}
+
+// MockMetricClientMockRecorder is the mock recorder for MockMetricClient
+type MockMetricClientMockRecorder struct {
+	mock *MockMetricClient
+}
+
+// NewMockMetricClient creates a new mock instance
+func NewMockMetricClient(ctrl *gomock.Controller) *MockMetricClient {
+	mock := &MockMetricClient{ctrl: ctrl}
+	mock.recorder = &MockMetricClientMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockMetricClient) EXPECT() *MockMetricClientMockRecorder {
+	return m.recorder
+}
+
+// Checker mocks base method
+func (m *MockMetricClient) Checker() healthcheck.Check {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Checker")
+	ret0, _ := ret[0].(healthcheck.Check)
+	return ret0
+}
+
+// Checker indicates an expected call of Checker
+func (mr *MockMetricClientMockRecorder) Checker() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Checker", reflect.TypeOf((*MockMetricClient)(nil).Checker))
+}
+
+// Prometheus mocks base method
+func (m *MockMetricClient) Prometheus(arg0 context.Context) (map[string]*io_prometheus_client.MetricFamily, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Prometheus", arg0)
+	ret0, _ := ret[0].(map[string]*io_prometheus_client.MetricFamily)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Prometheus indicates an expected call of Prometheus
+func (mr *MockMetricClientMockRecorder) Prometheus(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Prometheus", reflect.TypeOf((*MockMetricClient)(nil).Prometheus), arg0)
+}
+
 // MockTransactionSchedulerClient is a mock of TransactionSchedulerClient interface
 type MockTransactionSchedulerClient struct {
 	ctrl     *gomock.Controller
@@ -326,20 +379,6 @@ func NewMockTransactionSchedulerClient(ctrl *gomock.Controller) *MockTransaction
 // EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockTransactionSchedulerClient) EXPECT() *MockTransactionSchedulerClientMockRecorder {
 	return m.recorder
-}
-
-// Checker mocks base method
-func (m *MockTransactionSchedulerClient) Checker() healthcheck.Check {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Checker")
-	ret0, _ := ret[0].(healthcheck.Check)
-	return ret0
-}
-
-// Checker indicates an expected call of Checker
-func (mr *MockTransactionSchedulerClientMockRecorder) Checker() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Checker", reflect.TypeOf((*MockTransactionSchedulerClient)(nil).Checker))
 }
 
 // SendContractTransaction mocks base method
@@ -563,4 +602,33 @@ func (m *MockTransactionSchedulerClient) SearchJob(ctx context.Context, filters 
 func (mr *MockTransactionSchedulerClientMockRecorder) SearchJob(ctx, filters interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchJob", reflect.TypeOf((*MockTransactionSchedulerClient)(nil).SearchJob), ctx, filters)
+}
+
+// Checker mocks base method
+func (m *MockTransactionSchedulerClient) Checker() healthcheck.Check {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Checker")
+	ret0, _ := ret[0].(healthcheck.Check)
+	return ret0
+}
+
+// Checker indicates an expected call of Checker
+func (mr *MockTransactionSchedulerClientMockRecorder) Checker() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Checker", reflect.TypeOf((*MockTransactionSchedulerClient)(nil).Checker))
+}
+
+// Prometheus mocks base method
+func (m *MockTransactionSchedulerClient) Prometheus(arg0 context.Context) (map[string]*io_prometheus_client.MetricFamily, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Prometheus", arg0)
+	ret0, _ := ret[0].(map[string]*io_prometheus_client.MetricFamily)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Prometheus indicates an expected call of Prometheus
+func (mr *MockTransactionSchedulerClientMockRecorder) Prometheus(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Prometheus", reflect.TypeOf((*MockTransactionSchedulerClient)(nil).Prometheus), arg0)
 }

@@ -13,15 +13,15 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/handler/switcher"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/router"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tcp"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tcp/metrics"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 )
 
 const (
-	DefaultHTTPEntryPoint    = "http"
+	DefaultHTTPAppEntryPoint = "app"
 	DefaultMetricsEntryPoint = "metrics"
 )
 
@@ -34,7 +34,7 @@ type EntryPoints struct {
 func NewEntryPoints(
 	epConfigs traefikstatic.EntryPoints,
 	rt router.Builder,
-	reg metrics.TCP,
+	reg metrics.TPCMetrics,
 ) *EntryPoints {
 	s := &EntryPoints{
 		eps:    make(map[string]*EntryPoint),
@@ -154,7 +154,7 @@ type EntryPoint struct {
 	switcher *switchTCPHandler
 }
 
-func NewEntryPoint(name string, ep *traefikstatic.EntryPoint, httpSrv, httpsSrv *switchableServer, reg metrics.TCP) *EntryPoint {
+func NewEntryPoint(name string, ep *traefikstatic.EntryPoint, httpSrv, httpsSrv *switchableServer, reg metrics.TPCMetrics) *EntryPoint {
 	tcpSwitcher := &switchTCPHandler{
 		switcher:       tcp.NewSwitcher(),
 		http:           httpSrv,

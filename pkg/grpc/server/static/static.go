@@ -44,8 +44,8 @@ func (b *Builder) Build(ctx context.Context, name string, configuration interfac
 		enhancers          []func(srv *grpc.Server)
 	)
 	if b.Interceptor != nil {
-		for _, interceptor := range cfg.Interceptors {
-			unaryInterceptor, streamInterceptor, enhancer, err := b.Interceptor.Build(ctx, name, interceptor)
+		for _, intercep := range cfg.Interceptors {
+			unaryInterceptor, streamInterceptor, enhancer, err := b.Interceptor.Build(ctx, name, intercep)
 			if err != nil {
 				return nil, err
 			}

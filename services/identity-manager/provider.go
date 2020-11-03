@@ -31,7 +31,7 @@ func NewInternalConfig() *dynamic.Configuration {
 	// Router to Account API
 	cfg.HTTP.Routers["identities"] = &dynamic.Router{
 		Router: &traefikdynamic.Router{
-			EntryPoints: []string{http.DefaultHTTPEntryPoint},
+			EntryPoints: []string{http.DefaultHTTPAppEntryPoint},
 			Service:     "identities",
 			Priority:    math.MaxInt32,
 			Rule:        "PathPrefix(`/accounts`)",

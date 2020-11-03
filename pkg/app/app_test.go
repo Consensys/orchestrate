@@ -8,6 +8,7 @@ import (
 	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
 	"github.com/golang/mock/gomock"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/configwatcher"
@@ -15,8 +16,9 @@ import (
 	grpcstatic "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/config/static"
 	mockgrpc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/server/mock"
 	mockhttp "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/router/mock"
-	mockmetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/mock"
-	metrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/multi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/registry"
+	tcpmetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tcp/metrics"
 	gogrpc "google.golang.org/grpc"
 )
 
@@ -46,11 +48,12 @@ func newTestConfig() *Config {
 		Watcher: &configwatcher.Config{
 			ProvidersThrottleDuration: time.Millisecond,
 		},
-		Metrics: &metrics.Config{},
+		Metrics: registry.NewConfig(viper.GetViper()),
 	}
 }
 
 func TestApp(t *testing.T) {
+	ctx := context.Background()
 	ctrlr := gomock.NewController(t)
 	defer ctrlr.Finish()
 
@@ -59,26 +62,24 @@ func TestApp(t *testing.T) {
 
 	httpBuilder := mockhttp.NewMockBuilder(ctrlr)
 
-	metricsRegistry := mockmetrics.NewMockRegistry(ctrlr)
-	tcpMetrics := mockmetrics.NewMockTCP(ctrlr)
-
 	watcher := mockwatcher.NewMockWatcher(ctrlr)
 
-	app := newApp(newTestConfig(), httpBuilder, grpcBuilder, watcher, metricsRegistry, logrus.New())
+	reg := mock.NewMockRegistry(ctrlr)
+	app := newApp(newTestConfig(), httpBuilder, grpcBuilder, watcher, reg, logrus.New())
 
-	metricsRegistry.EXPECT().TCP().Return(tcpMetrics).Times(2)
+	reg.EXPECT().Add(gomock.AssignableToTypeOf(tcpmetrics.NewTCPMetrics(nil)))
 	watcher.EXPECT().AddListener(gomock.Any()).Times(2)
 	watcher.EXPECT().Run(gomock.Any())
 
-	err := app.Start(context.Background())
+	err := app.Start(ctx)
 	require.NoError(t, err, "App should have started properly")
 
 	// Wait for application to properly start
 	time.Sleep(100 * time.Millisecond)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	cctx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
-	err = app.Stop(ctx)
+	err = app.Stop(cctx)
 	assert.NoError(t, err, "App should have stop properly")
 
 	watcher.EXPECT().Close()

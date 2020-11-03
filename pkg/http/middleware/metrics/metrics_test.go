@@ -1,18 +1,20 @@
 // +build unit
+// +build !race
 
 package metrics
 
 import (
 	"context"
+	"testing"
 	"crypto/tls"
 	"net/http"
 	"net/http/httptest"
-	"testing"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 	mockhandler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/handler/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/httputil"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/metrics/mock"
 	mockmetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 )
@@ -21,7 +23,7 @@ func TestMetrics(t *testing.T) {
 	ctrlr := gomock.NewController(t)
 	defer ctrlr.Finish()
 
-	mockHTTP := mockmetrics.NewMockHTTP(ctrlr)
+	mockHTTP := mock.NewMockHTTPMetrics(ctrlr)
 
 	b := NewBuilder(mockHTTP)
 	ctx := httputil.WithEntryPoint(httputil.WithService(context.Background(), "service-test"), "entrypoint-test")

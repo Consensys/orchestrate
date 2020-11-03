@@ -12,7 +12,7 @@ func AddDynamicConfig(cfg *dynamic.Configuration, middlewares []string, specsFil
 	// Router to swagger
 	cfg.HTTP.Routers["swagger"] = &dynamic.Router{
 		Router: &traefikdynamic.Router{
-			EntryPoints: []string{http.DefaultHTTPEntryPoint},
+			EntryPoints: []string{http.DefaultHTTPAppEntryPoint},
 			Service:     "swagger",
 			Priority:    math.MaxInt32,
 			Rule:        "PathPrefix(`/swagger`)",

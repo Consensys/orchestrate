@@ -5,304 +5,119 @@
 package mock
 
 import (
-	metrics "github.com/go-kit/kit/metrics"
 	gomock "github.com/golang/mock/gomock"
+	prometheus "github.com/prometheus/client_golang/prometheus"
 	dynamic "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/config/dynamic"
-	metrics0 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics"
+	metrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics"
 	reflect "reflect"
 )
 
-// MockTCP is a mock of TCP interface
-type MockTCP struct {
+// MockPrometheus is a mock of Prometheus interface
+type MockPrometheus struct {
 	ctrl     *gomock.Controller
-	recorder *MockTCPMockRecorder
+	recorder *MockPrometheusMockRecorder
 }
 
-// MockTCPMockRecorder is the mock recorder for MockTCP
-type MockTCPMockRecorder struct {
-	mock *MockTCP
+// MockPrometheusMockRecorder is the mock recorder for MockPrometheus
+type MockPrometheusMockRecorder struct {
+	mock *MockPrometheus
 }
 
-// NewMockTCP creates a new mock instance
-func NewMockTCP(ctrl *gomock.Controller) *MockTCP {
-	mock := &MockTCP{ctrl: ctrl}
-	mock.recorder = &MockTCPMockRecorder{mock}
+// NewMockPrometheus creates a new mock instance
+func NewMockPrometheus(ctrl *gomock.Controller) *MockPrometheus {
+	mock := &MockPrometheus{ctrl: ctrl}
+	mock.recorder = &MockPrometheusMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use
-func (m *MockTCP) EXPECT() *MockTCPMockRecorder {
+func (m *MockPrometheus) EXPECT() *MockPrometheusMockRecorder {
 	return m.recorder
 }
 
-// AcceptedConnsCounter mocks base method
-func (m *MockTCP) AcceptedConnsCounter() metrics.Counter {
+// Describe mocks base method
+func (m *MockPrometheus) Describe(arg0 chan<- *prometheus.Desc) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AcceptedConnsCounter")
-	ret0, _ := ret[0].(metrics.Counter)
-	return ret0
+	m.ctrl.Call(m, "Describe", arg0)
 }
 
-// AcceptedConnsCounter indicates an expected call of AcceptedConnsCounter
-func (mr *MockTCPMockRecorder) AcceptedConnsCounter() *gomock.Call {
+// Describe indicates an expected call of Describe
+func (mr *MockPrometheusMockRecorder) Describe(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AcceptedConnsCounter", reflect.TypeOf((*MockTCP)(nil).AcceptedConnsCounter))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Describe", reflect.TypeOf((*MockPrometheus)(nil).Describe), arg0)
 }
 
-// ClosedConnsCounter mocks base method
-func (m *MockTCP) ClosedConnsCounter() metrics.Counter {
+// Collect mocks base method
+func (m *MockPrometheus) Collect(arg0 chan<- prometheus.Metric) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ClosedConnsCounter")
-	ret0, _ := ret[0].(metrics.Counter)
-	return ret0
+	m.ctrl.Call(m, "Collect", arg0)
 }
 
-// ClosedConnsCounter indicates an expected call of ClosedConnsCounter
-func (mr *MockTCPMockRecorder) ClosedConnsCounter() *gomock.Call {
+// Collect indicates an expected call of Collect
+func (mr *MockPrometheusMockRecorder) Collect(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClosedConnsCounter", reflect.TypeOf((*MockTCP)(nil).ClosedConnsCounter))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Collect", reflect.TypeOf((*MockPrometheus)(nil).Collect), arg0)
 }
 
-// ConnsLatencyHistogram mocks base method
-func (m *MockTCP) ConnsLatencyHistogram() metrics.Histogram {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ConnsLatencyHistogram")
-	ret0, _ := ret[0].(metrics.Histogram)
-	return ret0
-}
-
-// ConnsLatencyHistogram indicates an expected call of ConnsLatencyHistogram
-func (mr *MockTCPMockRecorder) ConnsLatencyHistogram() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ConnsLatencyHistogram", reflect.TypeOf((*MockTCP)(nil).ConnsLatencyHistogram))
-}
-
-// OpenConnsGauge mocks base method
-func (m *MockTCP) OpenConnsGauge() metrics.Gauge {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "OpenConnsGauge")
-	ret0, _ := ret[0].(metrics.Gauge)
-	return ret0
-}
-
-// OpenConnsGauge indicates an expected call of OpenConnsGauge
-func (mr *MockTCPMockRecorder) OpenConnsGauge() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OpenConnsGauge", reflect.TypeOf((*MockTCP)(nil).OpenConnsGauge))
-}
-
-// MockHTTP is a mock of HTTP interface
-type MockHTTP struct {
+// MockDynamicPrometheus is a mock of DynamicPrometheus interface
+type MockDynamicPrometheus struct {
 	ctrl     *gomock.Controller
-	recorder *MockHTTPMockRecorder
+	recorder *MockDynamicPrometheusMockRecorder
 }
 
-// MockHTTPMockRecorder is the mock recorder for MockHTTP
-type MockHTTPMockRecorder struct {
-	mock *MockHTTP
+// MockDynamicPrometheusMockRecorder is the mock recorder for MockDynamicPrometheus
+type MockDynamicPrometheusMockRecorder struct {
+	mock *MockDynamicPrometheus
 }
 
-// NewMockHTTP creates a new mock instance
-func NewMockHTTP(ctrl *gomock.Controller) *MockHTTP {
-	mock := &MockHTTP{ctrl: ctrl}
-	mock.recorder = &MockHTTPMockRecorder{mock}
+// NewMockDynamicPrometheus creates a new mock instance
+func NewMockDynamicPrometheus(ctrl *gomock.Controller) *MockDynamicPrometheus {
+	mock := &MockDynamicPrometheus{ctrl: ctrl}
+	mock.recorder = &MockDynamicPrometheusMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use
-func (m *MockHTTP) EXPECT() *MockHTTPMockRecorder {
+func (m *MockDynamicPrometheus) EXPECT() *MockDynamicPrometheusMockRecorder {
 	return m.recorder
-}
-
-// RequestsCounter mocks base method
-func (m *MockHTTP) RequestsCounter() metrics.Counter {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RequestsCounter")
-	ret0, _ := ret[0].(metrics.Counter)
-	return ret0
-}
-
-// RequestsCounter indicates an expected call of RequestsCounter
-func (mr *MockHTTPMockRecorder) RequestsCounter() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RequestsCounter", reflect.TypeOf((*MockHTTP)(nil).RequestsCounter))
-}
-
-// TLSRequestsCounter mocks base method
-func (m *MockHTTP) TLSRequestsCounter() metrics.Counter {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "TLSRequestsCounter")
-	ret0, _ := ret[0].(metrics.Counter)
-	return ret0
-}
-
-// TLSRequestsCounter indicates an expected call of TLSRequestsCounter
-func (mr *MockHTTPMockRecorder) TLSRequestsCounter() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TLSRequestsCounter", reflect.TypeOf((*MockHTTP)(nil).TLSRequestsCounter))
-}
-
-// RequestsLatencyHistogram mocks base method
-func (m *MockHTTP) RequestsLatencyHistogram() metrics.Histogram {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RequestsLatencyHistogram")
-	ret0, _ := ret[0].(metrics.Histogram)
-	return ret0
-}
-
-// RequestsLatencyHistogram indicates an expected call of RequestsLatencyHistogram
-func (mr *MockHTTPMockRecorder) RequestsLatencyHistogram() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RequestsLatencyHistogram", reflect.TypeOf((*MockHTTP)(nil).RequestsLatencyHistogram))
-}
-
-// OpenConnsGauge mocks base method
-func (m *MockHTTP) OpenConnsGauge() metrics.Gauge {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "OpenConnsGauge")
-	ret0, _ := ret[0].(metrics.Gauge)
-	return ret0
-}
-
-// OpenConnsGauge indicates an expected call of OpenConnsGauge
-func (mr *MockHTTPMockRecorder) OpenConnsGauge() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OpenConnsGauge", reflect.TypeOf((*MockHTTP)(nil).OpenConnsGauge))
-}
-
-// RetriesCounter mocks base method
-func (m *MockHTTP) RetriesCounter() metrics.Counter {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RetriesCounter")
-	ret0, _ := ret[0].(metrics.Counter)
-	return ret0
-}
-
-// RetriesCounter indicates an expected call of RetriesCounter
-func (mr *MockHTTPMockRecorder) RetriesCounter() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RetriesCounter", reflect.TypeOf((*MockHTTP)(nil).RetriesCounter))
-}
-
-// ServerUpGauge mocks base method
-func (m *MockHTTP) ServerUpGauge() metrics.Gauge {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ServerUpGauge")
-	ret0, _ := ret[0].(metrics.Gauge)
-	return ret0
-}
-
-// ServerUpGauge indicates an expected call of ServerUpGauge
-func (mr *MockHTTPMockRecorder) ServerUpGauge() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ServerUpGauge", reflect.TypeOf((*MockHTTP)(nil).ServerUpGauge))
 }
 
 // Switch mocks base method
-func (m *MockHTTP) Switch(cfg *dynamic.Configuration) error {
+func (m *MockDynamicPrometheus) Switch(arg0 *dynamic.Configuration) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Switch", cfg)
+	ret := m.ctrl.Call(m, "Switch", arg0)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Switch indicates an expected call of Switch
-func (mr *MockHTTPMockRecorder) Switch(cfg interface{}) *gomock.Call {
+func (mr *MockDynamicPrometheusMockRecorder) Switch(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Switch", reflect.TypeOf((*MockHTTP)(nil).Switch), cfg)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Switch", reflect.TypeOf((*MockDynamicPrometheus)(nil).Switch), arg0)
 }
 
-// MockGRPCServer is a mock of GRPCServer interface
-type MockGRPCServer struct {
-	ctrl     *gomock.Controller
-	recorder *MockGRPCServerMockRecorder
-}
-
-// MockGRPCServerMockRecorder is the mock recorder for MockGRPCServer
-type MockGRPCServerMockRecorder struct {
-	mock *MockGRPCServer
-}
-
-// NewMockGRPCServer creates a new mock instance
-func NewMockGRPCServer(ctrl *gomock.Controller) *MockGRPCServer {
-	mock := &MockGRPCServer{ctrl: ctrl}
-	mock.recorder = &MockGRPCServerMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use
-func (m *MockGRPCServer) EXPECT() *MockGRPCServerMockRecorder {
-	return m.recorder
-}
-
-// StartedCounter mocks base method
-func (m *MockGRPCServer) StartedCounter() metrics.Counter {
+// Describe mocks base method
+func (m *MockDynamicPrometheus) Describe(arg0 chan<- *prometheus.Desc) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "StartedCounter")
-	ret0, _ := ret[0].(metrics.Counter)
-	return ret0
+	m.ctrl.Call(m, "Describe", arg0)
 }
 
-// StartedCounter indicates an expected call of StartedCounter
-func (mr *MockGRPCServerMockRecorder) StartedCounter() *gomock.Call {
+// Describe indicates an expected call of Describe
+func (mr *MockDynamicPrometheusMockRecorder) Describe(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StartedCounter", reflect.TypeOf((*MockGRPCServer)(nil).StartedCounter))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Describe", reflect.TypeOf((*MockDynamicPrometheus)(nil).Describe), arg0)
 }
 
-// HandledCounter mocks base method
-func (m *MockGRPCServer) HandledCounter() metrics.Counter {
+// Collect mocks base method
+func (m *MockDynamicPrometheus) Collect(arg0 chan<- prometheus.Metric) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "HandledCounter")
-	ret0, _ := ret[0].(metrics.Counter)
-	return ret0
+	m.ctrl.Call(m, "Collect", arg0)
 }
 
-// HandledCounter indicates an expected call of HandledCounter
-func (mr *MockGRPCServerMockRecorder) HandledCounter() *gomock.Call {
+// Collect indicates an expected call of Collect
+func (mr *MockDynamicPrometheusMockRecorder) Collect(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HandledCounter", reflect.TypeOf((*MockGRPCServer)(nil).HandledCounter))
-}
-
-// StreamMsgReceivedCounter mocks base method
-func (m *MockGRPCServer) StreamMsgReceivedCounter() metrics.Counter {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "StreamMsgReceivedCounter")
-	ret0, _ := ret[0].(metrics.Counter)
-	return ret0
-}
-
-// StreamMsgReceivedCounter indicates an expected call of StreamMsgReceivedCounter
-func (mr *MockGRPCServerMockRecorder) StreamMsgReceivedCounter() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StreamMsgReceivedCounter", reflect.TypeOf((*MockGRPCServer)(nil).StreamMsgReceivedCounter))
-}
-
-// StreamMsgSentCounter mocks base method
-func (m *MockGRPCServer) StreamMsgSentCounter() metrics.Counter {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "StreamMsgSentCounter")
-	ret0, _ := ret[0].(metrics.Counter)
-	return ret0
-}
-
-// StreamMsgSentCounter indicates an expected call of StreamMsgSentCounter
-func (mr *MockGRPCServerMockRecorder) StreamMsgSentCounter() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StreamMsgSentCounter", reflect.TypeOf((*MockGRPCServer)(nil).StreamMsgSentCounter))
-}
-
-// HandledDurationHistogram mocks base method
-func (m *MockGRPCServer) HandledDurationHistogram() metrics.Histogram {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "HandledDurationHistogram")
-	ret0, _ := ret[0].(metrics.Histogram)
-	return ret0
-}
-
-// HandledDurationHistogram indicates an expected call of HandledDurationHistogram
-func (mr *MockGRPCServerMockRecorder) HandledDurationHistogram() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HandledDurationHistogram", reflect.TypeOf((*MockGRPCServer)(nil).HandledDurationHistogram))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Collect", reflect.TypeOf((*MockDynamicPrometheus)(nil).Collect), arg0)
 }
 
 // MockRegistry is a mock of Registry interface
@@ -328,44 +143,52 @@ func (m *MockRegistry) EXPECT() *MockRegistryMockRecorder {
 	return m.recorder
 }
 
-// TCP mocks base method
-func (m *MockRegistry) TCP() metrics0.TCP {
+// Add mocks base method
+func (m_2 *MockRegistry) Add(m metrics.Prometheus) {
+	m_2.ctrl.T.Helper()
+	m_2.ctrl.Call(m_2, "Add", m)
+}
+
+// Add indicates an expected call of Add
+func (mr *MockRegistryMockRecorder) Add(m interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Add", reflect.TypeOf((*MockRegistry)(nil).Add), m)
+}
+
+// SwitchDynConfig mocks base method
+func (m *MockRegistry) SwitchDynConfig(dynCfg *dynamic.Configuration) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "TCP")
-	ret0, _ := ret[0].(metrics0.TCP)
+	ret := m.ctrl.Call(m, "SwitchDynConfig", dynCfg)
+	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// TCP indicates an expected call of TCP
-func (mr *MockRegistryMockRecorder) TCP() *gomock.Call {
+// SwitchDynConfig indicates an expected call of SwitchDynConfig
+func (mr *MockRegistryMockRecorder) SwitchDynConfig(dynCfg interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TCP", reflect.TypeOf((*MockRegistry)(nil).TCP))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SwitchDynConfig", reflect.TypeOf((*MockRegistry)(nil).SwitchDynConfig), dynCfg)
 }
 
-// HTTP mocks base method
-func (m *MockRegistry) HTTP() metrics0.HTTP {
+// Describe mocks base method
+func (m *MockRegistry) Describe(arg0 chan<- *prometheus.Desc) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "HTTP")
-	ret0, _ := ret[0].(metrics0.HTTP)
-	return ret0
+	m.ctrl.Call(m, "Describe", arg0)
 }
 
-// HTTP indicates an expected call of HTTP
-func (mr *MockRegistryMockRecorder) HTTP() *gomock.Call {
+// Describe indicates an expected call of Describe
+func (mr *MockRegistryMockRecorder) Describe(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HTTP", reflect.TypeOf((*MockRegistry)(nil).HTTP))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Describe", reflect.TypeOf((*MockRegistry)(nil).Describe), arg0)
 }
 
-// GRPCServer mocks base method
-func (m *MockRegistry) GRPCServer() metrics0.GRPCServer {
+// Collect mocks base method
+func (m *MockRegistry) Collect(arg0 chan<- prometheus.Metric) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GRPCServer")
-	ret0, _ := ret[0].(metrics0.GRPCServer)
-	return ret0
+	m.ctrl.Call(m, "Collect", arg0)
 }
 
-// GRPCServer indicates an expected call of GRPCServer
-func (mr *MockRegistryMockRecorder) GRPCServer() *gomock.Call {
+// Collect indicates an expected call of Collect
+func (mr *MockRegistryMockRecorder) Collect(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GRPCServer", reflect.TypeOf((*MockRegistry)(nil).GRPCServer))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Collect", reflect.TypeOf((*MockRegistry)(nil).Collect), arg0)
 }

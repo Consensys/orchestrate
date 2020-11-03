@@ -3,6 +3,8 @@ package txlistener
 import (
 	"os"
 
+	metrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/registry"
+	tcpmetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tcp/metrics"
 	txsentry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-sentry"
 
 	"github.com/spf13/cobra"
@@ -43,6 +45,7 @@ func newRunCommand() *cobra.Command {
 	registryclient.ContractRegistryURL(runCmd.Flags())
 	txschedulerclient.Flags(runCmd.Flags())
 	txsentry.Flags(runCmd.Flags())
+	metrics.Flags(runCmd.Flags(), tcpmetrics.ModuleName)
 
 	return runCmd
 }

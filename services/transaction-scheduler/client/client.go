@@ -4,6 +4,7 @@ import (
 	"context"
 
 	healthz "github.com/heptiolabs/healthcheck"
+	dto "github.com/prometheus/client_model/go"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/txscheduler"
 )
@@ -34,9 +35,14 @@ type JobClient interface {
 	SearchJob(ctx context.Context, filters *entities.JobFilters) ([]*types.JobResponse, error)
 }
 
-type TransactionSchedulerClient interface {
+type MetricClient interface {
 	Checker() healthz.Check
+	Prometheus(context.Context) (map[string]*dto.MetricFamily, error)
+}
+
+type TransactionSchedulerClient interface {
 	TransactionClient
 	ScheduleClient
 	JobClient
+	MetricClient
 }

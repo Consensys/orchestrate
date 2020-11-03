@@ -31,7 +31,7 @@ func NewInternalConfig() *dynamic.Configuration {
 	// Router to Chains API
 	cfg.HTTP.Routers["contracts"] = &dynamic.Router{
 		Router: &traefikdynamic.Router{
-			EntryPoints: []string{http.DefaultHTTPEntryPoint},
+			EntryPoints: []string{http.DefaultHTTPAppEntryPoint},
 			Service:     "contracts",
 			Priority:    math.MaxInt32,
 			Rule:        "PathPrefix(`/contracts`)",

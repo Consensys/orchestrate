@@ -18,6 +18,7 @@ import (
 	grpclogrus "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/interceptor/logrus"
 	grpcmetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/interceptor/metrics"
 	staticinterceptor "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/interceptor/static"
+	grpcmetrics2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/metrics"
 	staticgrpc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/server/static"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/service"
 	staticservice "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/service/static"
@@ -33,7 +34,8 @@ import (
 	dynmid "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/middleware/dynamic"
 	multitenancymid "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/middleware/multitenancy"
 	dynrouter "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/router/dynamic"
-	multimetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/multi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics"
+	metricregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/registry"
 )
 
 type Option func(*App) error
@@ -173,7 +175,7 @@ func SwaggerOpt(specsFile string, middlewares ...string) Option {
 	// Router to swagger
 	cfg.HTTP.Routers["swagger"] = &dynamic.Router{
 		Router: &traefikdynamic.Router{
-			EntryPoints: []string{http.DefaultHTTPEntryPoint},
+			EntryPoints: []string{http.DefaultHTTPAppEntryPoint},
 			Service:     "swagger",
 			Priority:    math.MaxInt32,
 			Rule:        "PathPrefix(`/swagger`)",
@@ -202,21 +204,59 @@ func SwaggerOpt(specsFile string, middlewares ...string) Option {
 	)
 }
 
-func MetricsOpt(middlewares ...string) Option {
+func MetricsOpt(appMetrics ...metrics.Prometheus) Option {
 	registry := prom.NewRegistry()
+
+	// Register Provided metrics
+	appMetricsRegister := func(app *App) error {
+		// Register base Process and Golang runtime metrics
+		if app.cfg.Metrics.IsActive(metricregistry.GoMetricsModule) {
+			app.metricReg.Add(prom.NewGoCollector())
+		}
+		if app.cfg.Metrics.IsActive(metricregistry.ProcessMetricsModule) {
+			app.metricReg.Add(prom.NewProcessCollector(prom.ProcessCollectorOpts{}))
+		}
+
+		for _, m := range appMetrics {
+			app.metricReg.Add(m)
+		}
+
+		return nil
+	}
+
+	healthzOpt := func(app *App) error {
+		var h healthz.Handler
+		if app.cfg.Metrics.IsActive(metricregistry.HealthzMetricsModule) {
+			h = healthz.NewMetricsHandler(registry, "prometheus")
+		} else {
+			h = healthz.NewHandler()
+		}
+
+		return HealthcheckOpt(h)(app)
+	}
+
 	return CombineOptions(
-		HealthcheckOpt(healthz.NewMetricsHandler(registry, "prometheus"), middlewares...),
-		PrometheusOpt(registry, middlewares...),
-		DashboardOpt(middlewares...),
+		appMetricsRegister,
+		healthzOpt,
+		PrometheusOpt(registry),
+		DashboardOpt(),
 		MetricsInterceptorOpt(),
 	)
 }
 
 func MetricsInterceptorOpt() Option {
 	return func(app *App) error {
+		var reg grpcmetrics2.GRPCMetrics
+		if app.cfg.Metrics.IsActive(grpcmetrics2.ModuleName) {
+			reg = grpcmetrics2.NewGRPCMetrics(nil)
+		} else {
+			reg = grpcmetrics2.NewGRPCNopMetrics(nil)
+		}
+
+		app.metricReg.Add(reg)
 		return InterceptorOpt(
 			reflect.TypeOf(&static.Metrics{}),
-			grpcmetrics.NewBuilder(app.Metrics().GRPCServer()),
+			grpcmetrics.NewBuilder(reg),
 		)(app)
 	}
 }
@@ -317,16 +357,13 @@ func PrometheusOpt(registry *prom.Registry, middlewares ...string) Option {
 
 	// Register Prometheus registry
 	promRegister := func(app *App) error {
-		// Register base Process and Golang runtime metrics
-		registry.MustRegister(prom.NewProcessCollector(prom.ProcessCollectorOpts{}))
-		registry.MustRegister(prom.NewGoCollector())
-
-		// Register base custom metrics
-		reg, ok := app.Metrics().(*multimetrics.Multi)
-		if ok {
-			return registry.Register(reg.Prometheus())
+		// Register app metric collector
+		err := registry.Register(app.MetricRegistry())
+		if err != nil {
+			return err
 		}
-		return fmt.Errorf("invalid metrics registry type %T (expected %T)", app.Metrics(), reg)
+
+		return nil
 	}
 
 	return CombineOptions(
