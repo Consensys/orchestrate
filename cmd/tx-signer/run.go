@@ -3,13 +3,6 @@ package txsigner
 import (
 	"os"
 
-	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
-	chnregclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/client"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/keystore"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/secretstore"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/secretstore/hashicorp"
-	txschedulerclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
@@ -35,23 +28,22 @@ func newRunCommand() *cobra.Command {
 	}
 
 	// Register KeyStore flags
-	hashicorp.InitFlags(runCmd.Flags())
-	keystore.InitFlags(runCmd.Flags())
-	secretstore.InitFlags(runCmd.Flags())
-
-	// Register Kafka flags
-	broker.InitKafkaFlags(runCmd.Flags())
-	broker.KafkaTopicTxSigner(runCmd.Flags())
-	broker.KafkaTopicTxSender(runCmd.Flags())
-	broker.KafkaTopicTxRecover(runCmd.Flags())
-
-	// Internal API clients
-	chnregclient.Flags(runCmd.Flags())
-	txschedulerclient.Flags(runCmd.Flags())
+	txsigner.Flags(runCmd.Flags())
 
 	return runCmd
 }
 
 func run(cmd *cobra.Command, _ []string) error {
-	return txsigner.Run(cmd.Context())
+	ctx := cmd.Context()
+	app, err := txsigner.New(ctx)
+	if err != nil {
+		return errors.CombineErrors(cmdErr, err)
+	}
+
+	err = app.Run(ctx)
+	if err != nil {
+		return errors.CombineErrors(cmdErr, err)
+	}
+
+	return nil
 }

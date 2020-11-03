@@ -57,33 +57,14 @@ func SignEEATransaction(tx *types.Transaction, privateArgs *entities.PrivateETHT
 		return nil, errors.InvalidParameterError(errMessage)
 	}
 
-	privateFromEncoded, err := base64.StdEncoding.DecodeString(privateArgs.PrivateFrom)
+	privateFromEncoded, err := GetEncodedPrivateFrom(privateArgs.PrivateFrom)
 	if err != nil {
-		errMessage := "invalid base64 privateFrom"
-		log.WithError(err).WithField("private_from", privateArgs.PrivateFrom).Error(errMessage)
-		return nil, errors.InvalidParameterError(errMessage)
+		return nil, err
 	}
 
-	var privateRecipientEncoded interface{}
-	if privateArgs.PrivacyGroupID != "" {
-		privateRecipientEncoded, err = base64.StdEncoding.DecodeString(privateArgs.PrivacyGroupID)
-		if err != nil {
-			errMessage := "invalid base64 privacyGroupId"
-			log.WithError(err).WithField("privacy_group_id", privateArgs.PrivacyGroupID).Error(errMessage)
-			return nil, errors.InvalidParameterError(errMessage)
-		}
-	} else {
-		var privateForByteSlice [][]byte
-		for _, v := range privateArgs.PrivateFor {
-			b, der := base64.StdEncoding.DecodeString(v)
-			if der != nil {
-				errMessage := "invalid base64 privateFor"
-				log.WithError(der).WithField("Private_for", v).Error(errMessage)
-				return nil, errors.InvalidParameterError(errMessage)
-			}
-			privateForByteSlice = append(privateForByteSlice, b)
-		}
-		privateRecipientEncoded = privateForByteSlice
+	privateRecipientEncoded, err := GetEncodedPrivateRecipient(privateArgs.PrivacyGroupID, privateArgs.PrivateFor)
+	if err != nil {
+		return nil, err
 	}
 
 	hash, err := rlp.Hash([]interface{}{
@@ -101,17 +82,55 @@ func SignEEATransaction(tx *types.Transaction, privateArgs *entities.PrivateETHT
 		privateArgs.PrivateTxType,
 	})
 	if err != nil {
-		errMessage := "failed to hash eea transaction for signature"
+		errMessage := "failed to hash eea transaction"
 		log.WithError(err).Error(errMessage)
 		return nil, errors.CryptoOperationError(errMessage)
 	}
 
-	decodedSignature, err := crypto.Sign(hash[:], privKey)
+	signature, err := crypto.Sign(hash[:], privKey)
 	if err != nil {
 		errMessage := "failed to sign eea transaction"
 		log.WithError(err).Error(errMessage)
 		return nil, errors.CryptoOperationError(errMessage)
 	}
 
-	return decodedSignature, err
+	return signature, err
+}
+
+func GetEncodedPrivateFrom(privateFrom string) ([]byte, error) {
+	privateFromEncoded, err := base64.StdEncoding.DecodeString(privateFrom)
+	if err != nil {
+		errMessage := "invalid base64 privateFrom"
+		log.WithError(err).WithField("private_from", privateFrom).Error(errMessage)
+		return nil, errors.InvalidParameterError(errMessage)
+	}
+
+	return privateFromEncoded, nil
+}
+
+func GetEncodedPrivateRecipient(privacyGroupID string, privateFor []string) (interface{}, error) {
+	var privateRecipientEncoded interface{}
+	var err error
+	if privacyGroupID != "" {
+		privateRecipientEncoded, err = base64.StdEncoding.DecodeString(privacyGroupID)
+		if err != nil {
+			errMessage := "invalid base64 privacyGroupId"
+			log.WithError(err).WithField("privacy_group_id", privacyGroupID).Error(errMessage)
+			return nil, errors.InvalidParameterError(errMessage)
+		}
+	} else {
+		var privateForByteSlice [][]byte
+		for _, v := range privateFor {
+			b, der := base64.StdEncoding.DecodeString(v)
+			if der != nil {
+				errMessage := "invalid base64 privateFor"
+				log.WithError(der).WithField("Private_for", v).Error(errMessage)
+				return nil, errors.InvalidParameterError(errMessage)
+			}
+			privateForByteSlice = append(privateForByteSlice, b)
+		}
+		privateRecipientEncoded = privateForByteSlice
+	}
+
+	return privateRecipientEncoded, nil
 }

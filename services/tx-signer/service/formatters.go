@@ -11,12 +11,12 @@ func EnvelopeToJob(envelope *tx.Envelope, tenantID string) *entities.Job {
 		NextJobUUID:  envelope.GetNextJobUUID(),
 		ChainUUID:    envelope.GetChainUUID(),
 		ScheduleUUID: envelope.GetScheduleUUID(),
-		TenantID:     tenantID,
 		Type:         envelope.GetJobTypeString(),
 		InternalData: &entities.InternalData{
 			OneTimeKey: envelope.IsOneTimeKeySignature(),
 			ChainID:    envelope.GetChainIDString(),
 		},
+		TenantID: tenantID,
 		Transaction: &entities.ETHTransaction{
 			Hash:           envelope.GetTxHashString(),
 			From:           envelope.GetFromString(),

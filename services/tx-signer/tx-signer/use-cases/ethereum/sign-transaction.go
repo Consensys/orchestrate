@@ -2,13 +2,16 @@ package ethereum
 
 import (
 	"context"
+	"fmt"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/rlp"
 
 	"github.com/ethereum/go-ethereum/crypto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/crypto/ethereum/signing"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-signer-new/tx-signer/parsers"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-signer/tx-signer/parsers"
 
-	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-signer-new/tx-signer/use-cases"
+	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-signer/tx-signer/use-cases"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -50,14 +53,23 @@ func (uc *signTransactionUseCase) Execute(ctx context.Context, job *entities.Job
 		return "", "", errors.FromError(err).ExtendComponent(signTransactionComponent)
 	}
 
-	signedRaw, err := GetSignedRawTransaction(transaction, decodedSignature, signer)
+	signedTx, err := transaction.WithSignature(signer, decodedSignature)
 	if err != nil {
-		return "", "", errors.FromError(err).ExtendComponent(signTransactionComponent)
+		errMessage := "failed to set transaction signature"
+		log.WithError(err).Error(errMessage)
+		return "", "", errors.InvalidParameterError(errMessage).ExtendComponent(signTransactionComponent)
 	}
-	txHash = transaction.Hash().Hex()
+
+	signedRaw, err := rlp.Encode(signedTx)
+	if err != nil {
+		errMessage := "failed to RLP encode signed transaction"
+		log.WithError(err).Error(errMessage)
+		return "", "", errors.CryptoOperationError(errMessage).ExtendComponent(signTransactionComponent)
+	}
+	txHash = signedTx.Hash().Hex()
 
 	logger.WithField("txHash", txHash).Info("ethereum transaction signed successfully")
-	return signedRaw, txHash, nil
+	return hexutil.Encode(signedRaw), txHash, nil
 }
 
 func (*signTransactionUseCase) signWithOneTimeKey(transaction *types.Transaction, signer types.Signer) ([]byte, error) {
@@ -73,30 +85,40 @@ func (*signTransactionUseCase) signWithOneTimeKey(transaction *types.Transaction
 
 func (uc *signTransactionUseCase) signWithAccount(ctx context.Context, job *entities.Job, tx *types.Transaction) ([]byte, error) {
 	request := &ethereum.SignETHTransactionRequest{
-		Namespace: job.TenantID,
-		Nonce:     tx.Nonce(),
-		Amount:    tx.Value().String(),
-		GasPrice:  tx.GasPrice().String(),
-		GasLimit:  tx.Gas(),
-		Data:      hexutil.Encode(tx.Data()),
-		ChainID:   job.InternalData.ChainID,
+		Nonce:    tx.Nonce(),
+		Amount:   tx.Value().String(),
+		GasPrice: tx.GasPrice().String(),
+		GasLimit: tx.Gas(),
+		Data:     hexutil.Encode(tx.Data()),
+		ChainID:  job.InternalData.ChainID,
 	}
 	if tx.To() != nil {
 		request.To = tx.To().Hex()
 	}
 
-	sig, err := uc.keyManagerClient.ETHSignTransaction(ctx, job.Transaction.From, request)
-	if err != nil {
-		log.WithError(err).Error("failed to sign ethereum transaction using key manager")
-		return nil, errors.FromError(err)
+	tenants := usecases.AllowedTenants(job.TenantID)
+	for _, tenant := range tenants {
+		request.Namespace = tenant
+		sig, err := uc.keyManagerClient.ETHSignTransaction(ctx, job.Transaction.From, request)
+		if err != nil && errors.IsNotFoundError(err) {
+			continue
+		}
+		if err != nil {
+			log.WithError(err).Error("failed to sign ethereum transaction using key manager")
+			return nil, errors.FromError(err)
+		}
+
+		decodedSignature, err := hexutil.Decode(sig)
+		if err != nil {
+			errMessage := "failed to decode signature"
+			log.WithField("encoded_signature", sig).WithError(err).Error(errMessage)
+			return nil, errors.EncodingError(errMessage)
+		}
+
+		return decodedSignature, nil
 	}
 
-	decodedSignature, err := hexutil.Decode(sig)
-	if err != nil {
-		errMessage := "failed to decode signature"
-		log.WithField("encoded_signature", sig).WithError(err).Error(errMessage)
-		return nil, errors.EncodingError(errMessage)
-	}
-
-	return decodedSignature, nil
+	errMessage := fmt.Sprintf("account %s was not found on key-manager", job.Transaction.From)
+	log.WithField("from_account", job.Transaction.From).WithField("tenants", tenants).Error(errMessage)
+	return nil, errors.InvalidParameterError(errMessage)
 }

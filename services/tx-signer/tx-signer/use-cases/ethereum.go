@@ -18,15 +18,15 @@ type EthereumUseCases interface {
 }
 
 type SignTransactionUseCase interface {
-	Execute(ctx context.Context, job *entities.Job) (signedRaw string, txHash string, err error)
+	Execute(ctx context.Context, job *entities.Job) (signedRaw, txHash string, err error)
 }
 
 type SignEEATransactionUseCase interface {
-	Execute(ctx context.Context, job *entities.Job) (signedRaw string, txHash string, err error)
+	Execute(ctx context.Context, job *entities.Job) (raw, txHash string, err error)
 }
 
 type SignQuorumPrivateTransactionUseCase interface {
-	Execute(ctx context.Context, job *entities.Job) (signedRaw string, txHash string, err error)
+	Execute(ctx context.Context, job *entities.Job) (signedRaw, txHash string, err error)
 }
 
 type SendEnvelopeUseCase interface {

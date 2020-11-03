@@ -2,15 +2,16 @@ package ethereum
 
 import (
 	"context"
+	"fmt"
 
 	quorumtypes "github.com/consensys/quorum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/crypto/ethereum/signing"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/rlp"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-signer-new/tx-signer/parsers"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-signer/tx-signer/parsers"
 
-	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-signer-new/tx-signer/use-cases"
+	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-signer/tx-signer/use-cases"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	log "github.com/sirupsen/logrus"
@@ -65,7 +66,7 @@ func (uc *signQuorumPrivateTransactionUseCase) Execute(ctx context.Context, job 
 		log.WithError(err).Error(errMessage)
 		return "", "", errors.CryptoOperationError(errMessage).ExtendComponent(signQuorumPrivateTransactionComponent)
 	}
-	txHash = transaction.Hash().Hex()
+	txHash = signedTx.Hash().Hex()
 
 	logger.WithField("txHash", txHash).Info("quorum private transaction signed successfully")
 	return hexutil.Encode(signedRaw), txHash, nil
@@ -95,18 +96,29 @@ func (uc *signQuorumPrivateTransactionUseCase) signWithAccount(ctx context.Conte
 		request.To = tx.To().Hex()
 	}
 
-	sig, err := uc.keyManagerClient.ETHSignQuorumPrivateTransaction(ctx, job.Transaction.From, request)
-	if err != nil {
-		log.WithError(err).Error("failed to sign quorum private transaction using key manager")
-		return nil, errors.FromError(err)
+	tenants := usecases.AllowedTenants(job.TenantID)
+	for _, tenant := range tenants {
+		request.Namespace = tenant
+		sig, err := uc.keyManagerClient.ETHSignQuorumPrivateTransaction(ctx, job.Transaction.From, request)
+		if err != nil && errors.IsNotFoundError(err) {
+			continue
+		}
+		if err != nil {
+			log.WithError(err).Error("failed to sign quorum private transaction using key manager")
+			return nil, errors.FromError(err)
+		}
+
+		decodedSignature, err := hexutil.Decode(sig)
+		if err != nil {
+			errMessage := "failed to decode quorum signature"
+			log.WithField("encoded_signature", sig).WithError(err).Error(errMessage)
+			return nil, errors.EncodingError(errMessage)
+		}
+
+		return decodedSignature, nil
 	}
 
-	decodedSignature, err := hexutil.Decode(sig)
-	if err != nil {
-		errMessage := "failed to decode quorum signature"
-		log.WithField("encoded_signature", sig).WithError(err).Error(errMessage)
-		return nil, errors.EncodingError(errMessage)
-	}
-
-	return decodedSignature, nil
+	errMessage := fmt.Sprintf("account %s was not found on key-manager", job.Transaction.From)
+	log.WithField("from_account", job.Transaction.From).WithField("tenants", tenants).Error(errMessage)
+	return nil, errors.InvalidParameterError(errMessage)
 }

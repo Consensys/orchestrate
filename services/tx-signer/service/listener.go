@@ -3,15 +3,16 @@ package service
 import (
 	"context"
 
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/multitenancy"
+
+	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/txscheduler"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
-	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-signer-new/tx-signer/use-cases"
+	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-signer/tx-signer/use-cases"
 
 	"github.com/Shopify/sarama"
 )
@@ -116,7 +117,9 @@ func decodeMessage(msg *sarama.ConsumerMessage) (*tx.Envelope, error) {
 }
 
 func (listener *MessageListener) processEnvelope(ctx context.Context, envelope *tx.Envelope) (raw, txHash string, err error) {
-	job := EnvelopeToJob(envelope, envelope.GetHeadersValue(multitenancy.TenantIDMetadata))
+	tenantID := envelope.GetHeadersValue(multitenancy.TenantIDMetadata)
+	job := EnvelopeToJob(envelope, tenantID)
+
 	switch {
 	case envelope.IsEthSendRawTransaction():
 		return job.Transaction.Raw, "", nil

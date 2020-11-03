@@ -3,8 +3,8 @@ package builder
 import (
 	"github.com/Shopify/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/key-manager/client"
-	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-signer-new/tx-signer/use-cases"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-signer-new/tx-signer/use-cases/ethereum"
+	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-signer/tx-signer/use-cases"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-signer/tx-signer/use-cases/ethereum"
 )
 
 type useCases struct {

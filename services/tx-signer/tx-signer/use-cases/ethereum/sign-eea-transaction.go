@@ -2,6 +2,9 @@ package ethereum
 
 import (
 	"context"
+	"fmt"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/rlp"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/crypto/ethereum/signing"
 
@@ -9,9 +12,9 @@ import (
 
 	"github.com/ethereum/go-ethereum/crypto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-signer-new/tx-signer/parsers"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-signer/tx-signer/parsers"
 
-	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-signer-new/tx-signer/use-cases"
+	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-signer/tx-signer/use-cases"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -42,15 +45,16 @@ func (uc *signEEATransactionUseCase) Execute(ctx context.Context, job *entities.
 
 	signer := signing.GetEIP155Signer(job.InternalData.ChainID)
 	transaction := parsers.ETHTransactionToTransaction(job.Transaction)
+	privateArgs := &entities.PrivateETHTransactionParams{
+		PrivateFrom:    job.Transaction.PrivateFrom,
+		PrivateFor:     job.Transaction.PrivateFor,
+		PrivacyGroupID: job.Transaction.PrivacyGroupID,
+		PrivateTxType:  utils.PrivateTxTypeRestricted,
+	}
 
 	var decodedSignature []byte
 	if job.InternalData.OneTimeKey {
-		decodedSignature, err = uc.signWithOneTimeKey(transaction, &entities.PrivateETHTransactionParams{
-			PrivateFrom:    job.Transaction.PrivateFrom,
-			PrivateFor:     job.Transaction.PrivateFor,
-			PrivacyGroupID: job.Transaction.PrivacyGroupID,
-			PrivateTxType:  utils.PrivateTxTypeRestricted,
-		}, job.InternalData.ChainID)
+		decodedSignature, err = uc.signWithOneTimeKey(transaction, privateArgs, job.InternalData.ChainID)
 	} else {
 		decodedSignature, err = uc.signWithAccount(ctx, job, transaction)
 	}
@@ -58,14 +62,15 @@ func (uc *signEEATransactionUseCase) Execute(ctx context.Context, job *entities.
 		return "", "", errors.FromError(err).ExtendComponent(signEEATransactionComponent)
 	}
 
-	signedRaw, err := GetSignedRawTransaction(transaction, decodedSignature, signer)
+	signedRaw, err := uc.getSignedRawEEATransaction(transaction, privateArgs, decodedSignature, signer)
 	if err != nil {
 		return "", "", errors.FromError(err).ExtendComponent(signEEATransactionComponent)
 	}
-	txHash = transaction.Hash().Hex()
 
-	logger.WithField("txHash", txHash).Info("eea transaction signed successfully")
-	return signedRaw, txHash, nil
+	logger.Info("eea transaction signed successfully")
+
+	// transaction hash of EEA transactions cannot be computed
+	return hexutil.Encode(signedRaw), "", nil
 }
 
 func (uc *signEEATransactionUseCase) signWithOneTimeKey(
@@ -87,8 +92,6 @@ func (uc *signEEATransactionUseCase) signWithAccount(ctx context.Context, job *e
 	request := &ethereum.SignEEATransactionRequest{
 		Namespace:      job.TenantID,
 		Nonce:          tx.Nonce(),
-		GasPrice:       tx.GasPrice().String(),
-		GasLimit:       tx.Gas(),
 		Data:           hexutil.Encode(tx.Data()),
 		ChainID:        job.InternalData.ChainID,
 		PrivateFrom:    job.Transaction.PrivateFrom,
@@ -99,18 +102,76 @@ func (uc *signEEATransactionUseCase) signWithAccount(ctx context.Context, job *e
 		request.To = tx.To().Hex()
 	}
 
-	sig, err := uc.keyManagerClient.ETHSignEEATransaction(ctx, job.Transaction.From, request)
+	tenants := usecases.AllowedTenants(job.TenantID)
+	for _, tenant := range tenants {
+		request.Namespace = tenant
+		sig, err := uc.keyManagerClient.ETHSignEEATransaction(ctx, job.Transaction.From, request)
+		if err != nil && errors.IsNotFoundError(err) {
+			continue
+		}
+		if err != nil {
+			log.WithError(err).Error("failed to sign eea transaction using key manager")
+			return nil, errors.FromError(err)
+		}
+
+		decodedSignature, err := hexutil.Decode(sig)
+		if err != nil {
+			errMessage := "failed to decode signature for eea transaction"
+			log.WithField("encoded_signature", sig).WithError(err).Error(errMessage)
+			return nil, errors.EncodingError(errMessage)
+		}
+
+		return decodedSignature, nil
+	}
+
+	errMessage := fmt.Sprintf("account %s was not found on key-manager", job.Transaction.From)
+	log.WithField("from_account", job.Transaction.From).WithField("tenants", tenants).Error(errMessage)
+	return nil, errors.InvalidParameterError(errMessage)
+}
+
+func (*signEEATransactionUseCase) getSignedRawEEATransaction(
+	transaction *types.Transaction,
+	privateArgs *entities.PrivateETHTransactionParams,
+	signature []byte,
+	signer types.Signer,
+) ([]byte, error) {
+	privateFromEncoded, err := signing.GetEncodedPrivateFrom(privateArgs.PrivateFrom)
 	if err != nil {
-		log.WithError(err).Error("failed to sign eea transaction using key manager")
 		return nil, err
 	}
 
-	decodedSignature, err := hexutil.Decode(sig)
+	privateRecipientEncoded, err := signing.GetEncodedPrivateRecipient(privateArgs.PrivacyGroupID, privateArgs.PrivateFor)
 	if err != nil {
-		errMessage := "failed to decode signature for eea transaction"
-		log.WithField("encoded_signature", sig).WithError(err).Error(errMessage)
-		return nil, errors.EncodingError(errMessage)
+		return nil, err
 	}
 
-	return decodedSignature, nil
+	signedTx, err := transaction.WithSignature(signer, signature)
+	if err != nil {
+		errMessage := "failed to set eea transaction signature"
+		log.WithError(err).Error(errMessage)
+		return nil, errors.InvalidParameterError(errMessage)
+	}
+	v, r, s := signedTx.RawSignatureValues()
+
+	signedRaw, err := rlp.Encode([]interface{}{
+		transaction.Nonce(),
+		transaction.GasPrice(),
+		transaction.Gas(),
+		transaction.To(),
+		transaction.Value(),
+		transaction.Data(),
+		v,
+		r,
+		s,
+		privateFromEncoded,
+		privateRecipientEncoded,
+		privateArgs.PrivateTxType,
+	})
+	if err != nil {
+		errMessage := "failed to RLP encode signed eea transaction"
+		log.WithError(err).Error(errMessage)
+		return nil, errors.CryptoOperationError(errMessage)
+	}
+
+	return signedRaw, nil
 }
