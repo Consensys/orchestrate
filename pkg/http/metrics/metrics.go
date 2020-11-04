@@ -7,7 +7,15 @@ import (
 	pkgmetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/multi"
 )
 
-const httpMetricsNamespace = "http"
+const (
+	Namespace              = "http"
+	RequestsTotal          = "requests_total"
+	RequestsTLSTotal       = "requests_tls_total"
+	RequestsLatencySeconds = "requests_latency_seconds"
+	OpenConnections        = "open_connections"
+	RetriesTotal           = "retries_total"
+	ServerUp               = "server_up"
+)
 
 type httpMulti struct {
 	*pkgmetrics.DynamicMulti
@@ -24,8 +32,8 @@ func NewHTTPMetrics(cfg *Config) HTTPMetrics {
 	reqsCounter := promcol.NewCounter(
 		multi.Values(),
 		&prometheus.CounterOpts{
-			Namespace: httpMetricsNamespace,
-			Name:      "requests_total",
+			Namespace: Namespace,
+			Name:      RequestsTotal,
 			Help:      "Total count of requests processed on a HTTP service",
 		},
 		[]string{"tenant_id", "entrypoint", "protocol", "service", "method", "code"},
@@ -35,8 +43,8 @@ func NewHTTPMetrics(cfg *Config) HTTPMetrics {
 	tlsReqsCounter := promcol.NewCounter(
 		multi.Values(),
 		&prometheus.CounterOpts{
-			Namespace: httpMetricsNamespace,
-			Name:      "requests_tls_total",
+			Namespace: Namespace,
+			Name:      RequestsTLSTotal,
 			Help:      "Total count of TLS requests processed on a HTTP service",
 		},
 		[]string{"tenant_id", "entrypoint", "service", "tls_version", "tls_cipher"},
@@ -46,8 +54,8 @@ func NewHTTPMetrics(cfg *Config) HTTPMetrics {
 	reqsLatencyHistogram := promcol.NewHistogram(
 		multi.Values(),
 		&prometheus.HistogramOpts{
-			Namespace: httpMetricsNamespace,
-			Name:      "requests_latency_seconds",
+			Namespace: Namespace,
+			Name:      RequestsLatencySeconds,
 			Help:      "Histogram of service's response latency (seconds)",
 			Buckets:   cfg.Buckets,
 		},
@@ -58,8 +66,8 @@ func NewHTTPMetrics(cfg *Config) HTTPMetrics {
 	openConnsGauge := promcol.NewGauge(
 		multi.Values(),
 		&prometheus.GaugeOpts{
-			Namespace: httpMetricsNamespace,
-			Name:      "open_connections",
+			Namespace: Namespace,
+			Name:      OpenConnections,
 			Help:      "Current count of open connections on a service",
 		},
 		[]string{"tenant_id", "entrypoint", "protocol", "service", "method"},
@@ -69,8 +77,8 @@ func NewHTTPMetrics(cfg *Config) HTTPMetrics {
 	retriesCounter := promcol.NewCounter(
 		multi.Values(),
 		&prometheus.CounterOpts{
-			Namespace: httpMetricsNamespace,
-			Name:      "retries_total",
+			Namespace: Namespace,
+			Name:      RetriesTotal,
 			Help:      "Total count of request retries on a service.",
 		},
 		[]string{"tenant_id", "entrypoint", "service"},
@@ -80,8 +88,8 @@ func NewHTTPMetrics(cfg *Config) HTTPMetrics {
 	serverUpGauge := promcol.NewGauge(
 		multi.Values(),
 		&prometheus.GaugeOpts{
-			Namespace: httpMetricsNamespace,
-			Name:      "server_up",
+			Namespace: Namespace,
+			Name:      ServerUp,
 			Help:      "Current server status (0=DOWN, 1=UP)",
 		},
 		[]string{"tenant_id", "entrypoint", "service", "url"},

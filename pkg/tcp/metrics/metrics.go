@@ -7,7 +7,13 @@ import (
 	pkgmetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/multi"
 )
 
-const metricsNamespace = "tcp"
+const (
+	Namespace                = "tcp"
+	AcceptedConnsTotal       = "accepted_conns_total"
+	ClosedConnsTotal         = "closed_conns_total"
+	OpenConnsDurationSeconds = "open_conns_duration_seconds"
+	OpenConns                = "open_conns"
+)
 
 type tpcMetrics struct {
 	prometheus.Collector
@@ -23,8 +29,8 @@ func NewTCPMetrics(cfg *Config) TPCMetrics {
 
 	acceptedConnsCounter := prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Namespace: metricsNamespace,
-			Name:      "accepted_conns_total",
+			Namespace: Namespace,
+			Name:      AcceptedConnsTotal,
 			Help:      "Total count of accepted connections.",
 		},
 		[]string{"entrypoint"},
@@ -33,8 +39,8 @@ func NewTCPMetrics(cfg *Config) TPCMetrics {
 
 	closedConnsCounter := prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Namespace: metricsNamespace,
-			Name:      "closed_conns_total",
+			Namespace: Namespace,
+			Name:      ClosedConnsTotal,
 			Help:      "Total count of closed connections.",
 		},
 		[]string{"entrypoint"},
@@ -43,8 +49,8 @@ func NewTCPMetrics(cfg *Config) TPCMetrics {
 
 	connsLatencyHistogram := prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
-			Namespace: metricsNamespace,
-			Name:      "open_conns_duration_seconds",
+			Namespace: Namespace,
+			Name:      OpenConnsDurationSeconds,
 			Help:      "Histogram of connections duration (seconds)",
 			Buckets:   cfg.Buckets,
 		},
@@ -54,8 +60,8 @@ func NewTCPMetrics(cfg *Config) TPCMetrics {
 
 	openConnsGauge := prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
-			Namespace: metricsNamespace,
-			Name:      "open_conns",
+			Namespace: Namespace,
+			Name:      OpenConns,
 			Help:      "Current count of open connections on an entrypoint",
 		},
 		[]string{"entrypoint"},

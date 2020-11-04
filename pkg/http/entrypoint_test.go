@@ -1,4 +1,5 @@
 // +build unit
+// +build !race
 
 package http
 

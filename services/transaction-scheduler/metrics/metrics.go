@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	MetricsNamespace     = "transaction_scheduler"
-	MetricCreatedJobName = "created_job"
+	Namespace      = "transaction_scheduler"
+	CreatedJobName = "created_job"
 )
 
 type tpcMetrics struct {
@@ -22,8 +22,8 @@ func NewTransactionSchedulerMetrics() TransactionSchedulerMetrics {
 
 	createdJobsCounter := prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Namespace: MetricsNamespace,
-			Name:      MetricCreatedJobName,
+			Namespace: Namespace,
+			Name:      CreatedJobName,
 			Help:      "Total count of created jobs.",
 		},
 		[]string{"tenant_id", "chain_uuid"},

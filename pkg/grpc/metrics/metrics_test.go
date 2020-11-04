@@ -43,9 +43,9 @@ func TestGRPCServerMetrics(t *testing.T) {
 	require.NoError(t, err, "Gathering metrics should not error")
 	require.Len(t, families, 5, "Count of metrics families should be correct")
 
-	testutils.AssertHistogramFamily(t, families[0], metricsNamespace, "handled_seconds", []uint64{1}, "HandledLatency")
-	testutils.AssertCounterFamily(t, families[1], metricsNamespace, "handled_total", []float64{1}, "Handled")
-	testutils.AssertCounterFamily(t, families[2], metricsNamespace, "msg_received_total", []float64{1}, "StreamMsgReceived")
-	testutils.AssertCounterFamily(t, families[3], metricsNamespace, "msg_sent_total", []float64{1}, "StreamMsgSent")
-	testutils.AssertCounterFamily(t, families[4], metricsNamespace, "started_total", []float64{1}, "Started")
+	testutils.AssertHistogramFamily(t, families[0], metricsNamespace, "handled_seconds", []uint64{1}, "HandledLatency", nil)
+	testutils.AssertCounterFamily(t, families[1], metricsNamespace, "handled_total", []float64{1}, "Handled", nil)
+	testutils.AssertCounterFamily(t, families[2], metricsNamespace, "msg_received_total", []float64{1}, "StreamMsgReceived", nil)
+	testutils.AssertCounterFamily(t, families[3], metricsNamespace, "msg_sent_total", []float64{1}, "StreamMsgSent", nil)
+	testutils.AssertCounterFamily(t, families[4], metricsNamespace, "started_total", []float64{1}, "Started", nil)
 }

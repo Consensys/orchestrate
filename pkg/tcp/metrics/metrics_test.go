@@ -1,5 +1,4 @@
 // +build unit
-// +build !race
 
 package metrics
 
@@ -39,8 +38,8 @@ func TestTCPMetrics(t *testing.T) {
 	require.NoError(t, err, "Gathering metrics should not error")
 	require.Len(t, families, 4, "Count of metrics families should be correct")
 
-	testutils.AssertCounterFamily(t, families[0], metricsNamespace, "accepted_conns_total", []float64{1}, "AcceptedConns")
-	testutils.AssertCounterFamily(t, families[1], metricsNamespace, "closed_conns_total", []float64{1}, "ClosedConns")
-	testutils.AssertGaugeFamily(t, families[2], metricsNamespace, "open_conns", []float64{1}, "OpenConns")
-	testutils.AssertHistogramFamily(t, families[3], metricsNamespace, "open_conns_duration_seconds", []uint64{1}, "ConnsLatency")
+	testutils.AssertCounterFamily(t, families[0], Namespace, AcceptedConnsTotal, []float64{1}, "AcceptedConns", nil)
+	testutils.AssertCounterFamily(t, families[1], Namespace, ClosedConnsTotal, []float64{1}, "ClosedConns", nil)
+	testutils.AssertGaugeFamily(t, families[2], Namespace, OpenConns, []float64{1}, "OpenConns", nil)
+	testutils.AssertHistogramFamily(t, families[3], Namespace, OpenConnsDurationSeconds, []uint64{1}, "ConnsLatency", nil)
 }

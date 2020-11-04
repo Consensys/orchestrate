@@ -58,7 +58,7 @@ func (s *identityManagerTransactionTestSuite) TestIdentityManager_CreateAccounts
 		assert.Equal(t, resp.TenantID, "_")
 	})
 
-	s.T().Run("should failt to create account with same alias", func(t *testing.T) {
+	s.T().Run("should fail to create account with same alias", func(t *testing.T) {
 		ethAccRes := testutils.FakeETHAccountResponse()
 		defer gock.Off()
 		txRequest := testutils.FakeCreateAccountRequest()

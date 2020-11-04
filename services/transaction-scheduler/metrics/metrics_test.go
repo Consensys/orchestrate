@@ -27,5 +27,5 @@ func TestTransactionSchedulerMetrics(t *testing.T) {
 	require.NoError(t, err, "Gathering metrics should not error")
 	require.Len(t, families, 1, "Count of metrics families should be correct")
 
-	testutils.AssertCounterFamily(t, families[0], MetricsNamespace, MetricCreatedJobName, []float64{1}, "Total count of created jobs.")
+	testutils.AssertCounterFamily(t, families[0], Namespace, CreatedJobName, []float64{1}, "Total count of created jobs.", nil)
 }

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 	"testing"
+	"time"
 
 	traefikdynamic "github.com/containous/traefik/v2/pkg/config/dynamic"
 	"github.com/prometheus/client_golang/prometheus"
@@ -51,12 +52,12 @@ func TestHTTPMetrics(t *testing.T) {
 	require.NoError(t, err, "Gathering metrics should not error")
 	require.Len(t, families, 6, "Count of metrics families should be correct")
 
-	testutils.AssertGaugeFamily(t, families[0], httpMetricsNamespace, "open_connections", []float64{1}, "OpenConns")
-	testutils.AssertHistogramFamily(t, families[1], httpMetricsNamespace, "requests_latency_seconds", []uint64{1}, "RequestsLatency")
-	testutils.AssertCounterFamily(t, families[2], httpMetricsNamespace, "requests_tls_total", []float64{1}, "TLSRequests")
-	testutils.AssertCounterFamily(t, families[3], httpMetricsNamespace, "requests_total", []float64{1}, "Requests")
-	testutils.AssertCounterFamily(t, families[4], httpMetricsNamespace, "retries_total", []float64{1}, "Retries")
-	testutils.AssertGaugeFamily(t, families[5], httpMetricsNamespace, "server_up", []float64{1}, "ServerUp")
+	testutils.AssertGaugeFamily(t, families[0], Namespace, OpenConnections, []float64{1}, "OpenConns", nil)
+	testutils.AssertHistogramFamily(t, families[1], Namespace, RequestsLatencySeconds, []uint64{1}, "RequestsLatency", nil)
+	testutils.AssertCounterFamily(t, families[2], Namespace, RequestsTLSTotal, []float64{1}, "TLSRequests", nil)
+	testutils.AssertCounterFamily(t, families[3], Namespace, RequestsTotal, []float64{1}, "Requests", nil)
+	testutils.AssertCounterFamily(t, families[4], Namespace, RetriesTotal, []float64{1}, "Retries", nil)
+	testutils.AssertGaugeFamily(t, families[5], Namespace, ServerUp, []float64{1}, "ServerUp", nil)
 }
 
 func TestReloadConfiguration(t *testing.T) {
@@ -117,6 +118,8 @@ func TestReloadConfiguration(t *testing.T) {
 	}
 
 	_ = httpCollector.Switch(dynCfg)
+	
+	time.Sleep(time.Second)
 
 	httpCollector.RequestsCounter().
 		With("tenant_id", "test-tenant", "entrypoint", "ep-foo", "protocol", "http", "service", "dashboard@provider1", "method", http.MethodGet, "code", strconv.Itoa(http.StatusOK)).
