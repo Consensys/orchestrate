@@ -36,7 +36,7 @@ func NewSignQuorumPrivateTransactionUseCase(keyManagerClient client.KeyManagerCl
 
 // Execute signs a quorum private transaction
 func (uc *signQuorumPrivateTransactionUseCase) Execute(ctx context.Context, job *entities.Job) (raw, txHash string, err error) {
-	logger := log.WithContext(ctx).WithField("job_uuid", job.UUID)
+	logger := log.WithContext(ctx).WithField("job_uuid", job.UUID).WithField("one_time_key", job.InternalData.OneTimeKey)
 	logger.Debug("signing quorum private transaction")
 
 	signer := signing.GetQuorumPrivateTxSigner()

@@ -37,7 +37,7 @@ func NewSignTransactionUseCase(keyManagerClient client.KeyManagerClient) usecase
 
 // Execute signs a public Ethereum transaction
 func (uc *signTransactionUseCase) Execute(ctx context.Context, job *entities.Job) (raw, txHash string, err error) {
-	logger := log.WithContext(ctx).WithField("job_uuid", job.UUID)
+	logger := log.WithContext(ctx).WithField("job_uuid", job.UUID).WithField("one_time_key", job.InternalData.OneTimeKey)
 	logger.Debug("signing ethereum transaction")
 
 	signer := signing.GetEIP155Signer(job.InternalData.ChainID)

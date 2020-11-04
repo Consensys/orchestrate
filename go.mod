@@ -28,6 +28,7 @@ require (
 	github.com/go-pg/pg/v9 v9.1.5
 	github.com/go-playground/validator/v10 v10.2.0
 	github.com/gofrs/uuid v3.2.0+incompatible
+	github.com/gogo/protobuf v1.3.1
 	github.com/golang/mock v1.4.3
 	github.com/golang/protobuf v1.3.5
 	github.com/gomodule/redigo v1.8.2
@@ -50,6 +51,7 @@ require (
 	github.com/oxtoacart/bpool v0.0.0-20190530202638-03653db5a59c
 	github.com/prometheus/client_golang v1.5.1
 	github.com/prometheus/client_model v0.2.0
+	github.com/prometheus/common v0.9.1
 	github.com/rs/cors v1.7.0
 	github.com/sirupsen/logrus v1.5.0
 	github.com/spf13/cobra v0.0.6

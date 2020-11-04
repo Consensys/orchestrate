@@ -18,6 +18,7 @@ import (
 )
 
 const messageListenerComponent = "service.message-listener"
+const recoverableErrorMessage = "retrying message on recoverable error"
 
 type MessageListener struct {
 	useCases          usecases.UseCases
@@ -53,6 +54,7 @@ func (MessageListener) Cleanup(session sarama.ConsumerGroupSession) error {
 func (listener *MessageListener) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	ctx := session.Context()
 	logger := log.WithContext(ctx)
+	logger.Info("tx-signer has started consuming claims")
 
 	for {
 		select {
@@ -69,6 +71,7 @@ func (listener *MessageListener) ConsumeClaim(session sarama.ConsumerGroupSessio
 			var der error
 			switch {
 			case err != nil && errors.IsConnectionError(err):
+				logger.Error(recoverableErrorMessage)
 				continue
 			case err != nil:
 				txResponse := envelope.AppendError(errors.FromError(err)).TxResponse()
@@ -78,13 +81,15 @@ func (listener *MessageListener) ConsumeClaim(session sarama.ConsumerGroupSessio
 				_ = envelope.SetTxHashString(txHash)
 				der = listener.useCases.SendEnvelope().Execute(ctx, envelope.TxEnvelopeAsRequest(), listener.senderTopic, envelope.PartitionKey())
 			}
-
 			if der != nil && errors.IsConnectionError(der) {
+				logger.Error(recoverableErrorMessage)
 				continue
 			}
 
 			if der != nil {
-				if err = listener.updateTransactionStatus(ctx, envelope.GetJobUUID(), err.Error()); err != nil && errors.IsConnectionError(err) {
+				err = listener.updateTransactionStatus(ctx, envelope.GetJobUUID(), err.Error())
+				if err != nil && errors.IsConnectionError(err) {
+					logger.Error(recoverableErrorMessage)
 					continue
 				}
 			}
@@ -122,8 +127,10 @@ func (listener *MessageListener) processEnvelope(ctx context.Context, envelope *
 
 	switch {
 	case envelope.IsEthSendRawTransaction():
+		log.WithContext(ctx).WithField("job_uuid", envelope.GetJobUUID()).Info("raw transaction processed successfully")
 		return job.Transaction.Raw, "", nil
 	case envelope.IsEthSendTesseraPrivateTransaction():
+		log.WithContext(ctx).WithField("job_uuid", envelope.GetJobUUID()).Info("tessera transaction processed successfully")
 		// Do nothing as we do not sign storeRaw payload
 		return "", "", nil
 	case envelope.IsEthSendTesseraMarkingTransaction():

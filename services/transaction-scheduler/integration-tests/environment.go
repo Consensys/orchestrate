@@ -6,7 +6,6 @@ import (
 	http2 "net/http"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
@@ -69,19 +68,14 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 	envPGHostPort = strconv.Itoa(rand.IntnRange(10000, 15235))
 	envHTTPPort = strconv.Itoa(rand.IntnRange(20000, 28080))
 	envMetricsPort = strconv.Itoa(rand.IntnRange(30000, 38082))
+	envKafkaHostPort = strconv.Itoa(rand.IntnRange(20000, 29092))
 
 	// Define external hostname
-	var kafkaExternalHostname = os.Getenv(sarama.KafkaURLEnv)
-	if kafkaExternalHostname != "" {
-		if strings.Contains(sarama.KafkaURLEnv, ":") {
-			envKafkaHostPort = strings.Split(sarama.KafkaURLEnv, ":")[1]
-		} else {
-			envKafkaHostPort = "9092"
-		}
-	} else {
-		envKafkaHostPort = strconv.Itoa(rand.IntnRange(20000, 29092))
-		kafkaExternalHostname = fmt.Sprintf("localhost:%s", envKafkaHostPort)
+	kafkaExternalHostname := os.Getenv("KAFKA_HOST")
+	if kafkaExternalHostname == "" {
+		kafkaExternalHostname = "localhost"
 	}
+	kafkaExternalHostname = fmt.Sprintf("%s:%s", kafkaExternalHostname, envKafkaHostPort)
 
 	// Initialize environment flags
 	flgs := pflag.NewFlagSet("transaction-scheduler-integration-test", pflag.ContinueOnError)
