@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/vault/vault"
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/secretstore/testutils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/secretstore/testutils"
 )
 
 // TODO: add new test with multi-tenancy context value

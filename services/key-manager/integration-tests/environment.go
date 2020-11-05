@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/spf13/viper"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/secretstore/hashicorp"
 	keymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/key-manager"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/secretstore/hashicorp"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
 	httputils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"

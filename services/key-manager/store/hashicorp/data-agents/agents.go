@@ -1,15 +1,15 @@
 package dataagents
 
 import (
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/secretstore"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/key-manager/store"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/secretstore/services"
 )
 
 type HashicorpAgents struct {
 	ethereum *HashicorpEthereum
 }
 
-func New(vault services.SecretStore) *HashicorpAgents {
+func New(vault secretstore.SecretStore) *HashicorpAgents {
 	return &HashicorpAgents{
 		ethereum: NewHashicorpEthereum(vault),
 	}

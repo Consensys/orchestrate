@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/secretstore/hashicorp"
 	hashicorpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/key-manager/store/hashicorp"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/secretstore/hashicorp"
 
 	log "github.com/sirupsen/logrus"
 

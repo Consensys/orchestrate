@@ -1,4 +1,5 @@
 @public-tx
+@raw-tx
 Feature: Send raw transfer transaction
   As an external developer
   I want to process a raw transaction using transaction scheduler API

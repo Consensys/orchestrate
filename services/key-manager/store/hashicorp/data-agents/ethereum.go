@@ -4,21 +4,22 @@ import (
 	"context"
 	"fmt"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/secretstore"
+
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/secretstore/services"
 )
 
 const ethereumDAComponent = "data-agents.ethereum"
 
 // HashicorpEthereum is a job data agent for Ethereum Hashicorp Vault
 type HashicorpEthereum struct {
-	vault       services.SecretStore
+	vault       secretstore.SecretStore
 	generateKey func(address, namespace string) string
 }
 
 // NewHashicorpEthereum creates a new HashicorpEthereum
-func NewHashicorpEthereum(vault services.SecretStore) *HashicorpEthereum {
+func NewHashicorpEthereum(vault secretstore.SecretStore) *HashicorpEthereum {
 	return &HashicorpEthereum{vault: vault, generateKey: generateKey}
 }
 

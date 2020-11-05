@@ -11,6 +11,9 @@ import (
 	"sync"
 	"time"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/crypto/ethereum/signing"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/rlp"
+
 	"github.com/Shopify/sarama"
 	"github.com/cucumber/godog"
 	gherkin "github.com/cucumber/messages-go/v10"
@@ -26,7 +29,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	utils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethclient/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/ethereum/account"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/keystore/session"
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/identitymanager"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
@@ -548,12 +550,6 @@ func (sc *ScenarioContext) iSignTheFollowingTransactions(table *gherkin.PickleSt
 }
 
 func (sc *ScenarioContext) craftAndSignEnvelope(ctx context.Context, e *tx.Envelope, privKey string) error {
-	a := account.NewAccount()
-	err := a.FromPrivateKey(privKey)
-	if err != nil {
-		return nil
-	}
-
 	chainRegistry, ok := sc.aliases.Get(alias.GlobalAka, "chain-registry")
 	if !ok {
 		return errors.DataError("Could not find the chain registry endpoint")
@@ -562,47 +558,54 @@ func (sc *ScenarioContext) craftAndSignEnvelope(ctx context.Context, e *tx.Envel
 	if e.GetChainID() == nil && e.GetChainUUID() != "" {
 		chainID, errNetwork := sc.ec.Network(utils2.RetryConnectionError(ctx, true), endpoint)
 		if errNetwork != nil {
+			log.WithError(errNetwork).Error("failed to get chain ID")
 			return errNetwork
 		}
 		_ = e.SetChainID(chainID)
 	}
 
-	s := session.NewSigningSession()
-	err = s.SetChain(e.GetChainID())
+	signer := signing.GetEIP155Signer(e.GetChainIDString())
+	acc, err := crypto.HexToECDSA(privKey)
 	if err != nil {
+		log.WithError(err).WithField("private_key", privKey).Error("failed to create account using private key")
 		return err
 	}
-	err = s.SetAccount(a)
-	if err != nil {
-		return err
-	}
-	_ = e.SetFrom(a.Address())
 
-	if e.GetNonce() == nil {
-		return errors.DataError("Need a nonce")
-	}
-
+	_ = e.SetFrom(crypto.PubkeyToAddress(acc.PublicKey))
 	if e.GetGasPrice() == nil {
 		gasPrice, errGasPrice := sc.ec.SuggestGasPrice(ctx, endpoint)
 		if errGasPrice != nil {
+			log.WithError(errGasPrice).Error("failed to suggest gas price")
 			return errGasPrice
 		}
 		_ = e.SetGasPrice(gasPrice)
 	}
 
-	t, err := e.GetTransaction()
+	transaction, err := e.GetTransaction()
 	if err != nil {
+		log.WithError(err).Error("failed to get transaction from envelope")
 		return err
 	}
 
-	// TODO able to sign private tx
-	raw, hash, err := s.ExecuteForTx(t)
+	signature, err := signing.SignTransaction(transaction, acc, signer)
 	if err != nil {
+		log.WithError(err).Error("failed to sign transaction")
 		return err
 	}
 
-	_ = e.SetRaw(raw).SetTxHash(*hash)
+	signedTx, err := transaction.WithSignature(signer, signature)
+	if err != nil {
+		log.WithError(err).Error("failed to set signature in transaction")
+		return err
+	}
 
+	signedRaw, err := rlp.Encode(signedTx)
+	if err != nil {
+		log.WithError(err).Error("failed to RLP encode signed transaction")
+		return err
+	}
+
+	_ = e.SetRaw(signedRaw).SetTxHash(signedTx.Hash())
 	return nil
 }
 

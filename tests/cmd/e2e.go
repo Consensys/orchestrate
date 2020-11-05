@@ -44,7 +44,7 @@ func runE2E(cmd *cobra.Command, _ []string) {
 	defer sig.Close()
 
 	if err := e2e.Start(ctx); err != nil {
-		cmdErr = err
+		cmdErr = errors.CombineErrors(cmdErr, cmd.Context().Err())
 		traefiklog.WithoutContext().WithError(err).Errorf("Cucumber did not complete successfully")
 	}
 

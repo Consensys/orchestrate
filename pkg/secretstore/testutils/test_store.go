@@ -3,15 +3,16 @@ package testutils
 import (
 	"context"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/secretstore"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/secretstore/services"
 )
 
 // SecretStoreTestSuite is a test suit for TraceStore
 type SecretStoreTestSuite struct {
 	suite.Suite
-	Store services.SecretStore
+	Store secretstore.SecretStore
 }
 
 // TestSecretStore test SecretStore

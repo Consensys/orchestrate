@@ -10,7 +10,7 @@ import (
 var internalErrMsg = "Internal server error. Please ask an admin for help or try again later"
 
 type ErrorResponse struct {
-	Message string `json:"message" example:"invalid status update for the current job state"`
+	Message string `json:"message" example:"error message"`
 	Code    uint64 `json:"code,omitempty" example:"24000"`
 }
 

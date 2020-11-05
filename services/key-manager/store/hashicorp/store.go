@@ -2,8 +2,8 @@ package hashicorp
 
 import (
 	healthz "github.com/heptiolabs/healthcheck"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/secretstore"
 	dataagents "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/key-manager/store/hashicorp/data-agents"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/secretstore/services"
 )
 
 type Vault struct {
@@ -11,7 +11,7 @@ type Vault struct {
 	healthChecker healthz.Check
 }
 
-func NewHashicorpVault(vault services.SecretStore, healthChecker healthz.Check) *Vault {
+func NewHashicorpVault(vault secretstore.SecretStore, healthChecker healthz.Check) *Vault {
 	return &Vault{
 		HashicorpAgents: dataagents.New(vault),
 		healthChecker:   healthChecker,

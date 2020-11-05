@@ -6,7 +6,7 @@ import (
 	"context"
 	"fmt"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/multi-vault/secretstore/services/mocks"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/secretstore/mocks"
 	"testing"
 
 	"github.com/golang/mock/gomock"

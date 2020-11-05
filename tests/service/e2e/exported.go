@@ -166,8 +166,7 @@ func importTestIdentities(ctx context.Context) error {
 		})
 
 		if err != nil {
-			if errors.IsInvalidParameterError(err) {
-				log.FromContext(ctx).WithError(err).Warn("Cannot import account")
+			if errors.IsAlreadyExistsError(err) {
 				continue
 			}
 
