@@ -3,12 +3,12 @@ module gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git
 go 1.14
 
 require (
-	github.com/ConsenSys/golang-utils v0.0.0-20190722185538-95555d181804
+	github.com/ConsenSys/golang-utils v0.0.0-20190722185538-95555d181804 // indirect
 	github.com/Shopify/sarama v1.26.1
 	github.com/alicebob/gopher-json v0.0.0-20180125190556-5a6b3ba71ee6 // indirect
 	github.com/alicebob/miniredis v2.5.0+incompatible
 	github.com/asaskevich/govalidator v0.0.0-20180720115003-f9ffefc3facf
-	github.com/aws/aws-sdk-go v1.29.33
+	github.com/aws/aws-sdk-go v1.29.33 // indirect
 	github.com/c0va23/go-proxyprotocol v0.9.1
 	github.com/cenkalti/backoff/v4 v4.0.0
 	github.com/consensys/quorum v2.7.0+incompatible

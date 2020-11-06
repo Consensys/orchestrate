@@ -73,7 +73,7 @@ func TestEntryPoints(t *testing.T) {
 	reg.EXPECT().ClosedConnsCounter().Times(2).Return(closedConnsCounter)
 	closedConnsCounter.EXPECT().With(gomock.Any()).Times(2).Return(closedConnsCounter)
 	closedConnsCounter.EXPECT().Add(gomock.Any()).AnyTimes()
-	
+
 	reg.EXPECT().ConnsLatencyHistogram().Times(2).Return(connsLatencyHisto)
 	connsLatencyHisto.EXPECT().With(gomock.Any()).Times(2).Return(connsLatencyHisto)
 	connsLatencyHisto.EXPECT().Observe(gomock.Any()).AnyTimes()
@@ -165,19 +165,17 @@ func TestEntryPointsError(t *testing.T) {
 	)
 	_ = eps.Switch(context.Background(), nil)
 
-	errors := eps.ListenAndServe(context.Background())
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
+	defer cancel()
+	errors := eps.ListenAndServe(ctx)
 	select {
 	case <-errors:
 	case <-time.After(time.Second):
 		t.Errorf("Entrypoints should have error")
 	}
 
-	err := eps.Shutdown(context.Background())
+	err := eps.Shutdown(ctx)
 	assert.NoError(t, err)
-
-	for range errors {
-		// drain errors until eps complete
-	}
 
 	err = eps.Close()
 	assert.NoError(t, err)

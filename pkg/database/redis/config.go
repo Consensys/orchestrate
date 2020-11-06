@@ -23,6 +23,8 @@ func init() {
 	_ = viper.BindEnv(DatabaseViperKey, databaseEnv)
 	viper.SetDefault(ExpirationViperKey, expirationDefault)
 	_ = viper.BindEnv(ExpirationViperKey, expirationEnv)
+	viper.SetDefault(TLSEnableViperKey, tlsEnableDefault)
+	_ = viper.BindEnv(TLSEnableViperKey, tlsEnableEnv)
 	viper.SetDefault(TLSCertViperKey, tlsCertDefault)
 	_ = viper.BindEnv(TLSCertViperKey, tlsCertEnv)
 	viper.SetDefault(TLSKeyViperKey, tlsKeyDefault)
@@ -121,6 +123,20 @@ Environment variable: %q`, expirationEnv)
 }
 
 const (
+	tlsEnableFlag     = "redis-tls-enable"
+	TLSEnableViperKey = "redis.tls.enable"
+	tlsEnableDefault  = false
+	tlsEnableEnv      = "REDIS_TLS_ENABLE"
+)
+
+func TLSEnableFlag(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Enable TLS/SSL to connect to Redis
+Environment variable: %q`, tlsEnableEnv)
+	f.Bool(tlsEnableFlag, tlsEnableDefault, desc)
+	_ = viper.BindPFlag(TLSEnableViperKey, f.Lookup(tlsEnableFlag))
+}
+
+const (
 	tlsCertFlag     = "redis-tls-cert"
 	TLSCertViperKey = "redis.tls.cert"
 	tlsCertDefault  = ""
@@ -187,6 +203,7 @@ func Flags(f *pflag.FlagSet) {
 	UsernameFlag(f)
 	DatabaseFlag(f)
 	PasswordFlag(f)
+	TLSEnableFlag(f)
 	TLSCertFlag(f)
 	TLSKeyFlag(f)
 	TLSCAFlag(f)
@@ -213,29 +230,26 @@ func NewConfig(vipr *viper.Viper) *Config {
 		Expiration: int(vipr.GetDuration(ExpirationViperKey).Milliseconds()),
 	}
 
-	if vipr.GetString(TLSCertViperKey) != "" {
+	if vipr.GetBool(TLSEnableViperKey) {
 		cfg.TLS = &tls.Option{
-			Certificates: []*certificate.KeyPair{
+			ServerName: cfg.Host,
+		}
+
+		if vipr.GetString(TLSCertViperKey) != "" {
+			cfg.TLS.Certificates = []*certificate.KeyPair{
 				{
 					Cert: []byte(vipr.GetString(TLSCertViperKey)),
 					Key:  []byte(vipr.GetString(TLSKeyViperKey)),
 				},
-			},
-		}
-	}
-
-	if vipr.GetString(TLSCAViperKey) != "" {
-		if cfg.TLS == nil {
-			cfg.TLS = &tls.Option{}
+			}
 		}
 
-		cfg.TLS.CAs = [][]byte{
-			[]byte(vipr.GetString(TLSCAViperKey)),
+		if vipr.GetString(TLSCAViperKey) != "" {
+			cfg.TLS.CAs = [][]byte{
+				[]byte(vipr.GetString(TLSCAViperKey)),
+			}
 		}
-	}
 
-	if cfg.TLS != nil {
-		cfg.TLS.ServerName = cfg.Host
 		if vipr.GetBool(TLSSkipVerifyViperKey) {
 			cfg.TLS.InsecureSkipVerify = true
 		}

@@ -160,7 +160,7 @@ const (
 
 // DBTLSSSLMode register flag for TLS SSL mode used to connect to the database
 func DBTLSSSLMode(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`TLS SSL mode to connect to database (one of %q)
+	desc := fmt.Sprintf(`TLS/SSL mode to connect to database (one of %q)
 Environment variable: %q`, dbTLSSSLModeEnv, availableSSLModes)
 	f.String(dbTLSSSLModeFlag, dbTLSSSLModeDefault, desc)
 	_ = viper.BindPFlag(DBTLSSSLModeViperKey, f.Lookup(dbTLSSSLModeFlag))

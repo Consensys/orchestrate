@@ -2,9 +2,18 @@
 
 ## v2.6.0 (Unreleased)
 
+### 🆕 Features
+* Support for enable/disable metric modules
+
 ### ⚠ BREAKING CHANGES
 
 * Remove account-generator and account-generated topic
+
+## v2.5.2 (Unreleased)
+
+### 🛠 Bug fixes
+
+* Allow usage of OS certificate bundle on Redis TLS connections
 
 ## v2.5.1 (2020-10-23)
 
