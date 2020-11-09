@@ -48,6 +48,8 @@ func TestHTTPMetrics(t *testing.T) {
 		With("tenant_id", "test-tenant", "entrypoint", "app", "service", "service1", "url", "test-url").
 		Set(1)
 
+	time.Sleep(time.Second)
+
 	families, err := registry.Gather()
 	require.NoError(t, err, "Gathering metrics should not error")
 	require.Len(t, families, 6, "Count of metrics families should be correct")
@@ -118,8 +120,9 @@ func TestReloadConfiguration(t *testing.T) {
 	}
 
 	_ = httpCollector.Switch(dynCfg)
-	
-	time.Sleep(time.Second)
+
+	// Increase waiting time to complete dynamic cfg switch
+	time.Sleep(time.Second * 2)
 
 	httpCollector.RequestsCounter().
 		With("tenant_id", "test-tenant", "entrypoint", "ep-foo", "protocol", "http", "service", "dashboard@provider1", "method", http.MethodGet, "code", strconv.Itoa(http.StatusOK)).

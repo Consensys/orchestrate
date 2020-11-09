@@ -36,14 +36,14 @@ func TestPrepareMsg(t *testing.T) {
 	txctx = engine.NewTxContext()
 	txctx.In = m
 	txctx.Set("invalid.nonce", true)
+	_ = txctx.Envelope.AppendError(errors.NonceTooLowError(""))
 	msg = &sarama.ProducerMessage{}
 	_ = PrepareMsg(txctx, msg)
 	assert.Equal(t, "topic-tx-crafter", msg.Topic, "If invalid nonce out topic should be tx-crafter")
 
 	txctx = engine.NewTxContext()
 	txctx.In = m
-	txctx.Set("invalid.nonce", true)
-	_ = txctx.Error(errors.ConnectionError("nonce too low"))
+	_ = txctx.Error(errors.ConnectionError("cannot connect to tx-scheduler"))
 	msg = &sarama.ProducerMessage{}
 	_ = PrepareMsg(txctx, msg)
 	assert.Equal(t, "topic-tx-recover", msg.Topic, "If invalid nonce and error topic should be tx-recover")

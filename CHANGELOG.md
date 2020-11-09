@@ -14,6 +14,7 @@
 ### 🛠 Bug fixes
 
 * Allow usage of OS certificate bundle on Redis TLS connections
+* Fix a bug on transaction recovering for invalid nonce 
 
 ## v2.5.1 (2020-10-23)
 

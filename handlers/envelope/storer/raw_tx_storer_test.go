@@ -5,8 +5,10 @@ package storer
 import (
 	"context"
 	"fmt"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 	"testing"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
 
@@ -94,52 +96,13 @@ func TestRawTxStore(t *testing.T) {
 
 		assert.Len(t, txctx.Envelope.GetErrors(), 1)
 	})
-
-	t.Run("should set status to RECOVERING if txctx contains errors", func(t *testing.T) {
+	
+	t.Run("should exit if txctx contains not recoverable error ", func(t *testing.T) {
 		txctx := engine.NewTxContext()
 		_ = txctx.Envelope.SetJobUUID("jobUUID")
 		txctx.Logger = log.NewEntry(log.New())
-		_ = txctx.AbortWithError(fmt.Errorf("error"))
-
-		schedulerClient.EXPECT().
-			UpdateJob(txctx.Context(), txctx.Envelope.GetJobUUID(), gomock.Any()).
-			Return(&txschedulertypes.JobResponse{}, nil)
-		schedulerClient.EXPECT().
-			UpdateJob(txctx.Context(), txctx.Envelope.GetJobUUID(), &txschedulertypes.UpdateJobRequest{
-				Status: utils.StatusRecovering,
-				Message: fmt.Sprintf(
-					"transaction attempt with nonce %v and sender %v failed with error: %v",
-					txctx.Envelope.GetNonceString(),
-					txctx.Envelope.GetFromString(),
-					txctx.Envelope.Error(),
-				),
-			}).
-			Return(&txschedulertypes.JobResponse{}, nil)
-
-		RawTxStore(schedulerClient)(txctx)
-	})
-
-	t.Run("should return if update fails on RECOVERING", func(t *testing.T) {
-		txctx := engine.NewTxContext()
-		_ = txctx.Envelope.SetJobUUID("jobUUID")
-		txctx.Logger = log.NewEntry(log.New())
-		_ = txctx.AbortWithError(fmt.Errorf("error"))
-
-		schedulerClient.EXPECT().
-			UpdateJob(txctx.Context(), txctx.Envelope.GetJobUUID(), gomock.Any()).
-			Return(&txschedulertypes.JobResponse{}, nil)
-
-		schedulerClient.EXPECT().
-			UpdateJob(txctx.Context(), txctx.Envelope.GetJobUUID(), &txschedulertypes.UpdateJobRequest{
-				Status: utils.StatusRecovering,
-				Message: fmt.Sprintf(
-					"transaction attempt with nonce %v and sender %v failed with error: %v",
-					txctx.Envelope.GetNonceString(),
-					txctx.Envelope.GetFromString(),
-					txctx.Envelope.Error(),
-				),
-			}).
-			Return(nil, fmt.Errorf("error"))
+		err := errors.ConflictedError("err")
+		_ = txctx.AbortWithError(err)
 
 		RawTxStore(schedulerClient)(txctx)
 	})

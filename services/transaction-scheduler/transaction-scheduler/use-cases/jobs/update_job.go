@@ -149,7 +149,9 @@ func canUpdateStatus(nextStatus, status string) bool {
 		return status == utils.StatusStarted || status == utils.StatusRecovering
 	case utils.StatusResending:
 		return status == utils.StatusPending
-	case utils.StatusRecovering, utils.StatusMined, utils.StatusStored, utils.StatusNeverMined:
+	case utils.StatusRecovering:
+		return status == utils.StatusStarted
+	case utils.StatusMined, utils.StatusStored, utils.StatusNeverMined:
 		return status == utils.StatusPending
 	case utils.StatusFailed:
 		return status == utils.StatusStarted || status == utils.StatusRecovering || status == utils.StatusPending

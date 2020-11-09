@@ -18,6 +18,24 @@ func TransactionUpdater(txSchedulerClient txscheduler.TransactionSchedulerClient
 			return
 		}
 
+		// Don't update to FAILED if we are going to retry
+		if b, ok := txctx.Get("invalid.nonce").(bool); b && ok {
+			txctx.Logger.Debug("transaction scheduler: updating transaction to RECOVERING")
+			_, err := txSchedulerClient.UpdateJob(
+				txctx.Context(),
+				txctx.Envelope.GetJobUUID(),
+				&txschedulertypes.UpdateJobRequest{
+					Status:  utils.StatusRecovering,
+					Message: txctx.Envelope.Error(),
+				})
+
+			if err != nil {
+				e := txctx.AbortWithError(err).ExtendComponent(component)
+				txctx.Logger.WithError(e).Errorf("tx updater: could not update transaction status")
+			}
+			return
+		}
+
 		// TODO: Improvement of the log message will be done when we move to clean architecture
 		// TODO: because at the moment it is difficult to know what error messages need to be sent to users and which ones not.
 		_, err := txSchedulerClient.UpdateJob(txctx.Context(), txctx.Envelope.GetJobUUID(), &txschedulertypes.UpdateJobRequest{

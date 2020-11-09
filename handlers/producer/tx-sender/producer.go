@@ -16,7 +16,7 @@ func PrepareMsg(txctx *engine.TxContext, msg *sarama.ProducerMessage) error {
 
 	b, ok := txctx.Get("invalid.nonce").(bool)
 	switch {
-	case len(txctx.Envelope.GetErrors()) == 0 && ok && b:
+	case len(txctx.Envelope.GetErrors()) != 0 && ok && b:
 		// If nonce is invalid we redirect envelope to tx-crafter
 		msg.Topic = viper.GetString(broker.TxCrafterViperKey)
 		p = txctx.Envelope.TxEnvelopeAsRequest()

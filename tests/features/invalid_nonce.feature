@@ -290,6 +290,61 @@ Feature: Invalid Nonce
       | Receipt.Status | Nonce | To      | ID               |
       | 1              | 1     | {{to2}} | {{scheduleUUID}} |
 
+  Scenario: Nonce recovering flow
+    Given I have the following tenants
+      | alias  | tenantID        |
+      | tenant | {{random.uuid}} |
+    Then I have created the following accounts
+      | alias   | ID              | Headers.Authorization   |
+      | fromAcc | {{random.uuid}} | Bearer {{tenant.token}} |
+    Then I register the following alias
+      | alias | value              |
+      | to    | {{random.account}} |
+    Then I set the headers
+      | Key           | Value                   |
+      | Authorization | Bearer {{tenant.token}} |
+    When I send "POST" request to "{{global.tx-scheduler}}/schedules" with json:
+      """
+{}
+      """
+    Then the response code should be 200
+    Then I register the following response fields
+      | alias        | path |
+      | scheduleUUID | uuid |
+    When I send "POST" request to "{{global.tx-scheduler}}/jobs" with json:
+  """
+{
+    "scheduleUUID": "{{scheduleUUID}}",
+	"chainUUID": "{{besu.UUID}}",
+    "type": "eth://ethereum/transaction",
+    "transaction": {
+        "from": "{{fromAcc}}",
+        "to": "{{to}}",
+        "nonce": "0"
+    },
+    "labels": {
+    	"scenario.id": "{{scenarioID}}"
+    }
+}
+      """
+    Then the response code should be 200
+    Then I register the following response fields
+      | alias        | path |
+      | txOneJobUUID | uuid |
+    Then I track the following envelopes
+      | ID               |
+      | {{scheduleUUID}} |
+    Then Set nonce last attributed records
+      | Account     | ChainID          | Nonce |
+      | {{fromAcc}} | {{besu.ChainID}} | 1     |
+    When I send "PUT" request to "{{global.tx-scheduler}}/jobs/{{txOneJobUUID}}/start"
+    Then the response code should be 202
+    Then Envelopes should be in topic "tx.decoded"
+    When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{txOneJobUUID}}"
+    Then the response code should be 200
+    And Response should have the following fields
+      | status  | logs[0].status | logs[1].status | logs[2].status | logs[3].status | logs[4].status |
+      | MINED | CREATED        | STARTED        | RECOVERING     | PENDING        | MINED          |
 
   Scenario: Chaotic nonce
     Given I register the following alias

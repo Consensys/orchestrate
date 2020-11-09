@@ -162,10 +162,7 @@ func Checker(conf *Configuration, nm nonce.Sender, ec hnonce.EthClient, tracker 
 			// We set a context value to indicate to other handlers that
 			// an invalid nonce has been processed
 			txctx.Set("invalid.nonce", true)
-
-			// Abort execution
-			txctx.Abort()
-
+			_ = txctx.Envelope.AppendError(errors.InvalidNonceWarning("invalid nonce. Expected %v, got %v", expectedNonce, n))
 			return
 		}
 

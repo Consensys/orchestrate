@@ -15,6 +15,11 @@ import (
 
 func RawTxStore(txSchedulerClient client.TransactionSchedulerClient) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
+		// If envelope contains errors exits
+		if len(txctx.Envelope.GetErrors()) != 0 {
+			return
+		}
+
 		txctx.Logger.Debug("transaction scheduler: updating transaction to PENDING")
 
 		computedTxHash := txctx.Envelope.GetTxHashString()
@@ -52,25 +57,8 @@ func RawTxStore(txSchedulerClient client.TransactionSchedulerClient) engine.Hand
 		txctx.Next()
 
 		// If an error occurred when executing pending handlers
-		if len(txctx.Envelope.GetErrors()) != 0 && !txctx.Envelope.IsChildJob() {
-			txctx.Logger.Debug("transaction scheduler: updating transaction to RECOVERING")
-			_, updateErr := txSchedulerClient.UpdateJob(
-				txctx.Context(),
-				txctx.Envelope.GetJobUUID(),
-				&txschedulertypes.UpdateJobRequest{
-					Status: utils.StatusRecovering,
-					Message: fmt.Sprintf(
-						"transaction attempt with nonce %v and sender %v failed with error: %v",
-						txctx.Envelope.GetNonceString(),
-						txctx.Envelope.GetFromString(),
-						txctx.Envelope.Error(),
-					),
-				})
-
-			if updateErr != nil {
-				e := errors.FromError(updateErr).ExtendComponent(component)
-				txctx.Logger.WithError(e).Errorf("transaction scheduler: failed to set transaction status for recovering")
-			}
+		if len(txctx.Envelope.GetErrors()) != 0 {
+			// If envelope contains errors exits
 			return
 		}
 

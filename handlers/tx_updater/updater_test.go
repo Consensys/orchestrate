@@ -26,6 +26,24 @@ func TestTransactionUpdater(t *testing.T) {
 		h := TransactionUpdater(schedulerClient)
 		h(txctx)
 	})
+	
+	t.Run("should update the status successfully to RECOVERING if envelope contains invalid nonce errors", func(t *testing.T) {
+		txctx := engine.NewTxContext()
+		_ = txctx.Envelope.SetID("test")
+		_ = txctx.AbortWithError(fmt.Errorf("error"))
+		txctx.Set("invalid.nonce", true)
+		txctx.Logger = log.NewEntry(log.New())
+
+		schedulerClient.EXPECT().
+			UpdateJob(txctx.Context(), txctx.Envelope.GetJobUUID(), &txschedulertypes.UpdateJobRequest{
+				Status:  utils.StatusRecovering,
+				Message: txctx.Envelope.Error(),
+			}).
+			Return(&txschedulertypes.JobResponse{}, nil)
+
+		h := TransactionUpdater(schedulerClient)
+		h(txctx)
+	})
 
 	t.Run("should update the status successfully to FAILED if envelope contains errors", func(t *testing.T) {
 		txctx := engine.NewTxContext()

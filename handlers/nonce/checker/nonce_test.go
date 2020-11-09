@@ -108,8 +108,8 @@ func makeContext(
 	return txctx
 }
 
-func assertTxContext(t *testing.T, txctx *engine.TxContext) {
-	assert.Len(t, txctx.Envelope.GetErrors(), txctx.Get("expectedErrorCount").(int), "Error count should be correct")
+func  assertTxContext(t *testing.T, txctx *engine.TxContext) {
+ 	assert.Len(t, txctx.Envelope.GetErrors(), txctx.Get("expectedErrorCount").(int), "Error count should be correct")
 
 	expectedNonceInMetadata := txctx.Get("expectedNonceInMetadata").(uint64)
 	if expectedNonceInMetadata > 0 {
@@ -178,13 +178,13 @@ func TestChecker(t *testing.T) {
 	assertTxContext(t, txctx)
 
 	// On 3rd execution envelope with nonce 10 should be too low
-	txctx = makeContext("testURL", chainID1, true, 10, 0, 1, 0, "")
+	txctx = makeContext("testURL", chainID1, true, 10, 0, 1, 1, "")
 	h(txctx)
 	assertTxContext(t, txctx)
 
 	// On 4th execution envelope with nonce 14 should be too high
 	// Checker should signal in metadata
-	txctx = makeContext("testURL", chainID1, true, 14, 12, 1, 0, "")
+	txctx = makeContext("testURL", chainID1, true, 14, 12, 1, 1, "")
 	h(txctx)
 	assertTxContext(t, txctx)
 	recovering := tracker.Recovering(txctx.Envelope.PartitionKey()) > 0
@@ -192,7 +192,7 @@ func TestChecker(t *testing.T) {
 
 	// On 5th execution envelope with nonce 15 should be too high
 	// Checker should not signal in metadata
-	txctx = makeContext("testURL", chainID1, true, 15, 0, 3, 0, "")
+	txctx = makeContext("testURL", chainID1, true, 15, 0, 3, 1, "")
 	_ = txctx.Envelope.SetInternalLabelsValue("nonce.recovering.count", fmt.Sprintf("%v", 2))
 	h(txctx)
 	assertTxContext(t, txctx)
@@ -274,7 +274,7 @@ func TestChecker_EEA(t *testing.T) {
 	
 	t.Run("envelope for EEA private tx job and privateGroupID should be invalid", func(t *testing.T) {
 		// On 1nd execution envelope with nonce 0 should be fetch from the chain
-		txctx := makeContext("testURL", "112", true, 0, 0, 1, 0, "")
+		txctx := makeContext("testURL", "112", true, 0, 0, 1, 1, "")
 		_ = txctx.Envelope.SetJobType(tx.JobType_ETH_ORION_EEA_TX).SetPrivacyGroupID("privateGroupID")
 		ec.EXPECT().PrivNonce(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Return(uint64(1), nil)

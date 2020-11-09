@@ -94,10 +94,6 @@ func TestSender_RawTransaction(t *testing.T) {
 				Status: utils.StatusPending,
 			}))
 
-		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(&txschedulertypes.UpdateJobRequest{
-			Status: utils.StatusRecovering,
-		}))
-
 		sender(txctx)
 
 		errs := txctx.Envelope.GetErrors()
@@ -109,7 +105,6 @@ func TestSender_TesseraTx(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	// ctx := context.Background()
 	envelopeId := utils.RandomString(12)
 	txHash := "0x" + utils.RandHexString(64)
 	txRaw := "0x" + utils.RandHexString(10)
@@ -178,10 +173,6 @@ func TestSender_TesseraTx(t *testing.T) {
 			&txschedulertypes.UpdateJobRequest{
 				Status: utils.StatusPending,
 			}))
-
-		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(&txschedulertypes.UpdateJobRequest{
-			Status: utils.StatusRecovering,
-		}))
 
 		sender(txctx)
 
@@ -260,11 +251,6 @@ func TestSender_EEAPrivateTransaction(t *testing.T) {
 		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId, gomockUpdateStatusMatcher(
 			&txschedulertypes.UpdateJobRequest{
 				Status: utils.StatusPending,
-			}))
-
-		schedulerClient.EXPECT().UpdateJob(txctx.Context(), envelopeId,
-			gomockUpdateStatusMatcher(&txschedulertypes.UpdateJobRequest{
-				Status: utils.StatusRecovering,
 			}))
 
 		sender(txctx)

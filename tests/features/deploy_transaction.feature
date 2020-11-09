@@ -171,7 +171,7 @@ Feature: Deploy ERC20 contract
     And Response should have the following fields
       | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status |
       | MINED  | CREATED        | STARTED        | PENDING        | MINED          |
-
+    
   Scenario: Fail to deploy ERC20 with too low gas
     Given I register the following contracts
       | name        | artifacts        | Headers.Authorization    |
@@ -212,8 +212,8 @@ Feature: Deploy ERC20 contract
     When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobOTKUUID}}"
     Then the response code should be 200
     And Response should have the following fields
-      | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status | logs[4].status |
-      | FAILED | CREATED        | STARTED        | PENDING        | RECOVERING     | FAILED         |
+      | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status |
+      | FAILED | CREATED        | STARTED        | PENDING        | FAILED         |
 
   Scenario: Fail to deploy ERC20 with invalid contract tag
     Given I register the following contracts
