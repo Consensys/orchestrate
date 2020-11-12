@@ -9,7 +9,13 @@
 
 * Remove account-generator and account-generated topic
 
-## v2.5.2 (Unreleased)
+## v2.5.3 (Unreleased)
+
+### 🛠 Bug fixes
+
+* Fix chain registration issue with Kaleido/Infura when multitenancy is enabled
+
+## v2.5.2 (2020-11-09)
 
 ### 🛠 Bug fixes
 
@@ -40,6 +46,17 @@
     * `REDIS_USERNAME`: Redis AUTH username
     * `REDIS_PASSWORD`: Redis AUTH password
     * `REDIS_DATABASE`: Redis CLI database number
+
+## v2.4.2 (Unreleased)
+
+### 🛠 Bug fixes
+
+* Fix chain registration issue with Kaleido/Infura when multitenancy is enabled
+
+## v2.4.1 (2020-11-09)
+
+### 🛠 Bug fixes
+* Remove duplicated tx-recover messages on transaction retries failing on sending
 
 ## v2.4.0 (2020-10-19)
 

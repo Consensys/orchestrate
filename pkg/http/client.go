@@ -21,10 +21,13 @@ func NewClient(cfg *Config) *http.Client {
 	*/
 	middlewares := []transport.Middleware{}
 	if cfg.MultiTenancy {
-		middlewares = append(middlewares,
-			transport.NewAuthHeadersTransport(),
-			transport.NewAPIKeyHeadersTransport(cfg.APIKey),
-		)
+		if cfg.AuthHeaderForward {
+			middlewares = append(middlewares, transport.NewAuthHeadersTransport())
+		}
+
+		if cfg.APIKey != "" {
+			middlewares = append(middlewares, transport.NewAPIKeyHeadersTransport(cfg.APIKey))
+		}
 	}
 
 	middlewares = append(middlewares, transport.NewRetry429Transport())

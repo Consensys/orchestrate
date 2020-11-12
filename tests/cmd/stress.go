@@ -39,7 +39,7 @@ func runStress(cmd *cobra.Command, _ []string) {
 	defer sig.Close()
 
 	if err := stress.Start(ctx); err != nil {
-		cmdErr = err
+		cmdErr = errors.CombineErrors(cmdErr, err)
 		traefiklog.WithoutContext().WithError(err).Errorf("test execution did not complete successfully")
 	}
 

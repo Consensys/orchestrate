@@ -62,7 +62,7 @@ func TestEntryPoint(t *testing.T) {
 	}()
 
 	// Wait a few millisecond for server to start
-	time.Sleep(50 * time.Millisecond)
+	time.Sleep(500 * time.Millisecond)
 
 	_, err := net.Dial("tcp", ep.Addr())
 	require.NoError(t, err, "Dial should not error")

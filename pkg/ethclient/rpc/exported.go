@@ -26,8 +26,14 @@ func Init(_ context.Context) {
 		}
 
 		newBackOff := func() backoff.BackOff { return utils.NewBackOff(utils.NewConfig(viper.GetViper())) }
+
+		httpCfg := http.NewConfig(viper.GetViper())
+
+		// Deactivate context authToken forwarding for RPC client requests
+		httpCfg.AuthHeaderForward = false
+
 		// Set Client
-		client = NewClient(newBackOff, http.NewClient(http.NewConfig(viper.GetViper())))
+		client = NewClient(newBackOff, http.NewClient(httpCfg))
 
 		log.Infof("%s: ready", component)
 

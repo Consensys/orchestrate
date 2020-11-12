@@ -291,18 +291,15 @@ Feature: Invalid Nonce
       | 1              | 1     | {{to2}} | {{scheduleUUID}} |
 
   Scenario: Nonce recovering flow
-    Given I have the following tenants
-      | alias  | tenantID        |
-      | tenant | {{random.uuid}} |
     Then I have created the following accounts
       | alias   | ID              | Headers.Authorization   |
-      | fromAcc | {{random.uuid}} | Bearer {{tenant.token}} |
+      | fromAcc | {{random.uuid}} | Bearer {{tenant1.token}} |
     Then I register the following alias
       | alias | value              |
       | to    | {{random.account}} |
     Then I set the headers
       | Key           | Value                   |
-      | Authorization | Bearer {{tenant.token}} |
+      | Authorization | Bearer {{tenant1.token}} |
     When I send "POST" request to "{{global.tx-scheduler}}/schedules" with json:
       """
 {}

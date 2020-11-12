@@ -119,12 +119,13 @@ func NewEPsConfig(vipr *viper.Viper) traefikstatic.EntryPoints {
 type Config struct {
 	Timeout               time.Duration
 	KeepAlive             time.Duration
-	MaxIdleConnsPerHost   int
 	IdleConnTimeout       time.Duration
 	TLSHandshakeTimeout   time.Duration
 	ExpectContinueTimeout time.Duration
-	MultiTenancy          bool
 	APIKey                string
+	MaxIdleConnsPerHost   int
+	MultiTenancy          bool
+	AuthHeaderForward     bool
 }
 
 func NewConfig(vipr *viper.Viper) *Config {
@@ -145,5 +146,6 @@ func NewDefaultConfig() *Config {
 		ExpectContinueTimeout: 1 * time.Second,
 		Timeout:               30 * time.Second,
 		KeepAlive:             30 * time.Second,
+		AuthHeaderForward:     true,
 	}
 }
