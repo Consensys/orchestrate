@@ -2,7 +2,9 @@ package service
 
 import (
 	"context"
+	"time"
 
+	"github.com/cenkalti/backoff/v4"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/multitenancy"
 
 	log "github.com/sirupsen/logrus"
@@ -18,21 +20,23 @@ import (
 )
 
 const messageListenerComponent = "service.message-listener"
-const recoverableErrorMessage = "retrying message on recoverable error"
 
 type MessageListener struct {
 	useCases          usecases.UseCases
 	senderTopic       string
 	recoverTopic      string
 	txSchedulerClient client.TransactionSchedulerClient
+	retryBackOff      backoff.BackOff
 }
 
-func NewMessageListener(ucs usecases.UseCases, senderTopic, recoverTopic string, txSchedulerClient client.TransactionSchedulerClient) *MessageListener {
+func NewMessageListener(ucs usecases.UseCases, senderTopic, recoverTopic string,
+	txSchedulerClient client.TransactionSchedulerClient, bck backoff.BackOff) *MessageListener {
 	return &MessageListener{
 		useCases:          ucs,
 		senderTopic:       senderTopic,
 		recoverTopic:      recoverTopic,
 		txSchedulerClient: txSchedulerClient,
+		retryBackOff:      bck,
 	}
 }
 
@@ -59,39 +63,62 @@ func (listener *MessageListener) ConsumeClaim(session sarama.ConsumerGroupSessio
 	for {
 		select {
 		case msg := <-claim.Messages():
+			if msg == nil {
+				continue
+			}
+
 			envelope, err := decodeMessage(msg)
 			if err != nil {
+				logger.WithError(err).Error("error decoding message", msg)
 				session.MarkMessage(msg, "")
 				continue
 			}
 
-			// Skip processing on raw transactions
-			raw, txHash, err := listener.processEnvelope(ctx, envelope)
+			err = backoff.RetryNotify(
+				func() error {
+					err = listener.processEnvelope(ctx, envelope)
+					switch {
+					// Exits if not errors
+					case err == nil:
+						return nil
+					// Retry on IsConnectionError
+					case errors.IsConnectionError(err):
+						return err
+					case err == context.DeadlineExceeded || err == context.Canceled:
+						return backoff.Permanent(err)
+					case ctx.Err() != nil:
+						return backoff.Permanent(ctx.Err())
+					}
 
-			var der error
-			switch {
-			case err != nil && errors.IsConnectionError(err):
-				logger.Error(recoverableErrorMessage)
-				continue
-			case err != nil:
-				txResponse := envelope.AppendError(errors.FromError(err)).TxResponse()
-				der = listener.useCases.SendEnvelope().Execute(ctx, txResponse, listener.recoverTopic, envelope.PartitionKey())
-			default:
-				_ = envelope.SetRawString(raw)
-				_ = envelope.SetTxHashString(txHash)
-				der = listener.useCases.SendEnvelope().Execute(ctx, envelope.TxEnvelopeAsRequest(), listener.senderTopic, envelope.PartitionKey())
-			}
-			if der != nil && errors.IsConnectionError(der) {
-				logger.Error(recoverableErrorMessage)
-				continue
-			}
+					// In case of other kind of errors...
+					txResponse := envelope.AppendError(errors.FromError(err)).TxResponse()
+					err2 := listener.useCases.SendEnvelope().Execute(ctx, txResponse, listener.recoverTopic, envelope.PartitionKey())
+					if err2 != nil {
+						if errors.IsConnectionError(err2) {
+							return err2
+						}
+						return backoff.Permanent(err2)
+					}
 
-			if der != nil {
-				err = listener.updateTransactionStatus(ctx, envelope.GetJobUUID(), err.Error())
-				if err != nil && errors.IsConnectionError(err) {
-					logger.Error(recoverableErrorMessage)
-					continue
-				}
+					err = listener.updateTransactionStatus(ctx, envelope.GetJobUUID(), err.Error())
+					if err != nil {
+						if errors.IsConnectionError(err) {
+							return err
+						}
+						return backoff.Permanent(err)
+					}
+
+					return nil
+				},
+				listener.retryBackOff,
+				func(err error, duration time.Duration) {
+					logger.WithError(err).Warnf("error processing envelope %q, retrying in %v...", envelope.ID, duration)
+				},
+			)
+
+			if err != nil {
+				logger.WithError(err).Error("error processing message", msg)
+				return err
 			}
 
 			session.MarkMessage(msg, "")
@@ -100,6 +127,22 @@ func (listener *MessageListener) ConsumeClaim(session sarama.ConsumerGroupSessio
 			return nil
 		}
 	}
+}
+
+func (listener *MessageListener) processEnvelope(ctx context.Context, envelope *tx.Envelope) error {
+	raw, txHash, err := listener.signEnvelopeTransaction(ctx, envelope)
+	if err != nil {
+		return err
+	}
+
+	_ = envelope.SetRawString(raw)
+	_ = envelope.SetTxHashString(txHash)
+	err = listener.useCases.SendEnvelope().Execute(ctx, envelope.TxEnvelopeAsRequest(), listener.senderTopic, envelope.PartitionKey())
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func decodeMessage(msg *sarama.ConsumerMessage) (*tx.Envelope, error) {
@@ -121,7 +164,7 @@ func decodeMessage(msg *sarama.ConsumerMessage) (*tx.Envelope, error) {
 	return envelope, nil
 }
 
-func (listener *MessageListener) processEnvelope(ctx context.Context, envelope *tx.Envelope) (raw, txHash string, err error) {
+func (listener *MessageListener) signEnvelopeTransaction(ctx context.Context, envelope *tx.Envelope) (raw, txHash string, err error) {
 	tenantID := envelope.GetHeadersValue(multitenancy.TenantIDMetadata)
 	job := EnvelopeToJob(envelope, tenantID)
 

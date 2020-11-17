@@ -2,7 +2,9 @@ package txsigner
 
 import (
 	"context"
+	"time"
 
+	"github.com/cenkalti/backoff/v4"
 	pkgsarama "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
 	client2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-signer/tx-signer/builder"
@@ -54,7 +56,7 @@ func (signer *txSignerDaemon) Run(ctx context.Context) error {
 	useCases := builder.NewUseCases(signer.keyManagerClient, signer.producer)
 
 	// Create service layer listener
-	listener := service.NewMessageListener(useCases, signer.config.SenderTopic, signer.config.RecoverTopic, signer.txSchedulerClient)
+	listener := service.NewMessageListener(useCases, signer.config.SenderTopic, signer.config.RecoverTopic, signer.txSchedulerClient, retryMessageBackOff())
 
 	return signer.consumerGroup.Consume(ctx, []string{signer.config.ListenerTopic}, listener)
 }
@@ -70,4 +72,11 @@ func readinessOpt(keyManagerClient client.KeyManagerClient, txSchedulerClient cl
 		ap.AddReadinessCheck("transaction-scheduler", txSchedulerClient.Checker())
 		return nil
 	}
+}
+
+func retryMessageBackOff() backoff.BackOff {
+	bckOff := backoff.NewExponentialBackOff()
+	bckOff.MaxInterval = time.Second * 15
+	bckOff.MaxElapsedTime = time.Minute * 5
+	return bckOff
 }

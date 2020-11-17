@@ -10,9 +10,12 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/proto"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/httputil"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/txscheduler"
+
 	http2 "net/http"
 	"testing"
 	"time"
@@ -34,49 +37,48 @@ type txSignerEthereumTestSuite struct {
 
 func (s *txSignerEthereumTestSuite) TestTxSigner_Ethereum_Public() {
 	signature := "0xd35c752d3498e6f5ca1630d264802a992a141ca4b6a3f439d673c75e944e5fb05278aaa5fabbeac362c321b54e298dedae2d31471e432c26ea36a8d49cf08f1e01"
-
+	
 	s.T().Run("should sign a public ethereum transaction successfully and send it to the sender topic", func(t *testing.T) {
 		defer gock.Off()
-
+	
 		envelope := fakeEnvelope()
+		url := fmt.Sprintf("/ethereum/accounts/%s/sign-transaction", envelope.GetFromString())
+		gock.New(keyManagerURL).Post(url).Reply(200).BodyString(signature)
+	
 		err := s.sendEnvelope(envelope.TxEnvelopeAsRequest())
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
 		}
-
-		url := fmt.Sprintf("/ethereum/accounts/%s/sign-transaction", envelope.GetFromString())
-		gock.New(keyManagerURL).Post(url).Reply(200).BodyString(signature)
-
+	
 		retrievedEnvelope, err := s.env.consumer.WaitForEnvelope(envelope.GetID(), s.env.txSignerConfig.SenderTopic, waitForEnvelopeTimeOut)
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
 		}
-
+	
 		assert.Equal(t, envelope.GetID(), retrievedEnvelope.GetID())
 		assert.Equal(t, "0xf85380839896808252088083989680808216b4a0d35c752d3498e6f5ca1630d264802a992a141ca4b6a3f439d673c75e944e5fb0a05278aaa5fabbeac362c321b54e298dedae2d31471e432c26ea36a8d49cf08f1e", retrievedEnvelope.GetRaw())
 	})
-
+	
 	s.T().Run("should sign a public onetimekey ethereum transaction successfully and send it to the sender topic", func(t *testing.T) {
 		defer gock.Off()
-
+	
 		envelope := fakeEnvelope()
+		url := fmt.Sprintf("/ethereum/accounts/%s/sign-transaction", envelope.GetFromString())
+		gock.New(keyManagerURL).Post(url).Reply(200).BodyString(signature)
+	
 		err := s.sendEnvelope(envelope.TxEnvelopeAsRequest().EnableTxFromOneTimeKey())
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
 		}
-
-		url := fmt.Sprintf("/ethereum/accounts/%s/sign-transaction", envelope.GetFromString())
-		gock.New(keyManagerURL).Post(url).Reply(200).BodyString(signature)
-
 		retrievedEnvelope, err := s.env.consumer.WaitForEnvelope(envelope.GetID(), s.env.txSignerConfig.SenderTopic, waitForEnvelopeTimeOut)
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
 		}
-
+	
 		assert.Equal(t, envelope.GetID(), retrievedEnvelope.GetID())
 		assert.NotEmpty(t, retrievedEnvelope.GetRaw())
 		assert.NotEqual(
@@ -85,7 +87,7 @@ func (s *txSignerEthereumTestSuite) TestTxSigner_Ethereum_Public() {
 			retrievedEnvelope.GetRaw(),
 		)
 	})
-
+	
 	s.T().Run("should process a raw transaction and send it to the sender topic", func(t *testing.T) {
 		envelope := fakeEnvelope()
 		_ = envelope.SetJobType(tx.JobType_ETH_RAW_TX)
@@ -95,39 +97,41 @@ func (s *txSignerEthereumTestSuite) TestTxSigner_Ethereum_Public() {
 			assert.Fail(t, err.Error())
 			return
 		}
-
+	
 		retrievedEnvelope, err := s.env.consumer.WaitForEnvelope(envelope.GetID(), s.env.txSignerConfig.SenderTopic, waitForEnvelopeTimeOut)
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
 		}
-
+	
 		assert.Equal(t, envelope.GetID(), retrievedEnvelope.GetID())
 		assert.Equal(t, envelope.GetRaw(), retrievedEnvelope.GetRaw())
 	})
 
-	s.T().Run("should send envelope to tx-recover if an error occurs", func(t *testing.T) {
+	s.T().Run("should send envelope to tx-recover if an not recoverable error occurs", func(t *testing.T) {
 		defer gock.Off()
-
+	
 		envelope := fakeEnvelope()
+		url := fmt.Sprintf("/ethereum/accounts/%s/sign-transaction", envelope.GetFromString())
+		gock.New(keyManagerURL).Post(url).Reply(http2.StatusUnauthorized).JSON(httputil.ErrorResponse{
+			Message: "not authorized requests",
+			Code:    666,
+		})
+
+		gock.New(txSchedulerURL).Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).Reply(200).JSON(txscheduler.JobResponse{})
+	
 		err := s.sendEnvelope(envelope.TxEnvelopeAsRequest())
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
 		}
-
-		url := fmt.Sprintf("/ethereum/accounts/%s/sign-transaction", envelope.GetFromString())
-		gock.New(keyManagerURL).Post(url).Reply(500).JSON(httputil.ErrorResponse{
-			Message: "error message",
-			Code:    666,
-		})
-
+	
 		retrievedEnvelope, err := s.env.consumer.WaitForEnvelope(envelope.GetID(), s.env.txSignerConfig.RecoverTopic, waitForEnvelopeTimeOut)
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
 		}
-
+	
 		assert.Equal(t, envelope.GetID(), retrievedEnvelope.GetID())
 		assert.NotEmpty(t, retrievedEnvelope.GetErrors()[0].Code)
 		assert.NotEmpty(t, retrievedEnvelope.GetErrors()[0].Message)
@@ -142,14 +146,15 @@ func (s *txSignerEthereumTestSuite) TestTxSigner_Ethereum_EEA() {
 
 		envelope := fakeEnvelope()
 		_ = envelope.SetJobType(tx.JobType_ETH_ORION_EEA_TX)
+
+		url := fmt.Sprintf("/ethereum/accounts/%s/sign-eea-transaction", envelope.GetFromString())
+		gock.New(keyManagerURL).Post(url).Reply(200).BodyString(signature)
+
 		err := s.sendEnvelope(envelope.TxEnvelopeAsRequest())
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
 		}
-
-		url := fmt.Sprintf("/ethereum/accounts/%s/sign-eea-transaction", envelope.GetFromString())
-		gock.New(keyManagerURL).Post(url).Reply(200).BodyString(signature)
 
 		retrievedEnvelope, err := s.env.consumer.WaitForEnvelope(envelope.GetID(), s.env.txSignerConfig.SenderTopic, waitForEnvelopeTimeOut)
 		if err != nil {
@@ -166,14 +171,15 @@ func (s *txSignerEthereumTestSuite) TestTxSigner_Ethereum_EEA() {
 
 		envelope := fakeEnvelope()
 		_ = envelope.SetJobType(tx.JobType_ETH_ORION_EEA_TX)
+
+		url := fmt.Sprintf("/ethereum/accounts/%s/sign-eea-transaction", envelope.GetFromString())
+		gock.New(keyManagerURL).Post(url).Reply(200).BodyString(signature)
+		
 		err := s.sendEnvelope(envelope.TxEnvelopeAsRequest().EnableTxFromOneTimeKey())
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
 		}
-
-		url := fmt.Sprintf("/ethereum/accounts/%s/sign-eea-transaction", envelope.GetFromString())
-		gock.New(keyManagerURL).Post(url).Reply(200).BodyString(signature)
 
 		retrievedEnvelope, err := s.env.consumer.WaitForEnvelope(envelope.GetID(), s.env.txSignerConfig.SenderTopic, waitForEnvelopeTimeOut)
 		if err != nil {
@@ -199,14 +205,15 @@ func (s *txSignerEthereumTestSuite) TestTxSigner_Ethereum_Quorum() {
 
 		envelope := fakeEnvelope()
 		_ = envelope.SetJobType(tx.JobType_ETH_TESSERA_MARKING_TX)
+		
+		url := fmt.Sprintf("/ethereum/accounts/%s/sign-quorum-private-transaction", envelope.GetFromString())
+		gock.New(keyManagerURL).Post(url).Reply(200).BodyString(signature)
+
 		err := s.sendEnvelope(envelope.TxEnvelopeAsRequest())
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
 		}
-
-		url := fmt.Sprintf("/ethereum/accounts/%s/sign-quorum-private-transaction", envelope.GetFromString())
-		gock.New(keyManagerURL).Post(url).Reply(200).BodyString(signature)
 
 		retrievedEnvelope, err := s.env.consumer.WaitForEnvelope(envelope.GetID(), s.env.txSignerConfig.SenderTopic, waitForEnvelopeTimeOut)
 		if err != nil {
@@ -223,14 +230,15 @@ func (s *txSignerEthereumTestSuite) TestTxSigner_Ethereum_Quorum() {
 
 		envelope := fakeEnvelope()
 		_ = envelope.SetJobType(tx.JobType_ETH_TESSERA_MARKING_TX)
+		
+		url := fmt.Sprintf("/ethereum/accounts/%s/sign-quorum-private-transaction", envelope.GetFromString())
+		gock.New(keyManagerURL).Post(url).Reply(200).BodyString(signature)
+
 		err := s.sendEnvelope(envelope.TxEnvelopeAsRequest().EnableTxFromOneTimeKey())
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
 		}
-
-		url := fmt.Sprintf("/ethereum/accounts/%s/sign-quorum-private-transaction", envelope.GetFromString())
-		gock.New(keyManagerURL).Post(url).Reply(200).BodyString(signature)
 
 		retrievedEnvelope, err := s.env.consumer.WaitForEnvelope(envelope.GetID(), s.env.txSignerConfig.SenderTopic, waitForEnvelopeTimeOut)
 		if err != nil {
@@ -252,14 +260,15 @@ func (s *txSignerEthereumTestSuite) TestTxSigner_Ethereum_Quorum() {
 
 		envelope := fakeEnvelope()
 		_ = envelope.SetJobType(tx.JobType_ETH_TESSERA_PRIVATE_TX)
+		
+		url := fmt.Sprintf("/ethereum/accounts/%s/sign-quorum-private-transaction", envelope.GetFromString())
+		gock.New(keyManagerURL).Post(url).Reply(200).BodyString(signature)
+
 		err := s.sendEnvelope(envelope.TxEnvelopeAsRequest())
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
 		}
-
-		url := fmt.Sprintf("/ethereum/accounts/%s/sign-quorum-private-transaction", envelope.GetFromString())
-		gock.New(keyManagerURL).Post(url).Reply(200).BodyString(signature)
 
 		retrievedEnvelope, err := s.env.consumer.WaitForEnvelope(envelope.GetID(), s.env.txSignerConfig.SenderTopic, waitForEnvelopeTimeOut)
 		if err != nil {
@@ -284,17 +293,27 @@ func (s *txSignerEthereumTestSuite) TestTxSigner_Ethereum_Failures() {
 			assert.Fail(t, err.Error())
 			return
 		}
+	})
 
-		// Second one is processed successfully
+	s.T().Run("should retry message on connection error", func(t *testing.T) {
+		defer gock.Off()
+
+		// First one fails with service connection error
 		envelope := fakeEnvelope()
-		err = s.sendEnvelope(envelope.TxEnvelopeAsRequest())
+		url := fmt.Sprintf("/ethereum/accounts/%s/sign-transaction", envelope.GetFromString())
+
+		gock.New(keyManagerURL).Post(url).Times(1).Reply(500).JSON(httputil.ErrorResponse{
+			Message: "cannot connect to key-manager service",
+			Code:    errors.ServiceConnection,
+		})
+
+		gock.New(keyManagerURL).Post(url).Times(1).Reply(200).BodyString(signature)
+
+		err := s.sendEnvelope(envelope.TxEnvelopeAsRequest())
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
 		}
-
-		url := fmt.Sprintf("/ethereum/accounts/%s/sign-transaction", envelope.GetFromString())
-		gock.New(keyManagerURL).Post(url).Reply(200).BodyString(signature)
 
 		retrievedEnvelope, err := s.env.consumer.WaitForEnvelope(envelope.GetID(), s.env.txSignerConfig.SenderTopic, waitForEnvelopeTimeOut)
 		if err != nil {
@@ -305,47 +324,9 @@ func (s *txSignerEthereumTestSuite) TestTxSigner_Ethereum_Failures() {
 		assert.Equal(t, envelope.GetID(), retrievedEnvelope.GetID())
 		assert.NotEmpty(t, retrievedEnvelope.GetRaw())
 	})
-
-	/* TODO: Check why it does not work as expected (retry messages)
-	s.T().Run("should retry message on connection error", func(t *testing.T) {
-		defer gock.Off()
-
-		// First one fails with service connection error
-		envelope0 := fakeEnvelope()
-		errMessage := "error message"
-		url := fmt.Sprintf("/ethereum/accounts/%s/sign-transaction", envelope0.GetFromString())
-		gock.New(keyManagerURL).Post(url).Reply(500).JSON(httputil.ErrorResponse{
-			Message: errMessage,
-			Code:    errors.ServiceConnection,
-		})
-
-		err := s.sendEnvelope(envelope0.TxEnvelopeAsRequest())
-		if err != nil {
-			assert.Fail(t, err.Error())
-			return
-		}
-
-		// Second one is processed successfully
-		envelope1 := fakeEnvelope()
-		gock.New(keyManagerURL).Post(url).Reply(200)..BodyString(signature)
-		err = s.sendEnvelope(envelope1.TxEnvelopeAsRequest())
-		if err != nil {
-			assert.Fail(t, err.Error())
-			return
-		}
-
-		retrievedEnvelope, err := s.env.consumer.WaitForEnvelope(envelope1.GetID(), s.env.txSignerConfig.SenderTopic, waitForEnvelopeTimeOut)
-		if err != nil {
-			assert.Fail(t, err.Error())
-			return
-		}
-
-		assert.Equal(t, envelope1.GetID(), retrievedEnvelope.GetID())
-		assert.NotEmpty(t, retrievedEnvelope.GetRaw())
-	})*/
 }
 
-func (s *txSignerEthereumTestSuite) TestTxSigner_Ethereum_ZHealthCheck() {
+func (s *txSignerEthereumTestSuite) TestTxSigner_ZHealthCheck() {
 	type healthRes struct {
 		TransactionScheduler string `json:"transaction-scheduler,omitempty"`
 		KeyManager           string `json:"key-manager,omitempty"`

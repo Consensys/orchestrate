@@ -1,10 +1,12 @@
 // +build unit
+// +build !race
 
 package service
 
 import (
 	"context"
 	"github.com/Shopify/sarama"
+	"github.com/cenkalti/backoff/v4"
 	"github.com/gofrs/uuid"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama/mock"
@@ -73,7 +75,8 @@ func (s *messageListenerCtrlTestSuite) SetupTest() {
 	s.senderTopic = "sender-topic"
 	s.recoverTopic = "recover-topic"
 
-	s.listener = NewMessageListener(s, s.senderTopic, s.recoverTopic, s.txSchedulerClient)
+	bckoff := backoff.WithMaxRetries(backoff.NewConstantBackOff(time.Second), 1)
+	s.listener = NewMessageListener(s, s.senderTopic, s.recoverTopic, s.txSchedulerClient, bckoff )
 }
 
 func (s *messageListenerCtrlTestSuite) TestMessageListener_PublicEthereum() {
@@ -192,27 +195,34 @@ func (s *messageListenerCtrlTestSuite) TestMessageListener_PublicEthereum() {
 		assert.NoError(t, <-cerr)
 	})
 
-	s.T().Run("should not fail tx and send envelope to tx-recover on ConnectionError", func(t *testing.T) {
+	s.T().Run("should not fail tx and send envelope to tx-recover on AuthorizedErrors", func(t *testing.T) {
 		var claims map[string][]int32
-		ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
-
+	
 		mockSession := mock.NewConsumerGroupSession(ctx, "kafka-consumer-group", claims)
 		mockClaim := mock.NewConsumerGroupClaim("topic", 0, 0)
 		envelope := fakeEnvelope()
 		msg := &sarama.ConsumerMessage{}
 		msg.Value, _ = proto.Marshal(envelope.TxEnvelopeAsRequest())
 
-		s.signTxUC.EXPECT().Execute(ctx, gomock.Any()).Return("", "", errors.KafkaConnectionError("error"))
+		s.signTxUC.EXPECT().Execute(ctx, gomock.Any()).Times(2).Return("", "", errors.KafkaConnectionError("error"))
+		s.txSchedulerClient.EXPECT().UpdateJob(ctx, envelope.GetJobUUID(), &txschedulertypes.UpdateJobRequest{
+			Status:  utils.StatusFailed,
+			Message: "FF000@: error",
+		}).Return(&txschedulertypes.JobResponse{}, nil)
+		s.sendEnvelopeUC.EXPECT().
+			Execute(ctx, gomock.Any(), s.recoverTopic, gomock.Any()).
+			Return(nil)
 
 		cerr := make(chan error)
 		go func() {
 			cerr <- s.listener.ConsumeClaim(mockSession, mockClaim)
 		}()
-
+	
 		mockClaim.ExpectMessage(msg)
-
-		assert.NoError(t, <-cerr)
+	
+		assert.Error(t, <-cerr)
 	})
 
 	s.T().Run("should skip signing for raw transactions", func(t *testing.T) {
