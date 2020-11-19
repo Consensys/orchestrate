@@ -45,4 +45,6 @@ func NewConfig(vipr *viper.Viper) *Config {
 	}
 }
 
-func Flags(f *pflag.FlagSet) {}
+func Flags(f *pflag.FlagSet) {
+	Type(f)
+}
