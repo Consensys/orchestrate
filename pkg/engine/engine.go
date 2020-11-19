@@ -200,10 +200,8 @@ func (e *Engine) handleMessage(ctx context.Context, msg Msg) error {
 		applyHandlers(e.handlers...).
 		applyHandlers(e.wrapperHandlers...)
 
-	if !txctx.Envelope.OnlyWarnings() {
-		if err := txctx.HasRetryMsgErr(); err != nil {
-			return err
-		}
+	if err := txctx.HasRetryMsgErr(); err != nil {
+		return err
 	}
 
 	return nil

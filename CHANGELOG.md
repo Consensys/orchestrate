@@ -14,6 +14,8 @@
 ### 🛠 Bug fixes
 
 * Fix chain registration issue with Kaleido/Infura when multitenancy is enabled
+* Retry on worker messages when connection errors occurred
+* Fix missing error communication on edge cases
 
 ## v2.5.2 (2020-11-09)
 
