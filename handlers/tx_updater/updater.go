@@ -12,14 +12,17 @@ const component = "handler.tx-updater"
 // TransactionUpdater updates a transaction in the scheduler
 func TransactionUpdater(txSchedulerClient txscheduler.TransactionSchedulerClient) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
-		txctx.Next()
-
 		if txctx.Envelope.OnlyWarnings() {
 			return
 		}
 
-		// Don't update to FAILED if we are going to retry
-		if b, ok := txctx.Get("invalid.nonce").(bool); b && ok {
+		// In case we are retrying on same MSG we exit
+		if txctx.HasRetryMsgErr() != nil {
+			return
+		}
+
+		// Don't update to FAILED if we are going to send message to tx-crafter
+		if txctx.HasInvalidNonceErr() {
 			txctx.Logger.Debug("transaction scheduler: updating transaction to RECOVERING")
 			_, err := txSchedulerClient.UpdateJob(
 				txctx.Context(),
@@ -30,7 +33,7 @@ func TransactionUpdater(txSchedulerClient txscheduler.TransactionSchedulerClient
 				})
 
 			if err != nil {
-				e := txctx.AbortWithError(err).ExtendComponent(component)
+				e := txctx.Error(err).ExtendComponent(component)
 				txctx.Logger.WithError(e).Errorf("tx updater: could not update transaction status")
 			}
 			return
@@ -44,7 +47,7 @@ func TransactionUpdater(txSchedulerClient txscheduler.TransactionSchedulerClient
 		})
 
 		if err != nil {
-			e := txctx.AbortWithError(err).ExtendComponent(component)
+			e := txctx.Error(err).ExtendComponent(component)
 			txctx.Logger.WithError(e).Errorf("tx updater: could not update transaction status")
 			return
 		}

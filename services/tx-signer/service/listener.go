@@ -62,9 +62,13 @@ func (listener *MessageListener) ConsumeClaim(session sarama.ConsumerGroupSessio
 
 	for {
 		select {
-		case msg := <-claim.Messages():
-			if msg == nil {
-				continue
+		case <-session.Context().Done():
+			logger.WithField("reason", ctx.Err().Error()).Info("gracefully stopping message listener...")
+			return nil
+		case msg, ok := <-claim.Messages():
+			// Input channel has been close so we leave the loop
+			if !ok {
+				return nil
 			}
 
 			envelope, err := decodeMessage(msg)
@@ -122,9 +126,6 @@ func (listener *MessageListener) ConsumeClaim(session sarama.ConsumerGroupSessio
 			}
 
 			session.MarkMessage(msg, "")
-		case <-session.Context().Done():
-			logger.WithField("reason", ctx.Err().Error()).Info("gracefully stopping message listener...")
-			return nil
 		}
 	}
 }

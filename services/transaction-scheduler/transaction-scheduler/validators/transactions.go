@@ -60,6 +60,8 @@ func (txValidator *transactionValidator) ValidateChainExists(ctx context.Context
 		log.WithError(err).WithField("chain_uuid", chainUUID).Error(errMessage)
 		return "", errors.InvalidParameterError(errMessage)
 	}
+
+	log.WithError(err).WithField("chain_uuid", chainUUID).Error("failed to validate chain")
 	return "", errors.FromError(err).ExtendComponent(txValidatorComponent)
 }
 

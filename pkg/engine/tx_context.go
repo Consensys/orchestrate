@@ -65,8 +65,8 @@ func (txctx *TxContext) Next() {
 
 // Error attaches an error to Envelope
 func (txctx *TxContext) Error(err error) *ierror.Error {
-	if err == nil {
-		panic("err is nil")
+	if errors.IsConnectionError(err) {
+		txctx.SetRetryMsgErr(err)
 	}
 
 	_ = txctx.Envelope.AppendError(errors.FromError(err))
@@ -107,6 +107,45 @@ func (txctx *TxContext) Get(key string) interface{} {
 	return txctx.Context().Value(txCtxKey(key))
 }
 
+func (txctx *TxContext) SetInvalidNonceErr(v bool) *TxContext {
+	txctx.Set("invalid.nonce", v)
+	return txctx
+}
+
+func (txctx *TxContext) HasInvalidNonceErr() bool {
+	if b, ok := txctx.Get("invalid.nonce").(bool); ok && b {
+		return true
+	}
+
+	return false
+}
+
+func (txctx *TxContext) SetRetryMsgErr(err error) *TxContext {
+	txctx.Set("retry.msg", err)
+	return txctx
+}
+
+func (txctx *TxContext) HasRetryMsgErr() error {
+	if err, ok := txctx.Get("retry.msg").(error); ok && err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (txctx *TxContext) SetTxAlreadyPending(v bool) *TxContext {
+	txctx.Set("tx.pending", v)
+	return txctx
+}
+
+func (txctx *TxContext) IsTxAlreadyPending() bool {
+	if b, ok := txctx.Get("tx.pending").(bool); ok && b {
+		return true
+	}
+
+	return false
+}
+
 // Context returns the go context attached to Envelope.
 // To change the go context, use WithContext.
 //
@@ -128,7 +167,7 @@ func (txctx *TxContext) WithContext(ctx context.Context) *TxContext {
 	return txctx
 }
 
-func (txctx *TxContext) applyHandlers(handlers ...HandlerFunc) {
+func (txctx *TxContext) applyHandlers(handlers ...HandlerFunc) *TxContext {
 	// Recycle sequence
 	seq := seqPool.Get().(*sequence)
 	defer seqPool.Put(seq)
@@ -146,6 +185,7 @@ func (txctx *TxContext) applyHandlers(handlers ...HandlerFunc) {
 
 	// Once executed remove the sequence
 	txctx.stack = txctx.stack[:len(txctx.stack)-1]
+	return txctx
 }
 
 type sequence struct {

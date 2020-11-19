@@ -7,6 +7,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/cenkalti/backoff/v4"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -19,7 +20,8 @@ type Engine struct {
 	conf *Config
 
 	// chain of handlers to be to be executed
-	handlers []HandlerFunc
+	handlers        []HandlerFunc
+	wrapperHandlers []HandlerFunc
 
 	// running keeps track of the number of running loops
 	running   int64
@@ -77,6 +79,13 @@ func (e *Engine) Register(handler HandlerFunc) {
 	e.mux.Unlock()
 }
 
+// Register register a new WrapperHandler
+func (e *Engine) RegisterWrapper(handler HandlerFunc) {
+	e.mux.Lock()
+	e.wrapperHandlers = append(e.wrapperHandlers, handler)
+	e.mux.Unlock()
+}
+
 // Run starts consuming messages from an input channel
 //
 // Run will gracefully interrupt either if
@@ -110,6 +119,9 @@ func (e *Engine) Run(ctx context.Context, input <-chan Msg) {
 		"loops.count": count,
 	}).Debugf("engine: start running loop")
 
+	bckOff := backoff.NewExponentialBackOff()
+	bckOff.MaxInterval = time.Second * 15
+	bckOff.MaxElapsedTime = time.Minute * 5
 runningLoop:
 	for {
 		select {
@@ -122,8 +134,21 @@ runningLoop:
 			// Acquire a message slot
 			e.slots <- struct{}{}
 
-			// Handle message
-			e.handleMessage(ctx, msg)
+			err := backoff.RetryNotify(
+				func() error {
+					// Handle message
+					return e.handleMessage(ctx, msg)
+				},
+				bckOff,
+				func(err error, duration time.Duration) {
+					e.logger.WithError(err).Warnf("error processing msg %q, retrying in %v...", msg.Key(), duration)
+				},
+			)
+
+			if err != nil {
+				e.logger.WithError(err).Errorf("engine: left running loop")
+				break runningLoop
+			}
 
 			// Release a message slot
 			<-e.slots
@@ -158,7 +183,7 @@ func (e *Engine) CleanUp() {
 	})
 }
 
-func (e *Engine) handleMessage(ctx context.Context, msg Msg) {
+func (e *Engine) handleMessage(ctx context.Context, msg Msg) error {
 	// Retrieve a re-cycled context
 	txctx := e.ctxPool.Get().(*TxContext)
 
@@ -172,7 +197,16 @@ func (e *Engine) handleMessage(ctx context.Context, msg Msg) {
 			msg,
 		).
 		WithContext(ctx).
-		applyHandlers(e.handlers...)
+		applyHandlers(e.handlers...).
+		applyHandlers(e.wrapperHandlers...)
+
+	if !txctx.Envelope.OnlyWarnings() {
+		if err := txctx.HasRetryMsgErr(); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // TimeoutHandler returns a Handler that runs h with the given time limit

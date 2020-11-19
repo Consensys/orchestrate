@@ -161,7 +161,7 @@ func Checker(conf *Configuration, nm nonce.Sender, ec hnonce.EthClient, tracker 
 
 			// We set a context value to indicate to other handlers that
 			// an invalid nonce has been processed
-			txctx.Set("invalid.nonce", true)
+			txctx.SetInvalidNonceErr(true)
 			_ = txctx.Envelope.AppendError(errors.InvalidNonceWarning("invalid nonce. Expected %v, got %v", expectedNonce, n))
 			return
 		}
@@ -235,7 +235,7 @@ func Checker(conf *Configuration, nm nonce.Sender, ec hnonce.EthClient, tracker 
 
 			// We set a context value to indicate to other handlers that
 			// an invalid nonce has been processed
-			txctx.Set("invalid.nonce", true)
+			txctx.SetInvalidNonceErr(true)
 		}
 
 		// Update Envelope errors with Nonce too Low error removed
@@ -251,7 +251,7 @@ func Checker(conf *Configuration, nm nonce.Sender, ec hnonce.EthClient, tracker 
 //
 // Setting recovery status before producing the envelope could result in case of crash
 // in a situation were would never be able to signal tx-crafter to recalibrate nonce
-func RecoveryStatusSetter(nm nonce.Sender, tracker *RecoveryTracker) engine.HandlerFunc {
+func RecoveryStatusSetter(_ nonce.Sender, tracker *RecoveryTracker) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		// Execute pending handlers
 		txctx.Next()
@@ -264,7 +264,7 @@ func RecoveryStatusSetter(nm nonce.Sender, tracker *RecoveryTracker) engine.Hand
 			tracker.Recover(nonceKey)
 		}
 
-		if b, ok := txctx.Get("invalid.nonce").(bool); !ok || !b {
+		if !txctx.HasInvalidNonceErr() {
 			// Transaction has been processed properly
 			// Deactivate recovery if activated
 			tracker.Recovered(nonceKey)

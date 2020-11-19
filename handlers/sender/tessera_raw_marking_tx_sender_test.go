@@ -3,6 +3,7 @@
 package sender
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -59,7 +60,7 @@ func TestTesseraRawMarkingTxSender(t *testing.T) {
 			},
 			func(txctx *engine.TxContext) *engine.TxContext {
 				err := errors.DataError("no raw or privateFor filled").SetComponent(component)
-				_ = txctx.Envelope.AppendError(err)
+				_ = txctx.Error(err)
 				return txctx
 			},
 		},
@@ -73,7 +74,7 @@ func TestTesseraRawMarkingTxSender(t *testing.T) {
 				return txctx.WithContext(proxy.With(txctx.Context(), testMarkingChainProxyURL))
 			},
 			func(txctx *engine.TxContext) *engine.TxContext {
-				_ = txctx.Envelope.AppendError(testMarkingError)
+				_ = txctx.Error(testMarkingError)
 				return txctx
 			},
 		},
@@ -103,7 +104,7 @@ func TestTesseraRawMarkingTxSender(t *testing.T) {
 			expectedTxctx.Logger = txctx.Logger
 			expectedTxctx = test.expectedTxctx(test.input(expectedTxctx))
 
-			assert.True(t, reflect.DeepEqual(txctx, expectedTxctx), "Expected same input")
+			assert.True(t, reflect.DeepEqual(txctx, expectedTxctx), fmt.Sprintf("%s: expected same input", test.name))
 		})
 	}
 }

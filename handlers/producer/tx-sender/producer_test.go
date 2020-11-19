@@ -28,14 +28,14 @@ func TestPrepareMsg(t *testing.T) {
 	assert.Equal(t, "", msg.Topic, "If no error there should be no out topic")
 
 	// Error
-	_ = txctx.Error(errors.ConnectionError("Connection error"))
+	_ = txctx.Error(errors.AlreadyExistsError("Already exists"))
 	msg = &sarama.ProducerMessage{}
 	_ = PrepareMsg(txctx, msg)
 	assert.Equal(t, "topic-tx-recover", msg.Topic, "If error out topic should be recovery")
 
 	txctx = engine.NewTxContext()
 	txctx.In = m
-	txctx.Set("invalid.nonce", true)
+	txctx.SetInvalidNonceErr(true)
 	_ = txctx.Envelope.AppendError(errors.NonceTooLowError(""))
 	msg = &sarama.ProducerMessage{}
 	_ = PrepareMsg(txctx, msg)
@@ -43,10 +43,18 @@ func TestPrepareMsg(t *testing.T) {
 
 	txctx = engine.NewTxContext()
 	txctx.In = m
-	_ = txctx.Error(errors.ConnectionError("cannot connect to tx-scheduler"))
+	_ = txctx.Error(errors.InvalidAuthenticationError("invalid credentials"))
 	msg = &sarama.ProducerMessage{}
 	_ = PrepareMsg(txctx, msg)
 	assert.Equal(t, "topic-tx-recover", msg.Topic, "If invalid nonce and error topic should be tx-recover")
+	
+	txctx = engine.NewTxContext()
+	txctx.In = m
+	_ = txctx.Error(errors.ConnectionError("cannot connect to tx-scheduler"))
+	msg = &sarama.ProducerMessage{}
+	_ = PrepareMsg(txctx, msg)
+	assert.Empty(t, msg.Topic, "If invalid nonce and error topic should be tx-recover")
+	assert.NotNil(t, txctx.HasRetryMsgErr())
 	
 	// Skip child job error
 	_ = txctx.Error(errors.ConnectionError("Connection error"))

@@ -10,12 +10,11 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
 )
 
-var cmdErr error
-
 func main() {
 	command := &cobra.Command{
 		Use:              "run",
 		TraverseChildren: true,
+		SilenceUsage:     true,
 	}
 
 	// Set pkglog flags

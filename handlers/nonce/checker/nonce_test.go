@@ -123,11 +123,9 @@ func  assertTxContext(t *testing.T, txctx *engine.TxContext) {
 	}
 
 	if txctx.Get("expectedInvalid").(bool) {
-		v, ok := txctx.Get("invalid.nonce").(bool)
-		assert.True(t, ok && v, "Nonce invalidity should be correct")
+		assert.True(t, txctx.HasInvalidNonceErr(), "Nonce invalidity should be correct")
 	} else {
-		invalid, ok := txctx.Get("invalid.nonce").(bool)
-		assert.False(t, ok || invalid, "Nonce invalidity should be correct")
+		assert.False(t, txctx.HasInvalidNonceErr(), "Nonce invalidity should be correct")
 	}
 
 	var recoveryCount int

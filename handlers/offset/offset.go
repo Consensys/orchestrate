@@ -10,6 +10,12 @@ func Marker(txctx *engine.TxContext) {
 	// Marker only executes in second phase of middleware
 	txctx.Next()
 
+	// In case of msg retrying, skip offset marker
+	if err := txctx.HasRetryMsgErr(); err != nil {
+		txctx.Logger.WithError(err).Warn("marker: skip offset marking, retrying message...")
+		return
+	}
+
 	// Extract sarama ConsumerGroupSession from context
 	s, _ := broker.GetConsumerGroupSessionAndClaim(txctx.Context())
 	if s != nil {

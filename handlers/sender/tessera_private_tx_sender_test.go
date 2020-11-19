@@ -3,6 +3,7 @@
 package sender
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -58,7 +59,7 @@ func TestStoreRaw(t *testing.T) {
 			},
 			func(txctx *engine.TxContext) *engine.TxContext {
 				err := errors.DataError("cannot send transaction without data to Tessera").SetComponent(component)
-				_ = txctx.Envelope.AppendError(err)
+				_ = txctx.Error(err)
 				return txctx
 			},
 		},
@@ -72,7 +73,7 @@ func TestStoreRaw(t *testing.T) {
 				return txctx.WithContext(proxy.With(txctx.Context(), testPrivChainProxyURL))
 			},
 			func(txctx *engine.TxContext) *engine.TxContext {
-				_ = txctx.Envelope.AppendError(testPrivError)
+				_ = txctx.Error(testPrivError)
 				return txctx
 			},
 		},
@@ -102,7 +103,7 @@ func TestStoreRaw(t *testing.T) {
 			expectedTxctx.Logger = txctx.Logger
 			expectedTxctx = test.expectedTxctx(test.input(expectedTxctx))
 
-			assert.True(t, reflect.DeepEqual(txctx, expectedTxctx), "Expected same input")
+			assert.True(t, reflect.DeepEqual(txctx, expectedTxctx), fmt.Sprintf("%s: expected same input", test.name))
 		})
 	}
 }

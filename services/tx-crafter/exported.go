@@ -121,8 +121,6 @@ func registerHandlers() {
 	engine.Register(sarama.Loader)
 	engine.Register(offset.Marker)
 	engine.Register(opentracing.GlobalHandler())
-	engine.Register(producer.GlobalHandler())
-	engine.Register(txupdater.GlobalHandler())
 	engine.Register(injector.GlobalHandler())
 	engine.Register(multitenancy.GlobalHandler())
 
@@ -132,6 +130,9 @@ func registerHandlers() {
 	engine.Register(gaspricer.GlobalHandler())
 	engine.Register(gasestimator.GlobalHandler())
 	engine.Register(nonceattributor.GlobalHandler())
+
+	engine.RegisterWrapper(txupdater.GlobalHandler())
+	engine.RegisterWrapper(producer.GlobalHandler())
 }
 
 // Start starts application

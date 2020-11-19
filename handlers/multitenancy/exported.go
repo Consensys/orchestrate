@@ -50,13 +50,3 @@ func SetGlobalHandler(h engine.HandlerFunc) {
 func GlobalHandler() engine.HandlerFunc {
 	return handler
 }
-
-// SetGlobalHandler sets global Gas Estimator Handler
-func SetGlobalAuthHandler(h engine.HandlerFunc) {
-	authHandler = h
-}
-
-// GlobalHandler returns global Gas Estimator handler
-func GlobalAuthHandler() engine.HandlerFunc {
-	return authHandler
-}

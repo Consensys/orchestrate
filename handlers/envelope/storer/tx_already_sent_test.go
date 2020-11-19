@@ -124,7 +124,7 @@ func TestTxAlreadySent(t *testing.T) {
 
 		txSchedulerClient.EXPECT().GetJob(txctx.Context(), txctx.Envelope.GetJobUUID()).Return(jobResponse, nil)
 		mockChainLedgerReader.EXPECT().
-			TransactionByHash(txctx.Context(), gomock.Any(), jobResponse.Transaction.GetHash()).
+			TransactionByHash(gomock.Any(), gomock.Any(), jobResponse.Transaction.GetHash()).
 			Return(nil, false, nil)
 
 		handler(txctx)
@@ -139,7 +139,7 @@ func TestTxAlreadySent(t *testing.T) {
 
 		txSchedulerClient.EXPECT().GetJob(txctx.Context(), txctx.Envelope.GetJobUUID()).Return(jobResponse, nil)
 		mockChainLedgerReader.EXPECT().
-			TransactionByHash(txctx.Context(), gomock.Any(), jobResponse.Transaction.GetHash()).
+			TransactionByHash(gomock.Any(), gomock.Any(), jobResponse.Transaction.GetHash()).
 			Return(nil, false, fmt.Errorf(""))
 
 		handler(txctx)
@@ -154,7 +154,7 @@ func TestTxAlreadySent(t *testing.T) {
 
 		txSchedulerClient.EXPECT().GetJob(txctx.Context(), txctx.Envelope.GetJobUUID()).Return(jobResponse, nil)
 		mockChainLedgerReader.EXPECT().
-			TransactionByHash(txctx.Context(), gomock.Any(), jobResponse.Transaction.GetHash()).
+			TransactionByHash(gomock.Any(), gomock.Any(), jobResponse.Transaction.GetHash()).
 			Return(&ethtypes.Transaction{}, false, nil)
 
 		handler(txctx)

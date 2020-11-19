@@ -34,22 +34,17 @@ func GlobalEngine() *Engine {
 	return e
 }
 
-// SetConfig set configuration
-func SetConfig(conf *Config) {
-	e.SetConfig(conf)
-}
-
 // Register register a new handler
 func Register(handler HandlerFunc) {
 	e.Register(handler)
 }
 
+// Register register a new handler to execute at the end
+func RegisterWrapper(handler HandlerFunc) {
+	e.RegisterWrapper(handler)
+}
+
 // Run starts consuming messages from an input channel
 func Run(ctx context.Context, input <-chan Msg) {
 	e.Run(ctx, input)
-}
-
-// CleanUp clean engine resources
-func CleanUp() {
-	e.CleanUp()
 }

@@ -16,10 +16,12 @@ func PrepareMsg(txctx *engine.TxContext, msg *sarama.ProducerMessage) error {
 
 	// If an error occurred then we redirect to recovery with a tx response
 	switch {
+	case txctx.HasRetryMsgErr() != nil:
+		return nil
 	case txctx.Envelope.OnlyWarnings():
 		msg.Topic = viper.GetString(broker.TxSignerViperKey)
 		p = txctx.Envelope.TxEnvelopeAsRequest()
-	case !txctx.Envelope.OnlyWarnings() && txctx.Envelope.IsParentJob():
+	case txctx.Envelope.IsParentJob():
 		msg.Topic = viper.GetString(broker.TxRecoverViperKey)
 		p = txctx.Envelope.TxResponse()
 	default:

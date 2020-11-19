@@ -31,7 +31,7 @@ func TestTransactionUpdater(t *testing.T) {
 		txctx := engine.NewTxContext()
 		_ = txctx.Envelope.SetID("test")
 		_ = txctx.AbortWithError(fmt.Errorf("error"))
-		txctx.Set("invalid.nonce", true)
+		txctx.SetInvalidNonceErr(true)
 		txctx.Logger = log.NewEntry(log.New())
 
 		schedulerClient.EXPECT().

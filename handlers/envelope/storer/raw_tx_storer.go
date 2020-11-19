@@ -45,12 +45,13 @@ func RawTxStore(txSchedulerClient client.TransactionSchedulerClient) engine.Hand
 			txUpdateReq.Status = utils.StatusPending
 		}
 
-		_, err := txSchedulerClient.UpdateJob(txctx.Context(), txctx.Envelope.GetJobUUID(), txUpdateReq)
-
-		if err != nil {
-			e := txctx.AbortWithError(err).ExtendComponent(component)
-			txctx.Logger.WithError(e).Errorf("transaction scheduler: failed to update transaction")
-			return
+		if !txctx.IsTxAlreadyPending() {
+			_, err := txSchedulerClient.UpdateJob(txctx.Context(), txctx.Envelope.GetJobUUID(), txUpdateReq)
+			if err != nil {
+				e := txctx.AbortWithError(err).ExtendComponent(component)
+				txctx.Logger.WithError(e).Errorf("transaction scheduler: failed to update transaction")
+				return
+			}
 		}
 
 		// Execute pending handlers (expected to send the transaction)

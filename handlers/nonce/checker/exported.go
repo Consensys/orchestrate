@@ -45,19 +45,9 @@ func Init(ctx context.Context) {
 	})
 }
 
-// SetGlobalChecker sets global nonce checker
-func SetGlobalChecker(h engine.HandlerFunc) {
-	checker = h
-}
-
 // GlobalChecker returns global nonce checker handler
 func GlobalChecker() engine.HandlerFunc {
 	return checker
-}
-
-// SetGlobalRecoveryStatusSetter sets global nonce recovery status setter
-func SetGlobalRecoveryStatusSetter(h engine.HandlerFunc) {
-	recStatusSetter = h
 }
 
 // GlobalRecoveryStatusSetter returns global nonce recovery status setter
