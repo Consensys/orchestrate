@@ -55,5 +55,8 @@ func writeErrorResponse(rw http.ResponseWriter, status int, err error) {
 		return
 	}
 
-	http.Error(rw, string(msg), status)
+	rw.Header().Set("Content-Type", "application/json")
+	rw.Header().Set("X-Content-Type-Options", "nosniff")
+	rw.WriteHeader(status)
+	_, _ = rw.Write(msg)
 }

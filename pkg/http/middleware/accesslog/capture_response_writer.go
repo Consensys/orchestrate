@@ -1,4 +1,4 @@
-//nolint // reason
+// nolint // reason
 package accesslog
 
 import (
@@ -18,6 +18,7 @@ type capturer interface {
 	http.ResponseWriter
 	Size() int64
 	Status() int
+	Err() string
 }
 
 func newCaptureResponseWriter(rw http.ResponseWriter) capturer {
@@ -34,6 +35,7 @@ type captureResponseWriter struct {
 	rw     http.ResponseWriter
 	status int
 	size   int64
+	err    string
 }
 
 type captureResponseWriterWithCloseNotify struct {
@@ -54,6 +56,8 @@ func (crw *captureResponseWriter) Write(b []byte) (int, error) {
 	if crw.status == 0 {
 		crw.status = http.StatusOK
 	}
+
+	crw.err = http.StatusText(crw.status)
 	size, err := crw.rw.Write(b)
 	crw.size += int64(size)
 	return size, err
@@ -83,4 +87,8 @@ func (crw *captureResponseWriter) Status() int {
 
 func (crw *captureResponseWriter) Size() int64 {
 	return crw.size
+}
+
+func (crw *captureResponseWriter) Err() string {
+	return crw.err
 }

@@ -33,7 +33,7 @@ const (
 	expectedSuccessStatusBody        = "{\"uuid\":\"\",\"name\":\"\",\"tenantID\":\"\",\"urls\":null,\"chainID\":\"\",\"createdAt\":null}\n"
 	expectedSuccessStatusSliceBody   = "[]\n"
 	expectedSuccessStatusContentType = "application/json"
-	expectedErrorStatusContentType   = "text/plain; charset=utf-8"
+	expectedErrorStatusContentType   = "application/json"
 	expectedErrorInvalidManagerType  = "{\"message\":\"42400@encoding.json: invalid body, with: field validation for 'Type' failed on the 'isPrivateTxManagerType' tag\"}\n"
 	expectedErrorInvalidManagerURL   = "{\"message\":\"42400@encoding.json: invalid body, with: field validation for 'URL' failed on the 'url' tag field validation for 'Type' failed on the 'isPrivateTxManagerType' tag\"}\n"
 	notFoundErrorFilter              = "notFoundError"

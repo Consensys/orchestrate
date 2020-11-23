@@ -122,6 +122,7 @@ type LogData struct {
 	Request            request
 	OriginResponse     http.Header
 	DownstreamResponse downstreamResponse
+	Message            string
 }
 
 type downstreamResponse struct {

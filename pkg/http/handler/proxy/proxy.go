@@ -11,11 +11,10 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/oxtoacart/bpool"
-
 	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/containous/traefik/v2/pkg/types"
+	"github.com/oxtoacart/bpool"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/config/dynamic"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/httputil"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/middleware/loadbalancer"
@@ -126,11 +125,18 @@ func New(cfg *dynamic.ReverseProxy, transport http.RoundTripper, pool gohttputil
 			outReq.Header["Sec-WebSocket-Key"] = outReq.Header["Sec-Websocket-Key"]
 			delete(outReq.Header, "Sec-Websocket-Key")
 		},
-		Transport:      transport,
-		FlushInterval:  time.Duration(flushInterval),
-		ModifyResponse: respModifier,
-		BufferPool:     pool,
-		ErrorHandler: func(w http.ResponseWriter, request *http.Request, err error) {
+		Transport:     transport,
+		FlushInterval: time.Duration(flushInterval),
+		// ModifyResponse: respModifier,
+		ModifyResponse: func(rw *http.Response) error {
+			rw.Header.Set("X-Backend-Server", rw.Request.URL.String())
+			if respModifier == nil {
+				return nil
+			}
+			return respModifier(rw)
+		},
+		BufferPool: pool,
+		ErrorHandler: func(w http.ResponseWriter, req *http.Request, err error) {
 			statusCode := http.StatusInternalServerError
 
 			switch {
@@ -143,16 +149,18 @@ func New(cfg *dynamic.ReverseProxy, transport http.RoundTripper, pool gohttputil
 					if e.Timeout() {
 						statusCode = http.StatusGatewayTimeout
 					} else {
-						statusCode = http.StatusBadGateway
+						statusCode = http.StatusServiceUnavailable
 					}
 				}
 			}
 
-			log.Debugf("'%d %s' caused by: %v", statusCode, statusText(statusCode), err)
+			log.FromContext(req.Context()).Debugf("'%d %s' caused by: %v", statusCode, statusText(statusCode), err)
+
+			w.Header().Set("X-Backend-Server", req.URL.String())
 			w.WriteHeader(statusCode)
 			_, werr := w.Write([]byte(statusText(statusCode)))
 			if werr != nil {
-				log.Debugf("Error while writing status code", werr)
+				log.FromContext(req.Context()).Debugf("Error while writing status code", werr)
 			}
 		},
 	}, nil

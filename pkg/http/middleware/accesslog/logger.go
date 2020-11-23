@@ -1,4 +1,4 @@
-//nolint // reason
+// nolint // reason
 package accesslog
 
 import (
@@ -143,7 +143,6 @@ func GetLogData(req *http.Request) *LogData {
 
 func (h *Handler) ServeHTTP(rw http.ResponseWriter, req *http.Request, next http.Handler) {
 	now := time.Now().UTC()
-
 	core := CoreLogData{
 		StartUTC:   now,
 		StartLocal: now.Local(),
@@ -202,11 +201,14 @@ func (h *Handler) ServeHTTP(rw http.ResponseWriter, req *http.Request, next http
 		core[ClientUsername] = usernameIfPresent(reqWithDataTable.URL)
 	}
 
+	logDataTable.Message = crw.Err()
+
 	logDataTable.DownstreamResponse = downstreamResponse{
 		headers: crw.Header().Clone(),
 		status:  crw.Status(),
 		size:    crw.Size(),
 	}
+
 	if crr != nil {
 		logDataTable.Request.size = crr.count
 	}
@@ -312,7 +314,13 @@ func (h *Handler) logTheRoundTrip(logDataTable *LogData) {
 
 		h.mu.Lock()
 		defer h.mu.Unlock()
-		h.logger.WithFields(fields).Println()
+
+		logger := h.logger.WithField("type", "accesslog").WithFields(fields)
+		if status >= 300 {
+			logger.Errorln(logDataTable.Message)
+		} else {
+			logger.Println(logDataTable.Message)
+		}
 	}
 }
 
