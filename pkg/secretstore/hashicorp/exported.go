@@ -6,7 +6,7 @@ import (
 
 	healthz "github.com/heptiolabs/healthcheck"
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/multitenancy"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
 )
 
 const component = "secret-store.hashicorp"

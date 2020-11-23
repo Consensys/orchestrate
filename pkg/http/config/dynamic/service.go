@@ -4,7 +4,7 @@ import (
 	"reflect"
 
 	traefikdynamic "github.com/containous/traefik/v2/pkg/config/dynamic"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 )
 
 // +k8s:deepcopy-gen=true

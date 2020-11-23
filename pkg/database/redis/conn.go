@@ -5,8 +5,8 @@ import (
 
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/gomodule/redigo/redis"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tls"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tls"
 )
 
 // Conn is a wrapper around a redis.Conn that handles internal errors

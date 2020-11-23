@@ -16,7 +16,7 @@ import (
 
 	"github.com/dgraph-io/ristretto"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/config/dynamic"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/dynamic"
 	"golang.org/x/time/rate"
 )
 

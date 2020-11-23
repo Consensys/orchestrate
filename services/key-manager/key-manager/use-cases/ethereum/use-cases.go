@@ -7,7 +7,7 @@ import (
 
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 )
 
 //go:generate mockgen -source=use-cases.go -destination=mocks/use-cases.go -package=mocks

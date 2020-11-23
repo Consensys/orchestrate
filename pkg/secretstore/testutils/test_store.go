@@ -3,7 +3,7 @@ package testutils
 import (
 	"context"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/secretstore"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/secretstore"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"

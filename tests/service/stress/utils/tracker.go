@@ -2,10 +2,10 @@ package utils
 
 import (
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/utils/chanregistry"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/utils/tracker"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/tx"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/utils/chanregistry"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/utils/tracker"
 )
 
 func NewEnvelopeTracker(chanReg *chanregistry.ChanRegistry, e *tx.Envelope, testID string) *tracker.Tracker {

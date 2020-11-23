@@ -1,8 +1,8 @@
 package builder
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/key-manager/key-manager/use-cases/ethereum"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/key-manager/store"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/key-manager/use-cases/ethereum"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/store"
 )
 
 type useCases struct {

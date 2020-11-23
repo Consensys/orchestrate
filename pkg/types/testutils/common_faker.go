@@ -1,7 +1,7 @@
 package testutils
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/common"
 )
 
 // FakeAccountInstance returns a new fake account

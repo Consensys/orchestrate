@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/auth"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/config/static"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/auth"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/grpc/config/static"
 	"google.golang.org/grpc"
 )
 

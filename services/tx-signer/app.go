@@ -5,15 +5,15 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
-	pkgsarama "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/broker/sarama"
-	client2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/transaction-scheduler/client"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-signer/tx-signer/builder"
+	pkgsarama "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
+	client2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/client"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-signer/tx-signer/builder"
 
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/key-manager/client"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-signer/service"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/app"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-signer/service"
 )
 
 type txSignerDaemon struct {

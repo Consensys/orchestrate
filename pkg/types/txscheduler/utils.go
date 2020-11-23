@@ -1,6 +1,6 @@
 package txscheduler
 
-import "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+import "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 
 func validatePrivateTxParams(protocol, privacyGroupID string, privateFor []string) error {
 	if protocol == "" {

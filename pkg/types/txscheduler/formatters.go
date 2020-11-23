@@ -3,7 +3,7 @@ package txscheduler
 import (
 	"time"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 )
 
 func FormatAnnotationsToInternalData(annotations Annotations) *entities.InternalData {

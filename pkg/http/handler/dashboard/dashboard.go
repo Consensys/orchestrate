@@ -8,8 +8,8 @@ import (
 	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
 	assetfs "github.com/elazarl/go-bindata-assetfs"
 	"github.com/gorilla/mux"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/config/runtime"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/handler/dashboard/genstatic"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/runtime"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/handler/dashboard/genstatic"
 )
 
 type Builder struct {

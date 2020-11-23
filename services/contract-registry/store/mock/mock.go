@@ -7,8 +7,8 @@ package mock
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
-	common "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/common"
-	models "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store/models"
+	common "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/common"
+	models "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/contract-registry/store/models"
 	reflect "reflect"
 )
 

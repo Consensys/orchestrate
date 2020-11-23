@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	pkgUtils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+	pkgUtils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 )
 
 var TestConfig = &pkgUtils.Config{

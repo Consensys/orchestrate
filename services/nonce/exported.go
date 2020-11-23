@@ -4,8 +4,8 @@ import (
 	"context"
 	"sync"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/redis"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce/memory"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database/redis"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/nonce/memory"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"

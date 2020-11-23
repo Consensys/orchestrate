@@ -8,7 +8,7 @@ import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
 	healthcheck "github.com/heptiolabs/healthcheck"
-	store "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/key-manager/store"
+	store "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/store"
 	reflect "reflect"
 )
 

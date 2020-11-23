@@ -9,10 +9,10 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/config/static"
-	interceptormock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/interceptor/mock"
-	servermock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/server/mock"
-	servicemock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/service/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/grpc/config/static"
+	interceptormock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/grpc/interceptor/mock"
+	servermock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/grpc/server/mock"
+	servicemock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/grpc/service/mock"
 )
 
 func TestBuilder(t *testing.T) {

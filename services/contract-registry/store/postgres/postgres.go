@@ -2,7 +2,7 @@ package postgres
 
 import (
 	"github.com/go-pg/pg/v9"
-	dataagents "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/store/postgres/data-agents"
+	dataagents "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/contract-registry/store/postgres/data-agents"
 )
 
 func Build(db *pg.DB) (

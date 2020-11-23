@@ -1,7 +1,7 @@
 package chainregistry
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/store/models"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/store/models"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
 )

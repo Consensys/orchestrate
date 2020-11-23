@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"reflect"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/config/static"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/interceptor"
-	grpcerror "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/interceptor/error"
-	grpcrecovery "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/interceptor/recovery"
-	grpcreflect "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/interceptor/reflect"
-	grpctags "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/interceptor/tags"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/grpc/config/static"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/grpc/interceptor"
+	grpcerror "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/grpc/interceptor/error"
+	grpcrecovery "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/grpc/interceptor/recovery"
+	grpcreflect "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/grpc/interceptor/reflect"
+	grpctags "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/grpc/interceptor/tags"
 	"google.golang.org/grpc"
 )
 

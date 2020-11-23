@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/tx-listener/dynamic"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/dynamic"
 )
 
 var config1 = &dynamic.Chain{Name: "test", Listener: &dynamic.Listener{Depth: 1, Backoff: time.Second, ExternalTxEnabled: false}}

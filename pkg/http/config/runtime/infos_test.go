@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	testutilsdynamic "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/config/dynamic/testutils"
+	testutilsdynamic "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/dynamic/testutils"
 )
 
 func TestInfos(t *testing.T) {

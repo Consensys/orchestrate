@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/go-pg/pg/v9"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database/postgres"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database/postgres"
 )
 
 const storeServiceName = "chain-registry.store"

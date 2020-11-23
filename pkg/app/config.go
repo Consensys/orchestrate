@@ -4,12 +4,12 @@ import (
 	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
 	traefiktypes "github.com/containous/traefik/v2/pkg/types"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/configwatcher"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc"
-	grpcstatic "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/config/static"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/log"
-	metricsregister "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/registry"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/configwatcher"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/grpc"
+	grpcstatic "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/grpc/config/static"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
+	metricsregister "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/metrics/registry"
 )
 
 type Config struct {

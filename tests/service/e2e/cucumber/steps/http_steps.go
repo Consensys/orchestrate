@@ -13,8 +13,8 @@ import (
 	gherkin "github.com/cucumber/messages-go/v10"
 	merror "github.com/hashicorp/go-multierror"
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/e2e/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/e2e/utils"
 )
 
 func (sc *ScenarioContext) resetResponse(*gherkin.Pickle) {

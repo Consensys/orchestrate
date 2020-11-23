@@ -4,8 +4,8 @@ import (
 	"sync"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/config/dynamic"
-	promcol "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/collector"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/dynamic"
+	promcol "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/metrics/collector"
 )
 
 type DynamicMulti struct {

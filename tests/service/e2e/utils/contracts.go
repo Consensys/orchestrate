@@ -10,7 +10,7 @@ import (
 	gherkin "github.com/cucumber/messages-go/v10"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/abi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/abi"
 )
 
 type Artifact struct {

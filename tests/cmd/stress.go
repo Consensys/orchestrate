@@ -6,8 +6,8 @@ import (
 
 	traefiklog "github.com/containous/traefik/v2/pkg/log"
 	"github.com/spf13/cobra"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/tests/service/stress"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/stress"
 )
 
 func NewRunStressTestCommand() *cobra.Command {

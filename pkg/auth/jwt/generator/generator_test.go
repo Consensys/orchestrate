@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tls/certificate"
-	tlstestutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tls/testutils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tls/certificate"
+	tlstestutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tls/testutils"
 )
 
 func TestGenerateAccessToken(t *testing.T) {

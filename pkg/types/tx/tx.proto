@@ -4,7 +4,7 @@ import "pkg/types/error/error.proto";
 import "pkg/types/ethereum/receipt.proto";
 import "pkg/types/ethereum/transaction.proto";
 
-option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/tx";
+option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/tx";
 
 package tx;
 

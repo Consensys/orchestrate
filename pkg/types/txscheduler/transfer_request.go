@@ -1,6 +1,6 @@
 package txscheduler
 
-import "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+import "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 
 type TransferRequest struct {
 	ChainName string            `json:"chain" validate:"required" example:"myChain"`

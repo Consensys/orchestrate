@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/service"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/grpc/service"
 	"google.golang.org/grpc"
 )
 

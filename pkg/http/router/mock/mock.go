@@ -7,7 +7,7 @@ package mock
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
-	router "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/router"
+	router "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/router"
 	reflect "reflect"
 )
 

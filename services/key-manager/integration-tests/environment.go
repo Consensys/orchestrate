@@ -10,19 +10,19 @@ import (
 	"time"
 
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/secretstore/hashicorp"
-	keymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/key-manager"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/secretstore/hashicorp"
+	keymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/app"
-	httputils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http"
-	integrationtest "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/integration-test"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/app"
+	httputils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http"
+	integrationtest "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/integration-test"
 	"k8s.io/apimachinery/pkg/util/rand"
 
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/spf13/pflag"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/docker"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/docker/config"
-	hashicorpDocker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/docker/container/hashicorp"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/docker"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/docker/config"
+	hashicorpDocker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/docker/container/hashicorp"
 )
 
 const vaultContainerID = "vault-key-manager"

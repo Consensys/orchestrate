@@ -5,7 +5,7 @@ import (
 	"github.com/containous/traefik/v2/pkg/log"
 	traefikprovider "github.com/containous/traefik/v2/pkg/provider"
 	"github.com/containous/traefik/v2/pkg/safe"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/configwatcher/provider/aggregator"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/configwatcher/provider/aggregator"
 )
 
 // NewProviderAggregator returns an aggregate of all the providers configured in the static configuration.

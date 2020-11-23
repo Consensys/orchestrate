@@ -5,7 +5,7 @@ import (
 
 	"github.com/gomodule/redigo/redis"
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 )
 
 // NonceManager manages nonce using an underlying redis cache

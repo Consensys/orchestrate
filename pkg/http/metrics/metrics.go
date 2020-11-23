@@ -3,8 +3,8 @@ package metrics
 import (
 	"github.com/go-kit/kit/metrics/discard"
 	"github.com/prometheus/client_golang/prometheus"
-	promcol "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/collector"
-	pkgmetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/multi"
+	promcol "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/metrics/collector"
+	pkgmetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/metrics/multi"
 )
 
 const (

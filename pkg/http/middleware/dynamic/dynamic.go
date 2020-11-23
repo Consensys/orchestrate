@@ -22,13 +22,13 @@ import (
 	"github.com/containous/traefik/v2/pkg/middlewares/retry"
 	"github.com/containous/traefik/v2/pkg/middlewares/stripprefix"
 	"github.com/containous/traefik/v2/pkg/middlewares/stripprefixregex"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/config/dynamic"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/middleware"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/middleware/cors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/middleware/headers"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/middleware/httptrace"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/middleware/loadbalancer"
-	reflectmid "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/middleware/reflect"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/dynamic"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/middleware"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/middleware/cors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/middleware/headers"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/middleware/httptrace"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/middleware/loadbalancer"
+	reflectmid "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/middleware/reflect"
 )
 
 var errBadConf = errors.New("cannot create middleware: multi-types middleware not supported, consider declaring two different pieces of middleware instead")

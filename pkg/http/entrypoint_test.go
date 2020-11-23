@@ -15,12 +15,12 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/handler/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/router"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/router/static"
-	mock3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/mock"
-	mock2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tcp/metrics/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tls/generate"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/handler/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/router"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/router/static"
+	mock3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/metrics/mock"
+	mock2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tcp/metrics/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tls/generate"
 )
 
 type okHandler struct {

@@ -4,12 +4,12 @@
 
 Download the repository:
 ```bash
-go get -u gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git
+go get -u gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2
 ```
 
 Go to downloaded repository:
 ```bash
-cd ${GOPATH}/src/gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git
+cd ${GOPATH}/src/gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2
 ```
 
 Install vendors locally:

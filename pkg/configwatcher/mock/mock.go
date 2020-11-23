@@ -7,7 +7,7 @@ package mock
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
-	configwatcher "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/configwatcher"
+	configwatcher "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/configwatcher"
 	reflect "reflect"
 )
 

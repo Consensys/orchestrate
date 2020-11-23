@@ -3,7 +3,7 @@ package mocks
 import (
 	"context"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/contract-registry/proto"
 	"google.golang.org/grpc"
 )
 type ContractRegistryFaker struct {

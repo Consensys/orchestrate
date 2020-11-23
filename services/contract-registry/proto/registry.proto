@@ -6,7 +6,7 @@ import "pkg/types/abi/abi.proto";
 import "pkg/types/common/account_instance.proto";
 
 
-option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto";
+option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/contract-registry/proto";
 
 package contractregistry;
 

@@ -7,10 +7,10 @@ package mocks
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
-	database "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/database"
-	entities "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/entities"
-	store "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/identity-manager/store"
-	models "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/identity-manager/store/models"
+	database "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database"
+	entities "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
+	store "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/identity-manager/store"
+	models "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/identity-manager/store/models"
 	reflect "reflect"
 )
 

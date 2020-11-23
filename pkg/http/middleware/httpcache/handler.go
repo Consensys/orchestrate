@@ -12,7 +12,7 @@ import (
 
 	"github.com/dgraph-io/ristretto"
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/config/dynamic"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/dynamic"
 )
 
 type CacheRequest func(req *http.Request) (isCached bool, key string, ttl time.Duration, err error)

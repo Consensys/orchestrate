@@ -11,9 +11,9 @@ import (
 	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
-	mockserver "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/server/mock"
-	mock2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/metrics/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tcp/metrics/mock"
+	mockserver "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/grpc/server/mock"
+	mock2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/metrics/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tcp/metrics/mock"
 	"google.golang.org/grpc"
 )
 

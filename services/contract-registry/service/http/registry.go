@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	grpcgateway "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/handler/grpc-gateway"
-	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/contract-registry/proto"
+	grpcgateway "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/handler/grpc-gateway"
+	svc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/contract-registry/proto"
 )
 
 func NewBuilder(

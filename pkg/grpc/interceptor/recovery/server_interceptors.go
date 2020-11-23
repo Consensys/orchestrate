@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/config/static"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/grpc/config/static"
 	"google.golang.org/grpc"
 )
 

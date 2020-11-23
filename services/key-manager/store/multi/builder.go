@@ -3,13 +3,13 @@ package multi
 import (
 	"context"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/secretstore/hashicorp"
-	hashicorpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/key-manager/store/hashicorp"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/secretstore/hashicorp"
+	hashicorpstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/store/hashicorp"
 
 	log "github.com/sirupsen/logrus"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/key-manager/store"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/store"
 )
 
 func Build(ctx context.Context, cfg *Config) (store.Vault, error) {

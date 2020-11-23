@@ -1,6 +1,6 @@
 package entities
 
-import "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/utils"
+import "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 
 type ETHTransactionParams struct {
 	From            string        `json:"from,omitempty"  example:"0x1abae27a0cbfb02945720425d3b80c7e09728534"`

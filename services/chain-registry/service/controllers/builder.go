@@ -6,9 +6,9 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/http/config/dynamic"
-	chainsctrl "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/service/controllers/chains"
-	faucetctrl "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/service/controllers/faucets"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/dynamic"
+	chainsctrl "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/service/controllers/chains"
+	faucetctrl "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/service/controllers/faucets"
 )
 
 //go:generate swag init --dir . --generalInfo builder.go --output ../../../../public/swagger-specs/services/chain-registry

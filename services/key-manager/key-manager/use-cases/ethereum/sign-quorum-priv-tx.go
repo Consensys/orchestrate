@@ -8,8 +8,8 @@ import (
 	"github.com/consensys/quorum/common/hexutil"
 	quorumtypes "github.com/consensys/quorum/core/types"
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/key-manager/store"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/store"
 )
 
 const signQuorumPrivateTransactionComponent = "use-cases.ethereum.sign-quorum-private-transaction"

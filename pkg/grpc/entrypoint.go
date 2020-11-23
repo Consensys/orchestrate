@@ -5,9 +5,9 @@ import (
 
 	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
 	"github.com/hashicorp/go-multierror"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/grpc/server"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tcp"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/tcp/metrics"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/grpc/server"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tcp"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tcp/metrics"
 	"google.golang.org/grpc"
 )
 

@@ -1,7 +1,7 @@
 package testutils
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/abi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/abi"
 	"k8s.io/apimachinery/pkg/util/rand"
 )
 

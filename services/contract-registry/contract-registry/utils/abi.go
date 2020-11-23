@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 
 	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
-	pkgjson "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/encoding/json"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	pkgjson "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/json"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 )
 
 const component = "contract-registry-utils"

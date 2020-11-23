@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/types/abi";
+option go_package = "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/abi";
 
 package abi;
 

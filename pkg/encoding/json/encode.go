@@ -3,7 +3,7 @@ package json
 import (
 	"encoding/json"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 )
 
 // Marshal returns the JSON encoding of v

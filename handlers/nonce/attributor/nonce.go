@@ -4,12 +4,12 @@ import (
 	"strconv"
 
 	log "github.com/sirupsen/logrus"
-	hnonce "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/nonce"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/handlers/nonce/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/chain-registry/proxy"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/services/nonce"
+	hnonce "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/handlers/nonce"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/handlers/nonce/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/proxy"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/nonce"
 )
 
 // Handler creates and return an handler for nonce
