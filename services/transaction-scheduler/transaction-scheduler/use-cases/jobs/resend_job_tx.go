@@ -45,9 +45,9 @@ func (uc *resendJobTxUseCase) Execute(ctx context.Context, jobUUID string, tenan
 
 	jobModel.InternalData.ParentJobUUID = jobUUID
 	jobEntity := parsers.NewJobEntityFromModels(jobModel)
-	if jobEntity.GetStatus() != utils.StatusPending {
+	if jobEntity.Status != utils.StatusPending {
 		errMessage := "cannot resend job transaction at the current status"
-		logger.WithField("status", jobEntity.GetStatus()).Error(errMessage)
+		logger.WithField("status", jobEntity.Status).Error(errMessage)
 		return errors.InvalidStateError(errMessage)
 	}
 

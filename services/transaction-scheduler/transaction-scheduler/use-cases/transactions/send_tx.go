@@ -83,7 +83,7 @@ func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequ
 	// Step 4: Start first job of the schedule if status is CREATED
 	// Otherwise there was another request with same idempotency key and same reqHash
 	job := txRequest.Schedule.Jobs[0]
-	if job.GetStatus() == utils.StatusCreated {
+	if job.Status == utils.StatusCreated {
 		err = uc.startFaucetJob(ctx, txRequest.Params.From, chainUUID, job.ScheduleUUID, tenantID)
 		if err != nil {
 			logger.WithError(err).Error("could not start faucet job")

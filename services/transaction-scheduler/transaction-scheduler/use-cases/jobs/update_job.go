@@ -50,7 +50,7 @@ func (uc *updateJobUseCase) Execute(ctx context.Context, job *entities.Job, next
 		}
 
 		retrievedJob = parsers.NewJobEntityFromModels(jobModel)
-		status := retrievedJob.GetStatus()
+		status := retrievedJob.Status
 
 		if isFinalStatus(status) {
 			errMessage := "job status is final, cannot be updated"

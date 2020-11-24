@@ -27,7 +27,7 @@ func FormatJobResponse(job *entities.Job) *types.JobResponse {
 		TenantID:      job.TenantID,
 		Annotations:   types.FormatInternalDataToAnnotations(job.InternalData),
 		Type:          job.Type,
-		Status:        job.GetStatus(),
+		Status:        job.Status,
 		ParentJobUUID: job.InternalData.ParentJobUUID,
 		CreatedAt:     job.CreatedAt,
 		UpdatedAt:     job.UpdatedAt,

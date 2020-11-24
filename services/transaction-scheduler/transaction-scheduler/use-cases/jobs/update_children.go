@@ -56,7 +56,7 @@ func (uc *updateChildrenUseCase) Execute(ctx context.Context, jobUUID, parentJob
 	}
 
 	for _, jobModel := range jobsToUpdate {
-		status := parsers.NewJobEntityFromModels(jobModel).GetStatus()
+		status := parsers.NewJobEntityFromModels(jobModel).Status
 		if jobModel.UUID != jobUUID && status == utils.StatusPending {
 			jobLogModel := &models.Log{
 				JobID:   &jobModel.ID,

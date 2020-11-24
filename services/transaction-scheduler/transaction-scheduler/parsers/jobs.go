@@ -4,8 +4,8 @@ import (
 	"math/big"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/tx"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/store/models"
 )
 
@@ -64,8 +64,22 @@ func NewJobEntityFromModels(jobModel *models.Job) *entities.Job {
 		job.Transaction = NewTransactionEntityFromModels(jobModel.Transaction)
 	}
 
-	for _, logModel := range jobModel.Logs {
+	lastLogID := -1
+	for idx, logModel := range jobModel.Logs {
 		job.Logs = append(job.Logs, NewLogEntityFromModels(logModel))
+		// Ignore resending and warning statuses
+		if logModel.Status == utils.StatusResending || logModel.Status == utils.StatusWarning {
+			continue
+		}
+		// Ignore fail statuses if they come after a resending
+		if logModel.Status == utils.StatusFailed && idx > 1 && jobModel.Logs[idx-1].Status == utils.StatusResending {
+			continue
+		}
+
+		if logModel.ID > lastLogID {
+			job.Status = logModel.Status
+			lastLogID = logModel.ID
+		}
 	}
 
 	return job

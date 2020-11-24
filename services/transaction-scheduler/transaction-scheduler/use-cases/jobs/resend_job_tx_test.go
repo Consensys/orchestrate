@@ -42,7 +42,8 @@ func TestResendJobTx_Execute(t *testing.T) {
 		job.Transaction.Sender = "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"
 		job.Schedule = testutils.FakeSchedule("")
 		job.Logs = append(job.Logs, &models.Log{
-			Status: utils.StatusPending,
+			ID:        1,
+			Status:    utils.StatusPending,
 			CreatedAt: time.Now().Add(time.Second),
 		})
 
@@ -84,7 +85,8 @@ func TestResendJobTx_Execute(t *testing.T) {
 		job.Transaction.Sender = "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"
 		job.Schedule = testutils.FakeSchedule("")
 		job.Logs = append(job.Logs, &models.Log{
-			Status: utils.StatusPending,
+			ID:        1,
+			Status:    utils.StatusPending,
 			CreatedAt: time.Now().Add(time.Second),
 		})
 

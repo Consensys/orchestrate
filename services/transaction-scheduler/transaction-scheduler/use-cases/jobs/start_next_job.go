@@ -72,7 +72,7 @@ func (uc *startNextJobUseCase) handleOrionMarkingTx(ctx context.Context, prevJob
 	}
 
 	prevJobEntity := parsers.NewJobEntityFromModels(prevJobModel)
-	if prevJobEntity.GetStatus() != utils.StatusStored {
+	if prevJobEntity.Status != utils.StatusStored {
 		return errors.DataError("expected previous job status as: STORED")
 	}
 
@@ -86,7 +86,7 @@ func (uc *startNextJobUseCase) handleTesseraMarkingTx(ctx context.Context, prevJ
 	}
 
 	prevJobEntity := parsers.NewJobEntityFromModels(prevJobModel)
-	if prevJobEntity.GetStatus() != utils.StatusStored {
+	if prevJobEntity.Status != utils.StatusStored {
 		return errors.DataError("expected previous job status as: STORED")
 	}
 

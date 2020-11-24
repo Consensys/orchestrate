@@ -39,11 +39,12 @@ func TestStartNextJob_Execute(t *testing.T) {
 		jobModel := testutils2.FakeJobModel(0)
 		nextJobModel := testutils2.FakeJobModel(0)
 		txHash := ethcommon.HexToHash("0x123")
-		
+
 		jobModel.NextJobUUID = nextJobModel.UUID
 		jobModel.Transaction.Hash = txHash.String()
 		jobModel.Logs = append(jobModel.Logs, &models.Log{
-			Status: utils.StatusStored,
+			ID:        1,
+			Status:    utils.StatusStored,
 			CreatedAt: time.Now(),
 		})
 		jobModel.Type = utils.OrionEEATransaction
@@ -61,17 +62,18 @@ func TestStartNextJob_Execute(t *testing.T) {
 
 		assert.NoError(t, err)
 	})
-	
+
 	t.Run("should execute use case for tessera marking transaction successfully", func(t *testing.T) {
 		jobModel := testutils2.FakeJobModel(0)
 		nextJobModel := testutils2.FakeJobModel(0)
 		enclaveKey := ethcommon.HexToHash("0x123").String()
-		
+
 		jobModel.NextJobUUID = nextJobModel.UUID
 		jobModel.Transaction.EnclaveKey = enclaveKey
-		jobModel.Transaction.Gas = "0x1" 
+		jobModel.Transaction.Gas = "0x1"
 		jobModel.Logs = append(jobModel.Logs, &models.Log{
-			Status: utils.StatusStored,
+			ID:        1,
+			Status:    utils.StatusStored,
 			CreatedAt: time.Now(),
 		})
 		jobModel.Type = utils.TesseraPrivateTransaction
@@ -82,7 +84,7 @@ func TestStartNextJob_Execute(t *testing.T) {
 		mockJobDA.EXPECT().FindOneByUUID(ctx, nextJobModel.UUID, tenants).
 			Return(nextJobModel, nil)
 		nextJobModel.Transaction.Data = enclaveKey
-		nextJobModel.Transaction.Gas = "0x1" 
+		nextJobModel.Transaction.Gas = "0x1"
 		mockTxDA.EXPECT().Update(ctx, nextJobModel.Transaction).Return(nil)
 
 		mockStartJobUC.EXPECT().Execute(ctx, nextJobModel.UUID, tenants)

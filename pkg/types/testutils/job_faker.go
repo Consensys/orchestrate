@@ -21,6 +21,7 @@ func FakeJob() *entities.Job {
 		Labels:       make(map[string]string),
 		Logs:         []*entities.Log{FakeLog()},
 		CreatedAt:    time.Now(),
+		Status:       utils.StatusCreated,
 		Transaction:  FakeETHTransaction(),
 	}
 }

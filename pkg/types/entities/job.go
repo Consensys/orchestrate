@@ -3,8 +3,6 @@ package entities
 import (
 	"time"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
-
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/ethereum"
 )
 
@@ -15,6 +13,7 @@ type Job struct {
 	ScheduleUUID string
 	TenantID     string
 	Type         string
+	Status       string
 	Labels       map[string]string
 	InternalData *InternalData
 	Transaction  *ETHTransaction
@@ -22,31 +21,4 @@ type Job struct {
 	Logs         []*Log
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
-}
-
-// GetStatus Computes the status of a Job by checking its logs
-func (job *Job) GetStatus() string {
-	return getStatus(job.Logs)
-}
-
-func getStatus(logs []*Log) string {
-	var status string
-	var logCreatedAt *time.Time
-	for idx := range logs {
-		// Ignore resending and warning statuses
-		if logs[idx].Status == utils.StatusResending || logs[idx].Status == utils.StatusWarning {
-			continue
-		}
-		// Ignore fail statuses if they come after a resending
-		if logs[idx].Status == utils.StatusFailed && idx > 1 && logs[idx-1].Status == utils.StatusResending {
-			continue
-		}
-
-		if logCreatedAt == nil || logs[idx].CreatedAt.After(*logCreatedAt) {
-			status = logs[idx].Status
-			logCreatedAt = &logs[idx].CreatedAt
-		}
-	}
-
-	return status
 }

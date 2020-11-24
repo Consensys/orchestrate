@@ -88,7 +88,7 @@ func (uc *createJobUseCase) Execute(ctx context.Context, job *entities.Job, tena
 				return der
 			}
 
-			parentStatus := parsers.NewJobEntityFromModels(parentJobModel).GetStatus()
+			parentStatus := parsers.NewJobEntityFromModels(parentJobModel).Status
 			if parentStatus != utils.StatusPending {
 				errMessage := "cannot create a child job in a finalized schedule"
 				logger.

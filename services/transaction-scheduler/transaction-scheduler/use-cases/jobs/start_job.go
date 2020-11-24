@@ -45,9 +45,9 @@ func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID string, tenants 
 	}
 
 	jobEntity := parsers.NewJobEntityFromModels(jobModel)
-	if !canUpdateStatus(utils.StatusStarted, jobEntity.GetStatus()) {
+	if !canUpdateStatus(utils.StatusStarted, jobEntity.Status) {
 		errMessage := "cannot start job at the current status"
-		logger.WithField("status", jobEntity.GetStatus()).WithField("next_status", utils.StatusStarted).Error(errMessage)
+		logger.WithField("status", jobEntity.Status).WithField("next_status", utils.StatusStarted).Error(errMessage)
 		return errors.InvalidStateError(errMessage)
 	}
 

@@ -44,7 +44,7 @@ func (uc *searchJobsUseCase) Execute(ctx context.Context, filters *entities.JobF
 	for _, jobModel := range jobModels {
 		job := parsers.NewJobEntityFromModels(jobModel)
 		// Job.Status is a computed value, so that, we filter after parsing
-		if filters.Status == "" || job.GetStatus() == filters.Status {
+		if filters.Status == "" || job.Status == filters.Status {
 			resp = append(resp, job)
 		}
 	}
