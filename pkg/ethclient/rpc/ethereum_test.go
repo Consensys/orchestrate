@@ -81,12 +81,11 @@ func TestCallWithRetry(t *testing.T) {
 	// Test 2: not found error, should retry
 	bckoff = &backoffmock.MockBackoff{}
 	ctx = testutils.NewContext(nil, 404, testutils.MakeRespBody([]byte{}, ""))
-	ctx = utils.RetryNotFoundError(ctx, true)
 	err = ec.callWithRetry(ctx, func(context.Context) (*http.Request, error) {
 		return ec.newJSONRpcRequestWithContext(ctx, "test-endpoint", "test_method")
 	}, utils.ProcessResult(&raw), bckoff)
 	assert.Error(t, err, "#2 TestCallWithRetry should  error")
-	assert.True(t, bckoff.HasRetried(), "#2 Should have retried")
+	assert.False(t, bckoff.HasRetried(), "#2 Should have retried")
 	
 	// Test 3: invalid response body, should not retry
 	bckoff = &backoffmock.MockBackoff{}

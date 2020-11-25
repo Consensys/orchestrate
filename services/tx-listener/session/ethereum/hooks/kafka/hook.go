@@ -21,7 +21,6 @@ import (
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient"
-	ethclientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethereum/abi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/common"
 	ierror "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/error"
@@ -217,12 +216,7 @@ func GetAbi(e *ethAbi.Event) string {
 func (hk *Hook) registerDeployedContract(ctx context.Context, c *dynamic.Chain, receipt *types.Receipt, block *ethtypes.Block) error {
 	if receipt.ContractAddress != "" && receipt.ContractAddress != "0x0000000000000000000000000000000000000000" {
 		log.FromContext(ctx).WithField("contract.address", receipt.ContractAddress).Infof("new contract deployed")
-		code, err := hk.ec.CodeAt(
-			ethclientutils.RetryNotFoundError(ctx, true),
-			c.URL,
-			ethcommon.HexToAddress(receipt.ContractAddress),
-			block.Number(),
-		)
+		code, err := hk.ec.CodeAt(ctx, c.URL, ethcommon.HexToAddress(receipt.ContractAddress), block.Number())
 		if err != nil {
 			return err
 		}

@@ -111,6 +111,7 @@ func New(
 			NewProvider(getChainsUC, time.Second, cfg.ProxyCacheTTL),
 		),
 	)
+
 	if err != nil {
 		return nil, err
 	}

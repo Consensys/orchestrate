@@ -31,10 +31,3 @@ func FromTraefikMessage(traefikMsg *traefikdynamic.Message) *Message {
 		configuration: FromTraefikConfig(traefikMsg.Configuration),
 	}
 }
-
-func ToTraefikMessage(msg *Message) *traefikdynamic.Message {
-	return &traefikdynamic.Message{
-		ProviderName:  msg.providerName,
-		Configuration: ToTraefikConfig(msg.configuration),
-	}
-}

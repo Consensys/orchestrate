@@ -17,7 +17,6 @@ import (
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	ethclientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/dynamic"
 	hook "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/session/ethereum/hooks"
@@ -298,7 +297,7 @@ func (s *Session) callHook(ctx context.Context, block *fetchedBlock) error {
 func (s *Session) fetchBlock(ctx context.Context, blockPosition uint64) *Future {
 	return NewFuture(func() (interface{}, error) {
 		blck, err := s.ec.BlockByNumber(
-			ethclientutils.RetryNotFoundError(ctx, true),
+			ctx,
 			s.Chain.URL,
 			big.NewInt(int64(blockPosition)),
 		)
@@ -447,11 +446,7 @@ func (s *Session) fetchReceipt(ctx context.Context, job *entities.Job, txHash et
 
 		logger.Debug("fetching fetch receipt")
 
-		receipt, err := s.ec.TransactionReceipt(
-			ethclientutils.RetryNotFoundError(ctx, true),
-			s.Chain.URL,
-			txHash,
-		)
+		receipt, err := s.ec.TransactionReceipt(ctx, s.Chain.URL, txHash)
 		if err != nil {
 			logger.WithError(err).Errorf("failed to fetch receipt")
 			return nil, err
@@ -476,7 +471,7 @@ func (s *Session) fetchPrivateReceipt(ctx context.Context, job *entities.Job, tx
 		logger.Debug("fetching private receipt")
 
 		receipt, err := s.ec.PrivateTransactionReceipt(
-			ethclientutils.RetryNotFoundError(ctx, true),
+			ctx,
 			s.Chain.URL,
 			txHash,
 		)
@@ -514,11 +509,7 @@ func (s *Session) fetchPrivateReceipt(ctx context.Context, job *entities.Job, tx
 }
 
 func (s *Session) getChainTip(ctx context.Context) (tip uint64, err error) {
-	head, err := s.ec.HeaderByNumber(
-		ethclientutils.RetryNotFoundError(ctx, true),
-		s.Chain.URL,
-		nil,
-	)
+	head, err := s.ec.HeaderByNumber(ctx, s.Chain.URL, nil)
 	if err != nil {
 		log.FromContext(ctx).WithError(err).Errorf("failed to fetch chain head")
 		return 0, err

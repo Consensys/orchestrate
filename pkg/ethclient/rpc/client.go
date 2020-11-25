@@ -75,8 +75,6 @@ func (ec *Client) callWithRetry(ctx context.Context, reqBuilder func(context.Con
 			switch {
 			case e == nil:
 				return nil
-			case errors.IsNotFoundError(e) && utils.ShouldRetryNotFoundError(ctx):
-				return e
 			// Capture NotFoundData RPC Error and replace by InvalidParameterError to prevent 404 response
 			case errors.IsNotFoundError(e):
 				return backoff.Permanent(errors.InvalidParameterError(e.Error()))

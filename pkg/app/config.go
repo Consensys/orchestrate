@@ -53,7 +53,3 @@ func NewConfig(vipr *viper.Viper) *Config {
 		Metrics: metricsregister.NewConfig(vipr),
 	}
 }
-
-func DefaultConfig() *Config {
-	return NewConfig(viper.New())
-}

@@ -22,6 +22,7 @@
 * Retry on worker messages when connection errors occurred
 * Fix missing error communication on edge cases
 * Fix invalid job status computation on simultaneous log entries
+* Remove retries on not exiting chains
 
 ## v2.5.2 (2020-11-09)
 

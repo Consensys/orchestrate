@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
+	"net/http"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -11,6 +12,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cenkalti/backoff/v4"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/crypto/ethereum/signing"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/rlp"
 
@@ -345,6 +347,29 @@ func (sc *ScenarioContext) iRegisterTheFollowingChains(table *gherkin.PickleStep
 
 		// set aliases
 		sc.aliases.Set(res, sc.Pickle.Id, utilsCols.Rows[i+1].Cells[0].Value)
+
+		chainRegURL, _ := sc.aliases.Get(alias.GlobalAka, "chain-registry")
+		req, err := http.NewRequest("GET", fmt.Sprintf("%s/%s", chainRegURL, res.UUID), nil)
+		if err != nil {
+			return err
+		}
+
+		err = backoff.RetryNotify(
+			func() error {
+				_, err2 := sc.httpClient.Do(req)
+				return err2
+			},
+			backoff.WithMaxRetries(backoff.NewConstantBackOff(time.Second), 5),
+			func(err error, duration time.Duration) {
+				log.WithFields(log.Fields{
+					"chain_uuid": res.UUID,
+				}).WithError(err).Debug("scenario: chain proxy is still not ready")
+			},
+		)
+
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

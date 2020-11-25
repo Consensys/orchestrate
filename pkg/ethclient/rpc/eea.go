@@ -77,8 +77,7 @@ func (ec *Client) PrivateTransactionReceipt(ctx context.Context, endpoint string
 	// We do not need to retry for private Receipt as public receipt is available it means the private one
 	// is too as private chain are implemented with instant finality
 	var pr *privateReceipt
-	err = ec.Call(utils.RetryNotFoundError(ctx, false),
-		endpoint, processPrivateReceiptResult(&pr), "priv_getTransactionReceipt", txHash)
+	err = ec.Call(ctx, endpoint, processPrivateReceiptResult(&pr), "priv_getTransactionReceipt", txHash)
 
 	// In case of an error we still want to return the public receipt
 	if err != nil {
