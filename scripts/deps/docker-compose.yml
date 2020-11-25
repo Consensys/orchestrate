@@ -117,7 +117,8 @@ services:
       - IPC_LOCK
     volumes:
       - ./config/hashicorp/config.hcl:/vault/config.hcl:ro
-    entrypoint: vault server -config=/vault
+      - ./config/hashicorp/orchestrate-hashicorp-vault-plugin:/vault/plugins/orchestrate:rw
+    entrypoint: vault server -config=/vault/config.hcl
     ports:
       - 8200:8200
 
@@ -132,6 +133,7 @@ services:
     volumes:
       - vault-token:/vault/token
       - ./config/hashicorp/init.sh:/init.sh
+      - ./config/hashicorp/SHA256SUM:/SHA256SUM
     command: sh /init.sh
 
   jaeger:

@@ -144,7 +144,7 @@ down-orchestrate:## Down Orchestrate
 	@docker-compose down --volumes --timeout 0
 
 deps-persistent:
-	@docker-compose -f scripts/deps/docker-compose.yml up -d $(CMD_PERSISTENT)
+	@docker-compose -f scripts/deps/docker-compose.yml up --build -d $(CMD_PERSISTENT)
 
 deps: deps-persistent
 	@docker-compose -f scripts/deps/docker-compose.yml up -d $(CMD_KAFKA)
