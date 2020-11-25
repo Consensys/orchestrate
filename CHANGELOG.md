@@ -4,10 +4,12 @@
 
 ### 🆕 Features
 * Support for enable/disable metric modules
+* Ability set set an custom keep alive interval for Postgres clients 
 
 ### ⚠ BREAKING CHANGES
 
 * Remove account-generator and account-generated topic
+* JAEGER service is set as disabled by default
 
 ## v2.5.3 (Unreleased)
 
@@ -19,11 +21,13 @@
 * Fix chain registration issue with Kaleido/Infura when multitenancy is enabled
 * Retry on worker messages when connection errors occurred
 * Fix missing error communication on edge cases
+* Fix invalid job status computation on simultaneous log entries
 
 ## v2.5.2 (2020-11-09)
 
 ### 🛠 Bug fixes
 
+* Remove duplicated tx-recover messages on transaction retries failing on sending
 * Allow usage of OS certificate bundle on Redis TLS connections
 * Fix a bug on transaction recovering for invalid nonce 
 

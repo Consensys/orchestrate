@@ -147,7 +147,7 @@ Environment variable: %q`, passwordEnv)
 const (
 	enabledViperKey = "jaeger.enabled"
 	enabledFlag     = "jaeger-enabled"
-	enabledDefault  = true
+	enabledDefault  = false
 	enabledEnv      = "JAEGER_ENABLED"
 )
 

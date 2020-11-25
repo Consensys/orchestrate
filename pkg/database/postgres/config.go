@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/go-pg/pg/v9"
 	"github.com/spf13/pflag"
@@ -31,6 +32,8 @@ func init() {
 	_ = viper.BindEnv(DBTLSCAViperKey, dbTLSCAEnv)
 	viper.SetDefault(DBTLSSSLModeViperKey, dbTLSSSLModeDefault)
 	_ = viper.BindEnv(DBTLSSSLModeViperKey, dbTLSSSLModeEnv)
+	viper.SetDefault(DBKeepAliveKey, dbKeepAliveDefault)
+	_ = viper.BindEnv(DBKeepAliveKey, dbKeepAliveEnv)
 }
 
 // PGFlags register flags for Postgres database
@@ -41,6 +44,7 @@ func PGFlags(f *pflag.FlagSet) {
 	DBHost(f)
 	DBPort(f)
 	DBPoolSize(f)
+	DBKeepAliveInterval(f)
 	DBTLSSSLMode(f)
 	DBTLSCert(f)
 	DBTLSKey(f)
@@ -138,6 +142,21 @@ Environment variable: %q`, dbPoolSizeEnv)
 }
 
 const (
+	dbKeepAliveFlag    = "db-keepalive"
+	DBKeepAliveKey     = "db.keepalive"
+	dbKeepAliveDefault = time.Minute
+	dbKeepAliveEnv     = "DB_KEEPALIVE"
+)
+
+// DBPoolSize register flag for database pool size
+func DBKeepAliveInterval(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Controls the number of seconds after which a TCP keepalive message should be sent 
+Environment variable: %q`, dbKeepAliveEnv)
+	f.Duration(dbKeepAliveFlag, dbKeepAliveDefault, desc)
+	_ = viper.BindPFlag(DBKeepAliveKey, f.Lookup(dbKeepAliveFlag))
+}
+
+const (
 	requireSSLMode    = "require"
 	disableSSLMode    = "disable"
 	verifyCASSLMode   = "verify-ca"
@@ -212,15 +231,17 @@ Environment variable: %q`, dbTLSCAEnv)
 }
 
 type Config struct {
-	Host            string
-	Port            string
-	User            string
-	Password        string
-	Database        string
-	PoolSize        int
-	TLS             *tls.Option
-	ApplicationName string
-	SSLMode         string
+	Host              string
+	Port              string
+	User              string
+	Password          string
+	Database          string
+	PoolSize          int
+	DialTimeout       time.Duration
+	KeepAliveInterval time.Duration
+	TLS               *tls.Option
+	ApplicationName   string
+	SSLMode           string
 }
 
 func (cfg *Config) PGOptions() (*pg.Options, error) {
@@ -238,26 +259,27 @@ func (cfg *Config) PGOptions() (*pg.Options, error) {
 		return nil, err
 	}
 
-	if dialer == nil {
-		return opt, nil
+	if dialer != nil {
+		opt.Dialer = dialer.DialContext
+	} else {
+		opt.Dialer = Dialer(cfg).DialContext
 	}
-
-	opt.Dialer = dialer.DialContext
 
 	return opt, nil
 }
 
-// NewONewConfigNewConfigptions creates new postgres options
 func NewConfig(vipr *viper.Viper) *Config {
 	cfg := &Config{
-		Host:     vipr.GetString(DBHostViperKey),
-		Port:     vipr.GetString(DBPortViperKey),
-		User:     vipr.GetString(DBUserViperKey),
-		Password: vipr.GetString(DBPasswordViperKey),
-		Database: vipr.GetString(DBDatabaseViperKey),
-		PoolSize: vipr.GetInt(DBPoolSizeViperKey),
-		SSLMode:  vipr.GetString(DBTLSSSLModeViperKey),
-		TLS:      &tls.Option{},
+		Host:              vipr.GetString(DBHostViperKey),
+		Port:              vipr.GetString(DBPortViperKey),
+		User:              vipr.GetString(DBUserViperKey),
+		Password:          vipr.GetString(DBPasswordViperKey),
+		Database:          vipr.GetString(DBDatabaseViperKey),
+		PoolSize:          vipr.GetInt(DBPoolSizeViperKey),
+		SSLMode:           vipr.GetString(DBTLSSSLModeViperKey),
+		KeepAliveInterval: vipr.GetDuration(DBKeepAliveKey),
+		DialTimeout:       time.Second * 10, // Using double of default PG value
+		TLS:               &tls.Option{},
 	}
 
 	if vipr.GetString(DBTLSCertViperKey) != "" {

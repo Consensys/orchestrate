@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"net"
-	"time"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tcp"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tls"
@@ -105,7 +104,8 @@ func NewTLSDialer(cfg *Config) (*TLSDialer, error) {
 		Dialer: &tls.Dialer{
 			Dialer: &SSLDialer{
 				Dialer: &net.Dialer{
-					KeepAlive: 5 * time.Minute,
+					Timeout:   cfg.DialTimeout,
+					KeepAlive: cfg.KeepAliveInterval,
 				},
 			},
 			TLSConfig: tlsConfig,

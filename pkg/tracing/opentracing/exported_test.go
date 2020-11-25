@@ -4,6 +4,7 @@ package opentracing
 
 import (
 	"context"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -11,7 +12,10 @@ import (
 )
 
 func TestInit(t *testing.T) {
+	_ = os.Setenv("JAEGER_ENABLED", "true")
 	Init(context.Background())
+	_ = os.Unsetenv("JAEGER_ENABLED")
+	
 	tracer := GetGlobalTracer()
 	assert.NotNil(t, tracer, "Jaeger Tracer should not be nil")
 
