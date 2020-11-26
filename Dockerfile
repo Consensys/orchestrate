@@ -18,7 +18,7 @@ RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o /bin/main -a -tags netgo -
 ############################
 # STEP 2 build a small image
 ############################
-FROM alpine:3.10
+FROM alpine:3.12
 
 # Import from builder.
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/

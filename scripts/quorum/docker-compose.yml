@@ -104,7 +104,7 @@ x-tessera-def:
           esac
 
           echo Config type $${TESSERA_CONFIG_TYPE}
-          
+
           #generating the two config flavors
           cat <<EOF > $${DDIR}/tessera-config-09.json
           {
@@ -183,7 +183,7 @@ x-tessera-def:
       esac
 services:
   quorum1:
-    << : *quorum-def
+    <<: *quorum-def
     hostname: quorum1
     ports:
       - 22000:8545
@@ -195,25 +195,25 @@ services:
     environment:
       - PRIVATE_CONFIG=/qdata/tm/tm.ipc
       - NODE_ID=1
-    networks:   
+    networks:
+      orchestrate:
       quorum-tessera:
         ipv4_address: 172.16.239.11
-      orchestrate:    
   tessera1:
-    << : *tessera-def
+    <<: *tessera-def
     hostname: tessera1
     ports:
       - 9081:9080
     volumes:
       - vol1:/qdata
       - ./config:/examples:ro
-    networks:       
+    networks:
       quorum-tessera:
         ipv4_address: 172.16.239.101
     environment:
       - NODE_ID=1
   quorum2:
-    << : *quorum-def
+    <<: *quorum-def
     hostname: quorum2
     ports:
       - 22001:8545
@@ -226,46 +226,46 @@ services:
       - PRIVATE_CONFIG=/qdata/tm/tm.ipc
       - NODE_ID=2
     networks:
-      orchestrate:       
+      orchestrate:
       quorum-tessera:
         ipv4_address: 172.16.239.12
   tessera2:
-    << : *tessera-def
+    <<: *tessera-def
     hostname: tessera2
     ports:
       - 9082:9080
     volumes:
       - vol2:/qdata
       - ./config:/examples:ro
-    networks:     
+    networks:
       quorum-tessera:
         ipv4_address: 172.16.239.102
     environment:
       - NODE_ID=2
   quorum3:
-    << : *quorum-def
+    <<: *quorum-def
     hostname: quorum3
     ports:
       - 22002:8545
     volumes:
-      - vol3:/qdata    
+      - vol3:/qdata
       - ./config:/examples:ro
     environment:
       - PRIVATE_CONFIG=/qdata/tm/tm.ipc
       - NODE_ID=3
     networks:
-      orchestrate:       
+      orchestrate:
       quorum-tessera:
         ipv4_address: 172.16.239.13
   tessera3:
-    << : *tessera-def
+    <<: *tessera-def
     hostname: tessera3
     ports:
       - 9083:9080
     volumes:
       - vol3:/qdata
       - ./config:/examples:ro
-    networks:      
+    networks:
       quorum-tessera:
         ipv4_address: 172.16.239.103
     environment:

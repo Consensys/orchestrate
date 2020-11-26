@@ -1,10 +1,11 @@
 GOFILES := $(shell find . -name '*.go' -not -path "./vendor/*" | grep -v pkg/http/handler/dashboard/genstatic/gen.go | grep -v pkg/http/handler/swagger/genstatic/gen.go | egrep -v "^\./\.go" | grep -v _test.go)
 PACKAGES ?= $(shell go list ./... | grep -Fv -e e2e -e examples -e genstatic -e mock )
 INTEGRATION_TEST_PACKAGES ?= $(shell go list ./... | grep integration-tests )
-CMD_RUN = tx-crafter tx-signer tx-sender tx-listener contract-registry chain-registry transaction-scheduler identity-manager key-manager
-CMD_PERSISTENT = redis postgres-chain-registry postgres-contract-registry postgres-transaction-scheduler postgres-identity-manager vault-init vault jaeger
-CMD_KAFKA = zookeeper kafka
-CMD_MIGRATE = contract-registry chain-registry transaction-scheduler identity-manager
+ORCH_SERVICES = tx-crafter tx-signer tx-sender tx-listener contract-registry chain-registry transaction-scheduler identity-manager key-manager
+ORCH_MIGRATE = contract-registry chain-registry transaction-scheduler identity-manager
+DEPS_VAULT = vault-init vault
+DEPS_POSTGRES_REDIS = postgres-chain-registry postgres-contract-registry postgres-transaction-scheduler postgres-identity-manager redis
+DEPS_KAFKA = jaeger zookeeper kafka
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
@@ -92,20 +93,20 @@ help: ## Display this help screen
 gen-help: gobuild ## Generate Command Help file
 	@mkdir -p build/cmd
 	@./build/bin/orchestrate help tx-crafter | grep -A 9999 "Global Flags:" | head -n -2 > build/cmd/global.txt
-	@for cmd in $(CMD_RUN); do \
+	@for cmd in $(ORCH_SERVICES); do \
 		./build/bin/orchestrate help $$cmd run | grep -B 9999 "Global Flags:" | tail -n +3 | head -n -2 > build/cmd/$$cmd-run.txt; \
 	done
-	@for cmd in $(CMD_MIGRATE); do \
+	@for cmd in $(ORCH_MIGRATE); do \
 		./build/bin/orchestrate help $$cmd migrate | grep -B 9999 "Global Flags:" | tail -n +3 | head -n -2 > build/cmd/$$cmd-migrate.txt; \
 	done
 
 gen-help-docker: docker-build ## Generate Command Help file using docker
 	@mkdir -p build/cmd
 	@docker run orchestrate help tx-crafter | grep -A 9999 "Global Flags:" | head -n -3 > build/cmd/global.txt
-	@for cmd in $(CMD_RUN); do \
+	@for cmd in $(ORCH_SERVICES); do \
 		docker run orchestrate help $$cmd run | grep -B 9999 "Global Flags:" | tail -n +3 | head -n -3 > build/cmd/$$cmd-run.txt; \
 	done
-	@for cmd in $(CMD_MIGRATE); do \
+	@for cmd in $(ORCH_MIGRATE); do \
 		docker run orchestrate help $$cmd migrate | grep -B 9999 "Global Flags:" | tail -n +3 | head -n -3 > build/cmd/$$cmd-migrate.txt; \
 	done
 
@@ -132,22 +133,29 @@ gobuild-e2e: ## Build Orchestrate e2e Docker image
 	@GOOS=linux GOARCH=amd64 go build -i -o ./build/bin/test ./tests/cmd
 
 orchestrate: gobuild ## Start Orchestrate
-	@docker-compose up -d $(CMD_RUN)
+	@docker-compose up -d $(ORCH_SERVICES)
 
 ci-orchestrate:
-	@docker-compose up -d $(CMD_RUN)
+	@docker-compose up -d $(ORCH_SERVICES)
 
 stop-orchestrate: ## Stop Orchestrate
-	@docker-compose stop $(CMD_RUN)
+	@docker-compose stop $(ORCH_SERVICES)
 
 down-orchestrate:## Down Orchestrate
 	@docker-compose down --volumes --timeout 0
 
-deps-persistent:
-	@docker-compose -f scripts/deps/docker-compose.yml up --build -d $(CMD_PERSISTENT)
+deps-postgres-redis:
+	@docker-compose -f scripts/deps/docker-compose.yml up --build -d $(DEPS_POSTGRES_REDIS)
 
-deps: deps-persistent
-	@docker-compose -f scripts/deps/docker-compose.yml up -d $(CMD_KAFKA)
+deps-vault:
+	@docker-compose -f scripts/deps/docker-compose.yml up --build -d $(DEPS_VAULT)
+
+deps-kafka:
+	@docker-compose -f scripts/deps/docker-compose.yml up --build -d $(DEPS_KAFKA)
+
+deps-persistent: deps-vault deps-postgres-redis
+
+deps: deps-persistent deps-kafka
 
 down-deps:
 	@docker-compose -f scripts/deps/docker-compose.yml down --volumes --timeout 0
@@ -185,13 +193,13 @@ postgres:
 down-postgres:
 	@docker-compose -f scripts/deps/docker-compose.yml rm --force -s -v postgres-unit
 
-up: deps geth besu quorum bootstrap-deps orchestrate ## Start Orchestrate and deps
+up: deps-persistent quorum geth besu deps-kafka bootstrap-deps orchestrate ## Start Orchestrate and deps
 
 down: down-orchestrate down-quorum down-geth down-besu down-deps  ## Down Orchestrate and deps
 
-up-ci: deps geth besu quorum bootstrap-deps ci-orchestrate ## Start Orchestrate and deps
+up-ci: deps-persistent quorum geth besu deps-kafka bootstrap-deps ci-orchestrate ## Start Orchestrate and deps
 
-up-azure: deps-persistent geth besu quorum bootstrap orchestrate ## Start Blockchain and Orchestrate to be connect to Azure Event Hub
+up-azure: deps-persistent quorum geth besu bootstrap orchestrate ## Start Blockchain and Orchestrate to be connect to Azure Event Hub
 
 hashicorp-accounts:
 	@bash scripts/deps/config/hashicorp/vault.sh kv list secret/default
@@ -217,7 +225,7 @@ down-efk:
 ifeq (restart,$(firstword $(MAKECMDGOALS)))
   CMD_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
   ifeq ($(CMD_ARGS),)
-  	CMD_ARGS := $(CMD_RUN)
+  	CMD_ARGS := $(ORCH_SERVICES)
   endif
   $(eval $(CMD_ARGS):;@:)
 endif

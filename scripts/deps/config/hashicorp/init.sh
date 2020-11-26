@@ -8,11 +8,10 @@ curl --request POST --data '{"secret_shares": 1, "secret_threshold": 1}' ${VAULT
 # Retrieve root token and unseal key
 VAULT_TOKEN=$(cat init.json | jq .root_token | tr -d '"')
 UNSEAL_KEY=$(cat init.json | jq .keys | jq .[0])
-SHA256SUM=$(cat SHA256SUM)
+SHA256SUM=$(sha256sum -b /vault/plugins/orchestrate | cut -d' ' -f1)
 rm init.json
 
-echo "Vault token ${VAULT_TOKEN}"
-echo $VAULT_TOKEN >/vault/token/.root
+echo $VAULT_TOKEN > /vault/token/.root
 echo "ROOT_TOKEN: $VAULT_TOKEN"
 echo "SHA256SUM: ${SHA256SUM}"
 

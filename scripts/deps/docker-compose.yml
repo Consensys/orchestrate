@@ -50,18 +50,18 @@ services:
     volumes:
       - ./config/redis/redis.conf:/usr/local/etc/redis/redis.conf
 
-#  redis:
-#    <<: *container-common
-#    build: ./redis
-#    user: root
-#    ports:
-#      - 6379:6379
-#      - 6378:6378
-#    volumes:
-#      - ./config/redis/stunnel.conf:/etc/stunnel/stunnel.conf
-#      - ./config/redis/redis-auth.conf:/etc/redis/redis.conf
-#      - ./redis/init.sh:/init.sh
-#    command: sh /init.sh
+  #  redis:
+  #    <<: *container-common
+  #    build: ./redis
+  #    user: root
+  #    ports:
+  #      - 6379:6379
+  #      - 6378:6378
+  #    volumes:
+  #      - ./config/redis/stunnel.conf:/etc/stunnel/stunnel.conf
+  #      - ./config/redis/redis-auth.conf:/etc/redis/redis.conf
+  #      - ./redis/init.sh:/init.sh
+  #    command: sh /init.sh
 
   postgres-unit:
     <<: *container-common
@@ -117,7 +117,7 @@ services:
       - IPC_LOCK
     volumes:
       - ./config/hashicorp/config.hcl:/vault/config.hcl:ro
-      - ./config/hashicorp/orchestrate-hashicorp-vault-plugin:/vault/plugins/orchestrate:rw
+      - ./config/hashicorp/orchestrate-hashicorp-vault-plugin:/vault/plugins/orchestrate
     entrypoint: vault server -config=/vault/config.hcl
     ports:
       - 8200:8200
@@ -133,7 +133,7 @@ services:
     volumes:
       - vault-token:/vault/token
       - ./config/hashicorp/init.sh:/init.sh
-      - ./config/hashicorp/SHA256SUM:/SHA256SUM
+      - ./config/hashicorp/orchestrate-hashicorp-vault-plugin:/vault/plugins/orchestrate
     command: sh /init.sh
 
   jaeger:
