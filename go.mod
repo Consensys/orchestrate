@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	github.com/ConsenSys/golang-utils v0.0.0-20190722185538-95555d181804 // indirect
-	github.com/Shopify/sarama v1.26.1
+	github.com/Shopify/sarama v1.26.4
 	github.com/alicebob/gopher-json v0.0.0-20180125190556-5a6b3ba71ee6 // indirect
 	github.com/alicebob/miniredis v2.5.0+incompatible
 	github.com/asaskevich/govalidator v0.0.0-20180720115003-f9ffefc3facf

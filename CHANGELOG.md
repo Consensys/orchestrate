@@ -15,7 +15,7 @@
 * Remove account-generator and account-generated topic
 * JAEGER service is set as disabled by default
 
-## v2.5.3 (Unreleased)
+## v2.5.3 (2020-11-26)
 
 ### 🆕 Features
 * Append `X-Backend-Server` header to proxy responses  
