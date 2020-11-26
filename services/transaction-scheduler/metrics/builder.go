@@ -5,17 +5,24 @@ import (
 )
 
 type metrics struct {
-	createdJobsCounter kitmetrics.Counter
+	jobsLatencyHistogram  kitmetrics.Histogram
+	minedLatencyHistogram kitmetrics.Histogram
 }
 
 func buildMetrics(
-	createdJobsCounter kitmetrics.Counter,
+	jobsLatencyHistogram,
+	minedLatencyHistogram kitmetrics.Histogram,
 ) *metrics {
 	return &metrics{
-		createdJobsCounter: createdJobsCounter,
+		jobsLatencyHistogram:  jobsLatencyHistogram,
+		minedLatencyHistogram: minedLatencyHistogram,
 	}
 }
 
-func (r *metrics) CreatedJobsCounter() kitmetrics.Counter {
-	return r.createdJobsCounter
+func (r *metrics) JobsLatencyHistogram() kitmetrics.Histogram {
+	return r.jobsLatencyHistogram
+}
+
+func (r *metrics) MinedLatencyHistogram() kitmetrics.Histogram {
+	return r.minedLatencyHistogram
 }

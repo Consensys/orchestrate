@@ -7,7 +7,9 @@ import (
 	"testing"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	mock2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/metrics/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/metrics/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/store/models"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/transaction-scheduler/parsers"
 	mocks2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/transaction-scheduler/use-cases/mocks"
@@ -31,6 +33,17 @@ func TestUpdateJob_Execute(t *testing.T) {
 	mockLogDA := mocks.NewMockLogAgent(ctrl)
 	mockUpdateChilrenUC := mocks2.NewMockUpdateChildrenUseCase(ctrl)
 	mockStartNextJobUC := mocks2.NewMockStartNextJobUseCase(ctrl)
+	mockMetrics := mock.NewMockTransactionSchedulerMetrics(ctrl)
+
+	jobsLatencyHistogram := mock2.NewMockHistogram(ctrl)
+	jobsLatencyHistogram.EXPECT().With(gomock.Any()).AnyTimes().Return(jobsLatencyHistogram)
+	jobsLatencyHistogram.EXPECT().Observe(gomock.Any()).AnyTimes()
+	mockMetrics.EXPECT().JobsLatencyHistogram().AnyTimes().Return(jobsLatencyHistogram)
+
+	minedLatencyHistogram := mock2.NewMockHistogram(ctrl)
+	minedLatencyHistogram.EXPECT().With(gomock.Any()).AnyTimes().Return(minedLatencyHistogram)
+	minedLatencyHistogram.EXPECT().Observe(gomock.Any()).AnyTimes()
+	mockMetrics.EXPECT().MinedLatencyHistogram().AnyTimes().Return(minedLatencyHistogram)
 
 	mockDB.EXPECT().Job().Return(mockJobDA).AnyTimes()
 	mockDB.EXPECT().Begin().Return(mockDBTX, nil).AnyTimes()
@@ -42,7 +55,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 	mockDBTX.EXPECT().Close().Return(nil).AnyTimes()
 	mockUpdateChilrenUC.EXPECT().WithDBTransaction(mockDBTX).Return(mockUpdateChilrenUC).AnyTimes()
 
-	usecase := NewUpdateJobUseCase(mockDB, mockUpdateChilrenUC, mockStartNextJobUC)
+	usecase := NewUpdateJobUseCase(mockDB, mockUpdateChilrenUC, mockStartNextJobUC, mockMetrics)
 
 	tenantID := "tenantID"
 	nextStatus := utils.StatusStarted

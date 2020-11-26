@@ -51,7 +51,7 @@ func NewTCPMetrics(cfg *Config) TPCMetrics {
 		prometheus.HistogramOpts{
 			Namespace: Namespace,
 			Name:      OpenConnsDurationSeconds,
-			Help:      "Histogram of connections duration (seconds)",
+			Help:      "Histogram of connections duration (second)",
 			Buckets:   cfg.Buckets,
 		},
 		[]string{"entrypoint"},

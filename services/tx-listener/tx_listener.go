@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/client"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/metrics"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/session"
 
 	provider "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/providers"
@@ -22,9 +23,10 @@ func NewTxListener(
 	offsets offset.Manager,
 	ec ethereum.EthClient,
 	txSchedulerClient client.TransactionSchedulerClient,
+	m metrics.ListenerMetrics,
 ) *TxListener {
 	manager := session.NewManager(
-		ethereum.NewSessionBuilder(hk, offsets, ec, txSchedulerClient),
+		ethereum.NewSessionBuilder(hk, offsets, ec, txSchedulerClient, m),
 		prvdr,
 	)
 

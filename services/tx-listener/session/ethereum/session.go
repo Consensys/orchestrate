@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/metrics"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/session"
 
@@ -32,6 +33,8 @@ type Session struct {
 	hook              hook.Hook
 	offsets           offset.Manager
 	bckOff            backoff.BackOff
+	metrics           metrics.ListenerMetrics
+	metricsLabels     []string
 	// Listening session
 	trigger                        chan struct{}
 	blockPosition                  uint64
@@ -48,6 +51,8 @@ func NewSession(
 	txSchedulerClient client.TransactionSchedulerClient,
 	callHook hook.Hook,
 	offsets offset.Manager,
+	m metrics.ListenerMetrics,
+
 ) *Session {
 	return &Session{
 		Chain:             chain,
@@ -56,6 +61,10 @@ func NewSession(
 		hook:              callHook,
 		offsets:           offsets,
 		bckOff:            backoff.NewConstantBackOff(2 * time.Second),
+		metrics:           m,
+		metricsLabels: []string{
+			"chain_uuid", chain.UUID,
+		},
 	}
 }
 
@@ -64,6 +73,7 @@ type SessionBuilder struct {
 	offsets           offset.Manager
 	ec                EthClient
 	txSchedulerClient client.TransactionSchedulerClient
+	metrics           metrics.ListenerMetrics
 }
 
 func NewSessionBuilder(
@@ -71,17 +81,19 @@ func NewSessionBuilder(
 	offsets offset.Manager,
 	ec EthClient,
 	txSchedulerClient client.TransactionSchedulerClient,
+	m metrics.ListenerMetrics,
 ) *SessionBuilder {
 	return &SessionBuilder{
 		hook:              hk,
 		offsets:           offsets,
 		ec:                ec,
 		txSchedulerClient: txSchedulerClient,
+		metrics:           m,
 	}
 }
 
 func (b *SessionBuilder) NewSession(chain *dynamic.Chain) (session.Session, error) {
-	return NewSession(chain, b.ec, b.txSchedulerClient, b.hook, b.offsets), nil
+	return NewSession(chain, b.ec, b.txSchedulerClient, b.hook, b.offsets, b.metrics), nil
 }
 
 type fetchedBlock struct {
@@ -200,6 +212,8 @@ func (s *Session) initPosition(ctx context.Context) error {
 		return err
 	}
 
+	s.metrics.BlockCounter().With(s.metricsLabels...).Add(float64(blockPosition))
+
 	// if blockPosition and startingBlock are different then we have already started listening to that chain
 	// and we start at next block since the current one is already processed
 	if blockPosition != s.Chain.Listener.StartingBlock {
@@ -279,6 +293,8 @@ func (s *Session) callHooks(ctx context.Context) {
 
 		if err != nil {
 			s.errors <- err
+		} else {
+			s.metrics.BlockCounter().With(s.metricsLabels...).Add(1)
 		}
 	}
 

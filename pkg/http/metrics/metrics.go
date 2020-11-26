@@ -56,7 +56,7 @@ func NewHTTPMetrics(cfg *Config) HTTPMetrics {
 		&prometheus.HistogramOpts{
 			Namespace: Namespace,
 			Name:      RequestsLatencySeconds,
-			Help:      "Histogram of service's response latency (seconds)",
+			Help:      "Histogram of service's response latency (second)",
 			Buckets:   cfg.Buckets,
 		},
 		[]string{"tenant_id", "entrypoint", "protocol", "service", "method", "code"},

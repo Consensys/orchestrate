@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/metrics"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/transaction-scheduler/use-cases"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
@@ -28,15 +27,13 @@ const createJobComponent = "use-cases.create-job"
 type createJobUseCase struct {
 	validator validators.TransactionValidator
 	db        store.DB
-	metrics   metrics.TransactionSchedulerMetrics
 }
 
 // NewCreateJobUseCase creates a new CreateJobUseCase
-func NewCreateJobUseCase(db store.DB, validator validators.TransactionValidator, m metrics.TransactionSchedulerMetrics) usecases.CreateJobUseCase {
+func NewCreateJobUseCase(db store.DB, validator validators.TransactionValidator) usecases.CreateJobUseCase {
 	return &createJobUseCase{
 		validator: validator,
 		db:        db,
-		metrics:   m,
 	}
 }
 
@@ -118,10 +115,7 @@ func (uc *createJobUseCase) Execute(ctx context.Context, job *entities.Job, tena
 		return nil, errors.FromError(err).ExtendComponent(createJobComponent)
 	}
 
-	uc.metrics.CreatedJobsCounter().With([]string{
-		"chain_uuid", job.ChainUUID,
-		"tenant_id", job.TenantID,
-	}...).Add(1)
 	log.WithContext(ctx).WithField("job_uuid", jobModel.UUID).Info("job created successfully")
+
 	return parsers.NewJobEntityFromModels(jobModel), nil
 }

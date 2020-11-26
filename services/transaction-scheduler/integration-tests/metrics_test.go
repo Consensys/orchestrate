@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http"
 	httpmetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/metrics"
+	metrics1 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/metrics"
 	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/metrics/testutils"
 	tpcmetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tcp/metrics"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/identitymanager"
@@ -51,18 +52,18 @@ func (s *txSchedulerMetricsTestSuite) TestTransactionMetrics_Application() {
 	s.T().Run("should increase created job metrics", func(t *testing.T) {
 		mfsb, err := s.client.Prometheus(ctx)
 		assert.NoError(t, err)
-		expectedV, err := testutils2.FamilyValue(mfsb, metrics.Namespace, metrics.CreatedJobName, nil)
+		expectedV, err := testutils2.FamilyValue(mfsb, fmt.Sprintf("%s_%s", metrics1.Namespace, metrics.Subsystem), metrics.JobLatencySeconds, nil)
 		if err != nil {
-			expectedV = []float64{0.0}
+			expectedV = []uint64{0}
 		}
 
-		incrFloatArr(expectedV.([]float64))
+		incrUintArr(expectedV.([]uint64))
 
 		_, _ = s.client.SendTransferTransaction(ctx, txRequest)
 
 		mfsa, err := s.client.Prometheus(ctx)
 		assert.NoError(t, err)
-		testutils2.AssertFamilyValue(t, mfsa, metrics.Namespace, metrics.CreatedJobName, expectedV, "", nil)
+		testutils2.AssertFamilyValue(t, mfsa, fmt.Sprintf("%s_%s", metrics1.Namespace, metrics.Subsystem), metrics.JobLatencySeconds, expectedV, "", nil)
 	})
 }
 
@@ -130,6 +131,12 @@ func (s *txSchedulerMetricsTestSuite) TestTransactionMetrics_HTTP() {
 }
 
 func incrFloatArr(arr []float64) {
+	for i := range arr {
+		arr[i]++
+	}
+}
+
+func incrUintArr(arr []uint64) {
 	for i := range arr {
 		arr[i]++
 	}

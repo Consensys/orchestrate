@@ -7,6 +7,10 @@ import (
 
 //go:generate mockgen -source=metrics.go -destination=mock/mock.go -package=mock
 
+const (
+	Namespace = "orchestrate"
+)
+
 type Prometheus interface {
 	Describe(chan<- *prometheus.Desc)
 	Collect(chan<- prometheus.Metric)

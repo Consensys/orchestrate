@@ -22,8 +22,10 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+	mock6 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/metrics/mock"
 	mock4 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/client/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/dynamic"
+	mock5 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/metrics/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/session/ethereum/hooks/mock"
 	mock2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/session/ethereum/offset/mock"
 )
@@ -45,6 +47,12 @@ func TestSession_Run(t *testing.T) {
 	mockOffsetManager := mock2.NewMockManager(ctrl)
 	mockEthClient := mock3.NewMockEthClient(ctrl)
 	mockTxScheduler := mock4.NewMockTransactionSchedulerClient(ctrl)
+	mockMetrics := mock5.NewMockListenerMetrics(ctrl)
+
+	blockCounter := mock6.NewMockCounter(ctrl)
+	blockCounter.EXPECT().With(gomock.Any()).AnyTimes().Return(blockCounter)
+	blockCounter.EXPECT().Add(gomock.Any()).AnyTimes()
+	mockMetrics.EXPECT().BlockCounter().AnyTimes().Return(blockCounter)
 
 	t.Run("should process block successfully with internal txs", func(t *testing.T) {
 		cancellableCtx, cancel := context.WithCancel(ctx)
@@ -52,7 +60,7 @@ func TestSession_Run(t *testing.T) {
 		chain := newFakeChain()
 		block := newFakeBlock(newBlockPosition, toAddress)
 		jobResponse.Transaction.Hash = txHash
-		session := NewSession(chain, mockEthClient, mockTxScheduler, mockHook, mockOffsetManager)
+		session := NewSession(chain, mockEthClient, mockTxScheduler, mockHook, mockOffsetManager, mockMetrics)
 		bckoff := &backoffmock.MockIntervalBackoff{}
 		session.bckOff = bckoff
 
@@ -115,7 +123,7 @@ func TestSession_Run(t *testing.T) {
 
 		block := types.NewBlock(&types.Header{Number: blockPosition}, txs, []*types.Header{}, []*types.Receipt{})
 		chain := newFakeChain()
-		session := NewSession(chain, mockEthClient, mockTxScheduler, mockHook, mockOffsetManager)
+		session := NewSession(chain, mockEthClient, mockTxScheduler, mockHook, mockOffsetManager, mockMetrics)
 		backoff := &backoffmock.MockIntervalBackoff{}
 		session.bckOff = backoff
 
@@ -175,7 +183,7 @@ func TestSession_Run(t *testing.T) {
 		chain := newFakeChain()
 		block := newFakeBlock(newBlockPosition, eeaPrivPrecompiledContractAddr)
 		jobResponse.Transaction.Hash = txHashPrivate
-		session := NewSession(chain, mockEthClient, mockTxScheduler, mockHook, mockOffsetManager)
+		session := NewSession(chain, mockEthClient, mockTxScheduler, mockHook, mockOffsetManager, mockMetrics)
 		bckoff := &backoffmock.MockIntervalBackoff{}
 		session.bckOff = bckoff
 
@@ -221,7 +229,7 @@ func TestSession_Run(t *testing.T) {
 		block := newFakeBlock(newBlockPosition, toAddress)
 		chain := newFakeChain()
 		chain.Listener.ExternalTxEnabled = true
-		session := NewSession(chain, mockEthClient, mockTxScheduler, mockHook, mockOffsetManager)
+		session := NewSession(chain, mockEthClient, mockTxScheduler, mockHook, mockOffsetManager, mockMetrics)
 		bckoff := &backoffmock.MockIntervalBackoff{}
 		session.bckOff = bckoff
 
@@ -267,7 +275,7 @@ func TestSession_Run(t *testing.T) {
 		block := newFakeBlock(newBlockPosition, eeaPrivPrecompiledContractAddr)
 		chain := newFakeChain()
 		chain.Listener.ExternalTxEnabled = true
-		session := NewSession(chain, mockEthClient, mockTxScheduler, mockHook, mockOffsetManager)
+		session := NewSession(chain, mockEthClient, mockTxScheduler, mockHook, mockOffsetManager, mockMetrics)
 		bckoff := &backoffmock.MockIntervalBackoff{}
 		session.bckOff = bckoff
 
@@ -311,7 +319,7 @@ func TestSession_Run(t *testing.T) {
 	t.Run("should fail and retry if GetLastBlockNumber fails", func(t *testing.T) {
 		cancellableCtx, cancel := context.WithCancel(ctx)
 		chain := newFakeChain()
-		session := NewSession(chain, mockEthClient, mockTxScheduler, mockHook, mockOffsetManager)
+		session := NewSession(chain, mockEthClient, mockTxScheduler, mockHook, mockOffsetManager, mockMetrics)
 		bckoff := &backoffmock.MockIntervalBackoff{}
 		session.bckOff = bckoff
 
@@ -339,7 +347,7 @@ func TestSession_Run(t *testing.T) {
 	t.Run("should fail and retry if HeaderByNumber fails", func(t *testing.T) {
 		cancellableCtx, cancel := context.WithCancel(ctx)
 		chain := newFakeChain()
-		session := NewSession(chain, mockEthClient, mockTxScheduler, mockHook, mockOffsetManager)
+		session := NewSession(chain, mockEthClient, mockTxScheduler, mockHook, mockOffsetManager, mockMetrics)
 		bckoff := &backoffmock.MockIntervalBackoff{}
 		session.bckOff = bckoff
 
@@ -369,7 +377,7 @@ func TestSession_Run(t *testing.T) {
 	t.Run("should not fail if BlockByNumber fails", func(t *testing.T) {
 		cancellableCtx, cancel := context.WithCancel(ctx)
 		chain := newFakeChain()
-		session := NewSession(chain, mockEthClient, mockTxScheduler, mockHook, mockOffsetManager)
+		session := NewSession(chain, mockEthClient, mockTxScheduler, mockHook, mockOffsetManager, mockMetrics)
 		bckoff := &backoffmock.MockIntervalBackoff{}
 		session.bckOff = bckoff
 
@@ -402,7 +410,7 @@ func TestSession_Run(t *testing.T) {
 		cancellableCtx, cancel := context.WithCancel(ctx)
 		chain := newFakeChain()
 		block := newFakeBlock(newBlockPosition, eeaPrivPrecompiledContractAddr)
-		session := NewSession(chain, mockEthClient, mockTxScheduler, mockHook, mockOffsetManager)
+		session := NewSession(chain, mockEthClient, mockTxScheduler, mockHook, mockOffsetManager, mockMetrics)
 		bckoff := &backoffmock.MockIntervalBackoff{}
 		session.bckOff = bckoff
 
@@ -443,7 +451,7 @@ func TestSession_Run(t *testing.T) {
 		chain := newFakeChain()
 		chain.Listener.ExternalTxEnabled = true
 		block := newFakeBlock(newBlockPosition, eeaPrivPrecompiledContractAddr)
-		session := NewSession(chain, mockEthClient, mockTxScheduler, mockHook, mockOffsetManager)
+		session := NewSession(chain, mockEthClient, mockTxScheduler, mockHook, mockOffsetManager, mockMetrics)
 		bckoff := &backoffmock.MockIntervalBackoff{}
 		session.bckOff = bckoff
 
@@ -487,7 +495,7 @@ func TestSession_Run(t *testing.T) {
 		chain := newFakeChain()
 		chain.Listener.ExternalTxEnabled = true
 		block := newFakeBlock(newBlockPosition, toAddress)
-		session := NewSession(chain, mockEthClient, mockTxScheduler, mockHook, mockOffsetManager)
+		session := NewSession(chain, mockEthClient, mockTxScheduler, mockHook, mockOffsetManager, mockMetrics)
 		bckoff := &backoffmock.MockIntervalBackoff{}
 		session.bckOff = bckoff
 

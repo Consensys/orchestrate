@@ -1,6 +1,16 @@
 scrape_configs:
-  - job_name: 'nginx-proxy'
+  - job_name: 'orchestrate'
     scrape_interval: 1s
-    metrics_path: '/prometheus'
+    metrics_path: '/metrics'
     static_configs:
-      - targets: ['nginx-prometheus-exporter:9113']
+      - targets: [
+          'tx-crafter:8082',
+          'tx-signer:8082',
+          'tx-sender:8082',
+          'tx-listener:8082',
+          'contract-registry:8082',
+          'chain-registry:8082',
+          'transaction-scheduler:8082',
+          'identity-manager:8082',
+          'key-manager:8082',
+      ]

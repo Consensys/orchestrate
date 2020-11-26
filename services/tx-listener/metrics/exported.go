@@ -11,8 +11,7 @@ import (
 
 var ModuleName = fmt.Sprintf("%s_%s", pkgmetrics.Namespace, Subsystem)
 
-type TransactionSchedulerMetrics interface {
-	JobsLatencyHistogram() kitmetrics.Histogram
-	MinedLatencyHistogram() kitmetrics.Histogram
+type ListenerMetrics interface {
+	BlockCounter() kitmetrics.Counter
 	pkgmetrics.Prometheus
 }

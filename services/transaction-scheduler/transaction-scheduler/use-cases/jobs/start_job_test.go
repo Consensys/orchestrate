@@ -5,8 +5,11 @@ package jobs
 import (
 	"context"
 	"fmt"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"testing"
+
+	mock2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/metrics/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/metrics/mock"
 
 	mocks2 "github.com/Shopify/sarama/mocks"
 	"github.com/golang/mock/gomock"
@@ -30,6 +33,12 @@ func TestStartJob_Execute(t *testing.T) {
 	mockDBTX := mocks.NewMockTx(ctrl)
 	mockKafkaProducer := mocks2.NewSyncProducer(t, nil)
 	tenants := []string{"tenantID"}
+	mockMetrics := mock.NewMockTransactionSchedulerMetrics(ctrl)
+
+	jobsLatencyHistogram := mock2.NewMockHistogram(ctrl)
+	jobsLatencyHistogram.EXPECT().With(gomock.Any()).AnyTimes().Return(jobsLatencyHistogram)
+	jobsLatencyHistogram.EXPECT().Observe(gomock.Any()).AnyTimes()
+	mockMetrics.EXPECT().JobsLatencyHistogram().AnyTimes().Return(jobsLatencyHistogram)
 
 	mockDB := mocks.NewMockDB(ctrl)
 	mockDB.EXPECT().Begin().Return(mockDBTX, nil).AnyTimes()
@@ -38,7 +47,7 @@ func TestStartJob_Execute(t *testing.T) {
 	mockDB.EXPECT().Job().Return(mockJobDA).AnyTimes()
 	mockDBTX.EXPECT().Log().Return(mockLogDA).AnyTimes()
 
-	usecase := NewStartJobUseCase(mockDB, mockKafkaProducer, sarama.NewKafkaTopicConfig(viper.GetViper()))
+	usecase := NewStartJobUseCase(mockDB, mockKafkaProducer, sarama.NewKafkaTopicConfig(viper.GetViper()), mockMetrics)
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		job := testutils.FakeJobModel(1)

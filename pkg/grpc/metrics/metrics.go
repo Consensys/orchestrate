@@ -65,7 +65,7 @@ func NewGRPCMetrics(cfg *Config) GRPCMetrics {
 		prometheus.HistogramOpts{
 			Namespace: metricsNamespace,
 			Name:      "handled_seconds",
-			Help:      "Histogram of response latency (seconds) of RPCs handled by the server.",
+			Help:      "Histogram of response latency (second) of RPCs handled by the server.",
 			Buckets:   cfg.Buckets,
 		},
 		[]string{"tenant_id", "type", "service", "method", "code"},

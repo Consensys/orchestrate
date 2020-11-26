@@ -5,6 +5,10 @@
 ### 🆕 Features
 * Support for enable/disable metric modules
 * Ability set set an custom keep alive interval for Postgres clients 
+* Add application metrics:
+    * orchestrate_transaction_scheduler_job_latency_seconds: Histogram of job latency between status (second). Except PENDING and MINED (Histogram)
+    * orchestrate_transaction_scheduler_mined_latency_seconds Histogram of latency between PENDING and MINED (Histogram)
+    * orchestrate_transaction_listener_current_block: Last block processed by each listening session (Counter)
 
 ### ⚠ BREAKING CHANGES
 

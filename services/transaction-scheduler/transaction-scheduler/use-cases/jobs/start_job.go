@@ -2,8 +2,10 @@ package jobs
 
 import (
 	"context"
+	"time"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/metrics"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/transaction-scheduler/use-cases"
 	utils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/transaction-scheduler/utils"
 
@@ -23,14 +25,16 @@ type startJobUseCase struct {
 	db            store.DB
 	kafkaProducer sarama.SyncProducer
 	topicsCfg     *pkgsarama.KafkaTopicConfig
+	metrics       metrics.TransactionSchedulerMetrics
 }
 
 // NewStartJobUseCase creates a new StartJobUseCase
-func NewStartJobUseCase(db store.DB, kafkaProducer sarama.SyncProducer, topicsCfg *pkgsarama.KafkaTopicConfig) usecases.StartJobUseCase {
+func NewStartJobUseCase(db store.DB, kafkaProducer sarama.SyncProducer, topicsCfg *pkgsarama.KafkaTopicConfig, m metrics.TransactionSchedulerMetrics) usecases.StartJobUseCase {
 	return &startJobUseCase{
 		db:            db,
 		kafkaProducer: kafkaProducer,
 		topicsCfg:     topicsCfg,
+		metrics:       m,
 	}
 }
 
@@ -84,6 +88,19 @@ func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID string, tenants 
 	}
 
 	logger.WithField("partition", partition).WithField("offset", offset).Info("job started successfully")
+	uc.addMetrics(jobLog, jobModel.Logs[len(jobModel.Logs)-1], jobModel.ChainUUID)
 
 	return nil
+}
+
+func (uc *startJobUseCase) addMetrics(current, previous *models.Log, chainUUID string) {
+	baseLabels := []string{
+		"chain_uuid", chainUUID,
+	}
+
+	d := float64(current.CreatedAt.Sub(previous.CreatedAt).Nanoseconds()) / float64(time.Second)
+	uc.metrics.JobsLatencyHistogram().With(append(baseLabels,
+		"prev_status", previous.Status,
+		"status", current.Status,
+	)...).Observe(d)
 }

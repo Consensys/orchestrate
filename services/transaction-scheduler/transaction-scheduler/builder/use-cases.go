@@ -28,8 +28,8 @@ func NewUseCases(
 
 	createScheduleUC := schedules.NewCreateScheduleUseCase(db)
 	getScheduleUC := schedules.NewGetScheduleUseCase(db)
-	createJobUC := jobs.NewCreateJobUseCase(db, txValidator, appMetrics)
-	startJobUC := jobs.NewStartJobUseCase(db, producer, topicsCfg)
+	createJobUC := jobs.NewCreateJobUseCase(db, txValidator)
+	startJobUC := jobs.NewStartJobUseCase(db, producer, topicsCfg, appMetrics)
 	resendJobUC := jobs.NewResendJobTxUseCase(db, producer, topicsCfg)
 	updateChildrenUC := jobs.NewUpdateChildrenUseCase(db)
 	startNextJobUC := jobs.NewStartNextJobUseCase(db, startJobUC)
@@ -52,7 +52,7 @@ func NewUseCases(
 		createJob:   createJobUC,
 		getJob:      jobs.NewGetJobUseCase(db),
 		searchJobs:  jobs.NewSearchJobsUseCase(db),
-		updateJob:   jobs.NewUpdateJobUseCase(db, updateChildrenUC, startNextJobUC),
+		updateJob:   jobs.NewUpdateJobUseCase(db, updateChildrenUC, startNextJobUC, appMetrics),
 		startJob:    startJobUC,
 		resendJobTx: resendJobUC,
 	}

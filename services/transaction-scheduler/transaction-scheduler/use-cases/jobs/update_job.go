@@ -2,12 +2,14 @@ package jobs
 
 import (
 	"context"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/metrics"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/store/models"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/transaction-scheduler/parsers"
@@ -21,14 +23,16 @@ type updateJobUseCase struct {
 	db                    store.DB
 	updateChildrenUseCase usecases.UpdateChildrenUseCase
 	startNextJobUseCase   usecases.StartNextJobUseCase
+	metrics               metrics.TransactionSchedulerMetrics
 }
 
 // NewUpdateJobUseCase creates a new UpdateJobUseCase
-func NewUpdateJobUseCase(db store.DB, updateChildrenUseCase usecases.UpdateChildrenUseCase, startJobUC usecases.StartNextJobUseCase) usecases.UpdateJobUseCase {
+func NewUpdateJobUseCase(db store.DB, updateChildrenUseCase usecases.UpdateChildrenUseCase, startJobUC usecases.StartNextJobUseCase, m metrics.TransactionSchedulerMetrics) usecases.UpdateJobUseCase {
 	return &updateJobUseCase{
 		db:                    db,
 		updateChildrenUseCase: updateChildrenUseCase,
 		startNextJobUseCase:   startJobUC,
+		metrics:               m,
 	}
 }
 
@@ -98,6 +102,9 @@ func (uc *updateJobUseCase) Execute(ctx context.Context, job *entities.Job, next
 					return der
 				}
 			}
+
+			// Metrics observe request latency
+			uc.addMetrics(jobLogModel, jobModel.Logs[len(jobModel.Logs)-1], jobModel.ChainUUID)
 		}
 
 		return nil
@@ -158,4 +165,25 @@ func canUpdateStatus(nextStatus, status string) bool {
 	default: // For warning, they can be added at any time
 		return true
 	}
+}
+
+func (uc *updateJobUseCase) addMetrics(current, previous *models.Log, chainUUID string) {
+	baseLabels := []string{
+		"chain_uuid", chainUUID,
+	}
+
+	d := float64(current.CreatedAt.Sub(previous.CreatedAt).Nanoseconds()) / float64(time.Second)
+	switch current.Status {
+	case utils.StatusMined:
+		uc.metrics.MinedLatencyHistogram().With(append(baseLabels,
+			"prev_status", previous.Status,
+			"status", current.Status,
+		)...).Observe(d)
+	default:
+		uc.metrics.JobsLatencyHistogram().With(append(baseLabels,
+			"prev_status", previous.Status,
+			"status", current.Status,
+		)...).Observe(d)
+	}
+
 }

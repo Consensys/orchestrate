@@ -34,18 +34,32 @@ func (m *MockTransactionSchedulerMetrics) EXPECT() *MockTransactionSchedulerMetr
 	return m.recorder
 }
 
-// CreatedJobsCounter mocks base method
-func (m *MockTransactionSchedulerMetrics) CreatedJobsCounter() metrics.Counter {
+// JobsLatencyHistogram mocks base method
+func (m *MockTransactionSchedulerMetrics) JobsLatencyHistogram() metrics.Histogram {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreatedJobsCounter")
-	ret0, _ := ret[0].(metrics.Counter)
+	ret := m.ctrl.Call(m, "JobsLatencyHistogram")
+	ret0, _ := ret[0].(metrics.Histogram)
 	return ret0
 }
 
-// CreatedJobsCounter indicates an expected call of CreatedJobsCounter
-func (mr *MockTransactionSchedulerMetricsMockRecorder) CreatedJobsCounter() *gomock.Call {
+// JobsLatencyHistogram indicates an expected call of JobsLatencyHistogram
+func (mr *MockTransactionSchedulerMetricsMockRecorder) JobsLatencyHistogram() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreatedJobsCounter", reflect.TypeOf((*MockTransactionSchedulerMetrics)(nil).CreatedJobsCounter))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "JobsLatencyHistogram", reflect.TypeOf((*MockTransactionSchedulerMetrics)(nil).JobsLatencyHistogram))
+}
+
+// MinedLatencyHistogram mocks base method
+func (m *MockTransactionSchedulerMetrics) MinedLatencyHistogram() metrics.Histogram {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "MinedLatencyHistogram")
+	ret0, _ := ret[0].(metrics.Histogram)
+	return ret0
+}
+
+// MinedLatencyHistogram indicates an expected call of MinedLatencyHistogram
+func (mr *MockTransactionSchedulerMetricsMockRecorder) MinedLatencyHistogram() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MinedLatencyHistogram", reflect.TypeOf((*MockTransactionSchedulerMetrics)(nil).MinedLatencyHistogram))
 }
 
 // Describe mocks base method

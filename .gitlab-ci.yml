@@ -377,16 +377,17 @@ release-notes:
     refs:
       - tags
 
-e2e-staging:
-  stage: staging-e2e
-  before_script:
-    - apk update
-    - apk add bash jq curl
-  script:
-    - ORCHESTRATE_TAG=${CI_COMMIT_TAG}
-    - E2E_TAG=${CI_COMMIT_TAG}
-    - bash ./scripts/circleci-e2e.sh
-  rules:
-    - if: $CI_COMMIT_TAG
-      when: on_success
-      allow_failure: false
+#Uncomment when staging will work
+#e2e-staging:
+#  stage: staging-e2e
+#  before_script:
+#    - apk update
+#    - apk add bash jq curl
+#  script:
+#    - ORCHESTRATE_TAG=${CI_COMMIT_TAG}
+#    - E2E_TAG=${CI_COMMIT_TAG}
+#    - bash ./scripts/circleci-e2e.sh
+#  rules:
+#    - if: $CI_COMMIT_TAG
+#      when: on_success
+#      allow_failure: false

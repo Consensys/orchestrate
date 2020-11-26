@@ -5,10 +5,10 @@ package metrics
 
 import (
 	"context"
-	"testing"
 	"crypto/tls"
 	"net/http"
 	"net/http/httptest"
+	"testing"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
