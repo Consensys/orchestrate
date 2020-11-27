@@ -5,10 +5,9 @@
 package mocks
 
 import (
-	context "context"
 	gomock "github.com/golang/mock/gomock"
-	healthcheck "github.com/heptiolabs/healthcheck"
-	store "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/store"
+	entities "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
+	ethereum "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/ethereum"
 	reflect "reflect"
 )
 
@@ -35,25 +34,101 @@ func (m *MockVault) EXPECT() *MockVaultMockRecorder {
 	return m.recorder
 }
 
-// Ethereum mocks base method
-func (m *MockVault) Ethereum() store.EthereumAgent {
+// ETHCreateAccount mocks base method
+func (m *MockVault) ETHCreateAccount(namespace string) (*entities.ETHAccount, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Ethereum")
-	ret0, _ := ret[0].(store.EthereumAgent)
-	return ret0
+	ret := m.ctrl.Call(m, "ETHCreateAccount", namespace)
+	ret0, _ := ret[0].(*entities.ETHAccount)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
-// Ethereum indicates an expected call of Ethereum
-func (mr *MockVaultMockRecorder) Ethereum() *gomock.Call {
+// ETHCreateAccount indicates an expected call of ETHCreateAccount
+func (mr *MockVaultMockRecorder) ETHCreateAccount(namespace interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Ethereum", reflect.TypeOf((*MockVault)(nil).Ethereum))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHCreateAccount", reflect.TypeOf((*MockVault)(nil).ETHCreateAccount), namespace)
+}
+
+// ETHImportAccount mocks base method
+func (m *MockVault) ETHImportAccount(namespace, privateKey string) (*entities.ETHAccount, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ETHImportAccount", namespace, privateKey)
+	ret0, _ := ret[0].(*entities.ETHAccount)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ETHImportAccount indicates an expected call of ETHImportAccount
+func (mr *MockVaultMockRecorder) ETHImportAccount(namespace, privateKey interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHImportAccount", reflect.TypeOf((*MockVault)(nil).ETHImportAccount), namespace, privateKey)
+}
+
+// ETHSign mocks base method
+func (m *MockVault) ETHSign(address, namespace, data string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ETHSign", address, namespace, data)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ETHSign indicates an expected call of ETHSign
+func (mr *MockVaultMockRecorder) ETHSign(address, namespace, data interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHSign", reflect.TypeOf((*MockVault)(nil).ETHSign), address, namespace, data)
+}
+
+// ETHSignTransaction mocks base method
+func (m *MockVault) ETHSignTransaction(address string, request *ethereum.SignETHTransactionRequest) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ETHSignTransaction", address, request)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ETHSignTransaction indicates an expected call of ETHSignTransaction
+func (mr *MockVaultMockRecorder) ETHSignTransaction(address, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHSignTransaction", reflect.TypeOf((*MockVault)(nil).ETHSignTransaction), address, request)
+}
+
+// ETHSignQuorumPrivateTransaction mocks base method
+func (m *MockVault) ETHSignQuorumPrivateTransaction(address string, request *ethereum.SignQuorumPrivateTransactionRequest) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ETHSignQuorumPrivateTransaction", address, request)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ETHSignQuorumPrivateTransaction indicates an expected call of ETHSignQuorumPrivateTransaction
+func (mr *MockVaultMockRecorder) ETHSignQuorumPrivateTransaction(address, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHSignQuorumPrivateTransaction", reflect.TypeOf((*MockVault)(nil).ETHSignQuorumPrivateTransaction), address, request)
+}
+
+// ETHSignEEATransaction mocks base method
+func (m *MockVault) ETHSignEEATransaction(address string, request *ethereum.SignEEATransactionRequest) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ETHSignEEATransaction", address, request)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ETHSignEEATransaction indicates an expected call of ETHSignEEATransaction
+func (mr *MockVaultMockRecorder) ETHSignEEATransaction(address, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHSignEEATransaction", reflect.TypeOf((*MockVault)(nil).ETHSignEEATransaction), address, request)
 }
 
 // HealthCheck mocks base method
-func (m *MockVault) HealthCheck() healthcheck.Check {
+func (m *MockVault) HealthCheck() error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "HealthCheck")
-	ret0, _ := ret[0].(healthcheck.Check)
+	ret0, _ := ret[0].(error)
 	return ret0
 }
 
@@ -61,93 +136,4 @@ func (m *MockVault) HealthCheck() healthcheck.Check {
 func (mr *MockVaultMockRecorder) HealthCheck() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HealthCheck", reflect.TypeOf((*MockVault)(nil).HealthCheck))
-}
-
-// MockAgents is a mock of Agents interface
-type MockAgents struct {
-	ctrl     *gomock.Controller
-	recorder *MockAgentsMockRecorder
-}
-
-// MockAgentsMockRecorder is the mock recorder for MockAgents
-type MockAgentsMockRecorder struct {
-	mock *MockAgents
-}
-
-// NewMockAgents creates a new mock instance
-func NewMockAgents(ctrl *gomock.Controller) *MockAgents {
-	mock := &MockAgents{ctrl: ctrl}
-	mock.recorder = &MockAgentsMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use
-func (m *MockAgents) EXPECT() *MockAgentsMockRecorder {
-	return m.recorder
-}
-
-// Ethereum mocks base method
-func (m *MockAgents) Ethereum() store.EthereumAgent {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Ethereum")
-	ret0, _ := ret[0].(store.EthereumAgent)
-	return ret0
-}
-
-// Ethereum indicates an expected call of Ethereum
-func (mr *MockAgentsMockRecorder) Ethereum() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Ethereum", reflect.TypeOf((*MockAgents)(nil).Ethereum))
-}
-
-// MockEthereumAgent is a mock of EthereumAgent interface
-type MockEthereumAgent struct {
-	ctrl     *gomock.Controller
-	recorder *MockEthereumAgentMockRecorder
-}
-
-// MockEthereumAgentMockRecorder is the mock recorder for MockEthereumAgent
-type MockEthereumAgentMockRecorder struct {
-	mock *MockEthereumAgent
-}
-
-// NewMockEthereumAgent creates a new mock instance
-func NewMockEthereumAgent(ctrl *gomock.Controller) *MockEthereumAgent {
-	mock := &MockEthereumAgent{ctrl: ctrl}
-	mock.recorder = &MockEthereumAgentMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use
-func (m *MockEthereumAgent) EXPECT() *MockEthereumAgentMockRecorder {
-	return m.recorder
-}
-
-// Insert mocks base method
-func (m *MockEthereumAgent) Insert(ctx context.Context, address, privKey, namespace string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Insert", ctx, address, privKey, namespace)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Insert indicates an expected call of Insert
-func (mr *MockEthereumAgentMockRecorder) Insert(ctx, address, privKey, namespace interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*MockEthereumAgent)(nil).Insert), ctx, address, privKey, namespace)
-}
-
-// FindOne mocks base method
-func (m *MockEthereumAgent) FindOne(ctx context.Context, address, namespace string) (string, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindOne", ctx, address, namespace)
-	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// FindOne indicates an expected call of FindOne
-func (mr *MockEthereumAgentMockRecorder) FindOne(ctx, address, namespace interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOne", reflect.TypeOf((*MockEthereumAgent)(nil).FindOne), ctx, address, namespace)
 }

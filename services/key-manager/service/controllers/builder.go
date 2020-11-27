@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/key-manager/use-cases/ethereum"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/store"
 
 	"github.com/gorilla/mux"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/dynamic"
@@ -29,9 +29,9 @@ type Builder struct {
 	ethereumCtrl *EthereumController
 }
 
-func NewBuilder(ucs ethereum.UseCases) *Builder {
+func NewBuilder(vault store.Vault) *Builder {
 	return &Builder{
-		ethereumCtrl: NewEthereumController(ucs),
+		ethereumCtrl: NewEthereumController(vault),
 	}
 }
 

@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/store"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 
@@ -11,18 +13,17 @@ import (
 	jsonutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/httputil"
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/ethereum"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/key-manager/use-cases/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/service/formatters"
 )
 
 const Path = "/ethereum/accounts"
 
 type EthereumController struct {
-	ucs ethereum.UseCases
+	vault store.Vault
 }
 
-func NewEthereumController(ucs ethereum.UseCases) *EthereumController {
-	return &EthereumController{ucs: ucs}
+func NewEthereumController(vault store.Vault) *EthereumController {
+	return &EthereumController{vault: vault}
 }
 
 // Add routes to router
@@ -46,7 +47,6 @@ func (c *EthereumController) Append(router *mux.Router) {
 // @Router /ethereum/accounts [post]
 func (c *EthereumController) createAccount(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
-	ctx := request.Context()
 
 	ethAccountRequest := &types.CreateETHAccountRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, ethAccountRequest)
@@ -55,7 +55,7 @@ func (c *EthereumController) createAccount(rw http.ResponseWriter, request *http
 		return
 	}
 
-	accountResponse, err := c.ucs.CreateAccount().Execute(ctx, ethAccountRequest.Namespace, "")
+	accountResponse, err := c.vault.ETHCreateAccount(ethAccountRequest.Namespace)
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -76,7 +76,6 @@ func (c *EthereumController) createAccount(rw http.ResponseWriter, request *http
 // @Router /ethereum/accounts/import [post]
 func (c *EthereumController) importAccount(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
-	ctx := request.Context()
 
 	ethAccountRequest := &types.ImportETHAccountRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, ethAccountRequest)
@@ -85,7 +84,7 @@ func (c *EthereumController) importAccount(rw http.ResponseWriter, request *http
 		return
 	}
 
-	accountResponse, err := c.ucs.CreateAccount().Execute(ctx, ethAccountRequest.Namespace, ethAccountRequest.PrivateKey)
+	accountResponse, err := c.vault.ETHImportAccount(ethAccountRequest.Namespace, ethAccountRequest.PrivateKey)
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -105,8 +104,6 @@ func (c *EthereumController) importAccount(rw http.ResponseWriter, request *http
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /ethereum/accounts/{address}/sign [post]
 func (c *EthereumController) signPayload(rw http.ResponseWriter, request *http.Request) {
-	ctx := request.Context()
-
 	signRequest := &keymanager.PayloadRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, signRequest)
 	if err != nil {
@@ -119,7 +116,8 @@ func (c *EthereumController) signPayload(rw http.ResponseWriter, request *http.R
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
-	signature, err := c.ucs.SignPayload().Execute(ctx, address, signRequest.Namespace, signRequest.Data)
+
+	signature, err := c.vault.ETHSign(address, signRequest.Namespace, signRequest.Data)
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -139,8 +137,6 @@ func (c *EthereumController) signPayload(rw http.ResponseWriter, request *http.R
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /ethereum/accounts/{address}/sign-transaction [post]
 func (c *EthereumController) signTransaction(rw http.ResponseWriter, request *http.Request) {
-	ctx := request.Context()
-
 	signRequest := &types.SignETHTransactionRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, signRequest)
 	if err != nil {
@@ -154,8 +150,7 @@ func (c *EthereumController) signTransaction(rw http.ResponseWriter, request *ht
 		return
 	}
 
-	tx := formatters.FormatSignETHTransactionRequest(signRequest)
-	signature, err := c.ucs.SignTransaction().Execute(ctx, address, signRequest.Namespace, signRequest.ChainID, tx)
+	signature, err := c.vault.ETHSignTransaction(address, signRequest)
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -175,8 +170,6 @@ func (c *EthereumController) signTransaction(rw http.ResponseWriter, request *ht
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /ethereum/accounts/{address}/sign-quorum-private-transaction [post]
 func (c *EthereumController) signQuorumPrivate(rw http.ResponseWriter, request *http.Request) {
-	ctx := request.Context()
-
 	signRequest := &types.SignQuorumPrivateTransactionRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, signRequest)
 	if err != nil {
@@ -189,8 +182,8 @@ func (c *EthereumController) signQuorumPrivate(rw http.ResponseWriter, request *
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
-	tx := formatters.FormatSignQuorumPrivateTransactionRequest(signRequest)
-	signature, err := c.ucs.SignQuorumPrivateTransaction().Execute(ctx, address, signRequest.Namespace, tx)
+
+	signature, err := c.vault.ETHSignQuorumPrivateTransaction(address, signRequest)
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -210,8 +203,6 @@ func (c *EthereumController) signQuorumPrivate(rw http.ResponseWriter, request *
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /ethereum/accounts/{address}/sign-eea-transaction [post]
 func (c *EthereumController) signEEA(rw http.ResponseWriter, request *http.Request) {
-	ctx := request.Context()
-
 	signRequest := &types.SignEEATransactionRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, signRequest)
 	if err != nil {
@@ -230,8 +221,8 @@ func (c *EthereumController) signEEA(rw http.ResponseWriter, request *http.Reque
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
-	tx, privateArgs := formatters.FormatSignEEATransactionRequest(signRequest)
-	signature, err := c.ucs.SignEEATransaction().Execute(ctx, address, signRequest.Namespace, signRequest.ChainID, tx, privateArgs)
+
+	signature, err := c.vault.ETHSignEEATransaction(address, signRequest)
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return

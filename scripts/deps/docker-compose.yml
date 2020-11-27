@@ -111,7 +111,7 @@ services:
 
   vault:
     <<: *container-common
-    image: library/vault:1.5.4
+    image: library/vault:1.6.0
     tty: true
     cap_add:
       - IPC_LOCK

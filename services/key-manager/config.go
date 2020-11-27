@@ -8,7 +8,7 @@ import (
 	httpmetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/metrics"
 	metricregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/metrics/registry"
 	tcpmetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tcp/metrics"
-	store "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/store/multi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/store"
 )
 
 // Flags register flags for tx scheduler

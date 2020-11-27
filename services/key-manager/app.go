@@ -6,26 +6,20 @@ import (
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/store"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/key-manager/builder"
-
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/app"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/dynamic"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/service/controllers"
-	multistore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/store/multi"
 )
 
 func NewKeyManager(ctx context.Context, cfg *Config) (*app.App, error) {
 	// Create Data agents
-	vault, err := multistore.Build(ctx, cfg.Store)
+	vault, err := store.Build(ctx, cfg.Store)
 	if err != nil {
 		return nil, err
 	}
 
-	// Create UCs
-	ethUCs := builder.NewEthereumUseCases(vault)
-
 	// Option for key manager handler
-	keyManagerHandlerOpt := app.HandlerOpt(reflect.TypeOf(&dynamic.Signer{}), controllers.NewBuilder(ethUCs))
+	keyManagerHandlerOpt := app.HandlerOpt(reflect.TypeOf(&dynamic.Signer{}), controllers.NewBuilder(vault))
 
 	// Create app
 	return app.New(
@@ -41,7 +35,7 @@ func NewKeyManager(ctx context.Context, cfg *Config) (*app.App, error) {
 
 func ReadinessOpt(vault store.Vault) app.Option {
 	return func(ap *app.App) error {
-		ap.AddReadinessCheck("vault", vault.HealthCheck())
+		ap.AddReadinessCheck("vault", vault.HealthCheck)
 		return nil
 	}
 }

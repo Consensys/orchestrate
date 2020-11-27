@@ -5,14 +5,13 @@ package controllers
 import (
 	"bytes"
 	"fmt"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/store/mocks"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/key-manager/use-cases/ethereum"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/key-manager/use-cases/ethereum/mocks"
 
 	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"
@@ -25,35 +24,9 @@ import (
 
 type ethereumCtrlTestSuite struct {
 	suite.Suite
-	createAccountUC       *mocks.MockCreateAccountUseCase
-	signUC                *mocks.MockSignUseCase
-	signTxUC              *mocks.MockSignTransactionUseCase
-	signQuorumPrivateTxUC *mocks.MockSignQuorumPrivateTransactionUseCase
-	signEEATxUC           *mocks.MockSignEEATransactionUseCase
-	router                *mux.Router
+	vault  *mocks.MockVault
+	router *mux.Router
 }
-
-func (s *ethereumCtrlTestSuite) CreateAccount() ethereum.CreateAccountUseCase {
-	return s.createAccountUC
-}
-
-func (s *ethereumCtrlTestSuite) SignPayload() ethereum.SignUseCase {
-	return s.signUC
-}
-
-func (s *ethereumCtrlTestSuite) SignTransaction() ethereum.SignTransactionUseCase {
-	return s.signTxUC
-}
-
-func (s *ethereumCtrlTestSuite) SignQuorumPrivateTransaction() ethereum.SignQuorumPrivateTransactionUseCase {
-	return s.signQuorumPrivateTxUC
-}
-
-func (s *ethereumCtrlTestSuite) SignEEATransaction() ethereum.SignEEATransactionUseCase {
-	return s.signEEATxUC
-}
-
-var _ ethereum.UseCases = &ethereumCtrlTestSuite{}
 
 const (
 	inputTestAddress     = "0x7e654d251da770a068413677967f6d3ea2feA9e4"
@@ -69,14 +42,10 @@ func (s *ethereumCtrlTestSuite) SetupTest() {
 	ctrl := gomock.NewController(s.T())
 	defer ctrl.Finish()
 
-	s.createAccountUC = mocks.NewMockCreateAccountUseCase(ctrl)
-	s.signUC = mocks.NewMockSignUseCase(ctrl)
-	s.signTxUC = mocks.NewMockSignTransactionUseCase(ctrl)
-	s.signQuorumPrivateTxUC = mocks.NewMockSignQuorumPrivateTransactionUseCase(ctrl)
-	s.signEEATxUC = mocks.NewMockSignEEATransactionUseCase(ctrl)
+	s.vault = mocks.NewMockVault(ctrl)
 	s.router = mux.NewRouter()
 
-	controller := NewEthereumController(s)
+	controller := NewEthereumController(s.vault)
 	controller.Append(s.router)
 }
 
@@ -90,9 +59,7 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_Create() {
 
 		fakeETHAccount := testutils.FakeETHAccount()
 
-		s.createAccountUC.EXPECT().
-			Execute(gomock.Any(), createAccountRequest.Namespace, "").
-			Return(fakeETHAccount, nil)
+		s.vault.EXPECT().ETHCreateAccount(createAccountRequest.Namespace).Return(fakeETHAccount, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -110,9 +77,7 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_Create() {
 		rw := httptest.NewRecorder()
 		httpRequest := httptest.NewRequest(http.MethodPost, "/ethereum/accounts", bytes.NewReader(requestBytes))
 
-		s.createAccountUC.EXPECT().
-			Execute(gomock.Any(), gomock.Any(), "").
-			Return(nil, errors.HashicorpVaultConnectionError("error"))
+		s.vault.EXPECT().ETHCreateAccount(gomock.Any()).Return(nil, errors.HashicorpVaultConnectionError("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)
 		assert.Equal(t, http.StatusInternalServerError, rw.Code)
@@ -129,8 +94,8 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_Import() {
 
 		fakeETHAccount := testutils.FakeETHAccount()
 
-		s.createAccountUC.EXPECT().
-			Execute(gomock.Any(), importAccountRequest.Namespace, importAccountRequest.PrivateKey).
+		s.vault.EXPECT().
+			ETHImportAccount(importAccountRequest.Namespace, importAccountRequest.PrivateKey).
 			Return(fakeETHAccount, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -149,8 +114,8 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_Import() {
 		rw := httptest.NewRecorder()
 		httpRequest := httptest.NewRequest(http.MethodPost, "/ethereum/accounts/import", bytes.NewReader(requestBytes))
 
-		s.createAccountUC.EXPECT().
-			Execute(gomock.Any(), importAccountRequest.Namespace, importAccountRequest.PrivateKey).
+		s.vault.EXPECT().
+			ETHImportAccount(importAccountRequest.Namespace, importAccountRequest.PrivateKey).
 			Return(nil, errors.InvalidParameterError("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -172,8 +137,8 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_Sign() {
 		rw := httptest.NewRecorder()
 		httpRequest := httptest.NewRequest(http.MethodPost, url, bytes.NewReader(requestBytes))
 
-		s.signUC.EXPECT().
-			Execute(gomock.Any(), mixedCaseTestAddress, payloadRequest.Namespace, payloadRequest.Data).
+		s.vault.EXPECT().
+			ETHSign(mixedCaseTestAddress, payloadRequest.Namespace, payloadRequest.Data).
 			Return(signature, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -193,8 +158,8 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_Sign() {
 		rw := httptest.NewRecorder()
 		httpRequest := httptest.NewRequest(http.MethodPost, url, bytes.NewReader(requestBytes))
 
-		s.signUC.EXPECT().
-			Execute(gomock.Any(), mixedCaseTestAddress, payloadRequest.Namespace, payloadRequest.Data).
+		s.vault.EXPECT().
+			ETHSign(mixedCaseTestAddress, payloadRequest.Namespace, payloadRequest.Data).
 			Return("", errors.InvalidParameterError("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -213,10 +178,7 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_SignTransaction() {
 		rw := httptest.NewRecorder()
 		httpRequest := httptest.NewRequest(http.MethodPost, url, bytes.NewReader(requestBytes))
 
-		expectedTx := formatters.FormatSignETHTransactionRequest(signRequest)
-		s.signTxUC.EXPECT().
-			Execute(gomock.Any(), mixedCaseTestAddress, signRequest.Namespace, signRequest.ChainID, expectedTx).
-			Return(signature, nil)
+		s.vault.EXPECT().ETHSignTransaction(mixedCaseTestAddress, signRequest).Return(signature, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -232,8 +194,8 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_SignTransaction() {
 		rw := httptest.NewRecorder()
 		httpRequest := httptest.NewRequest(http.MethodPost, url, bytes.NewReader(requestBytes))
 
-		s.signTxUC.EXPECT().
-			Execute(gomock.Any(), mixedCaseTestAddress, signRequest.Namespace, gomock.Any(), gomock.Any()).
+		s.vault.EXPECT().
+			ETHSignTransaction(mixedCaseTestAddress, signRequest).
 			Return("", errors.ServiceConnectionError("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -252,9 +214,8 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_SignQuorumPrivateTransact
 		rw := httptest.NewRecorder()
 		httpRequest := httptest.NewRequest(http.MethodPost, url, bytes.NewReader(requestBytes))
 
-		expectedTx := formatters.FormatSignQuorumPrivateTransactionRequest(signRequest)
-		s.signQuorumPrivateTxUC.EXPECT().
-			Execute(gomock.Any(), mixedCaseTestAddress, signRequest.Namespace, expectedTx).
+		s.vault.EXPECT().
+			ETHSignQuorumPrivateTransaction(mixedCaseTestAddress, signRequest).
 			Return(signature, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -271,8 +232,8 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_SignQuorumPrivateTransact
 		rw := httptest.NewRecorder()
 		httpRequest := httptest.NewRequest(http.MethodPost, url, bytes.NewReader(requestBytes))
 
-		s.signQuorumPrivateTxUC.EXPECT().
-			Execute(gomock.Any(), mixedCaseTestAddress, signRequest.Namespace, gomock.Any()).
+		s.vault.EXPECT().
+			ETHSignQuorumPrivateTransaction(mixedCaseTestAddress, signRequest).
 			Return("", errors.ServiceConnectionError("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -291,10 +252,7 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_SignEEATransaction() {
 		rw := httptest.NewRecorder()
 		httpRequest := httptest.NewRequest(http.MethodPost, url, bytes.NewReader(requestBytes))
 
-		expectedTx, expectedPrivateArgs := formatters.FormatSignEEATransactionRequest(signRequest)
-		s.signEEATxUC.EXPECT().
-			Execute(gomock.Any(), mixedCaseTestAddress, signRequest.Namespace, signRequest.ChainID, expectedTx, expectedPrivateArgs).
-			Return(signature, nil)
+		s.vault.EXPECT().ETHSignEEATransaction(mixedCaseTestAddress, signRequest).Return(signature, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -310,8 +268,8 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_SignEEATransaction() {
 		rw := httptest.NewRecorder()
 		httpRequest := httptest.NewRequest(http.MethodPost, url, bytes.NewReader(requestBytes))
 
-		s.signEEATxUC.EXPECT().
-			Execute(gomock.Any(), mixedCaseTestAddress, signRequest.Namespace, gomock.Any(), gomock.Any(), gomock.Any()).
+		s.vault.EXPECT().
+			ETHSignEEATransaction(mixedCaseTestAddress, signRequest).
 			Return("", errors.InvalidParameterError("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)

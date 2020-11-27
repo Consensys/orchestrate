@@ -9,8 +9,12 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/hashicorp/vault/api"
+
+	log "github.com/sirupsen/logrus"
+
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/secretstore/hashicorp"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/hashicorp"
 	keymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/app"
@@ -18,7 +22,6 @@ import (
 	integrationtest "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/integration-test"
 	"k8s.io/apimachinery/pkg/util/rand"
 
-	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/spf13/pflag"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/docker"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/docker/config"
@@ -29,6 +32,7 @@ const vaultContainerID = "vault-key-manager"
 const networkName = "key-manager"
 const vaultTokenFilePrefix = "orchestrate_vault_token_"
 const localhostPath = "http://localhost:"
+const pluginFilename = "orchestrate-hashicorp-vault-plugin"
 
 var envVaultHostPort string
 var envHTTPPort string
@@ -36,23 +40,24 @@ var envMetricsPort string
 
 type IntegrationEnvironment struct {
 	ctx        context.Context
-	logger     log.Logger
+	logger     *log.Entry
 	keyManager *app.App
 	client     *docker.Client
 	baseURL    string
 	metricsURL string
+	rootToken  string
 }
 
 func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, error) {
-	logger := log.FromContext(ctx)
+	logger := log.WithContext(ctx)
 
 	host := os.Getenv("VAULT_HOST")
 	if host == "" {
 		host = "localhost"
 	}
 
-	rootTokenID := fmt.Sprintf("root_token_%v", strconv.Itoa(rand.IntnRange(0, 10000)))
-	tokenFileName, err := generateTokenFile(rootTokenID)
+	rootToken := fmt.Sprintf("root_token_%v", strconv.Itoa(rand.IntnRange(0, 10000)))
+	tokenFileName, err := generateTokenFile(rootToken)
 	if err != nil {
 		logger.WithError(err).Error("cannot generate vault token file")
 		return nil, err
@@ -80,11 +85,23 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 		return nil, err
 	}
 
+	pluginPath, err := getPluginPath()
+	if err != nil {
+		return nil, err
+	}
+
+	vaultContainer := hashicorpDocker.
+		NewDefault().
+		SetHostPort(envVaultHostPort).
+		SetRootToken(rootToken).
+		SetHost(host).
+		SetPluginSourceDirectory(pluginPath)
+
 	// Initialize environment container setup
 	composition := &config.Composition{
 		Containers: map[string]*config.Container{
 			vaultContainerID: {
-				HashicorpVault: hashicorpDocker.NewDefault().SetHostPort(envVaultHostPort).SetRootTokenID(rootTokenID).SetHost(host),
+				HashicorpVault: vaultContainer,
 			},
 		},
 	}
@@ -102,6 +119,7 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 		client:     dockerClient,
 		baseURL:    localhostPath + envHTTPPort,
 		metricsURL: localhostPath + envMetricsPort,
+		rootToken:  rootToken,
 	}, nil
 }
 
@@ -119,15 +137,36 @@ func (env *IntegrationEnvironment) Start(ctx context.Context) error {
 		return err
 	}
 
-	err = env.client.WaitTillIsReady(ctx, vaultContainerID, 10*time.Second)
+	err = env.client.WaitTillIsReady(ctx, vaultContainerID, 8*time.Second)
 	if err != nil {
 		env.logger.WithError(err).Error("could not start vault")
 		return err
 	}
 
+	// Enable orchestrate secret engine
+	vaultClient, err := api.NewClient(hashicorp.ToVaultConfig(hashicorp.ConfigFromViper()))
+	if err != nil {
+		env.logger.WithError(err).Error("failed to instantiate vault client")
+		return err
+	}
+	vaultClient.SetToken(env.rootToken)
+	err = vaultClient.Sys().Mount("orchestrate", &api.MountInput{
+		Type:        "plugin",
+		Description: "Orchestrate Wallets",
+		Config: api.MountConfigInput{
+			ForceNoCache:              true,
+			PassthroughRequestHeaders: []string{"X-Vault-Namespace"},
+		},
+		PluginName: pluginFilename,
+	})
+	if err != nil {
+		env.logger.WithError(err).Error("failed to mount (enable) orchestrate vault plugin")
+		return err
+	}
+
 	env.keyManager, err = keymanager.NewKeyManager(ctx, keymanager.NewConfig(viper.GetViper()))
 	if err != nil {
-		env.logger.WithError(err).Error("could initialize key manager")
+		env.logger.WithError(err).Error("could not initialize key manager")
 		return err
 	}
 
@@ -180,4 +219,14 @@ func generateTokenFile(rootToken string) (string, error) {
 	}
 
 	return file.Name(), nil
+}
+
+func getPluginPath() (string, error) {
+	currDir, err := os.Getwd()
+	if err != nil {
+		log.WithError(err).Error("failed to get the current directory path")
+		return "", err
+	}
+
+	return fmt.Sprintf("%s/plugins", currDir), nil
 }

@@ -28,6 +28,7 @@ func FakeSignETHTransactionRequest() *types.SignETHTransactionRequest {
 		GasPrice:  "10000000000",
 		GasLimit:  21000,
 		ChainID:   "1",
+		Data:      "0x",
 	}
 }
 
@@ -39,6 +40,7 @@ func FakeSignQuorumPrivateTransactionRequest() *types.SignQuorumPrivateTransacti
 		Amount:    "10000000000",
 		GasPrice:  "10000000000",
 		GasLimit:  21000,
+		Data:      "0x",
 	}
 }
 
@@ -50,6 +52,7 @@ func FakeSignEEATransactionRequest() *types.SignEEATransactionRequest {
 		ChainID:     "1",
 		PrivateFrom: "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=",
 		PrivateFor:  []string{"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="},
+		Data:        "0x",
 	}
 }
 

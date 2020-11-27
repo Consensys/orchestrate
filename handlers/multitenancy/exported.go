@@ -26,12 +26,8 @@ func Init(ctx context.Context) {
 			return
 		}
 
-		// Initialize Key Envelope
-		multitenancy.Init(ctx)
-
 		// Initialize Authentication Manager
 		jwt.Init(ctx)
-
 		log.Infof("multitenancy enable: %v", viper.GetBool(multitenancy.EnabledViperKey))
 
 		// Create Handler

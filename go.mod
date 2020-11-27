@@ -3,12 +3,12 @@ module gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2
 go 1.14
 
 require (
-	github.com/ConsenSys/golang-utils v0.0.0-20190722185538-95555d181804 // indirect
 	github.com/Shopify/sarama v1.26.4
 	github.com/alicebob/gopher-json v0.0.0-20180125190556-5a6b3ba71ee6 // indirect
 	github.com/alicebob/miniredis v2.5.0+incompatible
 	github.com/asaskevich/govalidator v0.0.0-20180720115003-f9ffefc3facf
 	github.com/aws/aws-sdk-go v1.29.33 // indirect
+	github.com/btcsuite/btcd v0.0.0-20190629003639-c26ffa870fd8 // indirect
 	github.com/c0va23/go-proxyprotocol v0.9.1
 	github.com/cenkalti/backoff/v4 v4.0.0
 	github.com/consensys/quorum v2.7.0+incompatible
@@ -18,15 +18,18 @@ require (
 	github.com/cucumber/messages-go/v10 v10.0.3
 	github.com/dgraph-io/ristretto v0.0.2
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/dnaeon/go-vcr v1.0.1 // indirect
 	github.com/docker/docker v1.13.1
 	github.com/docker/go-connections v0.4.0
 	github.com/eapache/channels v1.1.0
 	github.com/elazarl/go-bindata-assetfs v1.0.0
 	github.com/ethereum/go-ethereum v1.9.12
+	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32 // indirect
 	github.com/go-kit/kit v0.10.0
 	github.com/go-pg/migrations/v7 v7.1.9
 	github.com/go-pg/pg/v9 v9.1.5
 	github.com/go-playground/validator/v10 v10.2.0
+	github.com/go-test/deep v1.0.2 // indirect
 	github.com/gofrs/uuid v3.2.0+incompatible
 	github.com/gogo/protobuf v1.3.1
 	github.com/golang/mock v1.4.3
@@ -39,12 +42,14 @@ require (
 	github.com/hashicorp/go-cleanhttp v0.5.1
 	github.com/hashicorp/go-multierror v1.1.0
 	github.com/hashicorp/go-retryablehttp v0.6.4
-	github.com/hashicorp/vault v1.3.4
+	github.com/hashicorp/serf v0.8.3 // indirect
 	github.com/hashicorp/vault/api v1.0.5-0.20200117231345-460d63e36490
+	github.com/hashicorp/vault/sdk v0.1.14-0.20200305172021-03a3749f220d // indirect
 	github.com/heptiolabs/healthcheck v0.0.0-20180807145615-6ff867650f40
 	github.com/justinas/alice v1.2.0
 	github.com/mitchellh/copystructure v1.0.0
 	github.com/mitchellh/mapstructure v1.2.2
+	github.com/mitchellh/reflectwalk v1.0.1 // indirect
 	github.com/nmvalera/striped-mutex v0.1.0
 	github.com/opentracing/opentracing-go v1.1.0
 	github.com/ory/fosite v0.30.6

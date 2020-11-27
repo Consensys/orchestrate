@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/docker/docker/api/types/mount"
+
 	log "github.com/sirupsen/logrus"
 	httputils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http"
 
@@ -14,7 +16,7 @@ import (
 	"github.com/docker/go-connections/nat"
 )
 
-const defaultHashicorpVaultImage = "library/vault:1.1.1"
+const defaultHashicorpVaultImage = "library/vault:1.6.0"
 const defaultHostPort = "8200"
 const defaultRootToken = "myRoot"
 const defaultHost = "localhost"
@@ -22,18 +24,19 @@ const defaultHost = "localhost"
 type Vault struct{}
 
 type Config struct {
-	Image       string
-	Port        string
-	RootTokenID string
-	Host        string
+	Image                 string
+	Port                  string
+	RootToken             string
+	Host                  string
+	PluginSourceDirectory string
 }
 
 func NewDefault() *Config {
 	return &Config{
-		Image:       defaultHashicorpVaultImage,
-		Port:        defaultHostPort,
-		RootTokenID: defaultRootToken,
-		Host:        defaultHost,
+		Image:     defaultHashicorpVaultImage,
+		Port:      defaultHostPort,
+		RootToken: defaultRootToken,
+		Host:      defaultHost,
 	}
 }
 
@@ -42,8 +45,8 @@ func (cfg *Config) SetHostPort(port string) *Config {
 	return cfg
 }
 
-func (cfg *Config) SetRootTokenID(rootToken string) *Config {
-	cfg.RootTokenID = rootToken
+func (cfg *Config) SetRootToken(rootToken string) *Config {
+	cfg.RootToken = rootToken
 	return cfg
 }
 
@@ -52,6 +55,11 @@ func (cfg *Config) SetHost(host string) *Config {
 		cfg.Host = host
 	}
 
+	return cfg
+}
+
+func (cfg *Config) SetPluginSourceDirectory(dir string) *Config {
+	cfg.PluginSourceDirectory = dir
 	return cfg
 }
 
@@ -64,17 +72,24 @@ func (vault *Vault) GenerateContainerConfig(_ context.Context, configuration int
 	containerCfg := &dockercontainer.Config{
 		Image: cfg.Image,
 		Env: []string{
-			fmt.Sprintf("VAULT_DEV_ROOT_TOKEN_ID=%v", cfg.RootTokenID),
-			fmt.Sprintf("VAULT_API_ADDR=http://127.0.0.1:%v", cfg.Port),
+			fmt.Sprintf("VAULT_DEV_ROOT_TOKEN_ID=%v", cfg.RootToken),
 		},
 		ExposedPorts: nat.PortSet{
 			"8200/tcp": struct{}{},
 		},
 		Tty: true,
+		Cmd: []string{"server", "-dev", "-dev-plugin-dir=/vault/plugins", "-log-level=trace"},
 	}
 
 	hostConfig := &dockercontainer.HostConfig{
 		CapAdd: []string{"IPC_LOCK"},
+		Mounts: []mount.Mount{
+			{
+				Type:   mount.TypeBind,
+				Source: cfg.PluginSourceDirectory,
+				Target: "/vault/plugins",
+			},
+		},
 	}
 	if cfg.Port != "" {
 		hostConfig.PortBindings = nat.PortMap{
