@@ -147,7 +147,7 @@ func (s *identityManagerTransactionTestSuite) TestIdentityManager_ImportAccounts
 		assert.Equal(t, resp.Alias, txRequest.Alias)
 		assert.Equal(t, resp.TenantID, "_")
 	})
-	
+
 	s.T().Run("should fail to import same account twice", func(t *testing.T) {
 		ethAccRes := testutils.FakeETHAccountResponse()
 		defer gock.Off()
@@ -283,7 +283,6 @@ func (s *identityManagerTransactionTestSuite) TestIdentityManager_ZHealthCheck()
 	type healthRes struct {
 		KeyManager    string `json:"key-manager,omitempty"`
 		ChainRegistry string `json:"chain-registry,omitempty"`
-		TxScheduler   string `json:"transaction-scheduler,omitempty"`
 		Database      string `json:"database,omitempty"`
 	}
 
@@ -295,7 +294,6 @@ func (s *identityManagerTransactionTestSuite) TestIdentityManager_ZHealthCheck()
 		assert.NoError(s.T(), err)
 
 		gock.New(keyManagerMetricsURL).Get("/live").Reply(200)
-		gock.New(txSchedulerMetricsURL).Get("/live").Reply(200)
 		gock.New(chainRegistryMetricsURL).Get("/live").Reply(200)
 		defer gock.Off()
 
@@ -312,7 +310,6 @@ func (s *identityManagerTransactionTestSuite) TestIdentityManager_ZHealthCheck()
 		assert.Equal(s.T(), "OK", status.Database)
 		assert.Equal(s.T(), "OK", status.KeyManager)
 		assert.Equal(s.T(), "OK", status.ChainRegistry)
-		assert.Equal(s.T(), "OK", status.TxScheduler)
 	})
 
 	s.T().Run("should retrieve a negative health check over key-manager API service", func(t *testing.T) {
@@ -320,7 +317,6 @@ func (s *identityManagerTransactionTestSuite) TestIdentityManager_ZHealthCheck()
 		assert.NoError(s.T(), err)
 
 		gock.New(keyManagerMetricsURL).Get("/live").Reply(500)
-		gock.New(txSchedulerMetricsURL).Get("/live").Reply(200)
 		gock.New(chainRegistryMetricsURL).Get("/live").Reply(200)
 		defer gock.Off()
 
@@ -337,7 +333,6 @@ func (s *identityManagerTransactionTestSuite) TestIdentityManager_ZHealthCheck()
 		assert.Equal(s.T(), "OK", status.Database)
 		assert.NotEqual(s.T(), "OK", status.KeyManager)
 		assert.Equal(s.T(), "OK", status.ChainRegistry)
-		assert.Equal(s.T(), "OK", status.TxScheduler)
 	})
 
 	s.T().Run("should retrieve a negative health check over chain-registry API service", func(t *testing.T) {
@@ -345,7 +340,6 @@ func (s *identityManagerTransactionTestSuite) TestIdentityManager_ZHealthCheck()
 		assert.NoError(s.T(), err)
 
 		gock.New(keyManagerMetricsURL).Get("/live").Reply(200)
-		gock.New(txSchedulerMetricsURL).Get("/live").Reply(200)
 		gock.New(chainRegistryMetricsURL).Get("/live").Reply(500)
 		defer gock.Off()
 
@@ -362,32 +356,6 @@ func (s *identityManagerTransactionTestSuite) TestIdentityManager_ZHealthCheck()
 		assert.Equal(s.T(), "OK", status.Database)
 		assert.Equal(s.T(), "OK", status.KeyManager)
 		assert.NotEqual(s.T(), "OK", status.ChainRegistry)
-		assert.Equal(s.T(), "OK", status.TxScheduler)
-	})
-
-	s.T().Run("should retrieve a negative health check over tx-scheduler API service", func(t *testing.T) {
-		req, err := http2.NewRequest("GET", fmt.Sprintf("%s/ready?full=1", s.env.metricsURL), nil)
-		assert.NoError(s.T(), err)
-
-		gock.New(keyManagerMetricsURL).Get("/live").Reply(200)
-		gock.New(txSchedulerMetricsURL).Get("/live").Reply(500)
-		gock.New(chainRegistryMetricsURL).Get("/live").Reply(200)
-		defer gock.Off()
-
-		resp, err := httpClient.Do(req)
-		if err != nil {
-			assert.Fail(s.T(), err.Error())
-			return
-		}
-
-		assert.Equal(s.T(), 503, resp.StatusCode)
-		status := healthRes{}
-		err = json.UnmarshalBody(resp.Body, &status)
-		assert.NoError(s.T(), err)
-		assert.Equal(s.T(), "OK", status.Database)
-		assert.Equal(s.T(), "OK", status.KeyManager)
-		assert.Equal(s.T(), "OK", status.ChainRegistry)
-		assert.NotEqual(s.T(), "OK", status.TxScheduler)
 	})
 
 	s.T().Run("should retrieve a negative health check over postgres service", func(t *testing.T) {
@@ -395,7 +363,6 @@ func (s *identityManagerTransactionTestSuite) TestIdentityManager_ZHealthCheck()
 		assert.NoError(s.T(), err)
 
 		gock.New(keyManagerMetricsURL).Get("/live").Reply(200)
-		gock.New(txSchedulerMetricsURL).Get("/live").Reply(200)
 		gock.New(chainRegistryMetricsURL).Get("/live").Reply(200)
 		defer gock.Off()
 
@@ -419,6 +386,5 @@ func (s *identityManagerTransactionTestSuite) TestIdentityManager_ZHealthCheck()
 		assert.NotEqual(s.T(), "OK", status.Database)
 		assert.Equal(s.T(), "OK", status.KeyManager)
 		assert.Equal(s.T(), "OK", status.ChainRegistry)
-		assert.Equal(s.T(), "OK", status.TxScheduler)
 	})
 }

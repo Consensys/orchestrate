@@ -155,8 +155,8 @@ Feature: Verify HTTP Endpoints
     When I send "GET" request to "{{global.identity-manager-metrics}}/ready?full=1"
     Then the response code should be 200
     And Response should have the following fields
-      | chain-registry | transaction-scheduler | database | key-manager |
-      | OK             | OK                    | OK       | OK          |
+      | chain-registry | database | key-manager |
+      | OK             | OK       | OK          |
 
   Scenario: Get Identity Manager liveness
     When I send "GET" request to "{{global.identity-manager-metrics}}/live"

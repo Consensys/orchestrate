@@ -24,14 +24,12 @@ func TestApp(t *testing.T) {
 	keyManagerClient := mock.NewMockKeyManagerClient(ctrl)
 	chainRegistryClient := mock2.NewMockChainRegistryClient(ctrl)
 	txSchedulerClient := mock3.NewMockTransactionSchedulerClient(ctrl)
-	
 
 	cfg := NewConfig(viper.New())
 	cfg.Store.Type = "postgres"
 
-	keyManagerClient.EXPECT().Checker().Return(func() error {return nil})
-	chainRegistryClient.EXPECT().Checker().Return(func() error {return nil})
-	txSchedulerClient.EXPECT().Checker().Return(func() error {return nil})
+	keyManagerClient.EXPECT().Checker().Return(func() error { return nil })
+	chainRegistryClient.EXPECT().Checker().Return(func() error { return nil })
 	_, err := NewIdentityManager(cfg, postgres.GetManager(), jwtChecker, keyChecker, keyManagerClient, chainRegistryClient, txSchedulerClient)
 	assert.NoError(t, err, "Creating App should not error")
 }
