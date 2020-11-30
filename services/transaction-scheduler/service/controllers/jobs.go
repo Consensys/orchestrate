@@ -169,7 +169,7 @@ func (c *JobsController) start(rw http.ResponseWriter, request *http.Request) {
 // @Success 202
 // @Failure 404 {object} httputil.ErrorResponse "Job not found"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
-// @Router /jobs/{uuid}/resent [put]
+// @Router /jobs/{uuid}/resend [put]
 func (c *JobsController) resend(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	ctx := request.Context()

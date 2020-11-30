@@ -1213,7 +1213,7 @@
                 },
                 "message": {
                     "type": "string",
-                    "example": "invalid status update for the current job state"
+                    "example": "error message"
                 }
             }
         },

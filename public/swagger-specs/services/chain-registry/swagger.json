@@ -35,7 +35,19 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.Chain"
+                                "allOf": [
+                                    {
+                                        "$ref": "#/definitions/models.Chain"
+                                    },
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "privateTxManagers": {
+                                                "$ref": "#/definitions/models.PrivateTxManagerModel"
+                                            }
+                                        }
+                                    }
+                                ]
                             }
                         }
                     },
@@ -76,7 +88,22 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/chains.PostRequest"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/chains.PostRequest"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "listener": {
+                                            "$ref": "#/definitions/chains.ListenerPatchRequest"
+                                        },
+                                        "privateTxManager": {
+                                            "$ref": "#/definitions/chains.PrivateTxManagerRequest"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     }
                 ],
@@ -84,7 +111,19 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Chain"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Chain"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "privateTxManagers": {
+                                            "$ref": "#/definitions/models.PrivateTxManagerModel"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -129,7 +168,19 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Chain"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Chain"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "privateTxManagers": {
+                                            "$ref": "#/definitions/models.PrivateTxManagerModel"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -228,7 +279,22 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/chains.PatchRequest"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/chains.PatchRequest"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "listener": {
+                                            "$ref": "#/definitions/chains.ListenerPatchRequest"
+                                        },
+                                        "privateTxManager": {
+                                            "$ref": "#/definitions/chains.PrivateTxManagerRequest"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     }
                 ],
@@ -236,7 +302,19 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Chain"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/models.Chain"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "privateTxManagers": {
+                                            "$ref": "#/definitions/models.PrivateTxManagerModel"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -273,7 +351,7 @@
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Retrieves a list of all registered faucet",
+                "summary": "Retrieves a list of all registered faucets",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -535,7 +613,7 @@
                         }
                     },
                     "404": {
-                        "description": "Chain not found",
+                        "description": "Faucet not found",
                         "schema": {
                             "$ref": "#/definitions/httputil.ErrorResponse"
                         }
@@ -575,16 +653,20 @@
             "type": "object",
             "properties": {
                 "backOffDuration": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "1s"
                 },
                 "currentBlock": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 0
                 },
                 "depth": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 0
                 },
                 "externalTxEnabled": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "example": false
                 }
             }
         },
@@ -592,16 +674,20 @@
             "type": "object",
             "properties": {
                 "backOffDuration": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "1s"
                 },
                 "depth": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 0
                 },
                 "externalTxEnabled": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "example": false
                 },
                 "fromBlock": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "latest"
                 }
             }
         },
@@ -613,7 +699,8 @@
                     "$ref": "#/definitions/chains.ListenerPatchRequest"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "mainnet"
                 },
                 "privateTxManager": {
                     "type": "object",
@@ -623,7 +710,10 @@
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "example": [
+                        "https://mainnet.infura.io/v3/a73136601e6f4924a0baa4ed880b535e"
+                    ]
                 }
             }
         },
@@ -639,7 +729,8 @@
                     "$ref": "#/definitions/chains.ListenerPostRequest"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "mainnet"
                 },
                 "privateTxManager": {
                     "type": "object",
@@ -649,7 +740,10 @@
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "example": [
+                        "https://mainnet.infura.io/v3/a73136601e6f4924a0baa4ed880b535e"
+                    ]
                 }
             }
         },
@@ -657,10 +751,12 @@
             "type": "object",
             "properties": {
                 "type": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Tessera"
                 },
                 "url": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "http://tessera:3000"
                 }
             }
         },
@@ -668,22 +764,28 @@
             "type": "object",
             "properties": {
                 "amount": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "60000000000000000 (wei)"
                 },
                 "chainRule": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "mainnet"
                 },
                 "cooldown": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "10s"
                 },
                 "creditorAccount": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"
                 },
                 "maxBalance": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "100000000000000000 (wei)"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "faucet-mainnet"
                 }
             }
         },
@@ -699,22 +801,28 @@
             ],
             "properties": {
                 "amount": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "60000000000000000 (wei)"
                 },
                 "chainRule": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "mainnet"
                 },
                 "cooldown": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "10s"
                 },
                 "creditorAccount": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"
                 },
                 "maxBalance": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "100000000000000000 (wei)"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "faucet-mainnet"
                 }
             }
         },
@@ -727,7 +835,7 @@
                 },
                 "message": {
                     "type": "string",
-                    "example": "invalid status update for the current job state"
+                    "example": "error message"
                 }
             }
         },
@@ -738,51 +846,63 @@
             ],
             "properties": {
                 "chainID": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "1"
                 },
                 "createdAt": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2020-07-09T12:35:42.115395Z"
                 },
                 "listenerBackOffDuration": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "1s"
                 },
                 "listenerCurrentBlock": {
                     "type": "string",
                     "example": "0"
                 },
                 "listenerDepth": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 0
                 },
                 "listenerExternalTxEnabled": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "example": false
                 },
                 "listenerStartingBlock": {
                     "type": "string",
                     "example": "0"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "mainnet"
                 },
                 "privateTxManagers": {
                     "type": "array",
                     "items": {
-                        "type": "PrivateTxManagerModel"
+                        "$ref": "#/definitions/models.PrivateTxManagerModel"
                     }
                 },
                 "tenantID": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "tenant"
                 },
                 "updatedAt": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2020-07-09T12:35:42.115395Z"
                 },
                 "urls": {
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "example": [
+                        "https://mainnet.infura.io/v3/a73136601e6f4924a0baa4ed880b535e"
+                    ]
                 },
                 "uuid": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
                 }
             }
         },
@@ -790,34 +910,73 @@
             "type": "object",
             "properties": {
                 "amount": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "60000000000000000 (wei)"
                 },
                 "chainRule": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "mainnet"
                 },
                 "cooldown": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "10s"
                 },
                 "createdAt": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2020-07-09T12:35:42.115395Z"
                 },
                 "creditorAccountAddress": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"
                 },
                 "maxBalance": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "100000000000000000 (wei)"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "faucet-mainnet"
                 },
                 "tenantID": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "tenant"
                 },
                 "updatedAt": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2020-07-09T12:35:42.115395Z"
                 },
                 "uuid": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
+                }
+            }
+        },
+        "models.PrivateTxManagerModel": {
+            "type": "object",
+            "required": [
+                "type",
+                "url"
+            ],
+            "properties": {
+                "chainUUID": {
+                    "type": "string",
+                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
+                },
+                "createdAt": {
+                    "type": "string",
+                    "example": "2020-07-09T12:35:42.115395Z"
+                },
+                "type": {
+                    "type": "string",
+                    "example": "Tessera"
+                },
+                "url": {
+                    "type": "string",
+                    "example": "http://tessera:3000"
+                },
+                "uuid": {
+                    "type": "string",
+                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
                 }
             }
         }

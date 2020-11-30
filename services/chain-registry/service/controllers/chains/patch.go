@@ -17,8 +17,8 @@ import (
 // @Security ApiKeyAuth
 // @Security JWTAuth
 // @Param uuid path string true "ID of the chain"
-// @Param request body PatchRequest true "Chain update request"
-// @Success 200 {object} models.Chain
+// @Param request body PatchRequest{listener=chains.ListenerPatchRequest,privateTxManager=chains.PrivateTxManagerRequest} true "Chain update request"
+// @Success 200 {object} models.Chain{privateTxManagers=models.PrivateTxManagerModel}
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 404 {object} httputil.ErrorResponse "Chain not found"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"

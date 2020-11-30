@@ -15,7 +15,7 @@ import (
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Success 200 {array} models.Chain
+// @Success 200 {array} models.Chain{privateTxManagers=models.PrivateTxManagerModel}
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /chains [get]
@@ -46,7 +46,7 @@ func (h *controller) GetChains(rw http.ResponseWriter, request *http.Request) {
 // @Security ApiKeyAuth
 // @Security JWTAuth
 // @Param uuid path string true "ID of the chain"
-// @Success 200 {object} models.Chain
+// @Success 200 {object} models.Chain{privateTxManagers=models.PrivateTxManagerModel}
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 404 {object} httputil.ErrorResponse "Chain not found"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"

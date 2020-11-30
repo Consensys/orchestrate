@@ -18,8 +18,8 @@ const latestBlockStr string = "latest"
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Param request body PostRequest true "Chain registration request"
-// @Success 200 {object} models.Chain
+// @Param request body PostRequest{listener=chains.ListenerPatchRequest,privateTxManager=chains.PrivateTxManagerRequest} true "Chain registration request"
+// @Success 200 {object} models.Chain{privateTxManagers=models.PrivateTxManagerModel}
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /chains [post]

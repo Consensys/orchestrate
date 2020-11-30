@@ -11,18 +11,18 @@ import (
 type Chain struct {
 	tableName struct{} `pg:"chains"` // nolint:unused,structcheck // reason
 
-	UUID                      string                   `json:"uuid" pg:",pk"`
-	Name                      string                   `json:"name" validate:"required_with=UUID"`
-	TenantID                  string                   `json:"tenantID" validate:"required_with=UUID"`
-	URLs                      []string                 `json:"urls" pg:"urls,array" validate:"required_with=UUID,unique,dive,url"`
-	ChainID                   string                   `json:"chainID" validate:"required_with=UUID"`
-	ListenerDepth             *uint64                  `json:"listenerDepth,omitempty"`
-	ListenerCurrentBlock      *uint64                  `json:"listenerCurrentBlock,string,omitempty"`
-	ListenerStartingBlock     *uint64                  `json:"listenerStartingBlock,string,omitempty"`
-	ListenerBackOffDuration   *string                  `json:"listenerBackOffDuration,omitempty" validate:"required_with=UUID,omitempty,isDuration"`
-	ListenerExternalTxEnabled *bool                    `json:"listenerExternalTxEnabled,omitempty"`
-	CreatedAt                 *time.Time               `json:"createdAt" pg:"default:now()"`
-	UpdatedAt                 *time.Time               `json:"updatedAt,omitempty"`
+	UUID                      string                   `json:"uuid" pg:",pk" example:"b4374e6f-b28a-4bad-b4fe-bda36eaf849c"`
+	Name                      string                   `json:"name" validate:"required_with=UUID" example:"mainnet"`
+	TenantID                  string                   `json:"tenantID" validate:"required_with=UUID" example:"tenant"`
+	URLs                      []string                 `json:"urls" pg:"urls,array" validate:"required_with=UUID,unique,dive,url" example:"https://mainnet.infura.io/v3/a73136601e6f4924a0baa4ed880b535e"`
+	ChainID                   string                   `json:"chainID" validate:"required_with=UUID" example:"1"`
+	ListenerDepth             *uint64                  `json:"listenerDepth,omitempty" example:"0"`
+	ListenerCurrentBlock      *uint64                  `json:"listenerCurrentBlock,string,omitempty" example:"0"`
+	ListenerStartingBlock     *uint64                  `json:"listenerStartingBlock,string,omitempty" example:"0"`
+	ListenerBackOffDuration   *string                  `json:"listenerBackOffDuration,omitempty" validate:"required_with=UUID,omitempty,isDuration" example:"1s"`
+	ListenerExternalTxEnabled *bool                    `json:"listenerExternalTxEnabled,omitempty" example:"false"`
+	CreatedAt                 *time.Time               `json:"createdAt" pg:"default:now()" example:"2020-07-09T12:35:42.115395Z"`
+	UpdatedAt                 *time.Time               `json:"updatedAt,omitempty" example:"2020-07-09T12:35:42.115395Z"`
 	PrivateTxManagers         []*PrivateTxManagerModel `json:"privateTxManagers,omitempty" pg:"-" validate:"omitempty,dive,required"`
 }
 

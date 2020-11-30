@@ -20,7 +20,7 @@ import (
 // @Param request body PatchRequest true "Faucet update request"
 // @Success 200 {object} models.Faucet
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
-// @Failure 404 {object} httputil.ErrorResponse "Chain not found"
+// @Failure 404 {object} httputil.ErrorResponse "Faucet not found"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /faucets/{uuid} [patch]
 func (h *controller) PatchFaucet(rw http.ResponseWriter, request *http.Request) {

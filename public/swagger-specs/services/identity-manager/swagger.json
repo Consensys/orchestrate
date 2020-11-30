@@ -385,17 +385,13 @@
                 },
                 "message": {
                     "type": "string",
-                    "example": "invalid status update for the current job state"
+                    "example": "error message"
                 }
             }
         },
         "identitymanager.AccountResponse": {
             "type": "object",
             "properties": {
-                "active": {
-                    "type": "boolean",
-                    "example": true
-                },
                 "address": {
                     "type": "string",
                     "example": "1abae27a0cbfb02945720425d3b80c7e09728534"

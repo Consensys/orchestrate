@@ -18,7 +18,7 @@ import (
 var _ models.Faucet
 var _ chainregistry.Faucet
 
-// @Summary Retrieves a list of all registered faucet
+// @Summary Retrieves a list of all registered faucets
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth

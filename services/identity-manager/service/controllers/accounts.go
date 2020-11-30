@@ -98,7 +98,7 @@ func (c *IdentitiesController) getOne(rw http.ResponseWriter, request *http.Requ
 }
 
 // @Summary Search accounts by provided filters
-// @Description Get a list of filtered identities
+// @Description Get a list of filtered accounts
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -174,7 +174,7 @@ func (c *IdentitiesController) importKey(rw http.ResponseWriter, request *http.R
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Param request body identitymanager.UpdateAccountRequest{} true "Account update request"
+// @Param request body identitymanager.UpdateAccountRequest true "Account update request"
 // @Success 200 {object} identitymanager.AccountResponse "Account found"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 401 {object} httputil.ErrorResponse "Unauthorized"
@@ -210,7 +210,7 @@ func (c *IdentitiesController) update(rw http.ResponseWriter, request *http.Requ
 }
 
 // @Summary Sign arbitrary data
-// @Description Sign sent data using provided address
+// @Description Sign sent data using provided account
 // @Accept json
 // @Produce text/plain
 // @Security ApiKeyAuth
