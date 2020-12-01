@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/app"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/hashicorp"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http"
 	httpmetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/metrics"
 	metricregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/metrics/registry"
@@ -15,6 +16,7 @@ import (
 func Flags(f *pflag.FlagSet) {
 	store.Flags(f)
 	http.Flags(f)
+	hashicorp.InitFlags(f)
 	metricregistry.Flags(f, httpmetrics.ModuleName, tcpmetrics.ModuleName)
 }
 

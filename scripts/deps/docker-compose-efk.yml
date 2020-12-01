@@ -21,7 +21,7 @@ services:
     user: root
     command: ./filebeat -e -c filebeat.yml -strict.perms=false -v -e -d autodiscover,docker
     volumes:
-      - ./config/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
       - /var/lib/docker:/var/lib/docker:ro
       - /var/run/docker.sock:/var/run/docker.sock
 

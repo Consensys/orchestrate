@@ -201,6 +201,7 @@ services:
     restart: "no"
     depends_on:
       - identity-manager-migration-init
+      - key-manager
     command: identity-manager migrate up
 
   identity-manager:
@@ -213,17 +214,32 @@ services:
       <<: *identity-manager-common
     depends_on:
       - identity-manager-migration
+      - key-manager
     command: identity-manager run
 
+  #  TODO: Remove after version 2.7.0
+  keymanager-migration-import-secrets:
+    <<: *container-common
+    environment:
+      <<: *default-variables
+      <<: *key-manager-common
+    restart: "no"
+    depends_on:
+      - key-vault-init
+    command: key-manager migrate import-secrets
+    volumes:
+      - vault-token:/vault/token:ro
+      - ./build/bin/orchestrate:/bin/main
+
   key-vault-init:
-    build: ./scripts/deps/config/hashicorp
+    build: ./scripts/deps/hashicorp
     environment:
       VAULT_ADDR: ${VAULT_ADDR-http://vault:8200}
     networks:
       - orchestrate
     volumes:
       - vault-token:/vault/token
-      - ./scripts/deps/config/hashicorp/renew.sh:/renew.sh
+      - ./scripts/deps/hashicorp/renew.sh:/renew.sh
     command: sh /renew.sh
 
   key-manager:
@@ -260,7 +276,6 @@ services:
     environment:
       <<: *default-variables
       JAEGER_SERVICE_NAME: TX-SIGNER
-      SECRET_PKEY: ${SECRET_PKEY-}
       SECRET_STORE: ${SECRET_STORE-hashicorp}
     volumes:
       - vault-token:/vault/token:ro

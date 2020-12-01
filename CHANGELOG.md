@@ -9,11 +9,16 @@
     * orchestrate_transaction_scheduler_job_latency_seconds: Histogram of job latency between status (second). Except PENDING and MINED (Histogram)
     * orchestrate_transaction_scheduler_mined_latency_seconds Histogram of latency between PENDING and MINED (Histogram)
     * orchestrate_transaction_listener_current_block: Last block processed by each listening session (Counter)
+* Integrate Orchestrate HashiCorp plugin
 
 ### ⚠ BREAKING CHANGES
 
 * Remove account-generator and account-generated topic
 * JAEGER service is set as disabled by default
+* Remove support of `kv-v2` HashiCorp engine. Migration steps:
+    1. Instantiate HashiCorp with both engines: `kv-v2` and `orchestrate`
+    1. Fill up ENV variables: `VAULT_V2_SECRET_PATH`, `VAULT_V2_MOUNT_POINT`, `VAULT_V2_TOKEN_FILE`
+    1. Run command: `orchestrate key-manager migrate import-secrets` 
 
 ## v2.5.3 (2020-11-26)
 

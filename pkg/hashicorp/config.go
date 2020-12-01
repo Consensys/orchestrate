@@ -41,9 +41,6 @@ func init() {
 	viper.SetDefault(vaultMountPointViperKey, vaultMountPointDefault)
 	_ = viper.BindEnv(vaultMountPointViperKey, vaultMountPointEnv)
 
-	viper.SetDefault(vaultSecretPathViperKey, vaultSecretPathDefault)
-	_ = viper.BindEnv(vaultSecretPathViperKey, vaultSecretPathEnv)
-
 	viper.SetDefault(vaultRateLimitViperKey, vaultRateLimitDefault)
 	_ = viper.BindEnv(vaultRateLimitViperKey, vaultRateLimitEnv)
 
@@ -81,7 +78,6 @@ func init() {
 const (
 	vaultTokenFilePathEnv = "VAULT_TOKEN_FILE"
 	vaultMountPointEnv    = "VAULT_MOUNT_POINT"
-	vaultSecretPathEnv    = "VAULT_SECRET_PATH"
 	vaultRateLimitEnv     = "VAULT_RATE_LIMIT"
 	vaultBurstLimitEnv    = "VAULT_BURST_LIMIT"
 	vaultAddrEnv          = "VAULT_ADDR"
@@ -96,7 +92,6 @@ const (
 
 	vaultTokenFilePathFlag = "vault-token-file"
 	vaultMountPointFlag    = "vault-mount-point"
-	vaultSecretPathFlag    = "vault-secret-path"
 	vaultRateLimitFlag     = "vault-rate-limit"
 	vaultBurstLimitFlag    = "vault-burst-limit"
 	vaultAddrFlag          = "vault-addr"
@@ -111,7 +106,6 @@ const (
 
 	vaultTokenFilePathViperKey = "vault.token.file"
 	vaultMountPointViperKey    = "vault.mount.point"
-	vaultSecretPathViperKey    = "vault.secret.path"
 	vaultRateLimitViperKey     = "vault.rate.limit"
 	vaultBurstLimitViperKey    = "vault.burst.limit"
 	vaultAddrViperKey          = "vault.addr"
@@ -127,7 +121,6 @@ const (
 	// No need to redefine the default here
 	vaultTokenFilePathDefault = "/vault/token/.vault-token"
 	vaultMountPointDefault    = "orchestrate"
-	vaultSecretPathDefault    = "default"
 	vaultRateLimitDefault     = float64(0)
 	vaultBurstLimitDefault    = int(0)
 	vaultAddrDefault          = "https://127.0.0.1:8200"
@@ -153,7 +146,6 @@ func InitFlags(f *pflag.FlagSet) {
 	vaultMaxRetries(f)
 	vaultMountPoint(f)
 	vaultRateLimit(f)
-	vaultSecretPath(f)
 	vaultSkipVerify(f)
 	vaultTLSServerName(f)
 	vaultTokenFilePath(f)
@@ -172,13 +164,6 @@ func vaultMountPoint(f *pflag.FlagSet) {
 Environment variable: %q `, vaultMountPointEnv)
 	f.String(vaultMountPointFlag, vaultMountPointDefault, desc)
 	_ = viper.BindPFlag(vaultMountPointViperKey, f.Lookup(vaultMountPointFlag))
-}
-
-func vaultSecretPath(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Hashicorp secret path
-Environment variable: %q`, vaultSecretPathEnv)
-	f.String(vaultSecretPathFlag, vaultSecretPathDefault, desc)
-	_ = viper.BindPFlag(vaultSecretPathViperKey, f.Lookup(vaultSecretPathFlag))
 }
 
 func vaultRateLimit(f *pflag.FlagSet) {
@@ -271,7 +256,6 @@ func ConfigFromViper() *Config {
 		MaxRetries:    viper.GetInt(vaultMaxRetriesViperKey),
 		MountPoint:    viper.GetString(vaultMountPointViperKey),
 		RateLimit:     viper.GetFloat64(vaultRateLimitViperKey),
-		SecretPath:    viper.GetString(vaultSecretPathViperKey),
 		SkipVerify:    viper.GetBool(vaultSkipVerifyViperKey),
 		TLSServerName: viper.GetString(vaultTLSServerNameViperKey),
 		TokenFilePath: viper.GetString(vaultTokenFilePathViperKey),

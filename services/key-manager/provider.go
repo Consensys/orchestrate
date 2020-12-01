@@ -34,7 +34,7 @@ func NewInternalConfig() *dynamic.Configuration {
 			EntryPoints: []string{http.DefaultHTTPAppEntryPoint},
 			Service:     "ethereum",
 			Priority:    math.MaxInt32,
-			Rule:        "PathPrefix(`/ethereum/accounts`)",
+			Rule:        "PathPrefix(`/ethereum`)",
 			Middlewares: []string{"base@logger-base"},
 		},
 	}

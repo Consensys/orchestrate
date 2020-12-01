@@ -41,6 +41,7 @@ func Start(ctx context.Context) error {
 
 	initComponents(ctx)
 	registerHandlers()
+
 	if err := importTestIdentities(ctx); err != nil {
 		return err
 	}

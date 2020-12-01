@@ -126,6 +126,51 @@ func (mr *MockEthereumAccountClientMockRecorder) ETHSignEEATransaction(ctx, addr
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHSignEEATransaction", reflect.TypeOf((*MockEthereumAccountClient)(nil).ETHSignEEATransaction), ctx, address, request)
 }
 
+// ETHListAccounts mocks base method
+func (m *MockEthereumAccountClient) ETHListAccounts(ctx context.Context, namespace string) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ETHListAccounts", ctx, namespace)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ETHListAccounts indicates an expected call of ETHListAccounts
+func (mr *MockEthereumAccountClientMockRecorder) ETHListAccounts(ctx, namespace interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHListAccounts", reflect.TypeOf((*MockEthereumAccountClient)(nil).ETHListAccounts), ctx, namespace)
+}
+
+// ETHListNamespaces mocks base method
+func (m *MockEthereumAccountClient) ETHListNamespaces(ctx context.Context) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ETHListNamespaces", ctx)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ETHListNamespaces indicates an expected call of ETHListNamespaces
+func (mr *MockEthereumAccountClientMockRecorder) ETHListNamespaces(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHListNamespaces", reflect.TypeOf((*MockEthereumAccountClient)(nil).ETHListNamespaces), ctx)
+}
+
+// ETHGetAccount mocks base method
+func (m *MockEthereumAccountClient) ETHGetAccount(ctx context.Context, address, namespace string) (*ethereum.ETHAccountResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ETHGetAccount", ctx, address, namespace)
+	ret0, _ := ret[0].(*ethereum.ETHAccountResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ETHGetAccount indicates an expected call of ETHGetAccount
+func (mr *MockEthereumAccountClientMockRecorder) ETHGetAccount(ctx, address, namespace interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHGetAccount", reflect.TypeOf((*MockEthereumAccountClient)(nil).ETHGetAccount), ctx, address, namespace)
+}
+
 // MockKeyManagerClient is a mock of KeyManagerClient interface
 type MockKeyManagerClient struct {
 	ctrl     *gomock.Controller
@@ -251,4 +296,49 @@ func (m *MockKeyManagerClient) ETHSignEEATransaction(ctx context.Context, addres
 func (mr *MockKeyManagerClientMockRecorder) ETHSignEEATransaction(ctx, address, request interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHSignEEATransaction", reflect.TypeOf((*MockKeyManagerClient)(nil).ETHSignEEATransaction), ctx, address, request)
+}
+
+// ETHListAccounts mocks base method
+func (m *MockKeyManagerClient) ETHListAccounts(ctx context.Context, namespace string) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ETHListAccounts", ctx, namespace)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ETHListAccounts indicates an expected call of ETHListAccounts
+func (mr *MockKeyManagerClientMockRecorder) ETHListAccounts(ctx, namespace interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHListAccounts", reflect.TypeOf((*MockKeyManagerClient)(nil).ETHListAccounts), ctx, namespace)
+}
+
+// ETHListNamespaces mocks base method
+func (m *MockKeyManagerClient) ETHListNamespaces(ctx context.Context) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ETHListNamespaces", ctx)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ETHListNamespaces indicates an expected call of ETHListNamespaces
+func (mr *MockKeyManagerClientMockRecorder) ETHListNamespaces(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHListNamespaces", reflect.TypeOf((*MockKeyManagerClient)(nil).ETHListNamespaces), ctx)
+}
+
+// ETHGetAccount mocks base method
+func (m *MockKeyManagerClient) ETHGetAccount(ctx context.Context, address, namespace string) (*ethereum.ETHAccountResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ETHGetAccount", ctx, address, namespace)
+	ret0, _ := ret[0].(*ethereum.ETHAccountResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ETHGetAccount indicates an expected call of ETHGetAccount
+func (mr *MockKeyManagerClientMockRecorder) ETHGetAccount(ctx, address, namespace interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHGetAccount", reflect.TypeOf((*MockKeyManagerClient)(nil).ETHGetAccount), ctx, address, namespace)
 }

@@ -14,5 +14,8 @@ type Vault interface {
 	ETHSignTransaction(address string, request *types.SignETHTransactionRequest) (string, error)
 	ETHSignQuorumPrivateTransaction(address string, request *types.SignQuorumPrivateTransactionRequest) (string, error)
 	ETHSignEEATransaction(address string, request *types.SignEEATransactionRequest) (string, error)
+	ETHListAccounts(namespace string) ([]string, error)
+	ETHListNamespaces() ([]string, error)
+	ETHGetAccount(address string, namespace string) (*entities.ETHAccount, error)
 	HealthCheck() error
 }

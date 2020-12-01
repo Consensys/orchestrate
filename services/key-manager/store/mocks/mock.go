@@ -124,6 +124,51 @@ func (mr *MockVaultMockRecorder) ETHSignEEATransaction(address, request interfac
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHSignEEATransaction", reflect.TypeOf((*MockVault)(nil).ETHSignEEATransaction), address, request)
 }
 
+// ETHListAccounts mocks base method
+func (m *MockVault) ETHListAccounts(namespace string) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ETHListAccounts", namespace)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ETHListAccounts indicates an expected call of ETHListAccounts
+func (mr *MockVaultMockRecorder) ETHListAccounts(namespace interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHListAccounts", reflect.TypeOf((*MockVault)(nil).ETHListAccounts), namespace)
+}
+
+// ETHListNamespaces mocks base method
+func (m *MockVault) ETHListNamespaces() ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ETHListNamespaces")
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ETHListNamespaces indicates an expected call of ETHListNamespaces
+func (mr *MockVaultMockRecorder) ETHListNamespaces() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHListNamespaces", reflect.TypeOf((*MockVault)(nil).ETHListNamespaces))
+}
+
+// ETHGetAccount mocks base method
+func (m *MockVault) ETHGetAccount(address, namespace string) (*entities.ETHAccount, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ETHGetAccount", address, namespace)
+	ret0, _ := ret[0].(*entities.ETHAccount)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ETHGetAccount indicates an expected call of ETHGetAccount
+func (mr *MockVaultMockRecorder) ETHGetAccount(address, namespace interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHGetAccount", reflect.TypeOf((*MockVault)(nil).ETHGetAccount), address, namespace)
+}
+
 // HealthCheck mocks base method
 func (m *MockVault) HealthCheck() error {
 	m.ctrl.T.Helper()

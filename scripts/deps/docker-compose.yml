@@ -48,7 +48,7 @@ services:
     ports:
       - 6379:6379
     volumes:
-      - ./config/redis/redis.conf:/usr/local/etc/redis/redis.conf
+      - ./redis/config/redis.conf:/usr/local/etc/redis/redis.conf
 
   #  redis:
   #    <<: *container-common
@@ -58,8 +58,8 @@ services:
   #      - 6379:6379
   #      - 6378:6378
   #    volumes:
-  #      - ./config/redis/stunnel.conf:/etc/stunnel/stunnel.conf
-  #      - ./config/redis/redis-auth.conf:/etc/redis/redis.conf
+  #      - ./redis/config/stunnel.conf:/etc/stunnel/stunnel.conf
+  #      - ./redis/config/redis-auth.conf:/etc/redis/redis.conf
   #      - ./redis/init.sh:/init.sh
   #    command: sh /init.sh
 
@@ -116,15 +116,15 @@ services:
     cap_add:
       - IPC_LOCK
     volumes:
-      - ./config/hashicorp/config.hcl:/vault/config.hcl:ro
-      - ./config/hashicorp/orchestrate-hashicorp-vault-plugin:/vault/plugins/orchestrate
+      - ./hashicorp/config/config.hcl:/vault/config.hcl:ro
+      - ./hashicorp/plugins/orchestrate-hashicorp-vault-plugin:/vault/plugins/orchestrate
     entrypoint: vault server -config=/vault/config.hcl
     ports:
       - 8200:8200
 
   vault-init:
     <<: *container-common
-    build: ./config/hashicorp
+    build: ./hashicorp
     environment:
       VAULT_ADDR: ${VAULT_ADDR-http://vault:8200}
     restart: "no"
@@ -132,9 +132,23 @@ services:
       - vault
     volumes:
       - vault-token:/vault/token
-      - ./config/hashicorp/init.sh:/init.sh
-      - ./config/hashicorp/orchestrate-hashicorp-vault-plugin:/vault/plugins/orchestrate
+      - ./hashicorp/init.sh:/init.sh
+      - ./hashicorp/plugins/orchestrate-hashicorp-vault-plugin:/vault/plugins/orchestrate
     command: sh /init.sh
+
+  vault-import-secrets:
+    <<: *container-common
+    build: ./hashicorp
+    environment:
+      VAULT_ADDR: ${VAULT_ADDR-http://vault:8200}
+    restart: "no"
+    depends_on:
+      - vault
+      - vault-init
+    volumes:
+      - vault-token:/vault/token:ro
+      - ./hashicorp/kv-v2/secrets_to_engine.sh:/import.sh
+    command: bash -c "/import.sh"
 
   jaeger:
     <<: *container-common

@@ -146,3 +146,60 @@ func (c HTTPClient) ETHSignEEATransaction(ctx context.Context, address string, r
 	defer clientutils.CloseResponse(response)
 	return httputil.ParseStringResponse(ctx, response)
 }
+
+func (c HTTPClient) ETHListAccounts(ctx context.Context, namespace string) ([]string, error) {
+	reqURL := fmt.Sprintf("%v/ethereum/accounts", c.config.URL)
+	if namespace != "" {
+		reqURL += fmt.Sprintf("?namespace=%s", namespace)
+	}
+
+	response, err := clientutils.GetRequest(ctx, c.client, reqURL)
+	if err != nil {
+		errMessage := "error while listing accounts"
+		log.FromContext(ctx).WithError(err).Error(errMessage)
+		return []string{}, errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+	}
+
+	defer clientutils.CloseResponse(response)
+	var resp []string
+	err = httputil.ParseResponse(ctx, response, &resp)
+	return resp, err
+}
+
+func (c HTTPClient) ETHListNamespaces(ctx context.Context) ([]string, error) {
+	reqURL := fmt.Sprintf("%v/ethereum/namespaces", c.config.URL)
+
+	response, err := clientutils.GetRequest(ctx, c.client, reqURL)
+	if err != nil {
+		errMessage := "error while listing namespaces"
+		log.FromContext(ctx).WithError(err).Error(errMessage)
+		return []string{}, errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+	}
+
+	defer clientutils.CloseResponse(response)
+	var resp []string
+	err = httputil.ParseResponse(ctx, response, &resp)
+	return resp, err
+}
+
+func (c HTTPClient) ETHGetAccount(ctx context.Context, address, namespace string) (*types.ETHAccountResponse, error) {
+	resp := &types.ETHAccountResponse{}
+	reqURL := fmt.Sprintf("%v/ethereum/accounts/%s", c.config.URL, address)
+	if namespace != "" {
+		reqURL += fmt.Sprintf("?namespace=%s", namespace)
+	}
+
+	response, err := clientutils.GetRequest(ctx, c.client, reqURL)
+	if err != nil {
+		errMessage := "error while getting account"
+		log.FromContext(ctx).WithError(err).Error(errMessage)
+		return nil, errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+	}
+
+	defer clientutils.CloseResponse(response)
+	if err := httputil.ParseResponse(ctx, response, resp); err != nil {
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
+
+	return resp, nil
+}

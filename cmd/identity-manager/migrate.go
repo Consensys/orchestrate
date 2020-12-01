@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database/postgres"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/identity-manager/store/postgres/migrations"
+	keyManagerClient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client"
 )
 
 // newMigrateCmd create migrate command
@@ -38,6 +39,9 @@ func newMigrateCmd() *cobra.Command {
 
 	// Postgres flags
 	postgres.PGFlags(migrateCmd.Flags())
+
+	// Key-Manager init
+	keyManagerClient.Init()
 
 	// Register Init command
 	initCmd := &cobra.Command{

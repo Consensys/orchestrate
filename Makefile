@@ -2,8 +2,8 @@ GOFILES := $(shell find . -name '*.go' -not -path "./vendor/*" | grep -v pkg/htt
 PACKAGES ?= $(shell go list ./... | grep -Fv -e e2e -e examples -e genstatic -e mock )
 INTEGRATION_TEST_PACKAGES ?= $(shell go list ./... | grep integration-tests )
 ORCH_SERVICES = tx-crafter tx-signer tx-sender tx-listener contract-registry chain-registry transaction-scheduler identity-manager key-manager
-ORCH_MIGRATE = contract-registry chain-registry transaction-scheduler identity-manager
-DEPS_VAULT = vault-init vault
+ORCH_MIGRATE = contract-registry chain-registry transaction-scheduler identity-manager key-manager
+DEPS_VAULT = vault-init vault vault-import-secrets
 DEPS_POSTGRES_REDIS = postgres-chain-registry postgres-contract-registry postgres-transaction-scheduler postgres-identity-manager redis
 DEPS_KAFKA = jaeger zookeeper kafka
 
@@ -193,7 +193,7 @@ postgres:
 down-postgres:
 	@docker-compose -f scripts/deps/docker-compose.yml rm --force -s -v postgres-unit
 
-up: deps-persistent quorum geth besu deps-kafka bootstrap-deps orchestrate ## Start Orchestrate and deps
+up: deps-persistent quorum geth besu deps-kafka hashicorp-vault-import-secrets bootstrap-deps orchestrate ## Start Orchestrate and deps
 
 down: down-orchestrate down-quorum down-geth down-besu down-deps  ## Down Orchestrate and deps
 
@@ -202,13 +202,16 @@ up-ci: deps-persistent quorum geth besu deps-kafka bootstrap-deps ci-orchestrate
 up-azure: deps-persistent quorum geth besu bootstrap orchestrate ## Start Blockchain and Orchestrate to be connect to Azure Event Hub
 
 hashicorp-accounts:
-	@bash scripts/deps/config/hashicorp/vault.sh kv list secret/default
+	@bash scripts/deps/hashicorp/vault.sh kv list secret/default
 
 hashicorp-token-lookup:
-	@bash scripts/deps/config/hashicorp/vault.sh token lookup
+	@bash scripts/deps/hashicorp/vault.sh token lookup
 
 hashicorp-vault:
-	@bash scripts/deps/config/hashicorp/vault.sh $(COMMAND)
+	@bash scripts/deps/hashicorp/vault.sh $(COMMAND)
+
+hashicorp-vault-import-secrets: gobuild
+	@docker-compose up -d keymanager-migration-import-secrets
 
 pgadmin:
 	@docker-compose -f scripts/deps/docker-compose-tools.yml up -d pgadmin

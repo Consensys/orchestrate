@@ -21,8 +21,8 @@ services:
     restart: unless-stopped
     volumes:
       - pgadmin:/root/.pgadmin
-      - ./config/pgadmin/servers.json:/pgadmin4/servers.json
-      - ./config/pgadmin/password:/pgadmin4/password
+      - ./pgadmin/servers.json:/pgadmin4/servers.json
+      - ./pgadmin/password:/pgadmin4/password
     ports:
       - 9001:80
     networks:
@@ -44,7 +44,7 @@ services:
     command:
       - --config.file=/etc/prometheus/prometheus.yml
     volumes:
-      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     networks:
       - orchestrate
 
@@ -57,7 +57,7 @@ services:
     ports:
       - 3000:3000
     volumes:
-      - ./config/grafana/datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
+      - ./grafana/datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
     networks:
       - orchestrate
 
@@ -66,7 +66,7 @@ services:
     ports:
       - 4545:4545
     volumes:
-      - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
     networks:
       - orchestrate
 
@@ -86,7 +86,6 @@ volumes:
   portainer_data:
   pgadmin:
     driver: local
-
 
 networks:
   orchestrate:

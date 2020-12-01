@@ -2,6 +2,7 @@ package hashicorp
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -64,13 +65,17 @@ func (c *OrchestrateVaultClient) ETHCreateAccount(namespace string) (*entities.E
 	log.WithField("token", c.client.Token()).Info("Token before HTTP call")
 
 	c.client.SetNamespace(namespace)
-	response, err := c.client.Logical().Write(path.Join(c.config.MountPoint, "ethereum/accounts"), nil)
+	res, err := c.client.Logical().Write(path.Join(c.config.MountPoint, "ethereum/accounts"), nil)
 	if err != nil {
 		return nil, parseErrorResponse(err)
 	}
 
+	if res == nil || res.Data == nil {
+		return nil, nil
+	}
+
 	ethAccount := &entities.ETHAccount{}
-	err = parseResponse(response.Data, ethAccount)
+	err = parseResponse(res.Data, ethAccount)
 	if err != nil {
 		return nil, err
 	}
@@ -80,15 +85,19 @@ func (c *OrchestrateVaultClient) ETHCreateAccount(namespace string) (*entities.E
 
 func (c *OrchestrateVaultClient) ETHImportAccount(namespace, privateKey string) (*entities.ETHAccount, error) {
 	c.client.SetNamespace(namespace)
-	response, err := c.client.Logical().Write(path.Join(c.config.MountPoint, "ethereum/accounts/import"), map[string]interface{}{
+	res, err := c.client.Logical().Write(path.Join(c.config.MountPoint, "ethereum/accounts/import"), map[string]interface{}{
 		"privateKey": privateKey,
 	})
 	if err != nil {
 		return nil, parseErrorResponse(err)
 	}
 
+	if res == nil || res.Data == nil {
+		return nil, nil
+	}
+
 	ethAccount := &entities.ETHAccount{}
-	err = parseResponse(response.Data, ethAccount)
+	err = parseResponse(res.Data, ethAccount)
 	if err != nil {
 		return nil, err
 	}
@@ -98,19 +107,23 @@ func (c *OrchestrateVaultClient) ETHImportAccount(namespace, privateKey string) 
 
 func (c *OrchestrateVaultClient) ETHSign(address, namespace, data string) (string, error) {
 	c.client.SetNamespace(namespace)
-	response, err := c.client.Logical().Write(path.Join(c.config.MountPoint, "ethereum/accounts", address, "sign"), map[string]interface{}{
+	res, err := c.client.Logical().Write(path.Join(c.config.MountPoint, "ethereum/accounts", address, "sign"), map[string]interface{}{
 		dataLabel: data,
 	})
 	if err != nil {
 		return "", parseErrorResponse(err)
 	}
 
-	return response.Data[signatureLabel].(string), nil
+	if res == nil || res.Data == nil {
+		return "", nil
+	}
+
+	return res.Data[signatureLabel].(string), nil
 }
 
 func (c *OrchestrateVaultClient) ETHSignTransaction(address string, request *types.SignETHTransactionRequest) (string, error) {
 	c.client.SetNamespace(request.Namespace)
-	response, err := c.client.Logical().Write(path.Join(c.config.MountPoint, "ethereum/accounts", address, "sign-transaction"), map[string]interface{}{
+	res, err := c.client.Logical().Write(path.Join(c.config.MountPoint, "ethereum/accounts", address, "sign-transaction"), map[string]interface{}{
 		dataLabel:     request.Data,
 		chainIDLabel:  request.ChainID,
 		toLabel:       request.To,
@@ -123,12 +136,16 @@ func (c *OrchestrateVaultClient) ETHSignTransaction(address string, request *typ
 		return "", parseErrorResponse(err)
 	}
 
-	return response.Data[signatureLabel].(string), nil
+	if res == nil || res.Data == nil {
+		return "", nil
+	}
+
+	return res.Data[signatureLabel].(string), nil
 }
 
 func (c *OrchestrateVaultClient) ETHSignQuorumPrivateTransaction(address string, request *types.SignQuorumPrivateTransactionRequest) (string, error) {
 	c.client.SetNamespace(request.Namespace)
-	response, err := c.client.Logical().Write(path.Join(c.config.MountPoint, "ethereum/accounts", address, "sign-quorum-private-transaction"), map[string]interface{}{
+	res, err := c.client.Logical().Write(path.Join(c.config.MountPoint, "ethereum/accounts", address, "sign-quorum-private-transaction"), map[string]interface{}{
 		dataLabel:     request.Data,
 		toLabel:       request.To,
 		gasPriceLabel: request.GasPrice,
@@ -140,12 +157,16 @@ func (c *OrchestrateVaultClient) ETHSignQuorumPrivateTransaction(address string,
 		return "", parseErrorResponse(err)
 	}
 
-	return response.Data[signatureLabel].(string), nil
+	if res == nil || res.Data == nil {
+		return "", nil
+	}
+
+	return res.Data[signatureLabel].(string), nil
 }
 
 func (c *OrchestrateVaultClient) ETHSignEEATransaction(address string, request *types.SignEEATransactionRequest) (string, error) {
 	c.client.SetNamespace(request.Namespace)
-	response, err := c.client.Logical().Write(path.Join(c.config.MountPoint, "ethereum/accounts", address, "sign-eea-transaction"), map[string]interface{}{
+	res, err := c.client.Logical().Write(path.Join(c.config.MountPoint, "ethereum/accounts", address, "sign-eea-transaction"), map[string]interface{}{
 		dataLabel:        request.Data,
 		toLabel:          request.To,
 		chainIDLabel:     request.ChainID,
@@ -158,7 +179,78 @@ func (c *OrchestrateVaultClient) ETHSignEEATransaction(address string, request *
 		return "", parseErrorResponse(err)
 	}
 
-	return response.Data[signatureLabel].(string), nil
+	if res == nil || res.Data == nil {
+		return "", nil
+	}
+
+	return res.Data[signatureLabel].(string), nil
+}
+
+func (c *OrchestrateVaultClient) ETHListAccounts(namespace string) ([]string, error) {
+	c.client.SetNamespace(namespace)
+	res, err := c.client.Logical().List(path.Join(c.config.MountPoint, "ethereum/accounts"))
+	if err != nil {
+		return []string{}, parseErrorResponse(err)
+	}
+
+	if res == nil || res.Data == nil {
+		return []string{}, nil
+	}
+
+	secrets, ok := res.Data["keys"].([]interface{})
+	if !ok {
+		return []string{}, nil
+	}
+
+	rv := make([]string, len(secrets))
+	for i, elem := range secrets {
+		rv[i] = fmt.Sprintf("%v", elem)
+	}
+
+	return rv, nil
+}
+
+func (c *OrchestrateVaultClient) ETHListNamespaces() ([]string, error) {
+	res, err := c.client.Logical().List(path.Join(c.config.MountPoint, "ethereum/namespaces"))
+	if err != nil {
+		return []string{}, parseErrorResponse(err)
+	}
+
+	if res == nil || res.Data == nil {
+		return []string{}, nil
+	}
+
+	secrets, ok := res.Data["keys"].([]interface{})
+	if !ok {
+		return []string{}, nil
+	}
+
+	rv := make([]string, len(secrets))
+	for i, elem := range secrets {
+		rv[i] = fmt.Sprintf("%v", elem)
+	}
+
+	return rv, nil
+}
+
+func (c *OrchestrateVaultClient) ETHGetAccount(address, namespace string) (*entities.ETHAccount, error) {
+	c.client.SetNamespace(namespace)
+	res, err := c.client.Logical().Read(path.Join(c.config.MountPoint, "ethereum/accounts", address))
+	if err != nil {
+		return nil, parseErrorResponse(err)
+	}
+
+	if res == nil || res.Data == nil {
+		return nil, nil
+	}
+
+	ethAccount := &entities.ETHAccount{}
+	err = parseResponse(res.Data, ethAccount)
+	if err != nil {
+		return nil, err
+	}
+
+	return ethAccount, nil
 }
 
 func (c *OrchestrateVaultClient) HealthCheck() error {

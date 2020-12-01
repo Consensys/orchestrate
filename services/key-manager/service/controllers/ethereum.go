@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/store"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager"
@@ -16,7 +17,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/service/formatters"
 )
 
-const Path = "/ethereum/accounts"
+const ethAccountPath = "/ethereum/accounts"
 
 type EthereumController struct {
 	vault store.Vault
@@ -28,12 +29,16 @@ func NewEthereumController(vault store.Vault) *EthereumController {
 
 // Add routes to router
 func (c *EthereumController) Append(router *mux.Router) {
-	router.Methods(http.MethodPost).Path(Path).HandlerFunc(c.createAccount)
-	router.Methods(http.MethodPost).Path(Path + "/import").HandlerFunc(c.importAccount)
-	router.Methods(http.MethodPost).Path(Path + "/{address}/sign").HandlerFunc(c.signPayload)
-	router.Methods(http.MethodPost).Path(Path + "/{address}/sign-transaction").HandlerFunc(c.signTransaction)
-	router.Methods(http.MethodPost).Path(Path + "/{address}/sign-eea-transaction").HandlerFunc(c.signEEA)
-	router.Methods(http.MethodPost).Path(Path + "/{address}/sign-quorum-private-transaction").HandlerFunc(c.signQuorumPrivate)
+	router.Methods(http.MethodGet).Path("/ethereum/namespaces").HandlerFunc(c.listNamespaces)
+
+	router.Methods(http.MethodPost).Path(ethAccountPath).HandlerFunc(c.createAccount)
+	router.Methods(http.MethodGet).Path(ethAccountPath).HandlerFunc(c.listAccounts)
+	router.Methods(http.MethodPost).Path(ethAccountPath + "/import").HandlerFunc(c.importAccount)
+	router.Methods(http.MethodPost).Path(ethAccountPath + "/{address}/sign").HandlerFunc(c.signPayload)
+	router.Methods(http.MethodGet).Path(ethAccountPath + "/{address}").HandlerFunc(c.getAccount)
+	router.Methods(http.MethodPost).Path(ethAccountPath + "/{address}/sign-transaction").HandlerFunc(c.signTransaction)
+	router.Methods(http.MethodPost).Path(ethAccountPath + "/{address}/sign-eea-transaction").HandlerFunc(c.signEEA)
+	router.Methods(http.MethodPost).Path(ethAccountPath + "/{address}/sign-quorum-private-transaction").HandlerFunc(c.signQuorumPrivate)
 }
 
 // @Summary Creates a new Ethereum Account
@@ -62,6 +67,69 @@ func (c *EthereumController) createAccount(rw http.ResponseWriter, request *http
 	}
 
 	_ = json.NewEncoder(rw).Encode(formatters.FormatETHAccountResponse(accountResponse))
+}
+
+// @Summary List Ethereum Accounts
+// @Description List stored ethereum account in the Vault
+// @Produce json
+// @Success 200 {object} []string "List of ethereum public accounts"
+// @Failure 500 {object} httputil.ErrorResponse "Internal server error"
+// @Router /ethereum/accounts [get]
+func (c *EthereumController) listAccounts(rw http.ResponseWriter, req *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+
+	namespace := req.URL.Query().Get("namespace")
+
+	accountAddrs, err := c.vault.ETHListAccounts(namespace)
+	if err != nil {
+		httputil.WriteHTTPErrorResponse(rw, err)
+		return
+	}
+
+	_ = json.NewEncoder(rw).Encode(accountAddrs)
+}
+
+// @Summary List Ethereum Namespaces
+// @Description List ethereum namespaces in the Vault
+// @Produce json
+// @Success 200 {object} []string "List of ethereum public namespaces"
+// @Failure 500 {object} httputil.ErrorResponse "Internal server error"
+// @Router /ethereum/namespaces [get]
+func (c *EthereumController) listNamespaces(rw http.ResponseWriter, req *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+
+	namespaces, err := c.vault.ETHListNamespaces()
+	if err != nil {
+		httputil.WriteHTTPErrorResponse(rw, err)
+		return
+	}
+
+	_ = json.NewEncoder(rw).Encode(namespaces)
+}
+
+// @Summary Fetch Ethereum Account
+// @Description Get selected stored ethereum account in the Vault
+// @Produce json
+// @Success 200 {object} ethereum.ETHAccountResponse "Ethereum account"
+// @Failure 500 {object} httputil.ErrorResponse "Internal server error"
+// @Router /ethereum/accounts/{address} [get]
+func (c *EthereumController) getAccount(rw http.ResponseWriter, req *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+
+	address := mux.Vars(req)["address"]
+	namespace := req.URL.Query().Get("namespace")
+
+	ethAcc, err := c.vault.ETHGetAccount(address, namespace)
+	if err != nil {
+		httputil.WriteHTTPErrorResponse(rw, err)
+		return
+	}
+	if ethAcc == nil {
+		httputil.WriteHTTPErrorResponse(rw, errors.NotFoundError("account not found"))
+		return
+	}
+
+	_ = json.NewEncoder(rw).Encode(ethAcc)
 }
 
 // @Summary Imports an Ethereum Account
