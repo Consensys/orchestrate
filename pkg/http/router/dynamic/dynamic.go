@@ -194,6 +194,28 @@ func (b *Builder) buildMiddleware(ctx context.Context, routerName string, rtInfo
 	chain := alice.New()
 	var respModifiers []func(resp *http.Response) error
 	var rvErr error
+
+	// Add metrics middleware
+	if b.Metrics != nil {
+		mid, respModifier, err := b.Metrics.Build(
+			ctx,
+			fmt.Sprintf("%v:%v", routerName, "metrics"),
+			nil,
+		)
+		if err != nil {
+			log.FromContext(ctx).WithError(err).Error("could not build metrics middleware")
+			rvErr = err
+		} else {
+			if mid != nil {
+				chain = chain.Append(mid)
+			}
+
+			if respModifier != nil {
+				respModifiers = append(respModifiers, respModifier)
+			}
+		}
+	}
+
 	for _, midName := range rtInfo.Middlewares {
 		midCtx := httputil.WithMiddleware(ctx, midName)
 		logger := log.FromContext(midCtx).WithField("middleware", midName)
@@ -261,27 +283,6 @@ func (b *Builder) buildMiddleware(ctx context.Context, routerName string, rtInfo
 	if accessLog != nil {
 		log.FromContext(ctx).Debugf("add entrypoint accesslog")
 		chain = alice.New(accessLog).Extend(chain)
-	}
-
-	// Add metrics middleware
-	if b.Metrics != nil {
-		mid, respModifier, err := b.Metrics.Build(
-			ctx,
-			fmt.Sprintf("%v:%v", routerName, "metrics"),
-			nil,
-		)
-		if err != nil {
-			log.FromContext(ctx).WithError(err).Error("could not build metrics middleware")
-			rvErr = err
-		} else {
-			if mid != nil {
-				chain = chain.Append(mid)
-			}
-
-			if respModifier != nil {
-				respModifiers = append(respModifiers, respModifier)
-			}
-		}
 	}
 
 	return chain.Then, httputil.CombineResponseModifiers(respModifiers...), rvErr

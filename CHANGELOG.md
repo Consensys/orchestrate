@@ -11,6 +11,9 @@
     * orchestrate_transaction_listener_current_block: Last block processed by each listening session (Counter)
 * Integrate Orchestrate HashiCorp plugin
 
+### 🛠 Bug fixes
+* Incorrect counting of 429 http responses
+
 ### ⚠ BREAKING CHANGES
 
 * Remove account-generator and account-generated topic

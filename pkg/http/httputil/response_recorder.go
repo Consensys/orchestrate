@@ -9,35 +9,38 @@ import (
 
 type WriterRecorder interface {
 	http.ResponseWriter
+	CloseNotify() <-chan bool
 	GetCode() int
 }
 
 func NewResponseWriterRecorder(rw http.ResponseWriter) WriterRecorder {
-	return &ResponseWriterRecorder{
+	return &responseWriterRecorder{
 		ResponseWriter: rw,
 		statusCode:     http.StatusOK,
+		closeNotifyCh:  make(chan bool, 1),
 	}
 }
 
 // ResponseWriterRecorder captures information from the response and preserves it for
 // later analysis.
-type ResponseWriterRecorder struct {
+type responseWriterRecorder struct {
 	http.ResponseWriter
-	statusCode int
+	statusCode    int
+	closeNotifyCh chan bool
 }
 
-func (rec *ResponseWriterRecorder) GetCode() int {
+func (rec *responseWriterRecorder) GetCode() int {
 	return rec.statusCode
 }
 
 // WriteHeader captures the status code for later retrieval.
-func (rec *ResponseWriterRecorder) WriteHeader(status int) {
+func (rec *responseWriterRecorder) WriteHeader(status int) {
 	rec.ResponseWriter.WriteHeader(status)
 	rec.statusCode = status
 }
 
 // Hijack hijacks the connection
-func (rec *ResponseWriterRecorder) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+func (rec *responseWriterRecorder) Hijack() (net.Conn, *bufio.ReadWriter, error) {
 	if h, ok := rec.ResponseWriter.(http.Hijacker); ok {
 		return h.Hijack()
 	}
@@ -45,8 +48,17 @@ func (rec *ResponseWriterRecorder) Hijack() (net.Conn, *bufio.ReadWriter, error)
 }
 
 // Flush sends any buffered data to the client.
-func (rec *ResponseWriterRecorder) Flush() {
+func (rec *responseWriterRecorder) Flush() {
 	if f, ok := rec.ResponseWriter.(http.Flusher); ok {
 		f.Flush()
 	}
+}
+
+func (rec *responseWriterRecorder) CloseNotify() <-chan bool {
+	// This will panic if rw is not an http.CloseNotifier
+	if rw2, ok := rec.ResponseWriter.(http.CloseNotifier); ok { //nolint
+		return rw2.CloseNotify()
+	}
+
+	return rec.closeNotifyCh
 }

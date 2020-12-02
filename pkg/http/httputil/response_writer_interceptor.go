@@ -66,7 +66,11 @@ func (i *ResponseWriterInterceptor) Interceptor() WriterInterceptor {
 
 func (i *ResponseWriterInterceptor) CloseNotify() <-chan bool {
 	// This will panic if rw is not an http.CloseNotifier
-	return i.rw.(http.CloseNotifier).CloseNotify() //nolint
+	if rw2, ok := i.rw.(http.CloseNotifier); ok { //nolint
+		return rw2.CloseNotify()
+	}
+
+	return i.closeNotifyCh
 }
 
 func (i *ResponseWriterInterceptor) Flush() {
