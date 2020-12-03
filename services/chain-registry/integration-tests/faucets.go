@@ -5,29 +5,28 @@ package integrationtests
 import (
 	"context"
 	"fmt"
-	"math/rand"
-	"testing"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/store/models"
+	"math/rand"
+	"testing"
 )
 
-// JobsTestSuite is a test suite for Transaction API jobs controller
-type HttpFaucetTestSuite struct {
+// faucetTestSuite is a test suite for faucet API
+type faucetTestSuite struct {
 	suite.Suite
 	baseURL string
 	client  client.FaucetClient
 	env     *IntegrationEnvironment
 }
 
-func (s *HttpFaucetTestSuite) SetupSuite() {
+func (s *faucetTestSuite) SetupSuite() {
 	s.client = client.DialWithDefaultOptions(s.baseURL)
 }
 
-func (s *HttpFaucetTestSuite) TestChainRegistry_FaucetHappyFlow() {
+func (s *faucetTestSuite) TestChainRegistry_FaucetHappyFlow() {
 	ctx := context.Background()
 	faucetName := fmt.Sprintf("TestFaucet%d", rand.Intn(1000))
 	faucetNameTwo := fmt.Sprintf("TestFaucet%d", rand.Intn(1000))
@@ -43,8 +42,11 @@ func (s *HttpFaucetTestSuite) TestChainRegistry_FaucetHappyFlow() {
 			Cooldown:        "1s",
 		}
 		resp, err := s.client.RegisterFaucet(ctx, &faucet)
+		if err != nil {
+			assert.Fail(t, err.Error())
+			return
+		}
 
-		assert.NoError(t, err)
 		assert.NotEmpty(t, resp.UUID)
 		faucetUUID = resp.UUID
 	})
@@ -58,7 +60,11 @@ func (s *HttpFaucetTestSuite) TestChainRegistry_FaucetHappyFlow() {
 		assert.NoError(t, err)
 
 		faucet, err = s.client.GetFaucetByUUID(ctx, faucetUUID)
-		assert.NoError(t, err)
+		if err != nil {
+			assert.Fail(t, err.Error())
+			return
+		}
+
 		assert.Equal(t, faucet.Name, faucetNameTwo)
 	})
 

@@ -22,9 +22,10 @@ import (
 )
 
 const (
-	notFoundErrorMessage       = "chain does not exist"
-	invalidRequestErrorMessage = "invalid request"
-	failedToFetchErrorMessage  = "failed to fetch chain"
+	notFoundErrorMessage            = "chain does not exist"
+	invalidRequestErrorMessage      = "invalid request"
+	unprocessableEntityErrorMessage = "unprocessable entity"
+	failedToFetchErrorMessage       = "failed to fetch chain"
 )
 
 type HTTPClient struct {
@@ -69,6 +70,7 @@ func (c *HTTPClient) GetChains(ctx context.Context) ([]*models.Chain, error) {
 }
 
 func (c *HTTPClient) GetChainByName(ctx context.Context, chainName string) (*models.Chain, error) {
+	logger := log.WithContext(ctx).WithField("chain_name", chainName)
 	reqURL := fmt.Sprintf("%v/chains?name=%s", c.config.URL, chainName)
 
 	response, err := c.getRequest(ctx, reqURL)
@@ -91,11 +93,11 @@ func (c *HTTPClient) GetChainByName(ctx context.Context, chainName string) (*mod
 
 		return chainsResult[0], nil
 	case http.StatusNotFound:
-		log.WithContext(ctx).WithError(err).WithField("chain_name", chainName).Error(notFoundErrorMessage)
+		logger.WithError(err).Error(notFoundErrorMessage)
 		return nil, errors.NotFoundError(notFoundErrorMessage)
 	case http.StatusBadRequest:
-		log.WithContext(ctx).WithError(err).WithField("chain_name", chainName).Error(invalidRequestErrorMessage)
-		return nil, errors.InvalidParameterError(invalidRequestErrorMessage)
+		logger.WithError(err).Error(invalidRequestErrorMessage)
+		return nil, errors.InvalidFormatError(invalidRequestErrorMessage)
 	default:
 		log.WithContext(ctx).WithError(err).WithField("chain_name", chainName).Error(failedToFetchErrorMessage)
 		return nil, errors.ServiceConnectionError(failedToFetchErrorMessage)
@@ -161,7 +163,7 @@ func (c *HTTPClient) RegisterChain(ctx context.Context, chain *models.Chain) (*m
 	}
 
 	if len(chain.PrivateTxManagers) > 1 {
-		err := errors.DataError("maximum one element in PrivateTxManagers is allowed")
+		err := errors.InvalidFormatError("maximum one element in PrivateTxManagers is allowed")
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
 
@@ -173,7 +175,6 @@ func (c *HTTPClient) RegisterChain(ctx context.Context, chain *models.Chain) (*m
 	}
 
 	response, err := c.postRequest(ctx, reqURL, &postReq)
-
 	if err != nil {
 		return nil, err
 	}
@@ -217,7 +218,7 @@ func (c *HTTPClient) UpdateChainByUUID(ctx context.Context, chainUUID string, ch
 	}
 
 	if len(chain.PrivateTxManagers) > 1 {
-		err := errors.DataError("maximum one element in PrivateTxManagers is allowed")
+		err := errors.InvalidFormatError("maximum one element in PrivateTxManagers is allowed")
 		return errors.FromError(err).ExtendComponent(component)
 	}
 
@@ -238,6 +239,7 @@ func (c *HTTPClient) UpdateChainByUUID(ctx context.Context, chainUUID string, ch
 }
 
 func (c *HTTPClient) GetFaucetByUUID(ctx context.Context, faucetUUID string) (*models.Faucet, error) {
+	logger := log.WithContext(ctx).WithField("faucet_uuid", faucetUUID)
 	reqURL := fmt.Sprintf("%v/faucets/%s", c.config.URL, faucetUUID)
 
 	response, err := c.getRequest(ctx, reqURL)
@@ -256,13 +258,16 @@ func (c *HTTPClient) GetFaucetByUUID(ctx context.Context, faucetUUID string) (*m
 
 		return faucet, nil
 	case http.StatusNotFound:
-		log.WithContext(ctx).WithError(err).WithField("faucet_uuid", faucetUUID).Error(notFoundErrorMessage)
+		logger.WithError(err).Error(notFoundErrorMessage)
 		return nil, errors.NotFoundError("faucet does not exist")
 	case http.StatusBadRequest:
-		log.WithContext(ctx).WithError(err).WithField("faucet_uuid", faucetUUID).Error(invalidRequestErrorMessage)
-		return nil, errors.InvalidParameterError(invalidRequestErrorMessage)
+		logger.WithError(err).Error(invalidRequestErrorMessage)
+		return nil, errors.InvalidFormatError(invalidRequestErrorMessage)
+	case http.StatusUnprocessableEntity:
+		logger.WithError(err).Error(unprocessableEntityErrorMessage)
+		return nil, errors.InvalidParameterError(unprocessableEntityErrorMessage)
 	default:
-		log.WithContext(ctx).WithError(err).WithField("faucet_uuid", faucetUUID).Error(failedToFetchErrorMessage)
+		logger.WithError(err).Error(failedToFetchErrorMessage)
 		return nil, errors.ServiceConnectionError("failed to fetch faucet")
 	}
 }
@@ -430,7 +435,7 @@ func (c *HTTPClient) postRequest(ctx context.Context, reqURL string, postRequest
 
 	if r.StatusCode != http.StatusOK {
 		if r.StatusCode == http.StatusBadRequest {
-			return nil, errors.DataError(body.String())
+			return nil, errors.InvalidFormatError(body.String())
 		}
 
 		return nil, errors.FromError(fmt.Errorf("POST request: %s failed with error %d", reqURL, r.StatusCode)).ExtendComponent(component)
@@ -451,7 +456,7 @@ func (c *HTTPClient) patchRequest(ctx context.Context, reqURL string, patchReque
 
 	if r.StatusCode != http.StatusOK {
 		if r.StatusCode == http.StatusBadRequest {
-			return nil, errors.DataError(body.String())
+			return nil, errors.InvalidFormatError(body.String())
 		}
 
 		return nil, errors.FromError(fmt.Errorf("PATH request: %s failed with error %d", reqURL, r.StatusCode)).ExtendComponent(component)

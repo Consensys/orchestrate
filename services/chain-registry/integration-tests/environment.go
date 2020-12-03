@@ -3,6 +3,7 @@ package integrationtests
 import (
 	"context"
 	"fmt"
+	"os"
 	"strconv"
 	"time"
 
@@ -12,43 +13,59 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database/postgres"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/docker"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/docker/config"
+	ganacheDocker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/docker/container/ganache"
 	postgresDocker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/docker/container/postgres"
 	httputils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http"
 	integrationtest "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/integration-test"
+	logpkg "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/store/postgres/migrations"
 	"k8s.io/apimachinery/pkg/util/rand"
 )
 
 const postgresContainerID = "postgres-chain-registry"
+const ganacheContainerID = "ganache-chain-registry"
 
 var envPGHostPort string
 var envHTTPPort string
 var envMetricsPort string
+var envGanacheHostPort string
 
 type IntegrationEnvironment struct {
-	client     *docker.Client
-	pgmngr     postgres.Manager
-	logger     log.Logger
-	baseURL    string
-	metricsURL string
+	ctx               context.Context
+	client            *docker.Client
+	pgmngr            postgres.Manager
+	logger            log.Logger
+	baseURL           string
+	metricsURL        string
+	blockchainNodeURL string
 }
 
 func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, error) {
 	logger := log.FromContext(ctx)
 	envPGHostPort = strconv.Itoa(rand.IntnRange(10000, 15235))
+	envGanacheHostPort = strconv.Itoa(rand.IntnRange(10000, 15235))
 	envHTTPPort = strconv.Itoa(rand.IntnRange(20000, 28080))
 	envMetricsPort = strconv.Itoa(rand.IntnRange(30000, 38082))
 
+	// Define external hostname
+	ganacheExternalHostname := os.Getenv("GANACHE_HOST")
+	if ganacheExternalHostname == "" {
+		ganacheExternalHostname = "localhost"
+	}
+	blockchainNodeURL := fmt.Sprintf("http://%s:%s", ganacheExternalHostname, envGanacheHostPort)
+
 	// Initialize environment flags
-	flgs := pflag.NewFlagSet("transaction-scheduler-integration-test", pflag.ContinueOnError)
+	flgs := pflag.NewFlagSet("chain-registry-integration-test", pflag.ContinueOnError)
 	postgres.DBPort(flgs)
 	httputils.MetricFlags(flgs)
 	httputils.Flags(flgs)
+	logpkg.Level(flgs)
 	args := []string{
 		"--metrics-port=" + envMetricsPort,
 		"--rest-port=" + envHTTPPort,
 		"--db-port=" + envPGHostPort,
+		"--log-level=panic",
 	}
 
 	err := flgs.Parse(args)
@@ -60,6 +77,7 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 	composition := &config.Composition{
 		Containers: map[string]*config.Container{
 			postgresContainerID: {Postgres: postgresDocker.NewDefault().SetHostPort(envPGHostPort)},
+			ganacheContainerID:  {Ganache: ganacheDocker.NewDefault().SetHostPort(envGanacheHostPort).SetHost(ganacheExternalHostname)},
 		},
 	}
 
@@ -68,17 +86,17 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 		panic(err)
 	}
 
-	initChains := []string{`{"name":"geth","urls":["http://geth:8545"],"listenerStartingBlock":"0"}`,
-		`{"name":"besu","urls":["http://validator2:8545"],"listenerStartingBlock":"0"}`,
-		`{"name":"quorum","urls":["http://172.16.239.11:8545"],"listenerStartingBlock":"0","privateTxManagers":[{"url":"http://tessera1:9080","type":"Tessera"}]}`}
+	initChains := []string{fmt.Sprintf(`{"name":"ganache","urls":["%s"]}`, blockchainNodeURL)}
 	viper.SetDefault(chainregistry.InitViperKey, initChains)
 
 	return &IntegrationEnvironment{
-		client:     dockerClient,
-		pgmngr:     postgres.NewManager(),
-		logger:     logger,
-		baseURL:    "http://localhost:" + envHTTPPort,
-		metricsURL: "http://localhost:" + envMetricsPort,
+		ctx:               ctx,
+		client:            dockerClient,
+		pgmngr:            postgres.NewManager(),
+		logger:            logger,
+		baseURL:           "http://localhost:" + envHTTPPort,
+		metricsURL:        "http://localhost:" + envMetricsPort,
+		blockchainNodeURL: blockchainNodeURL,
 	}, nil
 }
 
@@ -92,6 +110,18 @@ func (env *IntegrationEnvironment) Start(ctx context.Context) error {
 	err = env.client.WaitTillIsReady(ctx, postgresContainerID, 10*time.Second)
 	if err != nil {
 		env.logger.WithError(err).Error("could not start postgres")
+		return err
+	}
+
+	// Start ganache
+	err = env.client.Up(ctx, ganacheContainerID, "")
+	if err != nil {
+		env.logger.WithError(err).Error("could not up ganache")
+		return err
+	}
+	err = env.client.WaitTillIsReady(ctx, ganacheContainerID, 10*time.Second)
+	if err != nil {
+		env.logger.WithError(err).Error("could not start ganache")
 		return err
 	}
 
@@ -121,15 +151,21 @@ func (env *IntegrationEnvironment) Start(ctx context.Context) error {
 func (env *IntegrationEnvironment) Teardown(ctx context.Context) {
 	log.WithoutContext().Infof("tearing test suite down")
 
-	err := env.client.Down(ctx, postgresContainerID)
+	err := chainregistry.Stop(ctx)
 	if err != nil {
-		env.logger.WithError(err).Errorf("could not down postgres")
+		env.logger.WithError(err).Errorf("could not stop chain-registry")
 		return
 	}
 
-	err = chainregistry.Stop(ctx)
+	err = env.client.Down(ctx, ganacheContainerID)
 	if err != nil {
-		env.logger.WithError(err).Errorf("could not stop chain-registry")
+		env.logger.WithError(err).Errorf("could not down ganache")
+		return
+	}
+
+	err = env.client.Down(ctx, postgresContainerID)
+	if err != nil {
+		env.logger.WithError(err).Errorf("could not down postgres")
 		return
 	}
 }

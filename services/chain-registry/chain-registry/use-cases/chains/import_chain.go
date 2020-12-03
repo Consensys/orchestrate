@@ -78,6 +78,7 @@ func (uc *importChain) Execute(ctx context.Context, chainEncodeJSON string) erro
 		"chainName": chain.Name,
 		"chainUUID": chain.UUID,
 		"tenantID":  chain.TenantID,
+		"chainID":   chain.ChainID,
 	}).Infof("imported chain from configuration")
 
 	return nil

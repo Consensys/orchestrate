@@ -4,20 +4,22 @@ package integrationtests
 
 import (
 	"context"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
 	integrationtest "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/integration-test"
 )
 
-type transactionSchedulerTestSuite struct {
+type chainRegistryTestSuite struct {
 	suite.Suite
 	env *IntegrationEnvironment
 	err error
 }
 
-func (s *transactionSchedulerTestSuite) SetupSuite() {
-	err := integrationtest.StartEnvironment(context.Background(), s.env)
+func (s *chainRegistryTestSuite) SetupSuite() {
+	err := integrationtest.StartEnvironment(s.env.ctx, s.env)
 	if err != nil {
 		s.env.logger.WithError(err).Error()
 		if s.err == nil {
@@ -29,7 +31,7 @@ func (s *transactionSchedulerTestSuite) SetupSuite() {
 	s.env.logger.Infof("setup test suite has completed")
 }
 
-func (s *transactionSchedulerTestSuite) TearDownSuite() {
+func (s *chainRegistryTestSuite) TearDownSuite() {
 	s.env.Teardown(context.Background())
 
 	if s.err != nil {
@@ -38,25 +40,32 @@ func (s *transactionSchedulerTestSuite) TearDownSuite() {
 }
 
 func TestChainRegistry(t *testing.T) {
-	/* Skipping until we have a blockchain node running as tests will fail at the moment
-	s := new(transactionSchedulerTestSuite)
-	s.env, s.err = NewIntegrationEnvironment(context.Background())
+	s := new(chainRegistryTestSuite)
+	ctx, cancel := context.WithCancel(context.Background())
+
+	s.env, s.err = NewIntegrationEnvironment(ctx)
 	if s.err != nil {
-		t.Fail()
+		t.Errorf(s.err.Error())
 		return
 	}
-	suite.Run(t, s)*/
+
+	sig := utils.NewSignalListener(func(signal os.Signal) {
+		cancel()
+	})
+	defer sig.Close()
+
+	suite.Run(t, s)
 }
 
-func (s *transactionSchedulerTestSuite) TestChainRegistry_HTTPChain() {
-	httpSuite := new(HttpChainTestSuite)
+func (s *chainRegistryTestSuite) TestChainRegistry_Chains() {
+	httpSuite := new(chainsTestSuite)
 	httpSuite.env = s.env
 	httpSuite.baseURL = s.env.baseURL
 	suite.Run(s.T(), httpSuite)
 }
 
-func (s *transactionSchedulerTestSuite) TestChainRegistry_HTTPFaucet() {
-	httpSuite := new(HttpFaucetTestSuite)
+func (s *chainRegistryTestSuite) TestChainRegistry_Faucets() {
+	httpSuite := new(faucetTestSuite)
 	httpSuite.env = s.env
 	httpSuite.baseURL = s.env.baseURL
 	suite.Run(s.T(), httpSuite)

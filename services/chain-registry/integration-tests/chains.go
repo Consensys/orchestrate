@@ -5,11 +5,6 @@ package integrationtests
 import (
 	"context"
 	"fmt"
-	"math/rand"
-	http2 "net/http"
-	"testing"
-	"time"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/json"
@@ -18,96 +13,67 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/store/models"
+	"math/rand"
+	http2 "net/http"
+	"testing"
+	"time"
 )
 
-// JobsTestSuite is a test suite for Transaction API jobs controller
-type HttpChainTestSuite struct {
+// chainsTestSuite is a test suite for Chains API
+type chainsTestSuite struct {
 	suite.Suite
 	baseURL string
 	client  client.ChainClient
 	env     *IntegrationEnvironment
 }
 
-func (s *HttpChainTestSuite) SetupSuite() {
+func (s *chainsTestSuite) SetupSuite() {
 	s.client = client.DialWithDefaultOptions(s.baseURL)
 }
 
-func (s *HttpChainTestSuite) TestChainRegistry_EnvChainImport() {
-	ctx := context.Background()
-	chainNameGeth := "geth"
-	chainUrlGeth := "http://geth:8545"
-
-	chainNameBesu := "besu"
-	chainUrlBesu := "http://validator2:8545"
-
-	chainNameQuorum := "quorum"
-	chainUrlQuorum := "http://172.16.239.11:8545"
-
-	chainQuorumPrivTxType := utils.TesseraChainType
-	chainQuorumPrivTxURL := "http://tessera1:9080"
-
-	s.T().Run("should fetch env chain geth by name", func(t *testing.T) {
-		resp, err := s.client.GetChainByName(ctx, chainNameGeth)
-		assert.NoError(t, err)
-		assert.Equal(t, 1, len(resp.URLs), "should be one URLs")
-		if len(resp.URLs) == 1 {
-			assert.Equal(t, chainUrlGeth, resp.URLs[0])
-		}
-	})
-
-	s.T().Run("should fetch env chain besu by name", func(t *testing.T) {
-		resp, err := s.client.GetChainByName(ctx, chainNameBesu)
-		assert.NoError(t, err)
-		assert.Equal(t, 1, len(resp.URLs), "should be one URLs")
-		if len(resp.URLs) == 1 {
-			assert.Equal(t, chainUrlBesu, resp.URLs[0])
-		}
-	})
-
-	s.T().Run("should fetch env chain quorum by name", func(t *testing.T) {
-		resp, err := s.client.GetChainByName(ctx, chainNameQuorum)
-		assert.NoError(t, err)
-
-		assert.Equal(t, 1, len(resp.URLs), "should be one URLs")
-		if len(resp.URLs) == 1 {
-			assert.Equal(t, chainUrlQuorum, resp.URLs[0])
-		}
-
-		assert.Equal(t, 1, len(resp.PrivateTxManagers), "should be one PrivateTxManagers")
-		if len(resp.PrivateTxManagers) == 1 {
-			assert.Equal(t, chainQuorumPrivTxURL, resp.PrivateTxManagers[0].URL)
-			assert.Equal(t, chainQuorumPrivTxType, resp.PrivateTxManagers[0].Type)
-		}
-	})
-}
-
-func (s *HttpChainTestSuite) TestChainRegistry_ChainHappyFlow() {
+func (s *chainsTestSuite) TestChainRegistry_ChainHappyFlow() {
 	ctx := context.Background()
 	chainName := fmt.Sprintf("TestChain%d", rand.Intn(1000))
-	chainURL := "http://test1.com"
 	var curBlockNumber uint64 = 666
 	var chainUUID string
+
+	s.T().Run("should fetch imported chain by name", func(t *testing.T) {
+		resp, err := s.client.GetChainByName(ctx, "ganache")
+		if err != nil {
+			assert.Fail(t, err.Error())
+			return
+		}
+
+		assert.NotEmpty(t, resp.UUID)
+	})
 
 	s.T().Run("should register a new chain", func(t *testing.T) {
 		chain := models.Chain{
 			Name:                    chainName,
-			URLs:                    []string{chainURL},
+			URLs:                    []string{s.env.blockchainNodeURL},
 			ListenerBackOffDuration: &(&struct{ x string }{"1s"}).x,
 			ListenerDepth:           &(&struct{ x uint64 }{1}).x,
 			ListenerCurrentBlock:    &(&struct{ x uint64 }{1}).x,
 			ListenerStartingBlock:   &(&struct{ x uint64 }{1}).x,
 		}
 		resp, err := s.client.RegisterChain(ctx, &chain)
+		if err != nil {
+			assert.Fail(t, err.Error())
+			return
+		}
 
-		assert.NoError(t, err)
 		assert.NotEmpty(t, resp.UUID)
 		chainUUID = resp.UUID
 	})
 
 	s.T().Run("should fetch registered chain by name", func(t *testing.T) {
 		resp, err := s.client.GetChainByName(ctx, chainName)
-		assert.NoError(t, err)
-		assert.Equal(t, chainURL, resp.URLs[0])
+		if err != nil {
+			assert.Fail(t, err.Error())
+			return
+		}
+
+		assert.Equal(t, s.env.blockchainNodeURL, resp.URLs[0])
 	})
 
 	s.T().Run("should update registered chain by UUID", func(t *testing.T) {
@@ -120,8 +86,12 @@ func (s *HttpChainTestSuite) TestChainRegistry_ChainHappyFlow() {
 
 	s.T().Run("should fetch registered chain by UUID", func(t *testing.T) {
 		resp, err := s.client.GetChainByUUID(ctx, chainUUID)
-		assert.NoError(t, err)
-		assert.Equal(t, chainURL, resp.URLs[0])
+		if err != nil {
+			assert.Fail(t, err.Error())
+			return
+		}
+
+		assert.Equal(t, s.env.blockchainNodeURL, resp.URLs[0])
 		assert.Equal(t, curBlockNumber, *resp.ListenerCurrentBlock)
 	})
 
@@ -134,10 +104,9 @@ func (s *HttpChainTestSuite) TestChainRegistry_ChainHappyFlow() {
 	})
 }
 
-func (s *HttpChainTestSuite) TestChainRegistry_TesseraChainHappyFlow() {
+func (s *chainsTestSuite) TestChainRegistry_TesseraChainHappyFlow() {
 	ctx := context.Background()
 	chainName := fmt.Sprintf("TestTesseraChain%d", rand.Intn(1000))
-	chainURL := "http://172.16.239.11:8545"
 	privTxManagerURL := "http://172.16.239.11:8545"
 	privTxManagerURLTwo := "http://172.16.239.11:9080"
 	var chainUUID string
@@ -145,7 +114,7 @@ func (s *HttpChainTestSuite) TestChainRegistry_TesseraChainHappyFlow() {
 	s.T().Run("should register a new chain", func(t *testing.T) {
 		chain := models.Chain{
 			Name:                  chainName,
-			URLs:                  []string{chainURL},
+			URLs:                  []string{s.env.blockchainNodeURL},
 			ListenerStartingBlock: &(&struct{ x uint64 }{1}).x,
 			PrivateTxManagers: []*models.PrivateTxManagerModel{
 				{
@@ -157,13 +126,22 @@ func (s *HttpChainTestSuite) TestChainRegistry_TesseraChainHappyFlow() {
 		resp, err := s.client.RegisterChain(ctx, &chain)
 
 		assert.NoError(t, err)
+		if err != nil {
+			assert.Fail(t, err.Error())
+			return
+		}
+
 		assert.NotEmpty(t, resp.UUID)
 		chainUUID = resp.UUID
 	})
 
 	s.T().Run("should fetch registered chain by name", func(t *testing.T) {
 		resp, err := s.client.GetChainByName(ctx, chainName)
-		assert.NoError(t, err)
+		if err != nil {
+			assert.Fail(t, err.Error())
+			return
+		}
+
 		assert.Equal(t, privTxManagerURL, resp.PrivateTxManagers[0].URL)
 	})
 
@@ -182,7 +160,11 @@ func (s *HttpChainTestSuite) TestChainRegistry_TesseraChainHappyFlow() {
 
 	s.T().Run("should fetch registered chain by UUID", func(t *testing.T) {
 		resp, err := s.client.GetChainByUUID(ctx, chainUUID)
-		assert.NoError(t, err)
+		if err != nil {
+			assert.Fail(t, err.Error())
+			return
+		}
+
 		assert.Equal(t, 1, len(resp.PrivateTxManagers))
 		if len(resp.PrivateTxManagers) == 1 {
 			assert.Equal(t, privTxManagerURLTwo, resp.PrivateTxManagers[0].URL)
@@ -199,7 +181,7 @@ func (s *HttpChainTestSuite) TestChainRegistry_TesseraChainHappyFlow() {
 	})
 }
 
-func (s *HttpChainTestSuite) TestChainRegistry_ChainErrors() {
+func (s *chainsTestSuite) TestChainRegistry_ChainErrors() {
 	ctx := context.Background()
 	chainName := fmt.Sprintf("TestChainErr%d", rand.Intn(1000))
 	var chainUUID string
@@ -207,13 +189,12 @@ func (s *HttpChainTestSuite) TestChainRegistry_ChainErrors() {
 	s.T().Run("should fail to register a new invalid chain", func(t *testing.T) {
 		chain := models.Chain{
 			Name:                    chainName,
-			URLs:                    []string{"http://test1.com"},
+			URLs:                    []string{"http://invalid:8545"},
 			ListenerBackOffDuration: &(&struct{ x string }{"1000"}).x,
 		}
 		_, err := s.client.RegisterChain(ctx, &chain)
 
-		assert.Error(t, err)
-		assert.True(t, errors.IsDataError(err))
+		assert.True(t, errors.IsInvalidFormatError(err))
 	})
 
 	s.T().Run("should fail to register a new invalid chain", func(t *testing.T) {
@@ -224,31 +205,29 @@ func (s *HttpChainTestSuite) TestChainRegistry_ChainErrors() {
 		}
 		_, err := s.client.RegisterChain(ctx, &chain)
 
-		assert.Error(t, err)
-		assert.True(t, errors.IsDataError(err))
+		assert.True(t, errors.IsInvalidFormatError(err))
 	})
 
-	s.T().Run("should register a new chain", func(t *testing.T) {
+	s.T().Run("should fail to update chain by UUID with invalid data", func(t *testing.T) {
 		chain := models.Chain{
 			Name:                    chainName,
-			URLs:                    []string{"http://test1.com"},
+			URLs:                    []string{s.env.blockchainNodeURL},
 			ListenerBackOffDuration: &(&struct{ x string }{"1s"}).x,
 			ListenerStartingBlock:   &(&struct{ x uint64 }{1}).x,
 		}
 		resp, err := s.client.RegisterChain(ctx, &chain)
+		if err != nil {
+			assert.Fail(t, err.Error())
+			return
+		}
 
-		assert.NoError(t, err)
 		assert.NotEmpty(t, resp.UUID)
 		chainUUID = resp.UUID
-	})
 
-	s.T().Run("should fail to update chain by UUID with invalid data", func(t *testing.T) {
-		err := s.client.UpdateChainByUUID(ctx, chainUUID, &models.Chain{
+		err = s.client.UpdateChainByUUID(ctx, chainUUID, &models.Chain{
 			ListenerBackOffDuration: &(&struct{ x string }{"1000"}).x,
 		})
-
-		assert.Error(t, err)
-		assert.True(t, errors.IsDataError(err))
+		assert.True(t, errors.IsInvalidFormatError(err))
 	})
 
 	s.T().Run("should fail to update chain by UUID with invalid data", func(t *testing.T) {
@@ -256,11 +235,10 @@ func (s *HttpChainTestSuite) TestChainRegistry_ChainErrors() {
 			URLs: []string{"$%^^"},
 		})
 
-		assert.Error(t, err)
-		assert.True(t, errors.IsDataError(err))
+		assert.True(t, errors.IsInvalidFormatError(err))
 	})
 
-	s.T().Run("should deleted registered chain by UUID", func(t *testing.T) {
+	s.T().Run("should delete registered chain by UUID", func(t *testing.T) {
 		err := s.client.DeleteChainByUUID(ctx, chainUUID)
 		assert.NoError(t, err)
 
@@ -269,7 +247,7 @@ func (s *HttpChainTestSuite) TestChainRegistry_ChainErrors() {
 	})
 }
 
-func (s *HttpChainTestSuite) TestChainRegistry_TesseraChainErrs() {
+func (s *chainsTestSuite) TestChainRegistry_TesseraChainErrs() {
 	ctx := context.Background()
 	chainName := fmt.Sprintf("TestTesseraChainErr%d", rand.Intn(1000))
 	var chainUUID string
@@ -277,7 +255,7 @@ func (s *HttpChainTestSuite) TestChainRegistry_TesseraChainErrs() {
 	s.T().Run("should fail to register a new invalid tessera chain", func(t *testing.T) {
 		chain := models.Chain{
 			Name:                  chainName,
-			URLs:                  []string{"http://127.0.0.1:8545"},
+			URLs:                  []string{s.env.blockchainNodeURL},
 			ListenerStartingBlock: &(&struct{ x uint64 }{1}).x,
 			PrivateTxManagers: []*models.PrivateTxManagerModel{
 				{
@@ -288,31 +266,25 @@ func (s *HttpChainTestSuite) TestChainRegistry_TesseraChainErrs() {
 		}
 		_, err := s.client.RegisterChain(ctx, &chain)
 
-		assert.Error(t, err)
-		assert.True(t, errors.IsDataError(err), "should be DataErr, instead "+err.Error())
+		assert.True(t, errors.IsInvalidFormatError(err))
 	})
 
 	s.T().Run("should fail to register a new invalid tessera chain", func(t *testing.T) {
 		chain := models.Chain{
 			Name:                  chainName,
-			URLs:                  []string{"http://127.0.0.1:8545"},
+			URLs:                  []string{s.env.blockchainNodeURL},
 			ListenerStartingBlock: &(&struct{ x uint64 }{1}).x,
-			PrivateTxManagers: []*models.PrivateTxManagerModel{
-				{
-					Type: utils.TesseraChainType,
-				},
-			},
+			PrivateTxManagers:     []*models.PrivateTxManagerModel{{Type: utils.TesseraChainType}},
 		}
 		_, err := s.client.RegisterChain(ctx, &chain)
 
-		assert.Error(t, err)
-		assert.True(t, errors.IsDataError(err), "should be DataErr, instead "+err.Error())
+		assert.True(t, errors.IsInvalidFormatError(err))
 	})
 
 	s.T().Run("should register a new tessera chain", func(t *testing.T) {
 		chain := models.Chain{
 			Name:                  chainName,
-			URLs:                  []string{"http://127.0.0.1:8545"},
+			URLs:                  []string{s.env.blockchainNodeURL},
 			ListenerStartingBlock: &(&struct{ x uint64 }{1}).x,
 			PrivateTxManagers: []*models.PrivateTxManagerModel{
 				{
@@ -322,8 +294,11 @@ func (s *HttpChainTestSuite) TestChainRegistry_TesseraChainErrs() {
 			},
 		}
 		resp, err := s.client.RegisterChain(ctx, &chain)
+		if err != nil {
+			assert.Fail(t, err.Error())
+			return
+		}
 
-		assert.NoError(t, err)
 		assert.NotEmpty(t, resp.UUID)
 		chainUUID = resp.UUID
 	})
@@ -337,8 +312,7 @@ func (s *HttpChainTestSuite) TestChainRegistry_TesseraChainErrs() {
 			},
 		})
 
-		assert.Error(t, err)
-		assert.True(t, errors.IsDataError(err), "should be DataErr, instead "+err.Error())
+		assert.True(t, errors.IsInvalidFormatError(err))
 	})
 
 	s.T().Run("should deleted registered chain by UUID", func(t *testing.T) {
@@ -350,9 +324,9 @@ func (s *HttpChainTestSuite) TestChainRegistry_TesseraChainErrs() {
 	})
 }
 
-func (s *HttpChainTestSuite) TestTransactionScheduler_ZHealthCheck() {
+func (s *chainsTestSuite) TestChainRegistry_ZHealthCheck() {
 	type healthRes struct {
-		Database         string `json:"Database,omitempty"`
+		Database string `json:"Database,omitempty"`
 	}
 
 	httpClient := http.NewClient(http.NewDefaultConfig())

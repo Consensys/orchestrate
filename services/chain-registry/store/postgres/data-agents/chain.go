@@ -32,7 +32,7 @@ func (ag *PGChainAgent) RegisterChain(ctx context.Context, chain *models.Chain) 
 
 	if err := chain.Validate(true); err != nil {
 		logger.WithError(err).Errorf("could not register chain")
-		return errors.DataError(err.Error())
+		return errors.InvalidFormatError(err.Error())
 	}
 
 	_, err := ag.db.ModelContext(ctx, chain).Insert()
@@ -125,7 +125,7 @@ func (ag *PGChainAgent) UpdateChainByName(ctx context.Context, chainName string,
 	logger := log.FromContext(ctx)
 	if err := chain.Validate(false); err != nil {
 		logger.WithError(err).Errorf("Failed to update chain by name")
-		return errors.DataError(err.Error())
+		return errors.InvalidFormatError(err.Error())
 	}
 
 	res, err := postgres.WhereAllowedTenantsDefault(
@@ -160,7 +160,7 @@ func (ag *PGChainAgent) UpdateChain(ctx context.Context, uuid string, tenants []
 
 	if err := chain.Validate(false); err != nil {
 		logger.WithError(err).Errorf("Failed to update chain by UUID")
-		return errors.DataError(err.Error())
+		return errors.InvalidFormatError(err.Error())
 	}
 
 	res, err := postgres.WhereAllowedTenantsDefault(ag.db.ModelContext(ctx, chain), tenants).

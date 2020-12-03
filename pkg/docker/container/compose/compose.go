@@ -6,6 +6,8 @@ import (
 	goreflect "reflect"
 	"time"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/docker/container/ganache"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/docker/container/hashicorp"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/docker/container/kafka"
@@ -31,6 +33,7 @@ func New() *Compose {
 	factory.reflect.AddGenerator(goreflect.TypeOf(&zookeeper.Config{}), &zookeeper.Zookeeper{})
 	factory.reflect.AddGenerator(goreflect.TypeOf(&kafka.Config{}), &kafka.Kafka{})
 	factory.reflect.AddGenerator(goreflect.TypeOf(&hashicorp.Config{}), &hashicorp.Vault{})
+	factory.reflect.AddGenerator(goreflect.TypeOf(&ganache.Config{}), &ganache.Ganache{})
 
 	return factory
 }

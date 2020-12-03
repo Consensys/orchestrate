@@ -62,8 +62,6 @@ func NewOrchestrateVaultClient(config *Config) (*OrchestrateVaultClient, error) 
 }
 
 func (c *OrchestrateVaultClient) ETHCreateAccount(namespace string) (*entities.ETHAccount, error) {
-	log.WithField("token", c.client.Token()).Info("Token before HTTP call")
-
 	c.client.SetNamespace(namespace)
 	res, err := c.client.Logical().Write(path.Join(c.config.MountPoint, "ethereum/accounts"), nil)
 	if err != nil {
@@ -356,8 +354,6 @@ func (c *OrchestrateVaultClient) setTokenFromConfig(config *Config) error {
 
 	decoded := strings.TrimSuffix(string(encoded), "\n") // Remove the newline if it exists
 	decoded = strings.TrimSuffix(decoded, "\r")          // This one is for windows compatibility
-
-	log.WithField("token", decoded).Info("Token first from file")
 	c.client.SetToken(decoded)
 
 	// Immediately delete the file after it was read

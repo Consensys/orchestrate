@@ -65,7 +65,6 @@ func (c *Client) Up(ctx context.Context, name, networkName string) error {
 		return err
 	}
 	_ = reader.Close()
-
 	logger.WithField("image", containerCfg.Image).Info("pulled imaged")
 
 	// Create Docker container
