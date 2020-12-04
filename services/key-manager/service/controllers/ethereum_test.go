@@ -5,6 +5,8 @@ package controllers
 import (
 	"bytes"
 	"fmt"
+	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/key-manager/use-cases"
+	mocks2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/key-manager/use-cases/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/store/mocks"
 	"net/http"
 	"net/http/httptest"
@@ -24,14 +26,21 @@ import (
 
 type ethereumCtrlTestSuite struct {
 	suite.Suite
-	vault  *mocks.MockVault
-	router *mux.Router
+	vault           *mocks.MockVault
+	signTypedDataUC *mocks2.MockSignTypedDataUseCase
+	router          *mux.Router
 }
 
 const (
 	inputTestAddress     = "0x7e654d251da770a068413677967f6d3ea2feA9e4"
 	mixedCaseTestAddress = "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4"
 )
+
+var _ usecases.UseCases = &ethereumCtrlTestSuite{}
+
+func (s ethereumCtrlTestSuite) SignTypedData() usecases.SignTypedDataUseCase {
+	return s.signTypedDataUC
+}
 
 func TestEthereumController(t *testing.T) {
 	s := new(ethereumCtrlTestSuite)
@@ -42,10 +51,11 @@ func (s *ethereumCtrlTestSuite) SetupTest() {
 	ctrl := gomock.NewController(s.T())
 	defer ctrl.Finish()
 
+	s.signTypedDataUC = mocks2.NewMockSignTypedDataUseCase(ctrl)
 	s.vault = mocks.NewMockVault(ctrl)
 	s.router = mux.NewRouter()
 
-	controller := NewEthereumController(s.vault)
+	controller := NewEthereumController(s.vault, s)
 	controller.Append(s.router)
 }
 
@@ -270,6 +280,45 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_SignEEATransaction() {
 
 		s.vault.EXPECT().
 			ETHSignEEATransaction(mixedCaseTestAddress, signRequest).
+			Return("", errors.InvalidParameterError("error"))
+
+		s.router.ServeHTTP(rw, httpRequest)
+		assert.Equal(t, http.StatusUnprocessableEntity, rw.Code)
+	})
+}
+
+func (s *ethereumCtrlTestSuite) TestEthereumController_SignTypedData() {
+	url := fmt.Sprintf("/ethereum/accounts/%v/sign-typed-data", inputTestAddress)
+
+	s.T().Run("should execute request successfully", func(t *testing.T) {
+		signature := "0xsignature"
+		signRequest := testutils.FakeSignTypedDataRequest()
+		requestBytes, _ := json.Marshal(signRequest)
+		expectedTypedData := formatters.FormatSignTypedDataRequest(signRequest)
+
+		rw := httptest.NewRecorder()
+		httpRequest := httptest.NewRequest(http.MethodPost, url, bytes.NewReader(requestBytes))
+
+		s.signTypedDataUC.EXPECT().
+			Execute(gomock.Any(), mixedCaseTestAddress, signRequest.Namespace, expectedTypedData).
+			Return(signature, nil)
+
+		s.router.ServeHTTP(rw, httpRequest)
+
+		assert.Equal(t, signature, rw.Body.String())
+		assert.Equal(t, http.StatusOK, rw.Code)
+	})
+
+	// Sufficient test to check that the mapping to HTTP errors is working. All other status code tests are done in integration tests
+	s.T().Run("should fail with correct error code if use case fails", func(t *testing.T) {
+		signRequest := testutils.FakeSignTypedDataRequest()
+		requestBytes, _ := json.Marshal(signRequest)
+
+		rw := httptest.NewRecorder()
+		httpRequest := httptest.NewRequest(http.MethodPost, url, bytes.NewReader(requestBytes))
+
+		s.signTypedDataUC.EXPECT().
+			Execute(gomock.Any(), mixedCaseTestAddress, signRequest.Namespace, gomock.Any()).
 			Return("", errors.InvalidParameterError("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)

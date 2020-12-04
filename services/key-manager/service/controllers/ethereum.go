@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
+	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/key-manager/use-cases"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/store"
 
@@ -20,11 +22,12 @@ import (
 const ethAccountPath = "/ethereum/accounts"
 
 type EthereumController struct {
-	vault store.Vault
+	vault    store.Vault
+	useCases usecases.UseCases
 }
 
-func NewEthereumController(vault store.Vault) *EthereumController {
-	return &EthereumController{vault: vault}
+func NewEthereumController(vault store.Vault, useCases usecases.UseCases) *EthereumController {
+	return &EthereumController{vault: vault, useCases: useCases}
 }
 
 // Add routes to router
@@ -39,6 +42,7 @@ func (c *EthereumController) Append(router *mux.Router) {
 	router.Methods(http.MethodPost).Path(ethAccountPath + "/{address}/sign-transaction").HandlerFunc(c.signTransaction)
 	router.Methods(http.MethodPost).Path(ethAccountPath + "/{address}/sign-eea-transaction").HandlerFunc(c.signEEA)
 	router.Methods(http.MethodPost).Path(ethAccountPath + "/{address}/sign-quorum-private-transaction").HandlerFunc(c.signQuorumPrivate)
+	router.Methods(http.MethodPost).Path(ethAccountPath + "/{address}/sign-typed-data").HandlerFunc(c.signTypedData)
 }
 
 // @Summary Creates a new Ethereum Account
@@ -291,6 +295,41 @@ func (c *EthereumController) signEEA(rw http.ResponseWriter, request *http.Reque
 	}
 
 	signature, err := c.vault.ETHSignEEATransaction(address, signRequest)
+	if err != nil {
+		httputil.WriteHTTPErrorResponse(rw, err)
+		return
+	}
+
+	_, _ = rw.Write([]byte(signature))
+}
+
+// @Summary Signs typed data using an existing account following the EIP-712 standard
+// @Description Signs typed data using ECDSA and the private key of an existing account following the EIP-712 standard
+// @Accept json
+// @Produce text/plain
+// @Param request body ethereum.SignTypedDataRequest{domainSeparator=types.DomainSeparator} true "Typed data to sign"
+// @Success 200 {string} string "Signed payload"
+// @Failure 400 {object} httputil.ErrorResponse "Invalid request"
+// @Failure 404 {object} httputil.ErrorResponse "Account not found"
+// @Failure 422 {object} httputil.ErrorResponse "Invalid parameters"
+// @Failure 500 {object} httputil.ErrorResponse "Internal server error"
+// @Router /ethereum/accounts/{address}/sign-typed-data [post]
+func (c *EthereumController) signTypedData(rw http.ResponseWriter, request *http.Request) {
+	signRequest := &types.SignTypedDataRequest{}
+	err := jsonutils.UnmarshalBody(request.Body, signRequest)
+	if err != nil {
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	address, err := utils.ParseHexToMixedCaseEthAddress(mux.Vars(request)["address"])
+	if err != nil {
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	typedData := formatters.FormatSignTypedDataRequest(signRequest)
+	signature, err := c.useCases.SignTypedData().Execute(request.Context(), address, signRequest.Namespace, typedData)
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return

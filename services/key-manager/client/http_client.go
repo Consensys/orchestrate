@@ -2,9 +2,7 @@ package client
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"time"
 
@@ -83,26 +81,21 @@ func (c HTTPClient) ETHSign(ctx context.Context, address string, req *keymanager
 	}
 
 	defer clientutils.CloseResponse(response)
+	return httputil.ParseStringResponse(ctx, response)
+}
 
-	if response.StatusCode != http.StatusOK {
-		errResp := httputil.ErrorResponse{}
-		if err = json.NewDecoder(response.Body).Decode(&errResp); err != nil {
-			errMessage := "failed to decode error response body"
-			log.FromContext(ctx).WithError(err).Error(errMessage)
-			return "", errors.ServiceConnectionError(errMessage)
-		}
+func (c HTTPClient) ETHSignTypedData(ctx context.Context, address string, req *types.SignTypedDataRequest) (string, error) {
+	reqURL := fmt.Sprintf("%v/ethereum/accounts/%v/sign-typed-data", c.config.URL, address)
 
-		return "", errors.Errorf(errResp.Code, errResp.Message)
-	}
-
-	responseData, err := ioutil.ReadAll(response.Body)
+	response, err := clientutils.PostRequest(ctx, c.client, reqURL, req)
 	if err != nil {
-		errMessage := "failed to decode response body"
+		errMessage := "error while signing typed data with Ethereum account"
 		log.FromContext(ctx).WithError(err).Error(errMessage)
-		return "", errors.ServiceConnectionError(errMessage)
+		return "", errors.ServiceConnectionError(errMessage).ExtendComponent(component)
 	}
 
-	return string(responseData), nil
+	defer clientutils.CloseResponse(response)
+	return httputil.ParseStringResponse(ctx, response)
 }
 
 func (c HTTPClient) ETHSignTransaction(ctx context.Context, address string, req *types.SignETHTransactionRequest) (string, error) {

@@ -9,6 +9,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client"
 	"testing"
@@ -198,5 +199,79 @@ func (s *keyManagerEthereumTestSuite) TestKeyManager_Ethereum_SignEEATransaction
 
 		assert.NoError(t, err)
 		assert.Equal(t, "0xd1a70ac2784a858394a13189cdea90876d3f34e1d850426a2cd8f71b5c4333d85b55970e274736011d0e5c55c5a8a310a71a8bff424ce1523d173a395644fb7601", signature)
+	})
+}
+
+func (s *keyManagerEthereumTestSuite) TestKeyManager_Ethereum_SignTypedData() {
+	ctx := s.env.ctx
+
+	accountRequest := testutils.FakeImportETHAccountRequest()
+	accountRequest.PrivateKey = "fa88c4a5912f80503d6b5503880d0745f4b88a1ff90ce8f64cdd8f32cc3bc249"
+	expectedAddress := "0xeca84382E0f1dDdE22EedCd0D803442972EC7BE5"
+	_, _ = s.client.ETHImportAccount(ctx, accountRequest)
+
+	s.T().Run("should fail with 400 if payload is invalid", func(t *testing.T) {
+		signRequest := testutils.FakeSignTypedDataRequest()
+		signRequest.Types = nil
+
+		_, err := s.client.ETHSignTypedData(ctx, expectedAddress, signRequest)
+
+		assert.True(t, errors.IsInvalidFormatError(err))
+	})
+
+	s.T().Run("should fail with 422 if types payload is invalid", func(t *testing.T) {
+		signRequest := testutils.FakeSignTypedDataRequest()
+		signRequest.Types["Mail"][0].Name = ""
+
+		_, err := s.client.ETHSignTypedData(ctx, expectedAddress, signRequest)
+
+		assert.True(t, errors.IsInvalidParameterError(err))
+	})
+
+	s.T().Run("should fail if message payload does not match with types", func(t *testing.T) {
+		signRequest := testutils.FakeSignTypedDataRequest()
+		signRequest.Message["sender"] = "notAnAddress"
+
+		_, err := s.client.ETHSignTypedData(ctx, expectedAddress, signRequest)
+
+		assert.True(t, errors.IsInvalidParameterError(err))
+	})
+
+	s.T().Run("should sign data successfully", func(t *testing.T) {
+		signRequest := testutils.FakeSignTypedDataRequest()
+
+		signature, err := s.client.ETHSignTypedData(ctx, expectedAddress, signRequest)
+
+		assert.NoError(t, err)
+		assert.Equal(t, "0x35f91e0b7c74edea3d0e9720a9a359c3e8b491d0681ee344e1669396e3aa36d432381e017df44bdc832d26520841b149d55db02cde67c996490b3ac5eacca87900", signature)
+	})
+
+	s.T().Run("should sign data successfully without salt or verifyingContract", func(t *testing.T) {
+		signRequest := testutils.FakeSignTypedDataRequest()
+		signRequest.DomainSeparator.VerifyingContract = ""
+		signRequest.DomainSeparator.Salt = ""
+
+		signature, err := s.client.ETHSignTypedData(ctx, expectedAddress, signRequest)
+
+		assert.NoError(t, err)
+		assert.Equal(t, "0x2dcce6099a3a1d7f236ae69ad66254be525811309b7a6d58eb2420c3db7e9e20404a8ac4c5d1bf9a0dc1599ad67d790dabf72ec8995973a4f8b6721f375e367e01", signature)
+	})
+
+	s.T().Run("should sign data successfully with nested types", func(t *testing.T) {
+		signRequest := testutils.FakeSignTypedDataRequest()
+		signRequest.Types["Example"] = []ethereum.Type{
+			{Name: "testFieldString", Type: "string"},
+			{Name: "testFieldAddress", Type: "address"},
+		}
+		signRequest.Types["Mail"] = append(signRequest.Types["Mail"], ethereum.Type{Name: "example", Type: "Example"})
+		signRequest.Message["example"] = map[string]interface{}{
+			"testFieldString":  "myString",
+			"testFieldAddress": "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18",
+		}
+
+		signature, err := s.client.ETHSignTypedData(ctx, expectedAddress, signRequest)
+
+		assert.NoError(t, err)
+		assert.Equal(t, "0x6019a3c839995c67359b8be3f7d327364e53b22ad88efec73e52c72d8d1a8b1159d23e9ffd30ac8b6f2ad03d4249e548b04be126d285f67783a0debc3e4186b400", signature)
 	})
 }

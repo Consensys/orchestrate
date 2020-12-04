@@ -81,6 +81,21 @@ func (mr *MockEthereumAccountClientMockRecorder) ETHSign(ctx, address, request i
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHSign", reflect.TypeOf((*MockEthereumAccountClient)(nil).ETHSign), ctx, address, request)
 }
 
+// ETHSignTypedData mocks base method
+func (m *MockEthereumAccountClient) ETHSignTypedData(ctx context.Context, address string, request *ethereum.SignTypedDataRequest) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ETHSignTypedData", ctx, address, request)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ETHSignTypedData indicates an expected call of ETHSignTypedData
+func (mr *MockEthereumAccountClientMockRecorder) ETHSignTypedData(ctx, address, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHSignTypedData", reflect.TypeOf((*MockEthereumAccountClient)(nil).ETHSignTypedData), ctx, address, request)
+}
+
 // ETHSignTransaction mocks base method
 func (m *MockEthereumAccountClient) ETHSignTransaction(ctx context.Context, address string, request *ethereum.SignETHTransactionRequest) (string, error) {
 	m.ctrl.T.Helper()
@@ -251,6 +266,21 @@ func (m *MockKeyManagerClient) ETHSign(ctx context.Context, address string, requ
 func (mr *MockKeyManagerClientMockRecorder) ETHSign(ctx, address, request interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHSign", reflect.TypeOf((*MockKeyManagerClient)(nil).ETHSign), ctx, address, request)
+}
+
+// ETHSignTypedData mocks base method
+func (m *MockKeyManagerClient) ETHSignTypedData(ctx context.Context, address string, request *ethereum.SignTypedDataRequest) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ETHSignTypedData", ctx, address, request)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ETHSignTypedData indicates an expected call of ETHSignTypedData
+func (mr *MockKeyManagerClientMockRecorder) ETHSignTypedData(ctx, address, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHSignTypedData", reflect.TypeOf((*MockKeyManagerClient)(nil).ETHSignTypedData), ctx, address, request)
 }
 
 // ETHSignTransaction mocks base method

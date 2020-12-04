@@ -36,6 +36,27 @@ type SignEEATransactionRequest struct {
 	PrivacyGroupID string   `json:"privacyGroupId,omitempty" validate:"omitempty,base64" example:"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="`
 }
 
+type SignTypedDataRequest struct {
+	Namespace       string                 `json:"namespace,omitempty" example:"tenant_id"`
+	DomainSeparator DomainSeparator        `json:"domainSeparator" validate:"required"`
+	Types           map[string][]Type      `json:"types" validate:"required"`
+	Message         map[string]interface{} `json:"message" validate:"required"`
+	MessageType     string                 `json:"messageType" validate:"required" example:"Mail"`
+}
+
+type DomainSeparator struct {
+	Name              string `json:"name" validate:"required" example:"MyDApp"`
+	Version           string `json:"version" validate:"required" example:"v1.0.0"`
+	ChainID           int64  `json:"chainID" validate:"required" example:"1 (mainnet)"`
+	VerifyingContract string `json:"verifyingContract,omitempty" validate:"omitempty,isHex" example:"0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"`
+	Salt              string `json:"salt,omitempty" validate:"omitempty" example:"some-random-string"`
+}
+
+type Type struct {
+	Name string `json:"name" validate:"required" example:"fieldName"`
+	Type string `json:"type" validate:"required" example:"string"`
+}
+
 func (req *SignEEATransactionRequest) Validate() error {
 	if len(req.PrivateFor) > 0 && req.PrivacyGroupID != "" {
 		return errors.InvalidFormatError("privacyGroupId and privateFor fields are mutually exclusive")

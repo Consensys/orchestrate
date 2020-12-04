@@ -63,3 +63,29 @@ func FakeETHAccountResponse() *types.ETHAccountResponse {
 		PublicKey: ethcommon.HexToHash(utils.RandHexString(12)).String(),
 	}
 }
+
+func FakeSignTypedDataRequest() *types.SignTypedDataRequest {
+	return &types.SignTypedDataRequest{
+		Namespace: "_",
+		DomainSeparator: types.DomainSeparator{
+			Name:              "orchestrate",
+			Version:           "v2.6.0",
+			ChainID:           1,
+			VerifyingContract: "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18",
+			Salt:              "mySalt",
+		},
+		Types: map[string][]types.Type{
+			"Mail": {
+				{Name: "sender", Type: "address"},
+				{Name: "recipient", Type: "address"},
+				{Name: "content", Type: "string"},
+			},
+		},
+		Message: map[string]interface{}{
+			"sender":    "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18",
+			"recipient": "0xFE3B557E8Fb62b89F4916B721be55cEb828dBd73",
+			"content":   "my content",
+		},
+		MessageType: "Mail",
+	}
+}

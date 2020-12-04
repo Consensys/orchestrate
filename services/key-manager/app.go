@@ -4,6 +4,8 @@ import (
 	"context"
 	"reflect"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/key-manager/builder"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/store"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/app"
@@ -19,7 +21,7 @@ func NewKeyManager(ctx context.Context, cfg *Config) (*app.App, error) {
 	}
 
 	// Option for key manager handler
-	keyManagerHandlerOpt := app.HandlerOpt(reflect.TypeOf(&dynamic.Signer{}), controllers.NewBuilder(vault))
+	keyManagerHandlerOpt := app.HandlerOpt(reflect.TypeOf(&dynamic.Signer{}), controllers.NewBuilder(vault, builder.NewUseCases(vault)))
 
 	// Create app
 	return app.New(
