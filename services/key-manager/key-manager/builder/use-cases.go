@@ -7,15 +7,29 @@ import (
 )
 
 type useCases struct {
-	signTypedData usecases.SignTypedDataUseCase
+	signTypedDataUC            usecases.SignTypedDataUseCase
+	verifySignatureUC          usecases.VerifySignatureUseCase
+	verifyTypedDataSignatureUC usecases.VerifyTypedDataSignatureUseCase
 }
 
 func NewUseCases(vaultClient store.Vault) usecases.UseCases {
+	verifySignatureUC := ethereum.NewVerifySignatureUseCase()
+
 	return &useCases{
-		signTypedData: ethereum.NewSignTypedDataUseCase(vaultClient),
+		signTypedDataUC:            ethereum.NewSignTypedDataUseCase(vaultClient),
+		verifySignatureUC:          verifySignatureUC,
+		verifyTypedDataSignatureUC: ethereum.NewVerifyTypedDataSignatureUseCase(verifySignatureUC),
 	}
 }
 
 func (u *useCases) SignTypedData() usecases.SignTypedDataUseCase {
-	return u.signTypedData
+	return u.signTypedDataUC
+}
+
+func (u *useCases) VerifySignature() usecases.VerifySignatureUseCase {
+	return u.verifySignatureUC
+}
+
+func (u *useCases) VerifyTypedDataSignature() usecases.VerifyTypedDataSignatureUseCase {
+	return u.verifyTypedDataSignatureUC
 }

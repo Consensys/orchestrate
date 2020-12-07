@@ -80,9 +80,8 @@ func ParseStringResponse(ctx context.Context, response *http.Response) (string, 
 	if response.StatusCode != http.StatusOK {
 		errResp := ErrorResponse{}
 		if err := json.NewDecoder(response.Body).Decode(&errResp); err != nil {
-			errMessage := "failed to decode error response body"
-			log.FromContext(ctx).WithError(err).Error(errMessage)
-			return "", errors.ServiceConnectionError(errMessage)
+			log.FromContext(ctx).WithError(err).Error(invalidResponseBody)
+			return "", errors.ServiceConnectionError(invalidResponseBody)
 		}
 
 		return "", errors.Errorf(errResp.Code, errResp.Message)
@@ -96,4 +95,18 @@ func ParseStringResponse(ctx context.Context, response *http.Response) (string, 
 	}
 
 	return string(responseData), nil
+}
+
+func ParseEmptyBodyResponse(ctx context.Context, response *http.Response) error {
+	if response.StatusCode != http.StatusNoContent {
+		errResp := ErrorResponse{}
+		if err := json.NewDecoder(response.Body).Decode(&errResp); err != nil {
+			log.FromContext(ctx).WithError(err).Error(invalidResponseBody)
+			return errors.ServiceConnectionError(invalidResponseBody)
+		}
+
+		return errors.Errorf(errResp.Code, errResp.Message)
+	}
+
+	return nil
 }

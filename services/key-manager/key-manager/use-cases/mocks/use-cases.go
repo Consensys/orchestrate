@@ -49,6 +49,34 @@ func (mr *MockUseCasesMockRecorder) SignTypedData() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignTypedData", reflect.TypeOf((*MockUseCases)(nil).SignTypedData))
 }
 
+// VerifySignature mocks base method
+func (m *MockUseCases) VerifySignature() usecases.VerifySignatureUseCase {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "VerifySignature")
+	ret0, _ := ret[0].(usecases.VerifySignatureUseCase)
+	return ret0
+}
+
+// VerifySignature indicates an expected call of VerifySignature
+func (mr *MockUseCasesMockRecorder) VerifySignature() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifySignature", reflect.TypeOf((*MockUseCases)(nil).VerifySignature))
+}
+
+// VerifyTypedDataSignature mocks base method
+func (m *MockUseCases) VerifyTypedDataSignature() usecases.VerifyTypedDataSignatureUseCase {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "VerifyTypedDataSignature")
+	ret0, _ := ret[0].(usecases.VerifyTypedDataSignatureUseCase)
+	return ret0
+}
+
+// VerifyTypedDataSignature indicates an expected call of VerifyTypedDataSignature
+func (mr *MockUseCasesMockRecorder) VerifyTypedDataSignature() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifyTypedDataSignature", reflect.TypeOf((*MockUseCases)(nil).VerifyTypedDataSignature))
+}
+
 // MockSignTypedDataUseCase is a mock of SignTypedDataUseCase interface
 type MockSignTypedDataUseCase struct {
 	ctrl     *gomock.Controller
@@ -85,4 +113,78 @@ func (m *MockSignTypedDataUseCase) Execute(ctx context.Context, address, namespa
 func (mr *MockSignTypedDataUseCaseMockRecorder) Execute(ctx, address, namespace, typedData interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSignTypedDataUseCase)(nil).Execute), ctx, address, namespace, typedData)
+}
+
+// MockVerifySignatureUseCase is a mock of VerifySignatureUseCase interface
+type MockVerifySignatureUseCase struct {
+	ctrl     *gomock.Controller
+	recorder *MockVerifySignatureUseCaseMockRecorder
+}
+
+// MockVerifySignatureUseCaseMockRecorder is the mock recorder for MockVerifySignatureUseCase
+type MockVerifySignatureUseCaseMockRecorder struct {
+	mock *MockVerifySignatureUseCase
+}
+
+// NewMockVerifySignatureUseCase creates a new mock instance
+func NewMockVerifySignatureUseCase(ctrl *gomock.Controller) *MockVerifySignatureUseCase {
+	mock := &MockVerifySignatureUseCase{ctrl: ctrl}
+	mock.recorder = &MockVerifySignatureUseCaseMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockVerifySignatureUseCase) EXPECT() *MockVerifySignatureUseCaseMockRecorder {
+	return m.recorder
+}
+
+// Execute mocks base method
+func (m *MockVerifySignatureUseCase) Execute(ctx context.Context, address, signature, payload string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Execute", ctx, address, signature, payload)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Execute indicates an expected call of Execute
+func (mr *MockVerifySignatureUseCaseMockRecorder) Execute(ctx, address, signature, payload interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockVerifySignatureUseCase)(nil).Execute), ctx, address, signature, payload)
+}
+
+// MockVerifyTypedDataSignatureUseCase is a mock of VerifyTypedDataSignatureUseCase interface
+type MockVerifyTypedDataSignatureUseCase struct {
+	ctrl     *gomock.Controller
+	recorder *MockVerifyTypedDataSignatureUseCaseMockRecorder
+}
+
+// MockVerifyTypedDataSignatureUseCaseMockRecorder is the mock recorder for MockVerifyTypedDataSignatureUseCase
+type MockVerifyTypedDataSignatureUseCaseMockRecorder struct {
+	mock *MockVerifyTypedDataSignatureUseCase
+}
+
+// NewMockVerifyTypedDataSignatureUseCase creates a new mock instance
+func NewMockVerifyTypedDataSignatureUseCase(ctrl *gomock.Controller) *MockVerifyTypedDataSignatureUseCase {
+	mock := &MockVerifyTypedDataSignatureUseCase{ctrl: ctrl}
+	mock.recorder = &MockVerifyTypedDataSignatureUseCaseMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockVerifyTypedDataSignatureUseCase) EXPECT() *MockVerifyTypedDataSignatureUseCaseMockRecorder {
+	return m.recorder
+}
+
+// Execute mocks base method
+func (m *MockVerifyTypedDataSignatureUseCase) Execute(ctx context.Context, address, signature string, typedData *core.TypedData) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Execute", ctx, address, signature, typedData)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Execute indicates an expected call of Execute
+func (mr *MockVerifyTypedDataSignatureUseCaseMockRecorder) Execute(ctx, address, signature, typedData interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockVerifyTypedDataSignatureUseCase)(nil).Execute), ctx, address, signature, typedData)
 }

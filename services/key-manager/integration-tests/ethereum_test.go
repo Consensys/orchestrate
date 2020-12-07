@@ -275,3 +275,108 @@ func (s *keyManagerEthereumTestSuite) TestKeyManager_Ethereum_SignTypedData() {
 		assert.Equal(t, "0x6019a3c839995c67359b8be3f7d327364e53b22ad88efec73e52c72d8d1a8b1159d23e9ffd30ac8b6f2ad03d4249e548b04be126d285f67783a0debc3e4186b400", signature)
 	})
 }
+
+func (s *keyManagerEthereumTestSuite) TestKeyManager_Ethereum_VerifyTypedDataSignature() {
+	ctx := s.env.ctx
+
+	accountRequest := testutils.FakeImportETHAccountRequest()
+	accountRequest.PrivateKey = "fa88c4a5912f80503d6b5503880d0745f4b88a1ff90ce8f64cdd8f32cc3bc249"
+	account, _ := s.client.ETHImportAccount(ctx, accountRequest)
+
+	signRequest := testutils.FakeSignTypedDataRequest()
+	signature, _ := s.client.ETHSignTypedData(ctx, account.Address, signRequest)
+
+	s.T().Run("should fail with 400 if payload is invalid", func(t *testing.T) {
+		err := s.client.ETHVerifyTypedDataSignature(ctx, &ethereum.VerifyTypedDataRequest{
+			TypedData: *signRequest,
+			Signature: "",
+			Address:   account.Address,
+		})
+
+		assert.True(t, errors.IsInvalidFormatError(err))
+	})
+
+	s.T().Run("should fail with 422 if signature is invalid", func(t *testing.T) {
+		err := s.client.ETHVerifyTypedDataSignature(ctx, &ethereum.VerifyTypedDataRequest{
+			TypedData: *signRequest,
+			Signature: "0xfeee",
+			Address:   account.Address,
+		})
+
+		assert.True(t, errors.IsInvalidParameterError(err))
+	})
+
+	s.T().Run("should fail with 422 if signature is invalid for the given address", func(t *testing.T) {
+		err := s.client.ETHVerifyTypedDataSignature(ctx, &ethereum.VerifyTypedDataRequest{
+			TypedData: *signRequest,
+			Signature: signature,
+			Address:   "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18",
+		})
+
+		assert.True(t, errors.IsInvalidParameterError(err))
+	})
+
+	s.T().Run("should verify signature successfully", func(t *testing.T) {
+		err := s.client.ETHVerifyTypedDataSignature(ctx, &ethereum.VerifyTypedDataRequest{
+			TypedData: *signRequest,
+			Signature: signature,
+			Address:   account.Address,
+		})
+
+		assert.NoError(t, err)
+	})
+}
+
+func (s *keyManagerEthereumTestSuite) TestKeyManager_Ethereum_VerifySignature() {
+	ctx := s.env.ctx
+
+	accountRequest := testutils.FakeImportETHAccountRequest()
+	accountRequest.PrivateKey = "fa88c4a5912f80503d6b5503880d0745f4b88a1ff90ce8f64cdd8f32cc3bc249"
+	account, _ := s.client.ETHImportAccount(ctx, accountRequest)
+
+	signRequest := &keymanager.PayloadRequest{
+		Data:      "my data to sign",
+		Namespace: "_",
+	}
+	signature, _ := s.client.ETHSign(ctx, account.Address, signRequest)
+
+	s.T().Run("should fail with 400 if payload is invalid", func(t *testing.T) {
+		err := s.client.ETHVerifySignature(ctx, &keymanager.VerifyPayloadRequest{
+			Data:      signRequest.Data,
+			Signature: "",
+			Address:   account.Address,
+		})
+
+		assert.True(t, errors.IsInvalidFormatError(err))
+	})
+
+	s.T().Run("should fail with 422 if signature is invalid", func(t *testing.T) {
+		err := s.client.ETHVerifySignature(ctx, &keymanager.VerifyPayloadRequest{
+			Data:      signRequest.Data,
+			Signature: "0xfeee",
+			Address:   account.Address,
+		})
+
+		assert.True(t, errors.IsInvalidParameterError(err))
+	})
+
+	s.T().Run("should fail with 422 if signature is invalid for the given address", func(t *testing.T) {
+		err := s.client.ETHVerifySignature(ctx, &keymanager.VerifyPayloadRequest{
+			Data:      signRequest.Data,
+			Signature: signature,
+			Address:   "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18",
+		})
+
+		assert.True(t, errors.IsInvalidParameterError(err))
+	})
+
+	s.T().Run("should verify signature successfully", func(t *testing.T) {
+		err := s.client.ETHVerifySignature(ctx, &keymanager.VerifyPayloadRequest{
+			Data:      signRequest.Data,
+			Signature: signature,
+			Address:   account.Address,
+		})
+
+		assert.NoError(t, err)
+	})
+}

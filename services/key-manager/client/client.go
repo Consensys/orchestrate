@@ -22,6 +22,8 @@ type EthereumAccountClient interface {
 	ETHListAccounts(ctx context.Context, namespace string) ([]string, error)
 	ETHListNamespaces(ctx context.Context) ([]string, error)
 	ETHGetAccount(ctx context.Context, address, namespace string) (*types.ETHAccountResponse, error)
+	ETHVerifySignature(ctx context.Context, request *keymanager.VerifyPayloadRequest) error
+	ETHVerifyTypedDataSignature(ctx context.Context, request *types.VerifyTypedDataRequest) error
 }
 
 type KeyManagerClient interface {

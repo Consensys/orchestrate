@@ -37,12 +37,14 @@ func (c *EthereumController) Append(router *mux.Router) {
 	router.Methods(http.MethodPost).Path(ethAccountPath).HandlerFunc(c.createAccount)
 	router.Methods(http.MethodGet).Path(ethAccountPath).HandlerFunc(c.listAccounts)
 	router.Methods(http.MethodPost).Path(ethAccountPath + "/import").HandlerFunc(c.importAccount)
-	router.Methods(http.MethodPost).Path(ethAccountPath + "/{address}/sign").HandlerFunc(c.signPayload)
 	router.Methods(http.MethodGet).Path(ethAccountPath + "/{address}").HandlerFunc(c.getAccount)
+	router.Methods(http.MethodPost).Path(ethAccountPath + "/{address}/sign").HandlerFunc(c.signPayload)
 	router.Methods(http.MethodPost).Path(ethAccountPath + "/{address}/sign-transaction").HandlerFunc(c.signTransaction)
 	router.Methods(http.MethodPost).Path(ethAccountPath + "/{address}/sign-eea-transaction").HandlerFunc(c.signEEA)
 	router.Methods(http.MethodPost).Path(ethAccountPath + "/{address}/sign-quorum-private-transaction").HandlerFunc(c.signQuorumPrivate)
 	router.Methods(http.MethodPost).Path(ethAccountPath + "/{address}/sign-typed-data").HandlerFunc(c.signTypedData)
+	router.Methods(http.MethodPost).Path(ethAccountPath + "/verify-signature").HandlerFunc(c.verifySignature)
+	router.Methods(http.MethodPost).Path(ethAccountPath + "/verify-typed-data-signature").HandlerFunc(c.verifyTypedDataSignature)
 }
 
 // @Summary Creates a new Ethereum Account
@@ -99,7 +101,7 @@ func (c *EthereumController) listAccounts(rw http.ResponseWriter, req *http.Requ
 // @Success 200 {object} []string "List of ethereum public namespaces"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /ethereum/namespaces [get]
-func (c *EthereumController) listNamespaces(rw http.ResponseWriter, req *http.Request) {
+func (c *EthereumController) listNamespaces(rw http.ResponseWriter, _ *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 
 	namespaces, err := c.vault.ETHListNamespaces()
@@ -336,4 +338,70 @@ func (c *EthereumController) signTypedData(rw http.ResponseWriter, request *http
 	}
 
 	_, _ = rw.Write([]byte(signature))
+}
+
+// @Summary Verifies the signature of a typed data message following the EIP-712 standard
+// @Description Verifies if a typed data message has been signed by the Ethereum account passed as argument following the EIP-712 standard
+// @Accept json
+// @Param request body ethereum.SignTypedDataRequest{domainSeparator=types.DomainSeparator} true "Typed data to sign"
+// @Success 204
+// @Failure 400 {object} httputil.ErrorResponse "Invalid request"
+// @Failure 404 {object} httputil.ErrorResponse "Account not found"
+// @Failure 422 {object} httputil.ErrorResponse "Invalid parameters"
+// @Failure 500 {object} httputil.ErrorResponse "Internal server error"
+// @Router /ethereum/accounts/verify-typed-data-signature [post]
+func (c *EthereumController) verifyTypedDataSignature(rw http.ResponseWriter, request *http.Request) {
+	verifyRequest := &types.VerifyTypedDataRequest{}
+	err := jsonutils.UnmarshalBody(request.Body, verifyRequest)
+	if err != nil {
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	address, err := utils.ParseHexToMixedCaseEthAddress(verifyRequest.Address)
+	if err != nil {
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	typedData := formatters.FormatSignTypedDataRequest(&verifyRequest.TypedData)
+	err = c.useCases.VerifyTypedDataSignature().Execute(request.Context(), address, verifyRequest.Signature, typedData)
+	if err != nil {
+		httputil.WriteHTTPErrorResponse(rw, err)
+		return
+	}
+
+	rw.WriteHeader(http.StatusNoContent)
+}
+
+// @Summary Verifies the signature of a message
+// @Description Verifies if a message has been signed by the Ethereum account passed as argument
+// @Accept json
+// @Param request body ethereum.VerifySignatureRequest true "signature and message to verify"
+// @Success 204
+// @Failure 400 {object} httputil.ErrorResponse "Invalid request"
+// @Failure 404 {object} httputil.ErrorResponse "Account not found"
+// @Failure 500 {object} httputil.ErrorResponse "Internal server error"
+// @Router /ethereum/accounts/verify-signature [post]
+func (c *EthereumController) verifySignature(rw http.ResponseWriter, request *http.Request) {
+	verifyRequest := &keymanager.VerifyPayloadRequest{}
+	err := jsonutils.UnmarshalBody(request.Body, verifyRequest)
+	if err != nil {
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	address, err := utils.ParseHexToMixedCaseEthAddress(verifyRequest.Address)
+	if err != nil {
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = c.useCases.VerifySignature().Execute(request.Context(), address, verifyRequest.Signature, verifyRequest.Data)
+	if err != nil {
+		httputil.WriteHTTPErrorResponse(rw, err)
+		return
+	}
+
+	rw.WriteHeader(http.StatusNoContent)
 }

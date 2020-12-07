@@ -186,6 +186,34 @@ func (mr *MockEthereumAccountClientMockRecorder) ETHGetAccount(ctx, address, nam
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHGetAccount", reflect.TypeOf((*MockEthereumAccountClient)(nil).ETHGetAccount), ctx, address, namespace)
 }
 
+// ETHVerifySignature mocks base method
+func (m *MockEthereumAccountClient) ETHVerifySignature(ctx context.Context, request *keymanager.VerifyPayloadRequest) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ETHVerifySignature", ctx, request)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ETHVerifySignature indicates an expected call of ETHVerifySignature
+func (mr *MockEthereumAccountClientMockRecorder) ETHVerifySignature(ctx, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHVerifySignature", reflect.TypeOf((*MockEthereumAccountClient)(nil).ETHVerifySignature), ctx, request)
+}
+
+// ETHVerifyTypedDataSignature mocks base method
+func (m *MockEthereumAccountClient) ETHVerifyTypedDataSignature(ctx context.Context, request *ethereum.VerifyTypedDataRequest) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ETHVerifyTypedDataSignature", ctx, request)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ETHVerifyTypedDataSignature indicates an expected call of ETHVerifyTypedDataSignature
+func (mr *MockEthereumAccountClientMockRecorder) ETHVerifyTypedDataSignature(ctx, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHVerifyTypedDataSignature", reflect.TypeOf((*MockEthereumAccountClient)(nil).ETHVerifyTypedDataSignature), ctx, request)
+}
+
 // MockKeyManagerClient is a mock of KeyManagerClient interface
 type MockKeyManagerClient struct {
 	ctrl     *gomock.Controller
@@ -371,4 +399,32 @@ func (m *MockKeyManagerClient) ETHGetAccount(ctx context.Context, address, names
 func (mr *MockKeyManagerClientMockRecorder) ETHGetAccount(ctx, address, namespace interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHGetAccount", reflect.TypeOf((*MockKeyManagerClient)(nil).ETHGetAccount), ctx, address, namespace)
+}
+
+// ETHVerifySignature mocks base method
+func (m *MockKeyManagerClient) ETHVerifySignature(ctx context.Context, request *keymanager.VerifyPayloadRequest) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ETHVerifySignature", ctx, request)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ETHVerifySignature indicates an expected call of ETHVerifySignature
+func (mr *MockKeyManagerClientMockRecorder) ETHVerifySignature(ctx, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHVerifySignature", reflect.TypeOf((*MockKeyManagerClient)(nil).ETHVerifySignature), ctx, request)
+}
+
+// ETHVerifyTypedDataSignature mocks base method
+func (m *MockKeyManagerClient) ETHVerifyTypedDataSignature(ctx context.Context, request *ethereum.VerifyTypedDataRequest) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ETHVerifyTypedDataSignature", ctx, request)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ETHVerifyTypedDataSignature indicates an expected call of ETHVerifyTypedDataSignature
+func (mr *MockKeyManagerClientMockRecorder) ETHVerifyTypedDataSignature(ctx, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHVerifyTypedDataSignature", reflect.TypeOf((*MockKeyManagerClient)(nil).ETHVerifyTypedDataSignature), ctx, request)
 }

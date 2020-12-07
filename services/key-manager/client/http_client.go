@@ -196,3 +196,31 @@ func (c HTTPClient) ETHGetAccount(ctx context.Context, address, namespace string
 
 	return resp, nil
 }
+
+func (c HTTPClient) ETHVerifySignature(ctx context.Context, request *keymanager.VerifyPayloadRequest) error {
+	reqURL := fmt.Sprintf("%v/ethereum/accounts/verify-signature", c.config.URL)
+
+	response, err := clientutils.PostRequest(ctx, c.client, reqURL, request)
+	if err != nil {
+		errMessage := "error while verifying signature"
+		log.FromContext(ctx).WithError(err).Error(errMessage)
+		return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+	}
+
+	defer clientutils.CloseResponse(response)
+	return httputil.ParseEmptyBodyResponse(ctx, response)
+}
+
+func (c HTTPClient) ETHVerifyTypedDataSignature(ctx context.Context, request *types.VerifyTypedDataRequest) error {
+	reqURL := fmt.Sprintf("%v/ethereum/accounts/verify-typed-data-signature", c.config.URL)
+
+	response, err := clientutils.PostRequest(ctx, c.client, reqURL, request)
+	if err != nil {
+		errMessage := "error while verifying typed data signature"
+		log.FromContext(ctx).WithError(err).Error(errMessage)
+		return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+	}
+
+	defer clientutils.CloseResponse(response)
+	return httputil.ParseEmptyBodyResponse(ctx, response)
+}

@@ -2,6 +2,7 @@ package testutils
 
 import (
 	ethcommon "github.com/ethereum/go-ethereum/common"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager"
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 )
@@ -87,5 +88,21 @@ func FakeSignTypedDataRequest() *types.SignTypedDataRequest {
 			"content":   "my content",
 		},
 		MessageType: "Mail",
+	}
+}
+
+func FakeVerifyPayloadRequest() *keymanager.VerifyPayloadRequest {
+	return &keymanager.VerifyPayloadRequest{
+		Data:      "my data to sign",
+		Signature: "0x34334af7bacf5d82bb892c838beda65331232c29e122b3485f31e14eda731dbb0ebae9d1eed72c099ff4c3b462aebf449068f717f3638a6facd0b3dddf2529a500",
+		Address:   "0x5Cc634233E4a454d47aACd9fC68801482Fb02610",
+	}
+}
+
+func FakeVerifyTypedDataPayloadRequest() *types.VerifyTypedDataRequest {
+	return &types.VerifyTypedDataRequest{
+		TypedData: *FakeSignTypedDataRequest(),
+		Signature: "0x3399aeb23d6564b3a0b220447e9f1bb2057ffb82cfb766147620aa6bc84938e26941e7583d6460fea405d99da897e88cab07a7fd0991c6c2163645c45d25e4b201",
+		Address:   "0x5Cc634233E4a454d47aACd9fC68801482Fb02610",
 	}
 }

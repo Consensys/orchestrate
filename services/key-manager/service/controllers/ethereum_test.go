@@ -26,9 +26,11 @@ import (
 
 type ethereumCtrlTestSuite struct {
 	suite.Suite
-	vault           *mocks.MockVault
-	signTypedDataUC *mocks2.MockSignTypedDataUseCase
-	router          *mux.Router
+	vault                      *mocks.MockVault
+	signTypedDataUC            *mocks2.MockSignTypedDataUseCase
+	verifySignatureUC          *mocks2.MockVerifySignatureUseCase
+	verifyTypedDataSignatureUC *mocks2.MockVerifyTypedDataSignatureUseCase
+	router                     *mux.Router
 }
 
 const (
@@ -42,6 +44,14 @@ func (s ethereumCtrlTestSuite) SignTypedData() usecases.SignTypedDataUseCase {
 	return s.signTypedDataUC
 }
 
+func (s ethereumCtrlTestSuite) VerifyTypedDataSignature() usecases.VerifyTypedDataSignatureUseCase {
+	return s.verifyTypedDataSignatureUC
+}
+
+func (s ethereumCtrlTestSuite) VerifySignature() usecases.VerifySignatureUseCase {
+	return s.verifySignatureUC
+}
+
 func TestEthereumController(t *testing.T) {
 	s := new(ethereumCtrlTestSuite)
 	suite.Run(t, s)
@@ -52,6 +62,8 @@ func (s *ethereumCtrlTestSuite) SetupTest() {
 	defer ctrl.Finish()
 
 	s.signTypedDataUC = mocks2.NewMockSignTypedDataUseCase(ctrl)
+	s.verifySignatureUC = mocks2.NewMockVerifySignatureUseCase(ctrl)
+	s.verifyTypedDataSignatureUC = mocks2.NewMockVerifyTypedDataSignatureUseCase(ctrl)
 	s.vault = mocks.NewMockVault(ctrl)
 	s.router = mux.NewRouter()
 
@@ -320,6 +332,79 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_SignTypedData() {
 		s.signTypedDataUC.EXPECT().
 			Execute(gomock.Any(), mixedCaseTestAddress, signRequest.Namespace, gomock.Any()).
 			Return("", errors.InvalidParameterError("error"))
+
+		s.router.ServeHTTP(rw, httpRequest)
+		assert.Equal(t, http.StatusUnprocessableEntity, rw.Code)
+	})
+}
+
+func (s *ethereumCtrlTestSuite) TestEthereumController_VerifySignature() {
+	url := "/ethereum/accounts/verify-signature"
+
+	s.T().Run("should execute request successfully", func(t *testing.T) {
+		verifyRequest := testutils.FakeVerifyPayloadRequest()
+		requestBytes, _ := json.Marshal(verifyRequest)
+
+		rw := httptest.NewRecorder()
+		httpRequest := httptest.NewRequest(http.MethodPost, url, bytes.NewReader(requestBytes))
+
+		s.verifySignatureUC.EXPECT().
+			Execute(gomock.Any(), verifyRequest.Address, verifyRequest.Signature, verifyRequest.Data).
+			Return(nil)
+
+		s.router.ServeHTTP(rw, httpRequest)
+
+		assert.Equal(t, http.StatusNoContent, rw.Code)
+	})
+
+	// Sufficient test to check that the mapping to HTTP errors is working. All other status code tests are done in integration tests
+	s.T().Run("should fail with correct error code if use case fails", func(t *testing.T) {
+		verifyRequest := testutils.FakeVerifyPayloadRequest()
+		requestBytes, _ := json.Marshal(verifyRequest)
+
+		rw := httptest.NewRecorder()
+		httpRequest := httptest.NewRequest(http.MethodPost, url, bytes.NewReader(requestBytes))
+
+		s.verifySignatureUC.EXPECT().
+			Execute(gomock.Any(), verifyRequest.Address, verifyRequest.Signature, verifyRequest.Data).
+			Return(errors.InvalidParameterError("error"))
+
+		s.router.ServeHTTP(rw, httpRequest)
+		assert.Equal(t, http.StatusUnprocessableEntity, rw.Code)
+	})
+}
+
+func (s *ethereumCtrlTestSuite) TestEthereumController_VerifyTypedDataSignature() {
+	url := "/ethereum/accounts/verify-typed-data-signature"
+
+	s.T().Run("should execute request successfully", func(t *testing.T) {
+		verifyRequest := testutils.FakeVerifyTypedDataPayloadRequest()
+		requestBytes, _ := json.Marshal(verifyRequest)
+		expectedTypedData := formatters.FormatSignTypedDataRequest(&verifyRequest.TypedData)
+
+		rw := httptest.NewRecorder()
+		httpRequest := httptest.NewRequest(http.MethodPost, url, bytes.NewReader(requestBytes))
+
+		s.verifyTypedDataSignatureUC.EXPECT().
+			Execute(gomock.Any(), verifyRequest.Address, verifyRequest.Signature, expectedTypedData).
+			Return(nil)
+
+		s.router.ServeHTTP(rw, httpRequest)
+
+		assert.Equal(t, http.StatusNoContent, rw.Code)
+	})
+
+	// Sufficient test to check that the mapping to HTTP errors is working. All other status code tests are done in integration tests
+	s.T().Run("should fail with correct error code if use case fails", func(t *testing.T) {
+		verifyRequest := testutils.FakeVerifyTypedDataPayloadRequest()
+		requestBytes, _ := json.Marshal(verifyRequest)
+
+		rw := httptest.NewRecorder()
+		httpRequest := httptest.NewRequest(http.MethodPost, url, bytes.NewReader(requestBytes))
+
+		s.verifyTypedDataSignatureUC.EXPECT().
+			Execute(gomock.Any(), verifyRequest.Address, verifyRequest.Signature, gomock.Any()).
+			Return(errors.InvalidParameterError("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)
 		assert.Equal(t, http.StatusUnprocessableEntity, rw.Code)
