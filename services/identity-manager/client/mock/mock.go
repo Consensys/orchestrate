@@ -10,6 +10,8 @@ import (
 	healthcheck "github.com/heptiolabs/healthcheck"
 	entities "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	identitymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/identitymanager"
+	keymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager"
+	ethereum "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/ethereum"
 	reflect "reflect"
 )
 
@@ -124,6 +126,49 @@ func (m *MockAccountClient) SignPayload(ctx context.Context, address string, req
 func (mr *MockAccountClientMockRecorder) SignPayload(ctx, address, request interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignPayload", reflect.TypeOf((*MockAccountClient)(nil).SignPayload), ctx, address, request)
+}
+
+// SignTypedData mocks base method
+func (m *MockAccountClient) SignTypedData(ctx context.Context, address string, request *identitymanager.SignTypedDataRequest) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SignTypedData", ctx, address, request)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SignTypedData indicates an expected call of SignTypedData
+func (mr *MockAccountClientMockRecorder) SignTypedData(ctx, address, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignTypedData", reflect.TypeOf((*MockAccountClient)(nil).SignTypedData), ctx, address, request)
+}
+
+// VerifySignature mocks base method
+func (m *MockAccountClient) VerifySignature(ctx context.Context, request *keymanager.VerifyPayloadRequest) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "VerifySignature", ctx, request)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// VerifySignature indicates an expected call of VerifySignature
+func (mr *MockAccountClientMockRecorder) VerifySignature(ctx, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifySignature", reflect.TypeOf((*MockAccountClient)(nil).VerifySignature), ctx, request)
+}
+
+// VerifyTypedDataSignature mocks base method
+func (m *MockAccountClient) VerifyTypedDataSignature(ctx context.Context, request *ethereum.VerifyTypedDataRequest) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "VerifyTypedDataSignature", ctx, request)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// VerifyTypedDataSignature indicates an expected call of VerifyTypedDataSignature
+func (mr *MockAccountClientMockRecorder) VerifyTypedDataSignature(ctx, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifyTypedDataSignature", reflect.TypeOf((*MockAccountClient)(nil).VerifyTypedDataSignature), ctx, request)
 }
 
 // MockIdentityManagerClient is a mock of IdentityManagerClient interface
@@ -251,4 +296,47 @@ func (m *MockIdentityManagerClient) SignPayload(ctx context.Context, address str
 func (mr *MockIdentityManagerClientMockRecorder) SignPayload(ctx, address, request interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignPayload", reflect.TypeOf((*MockIdentityManagerClient)(nil).SignPayload), ctx, address, request)
+}
+
+// SignTypedData mocks base method
+func (m *MockIdentityManagerClient) SignTypedData(ctx context.Context, address string, request *identitymanager.SignTypedDataRequest) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SignTypedData", ctx, address, request)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SignTypedData indicates an expected call of SignTypedData
+func (mr *MockIdentityManagerClientMockRecorder) SignTypedData(ctx, address, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignTypedData", reflect.TypeOf((*MockIdentityManagerClient)(nil).SignTypedData), ctx, address, request)
+}
+
+// VerifySignature mocks base method
+func (m *MockIdentityManagerClient) VerifySignature(ctx context.Context, request *keymanager.VerifyPayloadRequest) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "VerifySignature", ctx, request)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// VerifySignature indicates an expected call of VerifySignature
+func (mr *MockIdentityManagerClientMockRecorder) VerifySignature(ctx, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifySignature", reflect.TypeOf((*MockIdentityManagerClient)(nil).VerifySignature), ctx, request)
+}
+
+// VerifyTypedDataSignature mocks base method
+func (m *MockIdentityManagerClient) VerifyTypedDataSignature(ctx context.Context, request *ethereum.VerifyTypedDataRequest) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "VerifyTypedDataSignature", ctx, request)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// VerifyTypedDataSignature indicates an expected call of VerifyTypedDataSignature
+func (mr *MockIdentityManagerClientMockRecorder) VerifyTypedDataSignature(ctx, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifyTypedDataSignature", reflect.TypeOf((*MockIdentityManagerClient)(nil).VerifyTypedDataSignature), ctx, request)
 }

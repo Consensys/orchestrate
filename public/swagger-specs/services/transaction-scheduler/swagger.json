@@ -397,7 +397,7 @@
                 }
             }
         },
-        "/jobs/{uuid}/resent": {
+        "/jobs/{uuid}/resend": {
             "put": {
                 "security": [
                     {

@@ -6,6 +6,8 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client/mock"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -34,7 +36,7 @@ type identityCtrlTestSuite struct {
 	searchIdentityUC  *mocks.MockSearchAccountsUseCase
 	updateIdentityUC  *mocks.MockUpdateAccountUseCase
 	fundingIdentityUC *mocks.MockFundingAccountUseCase
-	signPayloadUC     *mocks.MockSignPayloadUseCase
+	keyManagerClient  *mock.MockKeyManagerClient
 	ctx               context.Context
 	tenants           []string
 	router            *mux.Router
@@ -60,10 +62,6 @@ func (s *identityCtrlTestSuite) FundingAccount() usecases.FundingAccountUseCase 
 	return s.fundingIdentityUC
 }
 
-func (s *identityCtrlTestSuite) SignPayload() usecases.SignPayloadUseCase {
-	return s.signPayloadUC
-}
-
 var _ usecases.AccountUseCases = &identityCtrlTestSuite{}
 
 const (
@@ -85,13 +83,13 @@ func (s *identityCtrlTestSuite) SetupTest() {
 	s.getIdentityUC = mocks.NewMockGetAccountUseCase(ctrl)
 	s.searchIdentityUC = mocks.NewMockSearchAccountsUseCase(ctrl)
 	s.updateIdentityUC = mocks.NewMockUpdateAccountUseCase(ctrl)
-	s.signPayloadUC = mocks.NewMockSignPayloadUseCase(ctrl)
+	s.keyManagerClient = mock.NewMockKeyManagerClient(ctrl)
 	s.ctx = context.Background()
 	s.ctx = context.WithValue(s.ctx, multitenancy.TenantIDKey, s.tenants[0])
 	s.ctx = context.WithValue(s.ctx, multitenancy.AllowedTenantsKey, s.tenants)
 	s.router = mux.NewRouter()
 
-	controller := NewIdentitiesController(s)
+	controller := NewIdentitiesController(s, s.keyManagerClient)
 	controller.Append(s.router)
 }
 
@@ -273,21 +271,61 @@ func (s *identityCtrlTestSuite) TestAccountController_SignPayload() {
 		acc.Address = inputTestAddress
 		rw := httptest.NewRecorder()
 		payload := "payloadMessage"
-		signedPayload := ethcommon.HexToHash("0xABCDEF").String()
-		req := &types.SignPayloadRequest{
-			Data: payload,
-		}
-		requestBytes, _ := json.Marshal(req)
+		signature := "0xsignature"
+		requestBytes, _ := json.Marshal(&types.SignPayloadRequest{Data: payload})
 
 		httpRequest := httptest.
 			NewRequest(http.MethodPost, fmt.Sprintf("/accounts/%v/sign", acc.Address), bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 
-		s.signPayloadUC.EXPECT().Execute(gomock.Any(), mixedCaseTestAddress, payload, s.tenants[0]).Return(signedPayload, nil)
+		s.keyManagerClient.EXPECT().ETHSign(gomock.Any(), mixedCaseTestAddress, &keymanager.PayloadRequest{
+			Data:      payload,
+			Namespace: s.tenants[0],
+		}).Return(signature, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
-		assert.Equal(t, signedPayload, rw.Body.String())
+		assert.Equal(t, signature, rw.Body.String())
 		assert.Equal(t, http.StatusOK, rw.Code)
+	})
+}
+
+func (s *identityCtrlTestSuite) TestAccountController_VerifySignature() {
+	s.T().Run("should execute verify signature request successfully", func(t *testing.T) {
+		acc := testutils.FakeAccount()
+		acc.Address = inputTestAddress
+		rw := httptest.NewRecorder()
+		request := testutils.FakeVerifyPayloadRequest()
+		requestBytes, _ := json.Marshal(request)
+
+		httpRequest := httptest.
+			NewRequest(http.MethodPost, "/accounts/verify-signature", bytes.NewReader(requestBytes)).
+			WithContext(s.ctx)
+
+		s.keyManagerClient.EXPECT().ETHVerifySignature(gomock.Any(), request).Return(nil)
+
+		s.router.ServeHTTP(rw, httpRequest)
+
+		assert.Equal(t, http.StatusNoContent, rw.Code)
+	})
+}
+
+func (s *identityCtrlTestSuite) TestAccountController_VerifyTypedDataSignature() {
+	s.T().Run("should execute verify typed data signature request successfully", func(t *testing.T) {
+		acc := testutils.FakeAccount()
+		acc.Address = inputTestAddress
+		rw := httptest.NewRecorder()
+		request := testutils.FakeVerifyTypedDataPayloadRequest()
+		requestBytes, _ := json.Marshal(request)
+
+		httpRequest := httptest.
+			NewRequest(http.MethodPost, "/accounts/verify-typed-data-signature", bytes.NewReader(requestBytes)).
+			WithContext(s.ctx)
+
+		s.keyManagerClient.EXPECT().ETHVerifyTypedDataSignature(gomock.Any(), request).Return(nil)
+
+		s.router.ServeHTTP(rw, httpRequest)
+
+		assert.Equal(t, http.StatusNoContent, rw.Code)
 	})
 }

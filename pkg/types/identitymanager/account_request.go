@@ -1,5 +1,7 @@
 package identitymanager
 
+import "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/ethereum"
+
 type CreateAccountRequest struct {
 	Alias      string            `json:"alias" validate:"omitempty" example:"personal-account"`
 	Chain      string            `json:"chain" validate:"omitempty" example:"besu"`
@@ -20,4 +22,11 @@ type UpdateAccountRequest struct {
 
 type SignPayloadRequest struct {
 	Data string `json:"data" validate:"required" example:"data to sign"`
+}
+
+type SignTypedDataRequest struct {
+	DomainSeparator ethereum.DomainSeparator   `json:"domainSeparator" validate:"required"`
+	Types           map[string][]ethereum.Type `json:"types" validate:"required"`
+	Message         map[string]interface{}     `json:"message" validate:"required"`
+	MessageType     string                     `json:"messageType" validate:"required" example:"Mail"`
 }

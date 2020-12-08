@@ -3,6 +3,9 @@ package client
 import (
 	"context"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/ethereum"
+
 	healthz "github.com/heptiolabs/healthcheck"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/identitymanager"
@@ -17,6 +20,9 @@ type AccountClient interface {
 	ImportAccount(ctx context.Context, request *types.ImportAccountRequest) (*types.AccountResponse, error)
 	UpdateAccount(ctx context.Context, address string, request *types.UpdateAccountRequest) (*types.AccountResponse, error)
 	SignPayload(ctx context.Context, address string, request *types.SignPayloadRequest) (string, error)
+	SignTypedData(ctx context.Context, address string, request *types.SignTypedDataRequest) (string, error)
+	VerifySignature(ctx context.Context, request *keymanager.VerifyPayloadRequest) error
+	VerifyTypedDataSignature(ctx context.Context, request *ethereum.VerifyTypedDataRequest) error
 }
 
 type IdentityManagerClient interface {

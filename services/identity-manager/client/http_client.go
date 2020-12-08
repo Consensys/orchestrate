@@ -3,10 +3,12 @@ package client
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/ethereum"
 
 	"github.com/containous/traefik/v2/pkg/log"
 	healthz "github.com/heptiolabs/healthcheck"
@@ -29,11 +31,11 @@ type HTTPClient struct {
 	config *Config
 }
 
-func (c HTTPClient) Checker() healthz.Check {
+func (c *HTTPClient) Checker() healthz.Check {
 	return healthz.HTTPGetCheck(fmt.Sprintf("%s/live", c.config.MetricsURL), time.Second)
 }
 
-func (c HTTPClient) GetAccount(ctx context.Context, address string) (*types.AccountResponse, error) {
+func (c *HTTPClient) GetAccount(ctx context.Context, address string) (*types.AccountResponse, error) {
 	reqURL := fmt.Sprintf("%v/accounts/%s", c.config.URL, address)
 	resp := &types.AccountResponse{}
 
@@ -52,7 +54,7 @@ func (c HTTPClient) GetAccount(ctx context.Context, address string) (*types.Acco
 	return resp, nil
 }
 
-func (c HTTPClient) CreateAccount(ctx context.Context, req *types.CreateAccountRequest) (*types.AccountResponse, error) {
+func (c *HTTPClient) CreateAccount(ctx context.Context, req *types.CreateAccountRequest) (*types.AccountResponse, error) {
 	reqURL := fmt.Sprintf("%v/accounts", c.config.URL)
 	resp := &types.AccountResponse{}
 
@@ -71,7 +73,7 @@ func (c HTTPClient) CreateAccount(ctx context.Context, req *types.CreateAccountR
 	return resp, nil
 }
 
-func (c HTTPClient) ImportAccount(ctx context.Context, req *types.ImportAccountRequest) (*types.AccountResponse, error) {
+func (c *HTTPClient) ImportAccount(ctx context.Context, req *types.ImportAccountRequest) (*types.AccountResponse, error) {
 	reqURL := fmt.Sprintf("%v/accounts/import", c.config.URL)
 	resp := &types.AccountResponse{}
 
@@ -90,7 +92,7 @@ func (c HTTPClient) ImportAccount(ctx context.Context, req *types.ImportAccountR
 	return resp, nil
 }
 
-func (c HTTPClient) UpdateAccount(ctx context.Context, address string, req *types.UpdateAccountRequest) (*types.AccountResponse, error) {
+func (c *HTTPClient) UpdateAccount(ctx context.Context, address string, req *types.UpdateAccountRequest) (*types.AccountResponse, error) {
 	reqURL := fmt.Sprintf("%v/accounts/%s", c.config.URL, address)
 	resp := &types.AccountResponse{}
 
@@ -109,7 +111,7 @@ func (c HTTPClient) UpdateAccount(ctx context.Context, address string, req *type
 	return resp, nil
 }
 
-func (c HTTPClient) SearchAccounts(ctx context.Context, filters *entities.AccountFilters) ([]*types.AccountResponse, error) {
+func (c *HTTPClient) SearchAccounts(ctx context.Context, filters *entities.AccountFilters) ([]*types.AccountResponse, error) {
 	reqURL := fmt.Sprintf("%v/accounts", c.config.URL)
 	resp := []*types.AccountResponse{}
 
@@ -137,7 +139,7 @@ func (c HTTPClient) SearchAccounts(ctx context.Context, filters *entities.Accoun
 	return resp, nil
 }
 
-func (c HTTPClient) SignPayload(ctx context.Context, address string, req *types.SignPayloadRequest) (string, error) {
+func (c *HTTPClient) SignPayload(ctx context.Context, address string, req *types.SignPayloadRequest) (string, error) {
 	reqURL := fmt.Sprintf("%v/accounts/%s/sign", c.config.URL, address)
 
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, req)
@@ -148,12 +150,47 @@ func (c HTTPClient) SignPayload(ctx context.Context, address string, req *types.
 	}
 
 	defer clientutils.CloseResponse(response)
-	signature, err := ioutil.ReadAll(response.Body)
+	return httputil.ParseStringResponse(ctx, response)
+}
+
+func (c *HTTPClient) SignTypedData(ctx context.Context, address string, request *types.SignTypedDataRequest) (string, error) {
+	reqURL := fmt.Sprintf("%v/accounts/%s/sign-typed-data", c.config.URL, address)
+
+	response, err := clientutils.PostRequest(ctx, c.client, reqURL, request)
 	if err != nil {
-		errMessage := "failed to decode response body"
+		errMessage := "error while signing typed data"
 		log.FromContext(ctx).WithError(err).Error(errMessage)
 		return "", errors.ServiceConnectionError(errMessage).ExtendComponent(component)
 	}
 
-	return string(signature), nil
+	defer clientutils.CloseResponse(response)
+	return httputil.ParseStringResponse(ctx, response)
+}
+
+func (c *HTTPClient) VerifySignature(ctx context.Context, request *keymanager.VerifyPayloadRequest) error {
+	reqURL := fmt.Sprintf("%v/accounts/verify-signature", c.config.URL)
+
+	response, err := clientutils.PostRequest(ctx, c.client, reqURL, request)
+	if err != nil {
+		errMessage := "error while verifying signature"
+		log.FromContext(ctx).WithError(err).Error(errMessage)
+		return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+	}
+
+	defer clientutils.CloseResponse(response)
+	return httputil.ParseEmptyBodyResponse(ctx, response)
+}
+
+func (c *HTTPClient) VerifyTypedDataSignature(ctx context.Context, request *ethereum.VerifyTypedDataRequest) error {
+	reqURL := fmt.Sprintf("%v/accounts/verify-typed-data-signature", c.config.URL)
+
+	response, err := clientutils.PostRequest(ctx, c.client, reqURL, request)
+	if err != nil {
+		errMessage := "error while verifying typed data signature"
+		log.FromContext(ctx).WithError(err).Error(errMessage)
+		return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+	}
+
+	defer clientutils.CloseResponse(response)
+	return httputil.ParseEmptyBodyResponse(ctx, response)
 }

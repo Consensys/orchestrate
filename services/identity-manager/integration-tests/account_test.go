@@ -258,7 +258,7 @@ func (s *identityManagerTransactionTestSuite) TestIdentityManager_UpdateAccount(
 func (s *identityManagerTransactionTestSuite) TestIdentityManager_SignPayload() {
 	ctx := s.env.ctx
 
-	s.T().Run("should create account and update it successfully", func(t *testing.T) {
+	s.T().Run("should sign payload successfully", func(t *testing.T) {
 		defer gock.Off()
 		address := ethcommon.HexToAddress("0x123").String()
 		payload := "messageToSign"
@@ -269,13 +269,60 @@ func (s *identityManagerTransactionTestSuite) TestIdentityManager_SignPayload() 
 		response, err := s.client.SignPayload(ctx, address, &types.SignPayloadRequest{
 			Data: payload,
 		})
+		assert.NoError(t, err)
+		assert.Equal(t, signedPayload, response)
+	})
+}
 
+func (s *identityManagerTransactionTestSuite) TestIdentityManager_VerifySignature() {
+	ctx := s.env.ctx
+
+	s.T().Run("should verify signature successfully", func(t *testing.T) {
+		defer gock.Off()
+		gock.New(keyManagerURL).Post("/ethereum/accounts/verify-signature").Reply(http2.StatusNoContent)
+
+		verifyRequest := testutils.FakeVerifyPayloadRequest()
+		err := s.client.VerifySignature(ctx, verifyRequest)
+		assert.NoError(t, err)
+	})
+}
+
+func (s *identityManagerTransactionTestSuite) TestIdentityManager_VerifyTypedDataSignature() {
+	ctx := s.env.ctx
+
+	s.T().Run("should verify typed data signature successfully", func(t *testing.T) {
+		defer gock.Off()
+		gock.New(keyManagerURL).Post("/ethereum/accounts/verify-typed-data-signature").Reply(http2.StatusNoContent)
+
+		verifyRequest := testutils.FakeVerifyTypedDataPayloadRequest()
+		err := s.client.VerifyTypedDataSignature(ctx, verifyRequest)
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
 		}
+	})
+}
 
-		assert.Equal(t, signedPayload, response)
+func (s *identityManagerTransactionTestSuite) TestIdentityManager_SignTypedData() {
+	ctx := s.env.ctx
+
+	s.T().Run("should sign typed data successfully", func(t *testing.T) {
+		defer gock.Off()
+		address := ethcommon.HexToAddress("0x123").String()
+		signature := "0xsignature"
+		gock.New(keyManagerURL).Post(fmt.Sprintf("/ethereum/accounts/%s/sign-typed-data", address)).
+			Reply(200).BodyString(signature)
+
+		typedDataRequest := testutils.FakeSignTypedDataRequest()
+		response, err := s.client.SignTypedData(ctx, address, &types.SignTypedDataRequest{
+			DomainSeparator: typedDataRequest.DomainSeparator,
+			Types:           typedDataRequest.Types,
+			Message:         typedDataRequest.Message,
+			MessageType:     typedDataRequest.MessageType,
+		})
+
+		assert.NoError(t, err)
+		assert.Equal(t, signature, response)
 	})
 }
 

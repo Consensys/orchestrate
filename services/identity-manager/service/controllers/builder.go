@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client"
+
 	"github.com/gorilla/mux"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/dynamic"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/identity-manager/identity-manager/use-cases"
@@ -37,9 +39,9 @@ type Builder struct {
 	identitiesCtrl *IdentitiesController
 }
 
-func NewBuilder(ucs usecases.AccountUseCases) *Builder {
+func NewBuilder(ucs usecases.AccountUseCases, keyManagerClient client.KeyManagerClient) *Builder {
 	return &Builder{
-		identitiesCtrl: NewIdentitiesController(ucs),
+		identitiesCtrl: NewIdentitiesController(ucs, keyManagerClient),
 	}
 }
 

@@ -19,7 +19,6 @@ func NewUseCases(db store.DB, keyManagerClient client.KeyManagerClient, registry
 		searchAccountsUC: searchIdentityUC,
 		updateAccountUC:  account.NewUpdateAccountUseCase(db),
 		fundingAccountUC: fundingIdentityUC,
-		signPayloadUC:    account.NewSignPayloadUseCase(keyManagerClient),
 	}
 }
 
@@ -29,7 +28,6 @@ type useCases struct {
 	searchAccountsUC usecases.SearchAccountsUseCase
 	updateAccountUC  usecases.UpdateAccountUseCase
 	fundingAccountUC usecases.FundingAccountUseCase
-	signPayloadUC    usecases.SignPayloadUseCase
 }
 
 func (u useCases) GetAccount() usecases.GetAccountUseCase {
@@ -50,8 +48,4 @@ func (u useCases) UpdateAccount() usecases.UpdateAccountUseCase {
 
 func (u useCases) FundingAccount() usecases.FundingAccountUseCase {
 	return u.fundingAccountUC
-}
-
-func (u useCases) SignPayload() usecases.SignPayloadUseCase {
-	return u.signPayloadUC
 }

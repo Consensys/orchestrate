@@ -35,20 +35,6 @@ func (m *MockAccountUseCases) EXPECT() *MockAccountUseCasesMockRecorder {
 	return m.recorder
 }
 
-// SignPayload mocks base method
-func (m *MockAccountUseCases) SignPayload() usecases.SignPayloadUseCase {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SignPayload")
-	ret0, _ := ret[0].(usecases.SignPayloadUseCase)
-	return ret0
-}
-
-// SignPayload indicates an expected call of SignPayload
-func (mr *MockAccountUseCasesMockRecorder) SignPayload() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignPayload", reflect.TypeOf((*MockAccountUseCases)(nil).SignPayload))
-}
-
 // GetAccount mocks base method
 func (m *MockAccountUseCases) GetAccount() usecases.GetAccountUseCase {
 	m.ctrl.T.Helper()
@@ -306,42 +292,4 @@ func (m *MockFundingAccountUseCase) Execute(ctx context.Context, identity *entit
 func (mr *MockFundingAccountUseCaseMockRecorder) Execute(ctx, identity, chainName interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockFundingAccountUseCase)(nil).Execute), ctx, identity, chainName)
-}
-
-// MockSignPayloadUseCase is a mock of SignPayloadUseCase interface
-type MockSignPayloadUseCase struct {
-	ctrl     *gomock.Controller
-	recorder *MockSignPayloadUseCaseMockRecorder
-}
-
-// MockSignPayloadUseCaseMockRecorder is the mock recorder for MockSignPayloadUseCase
-type MockSignPayloadUseCaseMockRecorder struct {
-	mock *MockSignPayloadUseCase
-}
-
-// NewMockSignPayloadUseCase creates a new mock instance
-func NewMockSignPayloadUseCase(ctrl *gomock.Controller) *MockSignPayloadUseCase {
-	mock := &MockSignPayloadUseCase{ctrl: ctrl}
-	mock.recorder = &MockSignPayloadUseCaseMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use
-func (m *MockSignPayloadUseCase) EXPECT() *MockSignPayloadUseCaseMockRecorder {
-	return m.recorder
-}
-
-// Execute mocks base method
-func (m *MockSignPayloadUseCase) Execute(ctx context.Context, address, payload, tenantID string) (string, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, address, payload, tenantID)
-	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Execute indicates an expected call of Execute
-func (mr *MockSignPayloadUseCaseMockRecorder) Execute(ctx, address, payload, tenantID interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSignPayloadUseCase)(nil).Execute), ctx, address, payload, tenantID)
 }

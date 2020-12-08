@@ -9,7 +9,6 @@ import (
 //go:generate mockgen -source=use-cases.go -destination=mocks/use-cases.go -package=mocks
 
 type AccountUseCases interface {
-	SignPayload() SignPayloadUseCase
 	GetAccount() GetAccountUseCase
 	CreateAccount() CreateAccountUseCase
 	UpdateAccount() UpdateAccountUseCase
@@ -35,8 +34,4 @@ type UpdateAccountUseCase interface {
 
 type FundingAccountUseCase interface {
 	Execute(ctx context.Context, identity *entities.Account, chainName string) error
-}
-
-type SignPayloadUseCase interface {
-	Execute(ctx context.Context, address, payload, tenantID string) (string, error)
 }

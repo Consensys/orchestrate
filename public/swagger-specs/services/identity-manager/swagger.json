@@ -2,7 +2,7 @@
     "swagger": "2.0",
     "info": {
         "description": "PegaSys Orchestrate Account API. Enables dynamic management of identities.\nIdentities correspond to an Ethereum accounts. It can be a user account or a deployed smart contract. By usage of the generated cryptographic key pair, identities can be used to sign/verify and to encrypt/decrypt messages.",
-        "title": "Account Manager API",
+        "title": "Identity Manager API",
         "contact": {
             "name": "Contact PegaSys Orchestrate",
             "url": "https://pegasys.tech/contact/",
@@ -25,7 +25,7 @@
                         "JWTAuth": []
                     }
                 ],
-                "description": "Get a list of filtered identities",
+                "description": "Get a list of filtered accounts",
                 "consumes": [
                     "application/json"
                 ],
@@ -323,7 +323,7 @@
                         "JWTAuth": []
                     }
                 ],
-                "description": "Sign sent data using provided address",
+                "description": "Sign sent data using provided account",
                 "consumes": [
                     "application/json"
                 ],
@@ -373,9 +373,239 @@
                     }
                 }
             }
+        },
+        "/ethereum/accounts/verify-signature": {
+            "post": {
+                "description": "Verifies if a message has been signed by the Ethereum account passed as argument",
+                "consumes": [
+                    "application/json"
+                ],
+                "summary": "Verifies the signature of a message",
+                "parameters": [
+                    {
+                        "description": "signature and message to verify",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/keymanager.VerifyPayloadRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {},
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Invalid parameters",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/ethereum/accounts/verify-typed-data-signature": {
+            "post": {
+                "description": "Verifies if a typed data message has been signed by the Ethereum account passed as argument following the EIP-712 standard",
+                "consumes": [
+                    "application/json"
+                ],
+                "summary": "Verifies the signature of a typed data message following the EIP-712 standard",
+                "parameters": [
+                    {
+                        "description": "Typed data to sign",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/ethereum.VerifyTypedDataRequest"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "domainSeparator": {
+                                            "$ref": "#/definitions/ethereum.DomainSeparator"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {},
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Invalid parameters",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/ethereum/accounts/{address}/sign-typed-data": {
+            "post": {
+                "description": "Signs typed data using ECDSA and the private key of an existing account following the EIP-712 standard",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/plain"
+                ],
+                "summary": "Signs typed data using an existing account following the EIP-712 standard",
+                "parameters": [
+                    {
+                        "description": "Typed data to sign",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/identitymanager.SignTypedDataRequest"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "domainSeparator": {
+                                            "$ref": "#/definitions/ethereum.DomainSeparator"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Signed payload",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Account not found",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Invalid parameters",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "ethereum.DomainSeparator": {
+            "type": "object",
+            "required": [
+                "chainID",
+                "name",
+                "version"
+            ],
+            "properties": {
+                "chainID": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "name": {
+                    "type": "string",
+                    "example": "MyDApp"
+                },
+                "salt": {
+                    "type": "string",
+                    "example": "some-random-string"
+                },
+                "verifyingContract": {
+                    "type": "string",
+                    "example": "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"
+                },
+                "version": {
+                    "type": "string",
+                    "example": "v1.0.0"
+                }
+            }
+        },
+        "ethereum.VerifyTypedDataRequest": {
+            "type": "object",
+            "required": [
+                "address",
+                "data",
+                "signature"
+            ],
+            "properties": {
+                "address": {
+                    "type": "string",
+                    "example": "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"
+                },
+                "data": {
+                    "type": "SignTypedDataRequest"
+                },
+                "signature": {
+                    "type": "string",
+                    "example": "0x6019a3c8..."
+                }
+            }
+        },
         "httputil.ErrorResponse": {
             "type": "object",
             "properties": {
@@ -484,6 +714,38 @@
                 }
             }
         },
+        "identitymanager.SignTypedDataRequest": {
+            "type": "object",
+            "required": [
+                "domainSeparator",
+                "message",
+                "messageType",
+                "types"
+            ],
+            "properties": {
+                "domainSeparator": {
+                    "type": "object",
+                    "$ref": "#/definitions/ethereum.DomainSeparator"
+                },
+                "message": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "messageType": {
+                    "type": "string",
+                    "example": "Mail"
+                },
+                "types": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/ethereum.Type"
+                        }
+                    }
+                }
+            }
+        },
         "identitymanager.UpdateAccountRequest": {
             "type": "object",
             "properties": {
@@ -496,6 +758,28 @@
                     "additionalProperties": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "keymanager.VerifyPayloadRequest": {
+            "type": "object",
+            "required": [
+                "address",
+                "data",
+                "signature"
+            ],
+            "properties": {
+                "address": {
+                    "type": "string",
+                    "example": "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"
+                },
+                "data": {
+                    "type": "string",
+                    "example": "my data to sign"
+                },
+                "signature": {
+                    "type": "string",
+                    "example": "0x6019a3c8..."
                 }
             }
         }

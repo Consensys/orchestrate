@@ -4,6 +4,10 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/ethereum"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client"
+
 	"github.com/gorilla/mux"
 	jsonutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/httputil"
@@ -15,12 +19,14 @@ import (
 )
 
 type IdentitiesController struct {
-	accountUCs usecases.AccountUseCases
+	accountUCs       usecases.AccountUseCases
+	keyManagerClient client.KeyManagerClient
 }
 
-func NewIdentitiesController(accountUCs usecases.AccountUseCases) *IdentitiesController {
+func NewIdentitiesController(accountUCs usecases.AccountUseCases, keyManagerClient client.KeyManagerClient) *IdentitiesController {
 	return &IdentitiesController{
 		accountUCs,
+		keyManagerClient,
 	}
 }
 
@@ -32,6 +38,9 @@ func (c *IdentitiesController) Append(router *mux.Router) {
 	router.Methods(http.MethodGet).Path("/accounts/{address}").HandlerFunc(c.getOne)
 	router.Methods(http.MethodPatch).Path("/accounts/{address}").HandlerFunc(c.update)
 	router.Methods(http.MethodPost).Path("/accounts/{address}/sign").HandlerFunc(c.signPayload)
+	router.Methods(http.MethodPost).Path("/accounts/{address}/sign-typed-data").HandlerFunc(c.signTypedData)
+	router.Methods(http.MethodPost).Path("/accounts/verify-signature").HandlerFunc(c.verifySignature)
+	router.Methods(http.MethodPost).Path("/accounts/verify-typed-data-signature").HandlerFunc(c.verifyTypedDataSignature)
 }
 
 // @Summary Creates a new Account
@@ -237,11 +246,122 @@ func (c *IdentitiesController) signPayload(rw http.ResponseWriter, request *http
 		return
 	}
 
-	signature, err := c.accountUCs.SignPayload().Execute(ctx, address, payloadRequest.Data, multitenancy.TenantIDFromContext(ctx))
+	signature, err := c.keyManagerClient.ETHSign(request.Context(), address, &keymanager.PayloadRequest{
+		Namespace: multitenancy.TenantIDFromContext(ctx),
+		Data:      payloadRequest.Data,
+	})
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
 	}
 
 	_, _ = rw.Write([]byte(signature))
+}
+
+// @Summary Signs typed data using an existing account following the EIP-712 standard
+// @Description Signs typed data using ECDSA and the private key of an existing account following the EIP-712 standard
+// @Accept json
+// @Produce text/plain
+// @Param request body identitymanager.SignTypedDataRequest{domainSeparator=ethereum.DomainSeparator} true "Typed data to sign"
+// @Success 200 {string} string "Signed payload"
+// @Failure 400 {object} httputil.ErrorResponse "Invalid request"
+// @Failure 401 {object} httputil.ErrorResponse "Unauthorized"
+// @Failure 404 {object} httputil.ErrorResponse "Account not found"
+// @Failure 422 {object} httputil.ErrorResponse "Invalid parameters"
+// @Failure 500 {object} httputil.ErrorResponse "Internal server error"
+// @Router /ethereum/accounts/{address}/sign-typed-data [post]
+func (c *IdentitiesController) signTypedData(rw http.ResponseWriter, request *http.Request) {
+	ctx := request.Context()
+	signRequest := &identitymanager.SignTypedDataRequest{}
+	err := jsonutils.UnmarshalBody(request.Body, signRequest)
+	if err != nil {
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	address, err := utils.ParseHexToMixedCaseEthAddress(mux.Vars(request)["address"])
+	if err != nil {
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	signature, err := c.keyManagerClient.ETHSignTypedData(ctx, address, &ethereum.SignTypedDataRequest{
+		Namespace:       multitenancy.TenantIDFromContext(ctx),
+		DomainSeparator: signRequest.DomainSeparator,
+		Types:           signRequest.Types,
+		Message:         signRequest.Message,
+		MessageType:     signRequest.MessageType,
+	})
+	if err != nil {
+		httputil.WriteHTTPErrorResponse(rw, err)
+		return
+	}
+
+	_, _ = rw.Write([]byte(signature))
+}
+
+// @Summary Verifies the signature of a typed data message following the EIP-712 standard
+// @Description Verifies if a typed data message has been signed by the Ethereum account passed as argument following the EIP-712 standard
+// @Accept json
+// @Param request body ethereum.VerifyTypedDataRequest{domainSeparator=ethereum.DomainSeparator} true "Typed data to sign"
+// @Success 204
+// @Failure 400 {object} httputil.ErrorResponse "Invalid request"
+// @Failure 401 {object} httputil.ErrorResponse "Unauthorized"
+// @Failure 422 {object} httputil.ErrorResponse "Invalid parameters"
+// @Failure 500 {object} httputil.ErrorResponse "Internal server error"
+// @Router /ethereum/accounts/verify-typed-data-signature [post]
+func (c *IdentitiesController) verifyTypedDataSignature(rw http.ResponseWriter, request *http.Request) {
+	verifyRequest := &ethereum.VerifyTypedDataRequest{}
+	err := jsonutils.UnmarshalBody(request.Body, verifyRequest)
+	if err != nil {
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	verifyRequest.Address, err = utils.ParseHexToMixedCaseEthAddress(verifyRequest.Address)
+	if err != nil {
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = c.keyManagerClient.ETHVerifyTypedDataSignature(request.Context(), verifyRequest)
+	if err != nil {
+		httputil.WriteHTTPErrorResponse(rw, err)
+		return
+	}
+
+	rw.WriteHeader(http.StatusNoContent)
+}
+
+// @Summary Verifies the signature of a message
+// @Description Verifies if a message has been signed by the Ethereum account passed as argument
+// @Accept json
+// @Param request body keymanager.VerifyPayloadRequest true "signature and message to verify"
+// @Success 204
+// @Failure 400 {object} httputil.ErrorResponse "Invalid request"
+// @Failure 401 {object} httputil.ErrorResponse "Unauthorized"
+// @Failure 422 {object} httputil.ErrorResponse "Invalid parameters"
+// @Failure 500 {object} httputil.ErrorResponse "Internal server error"
+// @Router /ethereum/accounts/verify-signature [post]
+func (c *IdentitiesController) verifySignature(rw http.ResponseWriter, request *http.Request) {
+	verifyRequest := &keymanager.VerifyPayloadRequest{}
+	err := jsonutils.UnmarshalBody(request.Body, verifyRequest)
+	if err != nil {
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	verifyRequest.Address, err = utils.ParseHexToMixedCaseEthAddress(verifyRequest.Address)
+	if err != nil {
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = c.keyManagerClient.ETHVerifySignature(request.Context(), verifyRequest)
+	if err != nil {
+		httputil.WriteHTTPErrorResponse(rw, err)
+		return
+	}
+
+	rw.WriteHeader(http.StatusNoContent)
 }

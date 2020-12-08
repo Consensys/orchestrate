@@ -47,7 +47,7 @@ type SignTypedDataRequest struct {
 type DomainSeparator struct {
 	Name              string `json:"name" validate:"required" example:"MyDApp"`
 	Version           string `json:"version" validate:"required" example:"v1.0.0"`
-	ChainID           int64  `json:"chainID" validate:"required" example:"1 (mainnet)"`
+	ChainID           int64  `json:"chainID" validate:"required" example:"1"`
 	VerifyingContract string `json:"verifyingContract,omitempty" validate:"omitempty,isHex" example:"0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"`
 	Salt              string `json:"salt,omitempty" validate:"omitempty" example:"some-random-string"`
 }

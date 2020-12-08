@@ -30,7 +30,7 @@ func NewIdentityManager(cfg *Config, pgmngr postgres.Manager, jwt, key auth.Chec
 	ucs := builder.NewUseCases(db, keyManagerClient, registryClient, txSchedulerClient)
 
 	// Option for identity manager handler
-	identityManagerHandlerOpt := app.HandlerOpt(reflect.TypeOf(&dynamic.Identity{}), controllers.NewBuilder(ucs))
+	identityManagerHandlerOpt := app.HandlerOpt(reflect.TypeOf(&dynamic.Identity{}), controllers.NewBuilder(ucs, keyManagerClient))
 
 	// Create app
 	return app.New(
