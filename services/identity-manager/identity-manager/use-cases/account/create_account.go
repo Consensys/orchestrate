@@ -72,7 +72,8 @@ func (uc *createAccountUseCase) Execute(ctx context.Context, account *entities.A
 	accountModel := parsers.NewAccountModelFromEntities(account)
 	accountModel.TenantID = tenantID
 
-	_, err = uc.db.Account().FindOneByAddress(ctx, account.Address, []string{tenantID})
+	// IMPORTANT: Addresses are unique across every tenant
+	_, err = uc.db.Account().FindOneByAddress(ctx, account.Address, []string{})
 	if err == nil {
 		errMsg := fmt.Sprintf("account address %s already exists", account.Address)
 		logger.Error(errMsg)
@@ -81,6 +82,7 @@ func (uc *createAccountUseCase) Execute(ctx context.Context, account *entities.A
 		return nil, errors.FromError(err).ExtendComponent(createAccountComponent)
 	}
 
+	logger.WithField("address", account.Address).Info("inserting account...")
 	err = uc.db.Account().Insert(ctx, accountModel)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(createAccountComponent)

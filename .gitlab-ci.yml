@@ -39,7 +39,7 @@ services:
       - ${GOPATH}/pkg/mod/
 
 .go-setup: &go-setup
-  image: golang:1.14
+  image: golang:1.15
   stage: test
   extends: .go-cache
   before_script:

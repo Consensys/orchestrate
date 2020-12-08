@@ -23,6 +23,11 @@
     1. Fill up ENV variables: `VAULT_V2_SECRET_PATH`, `VAULT_V2_MOUNT_POINT`, `VAULT_V2_TOKEN_FILE`
     1. Run command: `orchestrate key-manager migrate import-secrets` 
 
+## v2.5.4 (Unreleased)
+
+### 🛠 Bug fixes
+* Capture and log chain-registry proxy errors
+
 ## v2.5.3 (2020-11-26)
 
 ### 🆕 Features

@@ -1,13 +1,13 @@
 ############################
 # STEP 1 build executable binary
 ############################
-FROM golang:1.14 AS builder
+FROM golang:1.15 AS builder
 
 RUN useradd appuser && \
     mkdir /app
 WORKDIR /app
 
-# Use go mod with go 1.14
+# Use go mod with go 1.15
 ENV GO111MODULE=on
 COPY go.mod go.sum ./
 RUN go mod download

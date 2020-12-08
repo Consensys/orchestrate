@@ -47,7 +47,7 @@ func TestCreateAccount_Execute(t *testing.T) {
 			Namespace: tenantID,
 		}, nil)
 
-		accountAgent.EXPECT().FindOneByAddress(ctx, accountEntity.Address, []string{tenantID}).
+		accountAgent.EXPECT().FindOneByAddress(ctx, accountEntity.Address, []string{}).
 			Return(nil, errors.NotFoundError("not found"))
 		accountAgent.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
 
@@ -73,7 +73,7 @@ func TestCreateAccount_Execute(t *testing.T) {
 			Namespace: tenantID,
 		}, nil)
 
-		accountAgent.EXPECT().FindOneByAddress(ctx, accEntity.Address, []string{tenantID}).
+		accountAgent.EXPECT().FindOneByAddress(ctx, accEntity.Address, []string{}).
 			Return(nil, errors.NotFoundError("not found"))
 		accountAgent.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
 
@@ -99,7 +99,7 @@ func TestCreateAccount_Execute(t *testing.T) {
 			Namespace: tenantID,
 		}, nil)
 
-		accountAgent.EXPECT().FindOneByAddress(ctx, accEntity.Address, []string{tenantID}).
+		accountAgent.EXPECT().FindOneByAddress(ctx, accEntity.Address, []string{}).
 			Return(nil, errors.NotFoundError("not found"))
 		accountAgent.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
 
@@ -162,7 +162,7 @@ func TestCreateAccount_Execute(t *testing.T) {
 			Namespace: tenantID,
 		}, nil)
 
-		accountAgent.EXPECT().FindOneByAddress(ctx, accEntity.Address, []string{tenantID}).
+		accountAgent.EXPECT().FindOneByAddress(ctx, accEntity.Address, []string{}).
 			Return(nil, expectedErr)
 
 		_, err := usecase.Execute(ctx, accEntity, "", "", tenantID)
@@ -184,7 +184,7 @@ func TestCreateAccount_Execute(t *testing.T) {
 			Namespace: tenantID,
 		}, nil)
 
-		accountAgent.EXPECT().FindOneByAddress(ctx, accEntity.Address, []string{tenantID}).
+		accountAgent.EXPECT().FindOneByAddress(ctx, accEntity.Address, []string{}).
 			Return(nil, nil)
 
 		_, err := usecase.Execute(ctx, accEntity, "", "", tenantID)
@@ -207,7 +207,7 @@ func TestCreateAccount_Execute(t *testing.T) {
 			Namespace: tenantID,
 		}, nil)
 
-		accountAgent.EXPECT().FindOneByAddress(ctx, accEntity.Address, []string{tenantID}).
+		accountAgent.EXPECT().FindOneByAddress(ctx, accEntity.Address, []string{}).
 			Return(nil, errors.NotFoundError("not found"))
 		accountAgent.EXPECT().Insert(ctx, gomock.Any()).Return(expectedErr)
 
@@ -231,7 +231,7 @@ func TestCreateAccount_Execute(t *testing.T) {
 			PublicKey: accEntity.PublicKey,
 		}, nil)
 
-		accountAgent.EXPECT().FindOneByAddress(ctx, accEntity.Address, []string{tenantID}).
+		accountAgent.EXPECT().FindOneByAddress(ctx, accEntity.Address, []string{}).
 			Return(nil, errors.NotFoundError("not found"))
 		accountAgent.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
 		mockFundingUC.EXPECT().Execute(ctx, gomock.Any(), chainName).Return(expectedErr)

@@ -1,6 +1,6 @@
 module gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2
 
-go 1.14
+go 1.15
 
 require (
 	github.com/Shopify/sarama v1.26.4

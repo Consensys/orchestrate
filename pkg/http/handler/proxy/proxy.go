@@ -1,10 +1,12 @@
 package proxy
 
 import (
+	"bytes"
 	"context"
 	"encoding/base64"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net"
 	"net/http"
 	gohttputil "net/http/httputil"
@@ -24,7 +26,7 @@ import (
 const StatusClientClosedRequest = 499
 
 // StatusClientClosedRequestText non-standard HTTP status for client disconnection
-const StatusClientClosedRequestText = "Client Closed Envelope"
+const StatusClientClosedRequestText = "Client Closed Connection"
 
 type Builder struct {
 	transport http.RoundTripper
@@ -102,6 +104,19 @@ func New(cfg *dynamic.ReverseProxy, transport http.RoundTripper, pool gohttputil
 			outReq.URL.RawQuery = u.RawQuery
 			outReq.RequestURI = "" // Outgoing request should not have RequestURI
 
+			// See More https://github.com/golang/net/blob/master/http2/transport.go#L554
+			if outReq.Body != nil {
+				body, _ := ioutil.ReadAll(outReq.Body)
+				outReq.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+				outReq.GetBody = func() (io.ReadCloser, error) {
+					return ioutil.NopCloser(bytes.NewBuffer(body)), nil
+				}
+			} else {
+				outReq.GetBody = func() (io.ReadCloser, error) {
+					return nil, nil
+				}
+			}
+
 			outReq.Proto = "HTTP/1.1"
 			outReq.ProtoMajor = 1
 			outReq.ProtoMinor = 1
@@ -130,9 +145,17 @@ func New(cfg *dynamic.ReverseProxy, transport http.RoundTripper, pool gohttputil
 		// ModifyResponse: respModifier,
 		ModifyResponse: func(rw *http.Response) error {
 			rw.Header.Set("X-Backend-Server", rw.Request.URL.String())
+			if rw.StatusCode >= 300 {
+				body, _ := ioutil.ReadAll(rw.Body)
+				rw.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+				log.FromContext(rw.Request.Context()).
+					Debugf("'%d %s' caused by: %q", rw.StatusCode, statusText(rw.StatusCode), string(body))
+			}
+
 			if respModifier == nil {
 				return nil
 			}
+
 			return respModifier(rw)
 		},
 		BufferPool: pool,
