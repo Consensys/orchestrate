@@ -340,7 +340,6 @@ func (s *txSignerEthereumTestSuite) TestTxSigner_ZHealthCheck() {
 		assert.NoError(s.T(), err)
 
 		gock.New(txSchedulerMetricsURL).Get("/live").Reply(200)
-		gock.New(keyManagerMetricsURL).Get("/live").Reply(200)
 		defer gock.Off()
 
 		resp, err := httpClient.Do(req)
@@ -353,7 +352,6 @@ func (s *txSignerEthereumTestSuite) TestTxSigner_ZHealthCheck() {
 		status := healthRes{}
 		err = json.UnmarshalBody(resp.Body, &status)
 		assert.NoError(s.T(), err)
-		assert.Equal(s.T(), "OK", status.KeyManager)
 		assert.Equal(s.T(), "OK", status.TransactionScheduler)
 		assert.Equal(s.T(), "OK", status.Kafka)
 	})
@@ -363,7 +361,6 @@ func (s *txSignerEthereumTestSuite) TestTxSigner_ZHealthCheck() {
 		assert.NoError(s.T(), err)
 
 		gock.New(txSchedulerMetricsURL).Get("/live").Reply(200)
-		gock.New(keyManagerMetricsURL).Get("/live").Reply(200)
 		defer gock.Off()
 
 		// Kill Kafka on first call so data is added in DB and status is CREATED but does not get updated to STARTED
@@ -384,7 +381,6 @@ func (s *txSignerEthereumTestSuite) TestTxSigner_ZHealthCheck() {
 		err = json.UnmarshalBody(resp.Body, &status)
 		assert.NoError(s.T(), err)
 		assert.NotEqual(s.T(), "OK", status.Kafka)
-		assert.Equal(s.T(), "OK", status.KeyManager)
 		assert.Equal(s.T(), "OK", status.TransactionScheduler)
 	})
 }

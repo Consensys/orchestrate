@@ -31,7 +31,7 @@ func NewTxSigner(
 	keyManagerClient client.KeyManagerClient,
 	txSchedulerClient client2.TransactionSchedulerClient,
 ) (*app.App, error) {
-	appli, err := app.New(config.App, readinessOpt(keyManagerClient, txSchedulerClient), app.MetricsOpt())
+	appli, err := app.New(config.App, readinessOpt(txSchedulerClient), app.MetricsOpt())
 	if err != nil {
 		return nil, err
 	}
@@ -65,10 +65,9 @@ func (signer *txSignerDaemon) Close() error {
 	return signer.consumerGroup.Close()
 }
 
-func readinessOpt(keyManagerClient client.KeyManagerClient, txSchedulerClient client2.TransactionSchedulerClient) app.Option {
+func readinessOpt(txSchedulerClient client2.TransactionSchedulerClient) app.Option {
 	return func(ap *app.App) error {
 		ap.AddReadinessCheck("kafka", pkgsarama.GlobalClientChecker())
-		ap.AddReadinessCheck("key-manager", keyManagerClient.Checker())
 		ap.AddReadinessCheck("transaction-scheduler", txSchedulerClient.Checker())
 		return nil
 	}

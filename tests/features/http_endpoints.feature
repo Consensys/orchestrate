@@ -89,8 +89,8 @@ Feature: Verify HTTP Endpoints
     When I send "GET" request to "{{global.tx-signer-metrics}}/ready?full=1"
     Then the response code should be 200
     And Response should have the following fields
-      | kafka | key-manager | transaction-scheduler
-      | OK    | OK          | OK
+      | kafka | transaction-scheduler
+      | OK    | OK
 
   Scenario: Get tx-signer liveness
     When I send "GET" request to "{{global.tx-signer-metrics}}/live"
@@ -155,8 +155,8 @@ Feature: Verify HTTP Endpoints
     When I send "GET" request to "{{global.identity-manager-metrics}}/ready?full=1"
     Then the response code should be 200
     And Response should have the following fields
-      | chain-registry | database | key-manager |
-      | OK             | OK       | OK          |
+      | chain-registry | database |
+      | OK             | OK       |
 
   Scenario: Get Identity Manager liveness
     When I send "GET" request to "{{global.identity-manager-metrics}}/live"

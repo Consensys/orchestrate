@@ -36,7 +36,7 @@ func NewIdentityManager(cfg *Config, pgmngr postgres.Manager, jwt, key auth.Chec
 	return app.New(
 		cfg.App,
 		app.MultiTenancyOpt("auth", jwt, key, cfg.Multitenancy),
-		ReadinessOpt(db, keyManagerClient, registryClient),
+		ReadinessOpt(db, registryClient),
 		app.MetricsOpt(),
 		app.LoggerMiddlewareOpt("base"),
 		app.SwaggerOpt("./public/swagger-specs/services/identity-manager/swagger.json", "base@logger-base"),
@@ -45,10 +45,9 @@ func NewIdentityManager(cfg *Config, pgmngr postgres.Manager, jwt, key auth.Chec
 	)
 }
 
-func ReadinessOpt(db database.DB, keyManagerClient client.KeyManagerClient, registryClient client2.ChainRegistryClient) app.Option {
+func ReadinessOpt(db database.DB, registryClient client2.ChainRegistryClient) app.Option {
 	return func(ap *app.App) error {
 		ap.AddReadinessCheck("database", postgres.Checker(db.(orm.DB)))
-		ap.AddReadinessCheck("key-manager", keyManagerClient.Checker())
 		ap.AddReadinessCheck("chain-registry", registryClient.Checker())
 		return nil
 	}

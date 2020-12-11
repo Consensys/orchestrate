@@ -340,7 +340,6 @@ func (s *identityManagerTransactionTestSuite) TestIdentityManager_ZHealthCheck()
 		req, err := http2.NewRequest("GET", fmt.Sprintf("%s/ready?full=1", s.env.metricsURL), nil)
 		assert.NoError(s.T(), err)
 
-		gock.New(keyManagerMetricsURL).Get("/live").Reply(200)
 		gock.New(chainRegistryMetricsURL).Get("/live").Reply(200)
 		defer gock.Off()
 
@@ -355,30 +354,6 @@ func (s *identityManagerTransactionTestSuite) TestIdentityManager_ZHealthCheck()
 		err = json.UnmarshalBody(resp.Body, &status)
 		assert.NoError(s.T(), err)
 		assert.Equal(s.T(), "OK", status.Database)
-		assert.Equal(s.T(), "OK", status.KeyManager)
-		assert.Equal(s.T(), "OK", status.ChainRegistry)
-	})
-
-	s.T().Run("should retrieve a negative health check over key-manager API service", func(t *testing.T) {
-		req, err := http2.NewRequest("GET", fmt.Sprintf("%s/ready?full=1", s.env.metricsURL), nil)
-		assert.NoError(s.T(), err)
-
-		gock.New(keyManagerMetricsURL).Get("/live").Reply(500)
-		gock.New(chainRegistryMetricsURL).Get("/live").Reply(200)
-		defer gock.Off()
-
-		resp, err := httpClient.Do(req)
-		if err != nil {
-			assert.Fail(s.T(), err.Error())
-			return
-		}
-
-		assert.Equal(s.T(), 503, resp.StatusCode)
-		status := healthRes{}
-		err = json.UnmarshalBody(resp.Body, &status)
-		assert.NoError(s.T(), err)
-		assert.Equal(s.T(), "OK", status.Database)
-		assert.NotEqual(s.T(), "OK", status.KeyManager)
 		assert.Equal(s.T(), "OK", status.ChainRegistry)
 	})
 
@@ -386,7 +361,6 @@ func (s *identityManagerTransactionTestSuite) TestIdentityManager_ZHealthCheck()
 		req, err := http2.NewRequest("GET", fmt.Sprintf("%s/ready?full=1", s.env.metricsURL), nil)
 		assert.NoError(s.T(), err)
 
-		gock.New(keyManagerMetricsURL).Get("/live").Reply(200)
 		gock.New(chainRegistryMetricsURL).Get("/live").Reply(500)
 		defer gock.Off()
 
@@ -401,7 +375,6 @@ func (s *identityManagerTransactionTestSuite) TestIdentityManager_ZHealthCheck()
 		err = json.UnmarshalBody(resp.Body, &status)
 		assert.NoError(s.T(), err)
 		assert.Equal(s.T(), "OK", status.Database)
-		assert.Equal(s.T(), "OK", status.KeyManager)
 		assert.NotEqual(s.T(), "OK", status.ChainRegistry)
 	})
 
@@ -409,7 +382,6 @@ func (s *identityManagerTransactionTestSuite) TestIdentityManager_ZHealthCheck()
 		req, err := http2.NewRequest("GET", fmt.Sprintf("%s/ready?full=1", s.env.metricsURL), nil)
 		assert.NoError(s.T(), err)
 
-		gock.New(keyManagerMetricsURL).Get("/live").Reply(200)
 		gock.New(chainRegistryMetricsURL).Get("/live").Reply(200)
 		defer gock.Off()
 
@@ -431,7 +403,6 @@ func (s *identityManagerTransactionTestSuite) TestIdentityManager_ZHealthCheck()
 		err = json.UnmarshalBody(resp.Body, &status)
 		assert.NoError(s.T(), err)
 		assert.NotEqual(s.T(), "OK", status.Database)
-		assert.Equal(s.T(), "OK", status.KeyManager)
 		assert.Equal(s.T(), "OK", status.ChainRegistry)
 	})
 }

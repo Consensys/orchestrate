@@ -58,7 +58,6 @@ func (uc *fundingAccountUseCase) Execute(ctx context.Context, account *entities.
 			},
 			Labels: chainregistry.FaucetToJobLabels(fct),
 		})
-
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(fundingAccountComponent)
 	}
