@@ -44,7 +44,7 @@ type workLoadItem struct {
 
 const (
 	nAccounts              = 20
-	waitForEnvelopeTimeout = time.Second * 20
+	waitForEnvelopeTimeout = time.Minute * 2 // TODO: make it customizable by ENVs
 )
 
 // Init initialize Cucumber service
@@ -84,10 +84,14 @@ func (c *WorkLoadService) Run(ctx context.Context) error {
 	}
 
 	var wg sync.WaitGroup
-	wg.Add(len(c.items))
 	var gerr error
 
 	for _, item := range c.items {
+		if gerr != nil {
+			break
+		}
+
+		wg.Add(1)
 		go func(it *workLoadItem) {
 			defer wg.Done()
 			err := c.run(cctx, it)
@@ -97,6 +101,7 @@ func (c *WorkLoadService) Run(ctx context.Context) error {
 		}(item)
 	}
 
+	log.FromContext(ctx).Info("waiting for jobs to complete...")
 	wg.Wait()
 	return gerr
 }

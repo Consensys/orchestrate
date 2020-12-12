@@ -35,11 +35,13 @@ func BatchDeployContractTest(ctx context.Context, cfg *WorkloadConfig, client tx
 	})
 
 	if err != nil {
+		log.FromContext(ctx).WithError(err).Error("failed to send transaction")
 		return err
 	}
 
 	err = t.Load("tx.decoded", cfg.waitForEnvelopeTimeout)
 	if err != nil {
+		log.FromContext(ctx).WithError(err).Error("failed to fetch envelope")
 		return err
 	}
 

@@ -44,7 +44,7 @@ func (t *Tracker) get(key string, timeout time.Duration) (*tx.Envelope, error) {
 	case e := <-ch:
 		return e, nil
 	case <-time.After(timeout):
-		return nil, fmt.Errorf("no envelope available in output %q", key)
+		return nil, fmt.Errorf("no envelope available in output %q. Timeout after %s", key, timeout)
 	}
 }
 
