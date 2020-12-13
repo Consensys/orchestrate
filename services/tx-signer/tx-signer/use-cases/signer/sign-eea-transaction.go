@@ -1,4 +1,4 @@
-package ethereum
+package signer
 
 import (
 	"context"
@@ -67,7 +67,7 @@ func (uc *signEEATransactionUseCase) Execute(ctx context.Context, job *entities.
 		return "", "", errors.FromError(err).ExtendComponent(signEEATransactionComponent)
 	}
 
-	logger.Info("eea transaction signed successfully")
+	logger.Info("EEA transaction signed successfully")
 
 	// transaction hash of EEA transactions cannot be computed
 	return hexutil.Encode(signedRaw), "", nil
@@ -102,7 +102,7 @@ func (uc *signEEATransactionUseCase) signWithAccount(ctx context.Context, job *e
 		request.To = tx.To().Hex()
 	}
 
-	tenants := usecases.AllowedTenants(job.TenantID)
+	tenants := utils.AllowedTenants(job.TenantID)
 	for _, tenant := range tenants {
 		request.Namespace = tenant
 		sig, err := uc.keyManagerClient.ETHSignEEATransaction(ctx, job.Transaction.From, request)

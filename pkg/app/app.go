@@ -381,6 +381,7 @@ func (app *App) Stop(ctx context.Context) error {
 		return err // something went wrong while shutting down
 	}
 
+	app.isReady = false
 	traefiklog.FromContext(ctx).Infof("app gracefully shutted down")
 	return nil // completed normally
 }
@@ -406,6 +407,7 @@ func (app *App) Close() (err error) {
 			gr.Go(daemon.Close)
 		}
 
+		app.isReady = false
 		err = gr.Wait().ErrorOrNil()
 	})
 	return

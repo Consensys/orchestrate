@@ -154,6 +154,16 @@ func (m *TxEnvelope) SetChainUUID(chainUUID string) *TxEnvelope {
 	return m
 }
 
+func (m *TxEnvelope) SetExpectedNonce(nonce string) *TxEnvelope {
+	m.InternalLabels[ExpectedNonceLabel] = nonce
+	return m
+}
+
+func (m *TxEnvelope) SetParentJobUUID(nonce string) *TxEnvelope {
+	m.InternalLabels[ParentJobUUIDLabel] = nonce
+	return m
+}
+
 func (m *TxEnvelope) EnableTxFromOneTimeKey() *TxEnvelope {
 	m.InternalLabels[TxFromLabel] = TxFromOneTimeKey
 	return m

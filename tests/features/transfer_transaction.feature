@@ -54,7 +54,6 @@ Feature: Send transfer transaction
 }
       """
     Then the response code should be 202
-    Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
 
   @geth
@@ -117,11 +116,6 @@ Feature: Send transfer transaction
       | 0     |
       | 0     |
     Then Envelopes should be in topic "tx.signer"
-    Then Envelopes should be in topic "tx.sender"
-    And Envelopes should have the following fields
-      | Raw | TxHash |
-      | ~   | ~      |
-      | ~   | ~      |
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
       | Receipt.Status |

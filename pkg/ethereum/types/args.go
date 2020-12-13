@@ -3,6 +3,7 @@ package types
 import (
 	"math/big"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/tx"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
@@ -18,13 +19,21 @@ type PrivateArgs struct {
 	PrivateTxType  string   `json:"restriction"`
 }
 
-// Call2PrivateArgs creates PrivateArgs from a call object
 func Call2PrivateArgs(req *tx.Envelope) *PrivateArgs {
 	var privateArgs PrivateArgs
 	privateArgs.PrivateFrom = req.PrivateFrom
 	privateArgs.PrivateFor = req.PrivateFor
 	privateArgs.PrivacyGroupID = req.PrivacyGroupID
 	privateArgs.PrivateTxType = req.PrivateTxType
+	return &privateArgs
+}
+
+func CallTx2PrivateArgs(rtx *entities.ETHTransaction) *PrivateArgs {
+	var privateArgs PrivateArgs
+	privateArgs.PrivateFrom = rtx.PrivateFrom
+	privateArgs.PrivateFor = rtx.PrivateFor
+	privateArgs.PrivacyGroupID = rtx.PrivacyGroupID
+	privateArgs.PrivateTxType = "restricted"
 	return &privateArgs
 }
 

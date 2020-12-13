@@ -1,14 +1,15 @@
 // +build unit
-// +build !race
 
 package service
 
 import (
 	"context"
+	"testing"
+	"time"
+
 	"github.com/Shopify/sarama"
 	"github.com/cenkalti/backoff/v4"
 	"github.com/gofrs/uuid"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/handlers/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
@@ -18,8 +19,6 @@ import (
 	mock2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/client/mock"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-signer/tx-signer/use-cases"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-signer/tx-signer/use-cases/mocks"
-	"testing"
-	"time"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -28,33 +27,39 @@ import (
 
 type messageListenerCtrlTestSuite struct {
 	suite.Suite
-	listener              *MessageListener
-	signTxUC              *mocks.MockSignTransactionUseCase
-	signEEATxUC           *mocks.MockSignEEATransactionUseCase
-	signQuorumPrivateTxUC *mocks.MockSignQuorumPrivateTransactionUseCase
-	sendEnvelopeUC        *mocks.MockSendEnvelopeUseCase
-	txSchedulerClient     *mock2.MockTransactionSchedulerClient
-	tenants               []string
-	senderTopic           string
-	recoverTopic          string
+	listener           *MessageListener
+	producer           *mock.MockSyncProducer
+	sendETHUC          *mocks.MockSendETHTxUseCase
+	sendETHRawUC       *mocks.MockSendETHRawTxUseCase
+	sendEEAPrivateUC   *mocks.MockSendEEAPrivateTxUseCase
+	sendTesseraMarking *mocks.MockSendTesseraMarkingTxUseCase
+	sendTesseraPrivate *mocks.MockSendTesseraPrivateTxUseCase
+	txSchedulerClient  *mock2.MockTransactionSchedulerClient
+	tenants            []string
+	crafterTopic       string
+	recoverTopic       string
 }
 
-var _ usecases.EthereumUseCases = &messageListenerCtrlTestSuite{}
+var _ usecases.UseCases = &messageListenerCtrlTestSuite{}
 
-func (s messageListenerCtrlTestSuite) SignTransaction() usecases.SignTransactionUseCase {
-	return s.signTxUC
+func (s *messageListenerCtrlTestSuite) SendETHRawTx() usecases.SendETHRawTxUseCase {
+	return s.sendETHRawUC
 }
 
-func (s messageListenerCtrlTestSuite) SignEEATransaction() usecases.SignEEATransactionUseCase {
-	return s.signEEATxUC
+func (s *messageListenerCtrlTestSuite) SendETHTx() usecases.SendETHTxUseCase {
+	return s.sendETHUC
 }
 
-func (s messageListenerCtrlTestSuite) SignQuorumPrivateTransaction() usecases.SignQuorumPrivateTransactionUseCase {
-	return s.signQuorumPrivateTxUC
+func (s *messageListenerCtrlTestSuite) SendEEAPrivateTx() usecases.SendEEAPrivateTxUseCase {
+	return s.sendEEAPrivateUC
 }
 
-func (s messageListenerCtrlTestSuite) SendEnvelope() usecases.SendEnvelopeUseCase {
-	return s.sendEnvelopeUC
+func (s *messageListenerCtrlTestSuite) SendTesseraPrivateTx() usecases.SendTesseraPrivateTxUseCase {
+	return s.sendTesseraPrivate
+}
+
+func (s *messageListenerCtrlTestSuite) SendTesseraMarkingTx() usecases.SendTesseraMarkingTxUseCase {
+	return s.sendTesseraMarking
 }
 
 func TestMessageListener(t *testing.T) {
@@ -67,34 +72,32 @@ func (s *messageListenerCtrlTestSuite) SetupTest() {
 	defer ctrl.Finish()
 
 	s.tenants = []string{"tenantID"}
-	s.signTxUC = mocks.NewMockSignTransactionUseCase(ctrl)
-	s.signEEATxUC = mocks.NewMockSignEEATransactionUseCase(ctrl)
-	s.signQuorumPrivateTxUC = mocks.NewMockSignQuorumPrivateTransactionUseCase(ctrl)
-	s.sendEnvelopeUC = mocks.NewMockSendEnvelopeUseCase(ctrl)
+	s.sendETHRawUC = mocks.NewMockSendETHRawTxUseCase(ctrl)
+	s.sendETHUC = mocks.NewMockSendETHTxUseCase(ctrl)
+	s.sendEEAPrivateUC = mocks.NewMockSendEEAPrivateTxUseCase(ctrl)
+	s.sendTesseraPrivate = mocks.NewMockSendTesseraPrivateTxUseCase(ctrl)
+	s.sendTesseraMarking = mocks.NewMockSendTesseraMarkingTxUseCase(ctrl)
 	s.txSchedulerClient = mock2.NewMockTransactionSchedulerClient(ctrl)
-	s.senderTopic = "sender-topic"
+	s.crafterTopic = "crafter-topic"
 	s.recoverTopic = "recover-topic"
+	s.producer = mock.NewMockSyncProducer()
 
 	bckoff := backoff.WithMaxRetries(backoff.NewConstantBackOff(time.Second), 1)
-	s.listener = NewMessageListener(s, s.senderTopic, s.recoverTopic, s.txSchedulerClient, bckoff )
+	s.listener = NewMessageListener(s, s.txSchedulerClient, s.producer, s.recoverTopic, s.crafterTopic, bckoff)
 }
 
 func (s *messageListenerCtrlTestSuite) TestMessageListener_PublicEthereum() {
 	s.T().Run("should execute use case for multiple public ethereum transactions", func(t *testing.T) {
 		var claims map[string][]int32
-		ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
-		defer cancel()
+		ctx := context.Background()
 
 		mockSession := mock.NewConsumerGroupSession(ctx, "kafka-consumer-group", claims)
 		mockClaim := mock.NewConsumerGroupClaim("topic", 0, 0)
 		envelope := fakeEnvelope()
 		msg := &sarama.ConsumerMessage{}
 		msg.Value, _ = proto.Marshal(envelope.TxEnvelopeAsRequest())
-		raw := "0xraw"
-		txHash := "0xhash"
 
-		s.signTxUC.EXPECT().Execute(ctx, gomock.Any()).Return(raw, txHash, nil).Times(2)
-		s.sendEnvelopeUC.EXPECT().Execute(ctx, gomock.Any(), s.senderTopic, "0xeca84382E0f1dDdE22EedCd0D803442972EC7BE5@1").Return(nil).Times(2)
+		s.sendETHUC.EXPECT().Execute(ctx, gomock.Any()).Times(2).Return(nil)
 
 		cerr := make(chan error)
 		go func() {
@@ -104,13 +107,38 @@ func (s *messageListenerCtrlTestSuite) TestMessageListener_PublicEthereum() {
 		mockClaim.ExpectMessage(msg)
 		mockClaim.ExpectMessage(msg)
 
+		assert.NoError(t, s.listener.Break(mockSession))
 		assert.NoError(t, <-cerr)
+		assert.Nil(t, s.producer.LastMessage())
 	})
 
-	s.T().Run("should execute use case for multiple eea transactions", func(t *testing.T) {
+	s.T().Run("should execute use case for public raw ethereum transactions", func(t *testing.T) {
 		var claims map[string][]int32
-		ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
-		defer cancel()
+		ctx := context.Background()
+
+		mockSession := mock.NewConsumerGroupSession(ctx, "kafka-consumer-group", claims)
+		mockClaim := mock.NewConsumerGroupClaim("topic", 0, 0)
+		envelope := fakeEnvelope()
+		_ = envelope.SetJobType(tx.JobType_ETH_RAW_TX)
+		msg := &sarama.ConsumerMessage{}
+		msg.Value, _ = proto.Marshal(envelope.TxEnvelopeAsRequest())
+
+		s.sendETHRawUC.EXPECT().Execute(ctx, gomock.Any()).Return(nil)
+
+		cerr := make(chan error)
+		go func() {
+			cerr <- s.listener.ConsumeClaim(mockSession, mockClaim)
+		}()
+
+		mockClaim.ExpectMessage(msg)
+		assert.NoError(t, s.listener.Break(mockSession))
+		assert.NoError(t, <-cerr)
+		assert.Nil(t, s.producer.LastMessage())
+	})
+
+	s.T().Run("should execute use case for eea transactions", func(t *testing.T) {
+		var claims map[string][]int32
+		ctx := context.Background()
 
 		mockSession := mock.NewConsumerGroupSession(ctx, "kafka-consumer-group", claims)
 		mockClaim := mock.NewConsumerGroupClaim("topic", 0, 0)
@@ -118,12 +146,8 @@ func (s *messageListenerCtrlTestSuite) TestMessageListener_PublicEthereum() {
 		_ = envelope.SetJobType(tx.JobType_ETH_ORION_EEA_TX)
 		msg := &sarama.ConsumerMessage{}
 		msg.Value, _ = proto.Marshal(envelope.TxEnvelopeAsRequest())
-		raw := "0xraw"
-		txHash := "0xhash"
-		expectedPartitionKey := "0xeca84382E0f1dDdE22EedCd0D803442972EC7BE5@orion-d24bc1408ff6fb773a0d30588f37553e@1"
 
-		s.signEEATxUC.EXPECT().Execute(ctx, gomock.Any()).Return(raw, txHash, nil).Times(2)
-		s.sendEnvelopeUC.EXPECT().Execute(ctx, gomock.Any(), s.senderTopic, expectedPartitionKey).Return(nil).Times(2)
+		s.sendEEAPrivateUC.EXPECT().Execute(ctx, gomock.Any()).Return(nil)
 
 		cerr := make(chan error)
 		go func() {
@@ -131,15 +155,15 @@ func (s *messageListenerCtrlTestSuite) TestMessageListener_PublicEthereum() {
 		}()
 
 		mockClaim.ExpectMessage(msg)
-		mockClaim.ExpectMessage(msg)
 
+		assert.NoError(t, s.listener.Break(mockSession))
 		assert.NoError(t, <-cerr)
+		assert.Nil(t, s.producer.LastMessage())
 	})
 
-	s.T().Run("should execute use case for multiple quorum private transactions", func(t *testing.T) {
+	s.T().Run("should execute use case for tessera marking transactions", func(t *testing.T) {
 		var claims map[string][]int32
-		ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
-		defer cancel()
+		ctx := context.Background()
 
 		mockSession := mock.NewConsumerGroupSession(ctx, "kafka-consumer-group", claims)
 		mockClaim := mock.NewConsumerGroupClaim("topic", 0, 0)
@@ -147,12 +171,33 @@ func (s *messageListenerCtrlTestSuite) TestMessageListener_PublicEthereum() {
 		_ = envelope.SetJobType(tx.JobType_ETH_TESSERA_MARKING_TX)
 		msg := &sarama.ConsumerMessage{}
 		msg.Value, _ = proto.Marshal(envelope.TxEnvelopeAsRequest())
-		raw := "0xraw"
-		txHash := "0xhash"
-		expectedPartitionKey := "0xeca84382E0f1dDdE22EedCd0D803442972EC7BE5@1"
 
-		s.signQuorumPrivateTxUC.EXPECT().Execute(ctx, gomock.Any()).Return(raw, txHash, nil).Times(2)
-		s.sendEnvelopeUC.EXPECT().Execute(ctx, gomock.Any(), s.senderTopic, expectedPartitionKey).Return(nil).Times(2)
+		s.sendTesseraMarking.EXPECT().Execute(ctx, gomock.Any()).Return(nil)
+
+		cerr := make(chan error)
+		go func() {
+			cerr <- s.listener.ConsumeClaim(mockSession, mockClaim)
+		}()
+
+		mockClaim.ExpectMessage(msg)
+
+		assert.NoError(t, s.listener.Break(mockSession))
+		assert.NoError(t, <-cerr)
+		assert.Nil(t, s.producer.LastMessage())
+	})
+
+	s.T().Run("should execute use case for multiple tessera private transactions", func(t *testing.T) {
+		var claims map[string][]int32
+		ctx := context.Background()
+
+		mockSession := mock.NewConsumerGroupSession(ctx, "kafka-consumer-group", claims)
+		mockClaim := mock.NewConsumerGroupClaim("topic", 0, 0)
+		envelope := fakeEnvelope()
+		_ = envelope.SetJobType(tx.JobType_ETH_TESSERA_PRIVATE_TX)
+		msg := &sarama.ConsumerMessage{}
+		msg.Value, _ = proto.Marshal(envelope.TxEnvelopeAsRequest())
+
+		s.sendTesseraPrivate.EXPECT().Execute(ctx, gomock.Any()).Times(2).Return(nil)
 
 		cerr := make(chan error)
 		go func() {
@@ -162,59 +207,64 @@ func (s *messageListenerCtrlTestSuite) TestMessageListener_PublicEthereum() {
 		mockClaim.ExpectMessage(msg)
 		mockClaim.ExpectMessage(msg)
 
+		assert.NoError(t, s.listener.Break(mockSession))
 		assert.NoError(t, <-cerr)
+		assert.Nil(t, s.producer.LastMessage())
 	})
+}
 
-	s.T().Run("should update transaction and send message to tx-recover if signing fails", func(t *testing.T) {
+func (s *messageListenerCtrlTestSuite) TestMessageListener_PublicEthereum_Errors() {
+	s.T().Run("should update transaction and send message to tx-recover if sending fails", func(t *testing.T) {
 		var claims map[string][]int32
-		ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
-		defer cancel()
-
+		ctx := context.Background()
+		s.producer.Clean()
+	
 		mockSession := mock.NewConsumerGroupSession(ctx, "kafka-consumer-group", claims)
 		mockClaim := mock.NewConsumerGroupClaim("topic", 0, 0)
-		envelope := fakeEnvelope()
+		evlp := fakeEnvelope()
 		msg := &sarama.ConsumerMessage{}
-		msg.Value, _ = proto.Marshal(envelope.TxEnvelopeAsRequest())
-
-		s.signTxUC.EXPECT().Execute(ctx, gomock.Any()).Return("", "", errors.InternalError("error"))
-		s.txSchedulerClient.EXPECT().UpdateJob(ctx, envelope.GetJobUUID(), &txschedulertypes.UpdateJobRequest{
-			Status:  utils.StatusFailed,
-			Message: "FF000@: error",
+		msg.Value, _ = proto.Marshal(evlp.TxEnvelopeAsRequest())
+	
+		err := errors.InternalError("error")
+		s.sendETHUC.EXPECT().Execute(gomock.Any(), gomock.Any()).Return(err)
+		s.txSchedulerClient.EXPECT().UpdateJob(gomock.Any(), evlp.GetJobUUID(), &txschedulertypes.UpdateJobRequest{
+			Status:      utils.StatusFailed,
+			Message:     err.Error(),
+			Transaction: nil,
 		}).Return(&txschedulertypes.JobResponse{}, nil)
-		s.sendEnvelopeUC.EXPECT().
-			Execute(ctx, gomock.Any(), s.recoverTopic, "0xeca84382E0f1dDdE22EedCd0D803442972EC7BE5@1").
-			Return(nil)
-
+	
 		cerr := make(chan error)
 		go func() {
 			cerr <- s.listener.ConsumeClaim(mockSession, mockClaim)
 		}()
-
+	
 		mockClaim.ExpectMessage(msg)
-
+	
+		assert.NoError(t, s.listener.Break(mockSession))
 		assert.NoError(t, <-cerr)
+		assert.NotNil(t, s.producer.LastMessage())
+		assert.Equal(t, s.recoverTopic, s.producer.LastMessage().Topic)
 	})
-
-	s.T().Run("should not fail tx and send envelope to tx-recover on AuthorizedErrors", func(t *testing.T) {
+	
+	s.T().Run("should update transaction and send message to tx-crafter if sending fails by nonce error", func(t *testing.T) {
 		var claims map[string][]int32
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-		defer cancel()
+		ctx := context.Background()
+		s.producer.Clean()
 	
 		mockSession := mock.NewConsumerGroupSession(ctx, "kafka-consumer-group", claims)
 		mockClaim := mock.NewConsumerGroupClaim("topic", 0, 0)
-		envelope := fakeEnvelope()
+		evlp := fakeEnvelope()
 		msg := &sarama.ConsumerMessage{}
-		msg.Value, _ = proto.Marshal(envelope.TxEnvelopeAsRequest())
-
-		s.signTxUC.EXPECT().Execute(ctx, gomock.Any()).Times(2).Return("", "", errors.KafkaConnectionError("error"))
-		s.txSchedulerClient.EXPECT().UpdateJob(ctx, envelope.GetJobUUID(), &txschedulertypes.UpdateJobRequest{
-			Status:  utils.StatusFailed,
-			Message: "FF000@: error",
+		msg.Value, _ = proto.Marshal(evlp.TxEnvelopeAsRequest())
+	
+		err := errors.InvalidNonceWarning("nonce too low")
+		s.sendETHUC.EXPECT().Execute(gomock.Any(), gomock.Any()).Return(err)
+		s.txSchedulerClient.EXPECT().UpdateJob(gomock.Any(), evlp.GetJobUUID(), &txschedulertypes.UpdateJobRequest{
+			Status:      utils.StatusRecovering,
+			Message:     err.Error(),
+			Transaction: nil,
 		}).Return(&txschedulertypes.JobResponse{}, nil)
-		s.sendEnvelopeUC.EXPECT().
-			Execute(ctx, gomock.Any(), s.recoverTopic, gomock.Any()).
-			Return(nil)
-
+	
 		cerr := make(chan error)
 		go func() {
 			cerr <- s.listener.ConsumeClaim(mockSession, mockClaim)
@@ -222,44 +272,21 @@ func (s *messageListenerCtrlTestSuite) TestMessageListener_PublicEthereum() {
 	
 		mockClaim.ExpectMessage(msg)
 	
-		assert.Error(t, <-cerr)
-	})
-
-	s.T().Run("should skip signing for raw transactions", func(t *testing.T) {
-		var claims map[string][]int32
-		ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
-		defer cancel()
-
-		mockSession := mock.NewConsumerGroupSession(ctx, "kafka-consumer-group", claims)
-		mockClaim := mock.NewConsumerGroupClaim("topic", 0, 0)
-		envelope := fakeEnvelope()
-		_ = envelope.SetJobType(tx.JobType_ETH_RAW_TX)
-		_ = envelope.SetRawString("0xf851018227108252088082c35080820713a09a0a890215ea6e79d06f9665297996ab967db117f36c2090d6d6ead5a2d32d52a065bc4bc766b5a833cb58b3319e44e952487559b9b939cb5268c0409398214c8b")
-		_ = envelope.SetJobType(tx.JobType_ETH_RAW_TX)
-		msg := &sarama.ConsumerMessage{}
-		msg.Value, _ = proto.Marshal(envelope.TxEnvelopeAsRequest())
-
-		s.sendEnvelopeUC.EXPECT().
-			Execute(ctx, gomock.Any(), s.senderTopic, "").
-			Return(nil)
-
-		cerr := make(chan error)
-		go func() {
-			cerr <- s.listener.ConsumeClaim(mockSession, mockClaim)
-		}()
-
-		mockClaim.ExpectMessage(msg)
-
+		assert.NoError(t, s.listener.Break(mockSession))
 		assert.NoError(t, <-cerr)
+		assert.NotNil(t, s.producer.LastMessage())
+		assert.Equal(t, s.crafterTopic, s.producer.LastMessage().Topic)
 	})
 }
 
 func fakeEnvelope() *tx.Envelope {
 	jobUUID := uuid.Must(uuid.NewV4()).String()
+	scheduleUUID := uuid.Must(uuid.NewV4()).String()
 
 	envelope := tx.NewEnvelope()
 	_ = envelope.SetID(jobUUID)
 	_ = envelope.SetJobUUID(jobUUID)
+	_ = envelope.SetScheduleUUID(scheduleUUID)
 	_ = envelope.SetNonce(0)
 	_ = envelope.SetFromString("0xeca84382E0f1dDdE22EedCd0D803442972EC7BE5")
 	_ = envelope.SetGas(21000)
@@ -267,7 +294,7 @@ func fakeEnvelope() *tx.Envelope {
 	_ = envelope.SetValueString("10000000")
 	_ = envelope.SetDataString("0x")
 	_ = envelope.SetChainIDString("1")
-	_ = envelope.SetHeadersValue(multitenancy.TenantIDMetadata, "tenantID")
+	_ = envelope.SetHeadersValue(utils.TenantIDMetadata, "tenantID")
 	_ = envelope.SetPrivateFrom("A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=")
 	_ = envelope.SetPrivateFor([]string{"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=", "B1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="})
 

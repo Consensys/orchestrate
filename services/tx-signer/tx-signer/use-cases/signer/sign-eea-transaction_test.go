@@ -1,6 +1,6 @@
 // +build unit
 
-package ethereum
+package signer
 
 import (
 	"context"

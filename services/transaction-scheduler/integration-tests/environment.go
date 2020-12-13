@@ -186,7 +186,7 @@ func (env *IntegrationEnvironment) Start(ctx context.Context) error {
 
 	// Start Kafka consumer
 	env.consumer, err = integrationtest.NewKafkaTestConsumer(ctx, "tx-scheduler-group", sarama.GlobalClient(),
-		[]string{env.kafkaTopicConfig.Crafter, env.kafkaTopicConfig.Sender})
+		[]string{env.kafkaTopicConfig.Crafter, env.kafkaTopicConfig.Signer})
 	if err != nil {
 		env.logger.WithError(err).Error("could initialize Kafka")
 		return err

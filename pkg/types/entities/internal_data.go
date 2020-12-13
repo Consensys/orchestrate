@@ -11,4 +11,5 @@ type InternalData struct {
 	GasPriceIncrement float64       `json:"gasPriceIncrement,omitempty"`
 	GasPriceLimit     float64       `json:"gasPriceLimit,omitempty"`
 	RetryInterval     time.Duration `json:"retryInterval"`
+	ExpectedNonce     string        `json:"expectedNonce,omitempty"` // Using string because 0 is a valid
 }

@@ -9,7 +9,6 @@ import (
 	transactionscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/cmd/transaction-scheduler"
 	txcrafter "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/cmd/tx-crafter"
 	txlistener "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/cmd/tx-listener"
-	txsender "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/cmd/tx-sender"
 	txsigner "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/cmd/tx-signer"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/cmd/utils"
 	authjwt "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/auth/jwt"
@@ -38,7 +37,6 @@ func NewCommand() *cobra.Command {
 	// Add Run command
 	rootCmd.AddCommand(txcrafter.NewRootCommand())
 	rootCmd.AddCommand(txsigner.NewRootCommand())
-	rootCmd.AddCommand(txsender.NewRootCommand())
 	rootCmd.AddCommand(txlistener.NewRootCommand())
 	rootCmd.AddCommand(contractregistry.NewRootCommand())
 	rootCmd.AddCommand(transactionscheduler.NewRootCommand())

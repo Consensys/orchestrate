@@ -2,23 +2,24 @@ package txsigner
 
 import (
 	"context"
-	"time"
-
-	"github.com/cenkalti/backoff/v4"
-	pkgsarama "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
-	client2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/client"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-signer/tx-signer/builder"
 
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/app"
+	pkgsarama "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/nonce"
+	client2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-signer/service"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-signer/tx-signer/builder"
 )
 
 type txSignerDaemon struct {
 	keyManagerClient  client.KeyManagerClient
 	txSchedulerClient client2.TransactionSchedulerClient
+	ec                ethclient.MultiClient
+	nonceManager      nonce.Sender
 	consumerGroup     sarama.ConsumerGroup
 	producer          sarama.SyncProducer
 	config            *Config
@@ -30,6 +31,8 @@ func NewTxSigner(
 	producer sarama.SyncProducer,
 	keyManagerClient client.KeyManagerClient,
 	txSchedulerClient client2.TransactionSchedulerClient,
+	ec ethclient.MultiClient,
+	nonceManager nonce.Sender,
 ) (*app.App, error) {
 	appli, err := app.New(config.App, readinessOpt(txSchedulerClient), app.MetricsOpt())
 	if err != nil {
@@ -42,27 +45,32 @@ func NewTxSigner(
 		consumerGroup:     consumerGroup,
 		producer:          producer,
 		config:            config,
+		ec:                ec,
+		nonceManager:      nonceManager,
 	}
+
 	appli.RegisterDaemon(txSignerDaemon)
 
 	return appli, nil
 }
 
-func (signer *txSignerDaemon) Run(ctx context.Context) error {
+func (d *txSignerDaemon) Run(ctx context.Context) error {
 	logger := log.WithContext(ctx)
 	logger.Infof("starting transaction signer")
 
 	// Create business layer use cases
-	useCases := builder.NewUseCases(signer.keyManagerClient, signer.producer)
+	useCases := builder.NewUseCases(d.txSchedulerClient, d.keyManagerClient, d.ec, d.nonceManager,
+		d.config.ChainRegistryURL, d.config.CheckerMaxRecovery)
 
 	// Create service layer listener
-	listener := service.NewMessageListener(useCases, signer.config.SenderTopic, signer.config.RecoverTopic, signer.txSchedulerClient, retryMessageBackOff())
+	listener := service.NewMessageListener(useCases, d.txSchedulerClient, d.producer, d.config.RecoverTopic, d.config.CrafterTopic,
+		d.config.BckOff)
 
-	return signer.consumerGroup.Consume(ctx, []string{signer.config.ListenerTopic}, listener)
+	return d.consumerGroup.Consume(ctx, []string{d.config.ListenerTopic}, listener)
 }
 
-func (signer *txSignerDaemon) Close() error {
-	return signer.consumerGroup.Close()
+func (d *txSignerDaemon) Close() error {
+	return d.consumerGroup.Close()
 }
 
 func readinessOpt(txSchedulerClient client2.TransactionSchedulerClient) app.Option {
@@ -71,11 +79,4 @@ func readinessOpt(txSchedulerClient client2.TransactionSchedulerClient) app.Opti
 		ap.AddReadinessCheck("transaction-scheduler", txSchedulerClient.Checker())
 		return nil
 	}
-}
-
-func retryMessageBackOff() backoff.BackOff {
-	bckOff := backoff.NewExponentialBackOff()
-	bckOff.MaxInterval = time.Second * 15
-	bckOff.MaxElapsedTime = time.Minute * 5
-	return bckOff
 }

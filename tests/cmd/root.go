@@ -25,7 +25,6 @@ func main() {
 	broker.InitKafkaFlags(command.Flags())
 	broker.KafkaTopicTxCrafter(command.Flags())
 	broker.KafkaTopicTxSigner(command.Flags())
-	broker.KafkaTopicTxSender(command.Flags())
 	broker.KafkaTopicTxDecoded(command.Flags())
 
 	command.AddCommand(NewRunE2ECommand())

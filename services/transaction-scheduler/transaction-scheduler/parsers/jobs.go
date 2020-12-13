@@ -1,10 +1,7 @@
 package parsers
 
 import (
-	"math/big"
-
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/store/models"
 )
@@ -83,52 +80,4 @@ func NewJobEntityFromModels(jobModel *models.Job) *entities.Job {
 	}
 
 	return job
-}
-
-func NewEnvelopeFromJobModel(job *models.Job, headers map[string]string) *tx.TxEnvelope {
-	contextLabels := job.Labels
-	if contextLabels == nil {
-		contextLabels = map[string]string{}
-	}
-
-	contextLabels[tx.NextJobUUIDLabel] = job.NextJobUUID
-	contextLabels[tx.PriorityLabel] = job.InternalData.Priority
-	contextLabels[tx.ParentJobUUIDLabel] = job.InternalData.ParentJobUUID
-
-	txEnvelope := &tx.TxEnvelope{
-		Msg: &tx.TxEnvelope_TxRequest{TxRequest: &tx.TxRequest{
-			Id:      job.Schedule.UUID,
-			Headers: headers,
-			Params: &tx.Params{
-				From:           job.Transaction.Sender,
-				To:             job.Transaction.Recipient,
-				Gas:            job.Transaction.Gas,
-				GasPrice:       job.Transaction.GasPrice,
-				Value:          job.Transaction.Value,
-				Nonce:          job.Transaction.Nonce,
-				Data:           job.Transaction.Data,
-				Raw:            job.Transaction.Raw,
-				PrivateFor:     job.Transaction.PrivateFor,
-				PrivateFrom:    job.Transaction.PrivateFrom,
-				PrivacyGroupId: job.Transaction.PrivacyGroupID,
-			},
-			ContextLabels: contextLabels,
-			JobType:       tx.JobTypeMap[job.Type],
-		}},
-		InternalLabels: make(map[string]string),
-	}
-
-	txEnvelope.SetChainUUID(job.ChainUUID)
-
-	chainID := new(big.Int)
-	chainID.SetString(job.InternalData.ChainID, 10)
-	txEnvelope.SetChainID(chainID)
-	txEnvelope.SetScheduleUUID(job.Schedule.UUID)
-	txEnvelope.SetJobUUID(job.UUID)
-
-	if job.InternalData.OneTimeKey {
-		txEnvelope.EnableTxFromOneTimeKey()
-	}
-
-	return txEnvelope
 }

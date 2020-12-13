@@ -14,4 +14,5 @@ const (
 	TxFromOneTimeKey = "one-time-key"
 
 	ParentJobUUIDLabel = "parentJobUUID"
+	ExpectedNonceLabel = "nonce.recovering.expected"
 )

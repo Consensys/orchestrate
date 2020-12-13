@@ -15,7 +15,6 @@ import (
 	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/client"
 	txcrafter "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-crafter"
 	txlistener "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener"
-	txsender "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sender"
 	txsigner "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-signer"
 )
 
@@ -63,12 +62,12 @@ func importGlobalAlias(rawAliases string) {
 		"api-key":                   viper.GetString(key.APIKeyViperKey),
 		"tx-crafter-metrics":        viper.GetString(txcrafter.MetricsURLViperKey),
 		"tx-signer-metrics":         viper.GetString(txsigner.MetricsURLViperKey),
-		"tx-sender-metrics":         viper.GetString(txsender.MetricsURLViperKey),
-		"tx-listener-metrics":       viper.GetString(txlistener.MetricsURLViperKey),
-		"identity-manager":          viper.GetString(identitymanager.URLViperKey),
-		"identity-manager-metrics":  viper.GetString(identitymanager.MetricsURLViperKey),
-		"key-manager":               viper.GetString(keymanager.URLViperKey),
-		"key-manager-metrics":       viper.GetString(keymanager.MetricsURLViperKey),
+		// "tx-sender-metrics":         viper.GetString(txsender.MetricsURLViperKey),
+		"tx-listener-metrics":      viper.GetString(txlistener.MetricsURLViperKey),
+		"identity-manager":         viper.GetString(identitymanager.URLViperKey),
+		"identity-manager-metrics": viper.GetString(identitymanager.MetricsURLViperKey),
+		"key-manager":              viper.GetString(keymanager.URLViperKey),
+		"key-manager-metrics":      viper.GetString(keymanager.MetricsURLViperKey),
 	}
 
 	for k, v := range internal {

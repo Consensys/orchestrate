@@ -14,6 +14,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/ethereum"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 )
 
 var (
@@ -37,12 +38,12 @@ func makeMultiTenancyContext(i int) *engine.TxContext {
 	switch i % 4 {
 	case 0:
 		// Error Use case:  Token is expired
-		_ = ctx.Envelope.SetHeadersValue(AuthorizationMetadata, idToken)
+		_ = ctx.Envelope.SetHeadersValue(utils.AuthorizationMetadata, idToken)
 		ctx.Set(keyExpectedValue, tenantID)
 		ctx.Set("errors", 0)
 	case 1:
 		// Error Use case:  UntrustedSigner
-		_ = ctx.Envelope.SetHeadersValue(AuthorizationMetadata, accessTokenWithoutTenantID)
+		_ = ctx.Envelope.SetHeadersValue(utils.AuthorizationMetadata, accessTokenWithoutTenantID)
 		ctx.Set("errors", 1)
 		ctx.Set("error.code", errors.Unauthorized)
 	case 2:
@@ -51,7 +52,7 @@ func makeMultiTenancyContext(i int) *engine.TxContext {
 		ctx.Set("error.code", errors.Unauthorized)
 	case 3:
 		// Error Use case:  UntrustedSigner
-		_ = ctx.Envelope.SetHeadersValue(AuthorizationMetadata, accessTokenUntrustedSigner)
+		_ = ctx.Envelope.SetHeadersValue(utils.AuthorizationMetadata, accessTokenUntrustedSigner)
 		ctx.Set("errors", 1)
 		ctx.Set("error.code", errors.Unauthorized)
 	default:

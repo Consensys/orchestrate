@@ -157,9 +157,11 @@ func canUpdateStatus(nextStatus, status string) bool {
 	case utils.StatusResending:
 		return status == utils.StatusPending
 	case utils.StatusRecovering:
-		return status == utils.StatusStarted
-	case utils.StatusMined, utils.StatusStored, utils.StatusNeverMined:
+		return status == utils.StatusStarted || status == utils.StatusRecovering || status == utils.StatusPending
+	case utils.StatusMined, utils.StatusNeverMined:
 		return status == utils.StatusPending
+	case utils.StatusStored:
+		return status == utils.StatusStarted || status == utils.StatusRecovering
 	case utils.StatusFailed:
 		return status == utils.StatusStarted || status == utils.StatusRecovering || status == utils.StatusPending
 	default: // For warning, they can be added at any time

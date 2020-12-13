@@ -15,7 +15,7 @@ x-default-variables: &default-variables
   TX_CRAFTER_METRICS_URL: ${TX_CRAFTER_METRICS_URL-http://tx-crafter:8082}
   TX_SIGNER_METRICS_URL: ${TX_SIGNER_METRICS_URL-http://tx-signer:8082}
   TX_LISTENER_METRICS_URL: ${TX_LISTENER_METRICS_URL-http://tx-listener:8082}
-  TX_SENDER_METRICS_URL: ${TX_SENDER_METRICS_URL-http://tx-sender:8082}
+#  TX_SENDER_METRICS_URL: ${TX_SENDER_METRICS_URL-http://tx-sender:8082}
   ETH_CLIENT_RETRY_MAX_ELAPSED_TIME: 5s
   LOG_LEVEL: ${LOG_LEVEL-debug}
   LOG_FORMAT: ${LOG_FORMAT-}
@@ -284,16 +284,16 @@ services:
       - key-vault-init
     command: tx-signer run
 
-  tx-sender:
-    ports:
-      - 8072:8082
-    <<: *container-common
-    environment:
-      <<: *default-variables
-      JAEGER_SERVICE_NAME: TX-SENDER
-    depends_on:
-      - transaction-scheduler
-    command: tx-sender run
+#  tx-sender:
+#    ports:
+#      - 8072:8082
+#    <<: *container-common
+#    environment:
+#      <<: *default-variables
+#      JAEGER_SERVICE_NAME: TX-SENDER
+#    depends_on:
+#      - transaction-scheduler
+#    command: tx-sender run
 
   tx-listener:
     ports:

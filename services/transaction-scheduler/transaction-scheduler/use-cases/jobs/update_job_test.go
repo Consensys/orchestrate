@@ -323,7 +323,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 	t.Run("should trigger next job start if nextStatus is STORED", func(t *testing.T) {
 		jobModel := testutils2.FakeJobModel(0)
 		nextJobModel := testutils2.FakeJobModel(0)
-		jobModel.Logs[0].Status = utils.StatusPending
+		jobModel.Logs[0].Status = utils.StatusStarted
 		jobModel.Schedule.TenantID = tenantID
 		jobModel.NextJobUUID = nextJobModel.UUID
 

@@ -100,16 +100,16 @@ Feature: Verify HTTP Endpoints
   ###################
   # TX-SENDER
   ###################
-  Scenario: Get tx-sender readiness
-    When I send "GET" request to "{{global.tx-sender-metrics}}/ready?full=1"
-    Then the response code should be 200
-    And Response should have the following fields
-      | transaction-scheduler | kafka | redis |
-      | OK                    | OK    | OK    |
-
-  Scenario: Get tx-sender liveness
-    When I send "GET" request to "{{global.tx-sender-metrics}}/live"
-    Then the response code should be 200
+#  Scenario: Get tx-sender readiness
+#    When I send "GET" request to "{{global.tx-sender-metrics}}/ready?full=1"
+#    Then the response code should be 200
+#    And Response should have the following fields
+#      | transaction-scheduler | kafka | redis |
+#      | OK                    | OK    | OK    |
+#
+#  Scenario: Get tx-sender liveness
+#    When I send "GET" request to "{{global.tx-sender-metrics}}/live"
+#    Then the response code should be 200
 
 
   ###################

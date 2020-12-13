@@ -1,10 +1,11 @@
-package ethereum
+package signer
 
 import (
 	"context"
 	"fmt"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/rlp"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 
 	"github.com/ethereum/go-ethereum/crypto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/crypto/ethereum/signing"
@@ -21,22 +22,22 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client"
 )
 
-const signTransactionComponent = "use-cases.sign-transaction"
+const signTransactionComponent = "use-cases.sign-eth-transaction"
 
-// signTransactionUseCase is a use case to sign a public Ethereum transaction
-type signTransactionUseCase struct {
+// signETHTransactionUseCase is a use case to sign a public Ethereum transaction
+type signETHTransactionUseCase struct {
 	keyManagerClient client.KeyManagerClient
 }
 
-// NewSignTransactionUseCase creates a new SignTransactionUseCase
-func NewSignTransactionUseCase(keyManagerClient client.KeyManagerClient) usecases.SignTransactionUseCase {
-	return &signTransactionUseCase{
+// NewSignETHTransactionUseCase creates a new SignTransactionUseCase
+func NewSignETHTransactionUseCase(keyManagerClient client.KeyManagerClient) usecases.SignETHTransactionUseCase {
+	return &signETHTransactionUseCase{
 		keyManagerClient: keyManagerClient,
 	}
 }
 
 // Execute signs a public Ethereum transaction
-func (uc *signTransactionUseCase) Execute(ctx context.Context, job *entities.Job) (raw, txHash string, err error) {
+func (uc *signETHTransactionUseCase) Execute(ctx context.Context, job *entities.Job) (raw, txHash string, err error) {
 	logger := log.WithContext(ctx).WithField("job_uuid", job.UUID).WithField("one_time_key", job.InternalData.OneTimeKey)
 	logger.Debug("signing ethereum transaction")
 
@@ -72,7 +73,7 @@ func (uc *signTransactionUseCase) Execute(ctx context.Context, job *entities.Job
 	return hexutil.Encode(signedRaw), txHash, nil
 }
 
-func (*signTransactionUseCase) signWithOneTimeKey(transaction *types.Transaction, signer types.Signer) ([]byte, error) {
+func (*signETHTransactionUseCase) signWithOneTimeKey(transaction *types.Transaction, signer types.Signer) ([]byte, error) {
 	privKey, err := crypto.GenerateKey()
 	if err != nil {
 		errMessage := "failed to generate Ethereum private key"
@@ -83,7 +84,7 @@ func (*signTransactionUseCase) signWithOneTimeKey(transaction *types.Transaction
 	return signing.SignTransaction(transaction, privKey, signer)
 }
 
-func (uc *signTransactionUseCase) signWithAccount(ctx context.Context, job *entities.Job, tx *types.Transaction) ([]byte, error) {
+func (uc *signETHTransactionUseCase) signWithAccount(ctx context.Context, job *entities.Job, tx *types.Transaction) ([]byte, error) {
 	request := &ethereum.SignETHTransactionRequest{
 		Nonce:    tx.Nonce(),
 		Amount:   tx.Value().String(),
@@ -96,7 +97,7 @@ func (uc *signTransactionUseCase) signWithAccount(ctx context.Context, job *enti
 		request.To = tx.To().Hex()
 	}
 
-	tenants := usecases.AllowedTenants(job.TenantID)
+	tenants := utils.AllowedTenants(job.TenantID)
 	for _, tenant := range tenants {
 		request.Namespace = tenant
 		sig, err := uc.keyManagerClient.ETHSignTransaction(ctx, job.Transaction.From, request)

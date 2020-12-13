@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils/envelope"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/transaction-scheduler/use-cases"
-	utils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/transaction-scheduler/utils"
 
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
@@ -51,7 +51,7 @@ func (uc *resendJobTxUseCase) Execute(ctx context.Context, jobUUID string, tenan
 		return errors.InvalidStateError(errMessage)
 	}
 
-	partition, offset, err := utils2.SendJobMessage(ctx, jobModel, uc.kafkaProducer, uc.topicsCfg.Sender)
+	partition, offset, err := envelope.SendJobMessage(ctx, jobEntity, uc.kafkaProducer, uc.topicsCfg.Signer)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(resendJobTxComponent)
 	}

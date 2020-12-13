@@ -1,40 +1,56 @@
 package builder
 
 import (
-	"github.com/Shopify/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client"
+	nonce2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/nonce"
+	client2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/client"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-signer/tx-signer/nonce"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-signer/tx-signer/use-cases"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-signer/tx-signer/use-cases/ethereum"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-signer/tx-signer/use-cases/sender"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-signer/tx-signer/use-cases/signer"
 )
 
 type useCases struct {
-	signTransaction              usecases.SignTransactionUseCase
-	signEEATransaction           usecases.SignEEATransactionUseCase
-	signQuorumPrivateTransaction usecases.SignQuorumPrivateTransactionUseCase
-	sendEnvelope                 usecases.SendEnvelopeUseCase
+	sendETHTx            usecases.SendETHTxUseCase
+	sendETHRawTx         usecases.SendETHRawTxUseCase
+	sendEEAPrivateTx     usecases.SendEEAPrivateTxUseCase
+	sendTesseraPrivateTx usecases.SendTesseraPrivateTxUseCase
+	sendTesseraMarkingTx usecases.SendTesseraMarkingTxUseCase
 }
 
-func NewUseCases(keyManagerClient client.KeyManagerClient, producer sarama.SyncProducer) usecases.UseCases {
+func NewUseCases(txSchedulerClient client2.TransactionSchedulerClient, keyManagerClient client.KeyManagerClient,
+	ec ethclient.MultiClient, nonceManager nonce2.Sender, chainRegistryURL string, checkerMaxRecovery uint64) usecases.UseCases {
+	signETHTransactionUC := signer.NewSignETHTransactionUseCase(keyManagerClient)
+	signEEATransactionUC := signer.NewSignEEATransactionUseCase(keyManagerClient)
+	signQuorumTransactionUC := signer.NewSignQuorumPrivateTransactionUseCase(keyManagerClient)
+
+	checker := nonce.NewNonceChecker(ec, nonceManager, nonce.NewRecoveryTracker(), chainRegistryURL, checkerMaxRecovery)
 	return &useCases{
-		signTransaction:              ethereum.NewSignTransactionUseCase(keyManagerClient),
-		signEEATransaction:           ethereum.NewSignEEATransactionUseCase(keyManagerClient),
-		signQuorumPrivateTransaction: ethereum.NewSignQuorumPrivateTransactionUseCase(keyManagerClient),
-		sendEnvelope:                 ethereum.NewSendEnvelopeUseCase(producer),
+		sendETHTx:            sender.NewSendEthTxUseCase(signETHTransactionUC, ec, txSchedulerClient, chainRegistryURL, checker),
+		sendETHRawTx:         sender.NewSendETHRawTxUseCase(ec, txSchedulerClient, chainRegistryURL),
+		sendEEAPrivateTx:     sender.NewSendEEAPrivateTxUseCase(signEEATransactionUC, ec, txSchedulerClient, chainRegistryURL, checker),
+		sendTesseraPrivateTx: sender.NewSendTesseraPrivateTxUseCase(ec, txSchedulerClient, chainRegistryURL),
+		sendTesseraMarkingTx: sender.NewSendTesseraMarkingTxUseCase(signQuorumTransactionUC, ec, txSchedulerClient, chainRegistryURL, checker),
 	}
 }
 
-func (u *useCases) SignTransaction() usecases.SignTransactionUseCase {
-	return u.signTransaction
+func (u *useCases) SendETHTx() usecases.SendETHTxUseCase {
+	return u.sendETHTx
 }
 
-func (u *useCases) SignEEATransaction() usecases.SignEEATransactionUseCase {
-	return u.signEEATransaction
+func (u *useCases) SendETHRawTx() usecases.SendETHRawTxUseCase {
+	return u.sendETHRawTx
 }
 
-func (u *useCases) SignQuorumPrivateTransaction() usecases.SignQuorumPrivateTransactionUseCase {
-	return u.signQuorumPrivateTransaction
+func (u *useCases) SendEEAPrivateTx() usecases.SendEEAPrivateTxUseCase {
+	return u.sendEEAPrivateTx
 }
 
-func (u *useCases) SendEnvelope() usecases.SendEnvelopeUseCase {
-	return u.sendEnvelope
+func (u *useCases) SendTesseraPrivateTx() usecases.SendTesseraPrivateTxUseCase {
+	return u.sendTesseraPrivateTx
+}
+
+func (u *useCases) SendTesseraMarkingTx() usecases.SendTesseraMarkingTxUseCase {
+	return u.sendTesseraMarkingTx
 }

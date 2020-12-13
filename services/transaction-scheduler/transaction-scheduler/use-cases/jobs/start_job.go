@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils/envelope"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/metrics"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/transaction-scheduler/use-cases"
-	utils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/transaction-scheduler/utils"
 
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
@@ -58,7 +58,7 @@ func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID string, tenants 
 	var msgTopic string
 	switch {
 	case jobModel.Type == utils.EthereumRawTransaction:
-		msgTopic = uc.topicsCfg.Sender
+		msgTopic = uc.topicsCfg.Signer
 	default:
 		msgTopic = uc.topicsCfg.Crafter
 	}
@@ -77,7 +77,7 @@ func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID string, tenants 
 		return errors.FromError(err).ExtendComponent(startJobComponent)
 	}
 
-	partition, offset, err := utils2.SendJobMessage(ctx, jobModel, uc.kafkaProducer, msgTopic)
+	partition, offset, err := envelope.SendJobMessage(ctx, jobEntity, uc.kafkaProducer, msgTopic)
 	if err != nil {
 		_ = dbtx.Rollback()
 		return errors.FromError(err).ExtendComponent(startJobComponent)

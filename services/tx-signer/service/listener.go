@@ -5,42 +5,47 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/handlers/multitenancy"
-
-	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/proto"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/tx"
-	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/txscheduler"
+	"github.com/golang/protobuf/proto"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils/envelope"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/client"
-	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-signer/tx-signer/use-cases"
+	utils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-signer/tx-signer/utils"
 
 	"github.com/Shopify/sarama"
+	log "github.com/sirupsen/logrus"
+	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/proto"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/tx"
+	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-signer/tx-signer/use-cases"
 )
 
 const messageListenerComponent = "service.message-listener"
 
 type MessageListener struct {
 	useCases          usecases.UseCases
-	senderTopic       string
 	recoverTopic      string
-	txSchedulerClient client.TransactionSchedulerClient
+	crafterTopic      string
 	retryBackOff      backoff.BackOff
+	producer          sarama.SyncProducer
+	txSchedulerClient client.TransactionSchedulerClient
+	breakLoop         chan bool
 }
 
-func NewMessageListener(ucs usecases.UseCases, senderTopic, recoverTopic string,
-	txSchedulerClient client.TransactionSchedulerClient, bck backoff.BackOff) *MessageListener {
+func NewMessageListener(useCases usecases.UseCases, txSchedulerClient client.TransactionSchedulerClient,
+	producer sarama.SyncProducer, recoverTopic, crafterTopic string, bck backoff.BackOff) *MessageListener {
 	return &MessageListener{
-		useCases:          ucs,
-		senderTopic:       senderTopic,
+		useCases:          useCases,
 		recoverTopic:      recoverTopic,
-		txSchedulerClient: txSchedulerClient,
+		crafterTopic:      crafterTopic,
+		producer:          producer,
 		retryBackOff:      bck,
+		txSchedulerClient: txSchedulerClient,
+		breakLoop:         make(chan bool, 1),
 	}
 }
 
-func (MessageListener) Setup(session sarama.ConsumerGroupSession) error {
+func (listener *MessageListener) Setup(session sarama.ConsumerGroupSession) error {
 	log.WithContext(session.Context()).
 		WithField("kafka.generation_id", session.GenerationID()).
 		WithField("kafka.member_id", session.MemberID()).
@@ -50,8 +55,17 @@ func (MessageListener) Setup(session sarama.ConsumerGroupSession) error {
 	return nil
 }
 
-func (MessageListener) Cleanup(session sarama.ConsumerGroupSession) error {
+func (listener *MessageListener) Cleanup(session sarama.ConsumerGroupSession) error {
 	log.WithContext(session.Context()).Info("listener: all claims consumed")
+	return nil
+}
+
+func (listener *MessageListener) Break(session sarama.ConsumerGroupSession) error {
+	log.WithContext(session.Context()).Info("listener: has been stopped")
+	listener.breakLoop <- true
+	if session != nil {
+		return listener.Cleanup(session)
+	}
 	return nil
 }
 
@@ -65,22 +79,31 @@ func (listener *MessageListener) ConsumeClaim(session sarama.ConsumerGroupSessio
 		case <-session.Context().Done():
 			logger.WithField("reason", ctx.Err().Error()).Info("gracefully stopping message listener...")
 			return nil
+		case <-listener.breakLoop:
+			logger.Info("gracefully stopping message listener...")
+			return nil
 		case msg, ok := <-claim.Messages():
 			// Input channel has been close so we leave the loop
 			if !ok {
 				return nil
 			}
 
-			envelope, err := decodeMessage(msg)
+			evlp, err := decodeMessage(msg)
 			if err != nil {
 				logger.WithError(err).Error("error decoding message", msg)
 				session.MarkMessage(msg, "")
 				continue
 			}
 
+			logger.WithField("envelope_id", evlp.ID).WithField("timestamp", msg.Timestamp).
+				Info("message consumed")
+
+			tenantID := evlp.GetHeadersValue(utils.TenantIDMetadata)
+			job := envelope.NewJobFromEnvelope(evlp, tenantID)
+
 			err = backoff.RetryNotify(
 				func() error {
-					err = listener.processEnvelope(ctx, envelope)
+					err = listener.processJob(ctx, job)
 					switch {
 					// Exits if not errors
 					case err == nil:
@@ -94,34 +117,42 @@ func (listener *MessageListener) ConsumeClaim(session sarama.ConsumerGroupSessio
 						return backoff.Permanent(ctx.Err())
 					}
 
-					// In case of other kind of errors...
-					txResponse := envelope.AppendError(errors.FromError(err)).TxResponse()
-					err2 := listener.useCases.SendEnvelope().Execute(ctx, txResponse, listener.recoverTopic, envelope.PartitionKey())
-					if err2 != nil {
-						if errors.IsConnectionError(err2) {
-							return err2
+					var serr error
+					if errors.IsInvalidNonceWarning(err) {
+						resetEnvelopeTx(evlp)
+						_, _, serr = envelope.SendJobMessage(ctx, job, listener.producer, listener.crafterTopic)
+						if serr == nil {
+							err = utils2.UpdateJobStatus(ctx, listener.txSchedulerClient, evlp.GetJobUUID(),
+								utils.StatusRecovering, err.Error(), nil)
 						}
-						return backoff.Permanent(err2)
+					} else {
+						// In case of other kind of errors...
+						txResponse := evlp.AppendError(errors.FromError(err)).TxResponse()
+						serr = listener.sendEnvelope(ctx, evlp.ID, txResponse, listener.recoverTopic, evlp.PartitionKey())
+						if serr == nil {
+							err = utils2.UpdateJobStatus(ctx, listener.txSchedulerClient, evlp.GetJobUUID(),
+								utils.StatusFailed, err.Error(), nil)
+						}
 					}
 
-					err = listener.updateTransactionStatus(ctx, envelope.GetJobUUID(), err.Error())
-					if err != nil {
-						if errors.IsConnectionError(err) {
-							return err
+					if serr != nil {
+						// Retry on IsConnectionError
+						if errors.IsConnectionError(serr) {
+							return serr
 						}
-						return backoff.Permanent(err)
+						return backoff.Permanent(serr)
 					}
 
 					return nil
 				},
 				listener.retryBackOff,
 				func(err error, duration time.Duration) {
-					logger.WithError(err).Warnf("error processing envelope %q, retrying in %v...", envelope.ID, duration)
+					logger.WithError(err).WithField("job", job.UUID).Warnf("error processing job, retrying in %v...", duration)
 				},
 			)
 
 			if err != nil {
-				logger.WithError(err).Error("error processing message", msg)
+				logger.WithError(err).Errorf("error processing message")
 				return err
 			}
 
@@ -130,72 +161,77 @@ func (listener *MessageListener) ConsumeClaim(session sarama.ConsumerGroupSessio
 	}
 }
 
-func (listener *MessageListener) processEnvelope(ctx context.Context, envelope *tx.Envelope) error {
-	raw, txHash, err := listener.signEnvelopeTransaction(ctx, envelope)
-	if err != nil {
-		return err
+func (listener *MessageListener) processJob(ctx context.Context, job *entities.Job) error {
+	switch job.Type {
+	case tx.JobType_ETH_TESSERA_PRIVATE_TX.String():
+		return listener.useCases.SendTesseraPrivateTx().Execute(ctx, job)
+	case tx.JobType_ETH_TESSERA_MARKING_TX.String():
+		return listener.useCases.SendTesseraMarkingTx().Execute(ctx, job)
+	case tx.JobType_ETH_ORION_EEA_TX.String():
+		return listener.useCases.SendEEAPrivateTx().Execute(ctx, job)
+	case tx.JobType_ETH_RAW_TX.String():
+		return listener.useCases.SendETHRawTx().Execute(ctx, job)
+	case tx.JobType_ETH_ORION_MARKING_TX.String(), tx.JobType_ETH_TX.String():
+		return listener.useCases.SendETHTx().Execute(ctx, job)
+	default:
+		return errors.InvalidParameterError("job type %s is not supported", job.Type)
 	}
-
-	_ = envelope.SetRawString(raw)
-	_ = envelope.SetTxHashString(txHash)
-	err = listener.useCases.SendEnvelope().Execute(ctx, envelope.TxEnvelopeAsRequest(), listener.senderTopic, envelope.PartitionKey())
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func decodeMessage(msg *sarama.ConsumerMessage) (*tx.Envelope, error) {
 	txEnvelope := &tx.TxEnvelope{}
-	err := proto.Unmarshal(msg.Value, txEnvelope)
+	err := encoding.Unmarshal(msg.Value, txEnvelope)
 	if err != nil {
 		errMessage := "failed to decode request message"
 		log.WithError(err).Error(errMessage)
 		return nil, errors.EncodingError(errMessage).ExtendComponent(messageListenerComponent)
 	}
 
-	envelope, err := txEnvelope.Envelope()
+	evlp, err := txEnvelope.Envelope()
 	if err != nil {
 		errMessage := "failed to extract envelope from request"
 		log.WithError(err).Error(errMessage)
 		return nil, errors.DataCorruptedError(errMessage).ExtendComponent(messageListenerComponent)
 	}
 
-	return envelope, nil
+	return evlp, nil
 }
 
-func (listener *MessageListener) signEnvelopeTransaction(ctx context.Context, envelope *tx.Envelope) (raw, txHash string, err error) {
-	tenantID := envelope.GetHeadersValue(multitenancy.TenantIDMetadata)
-	job := EnvelopeToJob(envelope, tenantID)
+func (listener *MessageListener) sendEnvelope(ctx context.Context, msgID string, protoMessage proto.Message, topic, partitionKey string) error {
+	logger := log.WithContext(ctx).WithField("topic", topic).WithField("envelope_id", msgID)
+	logger.Debug("sending envelope")
 
-	switch {
-	case envelope.IsEthSendRawTransaction():
-		log.WithContext(ctx).WithField("job_uuid", envelope.GetJobUUID()).Info("raw transaction processed successfully")
-		return job.Transaction.Raw, "", nil
-	case envelope.IsEthSendTesseraPrivateTransaction():
-		log.WithContext(ctx).WithField("job_uuid", envelope.GetJobUUID()).Info("tessera transaction processed successfully")
-		// Do nothing as we do not sign storeRaw payload
-		return "", "", nil
-	case envelope.IsEthSendTesseraMarkingTransaction():
-		return listener.useCases.SignQuorumPrivateTransaction().Execute(ctx, job)
-	case envelope.IsEeaSendPrivateTransaction():
-		return listener.useCases.SignEEATransaction().Execute(ctx, job)
-	default:
-		return listener.useCases.SignTransaction().Execute(ctx, job)
+	msg := &sarama.ProducerMessage{}
+	msg.Topic = topic
+	// Set key for Kafka partitions
+	if partitionKey != "" {
+		msg.Key = sarama.StringEncoder(partitionKey)
 	}
-}
 
-func (listener *MessageListener) updateTransactionStatus(ctx context.Context, jobUUID, errMessage string) error {
-	_, err := listener.txSchedulerClient.UpdateJob(ctx, jobUUID, &txschedulertypes.UpdateJobRequest{
-		Status:  utils.StatusFailed,
-		Message: errMessage,
-	})
+	b, err := encoding.Marshal(protoMessage)
 	if err != nil {
-		errMessage := "failed to update transaction status"
-		log.WithError(err).WithField("status", utils.StatusFailed).Error(errMessage)
-		return errors.FromError(err).ExtendComponent(messageListenerComponent)
+		errMessage := "failed to marshal envelope as request"
+		log.WithError(err).Error(errMessage)
+		return errors.EncodingError(errMessage)
 	}
+	msg.Value = sarama.ByteEncoder(b)
+
+	partition, offset, err := listener.producer.SendMessage(msg)
+	if err != nil {
+		errMessage := "failed to produce kafka message"
+		log.WithError(err).Error(errMessage)
+		return errors.KafkaConnectionError(errMessage)
+	}
+
+	logger.WithField("partition", partition).
+		WithField("offset", offset).
+		Info("envelope successfully sent")
 
 	return nil
+}
+
+func resetEnvelopeTx(req *tx.Envelope) {
+	req.Nonce = nil
+	req.TxHash = nil
+	req.Raw = ""
 }

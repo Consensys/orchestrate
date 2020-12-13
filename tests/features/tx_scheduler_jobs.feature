@@ -38,7 +38,6 @@ Feature: Transaction Scheduler Jobs
 }
       """
     Then the response code should be 202
-    Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
     Given I register the following alias
       | alias | value              |
@@ -104,10 +103,6 @@ Feature: Transaction Scheduler Jobs
     And Envelopes should have the following fields
       | Nonce | From         | To      |
       | 1     | {{account1}} | {{to2}} |
-    Then Envelopes should be in topic "tx.sender"
-    And Envelopes should have the following fields
-      | Raw | TxHash |
-      | ~   | ~      |
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
       | Receipt.Status |
@@ -161,10 +156,6 @@ Feature: Transaction Scheduler Jobs
     Then the response code should be 200
     When I send "PUT" request to "{{global.tx-scheduler}}/jobs/{{txTwoJobUUID}}/start"
     Then the response code should be 202
-    Then Envelopes should be in topic "tx.sender"
-    And Envelopes should have the following fields
-      | Raw | To                 |
-      | ~   | {{random_account}} |
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
       | Receipt.Status |

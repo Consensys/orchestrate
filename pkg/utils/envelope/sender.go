@@ -1,22 +1,21 @@
-package utils
+package envelope
 
 import (
 	"context"
 
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/handlers/multitenancy"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/store/models"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/transaction-scheduler/parsers"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 )
 
-func SendJobMessage(ctx context.Context, jobModel *models.Job, kafkaProducer sarama.SyncProducer, topic string) (partition int32, offset int64, err error) {
+func SendJobMessage(ctx context.Context, job *entities.Job, kafkaProducer sarama.SyncProducer, topic string) (partition int32, offset int64, err error) {
 	log.WithContext(ctx).Debug("sending kafka message")
 
-	txEnvelope := parsers.NewEnvelopeFromJobModel(jobModel, map[string]string{
-		multitenancy.TenantIDMetadata: jobModel.Schedule.TenantID,
+	txEnvelope := NewEnvelopeFromJob(job, map[string]string{
+		utils.TenantIDMetadata: job.TenantID,
 	})
 
 	evlp, err := txEnvelope.Envelope()
@@ -51,6 +50,7 @@ func SendJobMessage(ctx context.Context, jobModel *models.Job, kafkaProducer sar
 
 	log.WithField("envelope_id", txEnvelope.GetID()).
 		WithField("job_type", evlp.GetJobTypeString()).
-		Debug("envelope sent to kafka")
+		WithField("topic", topic).
+		Debug("envelope successfully sent")
 	return partition, offset, err
 }

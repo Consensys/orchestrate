@@ -414,7 +414,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		assert.Equal(t, tx.JobTypeMap[utils.EthereumTransaction].String(), evlp.GetJobTypeString())
 	})
 
-	s.T().Run("should send a raw transaction successfully to the transaction sender topic", func(t *testing.T) {
+	s.T().Run("should send a raw transaction successfully to the transaction signer topic", func(t *testing.T) {
 		defer gock.Off()
 		txRequest := testutils.FakeSendRawTransactionRequest()
 		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
@@ -446,7 +446,7 @@ func (s *txSchedulerTransactionTestSuite) TestTransactionScheduler_Transactions(
 		assert.Equal(t, utils.EthereumRawTransaction, job.Type)
 
 		evlp, err := s.env.consumer.WaitForEnvelope(job.ScheduleUUID,
-			s.env.kafkaTopicConfig.Sender, waitForEnvelopeTimeOut)
+			s.env.kafkaTopicConfig.Signer, waitForEnvelopeTimeOut)
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return

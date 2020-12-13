@@ -16,6 +16,7 @@ Feature: Send raw transfer transaction
     Given I register the following alias
       | alias          | value              |
       | random_account | {{random.account}} |
+      | idempotencykey | {{random.uuid}}    |
     Given I sign the following transactions
       | alias | ID              | Data | Gas   | To                 | Nonce | privateKey             | ChainUUID     | Headers.Authorization    |
       | rawTx | {{random.uuid}} | 0x   | 21000 | {{random_account}} | 0     | {{random.private_key}} | {{besu.UUID}} | Bearer {{tenant1.token}} |
@@ -23,8 +24,9 @@ Feature: Send raw transfer transaction
       | ID           |
       | {{rawTx.ID}} |
     Given I set the headers
-      | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Key               | Value                    |
+      | Authorization     | Bearer {{tenant1.token}} |
+      | X-Idempotency-Key | {{idempotencykey}}       |
     When I send "POST" request to "{{global.tx-scheduler}}/transactions/send-raw" with json:
   """
 {
@@ -42,7 +44,6 @@ Feature: Send raw transfer transaction
     Then I register the following response fields
       | alias   | path         |
       | jobUUID | jobs[0].uuid |
-    Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
       | Receipt.Status |
@@ -107,8 +108,9 @@ Feature: Send raw transfer transaction
       | alias   | path         |
       | jobUUID | jobs[0].uuid |
     Then Envelopes should be in topic "tx.recover"
+    Then I sleep "1s"
     When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobUUID}}"
     Then the response code should be 200
     And Response should have the following fields
-      | status | logs[0].status | logs[1].status | logs[3].status |
-      | FAILED | CREATED        | STARTED        | FAILED         |
+      | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status |
+      | FAILED | CREATED        | STARTED        | PENDING        | FAILED         |

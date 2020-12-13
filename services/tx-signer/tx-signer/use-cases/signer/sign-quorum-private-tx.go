@@ -1,4 +1,4 @@
-package ethereum
+package signer
 
 import (
 	"context"
@@ -9,6 +9,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/crypto/ethereum/signing"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/rlp"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-signer/tx-signer/parsers"
 
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-signer/tx-signer/use-cases"
@@ -96,7 +97,7 @@ func (uc *signQuorumPrivateTransactionUseCase) signWithAccount(ctx context.Conte
 		request.To = tx.To().Hex()
 	}
 
-	tenants := usecases.AllowedTenants(job.TenantID)
+	tenants := utils.AllowedTenants(job.TenantID)
 	for _, tenant := range tenants {
 		request.Namespace = tenant
 		sig, err := uc.keyManagerClient.ETHSignQuorumPrivateTransaction(ctx, job.Transaction.From, request)

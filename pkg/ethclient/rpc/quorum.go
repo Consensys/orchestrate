@@ -48,12 +48,15 @@ func (ec *Client) StoreRaw(ctx context.Context, endpoint string, data []byte, pr
 	storeRawResponse := StoreRawResponse{}
 	err := ec.postRequest(ctx, endpoint, "storeraw", request, &storeRawResponse)
 	if err != nil {
+		if errors.IsDataCorruptedError(err) {
+			return "", err
+		}
 		return "", errors.HTTPConnectionError("failed to send a request to Tessera enclave: %s", err)
 	}
 
 	enclaveKey, err := base64.StdEncoding.DecodeString(storeRawResponse.Key)
 	if err != nil {
-		return "", errors.HTTPConnectionError("failed to decode base64 encoded string in the 'storeraw' response: %s", err)
+		return "", errors.DataCorruptedError("failed to decode base64 encoded string in the 'storeraw' response: %s", err)
 	}
 	return hexutil.Encode(enclaveKey), nil
 }
@@ -65,7 +68,7 @@ func (ec *Client) GetStatus(ctx context.Context, endpoint string) (status string
 func (ec *Client) postRequest(ctx context.Context, endpoint, path string, request, reply interface{}) error {
 	requestURL := fmt.Sprintf("%s/%s", endpoint, path)
 
-	log.Debugf("Sending POST request to %s with body %q", requestURL, request)
+	log.Debugf("Sending POST request to %s", requestURL)
 
 	jsonValue, err := json.Marshal(request)
 	if err != nil {

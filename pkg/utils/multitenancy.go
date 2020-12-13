@@ -1,6 +1,13 @@
-package usecases
+package utils
 
-import "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
+import (
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
+)
+
+const (
+	AuthorizationMetadata = "Authorization"
+	TenantIDMetadata      = "X-Tenant-ID"
+)
 
 func AllowedTenants(tenantID string) []string {
 	// If no tenant then we use default tenant

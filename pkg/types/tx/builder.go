@@ -885,6 +885,10 @@ func (e *Envelope) GetParentJobUUID() string {
 	return e.ContextLabels[ParentJobUUIDLabel]
 }
 
+func (e *Envelope) GetExpectedNonce() string {
+	return e.ContextLabels[ExpectedNonceLabel]
+}
+
 func (e *Envelope) SetNextJobUUID(uuid string) *Envelope {
 	e.ContextLabels[NextJobUUIDLabel] = uuid
 	return e

@@ -50,6 +50,9 @@ Feature: Deploy ERC20 contract using tx-sentry
     Then Set nonce manager records
       | Account      | ChainID          | Nonce |
       | {{account1}} | {{besu.ChainID}} | 1     |
+    Then Set nonce last attributed records
+      | Account      | ChainID          | Nonce |
+      | {{account1}} | {{besu.ChainID}} | 1     |
     Then I track the following envelopes
       | ID                   |
       | {{besuContractTxID}} |
@@ -76,7 +79,6 @@ Feature: Deploy ERC20 contract using tx-sentry
     Then I register the following response fields
       | alias      | path         |
       | jobOneUUID | jobs[0].uuid |
-    Then Envelopes should be in topic "tx.sender"
     Then I sleep "5s"
     When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobOneUUID}}"
     Then the response code should be 200
@@ -84,6 +86,9 @@ Feature: Deploy ERC20 contract using tx-sentry
       | status  | logs[0].status | logs[1].status | logs[2].status | logs[3].status | logs[4].status |
       | PENDING | CREATED        | STARTED        | PENDING        | RESENDING      | FAILED         |
     Then Set nonce manager records
+      | Account      | ChainID          | Nonce |
+      | {{account1}} | {{besu.ChainID}} | 0     |
+    Then Set nonce last attributed records
       | Account      | ChainID          | Nonce |
       | {{account1}} | {{besu.ChainID}} | 0     |
     Then I track the following envelopes
@@ -196,7 +201,6 @@ Feature: Deploy ERC20 contract using tx-sentry
       | alias        | path         |
       | jobOneUUID   | jobs[0].uuid |
       | scheduleUUID | uuid         |
-    Then Envelopes should be in topic "tx.sender"
     Then I sleep "5s"
     When I send "GET" request to "{{global.tx-scheduler}}/schedules/{{scheduleUUID}}"
     Then the response code should be 200
@@ -289,7 +293,6 @@ Feature: Deploy ERC20 contract using tx-sentry
     Then I register the following response fields
       | alias      | path         |
       | jobOneUUID | jobs[0].uuid |
-    Then Envelopes should be in topic "tx.sender"
     Then I sleep "15s"
     When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobOneUUID}}"
     Then the response code should be 200

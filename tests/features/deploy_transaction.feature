@@ -54,7 +54,6 @@ Feature: Deploy ERC20 contract
 }
       """
     Then the response code should be 202
-    Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
 
   @besu @geth
@@ -111,7 +110,6 @@ Feature: Deploy ERC20 contract
       | jobTwoUUID | jobs[0].uuid |
     Then Envelopes should be in topic "tx.crafter"
     Then Envelopes should be in topic "tx.signer"
-    Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
       | Receipt.Status | Receipt.ContractAddress |
@@ -161,7 +159,6 @@ Feature: Deploy ERC20 contract
     Then I register the following response fields
       | alias      | path                  |
       | jobOTKUUID | jobs[0].uuid |
-    Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
       | Receipt.Status | Receipt.ContractAddress |
@@ -206,6 +203,7 @@ Feature: Deploy ERC20 contract
       | jobOTKUUID | jobs[0].uuid |
     Then Envelopes should be in topic "tx.crafter"
     Then Envelopes should be in topic "tx.recover"
+    Then I sleep "1s"
     And Envelopes should have the following fields
       | Errors.0.Message                                        |
       | code: -32003 - message: Intrinsic gas exceeds gas limit |

@@ -21,7 +21,6 @@ func Flags(f *pflag.FlagSet) {
 	// Register Kafka flags
 	broker.InitKafkaFlags(f)
 	broker.KafkaTopicTxCrafter(f)
-	broker.KafkaTopicTxSender(f)
 
 	// Internal API clients
 	chnregclient.Flags(f)

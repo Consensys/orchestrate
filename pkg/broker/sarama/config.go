@@ -136,7 +136,6 @@ const (
 type KafkaTopicConfig struct {
 	Crafter string
 	Signer  string
-	Sender  string
 	Decoded string
 	Recover string
 }
@@ -145,7 +144,6 @@ func NewKafkaTopicConfig(vipr *viper.Viper) *KafkaTopicConfig {
 	return &KafkaTopicConfig{
 		Crafter: vipr.GetString(TxCrafterViperKey),
 		Signer:  vipr.GetString(TxSignerViperKey),
-		Sender:  vipr.GetString(TxSenderViperKey),
 		Decoded: vipr.GetString(TxDecodedViperKey),
 		Recover: vipr.GetString(TxRecoverViperKey),
 	}

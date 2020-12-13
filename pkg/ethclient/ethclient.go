@@ -145,6 +145,21 @@ type ChainSyncReader interface {
 	SyncProgress(ctx context.Context, url string) (*eth.SyncProgress, error)
 }
 
+type MultiClient interface {
+	TransactionSender
+	ChainLedgerReader
+	ChainStateReader
+	ContractCaller
+	GasEstimator
+	GasPricer
+	ChainSyncReader
+	EEATransactionSender
+	EEAChainLedgerReader
+	EEAChainStateReader
+	QuorumTransactionSender
+	QuorumChainStateReader
+}
+
 type Client interface {
 	TransactionSender
 	ChainLedgerReader

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils/envelope"
 
 	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/tx"
@@ -40,37 +41,37 @@ func TestParsersJob_NewEntityFromModel(t *testing.T) {
 }
 
 func TestParsersJob_NewEnvelopeFromModel(t *testing.T) {
-	jobModel := testutils.FakeJobModel(1)
+	job := testutils2.FakeJob()
 	headers := map[string]string{
 		"Authorization": "Bearer MyToken",
 	}
-	txEnvelope := NewEnvelopeFromJobModel(jobModel, headers)
+	txEnvelope := envelope.NewEnvelopeFromJob(job, headers)
 
 	txRequest := txEnvelope.GetTxRequest()
-	assert.Equal(t, jobModel.ChainUUID, txEnvelope.GetChainUUID())
-	assert.Equal(t, tx.JobTypeMap[jobModel.Type], txRequest.GetJobType())
-	assert.Equal(t, jobModel.Transaction.Sender, txRequest.Params.GetFrom())
-	assert.Equal(t, jobModel.Transaction.Recipient, txRequest.Params.GetTo())
-	assert.Equal(t, jobModel.Transaction.Data, txRequest.Params.GetData())
-	assert.Equal(t, jobModel.Transaction.Nonce, txRequest.Params.GetNonce())
-	assert.Equal(t, jobModel.Transaction.Raw, txRequest.Params.GetRaw())
-	assert.Equal(t, jobModel.Transaction.GasPrice, txRequest.Params.GetGasPrice())
-	assert.Equal(t, jobModel.Transaction.Gas, txRequest.Params.GetGas())
-	assert.Equal(t, jobModel.Transaction.PrivateFor, txRequest.Params.GetPrivateFor())
-	assert.Equal(t, jobModel.Transaction.PrivateFrom, txRequest.Params.GetPrivateFrom())
-	assert.Equal(t, jobModel.Transaction.PrivacyGroupID, txRequest.Params.GetPrivacyGroupId())
-	assert.Equal(t, jobModel.InternalData.ChainID, txEnvelope.GetChainID())
+	assert.Equal(t, job.ChainUUID, txEnvelope.GetChainUUID())
+	assert.Equal(t, tx.JobTypeMap[job.Type], txRequest.GetJobType())
+	assert.Equal(t, job.Transaction.From, txRequest.Params.GetFrom())
+	assert.Equal(t, job.Transaction.To, txRequest.Params.GetTo())
+	assert.Equal(t, job.Transaction.Data, txRequest.Params.GetData())
+	assert.Equal(t, job.Transaction.Nonce, txRequest.Params.GetNonce())
+	assert.Equal(t, job.Transaction.Raw, txRequest.Params.GetRaw())
+	assert.Equal(t, job.Transaction.GasPrice, txRequest.Params.GetGasPrice())
+	assert.Equal(t, job.Transaction.Gas, txRequest.Params.GetGas())
+	assert.Equal(t, job.Transaction.PrivateFor, txRequest.Params.GetPrivateFor())
+	assert.Equal(t, job.Transaction.PrivateFrom, txRequest.Params.GetPrivateFrom())
+	assert.Equal(t, job.Transaction.PrivacyGroupID, txRequest.Params.GetPrivacyGroupId())
+	assert.Equal(t, job.InternalData.ChainID, txEnvelope.GetChainID())
 }
 
 func TestParsersJob_NewEnvelopeFromModelOneTimeKey(t *testing.T) {
-	jobModel := testutils.FakeJobModel(1)
-	jobModel.InternalData = &entities.InternalData{
+	job := testutils2.FakeJob()
+	job.InternalData = &entities.InternalData{
 		OneTimeKey: true,
 	}
 
-	txEnvelope := NewEnvelopeFromJobModel(jobModel, map[string]string{})
+	txEnvelope := envelope.NewEnvelopeFromJob(job, map[string]string{})
 
-	envelope, err := txEnvelope.Envelope()
+	evlp, err := txEnvelope.Envelope()
 	assert.NoError(t, err)
-	assert.True(t, envelope.IsOneTimeKeySignature())
+	assert.True(t, evlp.IsOneTimeKeySignature())
 }

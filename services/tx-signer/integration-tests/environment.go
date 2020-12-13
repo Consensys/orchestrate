@@ -8,7 +8,11 @@ import (
 	"time"
 
 	sarama2 "github.com/Shopify/sarama"
+	"github.com/cenkalti/backoff/v4"
+	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/rpc"
+	chnregclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/client"
 	keymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/nonce"
 	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/client"
 	txsigner "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-signer"
 
@@ -35,20 +39,22 @@ const txSchedulerURL = "http://transaction-scheduler:8081"
 const keyManagerURL = "http://key-manager:8081"
 const txSchedulerMetricsURL = "http://transaction-scheduler:8082"
 const keyManagerMetricsURL = "http://key-manager:8082"
+const chainRegistryURL = "http://chainregistry:8081"
 const networkName = "tx-signer"
 
 var envKafkaHostPort string
 var envMetricsPort string
 
 type IntegrationEnvironment struct {
-	ctx            context.Context
-	logger         log.Logger
-	txSigner       *app.App
-	client         *docker.Client
-	consumer       *integrationtest.KafkaConsumer
-	producer       sarama2.SyncProducer
-	metricsURL     string
-	txSignerConfig *txsigner.Config
+	ctx        context.Context
+	logger     log.Logger
+	txSigner   *app.App
+	client     *docker.Client
+	consumer   *integrationtest.KafkaConsumer
+	producer   sarama2.SyncProducer
+	metricsURL string
+	nm         nonce.Manager
+	srvConfig  *txsigner.Config
 }
 
 func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, error) {
@@ -69,9 +75,13 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 	sarama.KafkaURL(flgs)
 	httputils.MetricFlags(flgs)
 	httputils.Flags(flgs)
+	nonce.Type(flgs)
+	chnregclient.Flags(flgs)
 	args := []string{
 		"--metrics-port=" + envMetricsPort,
 		"--kafka-url=" + kafkaExternalHostname,
+		"--nonce-manager-type=in-memory",
+		"--chain-registry-url=" + chainRegistryURL,
 	}
 
 	err := flgs.Parse(args)
@@ -99,12 +109,15 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 		return nil, err
 	}
 
+	nonce.Init(ctx)
+
 	return &IntegrationEnvironment{
 		ctx:        ctx,
 		logger:     logger,
 		client:     dockerClient,
 		metricsURL: "http://localhost:" + envMetricsPort,
 		producer:   sarama.GlobalSyncProducer(),
+		nm:         nonce.GlobalManager(),
 	}, nil
 }
 
@@ -135,8 +148,9 @@ func (env *IntegrationEnvironment) Start(ctx context.Context) error {
 	}
 
 	// Create app
-	env.txSignerConfig = txsigner.NewConfig(viper.GetViper())
-	env.txSigner, err = newTxSigner(ctx, env.txSignerConfig)
+	env.srvConfig = txsigner.NewConfig(viper.GetViper())
+	env.srvConfig.BckOff = testBackOff()
+	env.txSigner, err = newTxSigner(ctx, env.srvConfig)
 	if err != nil {
 		env.logger.WithError(err).Error("could not initialize tx-signer")
 		return err
@@ -147,7 +161,7 @@ func (env *IntegrationEnvironment) Start(ctx context.Context) error {
 		ctx,
 		"tx-signer-integration-listener-group",
 		sarama.GlobalClient(),
-		[]string{env.txSignerConfig.SenderTopic, env.txSignerConfig.RecoverTopic},
+		[]string{env.srvConfig.CrafterTopic, env.srvConfig.RecoverTopic},
 	)
 	if err != nil {
 		env.logger.WithError(err).Error("could initialize Kafka")
@@ -201,10 +215,12 @@ func newTxSigner(ctx context.Context, txSignerConfig *txsigner.Config) (*app.App
 	// Initialize dependencies
 	sarama.InitSyncProducer(ctx)
 	sarama.InitConsumerGroup(ctx, txSignerConfig.GroupName)
+	nonce.Init(ctx)
 
 	httpClient := httputils.NewClient(httputils.NewDefaultConfig())
 	gock.InterceptClient(httpClient)
 
+	ec := ethclient.NewClient(testBackOff, httpClient)
 	// We mock the calls to the key manager and tx-scheduler
 	conf := keymanager.NewConfig(keyManagerURL, nil)
 	conf.MetricsURL = keyManagerMetricsURL
@@ -214,5 +230,10 @@ func newTxSigner(ctx context.Context, txSignerConfig *txsigner.Config) (*app.App
 	conf2.MetricsURL = txSchedulerMetricsURL
 	txSchedulerClient := txscheduler.NewHTTPClient(httpClient, conf2)
 
-	return txsigner.NewTxSigner(txSignerConfig, sarama.GlobalConsumerGroup(), sarama.GlobalSyncProducer(), keyManagerClient, txSchedulerClient)
+	return txsigner.NewTxSigner(txSignerConfig, sarama.GlobalConsumerGroup(), sarama.GlobalSyncProducer(),
+		keyManagerClient, txSchedulerClient, ec, nonce.GlobalManager())
+}
+
+func testBackOff() backoff.BackOff {
+	return backoff.WithMaxRetries(backoff.NewConstantBackOff(time.Second), 1)
 }

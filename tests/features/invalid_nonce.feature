@@ -75,7 +75,6 @@ Feature: Invalid Nonce
       """
     Then the response code should be 202
     Then the response code should be 202
-    Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
 
   Scenario: Nonce Too High
@@ -193,12 +192,6 @@ Feature: Invalid Nonce
       | 1000000 |
       | 1000001 |
       | 1000002 |
-    Then Envelopes should be in topic "tx.sender"
-    And Envelopes should have the following fields
-      | Nonce   |
-      | 1000000 |
-      | 1000001 |
-      | 1000002 |
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
       | Receipt.Status | Nonce |
@@ -249,7 +242,6 @@ Feature: Invalid Nonce
       | {{scheduleUUID}} |
     When I send "PUT" request to "{{global.tx-scheduler}}/jobs/{{txOneJobUUID}}/start"
     Then the response code should be 202
-    Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
       | Receipt.Status | Nonce | To      | ID               |
@@ -281,7 +273,6 @@ Feature: Invalid Nonce
       | {{scheduleUUID}} |
     When I send "PUT" request to "{{global.tx-scheduler}}/jobs/{{txOneJobUUID}}/start"
     Then the response code should be 202
-    Then Envelopes should be in topic "tx.sender"
     And Envelopes should have the following fields
       | Nonce |
       | 0     |
@@ -292,14 +283,14 @@ Feature: Invalid Nonce
 
   Scenario: Nonce recovering flow
     Then I have created the following accounts
-      | alias   | ID              | Headers.Authorization   |
+      | alias   | ID              | Headers.Authorization    |
       | fromAcc | {{random.uuid}} | Bearer {{tenant1.token}} |
     Then I register the following alias
-      | alias | value              |
-      | to    | {{random.account}} |
+      | alias          | value              |
+      | to             | {{random.account}} |
     Then I set the headers
-      | Key           | Value                   |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Key               | Value                    |
+      | Authorization     | Bearer {{tenant1.token}} |
     When I send "POST" request to "{{global.tx-scheduler}}/schedules" with json:
       """
 {}
@@ -340,8 +331,8 @@ Feature: Invalid Nonce
     When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{txOneJobUUID}}"
     Then the response code should be 200
     And Response should have the following fields
-      | status  | logs[0].status | logs[1].status | logs[2].status | logs[3].status | logs[4].status |
-      | MINED | CREATED        | STARTED        | RECOVERING     | PENDING        | MINED          |
+      | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status | logs[4].status |
+      | MINED  | CREATED        | STARTED        | RECOVERING     | PENDING        | MINED          |
 
   Scenario: Chaotic nonce
     Given I register the following alias
@@ -458,7 +449,6 @@ Feature: Invalid Nonce
     Then the response code should be 202
     Then Envelopes should be in topic "tx.crafter"
     Then Envelopes should be in topic "tx.signer"
-    Then Envelopes should be in topic "tx.sender"
     And Envelopes should have the following fields
       | Nonce |
       | 1002  |
@@ -581,7 +571,7 @@ Feature: Invalid Nonce
     When I send "PUT" request to "{{global.tx-scheduler}}/jobs/{{txThreeJobUUID}}/start"
     Then the response code should be 202
     Then Envelopes should be in topic "tx.crafter"
-    Then Envelopes should be in topic "tx.sender"
+    Then Envelopes should be in topic "tx.signer"
     And Envelopes should have the following fields
       | Nonce   |
       | 1000000 |
@@ -591,15 +581,15 @@ Feature: Invalid Nonce
     When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{txOneJobUUID}}"
     Then the response code should be 200
     And Response should have the following fields
-      | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status | transaction.nonce |
-      | STORED | CREATED        | STARTED        | PENDING        | STORED         | 0                 |
+      | status | logs[0].status | logs[1].status | logs[2].status | transaction.nonce |
+      | STORED | CREATED        | STARTED        | STORED         | 0                 |
     When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{txTwoJobUUID}}"
     Then the response code should be 200
     And Response should have the following fields
-      | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status | transaction.nonce |
-      | STORED | CREATED        | STARTED        | PENDING        | STORED         | 1                 |
+      | status | logs[0].status | logs[1].status | logs[2].status | transaction.nonce |
+      | STORED | CREATED        | STARTED        | STORED         | 1                 |
     When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{txThreeJobUUID}}"
     Then the response code should be 200
     And Response should have the following fields
-      | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status | transaction.nonce |
-      | STORED | CREATED        | STARTED        | PENDING        | STORED         | 2                 |
+      | status | logs[0].status | logs[1].status | logs[2].status | transaction.nonce |
+      | STORED | CREATED        | STARTED        | STORED         | 2                 |

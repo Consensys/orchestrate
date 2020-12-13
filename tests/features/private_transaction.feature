@@ -61,7 +61,6 @@ Feature: Private transactions
       | evlpID          | uuid         |
     Then Envelopes should be in topic "tx.crafter"
     Then Envelopes should be in topic "tx.signer"
-    Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
       | Receipt.Status | Receipt.ContractAddress |
@@ -72,8 +71,8 @@ Feature: Private transactions
     When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobPrivTxOne}}"
     Then the response code should be 200
     And Response should have the following fields
-      | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status |
-      | STORED | CREATED        | STARTED        | PENDING        | STORED         |
+      | status | logs[0].status | logs[1].status | logs[2].status |
+      | STORED | CREATED        | STARTED        | STORED         |
     When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobMarkingTxOne}}"
     Then the response code should be 200
     And Response should have the following fields
@@ -160,7 +159,6 @@ Feature: Private transactions
 }
       """
     Then the response code should be 202
-    Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
     Then I track the following envelopes
       | ID                                  |
@@ -184,7 +182,6 @@ Feature: Private transactions
       """
     Then the response code should be 202
     Then Envelopes should be in topic "tx.signer"
-    Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
       | Receipt.Status | Receipt.ContractAddress |
@@ -277,7 +274,6 @@ Feature: Private transactions
       | jobMarkingTxTwo | jobs[1].uuid |
     Then Envelopes should be in topic "tx.crafter"
     Then Envelopes should be in topic "tx.signer"
-    Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
       | Receipt.Status | Receipt.Output | Receipt.ContractAddress | Receipt.PrivateFrom                    | Receipt.PrivateFor                         |
@@ -288,8 +284,8 @@ Feature: Private transactions
     When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobPrivTxTwo}}"
     Then the response code should be 200
     And Response should have the following fields
-      | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status | transaction.from |
-      | STORED | CREATED        | STARTED        | PENDING        | STORED         | {{account2}}     |
+      | status | logs[0].status | logs[1].status | logs[2].status | transaction.from |
+      | STORED | CREATED        | STARTED        | STORED         | {{account2}}     |
     When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobMarkingTxTwo}}"
     Then the response code should be 200
     And Response should have the following fields
@@ -415,7 +411,6 @@ Feature: Private transactions
 }
       """
     Then the response code should be 202
-    Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
       | Receipt.Status | Receipt.Output | Receipt.PrivateFrom                    | Receipt.PrivateFor                         |
@@ -513,7 +508,6 @@ Feature: Private transactions
 }
       """
     Then the response code should be 202
-    Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
       | Receipt.Status | Receipt.Output | Receipt.PrivateFrom                    | Receipt.PrivateFor                         |
@@ -575,7 +569,6 @@ Feature: Private transactions
 }
       """
     Then the response code should be 202
-    Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
       | Receipt.Status | Receipt.Output | Receipt.PrivateFrom                    | Receipt.PrivacyGroupId |
@@ -638,7 +631,6 @@ Feature: Private transactions
 }
       """
     Then the response code should be 202
-    Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
       | Receipt.Status | Receipt.Output | Receipt.ContractAddress | Receipt.PrivateFrom                    | Receipt.PrivacyGroupId |
@@ -735,7 +727,6 @@ Feature: Private transactions
 }
       """
     Then the response code should be 202
-    Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
       | Receipt.Status | Receipt.Output | Receipt.ContractAddress | Receipt.PrivateFrom                    |
@@ -768,7 +759,6 @@ Feature: Private transactions
 }
       """
     Then the response code should be 202
-    Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
       | Receipt.Status | Receipt.ContractAddress |
@@ -794,7 +784,6 @@ Feature: Private transactions
 }
       """
     Then the response code should be 202
-    Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
       | Receipt.Status | Receipt.Output | Receipt.ContractAddress | Receipt.PrivateFrom                    | Receipt.PrivateFor                         |
@@ -863,7 +852,6 @@ Feature: Private transactions
     When I send "PUT" request to "{{global.tx-scheduler}}/jobs/{{txPrivJobUUID}}/start"
     Then the response code should be 202
     Then Envelopes should be in topic "tx.crafter"
-    Then Envelopes should be in topic "tx.sender"
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
       | Receipt.Status |
@@ -871,5 +859,5 @@ Feature: Private transactions
     When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{txPrivJobUUID}}"
     Then the response code should be 200
     And Response should have the following fields
-      | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status | transaction.nonce |
-      | STORED | CREATED        | STARTED        | PENDING        | STORED         | 0                 |
+      | status | logs[0].status | logs[1].status | logs[2].status | transaction.nonce |
+      | STORED | CREATED        | STARTED        | STORED         | 0                 |
