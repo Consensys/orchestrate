@@ -5,7 +5,7 @@ ORCH_SERVICES = tx-crafter tx-signer tx-listener contract-registry chain-registr
 ORCH_MIGRATE = contract-registry chain-registry transaction-scheduler identity-manager key-manager
 DEPS_VAULT = vault-init vault vault-import-secrets
 DEPS_POSTGRES_REDIS = postgres-chain-registry postgres-contract-registry postgres-transaction-scheduler postgres-identity-manager redis
-DEPS_KAFKA = jaeger zookeeper kafka
+DEPS_KAFKA = zookeeper kafka
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)

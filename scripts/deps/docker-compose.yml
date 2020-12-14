@@ -150,20 +150,6 @@ services:
       - ./hashicorp/kv-v2/secrets_to_engine.sh:/import.sh
     command: bash -c "/import.sh"
 
-  jaeger:
-    <<: *container-common
-    image: jaegertracing/all-in-one:1.8
-    environment:
-      COLLECTOR_ZIPKIN_HTTP_PORT: 9411
-    ports:
-      - 5775:5775/udp
-      - 6831:6831/udp
-      - 6832:6832/udp
-      - 5778:5778
-      - 16686:16686
-      - 14268:14268
-      - 9411:9411
-
 volumes:
   db-data-postgres-unit:
     driver: local
