@@ -22,36 +22,36 @@ Feature: Deploy ERC20 contract
     Given I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/transfer" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-      "from": "{{global.nodes.besu_1.fundedPublicKeys[0]}}",
-      "to": "{{account1}}",
-      "value": "100000000000000000"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "faucet-{{account1}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "from": "{{global.nodes.besu_1.fundedPublicKeys[0]}}",
+          "to": "{{account1}}",
+          "value": "100000000000000000"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "faucet-{{account1}}"
+        }
+      }
       """
     Then the response code should be 202
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/transfer" with json:
-  """
-{
-    "chain": "geth-{{scenarioID}}",
-    "params": {
-      "from": "{{global.nodes.geth.fundedPublicKeys[0]}}",
-      "to": "{{account2}}",
-      "value": "100000000000000000"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "faucet-{{account2}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
+      """
+      {
+        "chain": "geth-{{scenarioID}}",
+        "params": {
+          "from": "{{global.nodes.geth.fundedPublicKeys[0]}}",
+          "to": "{{account2}}",
+          "value": "100000000000000000"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "faucet-{{account2}}"
+        }
+      }
       """
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
@@ -72,41 +72,41 @@ Feature: Deploy ERC20 contract
     Given I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-        "contractName": "SimpleToken",
-        "from": "{{account1}}"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{besuContractTxID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "contractName": "SimpleToken",
+          "from": "{{account1}}"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{besuContractTxID}}"
+        }
+      }
       """
     Then the response code should be 202
     Then I register the following response fields
-      | alias      | path                  |
+      | alias      | path         |
       | jobOneUUID | jobs[0].uuid |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "geth-{{scenarioID}}",
-    "params": {
-        "contractName": "SimpleToken",
-        "from": "{{account2}}"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{gethContractTxID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
+      """
+      {
+        "chain": "geth-{{scenarioID}}",
+        "params": {
+          "contractName": "SimpleToken",
+          "from": "{{account2}}"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{gethContractTxID}}"
+        }
+      }
       """
     Then the response code should be 202
     Then I register the following response fields
-      | alias      | path                  |
+      | alias      | path         |
       | jobTwoUUID | jobs[0].uuid |
     Then Envelopes should be in topic "tx.crafter"
     Then Envelopes should be in topic "tx.signer"
@@ -115,12 +115,12 @@ Feature: Deploy ERC20 contract
       | Receipt.Status | Receipt.ContractAddress |
       | 1              | ~                       |
       | 1              | ~                       |
-    When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobOneUUID}}"
+    When I send "GET" request to "{{global.api}}/jobs/{{jobOneUUID}}"
     Then the response code should be 200
     And Response should have the following fields
       | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status |
       | MINED  | CREATED        | STARTED        | PENDING        | MINED          |
-    When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobTwoUUID}}"
+    When I send "GET" request to "{{global.api}}/jobs/{{jobTwoUUID}}"
     Then the response code should be 200
     And Response should have the following fields
       | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status |
@@ -141,34 +141,34 @@ Feature: Deploy ERC20 contract
     Given I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-        "contractName": "SimpleToken",
-        "oneTimeKey": true
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{besuContractTxID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "contractName": "SimpleToken",
+          "oneTimeKey": true
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{besuContractTxID}}"
+        }
+      }
       """
     Then the response code should be 202
     Then I register the following response fields
-      | alias      | path                  |
+      | alias      | path         |
       | jobOTKUUID | jobs[0].uuid |
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
       | Receipt.Status | Receipt.ContractAddress |
       | 1              | ~                       |
-    When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobOTKUUID}}"
+    When I send "GET" request to "{{global.api}}/jobs/{{jobOTKUUID}}"
     Then the response code should be 200
     And Response should have the following fields
       | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status |
       | MINED  | CREATED        | STARTED        | PENDING        | MINED          |
-    
+
   Scenario: Fail to deploy ERC20 with too low gas
     Given I register the following contracts
       | name        | artifacts        | Headers.Authorization    |
@@ -182,24 +182,24 @@ Feature: Deploy ERC20 contract
     Given I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-        "contractName": "SimpleToken",
-        "oneTimeKey": true,
-        "gas": "1"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{besuContractTxID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "contractName": "SimpleToken",
+          "oneTimeKey": true,
+          "gas": "1"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{besuContractTxID}}"
+        }
+      }
       """
     Then the response code should be 202
     Then I register the following response fields
-      | alias      | path                  |
+      | alias      | path         |
       | jobOTKUUID | jobs[0].uuid |
     Then Envelopes should be in topic "tx.crafter"
     Then Envelopes should be in topic "tx.recover"
@@ -207,7 +207,7 @@ Feature: Deploy ERC20 contract
     And Envelopes should have the following fields
       | Errors.0.Message                                        |
       | code: -32003 - message: Intrinsic gas exceeds gas limit |
-    When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobOTKUUID}}"
+    When I send "GET" request to "{{global.api}}/jobs/{{jobOTKUUID}}"
     Then the response code should be 200
     And Response should have the following fields
       | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status |
@@ -226,20 +226,20 @@ Feature: Deploy ERC20 contract
     Given I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-        "contractName": "SimpleToken",
-        "contractTag": "invalid",
-        "oneTimeKey": true
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{besuContractTxID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "contractName": "SimpleToken",
+          "contractTag": "invalid",
+          "oneTimeKey": true
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{besuContractTxID}}"
+        }
+      }
       """
     Then the response code should be 422
     And Response should have the following fields
@@ -260,18 +260,18 @@ Feature: Deploy ERC20 contract
     Given I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-        "from": "{{account1}}"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{besuContractTxID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "from": "{{account1}}"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{besuContractTxID}}"
+        }
+      }
       """
     Then the response code should be 400
     And Response should have the following fields

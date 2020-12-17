@@ -26,52 +26,52 @@ Feature: Invalid Nonce
     Given I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/transfer" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-      "from": "{{global.nodes.besu_1.fundedPublicKeys[0]}}",
-      "to": "{{account1}}",
-      "value": "100000000000000000"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "faucet-{{account1}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "from": "{{global.nodes.besu_1.fundedPublicKeys[0]}}",
+          "to": "{{account1}}",
+          "value": "100000000000000000"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "faucet-{{account1}}"
+        }
+      }
       """
     Then the response code should be 202
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/transfer" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-      "from": "{{global.nodes.besu_1.fundedPublicKeys[0]}}",
-      "to": "{{account2}}",
-      "value": "100000000000000000"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "faucet-{{account2}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "from": "{{global.nodes.besu_1.fundedPublicKeys[0]}}",
+          "to": "{{account2}}",
+          "value": "100000000000000000"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "faucet-{{account2}}"
+        }
+      }
       """
     Then the response code should be 202
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/transfer" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-      "from": "{{global.nodes.besu_1.fundedPublicKeys[0]}}",
-      "to": "{{account3}}",
-      "value": "100000000000000000"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "faucet-{{account3}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "from": "{{global.nodes.besu_1.fundedPublicKeys[0]}}",
+          "to": "{{account3}}",
+          "value": "100000000000000000"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "faucet-{{account3}}"
+        }
+      }
       """
     Then the response code should be 202
     Then the response code should be 202
@@ -84,91 +84,91 @@ Feature: Invalid Nonce
     Then I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/schedules" with json:
+    When I send "POST" request to "{{global.api}}/schedules" with json:
       """
-{}
+      {}
       """
     Then the response code should be 200
     Then I register the following response fields
       | alias           | path |
       | scheduleOneUUID | uuid |
-    When I send "POST" request to "{{global.tx-scheduler}}/schedules" with json:
+    When I send "POST" request to "{{global.api}}/schedules" with json:
       """
-{}
+      {}
       """
     Then the response code should be 200
     Then I register the following response fields
       | alias           | path |
       | scheduleTwoUUID | uuid |
-    When I send "POST" request to "{{global.tx-scheduler}}/schedules" with json:
+    When I send "POST" request to "{{global.api}}/schedules" with json:
       """
-{}
+      {}
       """
     Then the response code should be 200
     Then I register the following response fields
       | alias             | path |
       | scheduleThreeUUID | uuid |
-    When I send "POST" request to "{{global.tx-scheduler}}/jobs" with json:
-  """
-{
-    "scheduleUUID": "{{scheduleOneUUID}}",
-	"chainUUID": "{{besu.UUID}}",
-    "type": "eth://ethereum/transaction",
-    "transaction": {
-        "from": "{{account1}}",
-        "to": "{{to1}}",
-        "value": "100000",
-        "nonce": "1000000",
-        "gas": "21000"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/jobs" with json:
+      """
+      {
+        "scheduleUUID": "{{scheduleOneUUID}}",
+        "chainUUID": "{{besu.UUID}}",
+        "type": "eth://ethereum/transaction",
+        "transaction": {
+          "from": "{{account1}}",
+          "to": "{{to1}}",
+          "value": "100000",
+          "nonce": "1000000",
+          "gas": "21000"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}"
+        }
+      }
       """
     Then the response code should be 200
     Then I register the following response fields
       | alias        | path |
       | txOneJobUUID | uuid |
-    When I send "POST" request to "{{global.tx-scheduler}}/jobs" with json:
-  """
-{
-    "scheduleUUID": "{{scheduleTwoUUID}}",
-	"chainUUID": "{{besu.UUID}}",
-    "type": "eth://ethereum/transaction",
-    "transaction": {
-        "from": "{{account1}}",
-        "to": "{{to1}}",
-        "value": "100000",
-        "nonce": "1000001",
-        "gas": "21000"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/jobs" with json:
+      """
+      {
+        "scheduleUUID": "{{scheduleTwoUUID}}",
+        "chainUUID": "{{besu.UUID}}",
+        "type": "eth://ethereum/transaction",
+        "transaction": {
+          "from": "{{account1}}",
+          "to": "{{to1}}",
+          "value": "100000",
+          "nonce": "1000001",
+          "gas": "21000"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}"
+        }
+      }
       """
     Then the response code should be 200
     Then I register the following response fields
       | alias        | path |
       | txTwoJobUUID | uuid |
-    When I send "POST" request to "{{global.tx-scheduler}}/jobs" with json:
-  """
-{
-    "scheduleUUID": "{{scheduleThreeUUID}}",
-	"chainUUID": "{{besu.UUID}}",
-    "type": "eth://ethereum/transaction",
-    "transaction": {
-        "from": "{{account1}}",
-        "to": "{{to1}}",
-        "value": "100000",
-        "nonce": "1000002",
-        "gas": "21000"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/jobs" with json:
+      """
+      {
+        "scheduleUUID": "{{scheduleThreeUUID}}",
+        "chainUUID": "{{besu.UUID}}",
+        "type": "eth://ethereum/transaction",
+        "transaction": {
+          "from": "{{account1}}",
+          "to": "{{to1}}",
+          "value": "100000",
+          "nonce": "1000002",
+          "gas": "21000"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}"
+        }
+      }
       """
     Then the response code should be 200
     Then I register the following response fields
@@ -179,11 +179,11 @@ Feature: Invalid Nonce
       | {{scheduleOneUUID}}   |
       | {{scheduleTwoUUID}}   |
       | {{scheduleThreeUUID}} |
-    When I send "PUT" request to "{{global.tx-scheduler}}/jobs/{{txOneJobUUID}}/start"
+    When I send "PUT" request to "{{global.api}}/jobs/{{txOneJobUUID}}/start"
     Then the response code should be 202
-    When I send "PUT" request to "{{global.tx-scheduler}}/jobs/{{txTwoJobUUID}}/start"
+    When I send "PUT" request to "{{global.api}}/jobs/{{txTwoJobUUID}}/start"
     Then the response code should be 202
-    When I send "PUT" request to "{{global.tx-scheduler}}/jobs/{{txThreeJobUUID}}/start"
+    When I send "PUT" request to "{{global.api}}/jobs/{{txThreeJobUUID}}/start"
     Then the response code should be 202
     Then Envelopes should be in topic "tx.crafter"
     Then Envelopes should be in topic "tx.signer"
@@ -207,31 +207,31 @@ Feature: Invalid Nonce
     Then I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/schedules" with json:
+    When I send "POST" request to "{{global.api}}/schedules" with json:
       """
-{}
+      {}
       """
     Then the response code should be 200
     Then I register the following response fields
       | alias        | path |
       | scheduleUUID | uuid |
-    When I send "POST" request to "{{global.tx-scheduler}}/jobs" with json:
-  """
-{
-    "scheduleUUID": "{{scheduleUUID}}",
-	"chainUUID": "{{besu.UUID}}",
-    "type": "eth://ethereum/transaction",
-    "transaction": {
-        "from": "{{account2}}",
-        "to": "{{to1}}",
-        "value": "10000",
-        "nonce": "0",
-        "gas": "21000"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/jobs" with json:
+      """
+      {
+        "scheduleUUID": "{{scheduleUUID}}",
+        "chainUUID": "{{besu.UUID}}",
+        "type": "eth://ethereum/transaction",
+        "transaction": {
+          "from": "{{account2}}",
+          "to": "{{to1}}",
+          "value": "10000",
+          "nonce": "0",
+          "gas": "21000"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}"
+        }
+      }
       """
     Then the response code should be 200
     Then I register the following response fields
@@ -240,29 +240,29 @@ Feature: Invalid Nonce
     Then I track the following envelopes
       | ID               |
       | {{scheduleUUID}} |
-    When I send "PUT" request to "{{global.tx-scheduler}}/jobs/{{txOneJobUUID}}/start"
+    When I send "PUT" request to "{{global.api}}/jobs/{{txOneJobUUID}}/start"
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
       | Receipt.Status | Nonce | To      | ID               |
       | 1              | 0     | {{to1}} | {{scheduleUUID}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/jobs" with json:
-  """
-{
-    "scheduleUUID": "{{scheduleUUID}}",
-	"chainUUID": "{{besu.UUID}}",
-    "type": "eth://ethereum/transaction",
-    "transaction": {
-        "from": "{{account2}}",
-        "to": "{{to2}}",
-        "value": "10000",
-        "nonce": "0",
-        "gas": "21000"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/jobs" with json:
+      """
+      {
+        "scheduleUUID": "{{scheduleUUID}}",
+        "chainUUID": "{{besu.UUID}}",
+        "type": "eth://ethereum/transaction",
+        "transaction": {
+          "from": "{{account2}}",
+          "to": "{{to2}}",
+          "value": "10000",
+          "nonce": "0",
+          "gas": "21000"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}"
+        }
+      }
       """
     Then the response code should be 200
     Then I register the following response fields
@@ -271,7 +271,7 @@ Feature: Invalid Nonce
     Then I track the following envelopes
       | ID               |
       | {{scheduleUUID}} |
-    When I send "PUT" request to "{{global.tx-scheduler}}/jobs/{{txOneJobUUID}}/start"
+    When I send "PUT" request to "{{global.api}}/jobs/{{txOneJobUUID}}/start"
     Then the response code should be 202
     And Envelopes should have the following fields
       | Nonce |
@@ -286,34 +286,34 @@ Feature: Invalid Nonce
       | alias   | ID              | Headers.Authorization    |
       | fromAcc | {{random.uuid}} | Bearer {{tenant1.token}} |
     Then I register the following alias
-      | alias          | value              |
-      | to             | {{random.account}} |
+      | alias | value              |
+      | to    | {{random.account}} |
     Then I set the headers
-      | Key               | Value                    |
-      | Authorization     | Bearer {{tenant1.token}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/schedules" with json:
+      | Key           | Value                    |
+      | Authorization | Bearer {{tenant1.token}} |
+    When I send "POST" request to "{{global.api}}/schedules" with json:
       """
-{}
+      {}
       """
     Then the response code should be 200
     Then I register the following response fields
       | alias        | path |
       | scheduleUUID | uuid |
-    When I send "POST" request to "{{global.tx-scheduler}}/jobs" with json:
-  """
-{
-    "scheduleUUID": "{{scheduleUUID}}",
-	"chainUUID": "{{besu.UUID}}",
-    "type": "eth://ethereum/transaction",
-    "transaction": {
-        "from": "{{fromAcc}}",
-        "to": "{{to}}",
-        "nonce": "0"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/jobs" with json:
+      """
+      {
+        "scheduleUUID": "{{scheduleUUID}}",
+        "chainUUID": "{{besu.UUID}}",
+        "type": "eth://ethereum/transaction",
+        "transaction": {
+          "from": "{{fromAcc}}",
+          "to": "{{to}}",
+          "nonce": "0"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}"
+        }
+      }
       """
     Then the response code should be 200
     Then I register the following response fields
@@ -325,10 +325,10 @@ Feature: Invalid Nonce
     Then Set nonce last attributed records
       | Account     | ChainID          | Nonce |
       | {{fromAcc}} | {{besu.ChainID}} | 1     |
-    When I send "PUT" request to "{{global.tx-scheduler}}/jobs/{{txOneJobUUID}}/start"
+    When I send "PUT" request to "{{global.api}}/jobs/{{txOneJobUUID}}/start"
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
-    When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{txOneJobUUID}}"
+    When I send "GET" request to "{{global.api}}/jobs/{{txOneJobUUID}}"
     Then the response code should be 200
     And Response should have the following fields
       | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status | logs[4].status |
@@ -343,94 +343,94 @@ Feature: Invalid Nonce
     Then I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/schedules" with json:
+    When I send "POST" request to "{{global.api}}/schedules" with json:
       """
-{}
+      {}
       """
     Then the response code should be 200
     Then I register the following response fields
       | alias           | path |
       | scheduleOneUUID | uuid |
-    When I send "POST" request to "{{global.tx-scheduler}}/schedules" with json:
+    When I send "POST" request to "{{global.api}}/schedules" with json:
       """
-{}
+      {}
       """
     Then the response code should be 200
     Then I register the following response fields
       | alias           | path |
       | scheduleTwoUUID | uuid |
-    When I send "POST" request to "{{global.tx-scheduler}}/schedules" with json:
+    When I send "POST" request to "{{global.api}}/schedules" with json:
       """
-{}
+      {}
       """
     Then the response code should be 200
     Then I register the following response fields
       | alias             | path |
       | scheduleThreeUUID | uuid |
-    When I send "POST" request to "{{global.tx-scheduler}}/jobs" with json:
-  """
-{
-    "scheduleUUID": "{{scheduleOneUUID}}",
-	"chainUUID": "{{besu.UUID}}",
-    "type": "eth://ethereum/transaction",
-    "transaction": {
-        "from": "{{account3}}",
-        "to": "{{to1}}",
-        "value": "100000",
-        "nonce": "1002",
-        "gasPrice": "1000000000",
-        "gas": "21000"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/jobs" with json:
+      """
+      {
+        "scheduleUUID": "{{scheduleOneUUID}}",
+        "chainUUID": "{{besu.UUID}}",
+        "type": "eth://ethereum/transaction",
+        "transaction": {
+          "from": "{{account3}}",
+          "to": "{{to1}}",
+          "value": "100000",
+          "nonce": "1002",
+          "gasPrice": "1000000000",
+          "gas": "21000"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}"
+        }
+      }
       """
     Then the response code should be 200
     Then I register the following response fields
       | alias        | path |
       | txOneJobUUID | uuid |
-    When I send "POST" request to "{{global.tx-scheduler}}/jobs" with json:
-  """
-{
-    "scheduleUUID": "{{scheduleTwoUUID}}",
-	"chainUUID": "{{besu.UUID}}",
-    "type": "eth://ethereum/transaction",
-    "transaction": {
-        "from": "{{account3}}",
-        "to": "{{to2}}",
-        "value": "100000",
-        "nonce": "0",
-        "gasPrice": "1000000000",
-        "gas": "21000"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/jobs" with json:
+      """
+      {
+        "scheduleUUID": "{{scheduleTwoUUID}}",
+        "chainUUID": "{{besu.UUID}}",
+        "type": "eth://ethereum/transaction",
+        "transaction": {
+          "from": "{{account3}}",
+          "to": "{{to2}}",
+          "value": "100000",
+          "nonce": "0",
+          "gasPrice": "1000000000",
+          "gas": "21000"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}"
+        }
+      }
       """
     Then the response code should be 200
     Then I register the following response fields
       | alias        | path |
       | txTwoJobUUID | uuid |
-    When I send "POST" request to "{{global.tx-scheduler}}/jobs" with json:
-  """
-{
-    "scheduleUUID": "{{scheduleThreeUUID}}",
-	"chainUUID": "{{besu.UUID}}",
-    "type": "eth://ethereum/transaction",
-    "transaction": {
-        "from": "{{account3}}",
-        "to": "{{to3}}",
-        "value": "100000",
-        "nonce": "1001",
-        "gasPrice": "1000000000",
-        "gas": "21000"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/jobs" with json:
+      """
+      {
+        "scheduleUUID": "{{scheduleThreeUUID}}",
+        "chainUUID": "{{besu.UUID}}",
+        "type": "eth://ethereum/transaction",
+        "transaction": {
+          "from": "{{account3}}",
+          "to": "{{to3}}",
+          "value": "100000",
+          "nonce": "1001",
+          "gasPrice": "1000000000",
+          "gas": "21000"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}"
+        }
+      }
       """
     Then the response code should be 200
     Then I register the following response fields
@@ -441,11 +441,11 @@ Feature: Invalid Nonce
       | {{scheduleOneUUID}}   |
       | {{scheduleTwoUUID}}   |
       | {{scheduleThreeUUID}} |
-    When I send "PUT" request to "{{global.tx-scheduler}}/jobs/{{txOneJobUUID}}/start"
+    When I send "PUT" request to "{{global.api}}/jobs/{{txOneJobUUID}}/start"
     Then the response code should be 202
-    When I send "PUT" request to "{{global.tx-scheduler}}/jobs/{{txTwoJobUUID}}/start"
+    When I send "PUT" request to "{{global.api}}/jobs/{{txTwoJobUUID}}/start"
     Then the response code should be 202
-    When I send "PUT" request to "{{global.tx-scheduler}}/jobs/{{txThreeJobUUID}}/start"
+    When I send "PUT" request to "{{global.api}}/jobs/{{txThreeJobUUID}}/start"
     Then the response code should be 202
     Then Envelopes should be in topic "tx.crafter"
     Then Envelopes should be in topic "tx.signer"
@@ -469,91 +469,97 @@ Feature: Invalid Nonce
     Then I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/schedules" with json:
+    When I send "POST" request to "{{global.api}}/schedules" with json:
       """
-{}
+      {}
       """
     Then the response code should be 200
     Then I register the following response fields
       | alias           | path |
       | scheduleOneUUID | uuid |
-    When I send "POST" request to "{{global.tx-scheduler}}/schedules" with json:
+    When I send "POST" request to "{{global.api}}/schedules" with json:
       """
-{}
+      {}
       """
     Then the response code should be 200
     Then I register the following response fields
       | alias           | path |
       | scheduleTwoUUID | uuid |
-    When I send "POST" request to "{{global.tx-scheduler}}/schedules" with json:
+    When I send "POST" request to "{{global.api}}/schedules" with json:
       """
-{}
+      {}
       """
     Then the response code should be 200
     Then I register the following response fields
       | alias             | path |
       | scheduleThreeUUID | uuid |
-    When I send "POST" request to "{{global.tx-scheduler}}/jobs" with json:
-  """
-{
-    "scheduleUUID": "{{scheduleOneUUID}}",
-	"chainUUID": "{{besu.UUID}}",
-    "type": "eth://orion/eeaTransaction",
-    "transaction": {
-        "from": "{{account1}}",
-        "to": "{{to1}}",
-        "nonce": "1000000",
-        "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
-        "privateFor": ["{{global.nodes.besu_2.privateAddress}}"]
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/jobs" with json:
+      """
+      {
+        "scheduleUUID": "{{scheduleOneUUID}}",
+        "chainUUID": "{{besu.UUID}}",
+        "type": "eth://orion/eeaTransaction",
+        "transaction": {
+          "from": "{{account1}}",
+          "to": "{{to1}}",
+          "nonce": "1000000",
+          "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+          "privateFor": [
+            "{{global.nodes.besu_2.privateAddress}}"
+          ]
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}"
+        }
+      }
       """
     Then the response code should be 200
     Then I register the following response fields
       | alias        | path |
       | txOneJobUUID | uuid |
-    When I send "POST" request to "{{global.tx-scheduler}}/jobs" with json:
-  """
-{
-    "scheduleUUID": "{{scheduleTwoUUID}}",
-	"chainUUID": "{{besu.UUID}}",
-    "type": "eth://orion/eeaTransaction",
-    "transaction": {
-        "from": "{{account1}}",
-        "to": "{{to1}}",
-        "nonce": "1000001",
-        "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
-        "privateFor": ["{{global.nodes.besu_2.privateAddress}}"]
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/jobs" with json:
+      """
+      {
+        "scheduleUUID": "{{scheduleTwoUUID}}",
+        "chainUUID": "{{besu.UUID}}",
+        "type": "eth://orion/eeaTransaction",
+        "transaction": {
+          "from": "{{account1}}",
+          "to": "{{to1}}",
+          "nonce": "1000001",
+          "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+          "privateFor": [
+            "{{global.nodes.besu_2.privateAddress}}"
+          ]
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}"
+        }
+      }
       """
     Then the response code should be 200
     Then I register the following response fields
       | alias        | path |
       | txTwoJobUUID | uuid |
-    When I send "POST" request to "{{global.tx-scheduler}}/jobs" with json:
-  """
-{
-    "scheduleUUID": "{{scheduleThreeUUID}}",
-	"chainUUID": "{{besu.UUID}}",
-    "type": "eth://orion/eeaTransaction",
-    "transaction": {
-        "from": "{{account1}}",
-        "to": "{{to1}}",
-        "nonce": "1000002",
-        "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
-        "privateFor": ["{{global.nodes.besu_2.privateAddress}}"]
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/jobs" with json:
+      """
+      {
+        "scheduleUUID": "{{scheduleThreeUUID}}",
+        "chainUUID": "{{besu.UUID}}",
+        "type": "eth://orion/eeaTransaction",
+        "transaction": {
+          "from": "{{account1}}",
+          "to": "{{to1}}",
+          "nonce": "1000002",
+          "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+          "privateFor": [
+            "{{global.nodes.besu_2.privateAddress}}"
+          ]
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}"
+        }
+      }
       """
     Then the response code should be 200
     Then I register the following response fields
@@ -564,11 +570,11 @@ Feature: Invalid Nonce
       | {{scheduleOneUUID}}   |
       | {{scheduleTwoUUID}}   |
       | {{scheduleThreeUUID}} |
-    When I send "PUT" request to "{{global.tx-scheduler}}/jobs/{{txOneJobUUID}}/start"
+    When I send "PUT" request to "{{global.api}}/jobs/{{txOneJobUUID}}/start"
     Then the response code should be 202
-    When I send "PUT" request to "{{global.tx-scheduler}}/jobs/{{txTwoJobUUID}}/start"
+    When I send "PUT" request to "{{global.api}}/jobs/{{txTwoJobUUID}}/start"
     Then the response code should be 202
-    When I send "PUT" request to "{{global.tx-scheduler}}/jobs/{{txThreeJobUUID}}/start"
+    When I send "PUT" request to "{{global.api}}/jobs/{{txThreeJobUUID}}/start"
     Then the response code should be 202
     Then Envelopes should be in topic "tx.crafter"
     Then Envelopes should be in topic "tx.signer"
@@ -578,17 +584,17 @@ Feature: Invalid Nonce
       | 1000001 |
       | 1000002 |
     Given I sleep "2s"
-    When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{txOneJobUUID}}"
+    When I send "GET" request to "{{global.api}}/jobs/{{txOneJobUUID}}"
     Then the response code should be 200
     And Response should have the following fields
       | status | logs[0].status | logs[1].status | logs[2].status | transaction.nonce |
       | STORED | CREATED        | STARTED        | STORED         | 0                 |
-    When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{txTwoJobUUID}}"
+    When I send "GET" request to "{{global.api}}/jobs/{{txTwoJobUUID}}"
     Then the response code should be 200
     And Response should have the following fields
       | status | logs[0].status | logs[1].status | logs[2].status | transaction.nonce |
       | STORED | CREATED        | STARTED        | STORED         | 1                 |
-    When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{txThreeJobUUID}}"
+    When I send "GET" request to "{{global.api}}/jobs/{{txThreeJobUUID}}"
     Then the response code should be 200
     And Response should have the following fields
       | status | logs[0].status | logs[1].status | logs[2].status | transaction.nonce |

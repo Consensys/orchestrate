@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"sync"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
+
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -17,7 +19,6 @@ import (
 	pkglog "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	identitymanager2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/identitymanager"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
-	identitymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/identity-manager/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/handlers"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/handlers/consumer"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/handlers/dispatcher"
@@ -144,10 +145,10 @@ func initComponents(ctx context.Context) {
 
 // We import account define at Global Aliases
 func importTestIdentities(ctx context.Context) error {
-	client := identitymanager.GlobalClient()
+	orchestrateClient := client.GlobalClient()
 	aliases := alias.GlobalAliasRegistry()
 
-	privKeys := []interface{}{}
+	var privKeys []interface{}
 
 	if besuPrivKeys, ok := aliases.Get("global.nodes.besu_1.fundedPrivateKeys"); ok {
 		privKeys = append(privKeys, besuPrivKeys.([]interface{})...)
@@ -162,7 +163,7 @@ func importTestIdentities(ctx context.Context) error {
 	}
 
 	for _, privKey := range privKeys {
-		resp, err := client.ImportAccount(ctx, &identitymanager2.ImportAccountRequest{
+		resp, err := orchestrateClient.ImportAccount(ctx, &identitymanager2.ImportAccountRequest{
 			PrivateKey: privKey.(string),
 		})
 

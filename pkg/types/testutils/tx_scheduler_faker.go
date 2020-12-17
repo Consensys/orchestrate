@@ -6,11 +6,13 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 )
 
+const FromAddress = "0x5Cc634233E4a454d47aACd9fC68801482Fb02610"
+
 func FakeSendTransactionRequest() *types.SendTransactionRequest {
 	return &types.SendTransactionRequest{
 		ChainName: "chainName",
 		Params: types.TransactionParams{
-			From:            "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",
+			From:            FromAddress,
 			MethodSignature: "transfer()",
 			To:              "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18",
 		},
@@ -21,7 +23,7 @@ func FakeSendRawTransactionRequest() *types.RawTransactionRequest {
 	return &types.RawTransactionRequest{
 		ChainName: "chainName",
 		Params: types.RawTransactionParams{
-			Raw: "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",
+			Raw: "0xabeabe",
 		},
 	}
 }
@@ -30,7 +32,7 @@ func FakeSendTransferTransactionRequest() *types.TransferRequest {
 	return &types.TransferRequest{
 		ChainName: "chainName",
 		Params: types.TransferParams{
-			From:  "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",
+			From:  FromAddress,
 			Value: "1000000000000000000",
 			To:    "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18",
 		},
@@ -41,7 +43,7 @@ func FakeDeployContractRequest() *types.DeployContractRequest {
 	return &types.DeployContractRequest{
 		ChainName: "chainName",
 		Params: types.DeployContractParams{
-			From:         "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",
+			From:         FromAddress,
 			ContractName: "MyContract",
 			ContractTag:  "v1.0.0",
 		},
@@ -52,7 +54,7 @@ func FakeSendTesseraRequest() *types.SendTransactionRequest {
 	return &types.SendTransactionRequest{
 		ChainName: "chainName",
 		Params: types.TransactionParams{
-			From:            "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",
+			From:            FromAddress,
 			MethodSignature: "transfer()",
 			To:              "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18",
 			Protocol:        utils.TesseraChainType,
@@ -66,7 +68,7 @@ func FakeSendOrionRequest() *types.SendTransactionRequest {
 	return &types.SendTransactionRequest{
 		ChainName: "chainName",
 		Params: types.TransactionParams{
-			From:            "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4",
+			From:            FromAddress,
 			MethodSignature: "transfer()",
 			To:              "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18",
 			Protocol:        utils.OrionChainType,

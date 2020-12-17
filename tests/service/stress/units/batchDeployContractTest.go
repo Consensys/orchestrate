@@ -5,15 +5,15 @@ import (
 	"math/rand"
 
 	"github.com/containous/traefik/v2/pkg/log"
+	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/tx"
 	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/txscheduler"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
-	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/client"
 	utils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/stress/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/utils/chanregistry"
 )
 
-func BatchDeployContractTest(ctx context.Context, cfg *WorkloadConfig, client txscheduler.TransactionSchedulerClient, chanReg *chanregistry.ChanRegistry) error {
+func BatchDeployContractTest(ctx context.Context, cfg *WorkloadConfig, client orchestrateclient.OrchestrateClient, chanReg *chanregistry.ChanRegistry) error {
 	accounts := utils2.ContextAccounts(ctx)
 	chains := utils2.ContextChains(ctx)
 	log.FromContext(ctx).Debugf("Running batchDeployContract()...")

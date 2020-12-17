@@ -32,46 +32,46 @@ Feature: Transaction Scheduler Idempotency
       | Key               | Value                    |
       | Authorization     | Bearer {{tenant1.token}} |
       | X-Idempotency-Key | {{idempotencykey}}       |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "besu_1-{{scenarioID}}",
-    "params": {
-        "from": "{{account1}}",
-        "contractName": "SimpleToken"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{deployTxOneID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
+      """
+      {
+        "chain": "besu_1-{{scenarioID}}",
+        "params": {
+          "from": "{{account1}}",
+          "contractName": "SimpleToken"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{deployTxOneID}}"
+        }
+      }
       """
     Then the response code should be 202
     Then  I set the headers
       | Key               | Value                    |
       | Authorization     | Bearer {{tenant1.token}} |
       | X-Idempotency-Key | {{idempotencykey}}       |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "besu_1-{{scenarioID}}",
-    "params": {
-        "from": "{{account1}}",
-        "contractName": "SimpleToken"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{deployTxTwoID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
+      """
+      {
+        "chain": "besu_1-{{scenarioID}}",
+        "params": {
+          "from": "{{account1}}",
+          "contractName": "SimpleToken"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{deployTxTwoID}}"
+        }
+      }
       """
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
-    When I send "GET" request to "{{global.tx-scheduler}}/transactions?idempotency_keys={{idempotencykey}}"
+    When I send "GET" request to "{{global.api}}/transactions?idempotency_keys={{idempotencykey}}"
     Then the response code should be 200
     And Response should have the following fields
       | 0.idempotencyKey   | 0.jobs[0].status | 0.jobs[0].labels.id |
-      | {{idempotencykey}} | MINED                     | {{deployTxOneID}}            |
+      | {{idempotencykey}} | MINED            | {{deployTxOneID}}   |
 
   Scenario: Send twice different transaction using same idempotency key
     Given I register the following alias
@@ -86,46 +86,46 @@ Feature: Transaction Scheduler Idempotency
       | Key               | Value                    |
       | Authorization     | Bearer {{tenant1.token}} |
       | X-Idempotency-Key | {{idempotencykey}}       |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "besu_1-{{scenarioID}}",
-    "params": {
-        "from": "{{account1}}",
-        "contractName": "SimpleToken"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{deployTxOneID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
+      """
+      {
+        "chain": "besu_1-{{scenarioID}}",
+        "params": {
+          "from": "{{account1}}",
+          "contractName": "SimpleToken"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{deployTxOneID}}"
+        }
+      }
       """
     Then the response code should be 202
     Then  I set the headers
       | Key               | Value                    |
       | Authorization     | Bearer {{tenant1.token}} |
       | X-Idempotency-Key | {{idempotencykey}}       |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "besu_1-{{scenarioID}}",
-    "params": {
-        "oneTimeKey": true,
-        "contractName": "SimpleToken"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{deployTxTwoID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
+      """
+      {
+        "chain": "besu_1-{{scenarioID}}",
+        "params": {
+          "oneTimeKey": true,
+          "contractName": "SimpleToken"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{deployTxTwoID}}"
+        }
+      }
       """
     Then the response code should be 409
     And Response should have the following fields
       | message                                                                                                          |
       | DB101@use-cases.send-tx: a transaction request with the same idempotency key and different params already exists |
     Then Envelopes should be in topic "tx.decoded"
-    When I send "GET" request to "{{global.tx-scheduler}}/transactions?idempotency_keys={{idempotencykey}}"
+    When I send "GET" request to "{{global.api}}/transactions?idempotency_keys={{idempotencykey}}"
     Then the response code should be 200
     And Response should have the following fields
       | 0.idempotencyKey   | 0.jobs[0].status | 0.jobs[0].labels.id |
-      | {{idempotencykey}} | MINED                     | {{deployTxOneID}}            |
+      | {{idempotencykey}} | MINED            | {{deployTxOneID}}   |

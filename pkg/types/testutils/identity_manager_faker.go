@@ -20,7 +20,7 @@ func FakeCreateAccountRequest() *types.CreateAccountRequest {
 func FakeImportAccountRequest() *types.ImportAccountRequest {
 	return &types.ImportAccountRequest{
 		Alias:      fmt.Sprintf("Alias_%s", utils.RandomString(5)),
-		PrivateKey: "66232652FDFFD802B7252A456DBD8F3ECC0352BBDE76C23B40AFE8AEBD714E2D",
+		PrivateKey: "a93e498896143c02fdf42b9b69bdcf4aebcedc8d45851c33f8ae86057e7c4a90",
 		Attributes: map[string]string{
 			"attr1": "val1",
 			"attr2": "val2",

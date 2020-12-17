@@ -1,0 +1,2514 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "PegaSys Orchestrate API. Enables dynamic management of transactions, identities, chains, faucets and contracts.\nTransaction requests are an abstraction over schedules and jobs representing one or more transactions executed on the Blockchain network\nSchedules are ordered lists of jobs executed in a predefined sequence\nJobs represent single transaction flows executed on the Blockchain network\nChains represent list of endpoints pointing to a Blockchain network\nFaucets represent funded accounts (holding ETH) linked to specific chains, allowed to fund newly created accounts automatically for them to be able to send transactions.\nAccounts represent Ethereum accounts (private keys). By usage of the generated cryptographic key pair, accounts can be used to sign/verify and to encrypt/decrypt messages.",
+        "title": "Orchestrate API",
+        "contact": {
+            "name": "Contact PegaSys Orchestrate",
+            "url": "https://pegasys.tech/contact/",
+            "email": "support@pegasys.tech"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "2.0"
+    },
+    "paths": {
+        "/accounts": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "description": "Get a list of filtered accounts",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Search accounts by provided filters",
+                "parameters": [
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "List of account aliases",
+                        "name": "aliases",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of identities found",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/identitymanager.AccountResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid filter in the request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "description": "Creates a new Account",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Creates a new Account",
+                "parameters": [
+                    {
+                        "description": "Account creation request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/identitymanager.CreateAccountRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Account object",
+                        "schema": {
+                            "$ref": "#/definitions/identitymanager.AccountResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/accounts/import": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "description": "Creates a new Account by importing a private key",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Creates a new Account by importing a private key",
+                "parameters": [
+                    {
+                        "description": "Account creation request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/identitymanager.ImportAccountRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Account object",
+                        "schema": {
+                            "$ref": "#/definitions/identitymanager.AccountResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "405": {
+                        "description": "Not allowed",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/accounts/{address}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "description": "Fetch a single account by address",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Fetch a account by address",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "selected account address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Account found",
+                        "schema": {
+                            "$ref": "#/definitions/identitymanager.AccountResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Account not found",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "description": "Update a specific account by Address",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Update account by Address",
+                "parameters": [
+                    {
+                        "description": "Account update request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/identitymanager.UpdateAccountRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Account found",
+                        "schema": {
+                            "$ref": "#/definitions/identitymanager.AccountResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Account not found",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/accounts/{address}/sign": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "description": "Sign sent data using provided account",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/plain"
+                ],
+                "summary": "Sign arbitrary data",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "selected account address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data signature",
+                        "schema": {
+                            "$ref": "#/definitions/identitymanager.SignPayloadRequest"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Account not found",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/ethereum/accounts/verify-signature": {
+            "post": {
+                "description": "Verifies if a message has been signed by the Ethereum account passed as argument",
+                "consumes": [
+                    "application/json"
+                ],
+                "summary": "Verifies the signature of a message",
+                "parameters": [
+                    {
+                        "description": "signature and message to verify",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/keymanager.VerifyPayloadRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {},
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Invalid parameters",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/ethereum/accounts/verify-typed-data-signature": {
+            "post": {
+                "description": "Verifies if a typed data message has been signed by the Ethereum account passed as argument following the EIP-712 standard",
+                "consumes": [
+                    "application/json"
+                ],
+                "summary": "Verifies the signature of a typed data message following the EIP-712 standard",
+                "parameters": [
+                    {
+                        "description": "Typed data to sign",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/ethereum.VerifyTypedDataRequest"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "domainSeparator": {
+                                            "$ref": "#/definitions/ethereum.DomainSeparator"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {},
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Invalid parameters",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/ethereum/accounts/{address}/sign-typed-data": {
+            "post": {
+                "description": "Signs typed data using ECDSA and the private key of an existing account following the EIP-712 standard",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/plain"
+                ],
+                "summary": "Signs typed data using an existing account following the EIP-712 standard",
+                "parameters": [
+                    {
+                        "description": "Typed data to sign",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/identitymanager.SignTypedDataRequest"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "domainSeparator": {
+                                            "$ref": "#/definitions/ethereum.DomainSeparator"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Signed payload",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Account not found",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Invalid parameters",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/jobs": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "description": "Get a list of filtered jobs",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Search jobs by provided filters",
+                "parameters": [
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "List of transaction hashes",
+                        "name": "tx_hashes",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Chain UUID",
+                        "name": "chain_uuid",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of Jobs found",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/definitions/txscheduler.JobResponse"
+                                    },
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "annotations": {
+                                                "allOf": [
+                                                    {
+                                                        "$ref": "#/definitions/txscheduler.Annotations"
+                                                    },
+                                                    {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "gasPricePolicy": {
+                                                                "allOf": [
+                                                                    {
+                                                                        "$ref": "#/definitions/txscheduler.GasPriceParams"
+                                                                    },
+                                                                    {
+                                                                        "type": "object",
+                                                                        "properties": {
+                                                                            "retryPolicy": {
+                                                                                "$ref": "#/definitions/txscheduler.RetryParams"
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                ]
+                                                            }
+                                                        }
+                                                    }
+                                                ]
+                                            },
+                                            "logs": {
+                                                "type": "array",
+                                                "items": {
+                                                    "$ref": "#/definitions/entities.Log"
+                                                }
+                                            },
+                                            "transaction": {
+                                                "$ref": "#/definitions/entities.ETHTransaction"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid filter in the request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "description": "Creates a new job as part of an already created schedule",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Creates a new Job",
+                "parameters": [
+                    {
+                        "description": "Job creation request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/txscheduler.CreateJobRequest"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "annotations": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/txscheduler.Annotations"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "gasPricePolicy": {
+                                                            "allOf": [
+                                                                {
+                                                                    "$ref": "#/definitions/txscheduler.GasPriceParams"
+                                                                },
+                                                                {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "retryPolicy": {
+                                                                            "$ref": "#/definitions/txscheduler.RetryParams"
+                                                                        }
+                                                                    }
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "transaction": {
+                                            "$ref": "#/definitions/entities.ETHTransaction"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Created Job",
+                        "schema": {
+                            "$ref": "#/definitions/txscheduler.JobResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable parameters were sent",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/jobs/{uuid}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "description": "Fetch a single job by uuid",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Fetch a job by uuid",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "UUID of the job",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Job found",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/txscheduler.JobResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "annotations": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/txscheduler.Annotations"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "gasPricePolicy": {
+                                                            "allOf": [
+                                                                {
+                                                                    "$ref": "#/definitions/txscheduler.GasPriceParams"
+                                                                },
+                                                                {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "retryPolicy": {
+                                                                            "$ref": "#/definitions/txscheduler.RetryParams"
+                                                                        }
+                                                                    }
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Job not found",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "description": "Update a specific job by UUID\nWARNING: Reserved for advanced users. Orchestrate does not recommend using this endpoint.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Update job by UUID",
+                "parameters": [
+                    {
+                        "description": "Job update request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/txscheduler.UpdateJobRequest"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "annotations": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/txscheduler.Annotations"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "gasPricePolicy": {
+                                                            "allOf": [
+                                                                {
+                                                                    "$ref": "#/definitions/txscheduler.GasPriceParams"
+                                                                },
+                                                                {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "retryPolicy": {
+                                                                            "$ref": "#/definitions/txscheduler.RetryParams"
+                                                                        }
+                                                                    }
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "transaction": {
+                                            "$ref": "#/definitions/entities.ETHTransaction"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Job found",
+                        "schema": {
+                            "$ref": "#/definitions/txscheduler.JobResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Job not found",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Job in invalid state for the given status update",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/jobs/{uuid}/resend": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "description": "Resend transaction of specific job by UUID, effectively executing the re-sending of transaction asynchronously",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Resend Job transaction by UUID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "UUID of the job",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "202": {},
+                    "404": {
+                        "description": "Job not found",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/jobs/{uuid}/start": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "description": "Starts a specific job by UUID, effectively executing the transaction asynchronously",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Start a Job by UUID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "UUID of the job",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "202": {},
+                    "404": {
+                        "description": "Job not found",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/schedules": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "description": "Get all schedules",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get all schedules",
+                "responses": {
+                    "200": {
+                        "description": "List of schedules found",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/txscheduler.ScheduleResponse"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "description": "Creates a new schedule",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Creates a new Schedule",
+                "parameters": [
+                    {
+                        "description": "Schedule creation request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/txscheduler.CreateScheduleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Created schedule",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/txscheduler.ScheduleResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "jobs": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/txscheduler.JobResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable parameters were sent",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/schedules/{uuid}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "description": "Fetch a single schedule by uuid",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Fetch a schedule by uuid",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "UUID of the schedule",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Schedule found",
+                        "schema": {
+                            "$ref": "#/definitions/txscheduler.ScheduleResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Schedule not found",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/transactions": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "description": "Get a list of filtered transaction requests",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Search transaction requests by provided filters",
+                "parameters": [
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "List of idempotency keys",
+                        "name": "idempotency_keys",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of transaction requests found",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/txscheduler.TransactionResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid filter in the request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/transactions/deploy-contract": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "description": "Creates and executes a new contract deployment request\nThe transaction can be private (Tessera, Orion).\nThe transaction can be a One Time Key transaction in 0 gas private networks",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Creates and sends a new contract deployment",
+                "parameters": [
+                    {
+                        "description": "Deployment transaction request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/txscheduler.DeployContractRequest"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "params": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/txscheduler.DeployContractParams"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "gasPricePolicy": {
+                                                            "allOf": [
+                                                                {
+                                                                    "$ref": "#/definitions/txscheduler.GasPriceParams"
+                                                                },
+                                                                {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "retryPolicy": {
+                                                                            "$ref": "#/definitions/txscheduler.RetryParams"
+                                                                        }
+                                                                    }
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Created deployment transaction request",
+                        "schema": {
+                            "$ref": "#/definitions/txscheduler.TransactionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Already existing transaction",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable parameters were sent",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/transactions/send": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "description": "Creates and executes a new smart contract transaction request\nThe transaction can be private (Tessera, Orion).\nThe transaction can be a One Time Key transaction in 0 gas private networks",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Creates and sends a new contract transaction",
+                "parameters": [
+                    {
+                        "description": "Contract transaction request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/txscheduler.SendTransactionRequest"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "params": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/txscheduler.TransactionParams"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "gasPricePolicy": {
+                                                            "allOf": [
+                                                                {
+                                                                    "$ref": "#/definitions/txscheduler.GasPriceParams"
+                                                                },
+                                                                {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "retryPolicy": {
+                                                                            "$ref": "#/definitions/txscheduler.RetryParams"
+                                                                        }
+                                                                    }
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Created contract transaction request",
+                        "schema": {
+                            "$ref": "#/definitions/txscheduler.TransactionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Already existing transaction",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable parameters were sent",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/transactions/send-raw": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "description": "Creates and executes a new raw transaction request",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Creates and sends a raw transaction",
+                "parameters": [
+                    {
+                        "description": "Raw transaction request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/txscheduler.RawTransactionRequest"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "params": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/txscheduler.RawTransactionParams"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "retryPolicy": {
+                                                            "$ref": "#/definitions/txscheduler.IntervalRetryParams"
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Created raw transaction request",
+                        "schema": {
+                            "$ref": "#/definitions/txscheduler.TransactionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Already existing transaction",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable parameters were sent",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/transactions/transfer": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "description": "Creates and executes a new transfer request",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Creates and sends a transfer transaction",
+                "parameters": [
+                    {
+                        "description": "Transfer transaction request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/txscheduler.TransferRequest"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "params": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/txscheduler.TransferParams"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "gasPricePolicy": {
+                                                            "allOf": [
+                                                                {
+                                                                    "$ref": "#/definitions/txscheduler.GasPriceParams"
+                                                                },
+                                                                {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "retryPolicy": {
+                                                                            "$ref": "#/definitions/txscheduler.RetryParams"
+                                                                        }
+                                                                    }
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Created transfer transaction request",
+                        "schema": {
+                            "$ref": "#/definitions/txscheduler.TransactionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Already existing transaction",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable parameters were sent",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/transactions/{uuid}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "description": "Fetch a single transaction request by uuid",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Fetch a transaction request by uuid",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "UUID of the transaction request",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Transaction request found",
+                        "schema": {
+                            "$ref": "#/definitions/txscheduler.TransactionResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Transaction request not found",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "entities.ETHTransaction": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string",
+                    "example": "2020-07-09T12:35:42.115395Z"
+                },
+                "data": {
+                    "type": "string",
+                    "example": "0xfe378324abcde723"
+                },
+                "enclaveKey": {
+                    "type": "string",
+                    "example": "0xd41551c714c8ec769d2edad9adc250ae955d263da161bf59142b7500eea6715eadc250ae955d263da161bf59142b7500eea6715e"
+                },
+                "from": {
+                    "type": "string",
+                    "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
+                },
+                "gas": {
+                    "type": "string",
+                    "example": "21000"
+                },
+                "gasPrice": {
+                    "type": "string",
+                    "example": "71500000 (wei)"
+                },
+                "hash": {
+                    "type": "string",
+                    "example": "0xd41551c714c8ec769d2edad9adc250ae955d263da161bf59142b7500eea6715e"
+                },
+                "nonce": {
+                    "type": "string",
+                    "example": "1"
+                },
+                "privacyGroupID": {
+                    "type": "string",
+                    "example": "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="
+                },
+                "privateFor": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=",
+                        "B1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="
+                    ]
+                },
+                "privateFrom": {
+                    "type": "string",
+                    "example": "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="
+                },
+                "raw": {
+                    "type": "string",
+                    "example": "0xfe378324abcde723"
+                },
+                "to": {
+                    "type": "string",
+                    "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
+                },
+                "updatedAt": {
+                    "type": "string",
+                    "example": "2020-07-09T12:35:42.115395Z"
+                },
+                "value": {
+                    "type": "string",
+                    "example": "71500000 (wei)"
+                }
+            }
+        },
+        "entities.Log": {
+            "type": "object",
+            "properties": {
+                "at": {
+                    "type": "string",
+                    "example": "2020-07-09T12:35:42.115395Z"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Log message"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "MINED"
+                }
+            }
+        },
+        "ethereum.DomainSeparator": {
+            "type": "object",
+            "required": [
+                "chainID",
+                "name",
+                "version"
+            ],
+            "properties": {
+                "chainID": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "name": {
+                    "type": "string",
+                    "example": "MyDApp"
+                },
+                "salt": {
+                    "type": "string",
+                    "example": "some-random-string"
+                },
+                "verifyingContract": {
+                    "type": "string",
+                    "example": "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"
+                },
+                "version": {
+                    "type": "string",
+                    "example": "v1.0.0"
+                }
+            }
+        },
+        "ethereum.VerifyTypedDataRequest": {
+            "type": "object",
+            "required": [
+                "address",
+                "data",
+                "signature"
+            ],
+            "properties": {
+                "address": {
+                    "type": "string",
+                    "example": "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"
+                },
+                "data": {
+                    "type": "SignTypedDataRequest"
+                },
+                "signature": {
+                    "type": "string",
+                    "example": "0x6019a3c8..."
+                }
+            }
+        },
+        "httputil.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 24000
+                },
+                "message": {
+                    "type": "string",
+                    "example": "error message"
+                }
+            }
+        },
+        "identitymanager.AccountResponse": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string",
+                    "example": "1abae27a0cbfb02945720425d3b80c7e09728534"
+                },
+                "alias": {
+                    "type": "string",
+                    "example": "personal-account"
+                },
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "compressedPublicKey": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string",
+                    "example": "2020-07-09T12:35:42.115395Z"
+                },
+                "publicKey": {
+                    "type": "string",
+                    "example": "048e66b3e549818ea2cb354fb70749f6c8de8fa484f7530fc447d5fe80a1c424e4f5ae648d648c980ae7095d1efad87161d83886ca4b6c498ac22a93da5099014a"
+                },
+                "tenantID": {
+                    "type": "string",
+                    "example": "foo"
+                },
+                "updatedAt": {
+                    "type": "string",
+                    "example": "2020-07-09T12:35:42.115395Z"
+                }
+            }
+        },
+        "identitymanager.CreateAccountRequest": {
+            "type": "object",
+            "properties": {
+                "alias": {
+                    "type": "string",
+                    "example": "personal-account"
+                },
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "chain": {
+                    "type": "string",
+                    "example": "besu"
+                }
+            }
+        },
+        "identitymanager.ImportAccountRequest": {
+            "type": "object",
+            "required": [
+                "privateKey"
+            ],
+            "properties": {
+                "alias": {
+                    "type": "string",
+                    "example": "personal-account"
+                },
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "chain": {
+                    "type": "string",
+                    "example": "quorum"
+                },
+                "privateKey": {
+                    "type": "string",
+                    "example": "66232652FDFFD802B7252A456DBD8F3ECC0352BBDE76C23B40AFE8AEBD714E2D"
+                }
+            }
+        },
+        "identitymanager.SignPayloadRequest": {
+            "type": "object",
+            "required": [
+                "data"
+            ],
+            "properties": {
+                "data": {
+                    "type": "string",
+                    "example": "data to sign"
+                }
+            }
+        },
+        "identitymanager.SignTypedDataRequest": {
+            "type": "object",
+            "required": [
+                "domainSeparator",
+                "message",
+                "messageType",
+                "types"
+            ],
+            "properties": {
+                "domainSeparator": {
+                    "type": "object",
+                    "$ref": "#/definitions/ethereum.DomainSeparator"
+                },
+                "message": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "messageType": {
+                    "type": "string",
+                    "example": "Mail"
+                },
+                "types": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/ethereum.Type"
+                        }
+                    }
+                }
+            }
+        },
+        "identitymanager.UpdateAccountRequest": {
+            "type": "object",
+            "properties": {
+                "alias": {
+                    "type": "string",
+                    "example": "personal-account"
+                },
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "keymanager.VerifyPayloadRequest": {
+            "type": "object",
+            "required": [
+                "address",
+                "data",
+                "signature"
+            ],
+            "properties": {
+                "address": {
+                    "type": "string",
+                    "example": "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"
+                },
+                "data": {
+                    "type": "string",
+                    "example": "my data to sign"
+                },
+                "signature": {
+                    "type": "string",
+                    "example": "0x6019a3c8..."
+                }
+            }
+        },
+        "txscheduler.Annotations": {
+            "type": "object",
+            "properties": {
+                "gasPricePolicy": {
+                    "type": "object",
+                    "$ref": "#/definitions/txscheduler.GasPriceParams"
+                },
+                "hasBeenRetried": {
+                    "type": "boolean",
+                    "example": false
+                },
+                "oneTimeKey": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "txscheduler.CreateJobRequest": {
+            "type": "object",
+            "required": [
+                "chainUUID",
+                "scheduleUUID",
+                "transaction",
+                "type"
+            ],
+            "properties": {
+                "annotations": {
+                    "type": "object",
+                    "$ref": "#/definitions/txscheduler.Annotations"
+                },
+                "chainUUID": {
+                    "type": "string",
+                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
+                },
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "nextJobUUID": {
+                    "type": "string",
+                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
+                },
+                "parentJobUUID": {
+                    "type": "string",
+                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
+                },
+                "scheduleUUID": {
+                    "type": "string",
+                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
+                },
+                "transaction": {
+                    "type": "object",
+                    "$ref": "#/definitions/entities.ETHTransaction"
+                },
+                "type": {
+                    "type": "string",
+                    "example": "eth://ethereum/transaction"
+                }
+            }
+        },
+        "txscheduler.CreateScheduleRequest": {
+            "type": "object"
+        },
+        "txscheduler.DeployContractParams": {
+            "type": "object",
+            "required": [
+                "contractName"
+            ],
+            "properties": {
+                "args": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
+                },
+                "contractName": {
+                    "type": "string",
+                    "example": "MyContract"
+                },
+                "contractTag": {
+                    "type": "string",
+                    "example": "v1.1.0"
+                },
+                "from": {
+                    "type": "string",
+                    "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
+                },
+                "gas": {
+                    "type": "string",
+                    "example": "21000"
+                },
+                "gasPrice": {
+                    "type": "string",
+                    "example": "71500000 (wei)"
+                },
+                "gasPricePolicy": {
+                    "type": "object",
+                    "$ref": "#/definitions/txscheduler.GasPriceParams"
+                },
+                "oneTimeKey": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "privacyGroupId": {
+                    "type": "string",
+                    "example": "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="
+                },
+                "privateFor": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=",
+                        "B1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="
+                    ]
+                },
+                "privateFrom": {
+                    "type": "string",
+                    "example": "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="
+                },
+                "protocol": {
+                    "type": "string",
+                    "example": "Tessera"
+                },
+                "value": {
+                    "type": "string",
+                    "example": "71500000 (wei)"
+                }
+            }
+        },
+        "txscheduler.DeployContractRequest": {
+            "type": "object",
+            "required": [
+                "chain",
+                "params"
+            ],
+            "properties": {
+                "chain": {
+                    "type": "string",
+                    "example": "myChain"
+                },
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "params": {
+                    "type": "object",
+                    "$ref": "#/definitions/txscheduler.DeployContractParams"
+                }
+            }
+        },
+        "txscheduler.GasPriceParams": {
+            "type": "object",
+            "properties": {
+                "priority": {
+                    "type": "string",
+                    "example": "very-high"
+                },
+                "retryPolicy": {
+                    "type": "object",
+                    "$ref": "#/definitions/txscheduler.RetryParams"
+                }
+            }
+        },
+        "txscheduler.IntervalRetryParams": {
+            "type": "object",
+            "properties": {
+                "interval": {
+                    "type": "string",
+                    "example": "2m"
+                }
+            }
+        },
+        "txscheduler.JobResponse": {
+            "type": "object",
+            "properties": {
+                "annotations": {
+                    "type": "object",
+                    "$ref": "#/definitions/txscheduler.Annotations"
+                },
+                "chainUUID": {
+                    "type": "string",
+                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
+                },
+                "createdAt": {
+                    "type": "string",
+                    "example": "2020-07-09T12:35:42.115395Z"
+                },
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "logs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.Log"
+                    }
+                },
+                "nextJobUUID": {
+                    "type": "string",
+                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
+                },
+                "parentJobUUID": {
+                    "type": "string",
+                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
+                },
+                "scheduleUUID": {
+                    "type": "string",
+                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "MINED"
+                },
+                "tenantID": {
+                    "type": "string",
+                    "example": "foo"
+                },
+                "transaction": {
+                    "type": "object",
+                    "$ref": "#/definitions/entities.ETHTransaction"
+                },
+                "type": {
+                    "type": "string",
+                    "example": "eth://ethereum/transaction"
+                },
+                "updatedAt": {
+                    "type": "string",
+                    "example": "2020-07-09T12:35:42.115395Z"
+                },
+                "uuid": {
+                    "type": "string",
+                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
+                }
+            }
+        },
+        "txscheduler.RawTransactionParams": {
+            "type": "object",
+            "required": [
+                "raw"
+            ],
+            "properties": {
+                "raw": {
+                    "type": "string",
+                    "example": "0xfe378324abcde723..."
+                },
+                "retryPolicy": {
+                    "type": "object",
+                    "$ref": "#/definitions/txscheduler.IntervalRetryParams"
+                }
+            }
+        },
+        "txscheduler.RawTransactionRequest": {
+            "type": "object",
+            "required": [
+                "chain",
+                "params"
+            ],
+            "properties": {
+                "chain": {
+                    "type": "string",
+                    "example": "myChain"
+                },
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "params": {
+                    "type": "object",
+                    "$ref": "#/definitions/txscheduler.RawTransactionParams"
+                }
+            }
+        },
+        "txscheduler.RetryParams": {
+            "type": "object",
+            "properties": {
+                "increment": {
+                    "type": "number",
+                    "example": 0.05
+                },
+                "interval": {
+                    "type": "string",
+                    "example": "2m"
+                },
+                "limit": {
+                    "type": "number",
+                    "example": 0.5
+                }
+            }
+        },
+        "txscheduler.ScheduleResponse": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string",
+                    "example": "2020-07-09T12:35:42.115395Z"
+                },
+                "jobs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/txscheduler.JobResponse"
+                    }
+                },
+                "tenantID": {
+                    "type": "string",
+                    "example": "tenant_id"
+                },
+                "uuid": {
+                    "type": "string",
+                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
+                }
+            }
+        },
+        "txscheduler.SendTransactionRequest": {
+            "type": "object",
+            "required": [
+                "chain",
+                "params"
+            ],
+            "properties": {
+                "chain": {
+                    "type": "string",
+                    "example": "myChain"
+                },
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "params": {
+                    "type": "object",
+                    "$ref": "#/definitions/txscheduler.TransactionParams"
+                }
+            }
+        },
+        "txscheduler.TransactionParams": {
+            "type": "object",
+            "required": [
+                "methodSignature",
+                "to"
+            ],
+            "properties": {
+                "args": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
+                },
+                "from": {
+                    "type": "string",
+                    "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
+                },
+                "gas": {
+                    "type": "string",
+                    "example": "21000"
+                },
+                "gasPrice": {
+                    "type": "string",
+                    "example": "71500000 (wei)"
+                },
+                "gasPricePolicy": {
+                    "type": "object",
+                    "$ref": "#/definitions/txscheduler.GasPriceParams"
+                },
+                "methodSignature": {
+                    "type": "string",
+                    "example": "transfer(address,uint256)"
+                },
+                "oneTimeKey": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "privacyGroupId": {
+                    "type": "string",
+                    "example": "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="
+                },
+                "privateFor": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=",
+                        "B1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="
+                    ]
+                },
+                "privateFrom": {
+                    "type": "string",
+                    "example": "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="
+                },
+                "protocol": {
+                    "type": "string",
+                    "example": "Tessera"
+                },
+                "to": {
+                    "type": "string",
+                    "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
+                },
+                "value": {
+                    "type": "string",
+                    "example": "71500000 (wei)"
+                }
+            }
+        },
+        "txscheduler.TransactionResponse": {
+            "type": "object",
+            "properties": {
+                "chain": {
+                    "type": "string",
+                    "example": "myChain"
+                },
+                "createdAt": {
+                    "type": "string",
+                    "example": "2020-07-09T12:35:42.115395Z"
+                },
+                "idempotencyKey": {
+                    "type": "string",
+                    "example": "myIdempotencyKey"
+                },
+                "jobs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/txscheduler.JobResponse"
+                    }
+                },
+                "params": {
+                    "type": "string"
+                },
+                "uuid": {
+                    "type": "string",
+                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
+                }
+            }
+        },
+        "txscheduler.TransferParams": {
+            "type": "object",
+            "required": [
+                "from",
+                "to",
+                "value"
+            ],
+            "properties": {
+                "from": {
+                    "type": "string",
+                    "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
+                },
+                "gas": {
+                    "type": "string",
+                    "example": "21000"
+                },
+                "gasPrice": {
+                    "type": "string",
+                    "example": "71500000 (wei)"
+                },
+                "gasPricePolicy": {
+                    "type": "object",
+                    "$ref": "#/definitions/txscheduler.GasPriceParams"
+                },
+                "to": {
+                    "type": "string",
+                    "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
+                },
+                "value": {
+                    "type": "string",
+                    "example": "71500000 (wei)"
+                }
+            }
+        },
+        "txscheduler.TransferRequest": {
+            "type": "object",
+            "required": [
+                "chain",
+                "params"
+            ],
+            "properties": {
+                "chain": {
+                    "type": "string",
+                    "example": "myChain"
+                },
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "params": {
+                    "type": "object",
+                    "$ref": "#/definitions/txscheduler.TransferParams"
+                }
+            }
+        },
+        "txscheduler.UpdateJobRequest": {
+            "type": "object",
+            "properties": {
+                "annotations": {
+                    "type": "object",
+                    "$ref": "#/definitions/txscheduler.Annotations"
+                },
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Update message"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "MINED"
+                },
+                "transaction": {
+                    "type": "object",
+                    "$ref": "#/definitions/entities.ETHTransaction"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "X-API-Key",
+            "in": "header"
+        },
+        "JWTAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

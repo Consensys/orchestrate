@@ -14,11 +14,11 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	mock2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/mock"
+	mock3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/testutils"
 	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/txscheduler"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
-	mock3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/client/mock"
 )
 
 func TestSendETHRaw_Execute(t *testing.T) {
@@ -26,11 +26,11 @@ func TestSendETHRaw_Execute(t *testing.T) {
 	defer ctrl.Finish()
 
 	ec := mock2.NewMockTransactionSender(ctrl)
-	txSchedulerClient := mock3.NewMockTransactionSchedulerClient(ctrl)
+	client := mock3.NewMockOrchestrateClient(ctrl)
 	chainRegistryURL := "chainRegistryURL:8081"
 	ctx := context.Background()
 
-	usecase := NewSendETHRawTxUseCase(ec, txSchedulerClient, chainRegistryURL)
+	usecase := NewSendETHRawTxUseCase(ec, client, chainRegistryURL)
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		job := testutils.FakeJob()
@@ -43,8 +43,8 @@ func TestSendETHRaw_Execute(t *testing.T) {
 		proxyURL := fmt.Sprintf("%s/%s", chainRegistryURL, job.ChainUUID)
 		ec.EXPECT().SendRawTransaction(ctx, proxyURL, raw).Return(ethcommon.HexToHash(txHash), nil)
 
-		txSchedulerClient.EXPECT().UpdateJob(ctx, job.UUID, &txschedulertypes.UpdateJobRequest{
-			Status: utils.StatusPending,
+		client.EXPECT().UpdateJob(ctx, job.UUID, &txschedulertypes.UpdateJobRequest{
+			Status:      utils.StatusPending,
 			Transaction: decodeRaw(raw),
 		})
 
@@ -52,7 +52,7 @@ func TestSendETHRaw_Execute(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, job.Transaction.Hash, txHash)
 	})
-	
+
 	t.Run("should execute use case and update to warning successfully", func(t *testing.T) {
 		job := testutils.FakeJob()
 		raw := "0xf85380839896808252088083989680808216b4a0d35c752d3498e6f5ca1630d264802a992a141ca4b6a3f439d673c75e944e5fb0a05278aaa5fabbeac362c321b54e298dedae2d31471e432c26ea36a8d49cf08f1e"
@@ -67,12 +67,11 @@ func TestSendETHRaw_Execute(t *testing.T) {
 			Return(ethcommon.HexToHash(hash), nil)
 
 		transaction := decodeRaw(raw)
-		txSchedulerClient.EXPECT().UpdateJob(ctx, job.UUID, &txschedulertypes.UpdateJobRequest{
-			Status: utils.StatusPending,
+		client.EXPECT().UpdateJob(ctx, job.UUID, &txschedulertypes.UpdateJobRequest{
+			Status:      utils.StatusPending,
 			Transaction: transaction,
 		})
-		
-		txSchedulerClient.EXPECT().UpdateJob(ctx, job.UUID, gomock.Any())
+		client.EXPECT().UpdateJob(ctx, job.UUID, gomock.Any())
 
 		err := usecase.Execute(ctx, job)
 		assert.NoError(t, err)

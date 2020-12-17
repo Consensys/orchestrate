@@ -7,10 +7,10 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/txscheduler"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
-	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/client"
 )
 
 //go:generate mockgen -source=retry_session_job.go -destination=mocks/retry_session_job.go -package=mocks
@@ -23,13 +23,13 @@ type RetrySessionJobUseCase interface {
 
 // retrySessionJobUseCase is a use case to create a new transaction job
 type retrySessionJobUseCase struct {
-	txSchedulerClient txscheduler.TransactionSchedulerClient
+	client orchestrateclient.OrchestrateClient
 }
 
 // NewRetrySessionJobUseCase creates a new StartSessionUseCase
-func NewRetrySessionJobUseCase(txSchedulerClient txscheduler.TransactionSchedulerClient) RetrySessionJobUseCase {
+func NewRetrySessionJobUseCase(client orchestrateclient.OrchestrateClient) RetrySessionJobUseCase {
 	return &retrySessionJobUseCase{
-		txSchedulerClient: txSchedulerClient,
+		client: client,
 	}
 }
 
@@ -38,7 +38,7 @@ func (uc *retrySessionJobUseCase) Execute(ctx context.Context, jobUUID, childUUI
 	logger := log.WithContext(ctx).WithField("job_uuid", jobUUID)
 	logger.Debug("verifying job status")
 
-	job, err := uc.txSchedulerClient.GetJob(ctx, jobUUID)
+	job, err := uc.client.GetJob(ctx, jobUUID)
 	if err != nil {
 		errMessage := "failed to get job"
 		logger.Error(errMessage)
@@ -66,7 +66,7 @@ func (uc *retrySessionJobUseCase) Execute(ctx context.Context, jobUUID, childUUI
 
 	// Otherwise we retry on last job
 	logger.Debug("resending last child job transaction...")
-	err = uc.txSchedulerClient.ResendJobTx(ctx, childUUID)
+	err = uc.client.ResendJobTx(ctx, childUUID)
 	if err != nil {
 		return "", errors.FromError(err).ExtendComponent(retrySessionJobComponent)
 	}
@@ -86,14 +86,14 @@ func (uc *retrySessionJobUseCase) CreateAndStartNewChildJob(ctx context.Context,
 	)
 
 	childJobRequest := newChildJobRequest(parentJob, gasPriceMultiplier)
-	childJob, err := uc.txSchedulerClient.CreateJob(ctx, childJobRequest)
+	childJob, err := uc.client.CreateJob(ctx, childJobRequest)
 	if err != nil {
 		errMessage := "failed create new child job"
 		logger.Error(errMessage)
 		return nil, errors.FromError(err).ExtendComponent(retrySessionJobComponent)
 	}
 
-	err = uc.txSchedulerClient.StartJob(ctx, childJob.UUID)
+	err = uc.client.StartJob(ctx, childJob.UUID)
 	if err != nil {
 		errMessage := "failed start child job"
 		logger.WithField("child_job_uuid", childJob.UUID).Error(errMessage)

@@ -4,36 +4,41 @@ import (
 	"context"
 	"fmt"
 
+	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/txscheduler"
+
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient"
+	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-signer/tx-signer/nonce"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-signer/tx-signer/use-cases"
-	utils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-signer/tx-signer/utils"
 )
 
 const sendTesseraMarkingTxComponent = "use-cases.send-tessera-marking-tx"
 
 type sendTesseraMarkingTxUseCase struct {
-	signTx            usecases.SignETHTransactionUseCase
-	nonceChecker      nonce.Checker
-	txSchedulerClient client.TransactionSchedulerClient
-	ec                ethclient.QuorumTransactionSender
-	chainRegistryURL  string
+	signTx           usecases.SignETHTransactionUseCase
+	nonceChecker     nonce.Checker
+	client           orchestrateclient.OrchestrateClient
+	ec               ethclient.QuorumTransactionSender
+	chainRegistryURL string
 }
 
-func NewSendTesseraMarkingTxUseCase(signTx usecases.SignQuorumPrivateTransactionUseCase,
-	ec ethclient.QuorumTransactionSender, txSchedulerClient client.TransactionSchedulerClient, chainRegistryURL string,
-	nonceChecker nonce.Checker) usecases.SendTesseraMarkingTxUseCase {
+func NewSendTesseraMarkingTxUseCase(
+	signTx usecases.SignQuorumPrivateTransactionUseCase,
+	ec ethclient.QuorumTransactionSender,
+	client orchestrateclient.OrchestrateClient,
+	chainRegistryURL string,
+	nonceChecker nonce.Checker,
+) usecases.SendTesseraMarkingTxUseCase {
 	return &sendTesseraMarkingTxUseCase{
-		signTx:            signTx,
-		nonceChecker:      nonceChecker,
-		ec:                ec,
-		txSchedulerClient: txSchedulerClient,
-		chainRegistryURL:  chainRegistryURL,
+		signTx:           signTx,
+		nonceChecker:     nonceChecker,
+		ec:               ec,
+		client:           client,
+		chainRegistryURL: chainRegistryURL,
 	}
 }
 
@@ -52,7 +57,10 @@ func (uc *sendTesseraMarkingTxUseCase) Execute(ctx context.Context, job *entitie
 		return errors.FromError(err).ExtendComponent(sendTesseraMarkingTxComponent)
 	}
 
-	err = utils2.UpdateJobStatus(ctx, uc.txSchedulerClient, job.UUID, utils.StatusPending, "", job.Transaction)
+	_, err = uc.client.UpdateJob(ctx, job.UUID, &txschedulertypes.UpdateJobRequest{
+		Transaction: job.Transaction,
+		Status:      utils.StatusPending,
+	})
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(sendTesseraMarkingTxComponent)
 	}
@@ -71,9 +79,12 @@ func (uc *sendTesseraMarkingTxUseCase) Execute(ctx context.Context, job *entitie
 	}
 
 	if txHash != job.Transaction.Hash {
-		warnMessage := fmt.Sprintf("expected transaction hash %s, but got %s. Overriding", job.Transaction.Hash, txHash)
 		job.Transaction.Hash = txHash
-		err = utils2.UpdateJobStatus(ctx, uc.txSchedulerClient, job.UUID, utils.StatusWarning, warnMessage, job.Transaction)
+		_, err = uc.client.UpdateJob(ctx, job.UUID, &txschedulertypes.UpdateJobRequest{
+			Message:     fmt.Sprintf("expected transaction hash %s, but got %s. Overriding", job.Transaction.Hash, txHash),
+			Transaction: job.Transaction,
+			Status:      utils.StatusWarning,
+		})
 		if err != nil {
 			return errors.FromError(err).ExtendComponent(sendTesseraMarkingTxComponent)
 		}

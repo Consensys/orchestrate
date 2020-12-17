@@ -7,13 +7,15 @@ import (
 	"strconv"
 	"time"
 
+	logpkg "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
+
 	sarama2 "github.com/Shopify/sarama"
 	"github.com/cenkalti/backoff/v4"
 	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/rpc"
+	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	chnregclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/client"
 	keymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/nonce"
-	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/client"
 	txsigner "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-signer"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/app"
@@ -35,9 +37,9 @@ import (
 
 const kafkaContainerID = "Kafka-tx-signer"
 const zookeeperContainerID = "zookeeper-tx-signer"
-const txSchedulerURL = "http://transaction-scheduler:8081"
+const apiURL = "http://api:8081"
 const keyManagerURL = "http://key-manager:8081"
-const txSchedulerMetricsURL = "http://transaction-scheduler:8082"
+const apiMetricsURL = "http://api:8082"
 const keyManagerMetricsURL = "http://key-manager:8082"
 const chainRegistryURL = "http://chainregistry:8081"
 const networkName = "tx-signer"
@@ -77,11 +79,13 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 	httputils.Flags(flgs)
 	nonce.Type(flgs)
 	chnregclient.Flags(flgs)
+	logpkg.Level(flgs)
 	args := []string{
 		"--metrics-port=" + envMetricsPort,
 		"--kafka-url=" + kafkaExternalHostname,
 		"--nonce-manager-type=in-memory",
 		"--chain-registry-url=" + chainRegistryURL,
+		"--log-level=panic",
 	}
 
 	err := flgs.Parse(args)
@@ -226,8 +230,8 @@ func newTxSigner(ctx context.Context, txSignerConfig *txsigner.Config) (*app.App
 	conf.MetricsURL = keyManagerMetricsURL
 	keyManagerClient := keymanager.NewHTTPClient(httpClient, conf)
 
-	conf2 := txscheduler.NewConfig(txSchedulerURL, nil)
-	conf2.MetricsURL = txSchedulerMetricsURL
+	conf2 := txscheduler.NewConfig(apiURL, nil)
+	conf2.MetricsURL = apiMetricsURL
 	txSchedulerClient := txscheduler.NewHTTPClient(httpClient, conf2)
 
 	return txsigner.NewTxSigner(txSignerConfig, sarama.GlobalConsumerGroup(), sarama.GlobalSyncProducer(),

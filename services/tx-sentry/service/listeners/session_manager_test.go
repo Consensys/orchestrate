@@ -10,11 +10,11 @@ import (
 	"time"
 
 	"github.com/golang/mock/gomock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/testutils"
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/txscheduler"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/client/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sentry/tx-sentry/use-cases/mocks"
 )
 
@@ -24,10 +24,10 @@ func TestSessionManager(t *testing.T) {
 
 	retryInterval := 1 * time.Second
 
-	txSchedulerClient := mock.NewMockTransactionSchedulerClient(ctrl)
+	client := mock.NewMockOrchestrateClient(ctrl)
 	retrySessionJobUC := mocks.NewMockRetrySessionJobUseCase(ctrl)
 
-	sessionManager := NewSessionManager(txSchedulerClient, retrySessionJobUC)
+	sessionManager := NewSessionManager(client, retrySessionJobUC)
 
 	t.Run("should retry session job successfully at every retry interval with latest child job", func(t *testing.T) {
 		timeout := retryInterval*4 + 500*time.Millisecond
@@ -39,7 +39,7 @@ func TestSessionManager(t *testing.T) {
 
 		parentJobResponse := testutils.FakeJobResponse()
 		parentJobResponse.UUID = job.UUID
-		txSchedulerClient.EXPECT().SearchJob(ctx, &entities.JobFilters{
+		client.EXPECT().SearchJob(ctx, &entities.JobFilters{
 			ChainUUID:     job.ChainUUID,
 			ParentJobUUID: job.UUID,
 		}).Return([]*types.JobResponse{parentJobResponse}, nil)
@@ -47,7 +47,7 @@ func TestSessionManager(t *testing.T) {
 		retrySessionJobUC.EXPECT().Execute(ctx, parentJobResponse.UUID, childJobUUIDOne, 1).Return(childJobUUIDTwo, nil)
 		retrySessionJobUC.EXPECT().Execute(ctx, parentJobResponse.UUID, childJobUUIDTwo, 2).Return(childJobUUIDTwo, nil)
 		retrySessionJobUC.EXPECT().Execute(ctx, parentJobResponse.UUID, childJobUUIDTwo, 2).Return("", nil)
-		txSchedulerClient.EXPECT().UpdateJob(ctx, job.UUID, gomock.Any()).Return(nil, nil)
+		client.EXPECT().UpdateJob(ctx, job.UUID, gomock.Any()).Return(nil, nil)
 
 		sessionManager.Start(ctx, job)
 
@@ -64,7 +64,7 @@ func TestSessionManager(t *testing.T) {
 
 		parentJobResponse := testutils.FakeJobResponse()
 		parentJobResponse.UUID = job.UUID
-		txSchedulerClient.EXPECT().SearchJob(ctx, &entities.JobFilters{
+		client.EXPECT().SearchJob(ctx, &entities.JobFilters{
 			ChainUUID:     job.ChainUUID,
 			ParentJobUUID: job.UUID,
 		}).Return([]*types.JobResponse{parentJobResponse}, nil)
@@ -72,7 +72,7 @@ func TestSessionManager(t *testing.T) {
 		retrySessionJobUC.EXPECT().Execute(ctx, parentJobResponse.UUID, childJobUUIDOne, 1).Return(childJobUUIDTwo, nil)
 		retrySessionJobUC.EXPECT().Execute(ctx, parentJobResponse.UUID, childJobUUIDTwo, 2).Return(childJobUUIDTwo, nil)
 		retrySessionJobUC.EXPECT().Execute(ctx, parentJobResponse.UUID, childJobUUIDTwo, 2).Return("", nil)
-		txSchedulerClient.EXPECT().UpdateJob(ctx, job.UUID, gomock.Any()).Return(nil, nil)
+		client.EXPECT().UpdateJob(ctx, job.UUID, gomock.Any()).Return(nil, nil)
 
 		sessionManager.Start(ctx, job)
 
@@ -93,7 +93,7 @@ func TestSessionManager(t *testing.T) {
 			})
 		}
 
-		txSchedulerClient.EXPECT().SearchJob(ctx, &entities.JobFilters{
+		client.EXPECT().SearchJob(ctx, &entities.JobFilters{
 			ChainUUID:     job.ChainUUID,
 			ParentJobUUID: job.UUID,
 		}).Return([]*types.JobResponse{parentJobResponse}, nil)
@@ -111,13 +111,13 @@ func TestSessionManager(t *testing.T) {
 
 		parentJobResponse := testutils.FakeJobResponse()
 		parentJobResponse.UUID = job.UUID
-		txSchedulerClient.EXPECT().SearchJob(ctx, &entities.JobFilters{
+		client.EXPECT().SearchJob(ctx, &entities.JobFilters{
 			ChainUUID:     job.ChainUUID,
 			ParentJobUUID: job.UUID,
 		}).Return([]*types.JobResponse{parentJobResponse}, nil)
 		retrySessionJobUC.EXPECT().Execute(ctx, parentJobResponse.UUID, parentJobResponse.UUID, 0).Return("", nil)
 
-		txSchedulerClient.EXPECT().UpdateJob(ctx, job.UUID, gomock.Any()).Return(nil, nil)
+		client.EXPECT().UpdateJob(ctx, job.UUID, gomock.Any()).Return(nil, nil)
 		sessionManager.Start(ctx, job)
 
 		<-ctx.Done()
@@ -131,7 +131,7 @@ func TestSessionManager(t *testing.T) {
 	
 		parentJobResponse := testutils.FakeJobResponse()
 		parentJobResponse.UUID = job.UUID
-		txSchedulerClient.EXPECT().SearchJob(ctx, &entities.JobFilters{
+		client.EXPECT().SearchJob(ctx, &entities.JobFilters{
 			ChainUUID:     job.ChainUUID,
 			ParentJobUUID: job.UUID,
 		}).Return([]*types.JobResponse{parentJobResponse}, nil)
@@ -139,7 +139,7 @@ func TestSessionManager(t *testing.T) {
 		retrySessionJobUC.EXPECT().Execute(ctx, parentJobResponse.UUID, parentJobResponse.UUID, gomock.Any()).
 			Return(parentJobResponse.UUID, nil).Times(types.SentryMaxRetries)
 	
-		txSchedulerClient.EXPECT().UpdateJob(ctx, job.UUID, gomock.Any()).Return(nil, nil)
+		client.EXPECT().UpdateJob(ctx, job.UUID, gomock.Any()).Return(nil, nil)
 		sessionManager.Start(ctx, job)
 	
 		<-ctx.Done()
@@ -153,14 +153,14 @@ func TestSessionManager(t *testing.T) {
 	
 		parentJobResponse := testutils.FakeJobResponse()
 		parentJobResponse.UUID = job.UUID
-		txSchedulerClient.EXPECT().SearchJob(ctx, &entities.JobFilters{
+		client.EXPECT().SearchJob(ctx, &entities.JobFilters{
 			ChainUUID:     job.ChainUUID,
 			ParentJobUUID: job.UUID,
 		}).Return([]*types.JobResponse{parentJobResponse}, nil)
 	
 		retrySessionJobUC.EXPECT().Execute(ctx, parentJobResponse.UUID, parentJobResponse.UUID, 0).Return("", fmt.Errorf("error"))
 		retrySessionJobUC.EXPECT().Execute(ctx, parentJobResponse.UUID, parentJobResponse.UUID, gomock.Any()).Return(parentJobResponse.UUID, nil).AnyTimes()
-		txSchedulerClient.EXPECT().UpdateJob(ctx, job.UUID, gomock.Any()).Return(nil, nil)
+		client.EXPECT().UpdateJob(ctx, job.UUID, gomock.Any()).Return(nil, nil)
 		sessionManager.Start(ctx, job)
 	
 		<-ctx.Done()
@@ -174,7 +174,7 @@ func TestSessionManager(t *testing.T) {
 	
 		parentJobResponse := testutils.FakeJobResponse()
 		parentJobResponse.UUID = job.UUID
-		txSchedulerClient.EXPECT().SearchJob(ctx, &entities.JobFilters{
+		client.EXPECT().SearchJob(ctx, &entities.JobFilters{
 			ChainUUID:     job.ChainUUID,
 			ParentJobUUID: job.UUID,
 		}).Return([]*types.JobResponse{parentJobResponse}, nil)
@@ -189,7 +189,7 @@ func TestSessionManager(t *testing.T) {
 		// Second call does not call startSessionUC
 		ctx2, _ := context.WithTimeout(context.Background(), timeout)
 		sessionManager.Start(ctx, job)
-		txSchedulerClient.EXPECT().UpdateJob(ctx, job.UUID, gomock.Any()).Return(nil, nil)
+		client.EXPECT().UpdateJob(ctx, job.UUID, gomock.Any()).Return(nil, nil)
 	
 		<-ctx.Done()
 		<-ctx2.Done()

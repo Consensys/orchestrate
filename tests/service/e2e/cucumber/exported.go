@@ -13,11 +13,10 @@ import (
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
 	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/rpc"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/client"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/contract-registry/client"
-	identitymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/identity-manager/client"
 	noncememory "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/nonce/memory"
-	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/e2e/cucumber/alias"
 )
 
@@ -39,8 +38,7 @@ func Init(ctx context.Context) {
 		chainregistry.Init(ctx)
 		alias.Init(ctx)
 		contractregistry.Init(ctx)
-		txscheduler.Init()
-		identitymanager.Init()
+		client.Init()
 		noncememory.Init(ctx)
 		ethclient.Init(ctx)
 
@@ -74,7 +72,7 @@ func Init(ctx context.Context) {
 }
 
 func listTagCucumber() string {
-	tags := []string{}
+	var tags []string
 	if viper.GetString(TagsViperKey) != "" {
 		tags = append(tags, strings.Split(viper.GetString(TagsViperKey), " ")...)
 	}

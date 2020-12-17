@@ -4,31 +4,35 @@ import (
 	"context"
 	"fmt"
 
+	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/txscheduler"
+
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient"
+	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/client"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-signer/tx-signer/use-cases"
-	utils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-signer/tx-signer/utils"
 )
 
 const sendTesseraPrivateTxComponent = "use-cases.send-tessera-private-tx"
 
 type sendTesseraPrivateTxUseCase struct {
-	ec                ethclient.QuorumTransactionSender
-	chainRegistryURL  string
-	txSchedulerClient client.TransactionSchedulerClient
+	ec               ethclient.QuorumTransactionSender
+	chainRegistryURL string
+	client           orchestrateclient.OrchestrateClient
 }
 
-func NewSendTesseraPrivateTxUseCase(ec ethclient.QuorumTransactionSender,
-	txSchedulerClient client.TransactionSchedulerClient, chainRegistryURL string) usecases.SendTesseraPrivateTxUseCase {
+func NewSendTesseraPrivateTxUseCase(
+	ec ethclient.QuorumTransactionSender,
+	client orchestrateclient.OrchestrateClient,
+	chainRegistryURL string,
+) usecases.SendTesseraPrivateTxUseCase {
 	return &sendTesseraPrivateTxUseCase{
-		ec:                ec,
-		chainRegistryURL:  chainRegistryURL,
-		txSchedulerClient: txSchedulerClient,
+		ec:               ec,
+		chainRegistryURL: chainRegistryURL,
+		client:           client,
 	}
 }
 
@@ -42,7 +46,10 @@ func (uc *sendTesseraPrivateTxUseCase) Execute(ctx context.Context, job *entitie
 		return errors.FromError(err).ExtendComponent(sendTesseraPrivateTxComponent)
 	}
 
-	err = utils2.UpdateJobStatus(ctx, uc.txSchedulerClient, job.UUID, utils.StatusStored, "", job.Transaction)
+	_, err = uc.client.UpdateJob(ctx, job.UUID, &txschedulertypes.UpdateJobRequest{
+		Transaction: job.Transaction,
+		Status:      utils.StatusStored,
+	})
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(sendTesseraPrivateTxComponent)
 	}

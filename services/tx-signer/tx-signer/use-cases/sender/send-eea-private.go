@@ -4,36 +4,41 @@ import (
 	"context"
 	"fmt"
 
+	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/txscheduler"
+
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient"
+	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-signer/tx-signer/nonce"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-signer/tx-signer/use-cases"
-	utils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-signer/tx-signer/utils"
 )
 
 const sendEEAPrivateTxComponent = "use-cases.send-eea-private-tx"
 
 type sendEEAPrivateTxUseCase struct {
-	signTx            usecases.SignETHTransactionUseCase
-	nonceChecker      nonce.Checker
-	txSchedulerClient client.TransactionSchedulerClient
-	ec                ethclient.EEATransactionSender
-	chainRegistryURL  string
+	signTx           usecases.SignETHTransactionUseCase
+	nonceChecker     nonce.Checker
+	client           orchestrateclient.OrchestrateClient
+	ec               ethclient.EEATransactionSender
+	chainRegistryURL string
 }
 
-func NewSendEEAPrivateTxUseCase(signTx usecases.SignEEATransactionUseCase, ec ethclient.EEATransactionSender,
-	txSchedulerClient client.TransactionSchedulerClient, chainRegistryURL string, nonceChecker nonce.Checker,
+func NewSendEEAPrivateTxUseCase(
+	signTx usecases.SignEEATransactionUseCase,
+	ec ethclient.EEATransactionSender,
+	client orchestrateclient.OrchestrateClient,
+	chainRegistryURL string,
+	nonceChecker nonce.Checker,
 ) usecases.SendEEAPrivateTxUseCase {
 	return &sendEEAPrivateTxUseCase{
-		txSchedulerClient: txSchedulerClient,
-		chainRegistryURL:  chainRegistryURL,
-		signTx:            signTx,
-		ec:                ec,
-		nonceChecker:      nonceChecker,
+		client:           client,
+		chainRegistryURL: chainRegistryURL,
+		signTx:           signTx,
+		ec:               ec,
+		nonceChecker:     nonceChecker,
 	}
 }
 
@@ -65,7 +70,10 @@ func (uc *sendEEAPrivateTxUseCase) Execute(ctx context.Context, job *entities.Jo
 		return err
 	}
 
-	err = utils2.UpdateJobStatus(ctx, uc.txSchedulerClient, job.UUID, utils.StatusStored, "", job.Transaction)
+	_, err = uc.client.UpdateJob(ctx, job.UUID, &txschedulertypes.UpdateJobRequest{
+		Transaction: job.Transaction,
+		Status:      utils.StatusStored,
+	})
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(sendEEAPrivateTxComponent)
 	}

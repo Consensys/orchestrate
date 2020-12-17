@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"time"
 
+	logpkg "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
+
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
@@ -54,11 +56,13 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 	httputils.MetricFlags(flgs)
 	httputils.Flags(flgs)
 	grpc.Flags(flgs)
+	logpkg.Level(flgs)
 	args := []string{
 		"--metrics-port=" + envMetricsPort,
 		"--rest-port=" + envHTTPPort,
 		"--grpc-port=" + envGRPCPort,
 		"--db-port=" + envPGHostPort,
+		"--log-level=panic",
 	}
 
 	err := flgs.Parse(args)

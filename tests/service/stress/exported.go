@@ -13,11 +13,10 @@ import (
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/engine"
 	pkglog "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/client"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/contract-registry/client"
-	identitymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/identity-manager/client"
-	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/handlers"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/handlers/consumer"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/handlers/dispatcher"
@@ -51,8 +50,7 @@ func Start(ctx context.Context) error {
 		chanregistry.GlobalChanRegistry(),
 		chainregistry.GlobalClient(),
 		contractregistry.GlobalClient(),
-		txscheduler.GlobalClient(),
-		identitymanager.GlobalClient(),
+		client.GlobalClient(),
 		broker.GlobalSyncProducer())
 
 	// Start consuming on every topics of interest
@@ -119,8 +117,7 @@ func initComponents(ctx context.Context) {
 			broker.InitSyncProducer(ctx)
 			chainregistry.Init(ctx)
 			contractregistry.Init(ctx)
-			txscheduler.Init()
-			identitymanager.Init()
+			client.Init()
 		},
 		// Initialize ConsumerGroup
 		func() {

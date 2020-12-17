@@ -25,20 +25,20 @@ Feature: Transaction Scheduler Jobs
     Given I set the headers
       | Key           | Value                          |
       | Authorization | Bearer {{tenantDefault.token}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/transfer" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-      "from": "{{global.nodes.besu_1.fundedPublicKeys[0]}}",
-      "to": "{{account1}}",
-      "value": "100000000000000000"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "faucet-{{account1}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "from": "{{global.nodes.besu_1.fundedPublicKeys[0]}}",
+          "to": "{{account1}}",
+          "value": "100000000000000000"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "faucet-{{account1}}"
+        }
+      }
       """
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
@@ -51,67 +51,67 @@ Feature: Transaction Scheduler Jobs
     Then  I set the headers
       | Key           | Value                      |
       | Authorization | Bearer {{tenantFoo.token}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/schedules" with json:
+    When I send "POST" request to "{{global.api}}/schedules" with json:
       """
-{}
+      {}
       """
     Then the response code should be 200
     Then I register the following response fields
       | alias           | path |
       | scheduleOneUUID | uuid |
-    When I send "POST" request to "{{global.tx-scheduler}}/jobs" with json:
+    When I send "POST" request to "{{global.api}}/jobs" with json:
       """
-{
-	"scheduleUUID": "{{scheduleOneUUID}}",
-	"chainUUID": "{{besu.UUID}}",
-	"type": "eth://ethereum/transaction",
-    "transaction": {
-        "from": "{{account1}}",
-        "to": "{{to1}}",
-        "value": "100000"
-    }
-}
+      {
+        "scheduleUUID": "{{scheduleOneUUID}}",
+        "chainUUID": "{{besu.UUID}}",
+        "type": "eth://ethereum/transaction",
+        "transaction": {
+          "from": "{{account1}}",
+          "to": "{{to1}}",
+          "value": "100000"
+        }
+      }
       """
     Then the response code should be 200
     Then I register the following response fields
       | alias     | path |
       | txJobUUID | uuid |
     Then I track the following envelopes
-      | ID            |
+      | ID                  |
       | {{scheduleOneUUID}} |
     Then  I set the headers
       | Key           | Value                      |
       | Authorization | Bearer {{tenantBar.token}} |
-    When I send "PATCH" request to "{{global.tx-scheduler}}/jobs/{{txJobUUID}}" with json:
+    When I send "PATCH" request to "{{global.api}}/jobs/{{txJobUUID}}" with json:
       """
-{
-    "transaction": {
-        "from": "{{account1}}",
-        "to": "{{to1}}",
-        "value": "100000"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}"
-    }
-}
+      {
+        "transaction": {
+          "from": "{{account1}}",
+          "to": "{{to1}}",
+          "value": "100000"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}"
+        }
+      }
       """
     Then the response code should be 404
-    When I send "PUT" request to "{{global.tx-scheduler}}/jobs/{{txJobUUID}}/start"
+    When I send "PUT" request to "{{global.api}}/jobs/{{txJobUUID}}/start"
     Then the response code should be 404
-    When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{txJobUUID}}"
+    When I send "GET" request to "{{global.api}}/jobs/{{txJobUUID}}"
     Then the response code should be 404
     Then  I set the headers
       | Key           | Value                      |
       | Authorization | Bearer {{tenantFoo.token}} |
-    When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{txJobUUID}}"
+    When I send "GET" request to "{{global.api}}/jobs/{{txJobUUID}}"
     Then the response code should be 200
     And Response should have the following fields
       | uuid          | status  |
       | {{txJobUUID}} | CREATED |
-    When I send "PUT" request to "{{global.tx-scheduler}}/jobs/{{txJobUUID}}/start"
+    When I send "PUT" request to "{{global.api}}/jobs/{{txJobUUID}}/start"
     Then Envelopes should be in topic "tx.decoded"
-    When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{txJobUUID}}"
+    When I send "GET" request to "{{global.api}}/jobs/{{txJobUUID}}"
     Then the response code should be 200
     And Response should have the following fields
-      | uuid          | status  |
-      | {{txJobUUID}} | MINED |
+      | uuid          | status |
+      | {{txJobUUID}} | MINED  |

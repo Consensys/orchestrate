@@ -2,9 +2,10 @@ package docker
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
-	"os"
+	"strings"
 	"time"
 
 	"github.com/docker/docker/api/types/network"
@@ -55,17 +56,10 @@ func (c *Client) Up(ctx context.Context, name, networkName string) error {
 	}
 
 	// Pull image
-	reader, err := c.cli.ImagePull(ctx, containerCfg.Image, types.ImagePullOptions{})
+	err = c.pullImage(ctx, containerCfg.Image)
 	if err != nil {
 		return err
 	}
-
-	_, err = io.Copy(os.Stdout, reader)
-	if err != nil {
-		return err
-	}
-	_ = reader.Close()
-	logger.WithField("image", containerCfg.Image).Info("pulled imaged")
 
 	// Create Docker container
 	containerBody, err := c.cli.ContainerCreate(ctx, containerCfg, hostCfg, networkCfg, name)
@@ -231,4 +225,49 @@ func (c *Client) getContainer(name string) (dockercontainer.ContainerCreateCreat
 	}
 
 	return containerBody, nil
+}
+
+func (c *Client) pullImage(ctx context.Context, imageName string) error {
+	logger := log.FromContext(ctx).WithField("image_name", imageName)
+
+	// Pull image
+	events, err := c.cli.ImagePull(ctx, imageName, types.ImagePullOptions{})
+	if err != nil {
+		return err
+	}
+
+	d := json.NewDecoder(events)
+
+	type Event struct {
+		Status         string `json:"status"`
+		Error          string `json:"error"`
+		Progress       string `json:"progress"`
+		ProgressDetail struct {
+			Current int `json:"current"`
+			Total   int `json:"total"`
+		} `json:"progressDetail"`
+	}
+
+	var event *Event
+	for {
+		if err := d.Decode(&event); err != nil {
+			if err == io.EOF {
+				break
+			}
+
+			return err
+		}
+	}
+
+	if event != nil {
+		if strings.Contains(event.Status, fmt.Sprintf("Downloaded newer image for %s", imageName)) {
+			logger.Info("downloaded new image")
+		}
+
+		if strings.Contains(event.Status, fmt.Sprintf("Image is up to date for %s", imageName)) {
+			logger.Info("image up to date")
+		}
+	}
+
+	return nil
 }

@@ -4,8 +4,8 @@ import (
 	"context"
 
 	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/rpc"
+	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/nonce"
-	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/client"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/app"
 

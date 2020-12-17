@@ -6,16 +6,14 @@ x-default-variables: &default-variables
   CONTRACT_REGISTRY_URL: ${CONTRACT_REGISTRY_URL-contract-registry:8080}
   CONTRACT_REGISTRY_HTTP_URL: ${CONTRACT_REGISTRY_HTTP_URL-http://contract-registry:8081}
   CONTRACT_REGISTRY_METRICS_URL: ${CONTRACT_REGISTRY_METRICS_URL-http://contract-registry:8082}
-  TRANSACTION_SCHEDULER_URL: ${TRANSACTION_SCHEDULER_URL-http://transaction-scheduler:8081}
-  TRANSACTION_SCHEDULER_METRICS_URL: ${TRANSACTION_SCHEDULER_URL-http://transaction-scheduler:8082}
-  IDENTITY_MANAGER_URL: ${IDENTITY_MANAGER_URL-http://identity-manager:8081}
-  IDENTITY_MANAGER_METRICS_URL: ${IDENTITY_MANAGER_URL-http://identity-manager:8082}
+  API_URL: ${API-http://api:8081}
+  API_METRICS_URL: ${API-http://api:8082}
   KEY_MANAGER_URL: ${KEY_MANAGER_URL-http://key-manager:8081}
   KEY_MANAGER_METRICS_URL: ${KEY_MANAGER_URL-http://key-manager:8082}
   TX_CRAFTER_METRICS_URL: ${TX_CRAFTER_METRICS_URL-http://tx-crafter:8082}
   TX_SIGNER_METRICS_URL: ${TX_SIGNER_METRICS_URL-http://tx-signer:8082}
   TX_LISTENER_METRICS_URL: ${TX_LISTENER_METRICS_URL-http://tx-listener:8082}
-#  TX_SENDER_METRICS_URL: ${TX_SENDER_METRICS_URL-http://tx-sender:8082}
+  #  TX_SENDER_METRICS_URL: ${TX_SENDER_METRICS_URL-http://tx-sender:8082}
   ETH_CLIENT_RETRY_MAX_ELAPSED_TIME: 5s
   LOG_LEVEL: ${LOG_LEVEL-debug}
   LOG_FORMAT: ${LOG_FORMAT-}
@@ -71,13 +69,9 @@ x-contract-registry-common: &contract-registry-common
   CONTRACT_REGISTRY_TYPE: ${CONTRACT_REGISTRY_TYPE-}
   DB_HOST: postgres-contract-registry
 
-x-transaction-scheduler-common: &transaction-scheduler-common
-  TRANSACTION_SCHEDULER_TYPE: ${TRANSACTION_SCHEDULER_TYPE-}
-  DB_HOST: postgres-transaction-scheduler
-
-x-identity-manager-common: &identity-manager-common
-  IDENTITY_MANAGER_TYPE: ${IDENTITY_MANAGER_TYPE-}
-  DB_HOST: postgres-identity-manager
+x-api-common: &api-common
+  API_STORE_TYPE: ${API_STORE_TYPE-}
+  DB_HOST: postgres-api
 
 x-key-manager-common: &key-manager-common
   KEY_MANAGER_TYPE: ${KEY_MANAGER_TYPE-}
@@ -150,69 +144,38 @@ services:
       - contract-registry-migration
     command: contract-registry run
 
-  transaction-scheduler-migration-init:
+  api-migration-init:
     <<: *container-common
     environment:
       <<: *default-variables
-      <<: *transaction-scheduler-common
+      <<: *api-common
     restart: "no"
-    command: transaction-scheduler migrate init
+    command: api migrate init
 
-  transaction-scheduler-migration:
+  api-migration:
     <<: *container-common
     environment:
       <<: *default-variables
-      <<: *transaction-scheduler-common
+      <<: *api-common
     restart: "no"
     depends_on:
-      - transaction-scheduler-migration-init
-    command: transaction-scheduler migrate up
+      - api-migration-init
+    command: api migrate up
 
-  transaction-scheduler:
+  api:
     <<: *container-common
     ports:
       - 8031:8081
       - 8032:8082
     environment:
       <<: *default-variables
-      <<: *transaction-scheduler-common
+      <<: *api-common
     depends_on:
-      - transaction-scheduler-migration
+      - api-migration
       - contract-registry
       - chain-registry
-    command: transaction-scheduler run
-
-  identity-manager-migration-init:
-    <<: *container-common
-    environment:
-      <<: *default-variables
-      <<: *identity-manager-common
-    restart: "no"
-    command: identity-manager migrate init
-
-  identity-manager-migration:
-    <<: *container-common
-    environment:
-      <<: *default-variables
-      <<: *identity-manager-common
-    restart: "no"
-    depends_on:
-      - identity-manager-migration-init
       - key-manager
-    command: identity-manager migrate up
-
-  identity-manager:
-    <<: *container-common
-    ports:
-      - 8041:8081
-      - 8042:8082
-    environment:
-      <<: *default-variables
-      <<: *identity-manager-common
-    depends_on:
-      - identity-manager-migration
-      - key-manager
-    command: identity-manager run
+    command: api run
 
   #  TODO: Remove after version 2.7.0
   keymanager-migration-import-secrets:
@@ -262,7 +225,7 @@ services:
       <<: *default-variables
     depends_on:
       - contract-registry
-      - transaction-scheduler
+      - api
     command: tx-crafter run
 
   tx-signer:
@@ -279,15 +242,15 @@ services:
       - key-vault-init
     command: tx-signer run
 
-#  tx-sender:
-#    ports:
-#      - 8072:8082
-#    <<: *container-common
-#    environment:
-#      <<: *default-variables
-#    depends_on:
-#      - transaction-scheduler
-#    command: tx-sender run
+  #  tx-sender:
+  #    ports:
+  #      - 8072:8082
+  #    <<: *container-common
+  #    environment:
+  #      <<: *default-variables
+  #    depends_on:
+  #      - transaction-scheduler
+  #    command: tx-sender run
 
   tx-listener:
     ports:
@@ -296,7 +259,7 @@ services:
     environment:
       <<: *default-variables
     depends_on:
-      - transaction-scheduler
+      - api
       - chain-registry
     command: tx-listener run
 

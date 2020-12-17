@@ -4,8 +4,8 @@ import (
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/app"
 	pkgsarama "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
+	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/client"
-	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/client"
 	listenermetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/metrics"
 	provider "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/providers"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/session/ethereum"
@@ -21,8 +21,7 @@ func New(
 	offsets offset.Manager,
 	ec ethereum.EthClient,
 	txSchedulerClientListener,
-	txSchedulerClientSentry txscheduler.TransactionSchedulerClient,
-
+	client orchestrateclient.OrchestrateClient,
 ) (*app.App, error) {
 
 	var listenerMetrics listenermetrics.ListenerMetrics
@@ -41,14 +40,11 @@ func New(
 		listenerMetrics,
 	)
 
-	sentry = txsentry.NewTxSentry(
-		txSchedulerClientSentry,
-		txsentry.NewConfig(viper.GetViper()),
-	)
+	sentry = txsentry.NewTxSentry(client, txsentry.NewConfig(viper.GetViper()))
 
 	appli, err := app.New(
 		cfg,
-		ReadinessOpt(txscheduler.GlobalClient(), chainregistry.GlobalClient()),
+		ReadinessOpt(client, chainregistry.GlobalClient()),
 		app.MetricsOpt(listenerMetrics),
 	)
 	if err != nil {
@@ -61,10 +57,10 @@ func New(
 	return appli, nil
 }
 
-func ReadinessOpt(txSchedulerClient txscheduler.TransactionSchedulerClient, chainRegistryClient chainregistry.ChainRegistryClient) app.Option {
+func ReadinessOpt(client orchestrateclient.OrchestrateClient, chainRegistryClient chainregistry.ChainRegistryClient) app.Option {
 	return func(ap *app.App) error {
 		ap.AddReadinessCheck("chain-registry", chainRegistryClient.Checker())
-		ap.AddReadinessCheck("transaction-scheduler", txSchedulerClient.Checker())
+		ap.AddReadinessCheck("api", client.Checker())
 		ap.AddReadinessCheck("kafka", pkgsarama.GlobalClientChecker())
 		return nil
 	}

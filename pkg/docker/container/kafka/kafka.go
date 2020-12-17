@@ -103,7 +103,7 @@ func (k *Kafka) WaitForService(ctx context.Context, configuration interface{}, t
 	rctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	retryT := time.NewTicker(time.Second)
+	retryT := time.NewTicker(5 * time.Second)
 	defer retryT.Stop()
 
 	var cerr error

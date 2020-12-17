@@ -18,7 +18,7 @@ import (
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/client"
+	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/dynamic"
 	hook "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/session/ethereum/hooks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/session/ethereum/offset"
@@ -27,14 +27,14 @@ import (
 const MaxTxHashesLength = 30
 
 type Session struct {
-	Chain             *dynamic.Chain
-	ec                EthClient
-	txSchedulerClient client.TransactionSchedulerClient
-	hook              hook.Hook
-	offsets           offset.Manager
-	bckOff            backoff.BackOff
-	metrics           metrics.ListenerMetrics
-	metricsLabels     []string
+	Chain         *dynamic.Chain
+	ec            EthClient
+	client        orchestrateclient.OrchestrateClient
+	hook          hook.Hook
+	offsets       offset.Manager
+	bckOff        backoff.BackOff
+	metrics       metrics.ListenerMetrics
+	metricsLabels []string
 	// Listening session
 	trigger                        chan struct{}
 	blockPosition                  uint64
@@ -48,20 +48,20 @@ type Session struct {
 func NewSession(
 	chain *dynamic.Chain,
 	ec EthClient,
-	txSchedulerClient client.TransactionSchedulerClient,
+	client orchestrateclient.OrchestrateClient,
 	callHook hook.Hook,
 	offsets offset.Manager,
 	m metrics.ListenerMetrics,
 
 ) *Session {
 	return &Session{
-		Chain:             chain,
-		ec:                ec,
-		txSchedulerClient: txSchedulerClient,
-		hook:              callHook,
-		offsets:           offsets,
-		bckOff:            backoff.NewConstantBackOff(2 * time.Second),
-		metrics:           m,
+		Chain:   chain,
+		ec:      ec,
+		client:  client,
+		hook:    callHook,
+		offsets: offsets,
+		bckOff:  backoff.NewConstantBackOff(2 * time.Second),
+		metrics: m,
 		metricsLabels: []string{
 			"chain_uuid", chain.UUID,
 		},
@@ -69,31 +69,31 @@ func NewSession(
 }
 
 type SessionBuilder struct {
-	hook              hook.Hook
-	offsets           offset.Manager
-	ec                EthClient
-	txSchedulerClient client.TransactionSchedulerClient
-	metrics           metrics.ListenerMetrics
+	hook    hook.Hook
+	offsets offset.Manager
+	ec      EthClient
+	client  orchestrateclient.OrchestrateClient
+	metrics metrics.ListenerMetrics
 }
 
 func NewSessionBuilder(
 	hk hook.Hook,
 	offsets offset.Manager,
 	ec EthClient,
-	txSchedulerClient client.TransactionSchedulerClient,
+	client orchestrateclient.OrchestrateClient,
 	m metrics.ListenerMetrics,
 ) *SessionBuilder {
 	return &SessionBuilder{
-		hook:              hk,
-		offsets:           offsets,
-		ec:                ec,
-		txSchedulerClient: txSchedulerClient,
-		metrics:           m,
+		hook:    hk,
+		offsets: offsets,
+		ec:      ec,
+		client:  client,
+		metrics: m,
 	}
 }
 
 func (b *SessionBuilder) NewSession(chain *dynamic.Chain) (session.Session, error) {
-	return NewSession(chain, b.ec, b.txSchedulerClient, b.hook, b.offsets, b.metrics), nil
+	return NewSession(chain, b.ec, b.client, b.hook, b.offsets, b.metrics), nil
 }
 
 type fetchedBlock struct {
@@ -363,7 +363,7 @@ func (s *Session) fetchJobs(ctx context.Context, transactions ethtypes.Transacti
 		}
 
 		// By design, we will receive 0 or 1 job per tx_hash in the filter because we filter by status PENDING
-		jobResponses, err := s.txSchedulerClient.SearchJob(ctx, &entities.JobFilters{
+		jobResponses, err := s.client.SearchJob(ctx, &entities.JobFilters{
 			TxHashes:  txHashes,
 			ChainUUID: s.Chain.UUID,
 			Status:    utils.StatusPending,

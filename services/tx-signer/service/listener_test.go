@@ -13,10 +13,10 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	mock2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/tx"
 	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/txscheduler"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
-	mock2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/client/mock"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-signer/tx-signer/use-cases"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-signer/tx-signer/use-cases/mocks"
 
@@ -34,7 +34,7 @@ type messageListenerCtrlTestSuite struct {
 	sendEEAPrivateUC   *mocks.MockSendEEAPrivateTxUseCase
 	sendTesseraMarking *mocks.MockSendTesseraMarkingTxUseCase
 	sendTesseraPrivate *mocks.MockSendTesseraPrivateTxUseCase
-	txSchedulerClient  *mock2.MockTransactionSchedulerClient
+	client             *mock2.MockOrchestrateClient
 	tenants            []string
 	crafterTopic       string
 	recoverTopic       string
@@ -77,13 +77,13 @@ func (s *messageListenerCtrlTestSuite) SetupTest() {
 	s.sendEEAPrivateUC = mocks.NewMockSendEEAPrivateTxUseCase(ctrl)
 	s.sendTesseraPrivate = mocks.NewMockSendTesseraPrivateTxUseCase(ctrl)
 	s.sendTesseraMarking = mocks.NewMockSendTesseraMarkingTxUseCase(ctrl)
-	s.txSchedulerClient = mock2.NewMockTransactionSchedulerClient(ctrl)
+	s.client = mock2.NewMockOrchestrateClient(ctrl)
 	s.crafterTopic = "crafter-topic"
 	s.recoverTopic = "recover-topic"
 	s.producer = mock.NewMockSyncProducer()
 
 	bckoff := backoff.WithMaxRetries(backoff.NewConstantBackOff(time.Second), 1)
-	s.listener = NewMessageListener(s, s.txSchedulerClient, s.producer, s.recoverTopic, s.crafterTopic, bckoff)
+	s.listener = NewMessageListener(s, s.client, s.producer, s.recoverTopic, s.crafterTopic, bckoff)
 }
 
 func (s *messageListenerCtrlTestSuite) TestMessageListener_PublicEthereum() {
@@ -218,60 +218,60 @@ func (s *messageListenerCtrlTestSuite) TestMessageListener_PublicEthereum_Errors
 		var claims map[string][]int32
 		ctx := context.Background()
 		s.producer.Clean()
-	
+
 		mockSession := mock.NewConsumerGroupSession(ctx, "kafka-consumer-group", claims)
 		mockClaim := mock.NewConsumerGroupClaim("topic", 0, 0)
 		evlp := fakeEnvelope()
 		msg := &sarama.ConsumerMessage{}
 		msg.Value, _ = proto.Marshal(evlp.TxEnvelopeAsRequest())
-	
+
 		err := errors.InternalError("error")
 		s.sendETHUC.EXPECT().Execute(gomock.Any(), gomock.Any()).Return(err)
-		s.txSchedulerClient.EXPECT().UpdateJob(gomock.Any(), evlp.GetJobUUID(), &txschedulertypes.UpdateJobRequest{
+		s.client.EXPECT().UpdateJob(gomock.Any(), evlp.GetJobUUID(), &txschedulertypes.UpdateJobRequest{
 			Status:      utils.StatusFailed,
 			Message:     err.Error(),
 			Transaction: nil,
 		}).Return(&txschedulertypes.JobResponse{}, nil)
-	
+
 		cerr := make(chan error)
 		go func() {
 			cerr <- s.listener.ConsumeClaim(mockSession, mockClaim)
 		}()
-	
+
 		mockClaim.ExpectMessage(msg)
-	
+
 		assert.NoError(t, s.listener.Break(mockSession))
 		assert.NoError(t, <-cerr)
 		assert.NotNil(t, s.producer.LastMessage())
 		assert.Equal(t, s.recoverTopic, s.producer.LastMessage().Topic)
 	})
-	
+
 	s.T().Run("should update transaction and send message to tx-crafter if sending fails by nonce error", func(t *testing.T) {
 		var claims map[string][]int32
 		ctx := context.Background()
 		s.producer.Clean()
-	
+
 		mockSession := mock.NewConsumerGroupSession(ctx, "kafka-consumer-group", claims)
 		mockClaim := mock.NewConsumerGroupClaim("topic", 0, 0)
 		evlp := fakeEnvelope()
 		msg := &sarama.ConsumerMessage{}
 		msg.Value, _ = proto.Marshal(evlp.TxEnvelopeAsRequest())
-	
+
 		err := errors.InvalidNonceWarning("nonce too low")
 		s.sendETHUC.EXPECT().Execute(gomock.Any(), gomock.Any()).Return(err)
-		s.txSchedulerClient.EXPECT().UpdateJob(gomock.Any(), evlp.GetJobUUID(), &txschedulertypes.UpdateJobRequest{
+		s.client.EXPECT().UpdateJob(gomock.Any(), evlp.GetJobUUID(), &txschedulertypes.UpdateJobRequest{
 			Status:      utils.StatusRecovering,
 			Message:     err.Error(),
 			Transaction: nil,
 		}).Return(&txschedulertypes.JobResponse{}, nil)
-	
+
 		cerr := make(chan error)
 		go func() {
 			cerr <- s.listener.ConsumeClaim(mockSession, mockClaim)
 		}()
-	
+
 		mockClaim.ExpectMessage(msg)
-	
+
 		assert.NoError(t, s.listener.Break(mockSession))
 		assert.NoError(t, <-cerr)
 		assert.NotNil(t, s.producer.LastMessage())

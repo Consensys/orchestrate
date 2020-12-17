@@ -26,36 +26,36 @@ Feature: Send contract transactions
     Given I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/transfer" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-      "from": "{{global.nodes.besu_1.fundedPublicKeys[0]}}",
-      "to": "{{account1}}",
-      "value": "100000000000000000"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "faucet-{{account1}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "from": "{{global.nodes.besu_1.fundedPublicKeys[0]}}",
+          "to": "{{account1}}",
+          "value": "100000000000000000"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "faucet-{{account1}}"
+        }
+      }
       """
     Then the response code should be 202
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/transfer" with json:
-  """
-{
-    "chain": "geth-{{scenarioID}}",
-    "params": {
-      "from": "{{global.nodes.geth.fundedPublicKeys[0]}}",
-      "to": "{{account2}}",
-      "value": "100000000000000000"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "faucet-{{account2}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
+      """
+      {
+        "chain": "geth-{{scenarioID}}",
+        "params": {
+          "from": "{{global.nodes.geth.fundedPublicKeys[0]}}",
+          "to": "{{account2}}",
+          "value": "100000000000000000"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "faucet-{{account2}}"
+        }
+      }
       """
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
@@ -71,34 +71,34 @@ Feature: Send contract transactions
       | ID                   |
       | {{besuContractTxID}} |
       | {{gethContractTxID}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-        "contractName": "SimpleToken",
-        "from": "{{account1}}"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{besuContractTxID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "contractName": "SimpleToken",
+          "from": "{{account1}}"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{besuContractTxID}}"
+        }
+      }
       """
     Then the response code should be 202
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "geth-{{scenarioID}}",
-    "params": {
-        "contractName": "SimpleToken",
-        "from": "{{account2}}"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{gethContractTxID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
+      """
+      {
+        "chain": "geth-{{scenarioID}}",
+        "params": {
+          "contractName": "SimpleToken",
+          "from": "{{account2}}"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{gethContractTxID}}"
+        }
+      }
       """
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
@@ -128,108 +128,126 @@ Feature: Send contract transactions
     Given I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/send" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-        "from": "{{account1}}",
-        "to": "{{besuContractAddr}}",
-        "methodSignature": "transfer(address,uint256)",
-        "args": ["0xdbb881a51CD4023E4400CEF3ef73046743f08da3","1"]
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{besuSendTxOneID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/send" with json:
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "from": "{{account1}}",
+          "to": "{{besuContractAddr}}",
+          "methodSignature": "transfer(address,uint256)",
+          "args": [
+            "0xdbb881a51CD4023E4400CEF3ef73046743f08da3",
+            "1"
+          ]
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{besuSendTxOneID}}"
+        }
+      }
       """
     Then the response code should be 202
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/send" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-        "from": "{{account1}}",
-        "to": "{{besuContractAddr}}",
-        "methodSignature": "transfer(address,uint256)",
-        "args": ["0x6009608A02a7A15fd6689D6DaD560C44E9ab61Ff","0x2"]
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{besuSendTxTwoID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/send" with json:
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "from": "{{account1}}",
+          "to": "{{besuContractAddr}}",
+          "methodSignature": "transfer(address,uint256)",
+          "args": [
+            "0x6009608A02a7A15fd6689D6DaD560C44E9ab61Ff",
+            "0x2"
+          ]
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{besuSendTxTwoID}}"
+        }
+      }
       """
     Then the response code should be 202
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/send" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-        "from": "{{account1}}",
-        "to": "{{besuContractAddr}}",
-        "methodSignature": "transfer(address,uint256)",
-        "gas": "100000",
-        "args": ["0x6009608A02a7A15fd6689D6DaD560C44E9ab61Ff","0x8"]
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{besuSendTxThreeID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/send" with json:
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "from": "{{account1}}",
+          "to": "{{besuContractAddr}}",
+          "methodSignature": "transfer(address,uint256)",
+          "gas": "100000",
+          "args": [
+            "0x6009608A02a7A15fd6689D6DaD560C44E9ab61Ff",
+            "0x8"
+          ]
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{besuSendTxThreeID}}"
+        }
+      }
       """
     Then the response code should be 202
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/send" with json:
-  """
-{
-    "chain": "geth-{{scenarioID}}",
-    "params": {
-        "from": "{{account2}}",
-        "to": "{{gethContractAddr}}",
-        "methodSignature": "transfer(address,uint256)",
-        "args": ["0xdbb881a51CD4023E4400CEF3ef73046743f08da3","0x1"]
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{gethSendTxOneID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/send" with json:
+      """
+      {
+        "chain": "geth-{{scenarioID}}",
+        "params": {
+          "from": "{{account2}}",
+          "to": "{{gethContractAddr}}",
+          "methodSignature": "transfer(address,uint256)",
+          "args": [
+            "0xdbb881a51CD4023E4400CEF3ef73046743f08da3",
+            "0x1"
+          ]
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{gethSendTxOneID}}"
+        }
+      }
       """
     Then the response code should be 202
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/send" with json:
-  """
-{
-    "chain": "geth-{{scenarioID}}",
-    "params": {
-        "from": "{{account2}}",
-        "to": "{{gethContractAddr}}",
-        "methodSignature": "transfer(address,uint256)",
-        "args": ["0x6009608A02a7A15fd6689D6DaD560C44E9ab61Ff","0x2"]
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{gethSendTxTwoID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/send" with json:
+      """
+      {
+        "chain": "geth-{{scenarioID}}",
+        "params": {
+          "from": "{{account2}}",
+          "to": "{{gethContractAddr}}",
+          "methodSignature": "transfer(address,uint256)",
+          "args": [
+            "0x6009608A02a7A15fd6689D6DaD560C44E9ab61Ff",
+            "0x2"
+          ]
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{gethSendTxTwoID}}"
+        }
+      }
       """
     Then the response code should be 202
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/send" with json:
-  """
-{
-    "chain": "geth-{{scenarioID}}",
-    "params": {
-        "from": "{{account2}}",
-        "to": "{{gethContractAddr}}",
-        "methodSignature": "transfer(address,uint256)",
-        "gas": "100000",
-        "args": ["0x6009608A02a7A15fd6689D6DaD560C44E9ab61Ff","2"]
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{gethSendTxThreeID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/send" with json:
+      """
+      {
+        "chain": "geth-{{scenarioID}}",
+        "params": {
+          "from": "{{account2}}",
+          "to": "{{gethContractAddr}}",
+          "methodSignature": "transfer(address,uint256)",
+          "gas": "100000",
+          "args": [
+            "0x6009608A02a7A15fd6689D6DaD560C44E9ab61Ff",
+            "2"
+          ]
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{gethSendTxThreeID}}"
+        }
+      }
       """
     Then the response code should be 202
     Then Envelopes should be in topic "tx.crafter"
@@ -263,19 +281,19 @@ Feature: Send contract transactions
     Given I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-        "oneTimeKey": true,
-        "contractName": "Counter"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{counterDeployTxID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "oneTimeKey": true,
+          "contractName": "Counter"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{counterDeployTxID}}"
+        }
+      }
       """
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
@@ -288,31 +306,33 @@ Feature: Send contract transactions
     Then I track the following envelopes
       | ID              |
       | {{sendOTKTxID}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/send" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-        "oneTimeKey": true,
-        "to": "{{counterContractAddr}}",
-        "methodSignature": "increment(uint256)",
-        "args": [1]
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{sendOTKTxID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/send" with json:
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "oneTimeKey": true,
+          "to": "{{counterContractAddr}}",
+          "methodSignature": "increment(uint256)",
+          "args": [
+            1
+          ]
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{sendOTKTxID}}"
+        }
+      }
       """
     Then the response code should be 202
     Then I register the following response fields
-      | alias      | path                  |
+      | alias      | path         |
       | jobOTKUUID | jobs[0].uuid |
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
       | Receipt.Status | Receipt.Logs[0].Event        | Receipt.Logs[0].DecodedData.from |
       | 1              | Incremented(address,uint256) | ~                                |
-    When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobOTKUUID}}"
+    When I send "GET" request to "{{global.api}}/jobs/{{jobOTKUUID}}"
     Then the response code should be 200
     And Response should have the following fields
       | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status |
@@ -329,19 +349,19 @@ Feature: Send contract transactions
     Given I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-        "from": "{{account1}}",
-        "contractName": "Counter"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{counterDeployTxID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "from": "{{account1}}",
+          "contractName": "Counter"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{counterDeployTxID}}"
+        }
+      }
       """
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
@@ -354,21 +374,23 @@ Feature: Send contract transactions
     Then I track the following envelopes
       | ID           |
       | {{sendTxID}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/send" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-        "from": "{{account1}}",
-        "to": "{{counterContractAddr}}",
-        "methodSignature": "increment(uint256)",
-        "args": ["string"]
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{sendTxID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/send" with json:
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "from": "{{account1}}",
+          "to": "{{counterContractAddr}}",
+          "methodSignature": "increment(uint256)",
+          "args": [
+            "string"
+          ]
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{sendTxID}}"
+        }
+      }
       """
     Then the response code should be 422
     And Response should have the following fields
@@ -385,19 +407,19 @@ Feature: Send contract transactions
     Given I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-        "from": "{{account1}}",
-        "contractName": "Counter"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{counterDeployTxID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "from": "{{account1}}",
+          "contractName": "Counter"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{counterDeployTxID}}"
+        }
+      }
       """
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
@@ -410,29 +432,33 @@ Feature: Send contract transactions
     Then I track the following envelopes
       | ID           |
       | {{sendTxID}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/send" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-        "from": "{{account1}}",
-        "to": "{{counterContractAddr}}",
-        "methodSignature": "increment(uint256,uint256,uint256)",
-        "args": [1,2,"3"]
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{sendTxID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/send" with json:
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "from": "{{account1}}",
+          "to": "{{counterContractAddr}}",
+          "methodSignature": "increment(uint256,uint256,uint256)",
+          "args": [
+            1,
+            2,
+            "3"
+          ]
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{sendTxID}}"
+        }
+      }
       """
     Then the response code should be 202
     Then I register the following response fields
-      | alias         | path                  |
+      | alias         | path         |
       | jobFailedUUID | jobs[0].uuid |
     Then Envelopes should be in topic "tx.crafter"
     Then Envelopes should be in topic "tx.recover"
-    When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobFailedUUID}}"
+    When I send "GET" request to "{{global.api}}/jobs/{{jobFailedUUID}}"
     Then the response code should be 200
     And Response should have the following fields
       | status | logs[0].status | logs[1].status | logs[2].status |

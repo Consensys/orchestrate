@@ -306,7 +306,7 @@ func (sc *ScenarioContext) iHaveCreatedTheFollowingAccounts(table *gherkin.Pickl
 			req.Chain = accChainCol.Rows[idx+1].Cells[0].Value
 		}
 
-		accRes, err := sc.IdentityManager.CreateAccount(ctx, req)
+		accRes, err := sc.client.CreateAccount(ctx, req)
 
 		if err != nil {
 			return err

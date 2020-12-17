@@ -1,10 +1,10 @@
 GOFILES := $(shell find . -name '*.go' -not -path "./vendor/*" | grep -v pkg/http/handler/dashboard/genstatic/gen.go | grep -v pkg/http/handler/swagger/genstatic/gen.go | egrep -v "^\./\.go" | grep -v _test.go)
 PACKAGES ?= $(shell go list ./... | grep -Fv -e e2e -e examples -e genstatic -e mock )
 INTEGRATION_TEST_PACKAGES ?= $(shell go list ./... | grep integration-tests )
-ORCH_SERVICES = tx-crafter tx-signer tx-listener contract-registry chain-registry transaction-scheduler identity-manager key-manager
-ORCH_MIGRATE = contract-registry chain-registry transaction-scheduler identity-manager key-manager
+ORCH_SERVICES = tx-crafter tx-signer tx-listener contract-registry chain-registry api key-manager
+ORCH_MIGRATE = contract-registry chain-registry api key-manager
 DEPS_VAULT = vault-init vault vault-import-secrets
-DEPS_POSTGRES_REDIS = postgres-chain-registry postgres-contract-registry postgres-transaction-scheduler postgres-identity-manager redis
+DEPS_POSTGRES_REDIS = postgres-chain-registry postgres-contract-registry postgres-api redis
 DEPS_KAFKA = zookeeper kafka
 
 UNAME_S := $(shell uname -s)

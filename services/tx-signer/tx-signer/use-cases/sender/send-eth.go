@@ -4,36 +4,41 @@ import (
 	"context"
 	"fmt"
 
+	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/txscheduler"
+
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient"
+	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-signer/tx-signer/nonce"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-signer/tx-signer/use-cases"
-	utils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-signer/tx-signer/utils"
 )
 
 const sendETHTxComponent = "use-cases.send-eth-tx"
 
 type sendETHTxUseCase struct {
-	signTx            usecases.SignETHTransactionUseCase
-	nonceChecker      nonce.Checker
-	ec                ethclient.TransactionSender
-	chainRegistryURL  string
-	txSchedulerClient client.TransactionSchedulerClient
+	signTx           usecases.SignETHTransactionUseCase
+	nonceChecker     nonce.Checker
+	ec               ethclient.TransactionSender
+	chainRegistryURL string
+	client           orchestrateclient.OrchestrateClient
 }
 
-func NewSendEthTxUseCase(signTx usecases.SignETHTransactionUseCase, ec ethclient.TransactionSender,
-	txSchedulerClient client.TransactionSchedulerClient, chainRegistryURL string, nonceChecker nonce.Checker,
+func NewSendEthTxUseCase(
+	signTx usecases.SignETHTransactionUseCase,
+	ec ethclient.TransactionSender,
+	client orchestrateclient.OrchestrateClient,
+	chainRegistryURL string,
+	nonceChecker nonce.Checker,
 ) usecases.SendETHTxUseCase {
 	return &sendETHTxUseCase{
-		txSchedulerClient: txSchedulerClient,
-		ec:                ec,
-		chainRegistryURL:  chainRegistryURL,
-		signTx:            signTx,
-		nonceChecker:      nonceChecker,
+		client:           client,
+		ec:               ec,
+		chainRegistryURL: chainRegistryURL,
+		signTx:           signTx,
+		nonceChecker:     nonceChecker,
 	}
 }
 
@@ -52,12 +57,16 @@ func (uc *sendETHTxUseCase) Execute(ctx context.Context, job *entities.Job) erro
 		return errors.FromError(err).ExtendComponent(sendETHTxComponent)
 	}
 
+	txUpdateReq := &txschedulertypes.UpdateJobRequest{
+		Transaction: job.Transaction,
+	}
 	if job.InternalData.ParentJobUUID == job.UUID {
-		err = utils2.UpdateJobStatus(ctx, uc.txSchedulerClient, job.UUID, utils.StatusResending, "", job.Transaction)
+		txUpdateReq.Status = utils.StatusResending
 	} else {
-		err = utils2.UpdateJobStatus(ctx, uc.txSchedulerClient, job.UUID, utils.StatusPending, "", job.Transaction)
+		txUpdateReq.Status = utils.StatusPending
 	}
 
+	_, err = uc.client.UpdateJob(ctx, job.UUID, txUpdateReq)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(sendETHTxComponent)
 	}
@@ -75,9 +84,12 @@ func (uc *sendETHTxUseCase) Execute(ctx context.Context, job *entities.Job) erro
 	}
 
 	if txHash != job.Transaction.Hash {
-		warnMessage := fmt.Sprintf("expected transaction hash %s, but got %s. Overriding", job.Transaction.Hash, txHash)
 		job.Transaction.Hash = txHash
-		err = utils2.UpdateJobStatus(ctx, uc.txSchedulerClient, job.UUID, utils.StatusWarning, warnMessage, job.Transaction)
+		_, err = uc.client.UpdateJob(ctx, job.UUID, &txschedulertypes.UpdateJobRequest{
+			Message:     fmt.Sprintf("expected transaction hash %s, but got %s. Overriding", job.Transaction.Hash, txHash),
+			Transaction: job.Transaction,
+			Status:      utils.StatusWarning,
+		})
 		if err != nil {
 			return errors.FromError(err).ExtendComponent(sendETHTxComponent)
 		}

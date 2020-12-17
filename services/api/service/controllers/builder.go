@@ -1,0 +1,72 @@
+package controllers
+
+import (
+	"context"
+	"fmt"
+	"net/http"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client"
+
+	"github.com/gorilla/mux"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/dynamic"
+	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
+)
+
+//go:generate swag init --dir . --generalInfo builder.go --output ../../../../public/swagger-specs/services/api
+//go:generate rm ../../../../public/swagger-specs/services/api/docs.go ../../../../public/swagger-specs/services/api/swagger.yaml
+
+// @title Orchestrate API
+// @version 2.0
+// @description PegaSys Orchestrate API. Enables dynamic management of transactions, identities, chains, faucets and contracts.
+// @description Transaction requests are an abstraction over schedules and jobs representing one or more transactions executed on the Blockchain network
+// @description Schedules are ordered lists of jobs executed in a predefined sequence
+// @description Jobs represent single transaction flows executed on the Blockchain network
+// @description Chains represent list of endpoints pointing to a Blockchain network
+// @description Faucets represent funded accounts (holding ETH) linked to specific chains, allowed to fund newly created accounts automatically for them to be able to send transactions.
+// @description Accounts represent Ethereum accounts (private keys). By usage of the generated cryptographic key pair, accounts can be used to sign/verify and to encrypt/decrypt messages.
+
+// @contact.name Contact PegaSys Orchestrate
+// @contact.url https://pegasys.tech/contact/
+// @contact.email support@pegasys.tech
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name X-API-Key
+
+// @securityDefinitions.apikey JWTAuth
+// @in header
+// @name Authorization
+
+type Builder struct {
+	txCtrl        *TransactionsController
+	schedulesCtrl *SchedulesController
+	jobsCtrl      *JobsController
+	accountsCtrl  *AccountsController
+}
+
+func NewBuilder(ucs usecases.UseCases, keyManagerClient client.KeyManagerClient) *Builder {
+	return &Builder{
+		txCtrl:        NewTransactionsController(ucs),
+		schedulesCtrl: NewSchedulesController(ucs),
+		jobsCtrl:      NewJobsController(ucs),
+		accountsCtrl:  NewAccountsController(ucs, keyManagerClient),
+	}
+}
+
+func (b *Builder) Build(ctx context.Context, _ string, configuration interface{}, respModifier func(response *http.Response) error) (http.Handler, error) {
+	cfg, ok := configuration.(*dynamic.API)
+	if !ok {
+		return nil, fmt.Errorf("invalid configuration type (expected %T but got %T)", cfg, configuration)
+	}
+
+	router := mux.NewRouter()
+	b.txCtrl.Append(router)
+	b.schedulesCtrl.Append(router)
+	b.jobsCtrl.Append(router)
+	b.accountsCtrl.Append(router)
+
+	return router, nil
+}

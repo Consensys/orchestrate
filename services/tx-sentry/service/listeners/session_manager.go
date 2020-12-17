@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/txscheduler"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
-	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/client"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sentry/tx-sentry/use-cases"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
@@ -30,7 +30,7 @@ type sessionManager struct {
 	mutex                  *sync.RWMutex
 	sessions               map[string]bool
 	retrySessionJobUseCase usecases.RetrySessionJobUseCase
-	txSchedulerClient      txscheduler.TransactionSchedulerClient
+	client                 orchestrateclient.OrchestrateClient
 }
 
 type sessionData struct {
@@ -41,12 +41,12 @@ type sessionData struct {
 }
 
 // NewSessionManager creates a new SessionManager
-func NewSessionManager(txSchedulerClient txscheduler.TransactionSchedulerClient, retrySessionJobUseCase usecases.RetrySessionJobUseCase) SessionManager {
+func NewSessionManager(client orchestrateclient.OrchestrateClient, retrySessionJobUseCase usecases.RetrySessionJobUseCase) SessionManager {
 	return &sessionManager{
 		mutex:                  &sync.RWMutex{},
 		sessions:               make(map[string]bool),
 		retrySessionJobUseCase: retrySessionJobUseCase,
-		txSchedulerClient:      txSchedulerClient,
+		client:                 client,
 	}
 }
 
@@ -102,7 +102,7 @@ func (manager *sessionManager) Start(ctx context.Context, job *entities.Job) {
 
 		annotations := txschedulertypes.FormatInternalDataToAnnotations(job.InternalData)
 		annotations.HasBeenRetried = true
-		_, err = manager.txSchedulerClient.UpdateJob(ctx, job.UUID, &txschedulertypes.UpdateJobRequest{
+		_, err = manager.client.UpdateJob(ctx, job.UUID, &txschedulertypes.UpdateJobRequest{
 			Annotations: &annotations,
 		})
 
@@ -169,7 +169,7 @@ func (manager *sessionManager) removeSession(jobUUID string) {
 }
 
 func (manager *sessionManager) retrieveJobSessionData(ctx context.Context, job *entities.Job) (*sessionData, error) {
-	jobs, err := manager.txSchedulerClient.SearchJob(ctx, &entities.JobFilters{
+	jobs, err := manager.client.SearchJob(ctx, &entities.JobFilters{
 		ChainUUID:     job.ChainUUID,
 		ParentJobUUID: job.UUID,
 	})

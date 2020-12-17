@@ -31,20 +31,20 @@ Feature: Deploy ERC20 contract using tx-sentry
     Then I track the following envelopes
       | ID                      |
       | {{preBesuContractTxID}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-        "contractName": "SimpleToken",
-        "from": "{{account1}}"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{preBesuContractTxID}}"
-    }
-}
-  """
+    When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "contractName": "SimpleToken",
+          "from": "{{account1}}"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{preBesuContractTxID}}"
+        }
+      }
+      """
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
     Then Set nonce manager records
@@ -56,31 +56,31 @@ Feature: Deploy ERC20 contract using tx-sentry
     Then I track the following envelopes
       | ID                   |
       | {{besuContractTxID}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-        "contractName": "SimpleToken",
-        "from": "{{account1}}",
-        "gasPricePolicy": {
-          "retryPolicy": {
-            "interval": "1s"
+    When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "contractName": "SimpleToken",
+          "from": "{{account1}}",
+          "gasPricePolicy": {
+            "retryPolicy": {
+              "interval": "1s"
+            }
           }
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{besuContractTxID}}"
         }
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{besuContractTxID}}"
-    }
-}
-  """
+      }
+      """
     Then the response code should be 202
     Then I register the following response fields
       | alias      | path         |
       | jobOneUUID | jobs[0].uuid |
     Then I sleep "5s"
-    When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobOneUUID}}"
+    When I send "GET" request to "{{global.api}}/jobs/{{jobOneUUID}}"
     Then the response code should be 200
     And Response should have the following fields
       | status  | logs[0].status | logs[1].status | logs[2].status | logs[3].status | logs[4].status |
@@ -95,23 +95,23 @@ Feature: Deploy ERC20 contract using tx-sentry
       | ID                       |
       | {{postBesuContractTxID}} |
       | {{besuContractTxID}}     |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-        "contractName": "SimpleToken",
-        "from": "{{account1}}"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{postBesuContractTxID}}"
-    }
-}
-  """
+    When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "contractName": "SimpleToken",
+          "from": "{{account1}}"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{postBesuContractTxID}}"
+        }
+      }
+      """
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
-    When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobOneUUID}}"
+    When I send "GET" request to "{{global.api}}/jobs/{{jobOneUUID}}"
     Then the response code should be 200
     And Response should have the following fields
       | status |
@@ -125,20 +125,20 @@ Feature: Deploy ERC20 contract using tx-sentry
     Then I track the following envelopes
       | ID                  |
       | faucet-{{account2}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/transfer" with json:
-  """
-{
-    "chain": "geth-{{scenarioID}}",
-    "params": {
-      "from": "{{global.nodes.geth.fundedPublicKeys[0]}}",
-      "to": "{{account2}}",
-      "value": "100000000000000000"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "faucet-{{account2}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
+      """
+      {
+        "chain": "geth-{{scenarioID}}",
+        "params": {
+          "from": "{{global.nodes.geth.fundedPublicKeys[0]}}",
+          "to": "{{account2}}",
+          "value": "100000000000000000"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "faucet-{{account2}}"
+        }
+      }
       """
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
@@ -153,20 +153,20 @@ Feature: Deploy ERC20 contract using tx-sentry
     Then I track the following envelopes
       | ID                      |
       | {{preGethContractTxID}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "geth-{{scenarioID}}",
-    "params": {
-        "contractName": "SimpleToken",
-        "from": "{{account2}}"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{preGethContractTxID}}"
-    }
-}
-  """
+    When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
+      """
+      {
+        "chain": "geth-{{scenarioID}}",
+        "params": {
+          "contractName": "SimpleToken",
+          "from": "{{account2}}"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{preGethContractTxID}}"
+        }
+      }
+      """
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
     Then Set nonce manager records
@@ -175,34 +175,34 @@ Feature: Deploy ERC20 contract using tx-sentry
     Then I track the following envelopes
       | ID                   |
       | {{gethContractTxID}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "geth-{{scenarioID}}",
-    "params": {
-        "contractName": "SimpleToken",
-        "from": "{{account2}}",
-        "gasPricePolicy": {
-          "retryPolicy": {
-            "interval": "1s",
-            "increment": 0.15,
-            "limit": 0.45
+    When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
+      """
+      {
+        "chain": "geth-{{scenarioID}}",
+        "params": {
+          "contractName": "SimpleToken",
+          "from": "{{account2}}",
+          "gasPricePolicy": {
+            "retryPolicy": {
+              "interval": "1s",
+              "increment": 0.15,
+              "limit": 0.45
+            }
           }
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{gethContractTxID}}"
         }
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{gethContractTxID}}"
-    }
-}
-  """
+      }
+      """
     Then the response code should be 202
     Then I register the following response fields
       | alias        | path         |
       | jobOneUUID   | jobs[0].uuid |
       | scheduleUUID | uuid         |
     Then I sleep "5s"
-    When I send "GET" request to "{{global.tx-scheduler}}/schedules/{{scheduleUUID}}"
+    When I send "GET" request to "{{global.api}}/schedules/{{scheduleUUID}}"
     Then the response code should be 200
     And Response should have the following fields
       | jobs[0].status | jobs[1].status | jobs[2].status | jobs[3].status |
@@ -214,23 +214,23 @@ Feature: Deploy ERC20 contract using tx-sentry
       | ID                       |
       | {{postGethContractTxID}} |
       | {{gethContractTxID}}     |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "geth-{{scenarioID}}",
-    "params": {
-        "contractName": "SimpleToken",
-        "from": "{{account2}}"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{postGethContractTxID}}"
-    }
-}
-  """
+    When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
+      """
+      {
+        "chain": "geth-{{scenarioID}}",
+        "params": {
+          "contractName": "SimpleToken",
+          "from": "{{account2}}"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{postGethContractTxID}}"
+        }
+      }
+      """
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
-    When I send "GET" request to "{{global.tx-scheduler}}/schedules/{{scheduleUUID}}"
+    When I send "GET" request to "{{global.api}}/schedules/{{scheduleUUID}}"
     Then the response code should be 200
     And Response should have the following fields
       | jobs[0].status | jobs[1].status | jobs[2].status | jobs[3].status |
@@ -248,20 +248,20 @@ Feature: Deploy ERC20 contract using tx-sentry
     Then I track the following envelopes
       | ID                      |
       | {{preBesuContractTxID}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-        "contractName": "SimpleToken",
-        "from": "{{account1}}"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{preBesuContractTxID}}"
-    }
-}
-  """
+    When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "contractName": "SimpleToken",
+          "from": "{{account1}}"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{preBesuContractTxID}}"
+        }
+      }
+      """
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
     Then Set nonce manager records
@@ -270,31 +270,31 @@ Feature: Deploy ERC20 contract using tx-sentry
     Then I track the following envelopes
       | ID                   |
       | {{besuContractTxID}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-        "contractName": "SimpleToken",
-        "from": "{{account1}}",
-        "gasPricePolicy": {
-          "retryPolicy": {
-            "interval": "1s"
+    When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "contractName": "SimpleToken",
+          "from": "{{account1}}",
+          "gasPricePolicy": {
+            "retryPolicy": {
+              "interval": "1s"
+            }
           }
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{besuContractTxID}}"
         }
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{besuContractTxID}}"
-    }
-}
-  """
+      }
+      """
     Then the response code should be 202
     Then I register the following response fields
       | alias      | path         |
       | jobOneUUID | jobs[0].uuid |
     Then I sleep "15s"
-    When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobOneUUID}}"
+    When I send "GET" request to "{{global.api}}/jobs/{{jobOneUUID}}"
     Then the response code should be 200
     And Response should have the following fields
       | status  | logs.length | annotations.hasBeenRetried |

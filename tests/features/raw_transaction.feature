@@ -27,18 +27,18 @@ Feature: Send raw transfer transaction
       | Key               | Value                    |
       | Authorization     | Bearer {{tenant1.token}} |
       | X-Idempotency-Key | {{idempotencykey}}       |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/send-raw" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-      "raw": "{{rawTx.Raw}}"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{rawTx.ID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/send-raw" with json:
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "raw": "{{rawTx.Raw}}"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{rawTx.ID}}"
+        }
+      }
       """
     Then the response code should be 202
     Then I register the following response fields
@@ -48,7 +48,7 @@ Feature: Send raw transfer transaction
     And Envelopes should have the following fields
       | Receipt.Status |
       | 1              |
-    When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobUUID}}"
+    When I send "GET" request to "{{global.api}}/jobs/{{jobUUID}}"
     Then the response code should be 200
     And Response should have the following fields
       | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status |
@@ -67,41 +67,41 @@ Feature: Send raw transfer transaction
     Given I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/send-raw" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-      "raw": "{{rawTx.Raw}}"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{rawTx.ID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/send-raw" with json:
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "raw": "{{rawTx.Raw}}"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{rawTx.ID}}"
+        }
+      }
       """
     Then the response code should be 202
     Then I register the following response fields
       | alias   | path         |
       | jobUUID | jobs[0].uuid |
     Then Envelopes should be in topic "tx.decoded"
-    When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobUUID}}"
+    When I send "GET" request to "{{global.api}}/jobs/{{jobUUID}}"
     Then the response code should be 200
     And Response should have the following fields
       | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status |
       | MINED  | CREATED        | STARTED        | PENDING        | MINED          |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/send-raw" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-      "raw": "{{rawTx.Raw}}"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{rawTx.ID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/send-raw" with json:
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "raw": "{{rawTx.Raw}}"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{rawTx.ID}}"
+        }
+      }
       """
     Then the response code should be 202
     Then I register the following response fields
@@ -109,7 +109,7 @@ Feature: Send raw transfer transaction
       | jobUUID | jobs[0].uuid |
     Then Envelopes should be in topic "tx.recover"
     Then I sleep "1s"
-    When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobUUID}}"
+    When I send "GET" request to "{{global.api}}/jobs/{{jobUUID}}"
     Then the response code should be 200
     And Response should have the following fields
       | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status |

@@ -15,13 +15,12 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient"
 	rpcClient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/rpc"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http"
+	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/tx"
 	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/client"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/contract-registry/client"
 	registry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/contract-registry/proto"
-	identitymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/identity-manager/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/nonce"
-	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/e2e/cucumber/alias"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/e2e/utils"
 	utils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/utils"
@@ -55,11 +54,8 @@ type ScenarioContext struct {
 	// RegistryClient
 	ContractRegistry registry.ContractRegistryClient
 
-	// Transaction Schedule
-	TransactionScheduler txscheduler.TransactionSchedulerClient
-
-	// Identity Manager
-	IdentityManager identitymanager.IdentityManagerClient
+	// API
+	client orchestrateclient.OrchestrateClient
 
 	// Producer to producer envelopes in topics
 	producer sarama.SyncProducer
@@ -80,8 +76,7 @@ func NewScenarioContext(
 	httpClient *gohttp.Client,
 	chainReg chainregistry.ChainRegistryClient,
 	contractRegistry registry.ContractRegistryClient,
-	txScheduler txscheduler.TransactionSchedulerClient,
-	identityManager identitymanager.IdentityManagerClient,
+	client orchestrateclient.OrchestrateClient,
 	producer sarama.SyncProducer,
 	aliasesReg *alias.Registry,
 	jwtGenerator *generator.JWTGenerator,
@@ -89,18 +84,17 @@ func NewScenarioContext(
 	nonceManager nonce.Manager,
 ) *ScenarioContext {
 	sc := &ScenarioContext{
-		chanReg:              chanReg,
-		httpClient:           httpClient,
-		aliases:              aliasesReg,
-		ChainRegistry:        chainReg,
-		ContractRegistry:     contractRegistry,
-		TransactionScheduler: txScheduler,
-		IdentityManager:      identityManager,
-		producer:             producer,
-		logger:               log.NewEntry(log.StandardLogger()),
-		jwtGenerator:         jwtGenerator,
-		ec:                   ec,
-		nonceManager:         nonceManager,
+		chanReg:          chanReg,
+		httpClient:       httpClient,
+		aliases:          aliasesReg,
+		ChainRegistry:    chainReg,
+		ContractRegistry: contractRegistry,
+		client:           client,
+		producer:         producer,
+		logger:           log.NewEntry(log.StandardLogger()),
+		jwtGenerator:     jwtGenerator,
+		ec:               ec,
+		nonceManager:     nonceManager,
 	}
 
 	return sc
@@ -207,8 +201,7 @@ func InitializeScenario(s *godog.ScenarioContext) {
 		http.NewClient(http.NewDefaultConfig()),
 		chainregistry.GlobalClient(),
 		contractregistry.GlobalClient(),
-		txscheduler.GlobalClient(),
-		identitymanager.GlobalClient(),
+		orchestrateclient.GlobalClient(),
 		broker.GlobalSyncProducer(),
 		alias.GlobalAliasRegistry(),
 		generator.GlobalJWTGenerator(),

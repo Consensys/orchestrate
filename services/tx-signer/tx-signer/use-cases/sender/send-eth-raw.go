@@ -4,33 +4,34 @@ import (
 	"context"
 	"fmt"
 
+	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/txscheduler"
+
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient"
+	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/client"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-signer/tx-signer/use-cases"
-	utils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-signer/tx-signer/utils"
 )
 
 const sendETHRawTxComponent = "use-cases.send-eth-raw-tx"
 
 type sendETHRawTxUseCase struct {
-	ec                ethclient.TransactionSender
-	chainRegistryURL  string
-	txSchedulerClient client.TransactionSchedulerClient
+	ec               ethclient.TransactionSender
+	chainRegistryURL string
+	client           orchestrateclient.OrchestrateClient
 }
 
-func NewSendETHRawTxUseCase(ec ethclient.TransactionSender, txSchedulerClient client.TransactionSchedulerClient,
+func NewSendETHRawTxUseCase(ec ethclient.TransactionSender, client orchestrateclient.OrchestrateClient,
 	chainRegistryURL string) usecases.SendETHRawTxUseCase {
 	return &sendETHRawTxUseCase{
-		txSchedulerClient: txSchedulerClient,
-		chainRegistryURL:  chainRegistryURL,
-		ec:                ec,
+		client:           client,
+		chainRegistryURL: chainRegistryURL,
+		ec:               ec,
 	}
 }
 
@@ -46,12 +47,16 @@ func (uc *sendETHRawTxUseCase) Execute(ctx context.Context, job *entities.Job) e
 		return errors.FromError(err).ExtendComponent(sendETHRawTxComponent)
 	}
 
+	txUpdateReq := &txschedulertypes.UpdateJobRequest{
+		Transaction: job.Transaction,
+	}
 	if job.InternalData.ParentJobUUID == job.UUID {
-		err = utils2.UpdateJobStatus(ctx, uc.txSchedulerClient, job.UUID, utils.StatusResending, "", job.Transaction)
+		txUpdateReq.Status = utils.StatusResending
 	} else {
-		err = utils2.UpdateJobStatus(ctx, uc.txSchedulerClient, job.UUID, utils.StatusPending, "", job.Transaction)
+		txUpdateReq.Status = utils.StatusPending
 	}
 
+	_, err = uc.client.UpdateJob(ctx, job.UUID, txUpdateReq)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(sendETHRawTxComponent)
 	}
@@ -62,9 +67,12 @@ func (uc *sendETHRawTxUseCase) Execute(ctx context.Context, job *entities.Job) e
 	}
 
 	if txHash != job.Transaction.Hash {
-		warnMessage := fmt.Sprintf("expected transaction hash %s, but got %s. Overriding", job.Transaction.Hash, txHash)
 		job.Transaction.Hash = txHash
-		err = utils2.UpdateJobStatus(ctx, uc.txSchedulerClient, job.UUID, utils.StatusWarning, warnMessage, job.Transaction)
+		_, err = uc.client.UpdateJob(ctx, job.UUID, &txschedulertypes.UpdateJobRequest{
+			Message:     fmt.Sprintf("expected transaction hash %s, but got %s. Overriding", job.Transaction.Hash, txHash),
+			Transaction: job.Transaction,
+			Status:      utils.StatusWarning,
+		})
 		if err != nil {
 			return errors.FromError(err).ExtendComponent(sendETHRawTxComponent)
 		}

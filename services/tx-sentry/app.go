@@ -9,9 +9,9 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
+	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sentry/service/listeners"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sentry/service/parsers"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sentry/tx-sentry/use-cases"
@@ -20,18 +20,18 @@ import (
 const txSentryComponent = "tx-sentry"
 
 type TxSentry struct {
-	txSchedulerClient client.TransactionSchedulerClient
-	sessionManager    listeners.SessionManager
-	config            *Config
+	client         orchestrateclient.OrchestrateClient
+	sessionManager listeners.SessionManager
+	config         *Config
 }
 
-func NewTxSentry(txSchedulerClient client.TransactionSchedulerClient, config *Config) *TxSentry {
+func NewTxSentry(client orchestrateclient.OrchestrateClient, config *Config) *TxSentry {
 	// Create business layer
-	createChildJobUC := usecases.NewRetrySessionJobUseCase(txSchedulerClient)
+	createChildJobUC := usecases.NewRetrySessionJobUseCase(client)
 	return &TxSentry{
-		txSchedulerClient: txSchedulerClient,
-		sessionManager:    listeners.NewSessionManager(txSchedulerClient, createChildJobUC),
-		config:            config,
+		client:         client,
+		sessionManager: listeners.NewSessionManager(client, createChildJobUC),
+		config:         config,
 	}
 }
 
@@ -98,7 +98,7 @@ func (sentry *TxSentry) listen(ctx context.Context) error {
 
 func (sentry *TxSentry) createSessions(ctx context.Context, filters *entities.JobFilters) error {
 	// We get all the pending jobs updated_after the last tick
-	jobResponses, err := sentry.txSchedulerClient.SearchJob(ctx, filters)
+	jobResponses, err := sentry.client.SearchJob(ctx, filters)
 	if err != nil {
 		log.WithContext(ctx).WithError(err).Error("failed to fetch pending jobs")
 		return err

@@ -46,25 +46,25 @@ Feature: Verify HTTP Endpoints
 
 
   ###################
-  # TRANSACTION SCHEDULER
+  # API
   ###################
-  Scenario: Get Transaction Scheduler Swagger JSON file
-    When I send "GET" request to "{{global.tx-scheduler}}/swagger/swagger.json"
+  Scenario: Get API Swagger JSON file
+    When I send "GET" request to "{{global.api}}/swagger/swagger.json"
     Then the response code should be 200
 
-  Scenario: Get Transaction Scheduler metrics
-    When I send "GET" request to "{{global.tx-scheduler-metrics}}/metrics"
+  Scenario: Get API metrics
+    When I send "GET" request to "{{global.api-metrics}}/metrics"
     Then the response code should be 200
 
-  Scenario: Get Transaction Scheduler readiness
-    When I send "GET" request to "{{global.tx-scheduler-metrics}}/ready?full=1"
+  Scenario: Get API readiness
+    When I send "GET" request to "{{global.api-metrics}}/ready?full=1"
     Then the response code should be 200
     And Response should have the following fields
-      | chain-registry | contract-registry | database | kafka |
-      | OK             | OK                | OK       | OK    |
+      | database | kafka |
+      | OK       | OK    |
 
-  Scenario: Get Transaction Scheduler liveness
-    When I send "GET" request to "{{global.tx-scheduler-metrics}}/live"
+  Scenario: Get API liveness
+    When I send "GET" request to "{{global.api-metrics}}/live"
     Then the response code should be 200
 
 
@@ -75,8 +75,8 @@ Feature: Verify HTTP Endpoints
     When I send "GET" request to "{{global.tx-crafter-metrics}}/ready?full=1"
     Then the response code should be 200
     And Response should have the following fields
-      | chain-registry | redis | transaction-scheduler | kafka |
-      | OK             | OK    | OK                    | OK    |
+      | chain-registry | redis | api | kafka |
+      | OK             | OK    | OK  | OK    |
 
   Scenario: Get tx-crafter liveness
     When I send "GET" request to "{{global.tx-crafter-metrics}}/live"
@@ -89,27 +89,12 @@ Feature: Verify HTTP Endpoints
     When I send "GET" request to "{{global.tx-signer-metrics}}/ready?full=1"
     Then the response code should be 200
     And Response should have the following fields
-      | kafka | transaction-scheduler
-      | OK    | OK
+      | kafka |
+      | OK    |
 
   Scenario: Get tx-signer liveness
     When I send "GET" request to "{{global.tx-signer-metrics}}/live"
     Then the response code should be 200
-
-
-  ###################
-  # TX-SENDER
-  ###################
-#  Scenario: Get tx-sender readiness
-#    When I send "GET" request to "{{global.tx-sender-metrics}}/ready?full=1"
-#    Then the response code should be 200
-#    And Response should have the following fields
-#      | transaction-scheduler | kafka | redis |
-#      | OK                    | OK    | OK    |
-#
-#  Scenario: Get tx-sender liveness
-#    When I send "GET" request to "{{global.tx-sender-metrics}}/live"
-#    Then the response code should be 200
 
 
   ###################
@@ -119,13 +104,13 @@ Feature: Verify HTTP Endpoints
     When I send "GET" request to "{{global.tx-listener-metrics}}/ready?full=1"
     Then the response code should be 200
     And Response should have the following fields
-      | chain-registry | transaction-scheduler | kafka |
-      | OK             | OK                    | OK    |
+      | chain-registry | api | kafka |
+      | OK             | OK  | OK    |
 
   Scenario: Get tx-listener liveness
     When I send "GET" request to "{{global.tx-listener-metrics}}/live"
     Then the response code should be 200
-    
+
   ###################
   # Key Manager
   ###################
@@ -139,25 +124,3 @@ Feature: Verify HTTP Endpoints
     And Response should have the following fields
       | vault |
       | OK    |
-
-  ###################
-  # Identity Manager
-  ###################
-  Scenario: Get Identity Manager Swagger JSON file
-    When I send "GET" request to "{{global.identity-manager}}/swagger/swagger.json"
-    Then the response code should be 200
-
-  Scenario: Get Identity Manager metrics
-    When I send "GET" request to "{{global.identity-manager-metrics}}/metrics"
-    Then the response code should be 200
-
-  Scenario: Get Identity Manager readiness
-    When I send "GET" request to "{{global.identity-manager-metrics}}/ready?full=1"
-    Then the response code should be 200
-    And Response should have the following fields
-      | chain-registry | database |
-      | OK             | OK       |
-
-  Scenario: Get Identity Manager liveness
-    When I send "GET" request to "{{global.identity-manager-metrics}}/live"
-    Then the response code should be 200

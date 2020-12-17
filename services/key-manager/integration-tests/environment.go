@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"time"
 
+	logpkg "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
+
 	"github.com/hashicorp/vault/api"
 
 	log "github.com/sirupsen/logrus"
@@ -72,11 +74,13 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 	httputils.MetricFlags(flgs)
 	httputils.Flags(flgs)
 	hashicorp.InitFlags(flgs)
+	logpkg.Level(flgs)
 	args := []string{
 		"--metrics-port=" + envMetricsPort,
 		"--rest-port=" + envHTTPPort,
 		"--vault-addr=http://" + host + ":" + envVaultHostPort,
 		"--vault-token-file=" + tokenFileName,
+		"--log-level=panic",
 	}
 
 	err = flgs.Parse(args)

@@ -22,22 +22,22 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethereum/abi"
+	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/common"
 	ierror "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/error"
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/tx"
 	svccontracts "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/contract-registry/proto"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/dynamic"
 )
 
 type Hook struct {
 	conf *Config
 
-	registry          svccontracts.ContractRegistryClient
-	ec                ethclient.ChainStateReader
-	producer          sarama.SyncProducer
-	txSchedulerClient client.TransactionSchedulerClient
+	registry svccontracts.ContractRegistryClient
+	ec       ethclient.ChainStateReader
+	producer sarama.SyncProducer
+	client   orchestrateclient.OrchestrateClient
 }
 
 func NewHook(
@@ -45,14 +45,14 @@ func NewHook(
 	registry svccontracts.ContractRegistryClient,
 	ec ethclient.ChainStateReader,
 	producer sarama.SyncProducer,
-	txSchedulerClient client.TransactionSchedulerClient,
+	client orchestrateclient.OrchestrateClient,
 ) *Hook {
 	return &Hook{
-		conf:              conf,
-		registry:          registry,
-		ec:                ec,
-		producer:          producer,
-		txSchedulerClient: txSchedulerClient,
+		conf:     conf,
+		registry: registry,
+		ec:       ec,
+		producer: producer,
+		client:   client,
 	}
 }
 
@@ -102,7 +102,7 @@ func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *etht
 			continue
 		}
 
-		_, err := hk.txSchedulerClient.UpdateJob(
+		_, err := hk.client.UpdateJob(
 			ctx,
 			txResponse.GetJobUUID(),
 			&txschedulertypes.UpdateJobRequest{

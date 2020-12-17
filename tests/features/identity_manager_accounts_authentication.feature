@@ -27,7 +27,7 @@ Feature: Account management
     Given I set the headers
       | Key           | Value                     |
       | Authorization | Bearer {{wildcard.token}} |
-    When I send "POST" request to "{{global.identity-manager}}/accounts" with json:
+    When I send "POST" request to "{{global.api}}/accounts" with json:
   """
 {
     "alias": "{{generateAccID}}", 
@@ -49,19 +49,19 @@ Feature: Account management
     Given I set the headers
       | Key           | Value                      |
       | Authorization | Bearer {{tenantFoo.token}} |
-    When I send "PATCH" request to "{{global.identity-manager}}/accounts/{{generatedAccAddr}}" with json:
+    When I send "PATCH" request to "{{global.api}}/accounts/{{generatedAccAddr}}" with json:
   """
 {
     "alias": "{{generateAccID2}}"
 }
       """
     Then the response code should be 200
-    Then I send "GET" request to "{{global.identity-manager}}/accounts/{{generatedAccAddr}}"
+    Then I send "GET" request to "{{global.api}}/accounts/{{generatedAccAddr}}"
     Then the response code should be 200
     And Response should have the following fields
       | alias              |
       | {{generateAccID2}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
+    When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
   """
 {
     "chain": "besu-{{scenarioID}}",
@@ -83,7 +83,7 @@ Feature: Account management
     Given I set the headers
       | Key           | Value                      |
       | Authorization | Bearer {{tenantFoo.token}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
+    When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
   """
 {
     "chain": "besu-{{scenarioID}}",
@@ -105,7 +105,7 @@ Feature: Account management
     Given I set the headers
       | Key           | Value                     |
       | Authorization | Bearer {{wildcard.token}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
+    When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
   """
 {
     "chain": "besu-{{scenarioID}}",
@@ -133,7 +133,7 @@ Feature: Account management
     Given I set the headers
       | Key           | Value                      |
       | Authorization | Bearer {{tenantFoo.token}} |
-    When I send "POST" request to "{{global.identity-manager}}/accounts" with json:
+    When I send "POST" request to "{{global.api}}/accounts" with json:
   """
 {
     "alias": "{{generateAccID}}", 
@@ -155,7 +155,7 @@ Feature: Account management
     Given I set the headers
       | Key           | Value                      |
       | Authorization | Bearer {{tenantFoo.token}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
+    When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
   """
 {
     "chain": "besu-{{scenarioID}}",
@@ -177,14 +177,14 @@ Feature: Account management
     Given I set the headers
       | Key           | Value                      |
       | Authorization | Bearer {{tenantBar.token}} |
-    When I send "PATCH" request to "{{global.identity-manager}}/accounts/{{generatedAccAddr}}" with json:
+    When I send "PATCH" request to "{{global.api}}/accounts/{{generatedAccAddr}}" with json:
   """
 {
     "alias": "{{generateAccID2}}"
 }
       """
     Then the response code should be 404
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
+    When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
   """
 {
     "chain": "besu-{{scenarioID}}",
@@ -206,7 +206,7 @@ Feature: Account management
       | Key           | Value                     |
       | Authorization | Bearer {{wildcard.token}} |
       | X-Tenant-ID   | foo                       |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
+    When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
   """
 {
     "chain": "besu-{{scenarioID}}",

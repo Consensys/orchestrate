@@ -22,36 +22,36 @@ Feature: Send transfer transaction
     Given I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/transfer" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-      "from": "{{global.nodes.besu_1.fundedPublicKeys[0]}}",
-      "to": "{{account1}}",
-      "value": "100000000000000000"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "faucet-{{account1}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "from": "{{global.nodes.besu_1.fundedPublicKeys[0]}}",
+          "to": "{{account1}}",
+          "value": "100000000000000000"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "faucet-{{account1}}"
+        }
+      }
       """
     Then the response code should be 202
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/transfer" with json:
-  """
-{
-    "chain": "geth-{{scenarioID}}",
-    "params": {
-      "from": "{{global.nodes.geth.fundedPublicKeys[0]}}",
-      "to": "{{account2}}",
-      "value": "100000000000000000"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "faucet-{{account2}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
+      """
+      {
+        "chain": "geth-{{scenarioID}}",
+        "params": {
+          "from": "{{global.nodes.geth.fundedPublicKeys[0]}}",
+          "to": "{{account2}}",
+          "value": "100000000000000000"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "faucet-{{account2}}"
+        }
+      }
       """
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
@@ -70,45 +70,45 @@ Feature: Send transfer transaction
       | {{transferTxTwoID}} |
     Given I set the headers
       | Key         | Value                |
-      | X-API-KEY   | {{global.api-key}}          |
+      | X-API-KEY   | {{global.api-key}}   |
       | X-TENANT-ID | {{tenant1.tenantID}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/transfer" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-        "from": "{{account1}}",
-        "to": "{{to1}}",
-        "value": "500000000"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{transferTxOneID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "from": "{{account1}}",
+          "to": "{{to1}}",
+          "value": "500000000"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{transferTxOneID}}"
+        }
+      }
       """
     Then the response code should be 202
     Then I register the following response fields
-      | alias      | path                  |
+      | alias      | path         |
       | jobOneUUID | jobs[0].uuid |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/transfer" with json:
-  """
-{
-    "chain": "geth-{{scenarioID}}",
-    "params": {
-        "from": "{{account2}}",
-        "to": "{{to2}}",
-        "value": "400000000"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{transferTxTwoID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
+      """
+      {
+        "chain": "geth-{{scenarioID}}",
+        "params": {
+          "from": "{{account2}}",
+          "to": "{{to2}}",
+          "value": "400000000"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{transferTxTwoID}}"
+        }
+      }
       """
     Then the response code should be 202
     Then I register the following response fields
-      | alias      | path                  |
+      | alias      | path         |
       | jobTwoUUID | jobs[0].uuid |
     Then Envelopes should be in topic "tx.crafter"
     And Envelopes should have the following fields
@@ -121,12 +121,12 @@ Feature: Send transfer transaction
       | Receipt.Status |
       | 1              |
       | 1              |
-    When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobOneUUID}}"
+    When I send "GET" request to "{{global.api}}/jobs/{{jobOneUUID}}"
     Then the response code should be 200
     And Response should have the following fields
       | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status |
       | MINED  | CREATED        | STARTED        | PENDING        | MINED          |
-    When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{jobTwoUUID}}"
+    When I send "GET" request to "{{global.api}}/jobs/{{jobTwoUUID}}"
     Then the response code should be 200
     And Response should have the following fields
       | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status |
@@ -171,18 +171,18 @@ Feature: Send transfer transaction
     Given I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/transfer" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-        "from": "{{account1}}",
-        "to": "{{to1}}"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "from": "{{account1}}",
+          "to": "{{to1}}"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}"
+        }
+      }
       """
     Then the response code should be 400
     And Response should have the following fields
@@ -196,18 +196,18 @@ Feature: Send transfer transaction
     Given I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/transfer" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-        "from": "{{account1}}",
-        "value": "400000000"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "from": "{{account1}}",
+          "value": "400000000"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}"
+        }
+      }
       """
     Then the response code should be 400
     And Response should have the following fields
@@ -226,19 +226,19 @@ Feature: Send transfer transaction
     Given I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/transfer" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-        "from": "{{account3}}",
-        "to": "{{to1}}",
-        "value": "0"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{transferTxOneID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "from": "{{account3}}",
+          "to": "{{to1}}",
+          "value": "0"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{transferTxOneID}}"
+        }
+      }
       """
     Then the response code should be 422

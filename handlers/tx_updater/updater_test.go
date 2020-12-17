@@ -7,16 +7,16 @@ import (
 	"github.com/golang/mock/gomock"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client/mock"
 	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/txscheduler"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/client/mock"
 	"testing"
 )
 
 func TestTransactionUpdater(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	schedulerClient := mock.NewMockTransactionSchedulerClient(mockCtrl)
+	schedulerClient := mock.NewMockOrchestrateClient(mockCtrl)
 
 	t.Run("should do nothing if the tx does not contain errors", func(t *testing.T) {
 		txctx := engine.NewTxContext()
@@ -26,7 +26,7 @@ func TestTransactionUpdater(t *testing.T) {
 		h := TransactionUpdater(schedulerClient)
 		h(txctx)
 	})
-	
+
 	t.Run("should update the status successfully to RECOVERING if envelope contains invalid nonce errors", func(t *testing.T) {
 		txctx := engine.NewTxContext()
 		_ = txctx.Envelope.SetID("test")

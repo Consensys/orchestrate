@@ -17,8 +17,7 @@ type Service struct {
 	Dashboard    *Dashboard    `json:"dashboard,omitempty" toml:"dashboard,omitempty" yaml:"dashboard,omitempty"`
 	Chains       *Chains       `json:"chains,omitempty" toml:"chains,omitempty" yaml:"chains,omitempty"`
 	Contracts    *Contracts    `json:"contracts,omitempty" toml:"contracts,omitempty" yaml:"contracts,omitempty"`
-	Transactions *Transactions `json:"transactions,omitempty" toml:"transactions,omitempty" yaml:"transactions,omitempty"`
-	Identity     *Identity     `json:"identity,omitempty" toml:"identity,omitempty" yaml:"identity,omitempty"`
+	API          *API          `json:"api,omitempty" toml:"api,omitempty" yaml:"api,omitempty"`
 	Signer       *Signer       `json:"signer,omitempty" toml:"signer,omitempty" yaml:"signer,omitempty"`
 	Mock         *Mock         `json:"mock,omitempty" toml:"mock,omitempty" yaml:"mock,omitempty"`
 }
@@ -174,11 +173,7 @@ type Envelopes struct{}
 
 // +k8s:deepcopy-gen=true
 
-type Transactions struct{}
-
-// +k8s:deepcopy-gen=true
-
-type Identity struct{}
+type API struct{}
 
 // +k8s:deepcopy-gen=true
 

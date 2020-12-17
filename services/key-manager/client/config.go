@@ -19,13 +19,13 @@ func init() {
 const (
 	urlFlag     = "key-manager-url"
 	URLViperKey = "key.manager.url"
-	urlDefault  = "localhost:8081"
+	urlDefault  = "http://localhost:8081"
 	urlEnv      = "KEY_MANAGER_URL"
 )
 
 const (
 	MetricsURLViperKey = "key.manager.metrics.url"
-	metricsURLDefault  = "localhost:8082"
+	metricsURLDefault  = "http://localhost:8082"
 	metricsURLEnv      = "KEY_MANAGER_METRICS_URL"
 )
 

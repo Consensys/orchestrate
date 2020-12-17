@@ -10,25 +10,23 @@ import (
 	"github.com/Shopify/sarama"
 	"github.com/containous/traefik/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	utils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/store/models"
 	registry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/contract-registry/proto"
-	identitymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/identity-manager/client"
-	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/stress/units"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/stress/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/utils/chanregistry"
 )
 
-type WorkLoadTest func(context.Context, *units.WorkloadConfig, txscheduler.TransactionSchedulerClient, *chanregistry.ChanRegistry) error
+type WorkLoadTest func(context.Context, *units.WorkloadConfig, orchestrateclient.OrchestrateClient, *chanregistry.ChanRegistry) error
 
 type WorkLoadService struct {
 	cfg                    *Config
 	chainRegistryClient    chainregistry.ChainRegistryClient
 	contractRegistryClient registry.ContractRegistryClient
-	txSchedulerClient      txscheduler.TransactionSchedulerClient
-	identityClient         identitymanager.IdentityManagerClient
+	client                 orchestrateclient.OrchestrateClient
 	producer               sarama.SyncProducer
 	chanReg                *chanregistry.ChanRegistry
 	items                  []*workLoadItem
@@ -52,8 +50,7 @@ func NewService(cfg *Config,
 	chanReg *chanregistry.ChanRegistry,
 	chainRegistryClient chainregistry.ChainRegistryClient,
 	contractRegistryClient registry.ContractRegistryClient,
-	txSchedulerClient txscheduler.TransactionSchedulerClient,
-	identityClient identitymanager.IdentityManagerClient,
+	client orchestrateclient.OrchestrateClient,
 	producer sarama.SyncProducer,
 ) *WorkLoadService {
 	return &WorkLoadService{
@@ -61,8 +58,7 @@ func NewService(cfg *Config,
 		chanReg:                chanReg,
 		chainRegistryClient:    chainRegistryClient,
 		contractRegistryClient: contractRegistryClient,
-		txSchedulerClient:      txSchedulerClient,
-		identityClient:         identityClient,
+		client:                 client,
 		producer:               producer,
 		items: []*workLoadItem{
 			{cfg.Iterations, cfg.Concurrency, "BatchDeployContract", units.BatchDeployContractTest},
@@ -111,9 +107,9 @@ func (c *WorkLoadService) Stop() {
 }
 
 func (c *WorkLoadService) preRun(ctx context.Context) (context.Context, error) {
-	accounts := []string{}
+	var accounts []string
 	for idx := 0; idx <= nAccounts; idx++ {
-		acc, err := utils.CreateNewAccount(ctx, c.identityClient)
+		acc, err := utils.CreateNewAccount(ctx, c.client)
 		if err != nil {
 			return ctx, err
 		}
@@ -149,7 +145,7 @@ func (c *WorkLoadService) run(ctx context.Context, test *workLoadItem) error {
 	for idx := 1; idx <= test.iteration && gerr == nil; idx++ {
 		buffer <- true
 		go func(idx int) {
-			err := test.call(ctx, unitCfg, c.txSchedulerClient, c.chanReg)
+			err := test.call(ctx, unitCfg, c.client, c.chanReg)
 			if err != nil {
 				gerr = errors.CombineErrors(gerr, err)
 			}

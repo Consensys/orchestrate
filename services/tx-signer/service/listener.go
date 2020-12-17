@@ -4,13 +4,14 @@ import (
 	"context"
 	"time"
 
+	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/txscheduler"
+
 	"github.com/cenkalti/backoff/v4"
 	"github.com/golang/protobuf/proto"
+	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils/envelope"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/client"
-	utils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-signer/tx-signer/utils"
 
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
@@ -23,25 +24,30 @@ import (
 const messageListenerComponent = "service.message-listener"
 
 type MessageListener struct {
-	useCases          usecases.UseCases
-	recoverTopic      string
-	crafterTopic      string
-	retryBackOff      backoff.BackOff
-	producer          sarama.SyncProducer
-	txSchedulerClient client.TransactionSchedulerClient
-	breakLoop         chan bool
+	useCases     usecases.UseCases
+	recoverTopic string
+	crafterTopic string
+	retryBackOff backoff.BackOff
+	producer     sarama.SyncProducer
+	client       orchestrateclient.OrchestrateClient
+	breakLoop    chan bool
 }
 
-func NewMessageListener(useCases usecases.UseCases, txSchedulerClient client.TransactionSchedulerClient,
-	producer sarama.SyncProducer, recoverTopic, crafterTopic string, bck backoff.BackOff) *MessageListener {
+func NewMessageListener(
+	useCases usecases.UseCases,
+	client orchestrateclient.OrchestrateClient,
+	producer sarama.SyncProducer,
+	recoverTopic, crafterTopic string,
+	bck backoff.BackOff,
+) *MessageListener {
 	return &MessageListener{
-		useCases:          useCases,
-		recoverTopic:      recoverTopic,
-		crafterTopic:      crafterTopic,
-		producer:          producer,
-		retryBackOff:      bck,
-		txSchedulerClient: txSchedulerClient,
-		breakLoop:         make(chan bool, 1),
+		useCases:     useCases,
+		recoverTopic: recoverTopic,
+		crafterTopic: crafterTopic,
+		producer:     producer,
+		retryBackOff: bck,
+		client:       client,
+		breakLoop:    make(chan bool, 1),
 	}
 }
 
@@ -122,16 +128,20 @@ func (listener *MessageListener) ConsumeClaim(session sarama.ConsumerGroupSessio
 						resetEnvelopeTx(evlp)
 						_, _, serr = envelope.SendJobMessage(ctx, job, listener.producer, listener.crafterTopic)
 						if serr == nil {
-							err = utils2.UpdateJobStatus(ctx, listener.txSchedulerClient, evlp.GetJobUUID(),
-								utils.StatusRecovering, err.Error(), nil)
+							_, err = listener.client.UpdateJob(ctx, evlp.GetJobUUID(), &types.UpdateJobRequest{
+								Status:  utils.StatusRecovering,
+								Message: err.Error(),
+							})
 						}
 					} else {
 						// In case of other kind of errors...
 						txResponse := evlp.AppendError(errors.FromError(err)).TxResponse()
 						serr = listener.sendEnvelope(ctx, evlp.ID, txResponse, listener.recoverTopic, evlp.PartitionKey())
 						if serr == nil {
-							err = utils2.UpdateJobStatus(ctx, listener.txSchedulerClient, evlp.GetJobUUID(),
-								utils.StatusFailed, err.Error(), nil)
+							_, err = listener.client.UpdateJob(ctx, evlp.GetJobUUID(), &types.UpdateJobRequest{
+								Status:  utils.StatusFailed,
+								Message: err.Error(),
+							})
 						}
 					}
 

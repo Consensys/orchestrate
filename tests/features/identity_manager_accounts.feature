@@ -26,7 +26,7 @@ Feature: Account management
     Given I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
-    When I send "POST" request to "{{global.identity-manager}}/accounts/import" with json:
+    When I send "POST" request to "{{global.api}}/accounts/import" with json:
   """
 {
     "alias": "{{generateAccID}}",
@@ -40,7 +40,7 @@ Feature: Account management
     And Response should have the following fields
       | alias             | attributes.scenario_id | address               |
       | {{generateAccID}} | {{scenarioID}}         | {{importAcc.address}} |
-    When I send "PATCH" request to "{{global.identity-manager}}/accounts/{{importAcc.address}}" with json:
+    When I send "PATCH" request to "{{global.api}}/accounts/{{importAcc.address}}" with json:
   """
 {
     "alias": "{{generateAccID2}}", 
@@ -50,7 +50,7 @@ Feature: Account management
 }
       """
     Then the response code should be 200
-    Then I send "GET" request to "{{global.identity-manager}}/accounts/{{importAcc.address}}"
+    Then I send "GET" request to "{{global.api}}/accounts/{{importAcc.address}}"
     Then the response code should be 200
     And Response should have the following fields
       | alias              | attributes.new_attribute |
@@ -58,7 +58,7 @@ Feature: Account management
     Then I track the following envelopes
       | ID           |
       | {{sendTxID}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
+    When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
   """
 {
     "chain": "besu-{{scenarioID}}",
@@ -83,7 +83,7 @@ Feature: Account management
     Given I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
-    When I send "POST" request to "{{global.identity-manager}}/accounts" with json:
+    When I send "POST" request to "{{global.api}}/accounts" with json:
   """
 {
     "alias": "{{generateAccID}}", 
@@ -102,7 +102,7 @@ Feature: Account management
     Given I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
+    When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
   """
 {
     "chain": "besu-{{scenarioID}}",
@@ -130,7 +130,7 @@ Feature: Account management
     Given I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/deploy-contract" with json:
+    When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
   """
 {
     "chain": "besu-{{scenarioID}}",

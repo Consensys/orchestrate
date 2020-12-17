@@ -60,30 +60,30 @@ Feature: Faucet funding
     Given I set the headers
       | Key           | Value                      |
       | Authorization | Bearer {{tenantBar.token}} |
-    When I send "POST" request to "{{global.tx-scheduler}}/transactions/transfer" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-        "from": "{{account1}}",
-        "to": "{{toAddr}}",
-        "value": "100000000000000"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{transferOneID}}"
-    }
-}
+    When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "from": "{{account1}}",
+          "to": "{{toAddr}}",
+          "value": "100000000000000"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{transferOneID}}"
+        }
+      }
       """
     Then the response code should be 202
     And Response should have the following fields
       | jobs.length |
-      | 1                    |
+      | 1           |
     Then I register the following response fields
-      | alias     | path                  |
+      | alias     | path         |
       | txJobUUID | jobs[0].uuid |
     Then Envelopes should be in topic "tx.recover"
-    When I send "GET" request to "{{global.tx-scheduler}}/jobs/{{txJobUUID}}"
+    When I send "GET" request to "{{global.api}}/jobs/{{txJobUUID}}"
     Then the response code should be 200
     Then I sleep "1s"
     And Response should have the following fields

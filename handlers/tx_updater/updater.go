@@ -2,15 +2,15 @@ package txupdater
 
 import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/engine"
+	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/txscheduler"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
-	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/transaction-scheduler/client"
 )
 
 const component = "handler.tx-updater"
 
-// TransactionUpdater updates a transaction in the scheduler
-func TransactionUpdater(txSchedulerClient txscheduler.TransactionSchedulerClient) engine.HandlerFunc {
+// TransactionUpdater updates a transaction
+func TransactionUpdater(client orchestrateclient.OrchestrateClient) engine.HandlerFunc {
 	return func(txctx *engine.TxContext) {
 		if txctx.Envelope.OnlyWarnings() {
 			return
@@ -24,7 +24,7 @@ func TransactionUpdater(txSchedulerClient txscheduler.TransactionSchedulerClient
 		// Don't update to FAILED if we are going to send message to tx-crafter
 		if txctx.HasInvalidNonceErr() {
 			txctx.Logger.Debug("transaction scheduler: updating transaction to RECOVERING")
-			_, err := txSchedulerClient.UpdateJob(
+			_, err := client.UpdateJob(
 				txctx.Context(),
 				txctx.Envelope.GetJobUUID(),
 				&txschedulertypes.UpdateJobRequest{
@@ -41,7 +41,7 @@ func TransactionUpdater(txSchedulerClient txscheduler.TransactionSchedulerClient
 
 		// TODO: Improvement of the log message will be done when we move to clean architecture
 		// TODO: because at the moment it is difficult to know what error messages need to be sent to users and which ones not.
-		_, err := txSchedulerClient.UpdateJob(txctx.Context(), txctx.Envelope.GetJobUUID(), &txschedulertypes.UpdateJobRequest{
+		_, err := client.UpdateJob(txctx.Context(), txctx.Envelope.GetJobUUID(), &txschedulertypes.UpdateJobRequest{
 			Status:  utils.StatusFailed,
 			Message: txctx.Envelope.Error(),
 		})
