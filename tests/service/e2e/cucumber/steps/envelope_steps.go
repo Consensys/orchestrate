@@ -12,6 +12,8 @@ import (
 	"sync"
 	"time"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
+
 	"github.com/cenkalti/backoff/v4"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/crypto/ethereum/signing"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/rlp"
@@ -31,7 +33,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	utils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethereum/account"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/identitymanager"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/store/models"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/e2e/cucumber/alias"
@@ -296,7 +297,7 @@ func (sc *ScenarioContext) iHaveCreatedTheFollowingAccounts(table *gherkin.Pickl
 			ctx = authutils.WithAuthorization(ctx, token)
 		}
 
-		req := &types.CreateAccountRequest{}
+		req := &api.CreateAccountRequest{}
 
 		if accIDCol != nil {
 			req.Alias = accIDCol.Rows[idx+1].Cells[0].Value

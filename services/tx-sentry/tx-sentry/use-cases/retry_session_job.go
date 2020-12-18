@@ -8,8 +8,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
+	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/txscheduler"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 )
 
@@ -75,9 +75,9 @@ func (uc *retrySessionJobUseCase) Execute(ctx context.Context, jobUUID, childUUI
 }
 
 func (uc *retrySessionJobUseCase) CreateAndStartNewChildJob(ctx context.Context,
-	parentJob *txschedulertypes.JobResponse,
+	parentJob *types.JobResponse,
 	nChildrenJobs int,
-) (*txschedulertypes.JobResponse, error) {
+) (*types.JobResponse, error) {
 	logger := log.WithContext(ctx).WithField("job_uuid", parentJob.UUID)
 	gasPriceMultiplier := getGasPriceMultiplier(
 		parentJob.Annotations.GasPricePolicy.RetryPolicy.Increment,
@@ -116,9 +116,9 @@ func getGasPriceMultiplier(increment, limit, nChildren float64) float64 {
 	return newGasPriceMultiplier
 }
 
-func newChildJobRequest(parentJob *txschedulertypes.JobResponse, gasPriceMultiplier float64) *txschedulertypes.CreateJobRequest {
+func newChildJobRequest(parentJob *types.JobResponse, gasPriceMultiplier float64) *types.CreateJobRequest {
 	// We selectively choose fields from the parent job
-	newJobRequest := &txschedulertypes.CreateJobRequest{
+	newJobRequest := &types.CreateJobRequest{
 		ChainUUID:     parentJob.ChainUUID,
 		ScheduleUUID:  parentJob.ScheduleUUID,
 		Type:          parentJob.Type,

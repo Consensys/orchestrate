@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/txscheduler"
+	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	log "github.com/sirupsen/logrus"
@@ -46,7 +46,7 @@ func (uc *sendTesseraPrivateTxUseCase) Execute(ctx context.Context, job *entitie
 		return errors.FromError(err).ExtendComponent(sendTesseraPrivateTxComponent)
 	}
 
-	_, err = uc.client.UpdateJob(ctx, job.UUID, &txschedulertypes.UpdateJobRequest{
+	_, err = uc.client.UpdateJob(ctx, job.UUID, &types.UpdateJobRequest{
 		Transaction: job.Transaction,
 		Status:      utils.StatusStored,
 	})

@@ -66,7 +66,7 @@ func TestAuth(t *testing.T) {
 			false,
 		},
 		{
-			"Untrusted Signer",
+			"Untrusted KeyManager",
 			&authjwt.Config{
 				Certificate:          []byte(certificateOneLineOrchestrateTest),
 				ClaimsNamespace:      "http://orchestrate.info",

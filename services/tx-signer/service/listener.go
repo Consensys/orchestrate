@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/txscheduler"
+	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 
 	"github.com/cenkalti/backoff/v4"
 	"github.com/golang/protobuf/proto"

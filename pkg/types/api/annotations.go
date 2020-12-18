@@ -1,4 +1,4 @@
-package txscheduler
+package api
 
 import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"

@@ -11,31 +11,31 @@ import (
 	reflect "reflect"
 )
 
-// MockGRPCServerMetrics is a mock of GRPCServerMetrics interface
-type MockGRPCServerMetrics struct {
+// MockGRPCMetrics is a mock of GRPCMetrics interface
+type MockGRPCMetrics struct {
 	ctrl     *gomock.Controller
-	recorder *MockGRPCServerMetricsMockRecorder
+	recorder *MockGRPCMetricsMockRecorder
 }
 
-// MockGRPCServerMetricsMockRecorder is the mock recorder for MockGRPCServerMetrics
-type MockGRPCServerMetricsMockRecorder struct {
-	mock *MockGRPCServerMetrics
+// MockGRPCMetricsMockRecorder is the mock recorder for MockGRPCMetrics
+type MockGRPCMetricsMockRecorder struct {
+	mock *MockGRPCMetrics
 }
 
-// NewMockGRPCServerMetrics creates a new mock instance
-func NewMockGRPCServerMetrics(ctrl *gomock.Controller) *MockGRPCServerMetrics {
-	mock := &MockGRPCServerMetrics{ctrl: ctrl}
-	mock.recorder = &MockGRPCServerMetricsMockRecorder{mock}
+// NewMockGRPCMetrics creates a new mock instance
+func NewMockGRPCMetrics(ctrl *gomock.Controller) *MockGRPCMetrics {
+	mock := &MockGRPCMetrics{ctrl: ctrl}
+	mock.recorder = &MockGRPCMetricsMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use
-func (m *MockGRPCServerMetrics) EXPECT() *MockGRPCServerMetricsMockRecorder {
+func (m *MockGRPCMetrics) EXPECT() *MockGRPCMetricsMockRecorder {
 	return m.recorder
 }
 
 // StartedCounter mocks base method
-func (m *MockGRPCServerMetrics) StartedCounter() metrics.Counter {
+func (m *MockGRPCMetrics) StartedCounter() metrics.Counter {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "StartedCounter")
 	ret0, _ := ret[0].(metrics.Counter)
@@ -43,13 +43,13 @@ func (m *MockGRPCServerMetrics) StartedCounter() metrics.Counter {
 }
 
 // StartedCounter indicates an expected call of StartedCounter
-func (mr *MockGRPCServerMetricsMockRecorder) StartedCounter() *gomock.Call {
+func (mr *MockGRPCMetricsMockRecorder) StartedCounter() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StartedCounter", reflect.TypeOf((*MockGRPCServerMetrics)(nil).StartedCounter))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StartedCounter", reflect.TypeOf((*MockGRPCMetrics)(nil).StartedCounter))
 }
 
 // HandledCounter mocks base method
-func (m *MockGRPCServerMetrics) HandledCounter() metrics.Counter {
+func (m *MockGRPCMetrics) HandledCounter() metrics.Counter {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "HandledCounter")
 	ret0, _ := ret[0].(metrics.Counter)
@@ -57,13 +57,13 @@ func (m *MockGRPCServerMetrics) HandledCounter() metrics.Counter {
 }
 
 // HandledCounter indicates an expected call of HandledCounter
-func (mr *MockGRPCServerMetricsMockRecorder) HandledCounter() *gomock.Call {
+func (mr *MockGRPCMetricsMockRecorder) HandledCounter() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HandledCounter", reflect.TypeOf((*MockGRPCServerMetrics)(nil).HandledCounter))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HandledCounter", reflect.TypeOf((*MockGRPCMetrics)(nil).HandledCounter))
 }
 
 // StreamMsgReceivedCounter mocks base method
-func (m *MockGRPCServerMetrics) StreamMsgReceivedCounter() metrics.Counter {
+func (m *MockGRPCMetrics) StreamMsgReceivedCounter() metrics.Counter {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "StreamMsgReceivedCounter")
 	ret0, _ := ret[0].(metrics.Counter)
@@ -71,13 +71,13 @@ func (m *MockGRPCServerMetrics) StreamMsgReceivedCounter() metrics.Counter {
 }
 
 // StreamMsgReceivedCounter indicates an expected call of StreamMsgReceivedCounter
-func (mr *MockGRPCServerMetricsMockRecorder) StreamMsgReceivedCounter() *gomock.Call {
+func (mr *MockGRPCMetricsMockRecorder) StreamMsgReceivedCounter() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StreamMsgReceivedCounter", reflect.TypeOf((*MockGRPCServerMetrics)(nil).StreamMsgReceivedCounter))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StreamMsgReceivedCounter", reflect.TypeOf((*MockGRPCMetrics)(nil).StreamMsgReceivedCounter))
 }
 
 // StreamMsgSentCounter mocks base method
-func (m *MockGRPCServerMetrics) StreamMsgSentCounter() metrics.Counter {
+func (m *MockGRPCMetrics) StreamMsgSentCounter() metrics.Counter {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "StreamMsgSentCounter")
 	ret0, _ := ret[0].(metrics.Counter)
@@ -85,13 +85,13 @@ func (m *MockGRPCServerMetrics) StreamMsgSentCounter() metrics.Counter {
 }
 
 // StreamMsgSentCounter indicates an expected call of StreamMsgSentCounter
-func (mr *MockGRPCServerMetricsMockRecorder) StreamMsgSentCounter() *gomock.Call {
+func (mr *MockGRPCMetricsMockRecorder) StreamMsgSentCounter() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StreamMsgSentCounter", reflect.TypeOf((*MockGRPCServerMetrics)(nil).StreamMsgSentCounter))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StreamMsgSentCounter", reflect.TypeOf((*MockGRPCMetrics)(nil).StreamMsgSentCounter))
 }
 
 // HandledDurationHistogram mocks base method
-func (m *MockGRPCServerMetrics) HandledDurationHistogram() metrics.Histogram {
+func (m *MockGRPCMetrics) HandledDurationHistogram() metrics.Histogram {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "HandledDurationHistogram")
 	ret0, _ := ret[0].(metrics.Histogram)
@@ -99,31 +99,31 @@ func (m *MockGRPCServerMetrics) HandledDurationHistogram() metrics.Histogram {
 }
 
 // HandledDurationHistogram indicates an expected call of HandledDurationHistogram
-func (mr *MockGRPCServerMetricsMockRecorder) HandledDurationHistogram() *gomock.Call {
+func (mr *MockGRPCMetricsMockRecorder) HandledDurationHistogram() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HandledDurationHistogram", reflect.TypeOf((*MockGRPCServerMetrics)(nil).HandledDurationHistogram))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HandledDurationHistogram", reflect.TypeOf((*MockGRPCMetrics)(nil).HandledDurationHistogram))
 }
 
 // Describe mocks base method
-func (m *MockGRPCServerMetrics) Describe(arg0 chan<- *prometheus.Desc) {
+func (m *MockGRPCMetrics) Describe(arg0 chan<- *prometheus.Desc) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "Describe", arg0)
 }
 
 // Describe indicates an expected call of Describe
-func (mr *MockGRPCServerMetricsMockRecorder) Describe(arg0 interface{}) *gomock.Call {
+func (mr *MockGRPCMetricsMockRecorder) Describe(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Describe", reflect.TypeOf((*MockGRPCServerMetrics)(nil).Describe), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Describe", reflect.TypeOf((*MockGRPCMetrics)(nil).Describe), arg0)
 }
 
 // Collect mocks base method
-func (m *MockGRPCServerMetrics) Collect(arg0 chan<- prometheus.Metric) {
+func (m *MockGRPCMetrics) Collect(arg0 chan<- prometheus.Metric) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "Collect", arg0)
 }
 
 // Collect indicates an expected call of Collect
-func (mr *MockGRPCServerMetricsMockRecorder) Collect(arg0 interface{}) *gomock.Call {
+func (mr *MockGRPCMetricsMockRecorder) Collect(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Collect", reflect.TypeOf((*MockGRPCServerMetrics)(nil).Collect), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Collect", reflect.TypeOf((*MockGRPCMetrics)(nil).Collect), arg0)
 }

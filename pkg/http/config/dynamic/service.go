@@ -18,7 +18,7 @@ type Service struct {
 	Chains       *Chains       `json:"chains,omitempty" toml:"chains,omitempty" yaml:"chains,omitempty"`
 	Contracts    *Contracts    `json:"contracts,omitempty" toml:"contracts,omitempty" yaml:"contracts,omitempty"`
 	API          *API          `json:"api,omitempty" toml:"api,omitempty" yaml:"api,omitempty"`
-	Signer       *Signer       `json:"signer,omitempty" toml:"signer,omitempty" yaml:"signer,omitempty"`
+	KeyManager   *KeyManager   `json:"keyManager,omitempty" toml:"keymanager,omitempty" yaml:"keymanager,omitempty"`
 	Mock         *Mock         `json:"mock,omitempty" toml:"mock,omitempty" yaml:"mock,omitempty"`
 }
 
@@ -177,7 +177,7 @@ type API struct{}
 
 // +k8s:deepcopy-gen=true
 
-type Signer struct{}
+type KeyManager struct{}
 
 // +k8s:deepcopy-gen=true
 

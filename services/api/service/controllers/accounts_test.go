@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/service/formatters"
@@ -23,7 +24,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/identitymanager"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases/mocks"
 )
@@ -258,7 +258,7 @@ func (s *accountsCtrlTestSuite) TestAccountController_SearchIdentity() {
 		s.router.ServeHTTP(rw, httpRequest)
 
 		response := formatters.FormatAccountResponse(accResp)
-		expectedBody, _ := json.Marshal([]*types.AccountResponse{response})
+		expectedBody, _ := json.Marshal([]*api.AccountResponse{response})
 		assert.Equal(t, string(expectedBody)+"\n", rw.Body.String())
 		assert.Equal(t, http.StatusOK, rw.Code)
 	})
@@ -271,7 +271,7 @@ func (s *accountsCtrlTestSuite) TestAccountController_SignPayload() {
 		rw := httptest.NewRecorder()
 		payload := "payloadMessage"
 		signature := "0xsignature"
-		requestBytes, _ := json.Marshal(&types.SignPayloadRequest{Data: payload})
+		requestBytes, _ := json.Marshal(&api.SignPayloadRequest{Data: payload})
 
 		httpRequest := httptest.
 			NewRequest(http.MethodPost, fmt.Sprintf("/accounts/%v/sign", acc.Address), bytes.NewReader(requestBytes)).

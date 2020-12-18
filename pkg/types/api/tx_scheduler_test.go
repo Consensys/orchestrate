@@ -1,4 +1,4 @@
-package txscheduler
+package api
 
 import (
 	"testing"

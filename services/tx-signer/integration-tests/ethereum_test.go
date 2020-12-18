@@ -25,7 +25,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/httputil"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/tx"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/txscheduler"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	"gopkg.in/h2non/gock.v1"
 )
@@ -69,7 +69,7 @@ func (s *txSignerEthereumTestSuite) TestTxSender_Ethereum_Public() {
 		gock.New(apiURL).
 			Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
 			AddMatcher(txStatusUpdateMatcher(wg, utils.StatusPending)).
-			Reply(200).JSON(&txscheduler.JobResponse{})
+			Reply(200).JSON(&api.JobResponse{})
 
 		err := s.sendEnvelope(envelope.TxEnvelopeAsRequest())
 		if err != nil {
@@ -94,13 +94,13 @@ func (s *txSignerEthereumTestSuite) TestTxSender_Ethereum_Public() {
 		gock.New(apiURL).
 			Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
 			AddMatcher(txStatusUpdateMatcher(wg, utils.StatusPending)).
-			Reply(200).JSON(&txscheduler.JobResponse{})
+			Reply(200).JSON(&api.JobResponse{})
 
 		// IMPORTANT: As we cannot infer txHash before hand, status will be updated to WARNING
 		gock.New(apiURL).
 			Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
 			AddMatcher(txStatusUpdateMatcher(wg, utils.StatusWarning)).
-			Reply(200).JSON(&txscheduler.JobResponse{})
+			Reply(200).JSON(&api.JobResponse{})
 
 		err := s.sendEnvelope(envelope.TxEnvelopeAsRequest().EnableTxFromOneTimeKey())
 		if err != nil {
@@ -134,7 +134,7 @@ func (s *txSignerEthereumTestSuite) TestTxSender_Ethereum_Public() {
 		gock.New(apiURL).
 			Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
 			AddMatcher(txStatusUpdateMatcher(wg, utils.StatusFailed)).
-			Reply(200).JSON(&txscheduler.JobResponse{})
+			Reply(200).JSON(&api.JobResponse{})
 
 		err := s.sendEnvelope(envelope.TxEnvelopeAsRequest())
 		if err != nil {
@@ -189,7 +189,7 @@ func (s *txSignerEthereumTestSuite) TestTxSender_Ethereum_Public() {
 		gock.New(apiURL).
 			Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
 			AddMatcher(txStatusUpdateMatcher(wg, utils.StatusFailed)).
-			Reply(200).JSON(&txscheduler.JobResponse{})
+			Reply(200).JSON(&api.JobResponse{})
 
 		err := s.sendEnvelope(envelope.TxEnvelopeAsRequest())
 		if err != nil {
@@ -233,12 +233,12 @@ func (s *txSignerEthereumTestSuite) TestTxSender_Ethereum_Public() {
 		gock.New(apiURL).
 			Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
 			AddMatcher(txStatusUpdateMatcher(wg, utils.StatusPending)).
-			Reply(200).JSON(&txscheduler.JobResponse{})
+			Reply(200).JSON(&api.JobResponse{})
 
 		gock.New(apiURL).
 			Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
 			AddMatcher(txStatusUpdateMatcher(wg, utils.StatusFailed)).
-			Reply(200).JSON(&txscheduler.JobResponse{})
+			Reply(200).JSON(&api.JobResponse{})
 
 		err := s.sendEnvelope(envelope.TxEnvelopeAsRequest())
 		if err != nil {
@@ -282,7 +282,7 @@ func (s *txSignerEthereumTestSuite) TestTxSender_Ethereum_Raw_Public() {
 		gock.New(apiURL).
 			Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
 			AddMatcher(txStatusUpdateMatcher(wg, utils.StatusPending)).
-			Reply(200).JSON(&txscheduler.JobResponse{})
+			Reply(200).JSON(&api.JobResponse{})
 
 		err := s.sendEnvelope(envelope.TxEnvelopeAsRequest().EnableTxFromOneTimeKey())
 		if err != nil {
@@ -310,12 +310,12 @@ func (s *txSignerEthereumTestSuite) TestTxSender_Ethereum_Raw_Public() {
 		gock.New(apiURL).
 			Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
 			AddMatcher(txStatusUpdateMatcher(wg, utils.StatusPending)).
-			Reply(200).JSON(&txscheduler.JobResponse{})
+			Reply(200).JSON(&api.JobResponse{})
 
 		gock.New(apiURL).
 			Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
 			AddMatcher(txStatusUpdateMatcher(wg, utils.StatusFailed)).
-			Reply(200).JSON(&txscheduler.JobResponse{})
+			Reply(200).JSON(&api.JobResponse{})
 
 		err := s.sendEnvelope(envelope.TxEnvelopeAsRequest().EnableTxFromOneTimeKey())
 		if err != nil {
@@ -370,7 +370,7 @@ func (s *txSignerEthereumTestSuite) TestTxSender_Ethereum_EEA() {
 		gock.New(apiURL).
 			Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
 			AddMatcher(txStatusUpdateMatcher(wg, utils.StatusStored)).
-			Reply(200).JSON(&txscheduler.JobResponse{})
+			Reply(200).JSON(&api.JobResponse{})
 
 		err := s.sendEnvelope(envelope.TxEnvelopeAsRequest())
 		if err != nil {
@@ -398,7 +398,7 @@ func (s *txSignerEthereumTestSuite) TestTxSender_Ethereum_EEA() {
 		gock.New(apiURL).
 			Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
 			AddMatcher(txStatusUpdateMatcher(wg, utils.StatusStored)).
-			Reply(200).JSON(&txscheduler.JobResponse{})
+			Reply(200).JSON(&api.JobResponse{})
 
 		err := s.sendEnvelope(envelope.TxEnvelopeAsRequest().EnableTxFromOneTimeKey())
 		if err != nil {
@@ -425,7 +425,7 @@ func (s *txSignerEthereumTestSuite) TestTxSender_Ethereum_EEA() {
 		gock.New(apiURL).
 			Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
 			AddMatcher(txStatusUpdateMatcher(wg, utils.StatusFailed)).
-			Reply(200).JSON(&txscheduler.JobResponse{})
+			Reply(200).JSON(&api.JobResponse{})
 
 		err := s.sendEnvelope(envelope.TxEnvelopeAsRequest().EnableTxFromOneTimeKey())
 		if err != nil {
@@ -481,7 +481,7 @@ func (s *txSignerEthereumTestSuite) TestTxSender_Tessera_Marking() {
 		gock.New(apiURL).
 			Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
 			AddMatcher(txStatusUpdateMatcher(wg, utils.StatusPending)).
-			Reply(200).JSON(&txscheduler.JobResponse{})
+			Reply(200).JSON(&api.JobResponse{})
 
 		err := s.sendEnvelope(envelope.TxEnvelopeAsRequest())
 		if err != nil {
@@ -508,13 +508,13 @@ func (s *txSignerEthereumTestSuite) TestTxSender_Tessera_Marking() {
 		gock.New(apiURL).
 			Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
 			AddMatcher(txStatusUpdateMatcher(wg, utils.StatusPending)).
-			Reply(200).JSON(&txscheduler.JobResponse{})
+			Reply(200).JSON(&api.JobResponse{})
 
 		// HASH won't match
 		gock.New(apiURL).
 			Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
 			AddMatcher(txStatusUpdateMatcher(wg, utils.StatusWarning)).
-			Reply(200).JSON(&txscheduler.JobResponse{})
+			Reply(200).JSON(&api.JobResponse{})
 
 		err := s.sendEnvelope(envelope.TxEnvelopeAsRequest().EnableTxFromOneTimeKey())
 		if err != nil {
@@ -551,12 +551,12 @@ func (s *txSignerEthereumTestSuite) TestTxSender_Tessera_Marking() {
 		gock.New(apiURL).
 			Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
 			AddMatcher(txStatusUpdateMatcher(wg, utils.StatusPending)).
-			Reply(200).JSON(&txscheduler.JobResponse{})
+			Reply(200).JSON(&api.JobResponse{})
 
 		gock.New(apiURL).
 			Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
 			AddMatcher(txStatusUpdateMatcher(wg, utils.StatusFailed)).
-			Reply(200).JSON(&txscheduler.JobResponse{})
+			Reply(200).JSON(&api.JobResponse{})
 
 		err := s.sendEnvelope(envelope.TxEnvelopeAsRequest())
 		if err != nil {
@@ -600,7 +600,7 @@ func (s *txSignerEthereumTestSuite) TestTxSender_Tessera_Private() {
 		gock.New(apiURL).
 			Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
 			AddMatcher(txStatusUpdateMatcher(wg, utils.StatusStored)).
-			Reply(200).JSON(&txscheduler.JobResponse{})
+			Reply(200).JSON(&api.JobResponse{})
 
 		err := s.sendEnvelope(envelope.TxEnvelopeAsRequest())
 		if err != nil {
@@ -627,7 +627,7 @@ func (s *txSignerEthereumTestSuite) TestTxSender_Tessera_Private() {
 		gock.New(apiURL).
 			Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
 			AddMatcher(txStatusUpdateMatcher(wg, utils.StatusFailed)).
-			Reply(200).JSON(&txscheduler.JobResponse{})
+			Reply(200).JSON(&api.JobResponse{})
 
 		err := s.sendEnvelope(envelope.TxEnvelopeAsRequest())
 		if err != nil {
@@ -781,7 +781,7 @@ func txStatusUpdateMatcher(wg *multierror.Group, status string) gock.MatchFunc {
 
 		body, _ := ioutil.ReadAll(rw.Body)
 		rw.Body = ioutil.NopCloser(bytes.NewBuffer(body))
-		req := txscheduler.UpdateJobRequest{}
+		req := api.UpdateJobRequest{}
 		if err := json.Unmarshal(body, &req); err != nil {
 			cerr <- err
 			return false, err

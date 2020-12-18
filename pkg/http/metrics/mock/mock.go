@@ -119,6 +119,20 @@ func (mr *MockHTTPMetricsMockRecorder) ServerUpGauge() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ServerUpGauge", reflect.TypeOf((*MockHTTPMetrics)(nil).ServerUpGauge))
 }
 
+// Switch mocks base method
+func (m *MockHTTPMetrics) Switch(arg0 *dynamic.Configuration) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Switch", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Switch indicates an expected call of Switch
+func (mr *MockHTTPMetricsMockRecorder) Switch(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Switch", reflect.TypeOf((*MockHTTPMetrics)(nil).Switch), arg0)
+}
+
 // Describe mocks base method
 func (m *MockHTTPMetrics) Describe(arg0 chan<- *prometheus.Desc) {
 	m.ctrl.T.Helper()
@@ -141,18 +155,4 @@ func (m *MockHTTPMetrics) Collect(arg0 chan<- prometheus.Metric) {
 func (mr *MockHTTPMetricsMockRecorder) Collect(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Collect", reflect.TypeOf((*MockHTTPMetrics)(nil).Collect), arg0)
-}
-
-// Switch mocks base method
-func (m *MockHTTPMetrics) Switch(arg0 *dynamic.Configuration) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Switch", arg0)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Switch indicates an expected call of Switch
-func (mr *MockHTTPMetricsMockRecorder) Switch(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Switch", reflect.TypeOf((*MockHTTPMetrics)(nil).Switch), arg0)
 }

@@ -4,34 +4,35 @@ import (
 	"net/http"
 	"strings"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/identitymanager"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 )
 
-func FormatCreateAccountRequest(req *types.CreateAccountRequest) *entities.Account {
+func FormatCreateAccountRequest(req *api.CreateAccountRequest) *entities.Account {
 	return &entities.Account{
 		Alias:      req.Alias,
 		Attributes: req.Attributes,
 	}
 }
 
-func FormatImportAccountRequest(req *types.ImportAccountRequest) *entities.Account {
+func FormatImportAccountRequest(req *api.ImportAccountRequest) *entities.Account {
 	return &entities.Account{
 		Alias:      req.Alias,
 		Attributes: req.Attributes,
 	}
 }
 
-func FormatUpdateAccountRequest(req *types.UpdateAccountRequest) *entities.Account {
+func FormatUpdateAccountRequest(req *api.UpdateAccountRequest) *entities.Account {
 	return &entities.Account{
 		Alias:      req.Alias,
 		Attributes: req.Attributes,
 	}
 }
 
-func FormatAccountResponse(iden *entities.Account) *types.AccountResponse {
-	return &types.AccountResponse{
+func FormatAccountResponse(iden *entities.Account) *api.AccountResponse {
+	return &api.AccountResponse{
 		Alias:               iden.Alias,
 		Attributes:          iden.Attributes,
 		Address:             iden.Address,

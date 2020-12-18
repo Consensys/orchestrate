@@ -1,11 +1,11 @@
 package parsers
 
 import (
+	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/txscheduler"
 )
 
-func JobResponseToEntity(jobResponse *txschedulertypes.JobResponse) *entities.Job {
+func JobResponseToEntity(jobResponse *types.JobResponse) *entities.Job {
 	// Cannot fail as the duration coming from a response is expected to be valid
 	return &entities.Job{
 		UUID:         jobResponse.UUID,
@@ -14,7 +14,7 @@ func JobResponseToEntity(jobResponse *txschedulertypes.JobResponse) *entities.Jo
 		Type:         jobResponse.Type,
 		Labels:       jobResponse.Labels,
 		TenantID:     jobResponse.TenantID,
-		InternalData: txschedulertypes.FormatAnnotationsToInternalData(jobResponse.Annotations),
+		InternalData: types.FormatAnnotationsToInternalData(jobResponse.Annotations),
 		Transaction:  &jobResponse.Transaction,
 		Logs:         jobResponse.Logs,
 		CreatedAt:    jobResponse.CreatedAt,

@@ -9,11 +9,10 @@ import (
 	gomock "github.com/golang/mock/gomock"
 	healthcheck "github.com/heptiolabs/healthcheck"
 	io_prometheus_client "github.com/prometheus/client_model/go"
+	api "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 	entities "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	identitymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/identitymanager"
 	keymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager"
 	ethereum "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/ethereum"
-	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/txscheduler"
 	reflect "reflect"
 )
 
@@ -41,10 +40,10 @@ func (m *MockOrchestrateClient) EXPECT() *MockOrchestrateClientMockRecorder {
 }
 
 // SendContractTransaction mocks base method
-func (m *MockOrchestrateClient) SendContractTransaction(ctx context.Context, request *txscheduler.SendTransactionRequest) (*txscheduler.TransactionResponse, error) {
+func (m *MockOrchestrateClient) SendContractTransaction(ctx context.Context, request *api.SendTransactionRequest) (*api.TransactionResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SendContractTransaction", ctx, request)
-	ret0, _ := ret[0].(*txscheduler.TransactionResponse)
+	ret0, _ := ret[0].(*api.TransactionResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -56,10 +55,10 @@ func (mr *MockOrchestrateClientMockRecorder) SendContractTransaction(ctx, reques
 }
 
 // SendDeployTransaction mocks base method
-func (m *MockOrchestrateClient) SendDeployTransaction(ctx context.Context, request *txscheduler.DeployContractRequest) (*txscheduler.TransactionResponse, error) {
+func (m *MockOrchestrateClient) SendDeployTransaction(ctx context.Context, request *api.DeployContractRequest) (*api.TransactionResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SendDeployTransaction", ctx, request)
-	ret0, _ := ret[0].(*txscheduler.TransactionResponse)
+	ret0, _ := ret[0].(*api.TransactionResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -71,10 +70,10 @@ func (mr *MockOrchestrateClientMockRecorder) SendDeployTransaction(ctx, request 
 }
 
 // SendRawTransaction mocks base method
-func (m *MockOrchestrateClient) SendRawTransaction(ctx context.Context, request *txscheduler.RawTransactionRequest) (*txscheduler.TransactionResponse, error) {
+func (m *MockOrchestrateClient) SendRawTransaction(ctx context.Context, request *api.RawTransactionRequest) (*api.TransactionResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SendRawTransaction", ctx, request)
-	ret0, _ := ret[0].(*txscheduler.TransactionResponse)
+	ret0, _ := ret[0].(*api.TransactionResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -86,10 +85,10 @@ func (mr *MockOrchestrateClientMockRecorder) SendRawTransaction(ctx, request int
 }
 
 // SendTransferTransaction mocks base method
-func (m *MockOrchestrateClient) SendTransferTransaction(ctx context.Context, request *txscheduler.TransferRequest) (*txscheduler.TransactionResponse, error) {
+func (m *MockOrchestrateClient) SendTransferTransaction(ctx context.Context, request *api.TransferRequest) (*api.TransactionResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SendTransferTransaction", ctx, request)
-	ret0, _ := ret[0].(*txscheduler.TransactionResponse)
+	ret0, _ := ret[0].(*api.TransactionResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -101,10 +100,10 @@ func (mr *MockOrchestrateClientMockRecorder) SendTransferTransaction(ctx, reques
 }
 
 // GetTxRequest mocks base method
-func (m *MockOrchestrateClient) GetTxRequest(ctx context.Context, txRequestUUID string) (*txscheduler.TransactionResponse, error) {
+func (m *MockOrchestrateClient) GetTxRequest(ctx context.Context, txRequestUUID string) (*api.TransactionResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetTxRequest", ctx, txRequestUUID)
-	ret0, _ := ret[0].(*txscheduler.TransactionResponse)
+	ret0, _ := ret[0].(*api.TransactionResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -116,10 +115,10 @@ func (mr *MockOrchestrateClientMockRecorder) GetTxRequest(ctx, txRequestUUID int
 }
 
 // GetSchedule mocks base method
-func (m *MockOrchestrateClient) GetSchedule(ctx context.Context, scheduleUUID string) (*txscheduler.ScheduleResponse, error) {
+func (m *MockOrchestrateClient) GetSchedule(ctx context.Context, scheduleUUID string) (*api.ScheduleResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetSchedule", ctx, scheduleUUID)
-	ret0, _ := ret[0].(*txscheduler.ScheduleResponse)
+	ret0, _ := ret[0].(*api.ScheduleResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -131,10 +130,10 @@ func (mr *MockOrchestrateClientMockRecorder) GetSchedule(ctx, scheduleUUID inter
 }
 
 // GetSchedules mocks base method
-func (m *MockOrchestrateClient) GetSchedules(ctx context.Context) ([]*txscheduler.ScheduleResponse, error) {
+func (m *MockOrchestrateClient) GetSchedules(ctx context.Context) ([]*api.ScheduleResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetSchedules", ctx)
-	ret0, _ := ret[0].([]*txscheduler.ScheduleResponse)
+	ret0, _ := ret[0].([]*api.ScheduleResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -146,10 +145,10 @@ func (mr *MockOrchestrateClientMockRecorder) GetSchedules(ctx interface{}) *gomo
 }
 
 // CreateSchedule mocks base method
-func (m *MockOrchestrateClient) CreateSchedule(ctx context.Context, request *txscheduler.CreateScheduleRequest) (*txscheduler.ScheduleResponse, error) {
+func (m *MockOrchestrateClient) CreateSchedule(ctx context.Context, request *api.CreateScheduleRequest) (*api.ScheduleResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateSchedule", ctx, request)
-	ret0, _ := ret[0].(*txscheduler.ScheduleResponse)
+	ret0, _ := ret[0].(*api.ScheduleResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -161,10 +160,10 @@ func (mr *MockOrchestrateClientMockRecorder) CreateSchedule(ctx, request interfa
 }
 
 // GetJob mocks base method
-func (m *MockOrchestrateClient) GetJob(ctx context.Context, jobUUID string) (*txscheduler.JobResponse, error) {
+func (m *MockOrchestrateClient) GetJob(ctx context.Context, jobUUID string) (*api.JobResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetJob", ctx, jobUUID)
-	ret0, _ := ret[0].(*txscheduler.JobResponse)
+	ret0, _ := ret[0].(*api.JobResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -176,10 +175,10 @@ func (mr *MockOrchestrateClientMockRecorder) GetJob(ctx, jobUUID interface{}) *g
 }
 
 // GetJobs mocks base method
-func (m *MockOrchestrateClient) GetJobs(ctx context.Context) ([]*txscheduler.JobResponse, error) {
+func (m *MockOrchestrateClient) GetJobs(ctx context.Context) ([]*api.JobResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetJobs", ctx)
-	ret0, _ := ret[0].([]*txscheduler.JobResponse)
+	ret0, _ := ret[0].([]*api.JobResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -191,10 +190,10 @@ func (mr *MockOrchestrateClientMockRecorder) GetJobs(ctx interface{}) *gomock.Ca
 }
 
 // CreateJob mocks base method
-func (m *MockOrchestrateClient) CreateJob(ctx context.Context, request *txscheduler.CreateJobRequest) (*txscheduler.JobResponse, error) {
+func (m *MockOrchestrateClient) CreateJob(ctx context.Context, request *api.CreateJobRequest) (*api.JobResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateJob", ctx, request)
-	ret0, _ := ret[0].(*txscheduler.JobResponse)
+	ret0, _ := ret[0].(*api.JobResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -206,10 +205,10 @@ func (mr *MockOrchestrateClientMockRecorder) CreateJob(ctx, request interface{})
 }
 
 // UpdateJob mocks base method
-func (m *MockOrchestrateClient) UpdateJob(ctx context.Context, jobUUID string, request *txscheduler.UpdateJobRequest) (*txscheduler.JobResponse, error) {
+func (m *MockOrchestrateClient) UpdateJob(ctx context.Context, jobUUID string, request *api.UpdateJobRequest) (*api.JobResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateJob", ctx, jobUUID, request)
-	ret0, _ := ret[0].(*txscheduler.JobResponse)
+	ret0, _ := ret[0].(*api.JobResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -249,10 +248,10 @@ func (mr *MockOrchestrateClientMockRecorder) ResendJobTx(ctx, jobUUID interface{
 }
 
 // SearchJob mocks base method
-func (m *MockOrchestrateClient) SearchJob(ctx context.Context, filters *entities.JobFilters) ([]*txscheduler.JobResponse, error) {
+func (m *MockOrchestrateClient) SearchJob(ctx context.Context, filters *entities.JobFilters) ([]*api.JobResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SearchJob", ctx, filters)
-	ret0, _ := ret[0].([]*txscheduler.JobResponse)
+	ret0, _ := ret[0].([]*api.JobResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -293,10 +292,10 @@ func (mr *MockOrchestrateClientMockRecorder) Prometheus(arg0 interface{}) *gomoc
 }
 
 // CreateAccount mocks base method
-func (m *MockOrchestrateClient) CreateAccount(ctx context.Context, request *identitymanager.CreateAccountRequest) (*identitymanager.AccountResponse, error) {
+func (m *MockOrchestrateClient) CreateAccount(ctx context.Context, request *api.CreateAccountRequest) (*api.AccountResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateAccount", ctx, request)
-	ret0, _ := ret[0].(*identitymanager.AccountResponse)
+	ret0, _ := ret[0].(*api.AccountResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -308,10 +307,10 @@ func (mr *MockOrchestrateClientMockRecorder) CreateAccount(ctx, request interfac
 }
 
 // SearchAccounts mocks base method
-func (m *MockOrchestrateClient) SearchAccounts(ctx context.Context, filters *entities.AccountFilters) ([]*identitymanager.AccountResponse, error) {
+func (m *MockOrchestrateClient) SearchAccounts(ctx context.Context, filters *entities.AccountFilters) ([]*api.AccountResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SearchAccounts", ctx, filters)
-	ret0, _ := ret[0].([]*identitymanager.AccountResponse)
+	ret0, _ := ret[0].([]*api.AccountResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -323,10 +322,10 @@ func (mr *MockOrchestrateClientMockRecorder) SearchAccounts(ctx, filters interfa
 }
 
 // GetAccount mocks base method
-func (m *MockOrchestrateClient) GetAccount(ctx context.Context, address string) (*identitymanager.AccountResponse, error) {
+func (m *MockOrchestrateClient) GetAccount(ctx context.Context, address string) (*api.AccountResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAccount", ctx, address)
-	ret0, _ := ret[0].(*identitymanager.AccountResponse)
+	ret0, _ := ret[0].(*api.AccountResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -338,10 +337,10 @@ func (mr *MockOrchestrateClientMockRecorder) GetAccount(ctx, address interface{}
 }
 
 // ImportAccount mocks base method
-func (m *MockOrchestrateClient) ImportAccount(ctx context.Context, request *identitymanager.ImportAccountRequest) (*identitymanager.AccountResponse, error) {
+func (m *MockOrchestrateClient) ImportAccount(ctx context.Context, request *api.ImportAccountRequest) (*api.AccountResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ImportAccount", ctx, request)
-	ret0, _ := ret[0].(*identitymanager.AccountResponse)
+	ret0, _ := ret[0].(*api.AccountResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -353,10 +352,10 @@ func (mr *MockOrchestrateClientMockRecorder) ImportAccount(ctx, request interfac
 }
 
 // UpdateAccount mocks base method
-func (m *MockOrchestrateClient) UpdateAccount(ctx context.Context, address string, request *identitymanager.UpdateAccountRequest) (*identitymanager.AccountResponse, error) {
+func (m *MockOrchestrateClient) UpdateAccount(ctx context.Context, address string, request *api.UpdateAccountRequest) (*api.AccountResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateAccount", ctx, address, request)
-	ret0, _ := ret[0].(*identitymanager.AccountResponse)
+	ret0, _ := ret[0].(*api.AccountResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -368,7 +367,7 @@ func (mr *MockOrchestrateClientMockRecorder) UpdateAccount(ctx, address, request
 }
 
 // SignPayload mocks base method
-func (m *MockOrchestrateClient) SignPayload(ctx context.Context, address string, request *identitymanager.SignPayloadRequest) (string, error) {
+func (m *MockOrchestrateClient) SignPayload(ctx context.Context, address string, request *api.SignPayloadRequest) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SignPayload", ctx, address, request)
 	ret0, _ := ret[0].(string)
@@ -383,7 +382,7 @@ func (mr *MockOrchestrateClientMockRecorder) SignPayload(ctx, address, request i
 }
 
 // SignTypedData mocks base method
-func (m *MockOrchestrateClient) SignTypedData(ctx context.Context, address string, request *identitymanager.SignTypedDataRequest) (string, error) {
+func (m *MockOrchestrateClient) SignTypedData(ctx context.Context, address string, request *api.SignTypedDataRequest) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SignTypedData", ctx, address, request)
 	ret0, _ := ret[0].(string)
@@ -449,10 +448,10 @@ func (m *MockTransactionClient) EXPECT() *MockTransactionClientMockRecorder {
 }
 
 // SendContractTransaction mocks base method
-func (m *MockTransactionClient) SendContractTransaction(ctx context.Context, request *txscheduler.SendTransactionRequest) (*txscheduler.TransactionResponse, error) {
+func (m *MockTransactionClient) SendContractTransaction(ctx context.Context, request *api.SendTransactionRequest) (*api.TransactionResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SendContractTransaction", ctx, request)
-	ret0, _ := ret[0].(*txscheduler.TransactionResponse)
+	ret0, _ := ret[0].(*api.TransactionResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -464,10 +463,10 @@ func (mr *MockTransactionClientMockRecorder) SendContractTransaction(ctx, reques
 }
 
 // SendDeployTransaction mocks base method
-func (m *MockTransactionClient) SendDeployTransaction(ctx context.Context, request *txscheduler.DeployContractRequest) (*txscheduler.TransactionResponse, error) {
+func (m *MockTransactionClient) SendDeployTransaction(ctx context.Context, request *api.DeployContractRequest) (*api.TransactionResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SendDeployTransaction", ctx, request)
-	ret0, _ := ret[0].(*txscheduler.TransactionResponse)
+	ret0, _ := ret[0].(*api.TransactionResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -479,10 +478,10 @@ func (mr *MockTransactionClientMockRecorder) SendDeployTransaction(ctx, request 
 }
 
 // SendRawTransaction mocks base method
-func (m *MockTransactionClient) SendRawTransaction(ctx context.Context, request *txscheduler.RawTransactionRequest) (*txscheduler.TransactionResponse, error) {
+func (m *MockTransactionClient) SendRawTransaction(ctx context.Context, request *api.RawTransactionRequest) (*api.TransactionResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SendRawTransaction", ctx, request)
-	ret0, _ := ret[0].(*txscheduler.TransactionResponse)
+	ret0, _ := ret[0].(*api.TransactionResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -494,10 +493,10 @@ func (mr *MockTransactionClientMockRecorder) SendRawTransaction(ctx, request int
 }
 
 // SendTransferTransaction mocks base method
-func (m *MockTransactionClient) SendTransferTransaction(ctx context.Context, request *txscheduler.TransferRequest) (*txscheduler.TransactionResponse, error) {
+func (m *MockTransactionClient) SendTransferTransaction(ctx context.Context, request *api.TransferRequest) (*api.TransactionResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SendTransferTransaction", ctx, request)
-	ret0, _ := ret[0].(*txscheduler.TransactionResponse)
+	ret0, _ := ret[0].(*api.TransactionResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -509,10 +508,10 @@ func (mr *MockTransactionClientMockRecorder) SendTransferTransaction(ctx, reques
 }
 
 // GetTxRequest mocks base method
-func (m *MockTransactionClient) GetTxRequest(ctx context.Context, txRequestUUID string) (*txscheduler.TransactionResponse, error) {
+func (m *MockTransactionClient) GetTxRequest(ctx context.Context, txRequestUUID string) (*api.TransactionResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetTxRequest", ctx, txRequestUUID)
-	ret0, _ := ret[0].(*txscheduler.TransactionResponse)
+	ret0, _ := ret[0].(*api.TransactionResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -547,10 +546,10 @@ func (m *MockScheduleClient) EXPECT() *MockScheduleClientMockRecorder {
 }
 
 // GetSchedule mocks base method
-func (m *MockScheduleClient) GetSchedule(ctx context.Context, scheduleUUID string) (*txscheduler.ScheduleResponse, error) {
+func (m *MockScheduleClient) GetSchedule(ctx context.Context, scheduleUUID string) (*api.ScheduleResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetSchedule", ctx, scheduleUUID)
-	ret0, _ := ret[0].(*txscheduler.ScheduleResponse)
+	ret0, _ := ret[0].(*api.ScheduleResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -562,10 +561,10 @@ func (mr *MockScheduleClientMockRecorder) GetSchedule(ctx, scheduleUUID interfac
 }
 
 // GetSchedules mocks base method
-func (m *MockScheduleClient) GetSchedules(ctx context.Context) ([]*txscheduler.ScheduleResponse, error) {
+func (m *MockScheduleClient) GetSchedules(ctx context.Context) ([]*api.ScheduleResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetSchedules", ctx)
-	ret0, _ := ret[0].([]*txscheduler.ScheduleResponse)
+	ret0, _ := ret[0].([]*api.ScheduleResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -577,10 +576,10 @@ func (mr *MockScheduleClientMockRecorder) GetSchedules(ctx interface{}) *gomock.
 }
 
 // CreateSchedule mocks base method
-func (m *MockScheduleClient) CreateSchedule(ctx context.Context, request *txscheduler.CreateScheduleRequest) (*txscheduler.ScheduleResponse, error) {
+func (m *MockScheduleClient) CreateSchedule(ctx context.Context, request *api.CreateScheduleRequest) (*api.ScheduleResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateSchedule", ctx, request)
-	ret0, _ := ret[0].(*txscheduler.ScheduleResponse)
+	ret0, _ := ret[0].(*api.ScheduleResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -615,10 +614,10 @@ func (m *MockJobClient) EXPECT() *MockJobClientMockRecorder {
 }
 
 // GetJob mocks base method
-func (m *MockJobClient) GetJob(ctx context.Context, jobUUID string) (*txscheduler.JobResponse, error) {
+func (m *MockJobClient) GetJob(ctx context.Context, jobUUID string) (*api.JobResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetJob", ctx, jobUUID)
-	ret0, _ := ret[0].(*txscheduler.JobResponse)
+	ret0, _ := ret[0].(*api.JobResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -630,10 +629,10 @@ func (mr *MockJobClientMockRecorder) GetJob(ctx, jobUUID interface{}) *gomock.Ca
 }
 
 // GetJobs mocks base method
-func (m *MockJobClient) GetJobs(ctx context.Context) ([]*txscheduler.JobResponse, error) {
+func (m *MockJobClient) GetJobs(ctx context.Context) ([]*api.JobResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetJobs", ctx)
-	ret0, _ := ret[0].([]*txscheduler.JobResponse)
+	ret0, _ := ret[0].([]*api.JobResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -645,10 +644,10 @@ func (mr *MockJobClientMockRecorder) GetJobs(ctx interface{}) *gomock.Call {
 }
 
 // CreateJob mocks base method
-func (m *MockJobClient) CreateJob(ctx context.Context, request *txscheduler.CreateJobRequest) (*txscheduler.JobResponse, error) {
+func (m *MockJobClient) CreateJob(ctx context.Context, request *api.CreateJobRequest) (*api.JobResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateJob", ctx, request)
-	ret0, _ := ret[0].(*txscheduler.JobResponse)
+	ret0, _ := ret[0].(*api.JobResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -660,10 +659,10 @@ func (mr *MockJobClientMockRecorder) CreateJob(ctx, request interface{}) *gomock
 }
 
 // UpdateJob mocks base method
-func (m *MockJobClient) UpdateJob(ctx context.Context, jobUUID string, request *txscheduler.UpdateJobRequest) (*txscheduler.JobResponse, error) {
+func (m *MockJobClient) UpdateJob(ctx context.Context, jobUUID string, request *api.UpdateJobRequest) (*api.JobResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateJob", ctx, jobUUID, request)
-	ret0, _ := ret[0].(*txscheduler.JobResponse)
+	ret0, _ := ret[0].(*api.JobResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -703,10 +702,10 @@ func (mr *MockJobClientMockRecorder) ResendJobTx(ctx, jobUUID interface{}) *gomo
 }
 
 // SearchJob mocks base method
-func (m *MockJobClient) SearchJob(ctx context.Context, filters *entities.JobFilters) ([]*txscheduler.JobResponse, error) {
+func (m *MockJobClient) SearchJob(ctx context.Context, filters *entities.JobFilters) ([]*api.JobResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SearchJob", ctx, filters)
-	ret0, _ := ret[0].([]*txscheduler.JobResponse)
+	ret0, _ := ret[0].([]*api.JobResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -793,10 +792,10 @@ func (m *MockAccountClient) EXPECT() *MockAccountClientMockRecorder {
 }
 
 // CreateAccount mocks base method
-func (m *MockAccountClient) CreateAccount(ctx context.Context, request *identitymanager.CreateAccountRequest) (*identitymanager.AccountResponse, error) {
+func (m *MockAccountClient) CreateAccount(ctx context.Context, request *api.CreateAccountRequest) (*api.AccountResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateAccount", ctx, request)
-	ret0, _ := ret[0].(*identitymanager.AccountResponse)
+	ret0, _ := ret[0].(*api.AccountResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -808,10 +807,10 @@ func (mr *MockAccountClientMockRecorder) CreateAccount(ctx, request interface{})
 }
 
 // SearchAccounts mocks base method
-func (m *MockAccountClient) SearchAccounts(ctx context.Context, filters *entities.AccountFilters) ([]*identitymanager.AccountResponse, error) {
+func (m *MockAccountClient) SearchAccounts(ctx context.Context, filters *entities.AccountFilters) ([]*api.AccountResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SearchAccounts", ctx, filters)
-	ret0, _ := ret[0].([]*identitymanager.AccountResponse)
+	ret0, _ := ret[0].([]*api.AccountResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -823,10 +822,10 @@ func (mr *MockAccountClientMockRecorder) SearchAccounts(ctx, filters interface{}
 }
 
 // GetAccount mocks base method
-func (m *MockAccountClient) GetAccount(ctx context.Context, address string) (*identitymanager.AccountResponse, error) {
+func (m *MockAccountClient) GetAccount(ctx context.Context, address string) (*api.AccountResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAccount", ctx, address)
-	ret0, _ := ret[0].(*identitymanager.AccountResponse)
+	ret0, _ := ret[0].(*api.AccountResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -838,10 +837,10 @@ func (mr *MockAccountClientMockRecorder) GetAccount(ctx, address interface{}) *g
 }
 
 // ImportAccount mocks base method
-func (m *MockAccountClient) ImportAccount(ctx context.Context, request *identitymanager.ImportAccountRequest) (*identitymanager.AccountResponse, error) {
+func (m *MockAccountClient) ImportAccount(ctx context.Context, request *api.ImportAccountRequest) (*api.AccountResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ImportAccount", ctx, request)
-	ret0, _ := ret[0].(*identitymanager.AccountResponse)
+	ret0, _ := ret[0].(*api.AccountResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -853,10 +852,10 @@ func (mr *MockAccountClientMockRecorder) ImportAccount(ctx, request interface{})
 }
 
 // UpdateAccount mocks base method
-func (m *MockAccountClient) UpdateAccount(ctx context.Context, address string, request *identitymanager.UpdateAccountRequest) (*identitymanager.AccountResponse, error) {
+func (m *MockAccountClient) UpdateAccount(ctx context.Context, address string, request *api.UpdateAccountRequest) (*api.AccountResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateAccount", ctx, address, request)
-	ret0, _ := ret[0].(*identitymanager.AccountResponse)
+	ret0, _ := ret[0].(*api.AccountResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -868,7 +867,7 @@ func (mr *MockAccountClientMockRecorder) UpdateAccount(ctx, address, request int
 }
 
 // SignPayload mocks base method
-func (m *MockAccountClient) SignPayload(ctx context.Context, address string, request *identitymanager.SignPayloadRequest) (string, error) {
+func (m *MockAccountClient) SignPayload(ctx context.Context, address string, request *api.SignPayloadRequest) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SignPayload", ctx, address, request)
 	ret0, _ := ret[0].(string)
@@ -883,7 +882,7 @@ func (mr *MockAccountClientMockRecorder) SignPayload(ctx, address, request inter
 }
 
 // SignTypedData mocks base method
-func (m *MockAccountClient) SignTypedData(ctx context.Context, address string, request *identitymanager.SignTypedDataRequest) (string, error) {
+func (m *MockAccountClient) SignTypedData(ctx context.Context, address string, request *api.SignTypedDataRequest) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SignTypedData", ctx, address, request)
 	ret0, _ := ret[0].(string)

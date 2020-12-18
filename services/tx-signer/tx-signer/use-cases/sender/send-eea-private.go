@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/txscheduler"
+	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
@@ -70,7 +70,7 @@ func (uc *sendEEAPrivateTxUseCase) Execute(ctx context.Context, job *entities.Jo
 		return err
 	}
 
-	_, err = uc.client.UpdateJob(ctx, job.UUID, &txschedulertypes.UpdateJobRequest{
+	_, err = uc.client.UpdateJob(ctx, job.UUID, &types.UpdateJobRequest{
 		Transaction: job.Transaction,
 		Status:      utils.StatusStored,
 	})

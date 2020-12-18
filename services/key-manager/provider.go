@@ -41,7 +41,7 @@ func NewInternalConfig() *dynamic.Configuration {
 
 	// Ethereum accounts API
 	cfg.HTTP.Services["ethereum"] = &dynamic.Service{
-		Signer: &dynamic.Signer{},
+		KeyManager: &dynamic.KeyManager{},
 	}
 
 	return cfg

@@ -1,4 +1,4 @@
-package txscheduler
+package api
 
 type RawTransactionRequest struct {
 	ChainName string               `json:"chain" validate:"required" example:"myChain"`

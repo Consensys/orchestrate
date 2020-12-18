@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/txscheduler"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -47,7 +47,7 @@ func (uc *sendETHRawTxUseCase) Execute(ctx context.Context, job *entities.Job) e
 		return errors.FromError(err).ExtendComponent(sendETHRawTxComponent)
 	}
 
-	txUpdateReq := &txschedulertypes.UpdateJobRequest{
+	txUpdateReq := &api.UpdateJobRequest{
 		Transaction: job.Transaction,
 	}
 	if job.InternalData.ParentJobUUID == job.UUID {
@@ -68,7 +68,7 @@ func (uc *sendETHRawTxUseCase) Execute(ctx context.Context, job *entities.Job) e
 
 	if txHash != job.Transaction.Hash {
 		job.Transaction.Hash = txHash
-		_, err = uc.client.UpdateJob(ctx, job.UUID, &txschedulertypes.UpdateJobRequest{
+		_, err = uc.client.UpdateJob(ctx, job.UUID, &api.UpdateJobRequest{
 			Message:     fmt.Sprintf("expected transaction hash %s, but got %s. Overriding", job.Transaction.Hash, txHash),
 			Transaction: job.Transaction,
 			Status:      utils.StatusWarning,

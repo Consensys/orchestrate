@@ -4,12 +4,13 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
+
 	"github.com/gorilla/mux"
 	jsonutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/httputil"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/txscheduler"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/service/formatters"
@@ -65,8 +66,8 @@ func idempotencyKeyMiddleware(next http.Handler) http.Handler {
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Param request body txscheduler.SendTransactionRequest{params=txscheduler.TransactionParams{gasPricePolicy=txscheduler.GasPriceParams{retryPolicy=txscheduler.RetryParams}}} true "Contract transaction request"
-// @Success 202 {object} txscheduler.TransactionResponse "Created contract transaction request"
+// @Param request body api.SendTransactionRequest{params=api.TransactionParams{gasPricePolicy=api.GasPriceParams{retryPolicy=api.RetryParams}}} true "Contract transaction request"
+// @Success 202 {object} api.TransactionResponse "Created contract transaction request"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 409 {object} httputil.ErrorResponse "Already existing transaction"
 // @Failure 422 {object} httputil.ErrorResponse "Unprocessable parameters were sent"
@@ -76,7 +77,7 @@ func (c *TransactionsController) send(rw http.ResponseWriter, request *http.Requ
 	rw.Header().Set("Content-Type", "application/json")
 	ctx := request.Context()
 
-	txRequest := &txscheduler.SendTransactionRequest{}
+	txRequest := &api.SendTransactionRequest{}
 	if err := jsonutils.UnmarshalBody(request.Body, txRequest); err != nil {
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
 		return
@@ -106,8 +107,8 @@ func (c *TransactionsController) send(rw http.ResponseWriter, request *http.Requ
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Param request body txscheduler.DeployContractRequest{params=txscheduler.DeployContractParams{gasPricePolicy=txscheduler.GasPriceParams{retryPolicy=txscheduler.RetryParams}}} true "Deployment transaction request"
-// @Success 202 {object} txscheduler.TransactionResponse "Created deployment transaction request"
+// @Param request body api.DeployContractRequest{params=api.DeployContractParams{gasPricePolicy=api.GasPriceParams{retryPolicy=api.RetryParams}}} true "Deployment transaction request"
+// @Success 202 {object} api.TransactionResponse "Created deployment transaction request"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 409 {object} httputil.ErrorResponse "Already existing transaction"
 // @Failure 422 {object} httputil.ErrorResponse "Unprocessable parameters were sent"
@@ -117,7 +118,7 @@ func (c *TransactionsController) deployContract(rw http.ResponseWriter, request 
 	rw.Header().Set("Content-Type", "application/json")
 	ctx := request.Context()
 
-	txRequest := &txscheduler.DeployContractRequest{}
+	txRequest := &api.DeployContractRequest{}
 	if err := jsonutils.UnmarshalBody(request.Body, txRequest); err != nil {
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
 		return
@@ -145,8 +146,8 @@ func (c *TransactionsController) deployContract(rw http.ResponseWriter, request 
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Param request body txscheduler.RawTransactionRequest{params=txscheduler.RawTransactionParams{retryPolicy=txscheduler.IntervalRetryParams}} true "Raw transaction request"
-// @Success 202 {object} txscheduler.TransactionResponse "Created raw transaction request"
+// @Param request body api.RawTransactionRequest{params=api.RawTransactionParams{retryPolicy=api.IntervalRetryParams}} true "Raw transaction request"
+// @Success 202 {object} api.TransactionResponse "Created raw transaction request"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 409 {object} httputil.ErrorResponse "Already existing transaction"
 // @Failure 422 {object} httputil.ErrorResponse "Unprocessable parameters were sent"
@@ -156,7 +157,7 @@ func (c *TransactionsController) sendRaw(rw http.ResponseWriter, request *http.R
 	rw.Header().Set("Content-Type", "application/json")
 	ctx := request.Context()
 
-	txRequest := &txscheduler.RawTransactionRequest{}
+	txRequest := &api.RawTransactionRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, txRequest)
 	if err != nil {
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
@@ -180,8 +181,8 @@ func (c *TransactionsController) sendRaw(rw http.ResponseWriter, request *http.R
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Param request body txscheduler.TransferRequest{params=txscheduler.TransferParams{gasPricePolicy=txscheduler.GasPriceParams{retryPolicy=txscheduler.RetryParams}}} true "Transfer transaction request"
-// @Success 202 {object} txscheduler.TransactionResponse "Created transfer transaction request"
+// @Param request body api.TransferRequest{params=api.TransferParams{gasPricePolicy=api.GasPriceParams{retryPolicy=api.RetryParams}}} true "Transfer transaction request"
+// @Success 202 {object} api.TransactionResponse "Created transfer transaction request"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 409 {object} httputil.ErrorResponse "Already existing transaction"
 // @Failure 422 {object} httputil.ErrorResponse "Unprocessable parameters were sent"
@@ -191,7 +192,7 @@ func (c *TransactionsController) transfer(rw http.ResponseWriter, request *http.
 	rw.Header().Set("Content-Type", "application/json")
 	ctx := request.Context()
 
-	txRequest := &txscheduler.TransferRequest{}
+	txRequest := &api.TransferRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, txRequest)
 	if err != nil {
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
@@ -220,7 +221,7 @@ func (c *TransactionsController) transfer(rw http.ResponseWriter, request *http.
 // @Security ApiKeyAuth
 // @Security JWTAuth
 // @Param uuid path string true "UUID of the transaction request"
-// @Success 200 {object} txscheduler.TransactionResponse "Transaction request found"
+// @Success 200 {object} api.TransactionResponse "Transaction request found"
 // @Failure 404 {object} httputil.ErrorResponse "Transaction request not found"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /transactions/{uuid} [get]
@@ -246,7 +247,7 @@ func (c *TransactionsController) getOne(rw http.ResponseWriter, request *http.Re
 // @Security ApiKeyAuth
 // @Security JWTAuth
 // @Param idempotency_keys query []string false "List of idempotency keys" collectionFormat(csv)
-// @Success 200 {array} txscheduler.TransactionResponse "List of transaction requests found"
+// @Success 200 {array} api.TransactionResponse "List of transaction requests found"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid filter in the request"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /transactions [get]
@@ -266,7 +267,7 @@ func (c *TransactionsController) search(rw http.ResponseWriter, request *http.Re
 		return
 	}
 
-	var responses []*txscheduler.TransactionResponse
+	var responses []*api.TransactionResponse
 	for _, txRequest := range txRequests {
 		responses = append(responses, formatters.FormatTxResponse(txRequest))
 	}

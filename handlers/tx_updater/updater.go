@@ -3,7 +3,7 @@ package txupdater
 import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/engine"
 	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
-	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/txscheduler"
+	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 )
 
@@ -27,7 +27,7 @@ func TransactionUpdater(client orchestrateclient.OrchestrateClient) engine.Handl
 			_, err := client.UpdateJob(
 				txctx.Context(),
 				txctx.Envelope.GetJobUUID(),
-				&txschedulertypes.UpdateJobRequest{
+				&types.UpdateJobRequest{
 					Status:  utils.StatusRecovering,
 					Message: txctx.Envelope.Error(),
 				})
@@ -41,7 +41,7 @@ func TransactionUpdater(client orchestrateclient.OrchestrateClient) engine.Handl
 
 		// TODO: Improvement of the log message will be done when we move to clean architecture
 		// TODO: because at the moment it is difficult to know what error messages need to be sent to users and which ones not.
-		_, err := client.UpdateJob(txctx.Context(), txctx.Envelope.GetJobUUID(), &txschedulertypes.UpdateJobRequest{
+		_, err := client.UpdateJob(txctx.Context(), txctx.Envelope.GetJobUUID(), &types.UpdateJobRequest{
 			Status:  utils.StatusFailed,
 			Message: txctx.Envelope.Error(),
 		})

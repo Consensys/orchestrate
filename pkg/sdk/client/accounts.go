@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/ethereum"
 
@@ -13,12 +15,11 @@ import (
 	clientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/client-utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/httputil"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/identitymanager"
 )
 
-func (c *HTTPClient) GetAccount(ctx context.Context, address string) (*types.AccountResponse, error) {
+func (c *HTTPClient) GetAccount(ctx context.Context, address string) (*api.AccountResponse, error) {
 	reqURL := fmt.Sprintf("%v/accounts/%s", c.config.URL, address)
-	resp := &types.AccountResponse{}
+	resp := &api.AccountResponse{}
 
 	response, err := clientutils.GetRequest(ctx, c.client, reqURL)
 	if err != nil {
@@ -35,9 +36,9 @@ func (c *HTTPClient) GetAccount(ctx context.Context, address string) (*types.Acc
 	return resp, nil
 }
 
-func (c *HTTPClient) CreateAccount(ctx context.Context, req *types.CreateAccountRequest) (*types.AccountResponse, error) {
+func (c *HTTPClient) CreateAccount(ctx context.Context, req *api.CreateAccountRequest) (*api.AccountResponse, error) {
 	reqURL := fmt.Sprintf("%v/accounts", c.config.URL)
-	resp := &types.AccountResponse{}
+	resp := &api.AccountResponse{}
 
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, req)
 	if err != nil {
@@ -54,9 +55,9 @@ func (c *HTTPClient) CreateAccount(ctx context.Context, req *types.CreateAccount
 	return resp, nil
 }
 
-func (c *HTTPClient) ImportAccount(ctx context.Context, req *types.ImportAccountRequest) (*types.AccountResponse, error) {
+func (c *HTTPClient) ImportAccount(ctx context.Context, req *api.ImportAccountRequest) (*api.AccountResponse, error) {
 	reqURL := fmt.Sprintf("%v/accounts/import", c.config.URL)
-	resp := &types.AccountResponse{}
+	resp := &api.AccountResponse{}
 
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, req)
 	if err != nil {
@@ -73,9 +74,9 @@ func (c *HTTPClient) ImportAccount(ctx context.Context, req *types.ImportAccount
 	return resp, nil
 }
 
-func (c *HTTPClient) UpdateAccount(ctx context.Context, address string, req *types.UpdateAccountRequest) (*types.AccountResponse, error) {
+func (c *HTTPClient) UpdateAccount(ctx context.Context, address string, req *api.UpdateAccountRequest) (*api.AccountResponse, error) {
 	reqURL := fmt.Sprintf("%v/accounts/%s", c.config.URL, address)
-	resp := &types.AccountResponse{}
+	resp := &api.AccountResponse{}
 
 	response, err := clientutils.PatchRequest(ctx, c.client, reqURL, req)
 	if err != nil {
@@ -92,9 +93,9 @@ func (c *HTTPClient) UpdateAccount(ctx context.Context, address string, req *typ
 	return resp, nil
 }
 
-func (c *HTTPClient) SearchAccounts(ctx context.Context, filters *entities.AccountFilters) ([]*types.AccountResponse, error) {
+func (c *HTTPClient) SearchAccounts(ctx context.Context, filters *entities.AccountFilters) ([]*api.AccountResponse, error) {
 	reqURL := fmt.Sprintf("%v/accounts", c.config.URL)
-	var resp []*types.AccountResponse
+	var resp []*api.AccountResponse
 
 	var qParams []string
 	if len(filters.Aliases) > 0 {
@@ -120,7 +121,7 @@ func (c *HTTPClient) SearchAccounts(ctx context.Context, filters *entities.Accou
 	return resp, nil
 }
 
-func (c *HTTPClient) SignPayload(ctx context.Context, address string, req *types.SignPayloadRequest) (string, error) {
+func (c *HTTPClient) SignPayload(ctx context.Context, address string, req *api.SignPayloadRequest) (string, error) {
 	reqURL := fmt.Sprintf("%v/accounts/%s/sign", c.config.URL, address)
 
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, req)
@@ -134,7 +135,7 @@ func (c *HTTPClient) SignPayload(ctx context.Context, address string, req *types
 	return httputil.ParseStringResponse(ctx, response)
 }
 
-func (c *HTTPClient) SignTypedData(ctx context.Context, address string, request *types.SignTypedDataRequest) (string, error) {
+func (c *HTTPClient) SignTypedData(ctx context.Context, address string, request *api.SignTypedDataRequest) (string, error) {
 	reqURL := fmt.Sprintf("%v/accounts/%s/sign-typed-data", c.config.URL, address)
 
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, request)

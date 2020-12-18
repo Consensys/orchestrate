@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/service/formatters"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager"
@@ -14,7 +16,6 @@ import (
 	jsonutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/httputil"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/identitymanager"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
 )
@@ -50,8 +51,8 @@ func (c *AccountsController) Append(router *mux.Router) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Param request body identitymanager.CreateAccountRequest true "Account creation request"
-// @Success 200 {object} identitymanager.AccountResponse "Account object"
+// @Param request body api.CreateAccountRequest true "Account creation request"
+// @Success 200 {object} api.AccountResponse "Account object"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 401 {object} httputil.ErrorResponse "Unauthorized"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
@@ -60,7 +61,7 @@ func (c *AccountsController) create(rw http.ResponseWriter, request *http.Reques
 	rw.Header().Set("Content-Type", "application/json")
 	ctx := request.Context()
 
-	req := &identitymanager.CreateAccountRequest{}
+	req := &api.CreateAccountRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, req)
 	if err != nil {
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
@@ -83,7 +84,7 @@ func (c *AccountsController) create(rw http.ResponseWriter, request *http.Reques
 // @Security ApiKeyAuth
 // @Security JWTAuth
 // @Param address path string true "selected account address"
-// @Success 200 {object} identitymanager.AccountResponse "Account found"
+// @Success 200 {object} api.AccountResponse "Account found"
 // @Failure 404 {object} httputil.ErrorResponse "Account not found"
 // @Failure 401 {object} httputil.ErrorResponse "Unauthorized"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
@@ -114,7 +115,7 @@ func (c *AccountsController) getOne(rw http.ResponseWriter, request *http.Reques
 // @Security ApiKeyAuth
 // @Security JWTAuth
 // @Param aliases query []string false "List of account aliases" collectionFormat(csv)
-// @Success 200 {array} identitymanager.AccountResponse "List of identities found"
+// @Success 200 {array} api.AccountResponse "List of identities found"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid filter in the request"
 // @Failure 401 {object} httputil.ErrorResponse "Unauthorized"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
@@ -135,7 +136,7 @@ func (c *AccountsController) search(rw http.ResponseWriter, request *http.Reques
 		return
 	}
 
-	var response []*identitymanager.AccountResponse
+	var response []*api.AccountResponse
 	for _, iden := range accs {
 		response = append(response, formatters.FormatAccountResponse(iden))
 	}
@@ -149,8 +150,8 @@ func (c *AccountsController) search(rw http.ResponseWriter, request *http.Reques
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Param request body identitymanager.ImportAccountRequest true "Account creation request"
-// @Success 200 {object} identitymanager.AccountResponse "Account object"
+// @Param request body api.ImportAccountRequest true "Account creation request"
+// @Success 200 {object} api.AccountResponse "Account object"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 422 {object} httputil.ErrorResponse "Unprocessable entity"
 // @Failure 401 {object} httputil.ErrorResponse "Unauthorized"
@@ -161,7 +162,7 @@ func (c *AccountsController) importKey(rw http.ResponseWriter, request *http.Req
 	rw.Header().Set("Content-Type", "application/json")
 	ctx := request.Context()
 
-	req := &identitymanager.ImportAccountRequest{}
+	req := &api.ImportAccountRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, req)
 	if err != nil {
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
@@ -184,8 +185,8 @@ func (c *AccountsController) importKey(rw http.ResponseWriter, request *http.Req
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Param request body identitymanager.UpdateAccountRequest true "Account update request"
-// @Success 200 {object} identitymanager.AccountResponse "Account found"
+// @Param request body api.UpdateAccountRequest true "Account update request"
+// @Success 200 {object} api.AccountResponse "Account found"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 401 {object} httputil.ErrorResponse "Unauthorized"
 // @Failure 404 {object} httputil.ErrorResponse "Account not found"
@@ -195,7 +196,7 @@ func (c *AccountsController) update(rw http.ResponseWriter, request *http.Reques
 	rw.Header().Set("Content-Type", "application/json")
 	ctx := request.Context()
 
-	accRequest := &identitymanager.UpdateAccountRequest{}
+	accRequest := &api.UpdateAccountRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, accRequest)
 	if err != nil {
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
@@ -226,7 +227,7 @@ func (c *AccountsController) update(rw http.ResponseWriter, request *http.Reques
 // @Security ApiKeyAuth
 // @Security JWTAuth
 // @Param address path string true "selected account address"
-// @Success 200 {object} identitymanager.SignPayloadRequest "Data signature"
+// @Success 200 {object} api.SignPayloadRequest "Data signature"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 401 {object} httputil.ErrorResponse "Unauthorized"
 // @Failure 404 {object} httputil.ErrorResponse "Account not found"
@@ -234,7 +235,7 @@ func (c *AccountsController) update(rw http.ResponseWriter, request *http.Reques
 // @Router /accounts/{address}/sign [post]
 func (c *AccountsController) signPayload(rw http.ResponseWriter, request *http.Request) {
 	ctx := request.Context()
-	payloadRequest := &identitymanager.SignPayloadRequest{}
+	payloadRequest := &api.SignPayloadRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, payloadRequest)
 	if err != nil {
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
@@ -263,7 +264,7 @@ func (c *AccountsController) signPayload(rw http.ResponseWriter, request *http.R
 // @Description Signs typed data using ECDSA and the private key of an existing account following the EIP-712 standard
 // @Accept json
 // @Produce text/plain
-// @Param request body identitymanager.SignTypedDataRequest{domainSeparator=ethereum.DomainSeparator} true "Typed data to sign"
+// @Param request body api.SignTypedDataRequest{domainSeparator=ethereum.DomainSeparator} true "Typed data to sign"
 // @Success 200 {string} string "Signed payload"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 401 {object} httputil.ErrorResponse "Unauthorized"
@@ -273,7 +274,7 @@ func (c *AccountsController) signPayload(rw http.ResponseWriter, request *http.R
 // @Router /ethereum/accounts/{address}/sign-typed-data [post]
 func (c *AccountsController) signTypedData(rw http.ResponseWriter, request *http.Request) {
 	ctx := request.Context()
-	signRequest := &identitymanager.SignTypedDataRequest{}
+	signRequest := &api.SignTypedDataRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, signRequest)
 	if err != nil {
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)

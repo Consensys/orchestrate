@@ -7,7 +7,7 @@ import (
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
-	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/txscheduler"
+	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sentry/tx-sentry/use-cases"
 
@@ -74,7 +74,7 @@ func (manager *sessionManager) Start(ctx context.Context, job *entities.Job) {
 		return
 	}
 
-	if ses.retries >= txschedulertypes.SentryMaxRetries {
+	if ses.retries >= types.SentryMaxRetries {
 		logger.Warn("job already reached max retries")
 		return
 	}
@@ -100,9 +100,9 @@ func (manager *sessionManager) Start(ctx context.Context, job *entities.Job) {
 			logger.WithError(err).Error("job listening session unexpectedly stopped")
 		}
 
-		annotations := txschedulertypes.FormatInternalDataToAnnotations(job.InternalData)
+		annotations := types.FormatInternalDataToAnnotations(job.InternalData)
 		annotations.HasBeenRetried = true
-		_, err = manager.client.UpdateJob(ctx, job.UUID, &txschedulertypes.UpdateJobRequest{
+		_, err = manager.client.UpdateJob(ctx, job.UUID, &types.UpdateJobRequest{
 			Annotations: &annotations,
 		})
 
@@ -142,7 +142,7 @@ func (manager *sessionManager) runSession(ctx context.Context, ses *sessionData)
 			}
 
 			ses.retries++
-			if ses.retries >= txschedulertypes.SentryMaxRetries {
+			if ses.retries >= types.SentryMaxRetries {
 				return nil
 			}
 

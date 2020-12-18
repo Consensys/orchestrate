@@ -51,7 +51,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/identitymanager.AccountResponse"
+                                "$ref": "#/definitions/api.AccountResponse"
                             }
                         }
                     },
@@ -99,7 +99,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/identitymanager.CreateAccountRequest"
+                            "$ref": "#/definitions/api.CreateAccountRequest"
                         }
                     }
                 ],
@@ -107,7 +107,7 @@
                     "200": {
                         "description": "Account object",
                         "schema": {
-                            "$ref": "#/definitions/identitymanager.AccountResponse"
+                            "$ref": "#/definitions/api.AccountResponse"
                         }
                     },
                     "400": {
@@ -156,7 +156,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/identitymanager.ImportAccountRequest"
+                            "$ref": "#/definitions/api.ImportAccountRequest"
                         }
                     }
                 ],
@@ -164,7 +164,7 @@
                     "200": {
                         "description": "Account object",
                         "schema": {
-                            "$ref": "#/definitions/identitymanager.AccountResponse"
+                            "$ref": "#/definitions/api.AccountResponse"
                         }
                     },
                     "400": {
@@ -228,7 +228,7 @@
                     "200": {
                         "description": "Account found",
                         "schema": {
-                            "$ref": "#/definitions/identitymanager.AccountResponse"
+                            "$ref": "#/definitions/api.AccountResponse"
                         }
                     },
                     "401": {
@@ -275,7 +275,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/identitymanager.UpdateAccountRequest"
+                            "$ref": "#/definitions/api.UpdateAccountRequest"
                         }
                     }
                 ],
@@ -283,7 +283,7 @@
                     "200": {
                         "description": "Account found",
                         "schema": {
-                            "$ref": "#/definitions/identitymanager.AccountResponse"
+                            "$ref": "#/definitions/api.AccountResponse"
                         }
                     },
                     "400": {
@@ -344,7 +344,7 @@
                     "200": {
                         "description": "Data signature",
                         "schema": {
-                            "$ref": "#/definitions/identitymanager.SignPayloadRequest"
+                            "$ref": "#/definitions/api.SignPayloadRequest"
                         }
                     },
                     "400": {
@@ -499,7 +499,7 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/identitymanager.SignTypedDataRequest"
+                                    "$ref": "#/definitions/api.SignTypedDataRequest"
                                 },
                                 {
                                     "type": "object",
@@ -597,7 +597,7 @@
                             "items": {
                                 "allOf": [
                                     {
-                                        "$ref": "#/definitions/txscheduler.JobResponse"
+                                        "$ref": "#/definitions/api.JobResponse"
                                     },
                                     {
                                         "type": "object",
@@ -605,7 +605,7 @@
                                             "annotations": {
                                                 "allOf": [
                                                     {
-                                                        "$ref": "#/definitions/txscheduler.Annotations"
+                                                        "$ref": "#/definitions/api.Annotations"
                                                     },
                                                     {
                                                         "type": "object",
@@ -613,13 +613,13 @@
                                                             "gasPricePolicy": {
                                                                 "allOf": [
                                                                     {
-                                                                        "$ref": "#/definitions/txscheduler.GasPriceParams"
+                                                                        "$ref": "#/definitions/api.GasPriceParams"
                                                                     },
                                                                     {
                                                                         "type": "object",
                                                                         "properties": {
                                                                             "retryPolicy": {
-                                                                                "$ref": "#/definitions/txscheduler.RetryParams"
+                                                                                "$ref": "#/definitions/api.RetryParams"
                                                                             }
                                                                         }
                                                                     }
@@ -684,7 +684,7 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/txscheduler.CreateJobRequest"
+                                    "$ref": "#/definitions/api.CreateJobRequest"
                                 },
                                 {
                                     "type": "object",
@@ -692,7 +692,7 @@
                                         "annotations": {
                                             "allOf": [
                                                 {
-                                                    "$ref": "#/definitions/txscheduler.Annotations"
+                                                    "$ref": "#/definitions/api.Annotations"
                                                 },
                                                 {
                                                     "type": "object",
@@ -700,13 +700,13 @@
                                                         "gasPricePolicy": {
                                                             "allOf": [
                                                                 {
-                                                                    "$ref": "#/definitions/txscheduler.GasPriceParams"
+                                                                    "$ref": "#/definitions/api.GasPriceParams"
                                                                 },
                                                                 {
                                                                     "type": "object",
                                                                     "properties": {
                                                                         "retryPolicy": {
-                                                                            "$ref": "#/definitions/txscheduler.RetryParams"
+                                                                            "$ref": "#/definitions/api.RetryParams"
                                                                         }
                                                                     }
                                                                 }
@@ -729,7 +729,7 @@
                     "200": {
                         "description": "Created Job",
                         "schema": {
-                            "$ref": "#/definitions/txscheduler.JobResponse"
+                            "$ref": "#/definitions/api.JobResponse"
                         }
                     },
                     "400": {
@@ -783,7 +783,7 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/txscheduler.JobResponse"
+                                    "$ref": "#/definitions/api.JobResponse"
                                 },
                                 {
                                     "type": "object",
@@ -791,7 +791,7 @@
                                         "annotations": {
                                             "allOf": [
                                                 {
-                                                    "$ref": "#/definitions/txscheduler.Annotations"
+                                                    "$ref": "#/definitions/api.Annotations"
                                                 },
                                                 {
                                                     "type": "object",
@@ -799,13 +799,13 @@
                                                         "gasPricePolicy": {
                                                             "allOf": [
                                                                 {
-                                                                    "$ref": "#/definitions/txscheduler.GasPriceParams"
+                                                                    "$ref": "#/definitions/api.GasPriceParams"
                                                                 },
                                                                 {
                                                                     "type": "object",
                                                                     "properties": {
                                                                         "retryPolicy": {
-                                                                            "$ref": "#/definitions/txscheduler.RetryParams"
+                                                                            "$ref": "#/definitions/api.RetryParams"
                                                                         }
                                                                     }
                                                                 }
@@ -860,7 +860,7 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/txscheduler.UpdateJobRequest"
+                                    "$ref": "#/definitions/api.UpdateJobRequest"
                                 },
                                 {
                                     "type": "object",
@@ -868,7 +868,7 @@
                                         "annotations": {
                                             "allOf": [
                                                 {
-                                                    "$ref": "#/definitions/txscheduler.Annotations"
+                                                    "$ref": "#/definitions/api.Annotations"
                                                 },
                                                 {
                                                     "type": "object",
@@ -876,13 +876,13 @@
                                                         "gasPricePolicy": {
                                                             "allOf": [
                                                                 {
-                                                                    "$ref": "#/definitions/txscheduler.GasPriceParams"
+                                                                    "$ref": "#/definitions/api.GasPriceParams"
                                                                 },
                                                                 {
                                                                     "type": "object",
                                                                     "properties": {
                                                                         "retryPolicy": {
-                                                                            "$ref": "#/definitions/txscheduler.RetryParams"
+                                                                            "$ref": "#/definitions/api.RetryParams"
                                                                         }
                                                                     }
                                                                 }
@@ -905,7 +905,7 @@
                     "200": {
                         "description": "Job found",
                         "schema": {
-                            "$ref": "#/definitions/txscheduler.JobResponse"
+                            "$ref": "#/definitions/api.JobResponse"
                         }
                     },
                     "400": {
@@ -1038,7 +1038,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/txscheduler.ScheduleResponse"
+                                "$ref": "#/definitions/api.ScheduleResponse"
                             }
                         }
                     },
@@ -1074,7 +1074,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/txscheduler.CreateScheduleRequest"
+                            "$ref": "#/definitions/api.CreateScheduleRequest"
                         }
                     }
                 ],
@@ -1084,7 +1084,7 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/txscheduler.ScheduleResponse"
+                                    "$ref": "#/definitions/api.ScheduleResponse"
                                 },
                                 {
                                     "type": "object",
@@ -1092,7 +1092,7 @@
                                         "jobs": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/txscheduler.JobResponse"
+                                                "$ref": "#/definitions/api.JobResponse"
                                             }
                                         }
                                     }
@@ -1149,7 +1149,7 @@
                     "200": {
                         "description": "Schedule found",
                         "schema": {
-                            "$ref": "#/definitions/txscheduler.ScheduleResponse"
+                            "$ref": "#/definitions/api.ScheduleResponse"
                         }
                     },
                     "404": {
@@ -1203,7 +1203,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/txscheduler.TransactionResponse"
+                                "$ref": "#/definitions/api.TransactionResponse"
                             }
                         }
                     },
@@ -1249,7 +1249,7 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/txscheduler.DeployContractRequest"
+                                    "$ref": "#/definitions/api.DeployContractRequest"
                                 },
                                 {
                                     "type": "object",
@@ -1257,7 +1257,7 @@
                                         "params": {
                                             "allOf": [
                                                 {
-                                                    "$ref": "#/definitions/txscheduler.DeployContractParams"
+                                                    "$ref": "#/definitions/api.DeployContractParams"
                                                 },
                                                 {
                                                     "type": "object",
@@ -1265,13 +1265,13 @@
                                                         "gasPricePolicy": {
                                                             "allOf": [
                                                                 {
-                                                                    "$ref": "#/definitions/txscheduler.GasPriceParams"
+                                                                    "$ref": "#/definitions/api.GasPriceParams"
                                                                 },
                                                                 {
                                                                     "type": "object",
                                                                     "properties": {
                                                                         "retryPolicy": {
-                                                                            "$ref": "#/definitions/txscheduler.RetryParams"
+                                                                            "$ref": "#/definitions/api.RetryParams"
                                                                         }
                                                                     }
                                                                 }
@@ -1291,7 +1291,7 @@
                     "202": {
                         "description": "Created deployment transaction request",
                         "schema": {
-                            "$ref": "#/definitions/txscheduler.TransactionResponse"
+                            "$ref": "#/definitions/api.TransactionResponse"
                         }
                     },
                     "400": {
@@ -1348,7 +1348,7 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/txscheduler.SendTransactionRequest"
+                                    "$ref": "#/definitions/api.SendTransactionRequest"
                                 },
                                 {
                                     "type": "object",
@@ -1356,7 +1356,7 @@
                                         "params": {
                                             "allOf": [
                                                 {
-                                                    "$ref": "#/definitions/txscheduler.TransactionParams"
+                                                    "$ref": "#/definitions/api.TransactionParams"
                                                 },
                                                 {
                                                     "type": "object",
@@ -1364,13 +1364,13 @@
                                                         "gasPricePolicy": {
                                                             "allOf": [
                                                                 {
-                                                                    "$ref": "#/definitions/txscheduler.GasPriceParams"
+                                                                    "$ref": "#/definitions/api.GasPriceParams"
                                                                 },
                                                                 {
                                                                     "type": "object",
                                                                     "properties": {
                                                                         "retryPolicy": {
-                                                                            "$ref": "#/definitions/txscheduler.RetryParams"
+                                                                            "$ref": "#/definitions/api.RetryParams"
                                                                         }
                                                                     }
                                                                 }
@@ -1390,7 +1390,7 @@
                     "202": {
                         "description": "Created contract transaction request",
                         "schema": {
-                            "$ref": "#/definitions/txscheduler.TransactionResponse"
+                            "$ref": "#/definitions/api.TransactionResponse"
                         }
                     },
                     "400": {
@@ -1447,7 +1447,7 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/txscheduler.RawTransactionRequest"
+                                    "$ref": "#/definitions/api.RawTransactionRequest"
                                 },
                                 {
                                     "type": "object",
@@ -1455,13 +1455,13 @@
                                         "params": {
                                             "allOf": [
                                                 {
-                                                    "$ref": "#/definitions/txscheduler.RawTransactionParams"
+                                                    "$ref": "#/definitions/api.RawTransactionParams"
                                                 },
                                                 {
                                                     "type": "object",
                                                     "properties": {
                                                         "retryPolicy": {
-                                                            "$ref": "#/definitions/txscheduler.IntervalRetryParams"
+                                                            "$ref": "#/definitions/api.IntervalRetryParams"
                                                         }
                                                     }
                                                 }
@@ -1477,7 +1477,7 @@
                     "202": {
                         "description": "Created raw transaction request",
                         "schema": {
-                            "$ref": "#/definitions/txscheduler.TransactionResponse"
+                            "$ref": "#/definitions/api.TransactionResponse"
                         }
                     },
                     "400": {
@@ -1534,7 +1534,7 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/txscheduler.TransferRequest"
+                                    "$ref": "#/definitions/api.TransferRequest"
                                 },
                                 {
                                     "type": "object",
@@ -1542,7 +1542,7 @@
                                         "params": {
                                             "allOf": [
                                                 {
-                                                    "$ref": "#/definitions/txscheduler.TransferParams"
+                                                    "$ref": "#/definitions/api.TransferParams"
                                                 },
                                                 {
                                                     "type": "object",
@@ -1550,13 +1550,13 @@
                                                         "gasPricePolicy": {
                                                             "allOf": [
                                                                 {
-                                                                    "$ref": "#/definitions/txscheduler.GasPriceParams"
+                                                                    "$ref": "#/definitions/api.GasPriceParams"
                                                                 },
                                                                 {
                                                                     "type": "object",
                                                                     "properties": {
                                                                         "retryPolicy": {
-                                                                            "$ref": "#/definitions/txscheduler.RetryParams"
+                                                                            "$ref": "#/definitions/api.RetryParams"
                                                                         }
                                                                     }
                                                                 }
@@ -1576,7 +1576,7 @@
                     "202": {
                         "description": "Created transfer transaction request",
                         "schema": {
-                            "$ref": "#/definitions/txscheduler.TransactionResponse"
+                            "$ref": "#/definitions/api.TransactionResponse"
                         }
                     },
                     "400": {
@@ -1634,7 +1634,7 @@
                     "200": {
                         "description": "Transaction request found",
                         "schema": {
-                            "$ref": "#/definitions/txscheduler.TransactionResponse"
+                            "$ref": "#/definitions/api.TransactionResponse"
                         }
                     },
                     "404": {
@@ -1654,6 +1654,676 @@
         }
     },
     "definitions": {
+        "api.AccountResponse": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string",
+                    "example": "1abae27a0cbfb02945720425d3b80c7e09728534"
+                },
+                "alias": {
+                    "type": "string",
+                    "example": "personal-account"
+                },
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "compressedPublicKey": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string",
+                    "example": "2020-07-09T12:35:42.115395Z"
+                },
+                "publicKey": {
+                    "type": "string",
+                    "example": "048e66b3e549818ea2cb354fb70749f6c8de8fa484f7530fc447d5fe80a1c424e4f5ae648d648c980ae7095d1efad87161d83886ca4b6c498ac22a93da5099014a"
+                },
+                "tenantID": {
+                    "type": "string",
+                    "example": "foo"
+                },
+                "updatedAt": {
+                    "type": "string",
+                    "example": "2020-07-09T12:35:42.115395Z"
+                }
+            }
+        },
+        "api.Annotations": {
+            "type": "object",
+            "properties": {
+                "gasPricePolicy": {
+                    "type": "object",
+                    "$ref": "#/definitions/api.GasPriceParams"
+                },
+                "hasBeenRetried": {
+                    "type": "boolean",
+                    "example": false
+                },
+                "oneTimeKey": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "api.CreateAccountRequest": {
+            "type": "object",
+            "properties": {
+                "alias": {
+                    "type": "string",
+                    "example": "personal-account"
+                },
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "chain": {
+                    "type": "string",
+                    "example": "besu"
+                }
+            }
+        },
+        "api.CreateJobRequest": {
+            "type": "object",
+            "required": [
+                "chainUUID",
+                "scheduleUUID",
+                "transaction",
+                "type"
+            ],
+            "properties": {
+                "annotations": {
+                    "type": "object",
+                    "$ref": "#/definitions/api.Annotations"
+                },
+                "chainUUID": {
+                    "type": "string",
+                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
+                },
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "nextJobUUID": {
+                    "type": "string",
+                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
+                },
+                "parentJobUUID": {
+                    "type": "string",
+                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
+                },
+                "scheduleUUID": {
+                    "type": "string",
+                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
+                },
+                "transaction": {
+                    "type": "object",
+                    "$ref": "#/definitions/entities.ETHTransaction"
+                },
+                "type": {
+                    "type": "string",
+                    "example": "eth://ethereum/transaction"
+                }
+            }
+        },
+        "api.CreateScheduleRequest": {
+            "type": "object"
+        },
+        "api.DeployContractParams": {
+            "type": "object",
+            "required": [
+                "contractName"
+            ],
+            "properties": {
+                "args": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
+                },
+                "contractName": {
+                    "type": "string",
+                    "example": "MyContract"
+                },
+                "contractTag": {
+                    "type": "string",
+                    "example": "v1.1.0"
+                },
+                "from": {
+                    "type": "string",
+                    "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
+                },
+                "gas": {
+                    "type": "string",
+                    "example": "21000"
+                },
+                "gasPrice": {
+                    "type": "string",
+                    "example": "71500000 (wei)"
+                },
+                "gasPricePolicy": {
+                    "type": "object",
+                    "$ref": "#/definitions/api.GasPriceParams"
+                },
+                "oneTimeKey": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "privacyGroupId": {
+                    "type": "string",
+                    "example": "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="
+                },
+                "privateFor": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=",
+                        "B1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="
+                    ]
+                },
+                "privateFrom": {
+                    "type": "string",
+                    "example": "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="
+                },
+                "protocol": {
+                    "type": "string",
+                    "example": "Tessera"
+                },
+                "value": {
+                    "type": "string",
+                    "example": "71500000 (wei)"
+                }
+            }
+        },
+        "api.DeployContractRequest": {
+            "type": "object",
+            "required": [
+                "chain",
+                "params"
+            ],
+            "properties": {
+                "chain": {
+                    "type": "string",
+                    "example": "myChain"
+                },
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "params": {
+                    "type": "object",
+                    "$ref": "#/definitions/api.DeployContractParams"
+                }
+            }
+        },
+        "api.GasPriceParams": {
+            "type": "object",
+            "properties": {
+                "priority": {
+                    "type": "string",
+                    "example": "very-high"
+                },
+                "retryPolicy": {
+                    "type": "object",
+                    "$ref": "#/definitions/api.RetryParams"
+                }
+            }
+        },
+        "api.ImportAccountRequest": {
+            "type": "object",
+            "required": [
+                "privateKey"
+            ],
+            "properties": {
+                "alias": {
+                    "type": "string",
+                    "example": "personal-account"
+                },
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "chain": {
+                    "type": "string",
+                    "example": "quorum"
+                },
+                "privateKey": {
+                    "type": "string",
+                    "example": "66232652FDFFD802B7252A456DBD8F3ECC0352BBDE76C23B40AFE8AEBD714E2D"
+                }
+            }
+        },
+        "api.IntervalRetryParams": {
+            "type": "object",
+            "properties": {
+                "interval": {
+                    "type": "string",
+                    "example": "2m"
+                }
+            }
+        },
+        "api.JobResponse": {
+            "type": "object",
+            "properties": {
+                "annotations": {
+                    "type": "object",
+                    "$ref": "#/definitions/api.Annotations"
+                },
+                "chainUUID": {
+                    "type": "string",
+                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
+                },
+                "createdAt": {
+                    "type": "string",
+                    "example": "2020-07-09T12:35:42.115395Z"
+                },
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "logs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.Log"
+                    }
+                },
+                "nextJobUUID": {
+                    "type": "string",
+                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
+                },
+                "parentJobUUID": {
+                    "type": "string",
+                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
+                },
+                "scheduleUUID": {
+                    "type": "string",
+                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "MINED"
+                },
+                "tenantID": {
+                    "type": "string",
+                    "example": "foo"
+                },
+                "transaction": {
+                    "type": "object",
+                    "$ref": "#/definitions/entities.ETHTransaction"
+                },
+                "type": {
+                    "type": "string",
+                    "example": "eth://ethereum/transaction"
+                },
+                "updatedAt": {
+                    "type": "string",
+                    "example": "2020-07-09T12:35:42.115395Z"
+                },
+                "uuid": {
+                    "type": "string",
+                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
+                }
+            }
+        },
+        "api.RawTransactionParams": {
+            "type": "object",
+            "required": [
+                "raw"
+            ],
+            "properties": {
+                "raw": {
+                    "type": "string",
+                    "example": "0xfe378324abcde723..."
+                },
+                "retryPolicy": {
+                    "type": "object",
+                    "$ref": "#/definitions/api.IntervalRetryParams"
+                }
+            }
+        },
+        "api.RawTransactionRequest": {
+            "type": "object",
+            "required": [
+                "chain",
+                "params"
+            ],
+            "properties": {
+                "chain": {
+                    "type": "string",
+                    "example": "myChain"
+                },
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "params": {
+                    "type": "object",
+                    "$ref": "#/definitions/api.RawTransactionParams"
+                }
+            }
+        },
+        "api.RetryParams": {
+            "type": "object",
+            "properties": {
+                "increment": {
+                    "type": "number",
+                    "example": 0.05
+                },
+                "interval": {
+                    "type": "string",
+                    "example": "2m"
+                },
+                "limit": {
+                    "type": "number",
+                    "example": 0.5
+                }
+            }
+        },
+        "api.ScheduleResponse": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string",
+                    "example": "2020-07-09T12:35:42.115395Z"
+                },
+                "jobs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.JobResponse"
+                    }
+                },
+                "tenantID": {
+                    "type": "string",
+                    "example": "tenant_id"
+                },
+                "uuid": {
+                    "type": "string",
+                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
+                }
+            }
+        },
+        "api.SendTransactionRequest": {
+            "type": "object",
+            "required": [
+                "chain",
+                "params"
+            ],
+            "properties": {
+                "chain": {
+                    "type": "string",
+                    "example": "myChain"
+                },
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "params": {
+                    "type": "object",
+                    "$ref": "#/definitions/api.TransactionParams"
+                }
+            }
+        },
+        "api.SignPayloadRequest": {
+            "type": "object",
+            "required": [
+                "data"
+            ],
+            "properties": {
+                "data": {
+                    "type": "string",
+                    "example": "data to sign"
+                }
+            }
+        },
+        "api.SignTypedDataRequest": {
+            "type": "object",
+            "required": [
+                "domainSeparator",
+                "message",
+                "messageType",
+                "types"
+            ],
+            "properties": {
+                "domainSeparator": {
+                    "type": "object",
+                    "$ref": "#/definitions/ethereum.DomainSeparator"
+                },
+                "message": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "messageType": {
+                    "type": "string",
+                    "example": "Mail"
+                },
+                "types": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/ethereum.Type"
+                        }
+                    }
+                }
+            }
+        },
+        "api.TransactionParams": {
+            "type": "object",
+            "required": [
+                "methodSignature",
+                "to"
+            ],
+            "properties": {
+                "args": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
+                },
+                "from": {
+                    "type": "string",
+                    "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
+                },
+                "gas": {
+                    "type": "string",
+                    "example": "21000"
+                },
+                "gasPrice": {
+                    "type": "string",
+                    "example": "71500000 (wei)"
+                },
+                "gasPricePolicy": {
+                    "type": "object",
+                    "$ref": "#/definitions/api.GasPriceParams"
+                },
+                "methodSignature": {
+                    "type": "string",
+                    "example": "transfer(address,uint256)"
+                },
+                "oneTimeKey": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "privacyGroupId": {
+                    "type": "string",
+                    "example": "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="
+                },
+                "privateFor": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=",
+                        "B1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="
+                    ]
+                },
+                "privateFrom": {
+                    "type": "string",
+                    "example": "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="
+                },
+                "protocol": {
+                    "type": "string",
+                    "example": "Tessera"
+                },
+                "to": {
+                    "type": "string",
+                    "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
+                },
+                "value": {
+                    "type": "string",
+                    "example": "71500000 (wei)"
+                }
+            }
+        },
+        "api.TransactionResponse": {
+            "type": "object",
+            "properties": {
+                "chain": {
+                    "type": "string",
+                    "example": "myChain"
+                },
+                "createdAt": {
+                    "type": "string",
+                    "example": "2020-07-09T12:35:42.115395Z"
+                },
+                "idempotencyKey": {
+                    "type": "string",
+                    "example": "myIdempotencyKey"
+                },
+                "jobs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.JobResponse"
+                    }
+                },
+                "params": {
+                    "type": "string"
+                },
+                "uuid": {
+                    "type": "string",
+                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
+                }
+            }
+        },
+        "api.TransferParams": {
+            "type": "object",
+            "required": [
+                "from",
+                "to",
+                "value"
+            ],
+            "properties": {
+                "from": {
+                    "type": "string",
+                    "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
+                },
+                "gas": {
+                    "type": "string",
+                    "example": "21000"
+                },
+                "gasPrice": {
+                    "type": "string",
+                    "example": "71500000 (wei)"
+                },
+                "gasPricePolicy": {
+                    "type": "object",
+                    "$ref": "#/definitions/api.GasPriceParams"
+                },
+                "to": {
+                    "type": "string",
+                    "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
+                },
+                "value": {
+                    "type": "string",
+                    "example": "71500000 (wei)"
+                }
+            }
+        },
+        "api.TransferRequest": {
+            "type": "object",
+            "required": [
+                "chain",
+                "params"
+            ],
+            "properties": {
+                "chain": {
+                    "type": "string",
+                    "example": "myChain"
+                },
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "params": {
+                    "type": "object",
+                    "$ref": "#/definitions/api.TransferParams"
+                }
+            }
+        },
+        "api.UpdateAccountRequest": {
+            "type": "object",
+            "properties": {
+                "alias": {
+                    "type": "string",
+                    "example": "personal-account"
+                },
+                "attributes": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "api.UpdateJobRequest": {
+            "type": "object",
+            "properties": {
+                "annotations": {
+                    "type": "object",
+                    "$ref": "#/definitions/api.Annotations"
+                },
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Update message"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "MINED"
+                },
+                "transaction": {
+                    "type": "object",
+                    "$ref": "#/definitions/entities.ETHTransaction"
+                }
+            }
+        },
         "entities.ETHTransaction": {
             "type": "object",
             "properties": {
@@ -1806,148 +2476,6 @@
                 }
             }
         },
-        "identitymanager.AccountResponse": {
-            "type": "object",
-            "properties": {
-                "address": {
-                    "type": "string",
-                    "example": "1abae27a0cbfb02945720425d3b80c7e09728534"
-                },
-                "alias": {
-                    "type": "string",
-                    "example": "personal-account"
-                },
-                "attributes": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "compressedPublicKey": {
-                    "type": "string"
-                },
-                "createdAt": {
-                    "type": "string",
-                    "example": "2020-07-09T12:35:42.115395Z"
-                },
-                "publicKey": {
-                    "type": "string",
-                    "example": "048e66b3e549818ea2cb354fb70749f6c8de8fa484f7530fc447d5fe80a1c424e4f5ae648d648c980ae7095d1efad87161d83886ca4b6c498ac22a93da5099014a"
-                },
-                "tenantID": {
-                    "type": "string",
-                    "example": "foo"
-                },
-                "updatedAt": {
-                    "type": "string",
-                    "example": "2020-07-09T12:35:42.115395Z"
-                }
-            }
-        },
-        "identitymanager.CreateAccountRequest": {
-            "type": "object",
-            "properties": {
-                "alias": {
-                    "type": "string",
-                    "example": "personal-account"
-                },
-                "attributes": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "chain": {
-                    "type": "string",
-                    "example": "besu"
-                }
-            }
-        },
-        "identitymanager.ImportAccountRequest": {
-            "type": "object",
-            "required": [
-                "privateKey"
-            ],
-            "properties": {
-                "alias": {
-                    "type": "string",
-                    "example": "personal-account"
-                },
-                "attributes": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "chain": {
-                    "type": "string",
-                    "example": "quorum"
-                },
-                "privateKey": {
-                    "type": "string",
-                    "example": "66232652FDFFD802B7252A456DBD8F3ECC0352BBDE76C23B40AFE8AEBD714E2D"
-                }
-            }
-        },
-        "identitymanager.SignPayloadRequest": {
-            "type": "object",
-            "required": [
-                "data"
-            ],
-            "properties": {
-                "data": {
-                    "type": "string",
-                    "example": "data to sign"
-                }
-            }
-        },
-        "identitymanager.SignTypedDataRequest": {
-            "type": "object",
-            "required": [
-                "domainSeparator",
-                "message",
-                "messageType",
-                "types"
-            ],
-            "properties": {
-                "domainSeparator": {
-                    "type": "object",
-                    "$ref": "#/definitions/ethereum.DomainSeparator"
-                },
-                "message": {
-                    "type": "object",
-                    "additionalProperties": true
-                },
-                "messageType": {
-                    "type": "string",
-                    "example": "Mail"
-                },
-                "types": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/definitions/ethereum.Type"
-                        }
-                    }
-                }
-            }
-        },
-        "identitymanager.UpdateAccountRequest": {
-            "type": "object",
-            "properties": {
-                "alias": {
-                    "type": "string",
-                    "example": "personal-account"
-                },
-                "attributes": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                }
-            }
-        },
         "keymanager.VerifyPayloadRequest": {
             "type": "object",
             "required": [
@@ -1967,534 +2495,6 @@
                 "signature": {
                     "type": "string",
                     "example": "0x6019a3c8..."
-                }
-            }
-        },
-        "txscheduler.Annotations": {
-            "type": "object",
-            "properties": {
-                "gasPricePolicy": {
-                    "type": "object",
-                    "$ref": "#/definitions/txscheduler.GasPriceParams"
-                },
-                "hasBeenRetried": {
-                    "type": "boolean",
-                    "example": false
-                },
-                "oneTimeKey": {
-                    "type": "boolean",
-                    "example": true
-                }
-            }
-        },
-        "txscheduler.CreateJobRequest": {
-            "type": "object",
-            "required": [
-                "chainUUID",
-                "scheduleUUID",
-                "transaction",
-                "type"
-            ],
-            "properties": {
-                "annotations": {
-                    "type": "object",
-                    "$ref": "#/definitions/txscheduler.Annotations"
-                },
-                "chainUUID": {
-                    "type": "string",
-                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
-                },
-                "labels": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "nextJobUUID": {
-                    "type": "string",
-                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
-                },
-                "parentJobUUID": {
-                    "type": "string",
-                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
-                },
-                "scheduleUUID": {
-                    "type": "string",
-                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
-                },
-                "transaction": {
-                    "type": "object",
-                    "$ref": "#/definitions/entities.ETHTransaction"
-                },
-                "type": {
-                    "type": "string",
-                    "example": "eth://ethereum/transaction"
-                }
-            }
-        },
-        "txscheduler.CreateScheduleRequest": {
-            "type": "object"
-        },
-        "txscheduler.DeployContractParams": {
-            "type": "object",
-            "required": [
-                "contractName"
-            ],
-            "properties": {
-                "args": {
-                    "type": "array",
-                    "items": {
-                        "type": "object"
-                    }
-                },
-                "contractName": {
-                    "type": "string",
-                    "example": "MyContract"
-                },
-                "contractTag": {
-                    "type": "string",
-                    "example": "v1.1.0"
-                },
-                "from": {
-                    "type": "string",
-                    "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
-                },
-                "gas": {
-                    "type": "string",
-                    "example": "21000"
-                },
-                "gasPrice": {
-                    "type": "string",
-                    "example": "71500000 (wei)"
-                },
-                "gasPricePolicy": {
-                    "type": "object",
-                    "$ref": "#/definitions/txscheduler.GasPriceParams"
-                },
-                "oneTimeKey": {
-                    "type": "boolean",
-                    "example": true
-                },
-                "privacyGroupId": {
-                    "type": "string",
-                    "example": "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="
-                },
-                "privateFor": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    },
-                    "example": [
-                        "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=",
-                        "B1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="
-                    ]
-                },
-                "privateFrom": {
-                    "type": "string",
-                    "example": "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="
-                },
-                "protocol": {
-                    "type": "string",
-                    "example": "Tessera"
-                },
-                "value": {
-                    "type": "string",
-                    "example": "71500000 (wei)"
-                }
-            }
-        },
-        "txscheduler.DeployContractRequest": {
-            "type": "object",
-            "required": [
-                "chain",
-                "params"
-            ],
-            "properties": {
-                "chain": {
-                    "type": "string",
-                    "example": "myChain"
-                },
-                "labels": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "params": {
-                    "type": "object",
-                    "$ref": "#/definitions/txscheduler.DeployContractParams"
-                }
-            }
-        },
-        "txscheduler.GasPriceParams": {
-            "type": "object",
-            "properties": {
-                "priority": {
-                    "type": "string",
-                    "example": "very-high"
-                },
-                "retryPolicy": {
-                    "type": "object",
-                    "$ref": "#/definitions/txscheduler.RetryParams"
-                }
-            }
-        },
-        "txscheduler.IntervalRetryParams": {
-            "type": "object",
-            "properties": {
-                "interval": {
-                    "type": "string",
-                    "example": "2m"
-                }
-            }
-        },
-        "txscheduler.JobResponse": {
-            "type": "object",
-            "properties": {
-                "annotations": {
-                    "type": "object",
-                    "$ref": "#/definitions/txscheduler.Annotations"
-                },
-                "chainUUID": {
-                    "type": "string",
-                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
-                },
-                "createdAt": {
-                    "type": "string",
-                    "example": "2020-07-09T12:35:42.115395Z"
-                },
-                "labels": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "logs": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/entities.Log"
-                    }
-                },
-                "nextJobUUID": {
-                    "type": "string",
-                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
-                },
-                "parentJobUUID": {
-                    "type": "string",
-                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
-                },
-                "scheduleUUID": {
-                    "type": "string",
-                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
-                },
-                "status": {
-                    "type": "string",
-                    "example": "MINED"
-                },
-                "tenantID": {
-                    "type": "string",
-                    "example": "foo"
-                },
-                "transaction": {
-                    "type": "object",
-                    "$ref": "#/definitions/entities.ETHTransaction"
-                },
-                "type": {
-                    "type": "string",
-                    "example": "eth://ethereum/transaction"
-                },
-                "updatedAt": {
-                    "type": "string",
-                    "example": "2020-07-09T12:35:42.115395Z"
-                },
-                "uuid": {
-                    "type": "string",
-                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
-                }
-            }
-        },
-        "txscheduler.RawTransactionParams": {
-            "type": "object",
-            "required": [
-                "raw"
-            ],
-            "properties": {
-                "raw": {
-                    "type": "string",
-                    "example": "0xfe378324abcde723..."
-                },
-                "retryPolicy": {
-                    "type": "object",
-                    "$ref": "#/definitions/txscheduler.IntervalRetryParams"
-                }
-            }
-        },
-        "txscheduler.RawTransactionRequest": {
-            "type": "object",
-            "required": [
-                "chain",
-                "params"
-            ],
-            "properties": {
-                "chain": {
-                    "type": "string",
-                    "example": "myChain"
-                },
-                "labels": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "params": {
-                    "type": "object",
-                    "$ref": "#/definitions/txscheduler.RawTransactionParams"
-                }
-            }
-        },
-        "txscheduler.RetryParams": {
-            "type": "object",
-            "properties": {
-                "increment": {
-                    "type": "number",
-                    "example": 0.05
-                },
-                "interval": {
-                    "type": "string",
-                    "example": "2m"
-                },
-                "limit": {
-                    "type": "number",
-                    "example": 0.5
-                }
-            }
-        },
-        "txscheduler.ScheduleResponse": {
-            "type": "object",
-            "properties": {
-                "createdAt": {
-                    "type": "string",
-                    "example": "2020-07-09T12:35:42.115395Z"
-                },
-                "jobs": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/txscheduler.JobResponse"
-                    }
-                },
-                "tenantID": {
-                    "type": "string",
-                    "example": "tenant_id"
-                },
-                "uuid": {
-                    "type": "string",
-                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
-                }
-            }
-        },
-        "txscheduler.SendTransactionRequest": {
-            "type": "object",
-            "required": [
-                "chain",
-                "params"
-            ],
-            "properties": {
-                "chain": {
-                    "type": "string",
-                    "example": "myChain"
-                },
-                "labels": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "params": {
-                    "type": "object",
-                    "$ref": "#/definitions/txscheduler.TransactionParams"
-                }
-            }
-        },
-        "txscheduler.TransactionParams": {
-            "type": "object",
-            "required": [
-                "methodSignature",
-                "to"
-            ],
-            "properties": {
-                "args": {
-                    "type": "array",
-                    "items": {
-                        "type": "object"
-                    }
-                },
-                "from": {
-                    "type": "string",
-                    "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
-                },
-                "gas": {
-                    "type": "string",
-                    "example": "21000"
-                },
-                "gasPrice": {
-                    "type": "string",
-                    "example": "71500000 (wei)"
-                },
-                "gasPricePolicy": {
-                    "type": "object",
-                    "$ref": "#/definitions/txscheduler.GasPriceParams"
-                },
-                "methodSignature": {
-                    "type": "string",
-                    "example": "transfer(address,uint256)"
-                },
-                "oneTimeKey": {
-                    "type": "boolean",
-                    "example": true
-                },
-                "privacyGroupId": {
-                    "type": "string",
-                    "example": "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="
-                },
-                "privateFor": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    },
-                    "example": [
-                        "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=",
-                        "B1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="
-                    ]
-                },
-                "privateFrom": {
-                    "type": "string",
-                    "example": "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="
-                },
-                "protocol": {
-                    "type": "string",
-                    "example": "Tessera"
-                },
-                "to": {
-                    "type": "string",
-                    "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
-                },
-                "value": {
-                    "type": "string",
-                    "example": "71500000 (wei)"
-                }
-            }
-        },
-        "txscheduler.TransactionResponse": {
-            "type": "object",
-            "properties": {
-                "chain": {
-                    "type": "string",
-                    "example": "myChain"
-                },
-                "createdAt": {
-                    "type": "string",
-                    "example": "2020-07-09T12:35:42.115395Z"
-                },
-                "idempotencyKey": {
-                    "type": "string",
-                    "example": "myIdempotencyKey"
-                },
-                "jobs": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/txscheduler.JobResponse"
-                    }
-                },
-                "params": {
-                    "type": "string"
-                },
-                "uuid": {
-                    "type": "string",
-                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
-                }
-            }
-        },
-        "txscheduler.TransferParams": {
-            "type": "object",
-            "required": [
-                "from",
-                "to",
-                "value"
-            ],
-            "properties": {
-                "from": {
-                    "type": "string",
-                    "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
-                },
-                "gas": {
-                    "type": "string",
-                    "example": "21000"
-                },
-                "gasPrice": {
-                    "type": "string",
-                    "example": "71500000 (wei)"
-                },
-                "gasPricePolicy": {
-                    "type": "object",
-                    "$ref": "#/definitions/txscheduler.GasPriceParams"
-                },
-                "to": {
-                    "type": "string",
-                    "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
-                },
-                "value": {
-                    "type": "string",
-                    "example": "71500000 (wei)"
-                }
-            }
-        },
-        "txscheduler.TransferRequest": {
-            "type": "object",
-            "required": [
-                "chain",
-                "params"
-            ],
-            "properties": {
-                "chain": {
-                    "type": "string",
-                    "example": "myChain"
-                },
-                "labels": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "params": {
-                    "type": "object",
-                    "$ref": "#/definitions/txscheduler.TransferParams"
-                }
-            }
-        },
-        "txscheduler.UpdateJobRequest": {
-            "type": "object",
-            "properties": {
-                "annotations": {
-                    "type": "object",
-                    "$ref": "#/definitions/txscheduler.Annotations"
-                },
-                "labels": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "message": {
-                    "type": "string",
-                    "example": "Update message"
-                },
-                "status": {
-                    "type": "string",
-                    "example": "MINED"
-                },
-                "transaction": {
-                    "type": "object",
-                    "$ref": "#/definitions/entities.ETHTransaction"
                 }
             }
         }

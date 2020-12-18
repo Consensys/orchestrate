@@ -22,7 +22,7 @@ func TestNewInternalConfig(t *testing.T) {
 						EntryPoints: []string{http.DefaultHTTPAppEntryPoint},
 						Service:     "api",
 						Priority:    math.MaxInt32,
-						Rule:        "PathPrefix(`/transactions`) || PathPrefix(`/schedules`) || PathPrefix(`/jobs`) || PathPrefix(`/accounts`)",
+						Rule:        "PathPrefix(`/transactions`) || PathPrefix(`/schedules`) || PathPrefix(`/jobs`) || PathPrefix(`/accounts`) || PathPrefix(`/faucets`)",
 						Middlewares: []string{"base@logger-base", "auth@multitenancy"},
 					},
 				},

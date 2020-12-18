@@ -38,7 +38,7 @@ func NewBuilder(vault store.Vault, useCases usecases.UseCases) *Builder {
 }
 
 func (b *Builder) Build(ctx context.Context, _ string, configuration interface{}, respModifier func(response *http.Response) error) (http.Handler, error) {
-	cfg, ok := configuration.(*dynamic.Signer)
+	cfg, ok := configuration.(*dynamic.KeyManager)
 	if !ok {
 		return nil, fmt.Errorf("invalid configuration type (expected %T but got %T)", cfg, configuration)
 	}

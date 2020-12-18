@@ -759,6 +759,495 @@ func (mr *MockChainSyncReaderMockRecorder) SyncProgress(ctx, url interface{}) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SyncProgress", reflect.TypeOf((*MockChainSyncReader)(nil).SyncProgress), ctx, url)
 }
 
+// MockMultiClient is a mock of MultiClient interface
+type MockMultiClient struct {
+	ctrl     *gomock.Controller
+	recorder *MockMultiClientMockRecorder
+}
+
+// MockMultiClientMockRecorder is the mock recorder for MockMultiClient
+type MockMultiClientMockRecorder struct {
+	mock *MockMultiClient
+}
+
+// NewMockMultiClient creates a new mock instance
+func NewMockMultiClient(ctrl *gomock.Controller) *MockMultiClient {
+	mock := &MockMultiClient{ctrl: ctrl}
+	mock.recorder = &MockMultiClientMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockMultiClient) EXPECT() *MockMultiClientMockRecorder {
+	return m.recorder
+}
+
+// SendTransaction mocks base method
+func (m *MockMultiClient) SendTransaction(ctx context.Context, url string, args *types0.SendTxArgs) (common.Hash, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SendTransaction", ctx, url, args)
+	ret0, _ := ret[0].(common.Hash)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SendTransaction indicates an expected call of SendTransaction
+func (mr *MockMultiClientMockRecorder) SendTransaction(ctx, url, args interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendTransaction", reflect.TypeOf((*MockMultiClient)(nil).SendTransaction), ctx, url, args)
+}
+
+// SendRawTransaction mocks base method
+func (m *MockMultiClient) SendRawTransaction(ctx context.Context, url, raw string) (common.Hash, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SendRawTransaction", ctx, url, raw)
+	ret0, _ := ret[0].(common.Hash)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SendRawTransaction indicates an expected call of SendRawTransaction
+func (mr *MockMultiClientMockRecorder) SendRawTransaction(ctx, url, raw interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendRawTransaction", reflect.TypeOf((*MockMultiClient)(nil).SendRawTransaction), ctx, url, raw)
+}
+
+// SendRawPrivateTransaction mocks base method
+func (m *MockMultiClient) SendRawPrivateTransaction(ctx context.Context, url, raw string) (common.Hash, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SendRawPrivateTransaction", ctx, url, raw)
+	ret0, _ := ret[0].(common.Hash)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SendRawPrivateTransaction indicates an expected call of SendRawPrivateTransaction
+func (mr *MockMultiClientMockRecorder) SendRawPrivateTransaction(ctx, url, raw interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendRawPrivateTransaction", reflect.TypeOf((*MockMultiClient)(nil).SendRawPrivateTransaction), ctx, url, raw)
+}
+
+// BlockByHash mocks base method
+func (m *MockMultiClient) BlockByHash(ctx context.Context, url string, hash common.Hash) (*types.Block, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BlockByHash", ctx, url, hash)
+	ret0, _ := ret[0].(*types.Block)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// BlockByHash indicates an expected call of BlockByHash
+func (mr *MockMultiClientMockRecorder) BlockByHash(ctx, url, hash interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BlockByHash", reflect.TypeOf((*MockMultiClient)(nil).BlockByHash), ctx, url, hash)
+}
+
+// BlockByNumber mocks base method
+func (m *MockMultiClient) BlockByNumber(ctx context.Context, url string, number *big.Int) (*types.Block, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BlockByNumber", ctx, url, number)
+	ret0, _ := ret[0].(*types.Block)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// BlockByNumber indicates an expected call of BlockByNumber
+func (mr *MockMultiClientMockRecorder) BlockByNumber(ctx, url, number interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BlockByNumber", reflect.TypeOf((*MockMultiClient)(nil).BlockByNumber), ctx, url, number)
+}
+
+// HeaderByHash mocks base method
+func (m *MockMultiClient) HeaderByHash(ctx context.Context, url string, hash common.Hash) (*types.Header, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "HeaderByHash", ctx, url, hash)
+	ret0, _ := ret[0].(*types.Header)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// HeaderByHash indicates an expected call of HeaderByHash
+func (mr *MockMultiClientMockRecorder) HeaderByHash(ctx, url, hash interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HeaderByHash", reflect.TypeOf((*MockMultiClient)(nil).HeaderByHash), ctx, url, hash)
+}
+
+// HeaderByNumber mocks base method
+func (m *MockMultiClient) HeaderByNumber(ctx context.Context, url string, number *big.Int) (*types.Header, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "HeaderByNumber", ctx, url, number)
+	ret0, _ := ret[0].(*types.Header)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// HeaderByNumber indicates an expected call of HeaderByNumber
+func (mr *MockMultiClientMockRecorder) HeaderByNumber(ctx, url, number interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HeaderByNumber", reflect.TypeOf((*MockMultiClient)(nil).HeaderByNumber), ctx, url, number)
+}
+
+// TransactionByHash mocks base method
+func (m *MockMultiClient) TransactionByHash(ctx context.Context, url string, hash common.Hash) (*types.Transaction, bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "TransactionByHash", ctx, url, hash)
+	ret0, _ := ret[0].(*types.Transaction)
+	ret1, _ := ret[1].(bool)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// TransactionByHash indicates an expected call of TransactionByHash
+func (mr *MockMultiClientMockRecorder) TransactionByHash(ctx, url, hash interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TransactionByHash", reflect.TypeOf((*MockMultiClient)(nil).TransactionByHash), ctx, url, hash)
+}
+
+// TransactionReceipt mocks base method
+func (m *MockMultiClient) TransactionReceipt(ctx context.Context, url string, txHash common.Hash) (*ethereum0.Receipt, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "TransactionReceipt", ctx, url, txHash)
+	ret0, _ := ret[0].(*ethereum0.Receipt)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// TransactionReceipt indicates an expected call of TransactionReceipt
+func (mr *MockMultiClientMockRecorder) TransactionReceipt(ctx, url, txHash interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TransactionReceipt", reflect.TypeOf((*MockMultiClient)(nil).TransactionReceipt), ctx, url, txHash)
+}
+
+// BalanceAt mocks base method
+func (m *MockMultiClient) BalanceAt(ctx context.Context, url string, account common.Address, blockNumber *big.Int) (*big.Int, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BalanceAt", ctx, url, account, blockNumber)
+	ret0, _ := ret[0].(*big.Int)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// BalanceAt indicates an expected call of BalanceAt
+func (mr *MockMultiClientMockRecorder) BalanceAt(ctx, url, account, blockNumber interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BalanceAt", reflect.TypeOf((*MockMultiClient)(nil).BalanceAt), ctx, url, account, blockNumber)
+}
+
+// StorageAt mocks base method
+func (m *MockMultiClient) StorageAt(ctx context.Context, url string, account common.Address, key common.Hash, blockNumber *big.Int) ([]byte, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "StorageAt", ctx, url, account, key, blockNumber)
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// StorageAt indicates an expected call of StorageAt
+func (mr *MockMultiClientMockRecorder) StorageAt(ctx, url, account, key, blockNumber interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StorageAt", reflect.TypeOf((*MockMultiClient)(nil).StorageAt), ctx, url, account, key, blockNumber)
+}
+
+// CodeAt mocks base method
+func (m *MockMultiClient) CodeAt(ctx context.Context, url string, account common.Address, blockNumber *big.Int) ([]byte, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CodeAt", ctx, url, account, blockNumber)
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CodeAt indicates an expected call of CodeAt
+func (mr *MockMultiClientMockRecorder) CodeAt(ctx, url, account, blockNumber interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CodeAt", reflect.TypeOf((*MockMultiClient)(nil).CodeAt), ctx, url, account, blockNumber)
+}
+
+// NonceAt mocks base method
+func (m *MockMultiClient) NonceAt(ctx context.Context, url string, account common.Address, blockNumber *big.Int) (uint64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "NonceAt", ctx, url, account, blockNumber)
+	ret0, _ := ret[0].(uint64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NonceAt indicates an expected call of NonceAt
+func (mr *MockMultiClientMockRecorder) NonceAt(ctx, url, account, blockNumber interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NonceAt", reflect.TypeOf((*MockMultiClient)(nil).NonceAt), ctx, url, account, blockNumber)
+}
+
+// PendingBalanceAt mocks base method
+func (m *MockMultiClient) PendingBalanceAt(ctx context.Context, url string, account common.Address) (*big.Int, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PendingBalanceAt", ctx, url, account)
+	ret0, _ := ret[0].(*big.Int)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PendingBalanceAt indicates an expected call of PendingBalanceAt
+func (mr *MockMultiClientMockRecorder) PendingBalanceAt(ctx, url, account interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PendingBalanceAt", reflect.TypeOf((*MockMultiClient)(nil).PendingBalanceAt), ctx, url, account)
+}
+
+// PendingStorageAt mocks base method
+func (m *MockMultiClient) PendingStorageAt(ctx context.Context, url string, account common.Address, key common.Hash) ([]byte, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PendingStorageAt", ctx, url, account, key)
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PendingStorageAt indicates an expected call of PendingStorageAt
+func (mr *MockMultiClientMockRecorder) PendingStorageAt(ctx, url, account, key interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PendingStorageAt", reflect.TypeOf((*MockMultiClient)(nil).PendingStorageAt), ctx, url, account, key)
+}
+
+// PendingCodeAt mocks base method
+func (m *MockMultiClient) PendingCodeAt(ctx context.Context, url string, account common.Address) ([]byte, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PendingCodeAt", ctx, url, account)
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PendingCodeAt indicates an expected call of PendingCodeAt
+func (mr *MockMultiClientMockRecorder) PendingCodeAt(ctx, url, account interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PendingCodeAt", reflect.TypeOf((*MockMultiClient)(nil).PendingCodeAt), ctx, url, account)
+}
+
+// PendingNonceAt mocks base method
+func (m *MockMultiClient) PendingNonceAt(ctx context.Context, url string, account common.Address) (uint64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PendingNonceAt", ctx, url, account)
+	ret0, _ := ret[0].(uint64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PendingNonceAt indicates an expected call of PendingNonceAt
+func (mr *MockMultiClientMockRecorder) PendingNonceAt(ctx, url, account interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PendingNonceAt", reflect.TypeOf((*MockMultiClient)(nil).PendingNonceAt), ctx, url, account)
+}
+
+// CallContract mocks base method
+func (m *MockMultiClient) CallContract(ctx context.Context, url string, msg *ethereum.CallMsg, blockNumber *big.Int) ([]byte, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CallContract", ctx, url, msg, blockNumber)
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CallContract indicates an expected call of CallContract
+func (mr *MockMultiClientMockRecorder) CallContract(ctx, url, msg, blockNumber interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CallContract", reflect.TypeOf((*MockMultiClient)(nil).CallContract), ctx, url, msg, blockNumber)
+}
+
+// PendingCallContract mocks base method
+func (m *MockMultiClient) PendingCallContract(ctx context.Context, url string, msg *ethereum.CallMsg) ([]byte, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PendingCallContract", ctx, url, msg)
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PendingCallContract indicates an expected call of PendingCallContract
+func (mr *MockMultiClientMockRecorder) PendingCallContract(ctx, url, msg interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PendingCallContract", reflect.TypeOf((*MockMultiClient)(nil).PendingCallContract), ctx, url, msg)
+}
+
+// EstimateGas mocks base method
+func (m *MockMultiClient) EstimateGas(ctx context.Context, url string, msg *ethereum.CallMsg) (uint64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "EstimateGas", ctx, url, msg)
+	ret0, _ := ret[0].(uint64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EstimateGas indicates an expected call of EstimateGas
+func (mr *MockMultiClientMockRecorder) EstimateGas(ctx, url, msg interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EstimateGas", reflect.TypeOf((*MockMultiClient)(nil).EstimateGas), ctx, url, msg)
+}
+
+// SuggestGasPrice mocks base method
+func (m *MockMultiClient) SuggestGasPrice(ctx context.Context, url string) (*big.Int, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SuggestGasPrice", ctx, url)
+	ret0, _ := ret[0].(*big.Int)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SuggestGasPrice indicates an expected call of SuggestGasPrice
+func (mr *MockMultiClientMockRecorder) SuggestGasPrice(ctx, url interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SuggestGasPrice", reflect.TypeOf((*MockMultiClient)(nil).SuggestGasPrice), ctx, url)
+}
+
+// Network mocks base method
+func (m *MockMultiClient) Network(ctx context.Context, url string) (*big.Int, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Network", ctx, url)
+	ret0, _ := ret[0].(*big.Int)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Network indicates an expected call of Network
+func (mr *MockMultiClientMockRecorder) Network(ctx, url interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Network", reflect.TypeOf((*MockMultiClient)(nil).Network), ctx, url)
+}
+
+// SyncProgress mocks base method
+func (m *MockMultiClient) SyncProgress(ctx context.Context, url string) (*ethereum.SyncProgress, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SyncProgress", ctx, url)
+	ret0, _ := ret[0].(*ethereum.SyncProgress)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SyncProgress indicates an expected call of SyncProgress
+func (mr *MockMultiClientMockRecorder) SyncProgress(ctx, url interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SyncProgress", reflect.TypeOf((*MockMultiClient)(nil).SyncProgress), ctx, url)
+}
+
+// PrivDistributeRawTransaction mocks base method
+func (m *MockMultiClient) PrivDistributeRawTransaction(ctx context.Context, endpoint, raw string) (common.Hash, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PrivDistributeRawTransaction", ctx, endpoint, raw)
+	ret0, _ := ret[0].(common.Hash)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PrivDistributeRawTransaction indicates an expected call of PrivDistributeRawTransaction
+func (mr *MockMultiClientMockRecorder) PrivDistributeRawTransaction(ctx, endpoint, raw interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivDistributeRawTransaction", reflect.TypeOf((*MockMultiClient)(nil).PrivDistributeRawTransaction), ctx, endpoint, raw)
+}
+
+// PrivateTransactionReceipt mocks base method
+func (m *MockMultiClient) PrivateTransactionReceipt(ctx context.Context, url string, txHash common.Hash) (*ethereum0.Receipt, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PrivateTransactionReceipt", ctx, url, txHash)
+	ret0, _ := ret[0].(*ethereum0.Receipt)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PrivateTransactionReceipt indicates an expected call of PrivateTransactionReceipt
+func (mr *MockMultiClientMockRecorder) PrivateTransactionReceipt(ctx, url, txHash interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivateTransactionReceipt", reflect.TypeOf((*MockMultiClient)(nil).PrivateTransactionReceipt), ctx, url, txHash)
+}
+
+// PrivEEANonce mocks base method
+func (m *MockMultiClient) PrivEEANonce(ctx context.Context, endpoint string, account common.Address, privateFrom string, privateFor []string) (uint64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PrivEEANonce", ctx, endpoint, account, privateFrom, privateFor)
+	ret0, _ := ret[0].(uint64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PrivEEANonce indicates an expected call of PrivEEANonce
+func (mr *MockMultiClientMockRecorder) PrivEEANonce(ctx, endpoint, account, privateFrom, privateFor interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivEEANonce", reflect.TypeOf((*MockMultiClient)(nil).PrivEEANonce), ctx, endpoint, account, privateFrom, privateFor)
+}
+
+// PrivNonce mocks base method
+func (m *MockMultiClient) PrivNonce(ctx context.Context, endpoint string, account common.Address, privacyGroupID string) (uint64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PrivNonce", ctx, endpoint, account, privacyGroupID)
+	ret0, _ := ret[0].(uint64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PrivNonce indicates an expected call of PrivNonce
+func (mr *MockMultiClientMockRecorder) PrivNonce(ctx, endpoint, account, privacyGroupID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivNonce", reflect.TypeOf((*MockMultiClient)(nil).PrivNonce), ctx, endpoint, account, privacyGroupID)
+}
+
+// EEAPrivPrecompiledContractAddr mocks base method
+func (m *MockMultiClient) EEAPrivPrecompiledContractAddr(ctx context.Context, endpoint string) (common.Address, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "EEAPrivPrecompiledContractAddr", ctx, endpoint)
+	ret0, _ := ret[0].(common.Address)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EEAPrivPrecompiledContractAddr indicates an expected call of EEAPrivPrecompiledContractAddr
+func (mr *MockMultiClientMockRecorder) EEAPrivPrecompiledContractAddr(ctx, endpoint interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EEAPrivPrecompiledContractAddr", reflect.TypeOf((*MockMultiClient)(nil).EEAPrivPrecompiledContractAddr), ctx, endpoint)
+}
+
+// SendQuorumRawPrivateTransaction mocks base method
+func (m *MockMultiClient) SendQuorumRawPrivateTransaction(ctx context.Context, url, signedTxHash string, privateFor []string) (common.Hash, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SendQuorumRawPrivateTransaction", ctx, url, signedTxHash, privateFor)
+	ret0, _ := ret[0].(common.Hash)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SendQuorumRawPrivateTransaction indicates an expected call of SendQuorumRawPrivateTransaction
+func (mr *MockMultiClientMockRecorder) SendQuorumRawPrivateTransaction(ctx, url, signedTxHash, privateFor interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendQuorumRawPrivateTransaction", reflect.TypeOf((*MockMultiClient)(nil).SendQuorumRawPrivateTransaction), ctx, url, signedTxHash, privateFor)
+}
+
+// StoreRaw mocks base method
+func (m *MockMultiClient) StoreRaw(ctx context.Context, endpoint string, data []byte, privateFrom string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "StoreRaw", ctx, endpoint, data, privateFrom)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// StoreRaw indicates an expected call of StoreRaw
+func (mr *MockMultiClientMockRecorder) StoreRaw(ctx, endpoint, data, privateFrom interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StoreRaw", reflect.TypeOf((*MockMultiClient)(nil).StoreRaw), ctx, endpoint, data, privateFrom)
+}
+
+// GetStatus mocks base method
+func (m *MockMultiClient) GetStatus(ctx context.Context, endpoint string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStatus", ctx, endpoint)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetStatus indicates an expected call of GetStatus
+func (mr *MockMultiClientMockRecorder) GetStatus(ctx, endpoint interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStatus", reflect.TypeOf((*MockMultiClient)(nil).GetStatus), ctx, endpoint)
+}
+
 // MockClient is a mock of Client interface
 type MockClient struct {
 	ctrl     *gomock.Controller

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/txscheduler"
+	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
@@ -57,7 +57,7 @@ func (uc *sendTesseraMarkingTxUseCase) Execute(ctx context.Context, job *entitie
 		return errors.FromError(err).ExtendComponent(sendTesseraMarkingTxComponent)
 	}
 
-	_, err = uc.client.UpdateJob(ctx, job.UUID, &txschedulertypes.UpdateJobRequest{
+	_, err = uc.client.UpdateJob(ctx, job.UUID, &types.UpdateJobRequest{
 		Transaction: job.Transaction,
 		Status:      utils.StatusPending,
 	})
@@ -80,7 +80,7 @@ func (uc *sendTesseraMarkingTxUseCase) Execute(ctx context.Context, job *entitie
 
 	if txHash != job.Transaction.Hash {
 		job.Transaction.Hash = txHash
-		_, err = uc.client.UpdateJob(ctx, job.UUID, &txschedulertypes.UpdateJobRequest{
+		_, err = uc.client.UpdateJob(ctx, job.UUID, &types.UpdateJobRequest{
 			Message:     fmt.Sprintf("expected transaction hash %s, but got %s. Overriding", job.Transaction.Hash, txHash),
 			Transaction: job.Transaction,
 			Status:      utils.StatusWarning,

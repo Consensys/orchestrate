@@ -11,7 +11,7 @@ import (
 	jsonutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/httputil"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/txscheduler"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/service/formatters"
 )
 
@@ -38,8 +38,8 @@ func (c *SchedulesController) Append(router *mux.Router) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Param request body txscheduler.CreateScheduleRequest true "Schedule creation request"
-// @Success 200 {object} txscheduler.ScheduleResponse{jobs=[]txscheduler.JobResponse} "Created schedule"
+// @Param request body api.CreateScheduleRequest true "Schedule creation request"
+// @Success 200 {object} api.ScheduleResponse{jobs=[]api.JobResponse} "Created schedule"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 422 {object} httputil.ErrorResponse "Unprocessable parameters were sent"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
@@ -48,7 +48,7 @@ func (c *SchedulesController) create(rw http.ResponseWriter, request *http.Reque
 	rw.Header().Set("Content-Type", "application/json")
 	ctx := request.Context()
 
-	scheduleRequest := &txscheduler.CreateScheduleRequest{}
+	scheduleRequest := &api.CreateScheduleRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, scheduleRequest)
 	if err != nil {
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
@@ -71,7 +71,7 @@ func (c *SchedulesController) create(rw http.ResponseWriter, request *http.Reque
 // @Security ApiKeyAuth
 // @Security JWTAuth
 // @Param uuid path string true "UUID of the schedule"
-// @Success 200 {object} txscheduler.ScheduleResponse "Schedule found"
+// @Success 200 {object} api.ScheduleResponse "Schedule found"
 // @Failure 404 {object} httputil.ErrorResponse "Schedule not found"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /schedules/{uuid} [get]
@@ -96,7 +96,7 @@ func (c *SchedulesController) getOne(rw http.ResponseWriter, request *http.Reque
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Success 200 {array} txscheduler.ScheduleResponse "List of schedules found"
+// @Success 200 {array} api.ScheduleResponse "List of schedules found"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /schedules [get]
 func (c *SchedulesController) getAll(rw http.ResponseWriter, request *http.Request) {
@@ -109,7 +109,7 @@ func (c *SchedulesController) getAll(rw http.ResponseWriter, request *http.Reque
 		return
 	}
 
-	var response []*txscheduler.ScheduleResponse
+	var response []*api.ScheduleResponse
 	for _, scheduleEntity := range scheduleEntities {
 		response = append(response, formatters.FormatScheduleResponse(scheduleEntity))
 	}

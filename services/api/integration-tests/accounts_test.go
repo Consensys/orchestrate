@@ -5,6 +5,7 @@ package integrationtests
 import (
 	"fmt"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 	http2 "net/http"
 	"testing"
 	"time"
@@ -15,7 +16,6 @@ import (
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/identitymanager"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/store/models"
@@ -264,7 +264,7 @@ func (s *accountsTestSuite) TestSignPayload() {
 		gock.New(keyManagerURL).Post(fmt.Sprintf("/ethereum/accounts/%s/sign", address)).
 			Reply(200).BodyString(signedPayload)
 
-		response, err := s.client.SignPayload(ctx, address, &types.SignPayloadRequest{
+		response, err := s.client.SignPayload(ctx, address, &api.SignPayloadRequest{
 			Data: payload,
 		})
 		assert.NoError(t, err)
@@ -312,7 +312,7 @@ func (s *accountsTestSuite) TestSignTypedData() {
 			Reply(200).BodyString(signature)
 
 		typedDataRequest := testutils.FakeSignTypedDataRequest()
-		response, err := s.client.SignTypedData(ctx, address, &types.SignTypedDataRequest{
+		response, err := s.client.SignTypedData(ctx, address, &api.SignTypedDataRequest{
 			DomainSeparator: typedDataRequest.DomainSeparator,
 			Types:           typedDataRequest.Types,
 			Message:         typedDataRequest.Message,

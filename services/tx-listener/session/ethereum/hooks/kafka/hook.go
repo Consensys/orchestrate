@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"strings"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/txscheduler"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 
 	"github.com/Shopify/sarama"
@@ -105,7 +105,7 @@ func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *etht
 		_, err := hk.client.UpdateJob(
 			ctx,
 			txResponse.GetJobUUID(),
-			&txschedulertypes.UpdateJobRequest{
+			&api.UpdateJobRequest{
 				Status:  utils.StatusMined,
 				Message: fmt.Sprintf("Transaction mined in block %v", block.NumberU64()),
 			})

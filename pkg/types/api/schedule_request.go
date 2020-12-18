@@ -1,3 +1,3 @@
-package txscheduler
+package api
 
 type CreateScheduleRequest struct{}

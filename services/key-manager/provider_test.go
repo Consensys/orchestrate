@@ -30,7 +30,7 @@ func TestNewInternalConfig(t *testing.T) {
 			Middlewares: make(map[string]*dynamic.Middleware),
 			Services: map[string]*dynamic.Service{
 				"ethereum": {
-					Signer: &dynamic.Signer{},
+					KeyManager: &dynamic.KeyManager{},
 				},
 			},
 		},

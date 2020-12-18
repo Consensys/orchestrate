@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"sync"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 
 	"github.com/containous/traefik/v2/pkg/log"
@@ -17,7 +19,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	pkglog "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
-	identitymanager2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/identitymanager"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/handlers"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/handlers/consumer"
@@ -163,7 +164,7 @@ func importTestIdentities(ctx context.Context) error {
 	}
 
 	for _, privKey := range privKeys {
-		resp, err := orchestrateClient.ImportAccount(ctx, &identitymanager2.ImportAccountRequest{
+		resp, err := orchestrateClient.ImportAccount(ctx, &api.ImportAccountRequest{
 			PrivateKey: privKey.(string),
 		})
 
