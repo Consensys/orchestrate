@@ -164,7 +164,7 @@ func (s *transactionsTestSuite) TestSuccess() {
 		assert.Equal(t, txRequest.Params.To, job.Transaction.To)
 		assert.Equal(t, utils.EthereumTransaction, job.Type)
 
-		evlp, err := s.env.consumer.WaitForEnvelope(job.ScheduleUUID, s.env.kafkaTopicConfig.Crafter, waitForEnvelopeTimeOut)
+		evlp, err := s.env.consumer.WaitForEnvelope(job.ScheduleUUID, s.env.kafkaTopicConfig.Sender, waitForEnvelopeTimeOut)
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
@@ -219,7 +219,7 @@ func (s *transactionsTestSuite) TestSuccess() {
 		assert.Equal(t, txRequest.Params.To, txJob.Transaction.To)
 		assert.Equal(t, utils.EthereumTransaction, txJob.Type)
 
-		fctEvlp, err := s.env.consumer.WaitForEnvelope(faucetJob.ScheduleUUID, s.env.kafkaTopicConfig.Crafter, waitForEnvelopeTimeOut)
+		fctEvlp, err := s.env.consumer.WaitForEnvelope(faucetJob.ScheduleUUID, s.env.kafkaTopicConfig.Sender, waitForEnvelopeTimeOut)
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
@@ -229,7 +229,7 @@ func (s *transactionsTestSuite) TestSuccess() {
 		assert.Equal(t, tx.JobTypeMap[utils.EthereumTransaction].String(), fctEvlp.GetJobTypeString())
 		assert.Equal(t, fctEvlp.GetChainIDString(), chain.ChainID)
 
-		jobEvlp, err := s.env.consumer.WaitForEnvelope(txJob.ScheduleUUID, s.env.kafkaTopicConfig.Crafter, waitForEnvelopeTimeOut)
+		jobEvlp, err := s.env.consumer.WaitForEnvelope(txJob.ScheduleUUID, s.env.kafkaTopicConfig.Sender, waitForEnvelopeTimeOut)
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
@@ -281,7 +281,7 @@ func (s *transactionsTestSuite) TestSuccess() {
 		assert.Equal(t, utils.StatusCreated, markingTxJob.Status)
 		assert.Equal(t, utils.TesseraMarkingTransaction, markingTxJob.Type)
 
-		privTxEvlp, err := s.env.consumer.WaitForEnvelope(privTxJob.ScheduleUUID, s.env.kafkaTopicConfig.Crafter, waitForEnvelopeTimeOut)
+		privTxEvlp, err := s.env.consumer.WaitForEnvelope(privTxJob.ScheduleUUID, s.env.kafkaTopicConfig.Sender, waitForEnvelopeTimeOut)
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
@@ -333,7 +333,7 @@ func (s *transactionsTestSuite) TestSuccess() {
 		assert.Equal(t, utils.StatusCreated, markingTxJob.Status)
 		assert.Equal(t, utils.OrionMarkingTransaction, markingTxJob.Type)
 
-		privTxEvlp, err := s.env.consumer.WaitForEnvelope(privTxJob.ScheduleUUID, s.env.kafkaTopicConfig.Crafter, waitForEnvelopeTimeOut)
+		privTxEvlp, err := s.env.consumer.WaitForEnvelope(privTxJob.ScheduleUUID, s.env.kafkaTopicConfig.Sender, waitForEnvelopeTimeOut)
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
@@ -382,7 +382,7 @@ func (s *transactionsTestSuite) TestSuccess() {
 		assert.Equal(t, txRequest.Params.From, job.Transaction.From)
 		assert.Equal(t, utils.EthereumTransaction, job.Type)
 
-		evlp, err := s.env.consumer.WaitForEnvelope(job.ScheduleUUID, s.env.kafkaTopicConfig.Crafter, waitForEnvelopeTimeOut)
+		evlp, err := s.env.consumer.WaitForEnvelope(job.ScheduleUUID, s.env.kafkaTopicConfig.Sender, waitForEnvelopeTimeOut)
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
@@ -423,7 +423,7 @@ func (s *transactionsTestSuite) TestSuccess() {
 		assert.Equal(t, txRequest.Params.Raw, job.Transaction.Raw)
 		assert.Equal(t, utils.EthereumRawTransaction, job.Type)
 
-		evlp, err := s.env.consumer.WaitForEnvelope(job.ScheduleUUID, s.env.kafkaTopicConfig.Signer, waitForEnvelopeTimeOut)
+		evlp, err := s.env.consumer.WaitForEnvelope(job.ScheduleUUID, s.env.kafkaTopicConfig.Sender, waitForEnvelopeTimeOut)
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
@@ -466,7 +466,7 @@ func (s *transactionsTestSuite) TestSuccess() {
 		assert.Equal(t, txRequest.Params.From, job.Transaction.From)
 		assert.Equal(t, utils.EthereumTransaction, job.Type)
 
-		evlp, err := s.env.consumer.WaitForEnvelope(job.ScheduleUUID, s.env.kafkaTopicConfig.Crafter, waitForEnvelopeTimeOut)
+		evlp, err := s.env.consumer.WaitForEnvelope(job.ScheduleUUID, s.env.kafkaTopicConfig.Sender, waitForEnvelopeTimeOut)
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return

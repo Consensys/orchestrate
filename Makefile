@@ -1,7 +1,7 @@
 GOFILES := $(shell find . -name '*.go' -not -path "./vendor/*" | grep -v pkg/http/handler/dashboard/genstatic/gen.go | grep -v pkg/http/handler/swagger/genstatic/gen.go | egrep -v "^\./\.go" | grep -v _test.go)
 PACKAGES ?= $(shell go list ./... | grep -Fv -e e2e -e examples -e genstatic -e mock )
 INTEGRATION_TEST_PACKAGES ?= $(shell go list ./... | grep integration-tests )
-ORCH_SERVICES = tx-crafter tx-signer tx-listener contract-registry chain-registry api key-manager
+ORCH_SERVICES = tx-sender tx-listener contract-registry chain-registry api key-manager
 ORCH_MIGRATE = contract-registry chain-registry api key-manager
 DEPS_VAULT = vault-init vault vault-import-secrets
 DEPS_POSTGRES_REDIS = postgres-chain-registry postgres-contract-registry postgres-api redis
@@ -93,7 +93,7 @@ help: ## Display this help screen
 
 gen-help: gobuild ## Generate Command Help file
 	@mkdir -p build/cmd
-	@./build/bin/orchestrate help tx-crafter | grep -A 9999 "Global Flags:" | head -n -2 > build/cmd/global.txt
+	@./build/bin/orchestrate help tx-sender | grep -A 9999 "Global Flags:" | head -n -2 > build/cmd/global.txt
 	@for cmd in $(ORCH_SERVICES); do \
 		./build/bin/orchestrate help $$cmd run | grep -B 9999 "Global Flags:" | tail -n +3 | head -n -2 > build/cmd/$$cmd-run.txt; \
 	done

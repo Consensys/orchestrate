@@ -12,9 +12,9 @@ import (
 func TestInit(t *testing.T) {
 	viper.Reset()
 	Init()
-	assert.NotNil(t, GlobalNonceManager(), "Faucet should have been set")
+	assert.NotNil(t, GlobalClient(), "Faucet should have been set")
 
-	var n *NonceManager
-	SetGlobalNonceManager(n)
-	assert.Nil(t, GlobalNonceManager(), "Global should be reset to nil")
+	var n *Client
+	SetGlobalClient(n)
+	assert.Nil(t, GlobalClient(), "Global should be reset to nil")
 }

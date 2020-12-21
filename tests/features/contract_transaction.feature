@@ -250,16 +250,6 @@ Feature: Send contract transactions
       }
       """
     Then the response code should be 202
-    Then Envelopes should be in topic "tx.crafter"
-    Then Envelopes should be in topic "tx.signer"
-    And Envelopes should have the following fields
-      | Nonce | Data | Gas    | GasPrice | From         |
-      | ~     | ~    | ~      | ~        | {{account1}} |
-      | ~     | ~    | ~      | ~        | {{account1}} |
-      | ~     | ~    | 100000 | ~        | {{account1}} |
-      | ~     | ~    | ~      | ~        | {{account2}} |
-      | ~     | ~    | ~      | ~        | {{account2}} |
-      | ~     | ~    | ~      | ~        | {{account2}} |
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
       | Receipt.Status | Receipt.Logs[0].Event             | Receipt.Logs[0].DecodedData.from | Receipt.Logs[0].DecodedData.to             | Receipt.Logs[0].DecodedData.value |
@@ -456,7 +446,6 @@ Feature: Send contract transactions
     Then I register the following response fields
       | alias         | path         |
       | jobFailedUUID | jobs[0].uuid |
-    Then Envelopes should be in topic "tx.crafter"
     Then Envelopes should be in topic "tx.recover"
     When I send "GET" request to "{{global.api}}/jobs/{{jobFailedUUID}}"
     Then the response code should be 200

@@ -12,7 +12,7 @@ import (
 const component = "nonce.redis"
 
 var (
-	nm       *NonceManager
+	nm       *Client
 	initOnce = &sync.Once{}
 	checker  healthz.Check
 )
@@ -31,18 +31,16 @@ func Init() {
 		}
 
 		// Initialize Nonce
-		nm = NewNonceManager(pool, cfg)
+		nm = NewClient(pool, cfg)
 
 		checker = healthz.Timeout(nm.Ping, time.Second*2)
 
-		log.WithFields(log.Fields{
-			"type": "redis",
-		}).Info("nonce: ready")
+		log.Info("redis: ready")
 	})
 }
 
-// GlobalNonceManager returns global NonceManager
-func GlobalNonceManager() *NonceManager {
+// GlobalClient returns global NonceManager
+func GlobalClient() *Client {
 	return nm
 }
 
@@ -51,6 +49,6 @@ func GlobalChecker() healthz.Check {
 }
 
 // SetGlobalNonce sets global NonceManager
-func SetGlobalNonceManager(m *NonceManager) {
+func SetGlobalClient(m *Client) {
 	nm = m
 }

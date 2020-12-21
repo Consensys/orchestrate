@@ -47,10 +47,7 @@ Feature: Deploy ERC20 contract using tx-sentry
       """
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
-    Then Set nonce manager records
-      | Account      | ChainID          | Nonce |
-      | {{account1}} | {{besu.ChainID}} | 1     |
-    Then Set nonce last attributed records
+    Then Set last seen nonce record
       | Account      | ChainID          | Nonce |
       | {{account1}} | {{besu.ChainID}} | 1     |
     Then I track the following envelopes
@@ -85,10 +82,10 @@ Feature: Deploy ERC20 contract using tx-sentry
     And Response should have the following fields
       | status  | logs[0].status | logs[1].status | logs[2].status | logs[3].status | logs[4].status |
       | PENDING | CREATED        | STARTED        | PENDING        | RESENDING      | FAILED         |
-    Then Set nonce manager records
+    Then Set last seen nonce record
       | Account      | ChainID          | Nonce |
       | {{account1}} | {{besu.ChainID}} | 0     |
-    Then Set nonce last attributed records
+    Then Set last seen nonce record
       | Account      | ChainID          | Nonce |
       | {{account1}} | {{besu.ChainID}} | 0     |
     Then I track the following envelopes
@@ -169,7 +166,7 @@ Feature: Deploy ERC20 contract using tx-sentry
       """
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
-    Then Set nonce manager records
+    Then Set last seen nonce record
       | Account      | ChainID          | Nonce |
       | {{account2}} | {{geth.ChainID}} | 1     |
     Then I track the following envelopes
@@ -207,7 +204,7 @@ Feature: Deploy ERC20 contract using tx-sentry
     And Response should have the following fields
       | jobs[0].status | jobs[1].status | jobs[2].status | jobs[3].status |
       | PENDING        | PENDING        | PENDING        | PENDING        |
-    Then Set nonce manager records
+    Then Set last seen nonce record
       | Account      | ChainID          | Nonce |
       | {{account2}} | {{geth.ChainID}} | 0     |
     Then I track the following envelopes
@@ -264,7 +261,7 @@ Feature: Deploy ERC20 contract using tx-sentry
       """
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
-    Then Set nonce manager records
+    Then Set last seen nonce record
       | Account      | ChainID          | Nonce |
       | {{account1}} | {{besu.ChainID}} | 1     |
     Then I track the following envelopes

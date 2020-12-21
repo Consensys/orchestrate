@@ -53,12 +53,6 @@ func TestKafkaConsumerMaxWaitTime(t *testing.T) {
 func TestTopics(t *testing.T) {
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
 
-	KafkaTopicTxCrafter(flgs)
-	assert.Equal(t, "topic-tx-crafter", viper.GetString("topic.tx.crafter"), "From default")
-
-	KafkaTopicTxSigner(flgs)
-	assert.Equal(t, "topic-tx-signer", viper.GetString("topic.tx.signer"), "From default")
-
 	KafkaTopicTxSender(flgs)
 	assert.Equal(t, "topic-tx-sender", viper.GetString("topic.tx.sender"), "From default")
 

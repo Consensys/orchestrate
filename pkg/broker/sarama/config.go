@@ -15,10 +15,6 @@ func init() {
 	_ = viper.BindEnv(KafkaGroupViperKey, kafkaGroupEnv)
 
 	// Kafka topics for the tx workflow
-	viper.SetDefault(TxCrafterViperKey, txCrafterTopicDefault)
-	_ = viper.BindEnv(TxCrafterViperKey, txCrafterTopicEnv)
-	viper.SetDefault(TxSignerViperKey, txSignerTopicDefault)
-	_ = viper.BindEnv(TxSignerViperKey, txSignerTopicEnv)
 	viper.SetDefault(TxSenderViperKey, txSenderTopicDefault)
 	_ = viper.BindEnv(TxSenderViperKey, txSenderTopicEnv)
 	viper.SetDefault(TxDecodedViperKey, txDecodedTopicDefault)
@@ -107,16 +103,6 @@ Environment variable: %q`, kafkaGroupEnv)
 }
 
 const (
-	txCrafterFlag         = "topic-tx-crafter"
-	TxCrafterViperKey     = "topic.tx.crafter"
-	txCrafterTopicEnv     = "TOPIC_TX_CRAFTER"
-	txCrafterTopicDefault = "topic-tx-crafter"
-
-	txSignerFlag         = "topic-tx-signer"
-	TxSignerViperKey     = "topic.tx.signer"
-	txSignerTopicEnv     = "TOPIC_TX_SIGNER"
-	txSignerTopicDefault = "topic-tx-signer"
-
 	txSenderFlag         = "topic-tx-sender"
 	TxSenderViperKey     = "topic.tx.sender"
 	txSenderTopicEnv     = "TOPIC_TX_SENDER"
@@ -134,38 +120,20 @@ const (
 )
 
 type KafkaTopicConfig struct {
-	Crafter string
-	Signer  string
+	Sender  string
 	Decoded string
 	Recover string
 }
 
 func NewKafkaTopicConfig(vipr *viper.Viper) *KafkaTopicConfig {
 	return &KafkaTopicConfig{
-		Crafter: vipr.GetString(TxCrafterViperKey),
-		Signer:  vipr.GetString(TxSignerViperKey),
+		Sender:  vipr.GetString(TxSenderViperKey),
 		Decoded: vipr.GetString(TxDecodedViperKey),
 		Recover: vipr.GetString(TxRecoverViperKey),
 	}
 }
 
 // TODO: implement test for all Topics flags & Group flags
-
-// KafkaTopicTxCrafter register flag for Kafka topic
-func KafkaTopicTxCrafter(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Kafka topic for envelopes waiting for their transaction payload crafted
-Environment variable: %q`, txCrafterTopicEnv)
-	f.String(txCrafterFlag, txCrafterTopicDefault, desc)
-	_ = viper.BindPFlag(TxCrafterViperKey, f.Lookup(txCrafterFlag))
-}
-
-// KafkaTopicTxSigner register flag for Kafka topic
-func KafkaTopicTxSigner(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Kafka topic for envelopes waiting for their transaction signed
-Environment variable: %q`, txSignerTopicEnv)
-	f.String(txSignerFlag, txSignerTopicDefault, desc)
-	_ = viper.BindPFlag(TxSignerViperKey, f.Lookup(txSignerFlag))
-}
 
 // KafkaTopicTxSender register flag for Kafka topic
 func KafkaTopicTxSender(f *pflag.FlagSet) {

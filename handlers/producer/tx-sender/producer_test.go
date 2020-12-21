@@ -39,7 +39,7 @@ func TestPrepareMsg(t *testing.T) {
 	_ = txctx.Envelope.AppendError(errors.NonceTooLowError(""))
 	msg = &sarama.ProducerMessage{}
 	_ = PrepareMsg(txctx, msg)
-	assert.Equal(t, "topic-tx-crafter", msg.Topic, "If invalid nonce out topic should be tx-crafter")
+	assert.Equal(t, "", msg.Topic, "If invalid nonce out topic should be tx-crafter")
 
 	txctx = engine.NewTxContext()
 	txctx.In = m

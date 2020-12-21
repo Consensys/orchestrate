@@ -98,8 +98,7 @@ Feature: Transaction Scheduler Jobs
     And Response should have the following fields
       | uuid             | transaction.from | transaction.to | status  |
       | {{txOneJobUUID}} | {{account1}}     | {{to2}}        | STARTED |
-    Then Envelopes should be in topic "tx.crafter"
-    Then Envelopes should be in topic "tx.signer"
+    Then Envelopes should be in topic "tx.sender"
     And Envelopes should have the following fields
       | Nonce | From         | To      |
       | 1     | {{account1}} | {{to2}} |

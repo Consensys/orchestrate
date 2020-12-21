@@ -6,9 +6,8 @@ import (
 	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/cmd/chain-registry"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/cmd/contract-registry"
 	keymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/cmd/key-manager"
-	txcrafter "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/cmd/tx-crafter"
 	txlistener "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/cmd/tx-listener"
-	txsigner "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/cmd/tx-signer"
+	txsender "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/cmd/tx-sender"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/cmd/utils"
 	authjwt "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/auth/jwt"
 	authkey "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/auth/key"
@@ -34,8 +33,7 @@ func NewCommand() *cobra.Command {
 	jaeger.InitFlags(rootCmd.PersistentFlags())
 
 	// Add Run command
-	rootCmd.AddCommand(txcrafter.NewRootCommand())
-	rootCmd.AddCommand(txsigner.NewRootCommand())
+	rootCmd.AddCommand(txsender.NewRootCommand())
 	rootCmd.AddCommand(txlistener.NewRootCommand())
 	rootCmd.AddCommand(contractregistry.NewRootCommand())
 	rootCmd.AddCommand(api.NewRootCommand())

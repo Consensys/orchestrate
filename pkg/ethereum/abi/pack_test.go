@@ -249,10 +249,10 @@ func TestPack(t *testing.T) {
 		sig, _ := ParseMethodSignature(test.sig)
 		data, err := Pack(sig, test.args...)
 		if test.expectedError {
-			assert.Error(t, err, "Craft (%d/%d): should get an error", i+1, len(testSuite))
+			assert.Error(t, err, "GetNonce (%d/%d): should get an error", i+1, len(testSuite))
 			return
 		}
-		assert.NoError(t, err, "Craft (%d/%d):: should not get an error", i+1, len(testSuite))
-		assert.Equal(t, test.expectedOutput, hexutil.Encode(data), "Craft (%d/%d): expected equal payload", i+1, len(testSuite))
+		assert.NoError(t, err, "GetNonce (%d/%d):: should not get an error", i+1, len(testSuite))
+		assert.Equal(t, test.expectedOutput, hexutil.Encode(data), "GetNonce (%d/%d): expected equal payload", i+1, len(testSuite))
 	}
 }

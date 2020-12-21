@@ -60,14 +60,6 @@ func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID string, tenants 
 		return errors.InvalidStateError(errMessage)
 	}
 
-	var msgTopic string
-	switch {
-	case jobModel.Type == utils.EthereumRawTransaction:
-		msgTopic = uc.topicsCfg.Signer
-	default:
-		msgTopic = uc.topicsCfg.Crafter
-	}
-
 	jobLog := &models.Log{
 		JobID:  &jobModel.ID,
 		Status: utils.StatusStarted,
@@ -82,7 +74,7 @@ func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID string, tenants 
 		return errors.FromError(err).ExtendComponent(startJobComponent)
 	}
 
-	partition, offset, err := envelope.SendJobMessage(ctx, jobEntity, uc.kafkaProducer, msgTopic)
+	partition, offset, err := envelope.SendJobMessage(ctx, jobEntity, uc.kafkaProducer, uc.topicsCfg.Sender)
 	if err != nil {
 		_ = dbtx.Rollback()
 		return errors.FromError(err).ExtendComponent(startJobComponent)

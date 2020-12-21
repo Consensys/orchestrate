@@ -20,7 +20,8 @@ import (
 	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/client"
 	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/contract-registry/client"
 	registry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/contract-registry/proto"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/nonce"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sender/store"
+	redis2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sender/store/redis"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/e2e/cucumber/alias"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/e2e/utils"
 	utils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/utils"
@@ -66,7 +67,7 @@ type ScenarioContext struct {
 
 	ec ethclient.Client
 
-	nonceManager nonce.Manager
+	nonceSender store.NonceSender
 
 	TearDownFunc []func()
 }
@@ -81,7 +82,7 @@ func NewScenarioContext(
 	aliasesReg *alias.Registry,
 	jwtGenerator *generator.JWTGenerator,
 	ec ethclient.Client,
-	nonceManager nonce.Manager,
+	nonceSender store.NonceSender,
 ) *ScenarioContext {
 	sc := &ScenarioContext{
 		chanReg:          chanReg,
@@ -94,7 +95,7 @@ func NewScenarioContext(
 		logger:           log.NewEntry(log.StandardLogger()),
 		jwtGenerator:     jwtGenerator,
 		ec:               ec,
-		nonceManager:     nonceManager,
+		nonceSender:      nonceSender,
 	}
 
 	return sc
@@ -196,6 +197,8 @@ func (sc *ScenarioContext) preProcessTableStep(tableFunc stepTable) stepTable {
 }
 
 func InitializeScenario(s *godog.ScenarioContext) {
+
+	nm := redis2.NewNonceSender(redis.GlobalClient())
 	sc := NewScenarioContext(
 		chanregistry.GlobalChanRegistry(),
 		http.NewClient(http.NewDefaultConfig()),
@@ -206,7 +209,7 @@ func InitializeScenario(s *godog.ScenarioContext) {
 		alias.GlobalAliasRegistry(),
 		generator.GlobalJWTGenerator(),
 		rpcClient.GlobalClient(),
-		redis.GlobalNonceManager(),
+		nm,
 	)
 
 	s.BeforeScenario(sc.init)

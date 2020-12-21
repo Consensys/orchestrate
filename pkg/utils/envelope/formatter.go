@@ -52,10 +52,6 @@ func NewEnvelopeFromJob(job *entities.Job, headers map[string]string) *tx.TxEnve
 		txEnvelope.EnableTxFromOneTimeKey()
 	}
 
-	if job.InternalData.ExpectedNonce != "" {
-		txEnvelope.SetExpectedNonce(job.InternalData.ExpectedNonce)
-	}
-
 	if job.InternalData.ParentJobUUID != "" {
 		txEnvelope.SetParentJobUUID(job.InternalData.ParentJobUUID)
 	}
@@ -74,7 +70,6 @@ func NewJobFromEnvelope(envelope *tx.Envelope, tenantID string) *entities.Job {
 			OneTimeKey:    envelope.IsOneTimeKeySignature(),
 			ChainID:       envelope.GetChainIDString(),
 			ParentJobUUID: envelope.GetParentJobUUID(),
-			ExpectedNonce: envelope.GetExpectedNonce(),
 		},
 		TenantID: tenantID,
 		Transaction: &entities.ETHTransaction{

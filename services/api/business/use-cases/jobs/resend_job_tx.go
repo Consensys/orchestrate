@@ -51,7 +51,7 @@ func (uc *resendJobTxUseCase) Execute(ctx context.Context, jobUUID string, tenan
 		return errors.InvalidStateError(errMessage)
 	}
 
-	partition, offset, err := envelope.SendJobMessage(ctx, jobEntity, uc.kafkaProducer, uc.topicsCfg.Signer)
+	partition, offset, err := envelope.SendJobMessage(ctx, jobEntity, uc.kafkaProducer, uc.topicsCfg.Sender)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(resendJobTxComponent)
 	}
