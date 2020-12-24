@@ -24,7 +24,7 @@ type GetTxUseCase interface {
 }
 
 type SearchTransactionsUseCase interface {
-	Execute(ctx context.Context, filters *entities.TransactionFilters, tenants []string) ([]*entities.TxRequest, error)
+	Execute(ctx context.Context, filters *entities.TransactionRequestFilters, tenants []string) ([]*entities.TxRequest, error)
 }
 
 type SendDeployTxUseCase interface {

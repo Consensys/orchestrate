@@ -8,7 +8,6 @@ import (
 
 func Build(db *pg.DB) store.DataAgents {
 	return store.DataAgents{
-		Chain:  pgda.NewPGChainAgent(db),
-		Faucet: pgda.NewPGFaucetAgent(db),
+		Chain: pgda.NewPGChainAgent(db),
 	}
 }

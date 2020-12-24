@@ -63,10 +63,3 @@ func (s *chainRegistryTestSuite) TestChainRegistry_Chains() {
 	httpSuite.baseURL = s.env.baseURL
 	suite.Run(s.T(), httpSuite)
 }
-
-func (s *chainRegistryTestSuite) TestChainRegistry_Faucets() {
-	httpSuite := new(faucetTestSuite)
-	httpSuite.env = s.env
-	httpSuite.baseURL = s.env.baseURL
-	suite.Run(s.T(), httpSuite)
-}

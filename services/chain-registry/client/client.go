@@ -3,9 +3,7 @@ package client
 import (
 	"context"
 
-	ethcommon "github.com/ethereum/go-ethereum/common"
 	healthz "github.com/heptiolabs/healthcheck"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/chainregistry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/store/models"
 )
 
@@ -21,17 +19,7 @@ type ChainClient interface {
 	UpdateChainByUUID(ctx context.Context, chainUUID string, chain *models.Chain) error
 }
 
-type FaucetClient interface {
-	RegisterFaucet(ctx context.Context, faucet *models.Faucet) (*models.Faucet, error)
-	UpdateFaucetByUUID(ctx context.Context, uuid string, faucet *models.Faucet) (*models.Faucet, error)
-	GetFaucetByUUID(ctx context.Context, faucetUUID string) (*models.Faucet, error)
-	DeleteFaucetByUUID(ctx context.Context, faucetUUID string) error
-	GetFaucetsByChainRule(ctx context.Context, chainRule string) ([]*models.Faucet, error)
-	GetFaucetCandidate(ctx context.Context, sender ethcommon.Address, chainUUID string) (*types.Faucet, error)
-}
-
 type ChainRegistryClient interface {
 	Checker() healthz.Check
 	ChainClient
-	FaucetClient
 }

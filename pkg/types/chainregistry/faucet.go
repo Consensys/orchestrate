@@ -14,9 +14,3 @@ type Faucet struct {
 	Cooldown   time.Duration
 	Creditor   ethcommon.Address
 }
-
-func FaucetToJobLabels(fct *Faucet) map[string]string {
-	return map[string]string{
-		"faucetUUID": fct.UUID,
-	}
-}

@@ -3,6 +3,7 @@
 package api
 
 import (
+	ethclientmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/mock"
 	"testing"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
@@ -34,6 +35,7 @@ func TestApp(t *testing.T) {
 		mockchainregistryclient.NewMockChainRegistryClient(ctrl),
 		mock.NewMockContractRegistryClient(ctrl),
 		keymanagerclient.NewMockKeyManagerClient(ctrl),
+		ethclientmock.NewMockChainStateReader(ctrl),
 		mocks.NewSyncProducer(t, nil),
 		kCfg,
 	)

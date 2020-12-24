@@ -19,10 +19,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/middleware/httpcache"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/middleware/ratelimit"
 	chainUCs "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/chain-registry/use-cases/chains"
-	faucetsUCs "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/chain-registry/use-cases/faucets"
 	ctrl "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/service/controllers"
 	chainctrl "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/service/controllers/chains"
-	faucetctrl "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/service/controllers/faucets"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/store/multi"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/store/postgres"
 )
@@ -52,20 +50,9 @@ func New(
 		chainUCs.NewUpdateChain(dataAgents.Chain),
 	)
 
-	getFaucetsUC := faucetsUCs.NewGetFaucets(dataAgents.Faucet)
-	// Create HTTP Handler for Faucet
-	faucetCtrl := faucetctrl.NewController(
-		getFaucetsUC,
-		faucetsUCs.NewGetFaucet(dataAgents.Faucet),
-		faucetsUCs.NewRegisterFaucet(dataAgents.Faucet),
-		faucetsUCs.NewDeleteFaucet(dataAgents.Faucet),
-		faucetsUCs.NewUpdateFaucet(dataAgents.Faucet),
-		faucetsUCs.NewFaucetCandidateUseCase(getChainUC, getFaucetsUC, ec),
-	)
-
 	chainHandlerOpt := app.HandlerOpt(
 		reflect.TypeOf(&dynamic.Chains{}),
-		ctrl.NewBuilder(chainCtrl, faucetCtrl),
+		ctrl.NewBuilder(chainCtrl),
 	)
 
 	// ReverseProxy Handler

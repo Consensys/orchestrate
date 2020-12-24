@@ -12,6 +12,7 @@ type PGAgents struct {
 	schedule  *PGSchedule
 	txRequest *PGTransactionRequest
 	account   *PGAccount
+	faucet    *PGFaucet
 }
 
 func New(db pg.DB) *PGAgents {
@@ -22,6 +23,7 @@ func New(db pg.DB) *PGAgents {
 		schedule:  NewPGSchedule(db),
 		txRequest: NewPGTransactionRequest(db),
 		account:   NewPGAccount(db),
+		faucet:    NewPGFaucet(db),
 	}
 }
 
@@ -47,4 +49,8 @@ func (a *PGAgents) TransactionRequest() store.TransactionRequestAgent {
 
 func (a *PGAgents) Account() store.AccountAgent {
 	return a.account
+}
+
+func (a *PGAgents) Faucet() store.FaucetAgent {
+	return a.faucet
 }

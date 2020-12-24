@@ -21,7 +21,7 @@ import (
 )
 
 type AccountsController struct {
-	accountUCs       usecases.AccountUseCases
+	ucs              usecases.AccountUseCases
 	keyManagerClient client.KeyManagerClient
 }
 
@@ -69,7 +69,7 @@ func (c *AccountsController) create(rw http.ResponseWriter, request *http.Reques
 	}
 
 	acc := formatters.FormatCreateAccountRequest(req)
-	acc, err = c.accountUCs.CreateAccount().Execute(ctx, acc, "", req.Chain, multitenancy.TenantIDFromContext(ctx))
+	acc, err = c.ucs.CreateAccount().Execute(ctx, acc, "", req.Chain, multitenancy.TenantIDFromContext(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -99,7 +99,7 @@ func (c *AccountsController) getOne(rw http.ResponseWriter, request *http.Reques
 		return
 	}
 
-	acc, err := c.accountUCs.GetAccount().Execute(ctx, address, multitenancy.AllowedTenantsFromContext(ctx))
+	acc, err := c.ucs.GetAccount().Execute(ctx, address, multitenancy.AllowedTenantsFromContext(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -130,7 +130,7 @@ func (c *AccountsController) search(rw http.ResponseWriter, request *http.Reques
 		return
 	}
 
-	accs, err := c.accountUCs.SearchAccounts().Execute(ctx, filters, multitenancy.AllowedTenantsFromContext(ctx))
+	accs, err := c.ucs.SearchAccounts().Execute(ctx, filters, multitenancy.AllowedTenantsFromContext(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -170,7 +170,7 @@ func (c *AccountsController) importKey(rw http.ResponseWriter, request *http.Req
 	}
 
 	accResp := formatters.FormatImportAccountRequest(req)
-	accResp, err = c.accountUCs.CreateAccount().Execute(ctx, accResp, req.PrivateKey, req.Chain, multitenancy.TenantIDFromContext(ctx))
+	accResp, err = c.ucs.CreateAccount().Execute(ctx, accResp, req.PrivateKey, req.Chain, multitenancy.TenantIDFromContext(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -210,7 +210,7 @@ func (c *AccountsController) update(rw http.ResponseWriter, request *http.Reques
 		return
 	}
 
-	accRes, err := c.accountUCs.UpdateAccount().Execute(ctx, acc, multitenancy.AllowedTenantsFromContext(ctx))
+	accRes, err := c.ucs.UpdateAccount().Execute(ctx, acc, multitenancy.AllowedTenantsFromContext(ctx))
 
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)

@@ -8,6 +8,10 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/cenkalti/backoff/v4"
+	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/rpc"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
+
 	logpkg "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api"
@@ -92,7 +96,7 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 		"--rest-port=" + envHTTPPort,
 		"--db-port=" + envPGHostPort,
 		"--kafka-url=" + kafkaExternalHostname,
-		"--log-level=error",
+		"--log-level=panic",
 	}
 
 	err := flgs.Parse(args)
@@ -298,6 +302,10 @@ func newAPI(
 	conf.MetricsURL = chainRegistryMetricsURL
 	chainRegistryClient := chainClient.NewHTTPClient(httpClient, conf2)
 
+	// We mock the calls to the blockchain node
+	newBackOff := func() backoff.BackOff { return utils.NewBackOff(utils.NewConfig(viper.GetViper())) }
+	ethClient := ethclient.NewClient(newBackOff, httpClient)
+
 	pgmngr := postgres.GetManager()
 	txSchedulerConfig := api.NewConfig(viper.GetViper())
 	contractClient.SetGlobalChecker(func() error {
@@ -321,6 +329,7 @@ func newAPI(
 		chainRegistryClient,
 		contractRegistryClient,
 		keyManagerClient,
+		ethClient,
 		sarama.GlobalSyncProducer(),
 		topicCfg,
 	)

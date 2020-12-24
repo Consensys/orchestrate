@@ -383,7 +383,7 @@ func (sc *ScenarioContext) iRegisterTheFollowingChains(table *gherkin.PickleStep
 
 func (sc *ScenarioContext) iRegisterTheFollowingFaucets(table *gherkin.PickleStepArgument_PickleTable) error {
 	tokenTable := utils.ExtractColumns(table, []string{"Headers.Authorization"})
-	interfaceSlices, err := utils.ParseTable(models.Faucet{}, table)
+	interfaceSlices, err := utils.ParseTable(api.RegisterFaucetRequest{}, table)
 
 	if err != nil {
 		return err
@@ -391,16 +391,14 @@ func (sc *ScenarioContext) iRegisterTheFollowingFaucets(table *gherkin.PickleSte
 
 	f := func(uuid, token string) func() {
 		return func() {
-			_ = sc.ChainRegistry.DeleteFaucetByUUID(
-				authutils.WithAuthorization(context.Background(), token),
-				uuid)
+			_ = sc.client.DeleteFaucet(authutils.WithAuthorization(context.Background(), token), uuid)
 		}
 	}
 
 	for i, faucet := range interfaceSlices {
 		token := tokenTable.Rows[i+1].Cells[0].Value
 
-		res, err := sc.ChainRegistry.RegisterFaucet(authutils.WithAuthorization(context.Background(), token), faucet.(*models.Faucet))
+		res, err := sc.client.RegisterFaucet(authutils.WithAuthorization(context.Background(), token), faucet.(*api.RegisterFaucetRequest))
 		if err != nil {
 			return err
 		}

@@ -4,6 +4,8 @@ import (
 	"context"
 	"reflect"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient"
+
 	keymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client"
 
 	"github.com/Shopify/sarama"
@@ -30,6 +32,7 @@ func NewAPI(
 	chainRegistryClient chainregistry.ChainRegistryClient,
 	contractRegistryClient contractregistry.ContractRegistryClient,
 	keyManagerClient keymanager.KeyManagerClient,
+	chainStateReader ethclient.ChainStateReader,
 	syncProducer sarama.SyncProducer,
 	topicCfg *pkgsarama.KafkaTopicConfig,
 ) (*app.App, error) {
@@ -46,7 +49,7 @@ func NewAPI(
 		appMetrics = metrics.NewTransactionSchedulerNopMetrics()
 	}
 
-	ucs := builder.NewUseCases(db, appMetrics, chainRegistryClient, contractRegistryClient, keyManagerClient, syncProducer, topicCfg)
+	ucs := builder.NewUseCases(db, appMetrics, chainRegistryClient, contractRegistryClient, keyManagerClient, chainStateReader, syncProducer, topicCfg)
 
 	// Option of the API
 	apiHandlerOpt := app.HandlerOpt(reflect.TypeOf(&dynamic.API{}), controllers.NewBuilder(ucs, keyManagerClient))

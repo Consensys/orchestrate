@@ -1,14 +1,13 @@
 package chainregistry
 
 import (
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/store/models"
-
-	ethcommon "github.com/ethereum/go-ethereum/common"
 )
 
 // Envelope holds information for a Faucet candidate
 type Request struct {
 	Chain       *models.Chain
-	Beneficiary ethcommon.Address
-	Candidates  map[string]Faucet
+	Beneficiary string
+	Candidates  map[string]*entities.Faucet
 }

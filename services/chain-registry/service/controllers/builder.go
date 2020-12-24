@@ -8,7 +8,6 @@ import (
 	"github.com/gorilla/mux"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/dynamic"
 	chainsctrl "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/service/controllers/chains"
-	faucetctrl "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/service/controllers/faucets"
 )
 
 //go:generate swag init --dir . --generalInfo builder.go --output ../../../../public/swagger-specs/services/chain-registry
@@ -38,14 +37,12 @@ type Builder interface {
 }
 
 type builder struct {
-	chainCtrl  chainsctrl.Controller
-	faucetCtrl faucetctrl.Controller
+	chainCtrl chainsctrl.Controller
 }
 
-func NewBuilder(chainCtrl chainsctrl.Controller, faucetCtrl faucetctrl.Controller) Builder {
+func NewBuilder(chainCtrl chainsctrl.Controller) Builder {
 	return &builder{
-		chainCtrl:  chainCtrl,
-		faucetCtrl: faucetCtrl,
+		chainCtrl: chainCtrl,
 	}
 }
 
@@ -57,7 +54,6 @@ func (b *builder) Build(ctx context.Context, _ string, configuration interface{}
 
 	router := mux.NewRouter()
 	b.chainCtrl.Append(router)
-	b.faucetCtrl.Append(router)
 
 	return router, nil
 }

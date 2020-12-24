@@ -424,6 +424,80 @@ func (mr *MockOrchestrateClientMockRecorder) VerifyTypedDataSignature(ctx, reque
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifyTypedDataSignature", reflect.TypeOf((*MockOrchestrateClient)(nil).VerifyTypedDataSignature), ctx, request)
 }
 
+// RegisterFaucet mocks base method
+func (m *MockOrchestrateClient) RegisterFaucet(ctx context.Context, request *api.RegisterFaucetRequest) (*api.FaucetResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RegisterFaucet", ctx, request)
+	ret0, _ := ret[0].(*api.FaucetResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RegisterFaucet indicates an expected call of RegisterFaucet
+func (mr *MockOrchestrateClientMockRecorder) RegisterFaucet(ctx, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterFaucet", reflect.TypeOf((*MockOrchestrateClient)(nil).RegisterFaucet), ctx, request)
+}
+
+// UpdateFaucet mocks base method
+func (m *MockOrchestrateClient) UpdateFaucet(ctx context.Context, uuid string, request *api.UpdateFaucetRequest) (*api.FaucetResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateFaucet", ctx, uuid, request)
+	ret0, _ := ret[0].(*api.FaucetResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateFaucet indicates an expected call of UpdateFaucet
+func (mr *MockOrchestrateClientMockRecorder) UpdateFaucet(ctx, uuid, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateFaucet", reflect.TypeOf((*MockOrchestrateClient)(nil).UpdateFaucet), ctx, uuid, request)
+}
+
+// GetFaucet mocks base method
+func (m *MockOrchestrateClient) GetFaucet(ctx context.Context, uuid string) (*api.FaucetResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetFaucet", ctx, uuid)
+	ret0, _ := ret[0].(*api.FaucetResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetFaucet indicates an expected call of GetFaucet
+func (mr *MockOrchestrateClientMockRecorder) GetFaucet(ctx, uuid interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFaucet", reflect.TypeOf((*MockOrchestrateClient)(nil).GetFaucet), ctx, uuid)
+}
+
+// SearchFaucets mocks base method
+func (m *MockOrchestrateClient) SearchFaucets(ctx context.Context, filters *entities.FaucetFilters) ([]*api.FaucetResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SearchFaucets", ctx, filters)
+	ret0, _ := ret[0].([]*api.FaucetResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SearchFaucets indicates an expected call of SearchFaucets
+func (mr *MockOrchestrateClientMockRecorder) SearchFaucets(ctx, filters interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchFaucets", reflect.TypeOf((*MockOrchestrateClient)(nil).SearchFaucets), ctx, filters)
+}
+
+// DeleteFaucet mocks base method
+func (m *MockOrchestrateClient) DeleteFaucet(ctx context.Context, uuid string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteFaucet", ctx, uuid)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteFaucet indicates an expected call of DeleteFaucet
+func (mr *MockOrchestrateClientMockRecorder) DeleteFaucet(ctx, uuid interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteFaucet", reflect.TypeOf((*MockOrchestrateClient)(nil).DeleteFaucet), ctx, uuid)
+}
+
 // MockTransactionClient is a mock of TransactionClient interface
 type MockTransactionClient struct {
 	ctrl     *gomock.Controller
@@ -922,4 +996,101 @@ func (m *MockAccountClient) VerifyTypedDataSignature(ctx context.Context, reques
 func (mr *MockAccountClientMockRecorder) VerifyTypedDataSignature(ctx, request interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifyTypedDataSignature", reflect.TypeOf((*MockAccountClient)(nil).VerifyTypedDataSignature), ctx, request)
+}
+
+// MockFaucetClient is a mock of FaucetClient interface
+type MockFaucetClient struct {
+	ctrl     *gomock.Controller
+	recorder *MockFaucetClientMockRecorder
+}
+
+// MockFaucetClientMockRecorder is the mock recorder for MockFaucetClient
+type MockFaucetClientMockRecorder struct {
+	mock *MockFaucetClient
+}
+
+// NewMockFaucetClient creates a new mock instance
+func NewMockFaucetClient(ctrl *gomock.Controller) *MockFaucetClient {
+	mock := &MockFaucetClient{ctrl: ctrl}
+	mock.recorder = &MockFaucetClientMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockFaucetClient) EXPECT() *MockFaucetClientMockRecorder {
+	return m.recorder
+}
+
+// RegisterFaucet mocks base method
+func (m *MockFaucetClient) RegisterFaucet(ctx context.Context, request *api.RegisterFaucetRequest) (*api.FaucetResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RegisterFaucet", ctx, request)
+	ret0, _ := ret[0].(*api.FaucetResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RegisterFaucet indicates an expected call of RegisterFaucet
+func (mr *MockFaucetClientMockRecorder) RegisterFaucet(ctx, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterFaucet", reflect.TypeOf((*MockFaucetClient)(nil).RegisterFaucet), ctx, request)
+}
+
+// UpdateFaucet mocks base method
+func (m *MockFaucetClient) UpdateFaucet(ctx context.Context, uuid string, request *api.UpdateFaucetRequest) (*api.FaucetResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateFaucet", ctx, uuid, request)
+	ret0, _ := ret[0].(*api.FaucetResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateFaucet indicates an expected call of UpdateFaucet
+func (mr *MockFaucetClientMockRecorder) UpdateFaucet(ctx, uuid, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateFaucet", reflect.TypeOf((*MockFaucetClient)(nil).UpdateFaucet), ctx, uuid, request)
+}
+
+// GetFaucet mocks base method
+func (m *MockFaucetClient) GetFaucet(ctx context.Context, uuid string) (*api.FaucetResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetFaucet", ctx, uuid)
+	ret0, _ := ret[0].(*api.FaucetResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetFaucet indicates an expected call of GetFaucet
+func (mr *MockFaucetClientMockRecorder) GetFaucet(ctx, uuid interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFaucet", reflect.TypeOf((*MockFaucetClient)(nil).GetFaucet), ctx, uuid)
+}
+
+// SearchFaucets mocks base method
+func (m *MockFaucetClient) SearchFaucets(ctx context.Context, filters *entities.FaucetFilters) ([]*api.FaucetResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SearchFaucets", ctx, filters)
+	ret0, _ := ret[0].([]*api.FaucetResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SearchFaucets indicates an expected call of SearchFaucets
+func (mr *MockFaucetClientMockRecorder) SearchFaucets(ctx, filters interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchFaucets", reflect.TypeOf((*MockFaucetClient)(nil).SearchFaucets), ctx, filters)
+}
+
+// DeleteFaucet mocks base method
+func (m *MockFaucetClient) DeleteFaucet(ctx context.Context, uuid string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteFaucet", ctx, uuid)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteFaucet indicates an expected call of DeleteFaucet
+func (mr *MockFaucetClientMockRecorder) DeleteFaucet(ctx, uuid interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteFaucet", reflect.TypeOf((*MockFaucetClient)(nil).DeleteFaucet), ctx, uuid)
 }

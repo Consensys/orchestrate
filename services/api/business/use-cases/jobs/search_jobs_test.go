@@ -32,6 +32,7 @@ func TestSearchJobs_Execute(t *testing.T) {
 	usecase := NewSearchJobsUseCase(mockDB)
 
 	tenantID := "tenantID"
+	tenants := []string{tenantID}
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		txHash := common.HexToHash("0x1")
@@ -43,8 +44,9 @@ func TestSearchJobs_Execute(t *testing.T) {
 		}
 
 		expectedResponse := []*entities.Job{parsers.NewJobEntityFromModels(jobs[0])}
-		mockJobDA.EXPECT().Search(ctx, filters, []string{tenantID}).Return(jobs, nil)
-		jobResponse, err := usecase.Execute(ctx, filters, []string{tenantID})
+		mockJobDA.EXPECT().Search(ctx, filters, tenants).Return(jobs, nil)
+
+		jobResponse, err := usecase.Execute(ctx, filters, tenants)
 
 		assert.NoError(t, err)
 		assert.Equal(t, expectedResponse, jobResponse)
@@ -54,31 +56,11 @@ func TestSearchJobs_Execute(t *testing.T) {
 		filters := &entities.JobFilters{}
 		expectedErr := errors.NotFoundError("error")
 
-		mockJobDA.EXPECT().Search(ctx, filters, []string{tenantID}).Return(nil, expectedErr)
+		mockJobDA.EXPECT().Search(ctx, filters, tenants).Return(nil, expectedErr)
 
-		response, err := usecase.Execute(ctx, filters, []string{tenantID})
+		response, err := usecase.Execute(ctx, filters, tenants)
 
 		assert.Nil(t, response)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(searchJobsComponent), err)
-	})
-
-	t.Run("should fail with invalid parameter in case invalid txHashes", func(t *testing.T) {
-		filters := &entities.JobFilters{
-			TxHashes: []string{"axasad"},
-		}
-
-		_, err := usecase.Execute(ctx, filters, []string{tenantID})
-
-		assert.True(t, errors.IsInvalidParameterError(err))
-	})
-
-	t.Run("should fail with invalid parameter in case invalid chainUUID", func(t *testing.T) {
-		filters := &entities.JobFilters{
-			ChainUUID: "axasad",
-		}
-
-		_, err := usecase.Execute(ctx, filters, []string{tenantID})
-
-		assert.True(t, errors.IsInvalidParameterError(err))
 	})
 }

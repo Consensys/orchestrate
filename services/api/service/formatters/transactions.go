@@ -124,8 +124,8 @@ func FormatTxResponse(txRequest *entities.TxRequest) *types.TransactionResponse 
 	}
 }
 
-func FormatTransactionsFilterRequest(req *http.Request) (*entities.TransactionFilters, error) {
-	filters := &entities.TransactionFilters{}
+func FormatTransactionsFilterRequest(req *http.Request) (*entities.TransactionRequestFilters, error) {
+	filters := &entities.TransactionRequestFilters{}
 
 	qIdempotencyKeys := req.URL.Query().Get("idempotency_keys")
 	if qIdempotencyKeys != "" {

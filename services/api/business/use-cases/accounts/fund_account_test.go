@@ -4,10 +4,10 @@ package accounts
 
 import (
 	"context"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases/mocks"
 	"testing"
 
-	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
@@ -19,16 +19,18 @@ var (
 	faucetNotFoundErr = errors.NotFoundError("not found faucet candidate")
 )
 
-func TestFundingIdentity_Execute(t *testing.T) {
+func TestFundingAccount_Execute(t *testing.T) {
 	ctx := context.Background()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
 	tenantID := "tenantID"
+	allowedTenants := []string{tenantID, multitenancy.DefaultTenant}
 	mockRegisterClient := mock2.NewMockChainRegistryClient(ctrl)
+	mockGetFaucetCandidate := mocks.NewMockGetFaucetCandidateUseCase(ctrl)
 	mockSendTxUC := mocks.NewMockSendTxUseCase(ctrl)
 
-	usecase := NewFundAccountUseCase(mockRegisterClient, mockSendTxUC)
+	usecase := NewFundAccountUseCase(mockRegisterClient, mockSendTxUC, mockGetFaucetCandidate)
 
 	t.Run("should trigger funding identity successfully", func(t *testing.T) {
 		account := testutils3.FakeAccount()
@@ -37,7 +39,7 @@ func TestFundingIdentity_Execute(t *testing.T) {
 		chainName := "besu"
 
 		mockRegisterClient.EXPECT().GetChainByName(ctx, chainName).Return(chain, nil)
-		mockRegisterClient.EXPECT().GetFaucetCandidate(ctx, ethcommon.HexToAddress(account.Address), chain.UUID).Return(faucet, nil)
+		mockGetFaucetCandidate.EXPECT().Execute(ctx, account.Address, chain, allowedTenants).Return(faucet, nil)
 		mockSendTxUC.EXPECT().Execute(ctx, gomock.Any(), "", tenantID).Return(nil, nil)
 
 		err := usecase.Execute(ctx, account, chainName, tenantID)
@@ -51,8 +53,8 @@ func TestFundingIdentity_Execute(t *testing.T) {
 		chainName := "besu"
 
 		mockRegisterClient.EXPECT().GetChainByName(ctx, chainName).Return(chain, nil)
-		mockRegisterClient.EXPECT().
-			GetFaucetCandidate(ctx, ethcommon.HexToAddress(account.Address), chain.UUID).
+		mockGetFaucetCandidate.EXPECT().
+			Execute(ctx, account.Address, chain, allowedTenants).
 			Return(nil, faucetNotFoundErr)
 
 		err := usecase.Execute(ctx, account, chainName, tenantID)
@@ -80,7 +82,9 @@ func TestFundingIdentity_Execute(t *testing.T) {
 		chainName := "besu"
 
 		mockRegisterClient.EXPECT().GetChainByName(ctx, chainName).Return(chain, nil)
-		mockRegisterClient.EXPECT().GetFaucetCandidate(ctx, ethcommon.HexToAddress(account.Address), chain.UUID).Return(nil, expectedErr)
+		mockGetFaucetCandidate.EXPECT().
+			Execute(ctx, account.Address, chain, allowedTenants).
+			Return(nil, expectedErr)
 
 		err := usecase.Execute(ctx, account, chainName, tenantID)
 
@@ -96,7 +100,7 @@ func TestFundingIdentity_Execute(t *testing.T) {
 		chainName := "besu"
 
 		mockRegisterClient.EXPECT().GetChainByName(ctx, chainName).Return(chain, nil)
-		mockRegisterClient.EXPECT().GetFaucetCandidate(ctx, ethcommon.HexToAddress(account.Address), chain.UUID).Return(faucet, nil)
+		mockGetFaucetCandidate.EXPECT().Execute(ctx, account.Address, chain, allowedTenants).Return(faucet, nil)
 		mockSendTxUC.EXPECT().Execute(ctx, gomock.Any(), "", tenantID).Return(nil, expectedErr)
 
 		err := usecase.Execute(ctx, account, chainName, tenantID)

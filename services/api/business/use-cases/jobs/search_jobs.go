@@ -8,7 +8,6 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/parsers"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
 )
@@ -29,11 +28,8 @@ func NewSearchJobsUseCase(db store.DB) usecases.SearchJobsUseCase {
 
 // Execute search jobs
 func (uc *searchJobsUseCase) Execute(ctx context.Context, filters *entities.JobFilters, tenants []string) ([]*entities.Job, error) {
-	log.WithContext(ctx).WithField("filters", filters).WithField("tenants", tenants).Debug("searching jobs")
-
-	if err := utils.GetValidator().Struct(filters); err != nil {
-		return nil, errors.InvalidParameterError(err.Error()).ExtendComponent(searchJobsComponent)
-	}
+	logger := log.WithContext(ctx).WithField("filters", filters).WithField("tenants", tenants)
+	logger.Debug("searching jobs")
 
 	jobModels, err := uc.db.Job().Search(ctx, filters, tenants)
 	if err != nil {
@@ -49,7 +45,6 @@ func (uc *searchJobsUseCase) Execute(ctx context.Context, filters *entities.JobF
 		}
 	}
 
-	// Debug as search jobs is constantly called by tx-listener and tx-sentry
-	log.WithContext(ctx).Debug("jobs found successfully")
+	logger.Debug("jobs found successfully")
 	return resp, nil
 }

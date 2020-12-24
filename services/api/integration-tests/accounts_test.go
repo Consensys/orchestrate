@@ -73,18 +73,16 @@ func (s *accountsTestSuite) TestCreateAccounts() {
 		account := testutils.FakeETHAccountResponse()
 		txRequest := testutils.FakeCreateAccountRequest()
 		faucet := testutils.FakeFaucet()
-		faucet.Creditor = ethcommon.HexToAddress("0x12278c8C089ef98b4045f0b649b61Ed4316B1a50")
+		faucet.CreditorAccount = "0x12278c8C089ef98b4045f0b649b61Ed4316B1a50"
 		chain := testutils.FakeChain()
 		txRequest.Chain = chain.Name
 
 		// Create account and get faucet candidate for the newly created account
 		gock.New(keyManagerURL).Post("/ethereum/accounts").Reply(200).JSON(account)
 		gock.New(chainRegistryURL).URL(fmt.Sprintf("%s/chains?name=%s", chainRegistryURL, chain.Name)).Times(2).Reply(200).JSON([]*models.Chain{chain})
-		gock.New(chainRegistryURL).URL(fmt.Sprintf("%s/faucets/candidate?chain_uuid=%s&account=%s", chainRegistryURL, chain.UUID, account.Address)).Reply(200).JSON(faucet)
 
 		// Send funding tx (this will check if the faucet account itself needs funding)
 		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
-		gock.New(chainRegistryURL).URL(fmt.Sprintf("%s/faucets/candidate?chain_uuid=%s&account=%s", chainRegistryURL, chain.UUID, faucet.Creditor.Hex())).Reply(404)
 
 		resp, err := s.client.CreateAccount(ctx, txRequest)
 		if err != nil {
@@ -105,7 +103,7 @@ func (s *accountsTestSuite) TestCreateAccounts() {
 		gock.New(keyManagerURL).Post("/ethereum/accounts").Reply(500).JSON(ethAccRes)
 
 		_, err := s.client.CreateAccount(ctx, txRequest)
-		assert.Error(s.T(), err)
+		assert.Error(t, err)
 	})
 
 	s.T().Run("should fail to create account if postgres is down", func(t *testing.T) {
@@ -118,14 +116,14 @@ func (s *accountsTestSuite) TestCreateAccounts() {
 		assert.NoError(t, err)
 
 		_, err = s.client.CreateAccount(ctx, txRequest)
-		assert.Error(s.T(), err)
+		assert.Error(t, err)
 
 		err = s.env.client.StartServiceAndWait(ctx, postgresContainerID, 10*time.Second)
-		assert.NoError(s.T(), err)
+		assert.NoError(t, err)
 	})
 }
 
-func (s *accountsTestSuite) TestImportAccounts() {
+func (s *accountsTestSuite) TestImport() {
 	ctx := s.env.ctx
 
 	s.T().Run("should import account successfully by querying key-manager API", func(t *testing.T) {
@@ -166,7 +164,7 @@ func (s *accountsTestSuite) TestImportAccounts() {
 	})
 }
 
-func (s *accountsTestSuite) TestSearchIdentities() {
+func (s *accountsTestSuite) TestSearch() {
 	ctx := s.env.ctx
 
 	s.T().Run("should create account and search for it by alias successfully", func(t *testing.T) {
@@ -197,7 +195,7 @@ func (s *accountsTestSuite) TestSearchIdentities() {
 	})
 }
 
-func (s *accountsTestSuite) TestGetAccount() {
+func (s *accountsTestSuite) TestGetOne() {
 	ctx := s.env.ctx
 
 	s.T().Run("should create account and get it by address successfully", func(t *testing.T) {
@@ -225,7 +223,7 @@ func (s *accountsTestSuite) TestGetAccount() {
 	})
 }
 
-func (s *accountsTestSuite) TestUpdateAccount() {
+func (s *accountsTestSuite) TestUpdate() {
 	ctx := s.env.ctx
 
 	s.T().Run("should create account and update it successfully", func(t *testing.T) {

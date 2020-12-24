@@ -27,6 +27,7 @@ type Agents interface {
 	Transaction() TransactionAgent
 	TransactionRequest() TransactionRequestAgent
 	Account() AccountAgent
+	Faucet() FaucetAgent
 }
 
 type DB interface {
@@ -44,7 +45,7 @@ type TransactionRequestAgent interface {
 	Insert(ctx context.Context, txRequest *models.TransactionRequest) error
 	FindOneByIdempotencyKey(ctx context.Context, idempotencyKey string, tenantID string) (*models.TransactionRequest, error)
 	FindOneByUUID(ctx context.Context, scheduleUUID string, tenants []string) (*models.TransactionRequest, error)
-	Search(ctx context.Context, filters *entities.TransactionFilters, tenants []string) ([]*models.TransactionRequest, error)
+	Search(ctx context.Context, filters *entities.TransactionRequestFilters, tenants []string) ([]*models.TransactionRequest, error)
 }
 
 type ScheduleAgent interface {
@@ -75,4 +76,12 @@ type AccountAgent interface {
 	Update(ctx context.Context, account *models.Account) error
 	FindOneByAddress(ctx context.Context, address string, tenants []string) (*models.Account, error)
 	Search(ctx context.Context, filters *entities.AccountFilters, tenants []string) ([]*models.Account, error)
+}
+
+type FaucetAgent interface {
+	Insert(ctx context.Context, faucet *models.Faucet) error
+	Update(ctx context.Context, faucet *models.Faucet, tenants []string) error
+	FindOneByUUID(ctx context.Context, uuid string, tenants []string) (*models.Faucet, error)
+	Search(ctx context.Context, filters *entities.FaucetFilters, tenants []string) ([]*models.Faucet, error)
+	Delete(ctx context.Context, faucet *models.Faucet, tenants []string) error
 }

@@ -28,7 +28,7 @@ func TestSearchTxs_Execute(t *testing.T) {
 	mockTransactionRequestDA := mocks.NewMockTransactionRequestAgent(ctrl)
 	mockGetTxUC := mocks2.NewMockGetTxUseCase(ctrl)
 	tenantID := "tenantID"
-	filter := &entities.TransactionFilters{}
+	filter := &entities.TransactionRequestFilters{}
 
 	mockDB.EXPECT().TransactionRequest().Return(mockTransactionRequestDA).AnyTimes()
 

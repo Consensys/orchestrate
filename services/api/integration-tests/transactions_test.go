@@ -5,10 +5,11 @@ package integrationtests
 import (
 	"context"
 	"fmt"
+	"github.com/stretchr/testify/require"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 	"testing"
 	"time"
 
-	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
@@ -31,6 +32,7 @@ const (
 type transactionsTestSuite struct {
 	suite.Suite
 	client client.OrchestrateClient
+	faucet *api.FaucetResponse
 	env    *IntegrationEnvironment
 }
 
@@ -122,7 +124,6 @@ func (s *transactionsTestSuite) TestValidation() {
 func (s *transactionsTestSuite) TestSuccess() {
 	ctx := s.env.ctx
 	chain := testutils.FakeChain()
-	faucet := testutils.FakeFaucet()
 
 	s.T().Run("should send a contract transaction successfully", func(t *testing.T) {
 		defer gock.Off()
@@ -130,9 +131,6 @@ func (s *transactionsTestSuite) TestSuccess() {
 
 		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
 		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
-		gock.New(chainRegistryURL).
-			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", chainRegistryURL, chain.UUID, ethcommon.HexToAddress("0x").Hex())).
-			Reply(404)
 
 		txRequest.Params.From = ""
 		txRequest.Params.OneTimeKey = true
@@ -180,40 +178,38 @@ func (s *transactionsTestSuite) TestSuccess() {
 	s.T().Run("should send a transaction with an additional faucet job", func(t *testing.T) {
 		defer gock.Off()
 		txRequest := testutils.FakeSendTransferTransactionRequest()
-		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
-		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Times(2).Reply(200).JSON(chain)
-		gock.New(chainRegistryURL).
-			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", chainRegistryURL, chain.UUID, txRequest.Params.From)).
-			Reply(200).JSON(faucet)
+		chainWithFaucet := testutils.FakeChain()
+		chainWithFaucet.UUID = s.faucet.ChainRule
+
+		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chainWithFaucet})
+		gock.New(chainRegistryURL).Get("/chains/" + chainWithFaucet.UUID).Times(2).Reply(200).JSON(chainWithFaucet)
+		gock.New(chainWithFaucet.URLs[0]).Post("").Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"0x1000000000\"}")
+		gock.New(chainWithFaucet.URLs[0]).Post("").Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"0x0\"}")
+
 		IdempotencyKey := utils.RandomString(16)
 		rctx := context.WithValue(ctx, clientutils.RequestHeaderKey, map[string]string{
 			controllers.IdempotencyKeyHeader: IdempotencyKey,
 		})
 		txResponse, err := s.client.SendTransferTransaction(rctx, txRequest)
-		if err != nil {
-			assert.Fail(t, err.Error())
-			return
-		}
+		require.NoError(t, err)
 		assert.NotEmpty(t, txResponse.UUID)
 		assert.NotEmpty(t, txResponse.IdempotencyKey)
 
 		txResponseGET, err := s.client.GetTxRequest(ctx, txResponse.UUID)
-		if err != nil {
-			assert.Fail(t, err.Error())
-			return
-		}
+		require.NoError(t, err)
+		require.Len(t, txResponseGET.Jobs, 2)
 
 		faucetJob := txResponseGET.Jobs[1]
 		txJob := txResponseGET.Jobs[0]
-		assert.Equal(t, faucetJob.ChainUUID, chain.UUID)
+		assert.Equal(t, faucetJob.ChainUUID, chainWithFaucet.UUID)
 		assert.Equal(t, utils.StatusStarted, faucetJob.Status)
 		assert.Equal(t, utils.EthereumTransaction, faucetJob.Type)
 		assert.Equal(t, faucetJob.Transaction.To, txJob.Transaction.From)
-		assert.Equal(t, faucetJob.Transaction.Value, faucet.Amount.String())
+		assert.Equal(t, faucetJob.Transaction.Value, s.faucet.Amount)
 
 		assert.NotEmpty(t, txResponseGET.UUID)
 		assert.NotEmpty(t, txJob.UUID)
-		assert.Equal(t, txJob.ChainUUID, chain.UUID)
+		assert.Equal(t, txJob.ChainUUID, chainWithFaucet.UUID)
 		assert.Equal(t, utils.StatusStarted, txJob.Status)
 		assert.Equal(t, txRequest.Params.From, txJob.Transaction.From)
 		assert.Equal(t, txRequest.Params.To, txJob.Transaction.To)
@@ -243,9 +239,7 @@ func (s *transactionsTestSuite) TestSuccess() {
 		txRequest := testutils.FakeSendTesseraRequest()
 		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
 		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Times(2).Reply(200).JSON(chain)
-		gock.New(chainRegistryURL).
-			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", chainRegistryURL, chain.UUID, txRequest.Params.From)).
-			Reply(404).Done()
+
 		IdempotencyKey := utils.RandomString(16)
 		rctx := context.WithValue(ctx, clientutils.RequestHeaderKey, map[string]string{
 			controllers.IdempotencyKeyHeader: IdempotencyKey,
@@ -298,9 +292,6 @@ func (s *transactionsTestSuite) TestSuccess() {
 		txRequest := testutils.FakeSendOrionRequest()
 		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
 		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Times(2).Reply(200).JSON(chain)
-		gock.New(chainRegistryURL).
-			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", chainRegistryURL, chain.UUID, txRequest.Params.From)).
-			Reply(404).Done()
 
 		txResponse, err := s.client.SendContractTransaction(ctx, txRequest)
 		if err != nil {
@@ -348,10 +339,8 @@ func (s *transactionsTestSuite) TestSuccess() {
 		defer gock.Off()
 		txRequest := testutils.FakeDeployContractRequest()
 		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
-		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
-		gock.New(chainRegistryURL).
-			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", chainRegistryURL, chain.UUID, txRequest.Params.From)).
-			Reply(404).Done()
+		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Times(2).Reply(200).JSON(chain)
+
 		txRequest.Params.Args = testutils.ParseIArray(123) // FakeContract arguments
 
 		s.env.contractRegistryResponseFaker.GetContract = func() (*proto.GetContractResponse, error) {
@@ -438,9 +427,6 @@ func (s *transactionsTestSuite) TestSuccess() {
 		txRequest := testutils.FakeSendTransferTransactionRequest()
 		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
 		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
-		gock.New(chainRegistryURL).
-			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", chainRegistryURL, chain.UUID, txRequest.Params.From)).
-			Reply(404)
 
 		txResponse, err := s.client.SendTransferTransaction(ctx, txRequest)
 		if err != nil {
@@ -493,9 +479,7 @@ func (s *transactionsTestSuite) TestSuccess() {
 
 		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
 		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
-		gock.New(chainRegistryURL).
-			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", chainRegistryURL, chain.UUID, txRequest.Params.From)).
-			Reply(404).Done()
+
 		_, err = s.client.SendContractTransaction(rctx, txRequest)
 		assert.Error(t, err)
 
@@ -507,9 +491,7 @@ func (s *transactionsTestSuite) TestSuccess() {
 
 		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
 		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
-		gock.New(chainRegistryURL).
-			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", chainRegistryURL, chain.UUID, txRequest.Params.From)).
-			Reply(404).Done()
+
 		txResponse, err := s.client.SendContractTransaction(rctx, txRequest)
 		if err != nil {
 			assert.Fail(t, err.Error())

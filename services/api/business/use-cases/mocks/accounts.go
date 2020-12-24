@@ -91,20 +91,6 @@ func (mr *MockAccountUseCasesMockRecorder) SearchAccounts() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchAccounts", reflect.TypeOf((*MockAccountUseCases)(nil).SearchAccounts))
 }
 
-// FundAccount mocks base method
-func (m *MockAccountUseCases) FundAccount() usecases.FundAccountUseCase {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FundAccount")
-	ret0, _ := ret[0].(usecases.FundAccountUseCase)
-	return ret0
-}
-
-// FundAccount indicates an expected call of FundAccount
-func (mr *MockAccountUseCasesMockRecorder) FundAccount() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FundAccount", reflect.TypeOf((*MockAccountUseCases)(nil).FundAccount))
-}
-
 // MockGetAccountUseCase is a mock of GetAccountUseCase interface
 type MockGetAccountUseCase struct {
 	ctrl     *gomock.Controller

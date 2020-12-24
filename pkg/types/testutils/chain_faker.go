@@ -9,9 +9,10 @@ import (
 // TODO: To be refactored properly when chain registry types are refactored into types, entities and models
 func FakeChain() *models.Chain {
 	return &models.Chain{
-		Name:     "chainName",
 		UUID:     uuid.Must(uuid.NewV4()).String(),
+		Name:     "chainName",
 		TenantID: multitenancy.DefaultTenant,
+		URLs:     []string{"http://ethereum-node:8545"},
 		ChainID:  "888",
 	}
 }

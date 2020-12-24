@@ -72,7 +72,7 @@ func (agent *PGTransactionRequest) FindOneByUUID(ctx context.Context, scheduleUU
 	return txRequest, nil
 }
 
-func (agent *PGTransactionRequest) Search(ctx context.Context, filters *entities.TransactionFilters, tenants []string) ([]*models.TransactionRequest, error) {
+func (agent *PGTransactionRequest) Search(ctx context.Context, filters *entities.TransactionRequestFilters, tenants []string) ([]*models.TransactionRequest, error) {
 	var txRequests []*models.TransactionRequest
 
 	query := agent.db.ModelContext(ctx, &txRequests).Relation("Schedule")

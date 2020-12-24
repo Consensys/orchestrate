@@ -45,6 +45,7 @@ type Builder struct {
 	schedulesCtrl *SchedulesController
 	jobsCtrl      *JobsController
 	accountsCtrl  *AccountsController
+	faucetsCtrl   *FaucetsController
 }
 
 func NewBuilder(ucs usecases.UseCases, keyManagerClient client.KeyManagerClient) *Builder {
@@ -53,6 +54,7 @@ func NewBuilder(ucs usecases.UseCases, keyManagerClient client.KeyManagerClient)
 		schedulesCtrl: NewSchedulesController(ucs),
 		jobsCtrl:      NewJobsController(ucs),
 		accountsCtrl:  NewAccountsController(ucs, keyManagerClient),
+		faucetsCtrl:   NewFaucetsController(ucs),
 	}
 }
 
@@ -67,6 +69,7 @@ func (b *Builder) Build(ctx context.Context, _ string, configuration interface{}
 	b.schedulesCtrl.Append(router)
 	b.jobsCtrl.Append(router)
 	b.accountsCtrl.Append(router)
+	b.faucetsCtrl.Append(router)
 
 	return router, nil
 }

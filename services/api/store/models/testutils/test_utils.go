@@ -109,3 +109,16 @@ func FakeAccountModel() *models.Account {
 		},
 	}
 }
+
+func FakeFaucetModel() *models.Faucet {
+	return &models.Faucet{
+		UUID:            uuid.Must(uuid.NewV4()).String(),
+		TenantID:        "tenantID",
+		Name:            "faucet-mainnet",
+		ChainRule:       uuid.Must(uuid.NewV4()).String(),
+		CreditorAccount: "0x5Cc634233E4a454d47aACd9fC68801482Fb02610",
+		MaxBalance:      "60000000000000000",
+		Amount:          "100000000000000000",
+		Cooldown:        "10s",
+	}
+}

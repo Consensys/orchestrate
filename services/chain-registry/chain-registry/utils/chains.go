@@ -74,7 +74,7 @@ func GetChainTip(ctx context.Context, ec ethclient.ChainLedgerReader, uris []str
 	return
 }
 
-func GetAddressBalance(ctx context.Context, ec ethclient.ChainStateReader, uris []string, address ethcommon.Address) (*big.Int, error) {
+func GetAddressBalance(ctx context.Context, ec ethclient.ChainStateReader, uris []string, address string) (*big.Int, error) {
 	var balance *big.Int
 	var err error
 
@@ -86,9 +86,14 @@ func GetAddressBalance(ctx context.Context, ec ethclient.ChainStateReader, uris 
 
 	// All URLs must be valid and we return the head of the latest one
 	for _, uri := range uris {
-		balance, err = ec.BalanceAt(ctx, uri, address, nil)
+		balance, err = ec.BalanceAt(ctx, uri, ethcommon.HexToAddress(address), nil)
 		if err != nil {
-			log.FromContext(ctx).WithError(err).Errorf("failed to fetch address %s balance for URL %s", address.Hex(), uri)
+			log.FromContext(ctx).
+				WithField("address", address).
+				WithField("url", uri).
+				WithError(err).
+				Error("failed to fetch balance")
+
 			continue
 		}
 

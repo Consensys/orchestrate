@@ -3,6 +3,8 @@ package api
 import (
 	"context"
 
+	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/rpc"
+
 	keymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client"
 
 	"github.com/spf13/viper"
@@ -24,6 +26,7 @@ func New(ctx context.Context) (*app.App, error) {
 	sarama.InitSyncProducer(ctx)
 	contractregistry.Init(ctx)
 	keymanager.Init()
+	ethclient.Init(ctx)
 
 	config := NewConfig(viper.GetViper())
 	pgmngr := postgres.GetManager()
@@ -36,6 +39,7 @@ func New(ctx context.Context) (*app.App, error) {
 		chainregistry.GlobalClient(),
 		contractregistry.GlobalClient(),
 		keymanager.GlobalClient(),
+		ethclient.GlobalClient(),
 		sarama.GlobalSyncProducer(),
 		sarama.NewKafkaTopicConfig(viper.GetViper()),
 	)

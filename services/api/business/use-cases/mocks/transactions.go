@@ -167,7 +167,7 @@ func (m *MockSearchTransactionsUseCase) EXPECT() *MockSearchTransactionsUseCaseM
 }
 
 // Execute mocks base method
-func (m *MockSearchTransactionsUseCase) Execute(ctx context.Context, filters *entities.TransactionFilters, tenants []string) ([]*entities.TxRequest, error) {
+func (m *MockSearchTransactionsUseCase) Execute(ctx context.Context, filters *entities.TransactionRequestFilters, tenants []string) ([]*entities.TxRequest, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Execute", ctx, filters, tenants)
 	ret0, _ := ret[0].([]*entities.TxRequest)

@@ -13,7 +13,6 @@ type AccountUseCases interface {
 	CreateAccount() CreateAccountUseCase
 	UpdateAccount() UpdateAccountUseCase
 	SearchAccounts() SearchAccountsUseCase
-	FundAccount() FundAccountUseCase
 }
 
 type GetAccountUseCase interface {

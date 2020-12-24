@@ -140,7 +140,7 @@ func (s *txRequestTestSuite) TestPGTransactionRequest_Search() {
 	assert.Nil(s.T(), err)
 
 	s.T().Run("should find requests successfully", func(t *testing.T) {
-		filter := &entities.TransactionFilters{}
+		filter := &entities.TransactionRequestFilters{}
 		txRequestsRetrieved, err := s.agents.TransactionRequest().Search(ctx, filter, []string{multitenancy.Wildcard})
 
 		assert.NoError(t, err)
@@ -149,7 +149,7 @@ func (s *txRequestTestSuite) TestPGTransactionRequest_Search() {
 	})
 
 	s.T().Run("should find requests successfully by idempotency keys", func(t *testing.T) {
-		filter := &entities.TransactionFilters{
+		filter := &entities.TransactionRequestFilters{
 			IdempotencyKeys: []string{txRequest.IdempotencyKey},
 		}
 		txRequestsRetrieved, err := s.agents.TransactionRequest().Search(ctx, filter, []string{multitenancy.Wildcard})
@@ -160,7 +160,7 @@ func (s *txRequestTestSuite) TestPGTransactionRequest_Search() {
 	})
 
 	s.T().Run("should return empty array if nothing found in filter", func(t *testing.T) {
-		filter := &entities.TransactionFilters{
+		filter := &entities.TransactionRequestFilters{
 			IdempotencyKeys: []string{"notExisting"},
 		}
 
@@ -171,7 +171,7 @@ func (s *txRequestTestSuite) TestPGTransactionRequest_Search() {
 	})
 
 	s.T().Run("should return empty array if tenant is not found", func(t *testing.T) {
-		filter := &entities.TransactionFilters{}
+		filter := &entities.TransactionRequestFilters{}
 		result, err := s.agents.TransactionRequest().Search(ctx, filter, []string{"NotExistingTenant"})
 
 		assert.NoError(t, err)
@@ -202,7 +202,7 @@ func (s *txRequestTestSuite) TestPGTransactionRequest_ConnectionErr() {
 	})
 
 	s.T().Run("should return PostgresConnectionError if find fails", func(t *testing.T) {
-		_, err := s.agents.TransactionRequest().Search(ctx, &entities.TransactionFilters{}, []string{"tenant"})
+		_, err := s.agents.TransactionRequest().Search(ctx, &entities.TransactionRequestFilters{}, []string{"tenant"})
 		assert.True(t, errors.IsPostgresConnectionError(err))
 	})
 

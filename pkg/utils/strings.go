@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"math/rand"
 	"reflect"
+	"time"
 )
+
+var seededRand = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 // ShortString makes hashes short for a limited column size
 func ShortString(s string, tailLength int) string {
@@ -21,7 +24,7 @@ func RandomString(n int) string {
 
 	b := make([]rune, n)
 	for i := range b {
-		b[i] = letter[rand.Intn(len(letter))]
+		b[i] = letter[seededRand.Intn(len(letter))]
 	}
 	return string(b)
 }
@@ -30,7 +33,7 @@ func RandHexString(n int) string {
 	var letterRunes = []rune("abcdef0123456789")
 	b := make([]rune, n)
 	for i := range b {
-		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+		b[i] = letterRunes[seededRand.Intn(len(letterRunes))]
 	}
 	return string(b)
 }

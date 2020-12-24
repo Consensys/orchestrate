@@ -39,7 +39,7 @@ func NewUpdateJobUseCase(db store.DB, updateChildrenUseCase usecases.UpdateChild
 // Execute validates and creates a new transaction job
 func (uc *updateJobUseCase) Execute(ctx context.Context, job *entities.Job, nextStatus, logMessage string, tenants []string) (*entities.Job, error) {
 	logger := log.WithContext(ctx).WithField("tenants", tenants).WithField("job_uuid", job.UUID)
-	logger.Debug("updating job entity")
+	logger.Debug("updating job")
 
 	var retrievedJob *entities.Job
 	err := database.ExecuteInDBTx(uc.db, func(tx database.Tx) error {

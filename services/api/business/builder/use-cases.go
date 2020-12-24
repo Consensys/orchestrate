@@ -3,8 +3,10 @@ package builder
 import (
 	"github.com/Shopify/sarama"
 	pkgsarama "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases/accounts"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases/faucets"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases/jobs"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases/schedules"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases/transactions"
@@ -23,10 +25,12 @@ type useCases struct {
 	sendTransaction         usecases.SendTxUseCase
 	getTransaction          usecases.GetTxUseCase
 	searchTransactions      usecases.SearchTransactionsUseCase
+
 	// Schedules
 	createSchedule  usecases.CreateScheduleUseCase
 	getSchedule     usecases.GetScheduleUseCase
 	searchSchedules usecases.SearchSchedulesUseCase
+
 	// Jobs
 	createJob   usecases.CreateJobUseCase
 	getJob      usecases.GetJobUseCase
@@ -34,12 +38,19 @@ type useCases struct {
 	resendJobTx usecases.ResendJobTxUseCase
 	updateJob   usecases.UpdateJobUseCase
 	searchJobs  usecases.SearchJobsUseCase
+
 	// Accounts
 	createAccountUC  usecases.CreateAccountUseCase
 	getAccountUC     usecases.GetAccountUseCase
 	searchAccountsUC usecases.SearchAccountsUseCase
 	updateAccountUC  usecases.UpdateAccountUseCase
-	fundAccountUC    usecases.FundAccountUseCase
+
+	// Faucets
+	registerFaucetUC usecases.RegisterFaucetUseCase
+	updateFaucetUC   usecases.UpdateFaucetUseCase
+	getFaucetUC      usecases.GetFaucetUseCase
+	searchFaucetUC   usecases.SearchFaucetsUseCase
+	deleteFaucetUC   usecases.DeleteFaucetUseCase
 }
 
 func NewUseCases(
@@ -48,6 +59,7 @@ func NewUseCases(
 	chainRegistryClient client.ChainRegistryClient,
 	contractRegistryClient contractregistry.ContractRegistryClient,
 	keyManagerClient keymanager.KeyManagerClient,
+	chainStateReader ethclient.ChainStateReader,
 	producer sarama.SyncProducer,
 	topicsCfg *pkgsarama.KafkaTopicConfig,
 ) usecases.UseCases {
@@ -61,10 +73,12 @@ func NewUseCases(
 	updateChildrenUC := jobs.NewUpdateChildrenUseCase(db)
 	startNextJobUC := jobs.NewStartNextJobUseCase(db, startJobUC)
 	getTransactionUC := transactions.NewGetTxUseCase(db, getScheduleUC)
+	searchFaucetsUC := faucets.NewSearchFaucets(db)
+	getFaucetCandidate := faucets.NewGetFaucetCandidateUseCase(chainRegistryClient, searchFaucetsUC, chainStateReader)
 
-	sendTxUC := transactions.NewSendTxUseCase(txValidator, db, chainRegistryClient, startJobUC, createJobUC, createScheduleUC, getTransactionUC)
+	sendTxUC := transactions.NewSendTxUseCase(txValidator, db, chainRegistryClient, startJobUC, createJobUC, createScheduleUC, getTransactionUC, getFaucetCandidate)
 	searchAccountsUC := accounts.NewSearchAccountsUseCase(db)
-	fundAccountUC := accounts.NewFundAccountUseCase(chainRegistryClient, sendTxUC)
+	fundAccountUC := accounts.NewFundAccountUseCase(chainRegistryClient, sendTxUC, getFaucetCandidate)
 
 	return &useCases{
 		// Transaction
@@ -73,10 +87,12 @@ func NewUseCases(
 		sendTransaction:         sendTxUC,
 		getTransaction:          getTransactionUC,
 		searchTransactions:      transactions.NewSearchTransactionsUseCase(db, getTransactionUC),
+
 		// Schedules
 		createSchedule:  createScheduleUC,
 		getSchedule:     getScheduleUC,
 		searchSchedules: schedules.NewSearchSchedulesUseCase(db),
+
 		// Jobs
 		createJob:   createJobUC,
 		getJob:      jobs.NewGetJobUseCase(db),
@@ -84,12 +100,19 @@ func NewUseCases(
 		updateJob:   jobs.NewUpdateJobUseCase(db, updateChildrenUC, startNextJobUC, appMetrics),
 		startJob:    startJobUC,
 		resendJobTx: resendJobUC,
+
 		// Accounts
 		createAccountUC:  accounts.NewCreateAccountUseCase(db, searchAccountsUC, fundAccountUC, keyManagerClient),
 		getAccountUC:     accounts.NewGetAccountUseCase(db),
 		searchAccountsUC: searchAccountsUC,
 		updateAccountUC:  accounts.NewUpdateAccountUseCase(db),
-		fundAccountUC:    fundAccountUC,
+
+		// Faucets
+		registerFaucetUC: faucets.NewRegisterFaucetUseCase(db, searchFaucetsUC),
+		updateFaucetUC:   faucets.NewUpdateFaucetUseCase(db),
+		getFaucetUC:      faucets.NewGetFaucetUseCase(db),
+		searchFaucetUC:   searchFaucetsUC,
+		deleteFaucetUC:   faucets.NewDeleteFaucetUseCase(db),
 	}
 }
 
@@ -165,6 +188,22 @@ func (u *useCases) UpdateAccount() usecases.UpdateAccountUseCase {
 	return u.updateAccountUC
 }
 
-func (u *useCases) FundAccount() usecases.FundAccountUseCase {
-	return u.fundAccountUC
+func (u *useCases) RegisterFaucet() usecases.RegisterFaucetUseCase {
+	return u.registerFaucetUC
+}
+
+func (u *useCases) UpdateFaucet() usecases.UpdateFaucetUseCase {
+	return u.updateFaucetUC
+}
+
+func (u *useCases) GetFaucet() usecases.GetFaucetUseCase {
+	return u.getFaucetUC
+}
+
+func (u *useCases) SearchFaucets() usecases.SearchFaucetsUseCase {
+	return u.searchFaucetUC
+}
+
+func (u *useCases) DeleteFaucet() usecases.DeleteFaucetUseCase {
+	return u.deleteFaucetUC
 }

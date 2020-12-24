@@ -9,8 +9,7 @@ import (
 //go:generate mockgen -source=store.go -destination=mock/data-agents.go -package=mock
 
 type DataAgents struct {
-	Chain  ChainAgent
-	Faucet FaucetAgent
+	Chain ChainAgent
 }
 
 type ChainAgent interface {
@@ -21,12 +20,4 @@ type ChainAgent interface {
 	UpdateChain(ctx context.Context, uuid string, tenants []string, chain *models.Chain) error
 	UpdateChainByName(ctx context.Context, name string, tenants []string, chain *models.Chain) error
 	DeleteChain(ctx context.Context, uuid string, tenants []string) error
-}
-
-type FaucetAgent interface {
-	RegisterFaucet(ctx context.Context, faucet *models.Faucet) error
-	GetFaucets(ctx context.Context, tenants []string, filters map[string]string) ([]*models.Faucet, error)
-	GetFaucet(ctx context.Context, uuid string, tenants []string) (*models.Faucet, error)
-	UpdateFaucet(ctx context.Context, uuid string, tenants []string, faucet *models.Faucet) error
-	DeleteFaucet(ctx context.Context, uuid string, tenants []string) error
 }

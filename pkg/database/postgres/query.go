@@ -59,6 +59,48 @@ func Update(ctx context.Context, db DB, models ...interface{}) *ierror.Error {
 	return nil
 }
 
+func UpdateNotZero(ctx context.Context, q *orm.Query) *ierror.Error {
+	logger := log.WithContext(ctx)
+	_, err := q.Context(ctx).UpdateNotZero()
+	if err != nil {
+		pgErr, ok := err.(pg.Error)
+		if ok && errors.IsAlreadyExistsError(err) {
+			errMsg := "entity cannot be non zero updated in DB"
+			logger.WithError(err).Error(errMsg)
+			return errors.AlreadyExistsError(errMsg)
+		} else if ok && pgErr.IntegrityViolation() {
+			errMsg := "non zero update integrity violation"
+			logger.WithError(err).Error(errMsg)
+			return errors.PostgresConnectionError(errMsg)
+		}
+
+		errMsg := "error executing non zero update"
+		logger.WithError(err).Error(errMsg)
+		return errors.PostgresConnectionError(errMsg)
+	}
+	return nil
+}
+
+func Delete(ctx context.Context, q *orm.Query) *ierror.Error {
+	logger := log.WithContext(ctx)
+
+	_, err := q.Context(ctx).Delete()
+	if err != nil {
+		pgErr, ok := err.(pg.Error)
+		if ok && pgErr.IntegrityViolation() {
+			errMsg := "delete integrity violation"
+			logger.WithError(err).Error(errMsg)
+			return errors.PostgresConnectionError(errMsg)
+		}
+
+		errMsg := "error executing delete"
+		logger.WithError(err).Error(errMsg)
+		return errors.PostgresConnectionError(errMsg)
+	}
+
+	return nil
+}
+
 func Select(ctx context.Context, q *orm.Query) *ierror.Error {
 	logger := log.WithContext(ctx)
 

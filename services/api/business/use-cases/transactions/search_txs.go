@@ -28,7 +28,7 @@ func NewSearchTransactionsUseCase(db store.DB, getTxUseCase usecases.GetTxUseCas
 }
 
 // Execute gets a transaction requests by filter (or all)
-func (uc *searchTransactionsUseCase) Execute(ctx context.Context, filters *entities.TransactionFilters, tenants []string) ([]*entities.TxRequest, error) {
+func (uc *searchTransactionsUseCase) Execute(ctx context.Context, filters *entities.TransactionRequestFilters, tenants []string) ([]*entities.TxRequest, error) {
 	log.WithContext(ctx).WithField("filters", filters).Debug("search transaction requests")
 
 	txRequestModels, err := uc.db.TransactionRequest().Search(ctx, filters, tenants)

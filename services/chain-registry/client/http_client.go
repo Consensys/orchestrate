@@ -9,23 +9,18 @@ import (
 	"strconv"
 	"time"
 
-	ethcommon "github.com/ethereum/go-ethereum/common"
 	healthz "github.com/heptiolabs/healthcheck"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/httputil"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/chainregistry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/store/models"
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	chainsctrl "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/service/controllers/chains"
-	facuetsctrl "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/service/controllers/faucets"
 )
 
 const (
-	notFoundErrorMessage            = "chain does not exist"
-	invalidRequestErrorMessage      = "invalid request"
-	unprocessableEntityErrorMessage = "unprocessable entity"
-	failedToFetchErrorMessage       = "failed to fetch chain"
+	notFoundErrorMessage       = "chain does not exist"
+	invalidRequestErrorMessage = "invalid request"
+	failedToFetchErrorMessage  = "failed to fetch chain"
 )
 
 type HTTPClient struct {
@@ -236,165 +231,6 @@ func (c *HTTPClient) UpdateChainByUUID(ctx context.Context, chainUUID string, ch
 	defer closeResponse(response)
 
 	return nil
-}
-
-func (c *HTTPClient) GetFaucetByUUID(ctx context.Context, faucetUUID string) (*models.Faucet, error) {
-	logger := log.WithContext(ctx).WithField("faucet_uuid", faucetUUID)
-	reqURL := fmt.Sprintf("%v/faucets/%s", c.config.URL, faucetUUID)
-
-	response, err := c.getRequest(ctx, reqURL)
-	if err != nil {
-		return nil, err
-	}
-
-	switch response.StatusCode {
-	case http.StatusOK:
-		defer closeResponse(response)
-
-		faucet := &models.Faucet{}
-		if err = json.NewDecoder(response.Body).Decode(faucet); err != nil {
-			return nil, errors.FromError(err).ExtendComponent(component)
-		}
-
-		return faucet, nil
-	case http.StatusNotFound:
-		logger.WithError(err).Error(notFoundErrorMessage)
-		return nil, errors.NotFoundError("faucet does not exist")
-	case http.StatusBadRequest:
-		logger.WithError(err).Error(invalidRequestErrorMessage)
-		return nil, errors.InvalidFormatError(invalidRequestErrorMessage)
-	case http.StatusUnprocessableEntity:
-		logger.WithError(err).Error(unprocessableEntityErrorMessage)
-		return nil, errors.InvalidParameterError(unprocessableEntityErrorMessage)
-	default:
-		logger.WithError(err).Error(failedToFetchErrorMessage)
-		return nil, errors.ServiceConnectionError("failed to fetch faucet")
-	}
-}
-
-func (c *HTTPClient) GetFaucetsByChainRule(ctx context.Context, chainRule string) ([]*models.Faucet, error) {
-	reqURL := fmt.Sprintf("%v/faucets?chain_rule=%s", c.config.URL, chainRule)
-
-	response, err := c.getRequest(ctx, reqURL)
-	if err != nil {
-		return nil, err
-	}
-
-	switch response.StatusCode {
-	case http.StatusOK:
-		defer closeResponse(response)
-
-		var faucetsResult []*models.Faucet
-		if err = json.NewDecoder(response.Body).Decode(&faucetsResult); err != nil {
-			return nil, errors.FromError(err).ExtendComponent(component)
-		}
-
-		return faucetsResult, nil
-	default:
-		errMessage := "failed to fetch faucets"
-		log.WithContext(ctx).WithError(err).Error(errMessage)
-		return nil, errors.ServiceConnectionError(errMessage)
-	}
-}
-
-func (c *HTTPClient) GetFaucetCandidate(ctx context.Context, account ethcommon.Address, chainUUID string) (*types.Faucet, error) {
-	reqURL := fmt.Sprintf("%v/faucets/candidate?chain_uuid=%s&account=%s", c.config.URL, chainUUID, account.Hex())
-
-	// @TODO API-KEY
-	response, err := c.getRequest(ctx, reqURL)
-	if err != nil {
-		return nil, err
-	}
-	defer closeResponse(response)
-
-	switch response.StatusCode {
-	case http.StatusOK:
-		var faucetsResult *types.Faucet
-		if err = json.NewDecoder(response.Body).Decode(&faucetsResult); err != nil {
-			return nil, errors.FromError(err).ExtendComponent(component)
-		}
-
-		return faucetsResult, nil
-	case http.StatusNotFound:
-		return nil, errors.NotFoundError("not available faucet candidates").ExtendComponent(component)
-	default:
-		errResp := httputil.ErrorResponse{}
-		if err = json.NewDecoder(response.Body).Decode(&errResp); err != nil {
-			return nil, errors.FromError(err).ExtendComponent(component)
-		}
-		errMessage := "failed to fetch faucet candidate"
-		log.WithContext(ctx).WithError(fmt.Errorf(errResp.Message)).Error(errMessage)
-		return nil, errors.ServiceConnectionError(errMessage)
-	}
-}
-
-func (c *HTTPClient) DeleteFaucetByUUID(ctx context.Context, faucetUUID string) error {
-	reqURL := fmt.Sprintf("%v/faucets/%s", c.config.URL, faucetUUID)
-
-	response, err := c.deleteRequest(ctx, reqURL)
-	if err != nil {
-		return err
-	}
-
-	defer closeResponse(response)
-
-	return nil
-}
-
-func (c *HTTPClient) RegisterFaucet(ctx context.Context, faucet *models.Faucet) (*models.Faucet, error) {
-	reqURL := fmt.Sprintf("%v/faucets", c.config.URL)
-
-	postReq := facuetsctrl.PostRequest{
-		Name:            faucet.Name,
-		Amount:          faucet.Amount,
-		ChainRule:       faucet.ChainRule,
-		MaxBalance:      faucet.MaxBalance,
-		CreditorAccount: faucet.CreditorAccount,
-		Cooldown:        faucet.Cooldown,
-	}
-
-	response, err := c.postRequest(ctx, reqURL, &postReq)
-
-	if err != nil {
-		return nil, err
-	}
-
-	defer closeResponse(response)
-
-	resp := &models.Faucet{}
-	if err := json.NewDecoder(response.Body).Decode(resp); err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
-	}
-
-	return resp, nil
-}
-
-func (c *HTTPClient) UpdateFaucetByUUID(ctx context.Context, uuid string, faucet *models.Faucet) (*models.Faucet, error) {
-	reqURL := fmt.Sprintf("%v/faucets/%v", c.config.URL, uuid)
-
-	postReq := facuetsctrl.PatchRequest{
-		Name:            faucet.Name,
-		Amount:          faucet.Amount,
-		ChainRule:       faucet.ChainRule,
-		MaxBalance:      faucet.MaxBalance,
-		CreditorAccount: faucet.CreditorAccount,
-		Cooldown:        faucet.Cooldown,
-	}
-
-	response, err := c.patchRequest(ctx, reqURL, &postReq)
-
-	if err != nil {
-		return nil, err
-	}
-
-	defer closeResponse(response)
-
-	resp := &models.Faucet{}
-	if err := json.NewDecoder(response.Body).Decode(resp); err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
-	}
-
-	return resp, nil
 }
 
 func (c *HTTPClient) getRequest(ctx context.Context, reqURL string) (*http.Response, error) {

@@ -5,4 +5,5 @@ type UseCases interface {
 	ScheduleUseCases
 	JobUseCases
 	AccountUseCases
+	FaucetUseCases
 }

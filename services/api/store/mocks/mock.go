@@ -200,6 +200,20 @@ func (mr *MockAgentsMockRecorder) Account() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Account", reflect.TypeOf((*MockAgents)(nil).Account))
 }
 
+// Faucet mocks base method
+func (m *MockAgents) Faucet() store.FaucetAgent {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Faucet")
+	ret0, _ := ret[0].(store.FaucetAgent)
+	return ret0
+}
+
+// Faucet indicates an expected call of Faucet
+func (mr *MockAgentsMockRecorder) Faucet() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Faucet", reflect.TypeOf((*MockAgents)(nil).Faucet))
+}
+
 // MockDB is a mock of DB interface
 type MockDB struct {
 	ctrl     *gomock.Controller
@@ -320,6 +334,20 @@ func (m *MockDB) Account() store.AccountAgent {
 func (mr *MockDBMockRecorder) Account() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Account", reflect.TypeOf((*MockDB)(nil).Account))
+}
+
+// Faucet mocks base method
+func (m *MockDB) Faucet() store.FaucetAgent {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Faucet")
+	ret0, _ := ret[0].(store.FaucetAgent)
+	return ret0
+}
+
+// Faucet indicates an expected call of Faucet
+func (mr *MockDBMockRecorder) Faucet() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Faucet", reflect.TypeOf((*MockDB)(nil).Faucet))
 }
 
 // MockTx is a mock of Tx interface
@@ -486,6 +514,20 @@ func (mr *MockTxMockRecorder) Account() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Account", reflect.TypeOf((*MockTx)(nil).Account))
 }
 
+// Faucet mocks base method
+func (m *MockTx) Faucet() store.FaucetAgent {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Faucet")
+	ret0, _ := ret[0].(store.FaucetAgent)
+	return ret0
+}
+
+// Faucet indicates an expected call of Faucet
+func (mr *MockTxMockRecorder) Faucet() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Faucet", reflect.TypeOf((*MockTx)(nil).Faucet))
+}
+
 // MockTransactionRequestAgent is a mock of TransactionRequestAgent interface
 type MockTransactionRequestAgent struct {
 	ctrl     *gomock.Controller
@@ -554,7 +596,7 @@ func (mr *MockTransactionRequestAgentMockRecorder) FindOneByUUID(ctx, scheduleUU
 }
 
 // Search mocks base method
-func (m *MockTransactionRequestAgent) Search(ctx context.Context, filters *entities.TransactionFilters, tenants []string) ([]*models.TransactionRequest, error) {
+func (m *MockTransactionRequestAgent) Search(ctx context.Context, filters *entities.TransactionRequestFilters, tenants []string) ([]*models.TransactionRequest, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Search", ctx, filters, tenants)
 	ret0, _ := ret[0].([]*models.TransactionRequest)
@@ -897,4 +939,99 @@ func (m *MockAccountAgent) Search(ctx context.Context, filters *entities.Account
 func (mr *MockAccountAgentMockRecorder) Search(ctx, filters, tenants interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Search", reflect.TypeOf((*MockAccountAgent)(nil).Search), ctx, filters, tenants)
+}
+
+// MockFaucetAgent is a mock of FaucetAgent interface
+type MockFaucetAgent struct {
+	ctrl     *gomock.Controller
+	recorder *MockFaucetAgentMockRecorder
+}
+
+// MockFaucetAgentMockRecorder is the mock recorder for MockFaucetAgent
+type MockFaucetAgentMockRecorder struct {
+	mock *MockFaucetAgent
+}
+
+// NewMockFaucetAgent creates a new mock instance
+func NewMockFaucetAgent(ctrl *gomock.Controller) *MockFaucetAgent {
+	mock := &MockFaucetAgent{ctrl: ctrl}
+	mock.recorder = &MockFaucetAgentMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockFaucetAgent) EXPECT() *MockFaucetAgentMockRecorder {
+	return m.recorder
+}
+
+// Insert mocks base method
+func (m *MockFaucetAgent) Insert(ctx context.Context, faucet *models.Faucet) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Insert", ctx, faucet)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Insert indicates an expected call of Insert
+func (mr *MockFaucetAgentMockRecorder) Insert(ctx, faucet interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*MockFaucetAgent)(nil).Insert), ctx, faucet)
+}
+
+// Update mocks base method
+func (m *MockFaucetAgent) Update(ctx context.Context, faucet *models.Faucet, tenants []string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Update", ctx, faucet, tenants)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Update indicates an expected call of Update
+func (mr *MockFaucetAgentMockRecorder) Update(ctx, faucet, tenants interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockFaucetAgent)(nil).Update), ctx, faucet, tenants)
+}
+
+// FindOneByUUID mocks base method
+func (m *MockFaucetAgent) FindOneByUUID(ctx context.Context, uuid string, tenants []string) (*models.Faucet, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindOneByUUID", ctx, uuid, tenants)
+	ret0, _ := ret[0].(*models.Faucet)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindOneByUUID indicates an expected call of FindOneByUUID
+func (mr *MockFaucetAgentMockRecorder) FindOneByUUID(ctx, uuid, tenants interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneByUUID", reflect.TypeOf((*MockFaucetAgent)(nil).FindOneByUUID), ctx, uuid, tenants)
+}
+
+// Search mocks base method
+func (m *MockFaucetAgent) Search(ctx context.Context, filters *entities.FaucetFilters, tenants []string) ([]*models.Faucet, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Search", ctx, filters, tenants)
+	ret0, _ := ret[0].([]*models.Faucet)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Search indicates an expected call of Search
+func (mr *MockFaucetAgentMockRecorder) Search(ctx, filters, tenants interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Search", reflect.TypeOf((*MockFaucetAgent)(nil).Search), ctx, filters, tenants)
+}
+
+// Delete mocks base method
+func (m *MockFaucetAgent) Delete(ctx context.Context, faucet *models.Faucet, tenants []string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Delete", ctx, faucet, tenants)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Delete indicates an expected call of Delete
+func (mr *MockFaucetAgentMockRecorder) Delete(ctx, faucet, tenants interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockFaucetAgent)(nil).Delete), ctx, faucet, tenants)
 }

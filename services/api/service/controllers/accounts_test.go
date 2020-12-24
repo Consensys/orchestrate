@@ -115,8 +115,8 @@ func (s *accountsCtrlTestSuite) TestAccountController_Create() {
 	})
 
 	s.T().Run("should fail with Bad request if invalid format", func(t *testing.T) {
-		jobRequest := testutils.FakeImportAccountRequest()
-		requestBytes, _ := json.Marshal(jobRequest)
+		req := testutils.FakeImportAccountRequest()
+		requestBytes, _ := json.Marshal(req)
 
 		rw := httptest.NewRecorder()
 		httpRequest := httptest.
@@ -166,8 +166,8 @@ func (s *accountsCtrlTestSuite) TestAccountController_Import() {
 	})
 }
 
-func (s *accountsCtrlTestSuite) TestAccountController_GetAccount() {
-	s.T().Run("should execute get identity request successfully", func(t *testing.T) {
+func (s *accountsCtrlTestSuite) TestAccountController_GetOne() {
+	s.T().Run("should execute get account request successfully", func(t *testing.T) {
 		accResp := testutils.FakeAccount()
 		rw := httptest.NewRecorder()
 
@@ -185,7 +185,7 @@ func (s *accountsCtrlTestSuite) TestAccountController_GetAccount() {
 		assert.Equal(t, http.StatusOK, rw.Code)
 	})
 
-	s.T().Run("should fail with Bad request if invalid format", func(t *testing.T) {
+	s.T().Run("should fail with Internal server error if use case fails", func(t *testing.T) {
 		address := ethcommon.HexToAddress("0x123").String()
 
 		rw := httptest.NewRecorder()
@@ -240,7 +240,7 @@ func (s *accountsCtrlTestSuite) TestAccountController_UpdateAccount() {
 }
 
 func (s *accountsCtrlTestSuite) TestAccountController_SearchIdentity() {
-	s.T().Run("should execute search identity request successfully", func(t *testing.T) {
+	s.T().Run("should execute search account request successfully", func(t *testing.T) {
 		accResp := testutils.FakeAccount()
 		rw := httptest.NewRecorder()
 		aliases := []string{"alias1", "alias2"}

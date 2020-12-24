@@ -396,7 +396,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_search() {
 		rw := httptest.NewRecorder()
 		httpRequest := httptest.NewRequest(http.MethodGet, urlPath+"?idempotency_keys=mykey,mykey1", nil).WithContext(s.ctx)
 		txRequest := testutils.FakeTransferTxRequest()
-		expectedFilers := &entities.TransactionFilters{
+		expectedFilers := &entities.TransactionRequestFilters{
 			IdempotencyKeys: []string{"mykey", "mykey1"},
 		}
 
@@ -422,7 +422,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_search() {
 	s.T().Run("should fail with 500 if use case fails", func(t *testing.T) {
 		rw := httptest.NewRecorder()
 		httpRequest := httptest.NewRequest(http.MethodGet, urlPath+"?idempotency_keys=mykey,mykey1", nil).WithContext(s.ctx)
-		expectedFilers := &entities.TransactionFilters{
+		expectedFilers := &entities.TransactionRequestFilters{
 			IdempotencyKeys: []string{"mykey", "mykey1"},
 		}
 

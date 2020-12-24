@@ -8,9 +8,9 @@ import (
 )
 
 func TestAccountsParser(t *testing.T) {
-	idenEntity := testutils.FakeAccount()
-	idenModel := NewAccountModelFromEntities(idenEntity)
-	finalIdenEntity := NewAccountEntityFromModels(idenModel)
+	account := testutils.FakeAccount()
+	accountModel := NewAccountModelFromEntities(account)
+	finalAccount := NewAccountEntityFromModels(accountModel)
 
-	assert.Equal(t, idenEntity, finalIdenEntity)
+	assert.Equal(t, account, finalAccount)
 }

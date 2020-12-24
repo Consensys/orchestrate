@@ -6,17 +6,14 @@ import (
 	"context"
 	"fmt"
 	testutils3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/testutils"
-	"math/big"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/gofrs/uuid"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/chainregistry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
@@ -42,6 +39,7 @@ type sendTxSuite struct {
 	CreateJobUC         *mocks.MockCreateJobUseCase
 	CreateScheduleUC    *mocks.MockCreateScheduleUseCase
 	GetTxUC             *mocks.MockGetTxUseCase
+	GetFaucetCandidate  *mocks.MockGetFaucetCandidateUseCase
 }
 
 var (
@@ -66,6 +64,7 @@ func (s *sendTxSuite) SetupTest() {
 	s.CreateJobUC = mocks.NewMockCreateJobUseCase(ctrl)
 	s.CreateScheduleUC = mocks.NewMockCreateScheduleUseCase(ctrl)
 	s.GetTxUC = mocks.NewMockGetTxUseCase(ctrl)
+	s.GetFaucetCandidate = mocks.NewMockGetFaucetCandidateUseCase(ctrl)
 	s.ChainRegistryClient = mock.NewMockChainRegistryClient(ctrl)
 
 	s.DB.EXPECT().Begin().Return(s.DBTX, nil).AnyTimes()
@@ -78,7 +77,16 @@ func (s *sendTxSuite) SetupTest() {
 	s.CreateScheduleUC.EXPECT().WithDBTransaction(s.DBTX).Return(s.CreateScheduleUC).AnyTimes()
 	s.CreateJobUC.EXPECT().WithDBTransaction(s.DBTX).Return(s.CreateJobUC).AnyTimes()
 
-	s.usecase = NewSendTxUseCase(s.Validators, s.DB, s.ChainRegistryClient, s.StartJobUC, s.CreateJobUC, s.CreateScheduleUC, s.GetTxUC)
+	s.usecase = NewSendTxUseCase(
+		s.Validators,
+		s.DB,
+		s.ChainRegistryClient,
+		s.StartJobUC,
+		s.CreateJobUC,
+		s.CreateScheduleUC,
+		s.GetTxUC,
+		s.GetFaucetCandidate,
+	)
 }
 
 func (s *sendTxSuite) TestSendTx_Success() {
@@ -151,6 +159,7 @@ func (s *sendTxSuite) TestSendTx_Success() {
 		ctx := context.Background()
 		tenantID := "tenantID"
 		tenants := []string{tenantID}
+		allowedTenants := []string{tenantID, multitenancy.DefaultTenant}
 		chain := &models2.Chain{UUID: "32da9731-0fb8-4235-a4cc-35070ffe5bf0"}
 		jobUUID := txRequest.Schedule.Jobs[0].UUID
 		txData := ""
@@ -160,7 +169,7 @@ func (s *sendTxSuite) TestSendTx_Success() {
 		s.ChainRegistryClient.EXPECT().GetChainByName(ctx, txRequest.ChainName).Return(chain, nil)
 		s.TxRequestDA.EXPECT().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey, tenantID).Return(txRequestModel, nil)
 		s.GetTxUC.EXPECT().Execute(ctx, txRequestModel.Schedule.UUID, tenants).Return(txRequest, nil)
-		s.ChainRegistryClient.EXPECT().GetFaucetCandidate(ctx, gomock.Any(), chain.UUID).Return(nil, faucetNotFoundErr)
+		s.GetFaucetCandidate.EXPECT().Execute(ctx, gomock.Any(), chain, allowedTenants).Return(nil, faucetNotFoundErr)
 		s.StartJobUC.EXPECT().Execute(ctx, jobUUID, tenants).Return(nil)
 		s.GetTxUC.EXPECT().Execute(ctx, txRequest.Schedule.UUID, tenants).Return(txRequest, nil)
 
@@ -219,6 +228,7 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 
 	tenantID := "tenantID"
 	tenants := []string{tenantID}
+	allowedTenants := []string{tenantID, multitenancy.DefaultTenant}
 	chain := &models2.Chain{UUID: uuid.Must(uuid.NewV4()).String()}
 	jobUUID := uuid.Must(uuid.NewV4()).String()
 	scheduleUUID := uuid.Must(uuid.NewV4()).String()
@@ -343,7 +353,7 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 		s.CreateScheduleUC.EXPECT().Execute(gomock.Any(), gomock.Any()).Return(txRequest.Schedule, nil)
 		s.ScheduleDA.EXPECT().FindOneByUUID(ctx, txRequest.Schedule.UUID, tenants).Return(scheduleModel, nil)
 		s.TxRequestDA.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
-		s.ChainRegistryClient.EXPECT().GetFaucetCandidate(gomock.Any(), common.HexToAddress(txRequest.Params.From), chain.UUID).Return(nil, faucetNotFoundErr)
+		s.GetFaucetCandidate.EXPECT().Execute(gomock.Any(), txRequest.Params.From, chain, allowedTenants).Return(nil, faucetNotFoundErr)
 		s.CreateJobUC.EXPECT().Execute(gomock.Any(), gomock.Any(), tenants).Return(txRequest.Schedule.Jobs[0], expectedErr)
 
 		response, err := s.usecase.Execute(ctx, txRequest, txData, tenantID)
@@ -367,7 +377,7 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 		s.ScheduleDA.EXPECT().FindOneByUUID(ctx, txRequest.Schedule.UUID, tenants).Return(scheduleModel, nil)
 		s.TxRequestDA.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
 		s.CreateJobUC.EXPECT().Execute(gomock.Any(), gomock.Any(), tenants).Return(txRequest.Schedule.Jobs[0], nil)
-		s.ChainRegistryClient.EXPECT().GetFaucetCandidate(gomock.Any(), common.HexToAddress(txRequest.Params.From), chain.UUID).Return(nil, expectedErr)
+		s.GetFaucetCandidate.EXPECT().Execute(gomock.Any(), txRequest.Params.From, chain, allowedTenants).Return(nil, expectedErr)
 
 		response, err := s.usecase.Execute(ctx, txRequest, txData, tenantID)
 
@@ -388,8 +398,7 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 		s.ScheduleDA.EXPECT().FindOneByUUID(ctx, txRequest.Schedule.UUID, tenants).Return(scheduleModel, nil)
 		s.TxRequestDA.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
 		s.CreateJobUC.EXPECT().Execute(gomock.Any(), gomock.Any(), tenants).Return(txRequest.Schedule.Jobs[0], nil)
-		s.ChainRegistryClient.EXPECT().GetFaucetCandidate(gomock.Any(), common.HexToAddress(txRequest.Params.From), chain.UUID).
-			Return(nil, faucetNotFoundErr)
+		s.GetFaucetCandidate.EXPECT().Execute(gomock.Any(), txRequest.Params.From, chain, allowedTenants).Return(nil, faucetNotFoundErr)
 		s.StartJobUC.EXPECT().Execute(ctx, jobUUID, tenants).Return(expectedErr)
 
 		response, err := s.usecase.Execute(ctx, txRequest, txData, tenantID)
@@ -410,7 +419,8 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 		s.CreateScheduleUC.EXPECT().Execute(gomock.Any(), gomock.Any()).Return(txRequest.Schedule, nil)
 		s.ScheduleDA.EXPECT().FindOneByUUID(ctx, txRequest.Schedule.UUID, tenants).Return(scheduleModel, nil)
 		s.TxRequestDA.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
-		s.ChainRegistryClient.EXPECT().GetFaucetCandidate(gomock.Any(), common.HexToAddress(txRequest.Params.From), chain.UUID).
+		s.GetFaucetCandidate.EXPECT().
+			Execute(gomock.Any(), txRequest.Params.From, chain, allowedTenants).
 			Return(nil, faucetNotFoundErr)
 		s.CreateJobUC.EXPECT().Execute(gomock.Any(), gomock.Any(), tenants).Return(txRequest.Schedule.Jobs[0], nil)
 		s.StartJobUC.EXPECT().Execute(ctx, jobUUID, tenants).Return(nil)
@@ -427,6 +437,7 @@ func successfulTestExecution(s *sendTxSuite, txRequest *entities.TxRequest, with
 	ctx := context.Background()
 	tenantID := "tenantID"
 	tenants := []string{"tenantID"}
+	allowedTenants := []string{tenantID, multitenancy.DefaultTenant}
 	chain := &models2.Chain{UUID: "32da9731-0fb8-4235-a4cc-35070ffe5bf0"}
 	jobUUID := txRequest.Schedule.Jobs[0].UUID
 	txData := ""
@@ -453,40 +464,37 @@ func successfulTestExecution(s *sendTxSuite, txRequest *entities.TxRequest, with
 
 	// We flag this "special" scenario as faucet funding tx flow
 	if withFaucet {
-		creditor := common.HexToAddress("0xacd")
-		fctJobUUID := "fctJobUUID"
-		fct := &chainregistry.Faucet{
-			Creditor: creditor,
-			Amount:   big.NewInt(10),
-		}
-		s.ChainRegistryClient.EXPECT().GetFaucetCandidate(multitenancy.WithTenantID(ctx, tenantID), common.HexToAddress(txRequest.Params.From), chain.UUID).
-			Return(fct, nil)
+		faucet := testutils3.FakeFaucet()
+		s.GetFaucetCandidate.EXPECT().
+			Execute(multitenancy.WithTenantID(ctx, tenantID), txRequest.Params.From, chain, tenants).
+			Return(faucet, nil)
 
 		expectedFaucetJob := &entities.Job{
 			ScheduleUUID: txRequest.Schedule.UUID,
 			ChainUUID:    chain.UUID,
 			Type:         utils.EthereumTransaction,
-			Labels:       chainregistry.FaucetToJobLabels(fct),
+			Labels: map[string]string{
+				"faucetUUID": faucet.UUID,
+			},
 			InternalData: &entities.InternalData{},
 			Transaction: &entities.ETHTransaction{
-				From:  fct.Creditor.Hex(),
+				From:  faucet.CreditorAccount,
 				To:    txRequest.Params.From,
-				Value: fct.Amount.String(),
+				Value: faucet.Amount,
 			},
 		}
 		s.CreateJobUC.EXPECT().Execute(gomock.Any(), expectedFaucetJob, tenants).
 			DoAndReturn(func(ctx context.Context, jobEntity *entities.Job, tenants []string) (*entities.Job, error) {
-				if jobEntity.Transaction.From != creditor.Hex() {
-					return nil, fmt.Errorf("invalid from account. Got %s, expected %s", jobEntity.Transaction.From, creditor.Hex())
+				if jobEntity.Transaction.From != faucet.CreditorAccount {
+					return nil, fmt.Errorf("invalid from account. Got %s, expected %s", jobEntity.Transaction.From, faucet.CreditorAccount)
 				}
 
-				jobEntity.UUID = fctJobUUID
+				jobEntity.UUID = faucet.UUID
 				return jobEntity, nil
 			})
 		s.StartJobUC.EXPECT().Execute(ctx, jobUUID, tenants).Return(nil)
 	} else {
-		s.ChainRegistryClient.EXPECT().GetFaucetCandidate(multitenancy.WithTenantID(ctx, tenantID), common.HexToAddress(txRequest.Params.From), chain.UUID).
-			Return(nil, faucetNotFoundErr)
+		s.GetFaucetCandidate.EXPECT().Execute(ctx, txRequest.Params.From, chain, allowedTenants).Return(nil, faucetNotFoundErr)
 	}
 
 	s.StartJobUC.EXPECT().Execute(ctx, jobUUID, tenants).Return(nil)

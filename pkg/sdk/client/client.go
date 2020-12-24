@@ -20,6 +20,7 @@ type OrchestrateClient interface {
 	JobClient
 	MetricClient
 	AccountClient
+	FaucetClient
 }
 
 type TransactionClient interface {
@@ -61,4 +62,12 @@ type AccountClient interface {
 	SignTypedData(ctx context.Context, address string, request *types.SignTypedDataRequest) (string, error)
 	VerifySignature(ctx context.Context, request *keymanager.VerifyPayloadRequest) error
 	VerifyTypedDataSignature(ctx context.Context, request *ethereum.VerifyTypedDataRequest) error
+}
+
+type FaucetClient interface {
+	RegisterFaucet(ctx context.Context, request *types.RegisterFaucetRequest) (*types.FaucetResponse, error)
+	UpdateFaucet(ctx context.Context, uuid string, request *types.UpdateFaucetRequest) (*types.FaucetResponse, error)
+	GetFaucet(ctx context.Context, uuid string) (*types.FaucetResponse, error)
+	SearchFaucets(ctx context.Context, filters *entities.FaucetFilters) ([]*types.FaucetResponse, error)
+	DeleteFaucet(ctx context.Context, uuid string) error
 }
