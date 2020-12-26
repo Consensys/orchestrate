@@ -148,7 +148,7 @@ func TestSendTesseraMarking_Execute(t *testing.T) {
 		})
 		ec.EXPECT().SendQuorumRawPrivateTransaction(ctx, proxyURL, job.Transaction.Raw, job.Transaction.PrivateFor).
 			Return(ethcommon.HexToHash(txHash), expectedErr)
-		nonceChecker.EXPECT().DecreaseNonce(ctx, job, expectedErr).Return(nil)
+		nonceChecker.EXPECT().CleanNonce(ctx, job, expectedErr).Return(nil)
 
 		err := usecase.Execute(ctx, job)
 		assert.Equal(t, err, expectedErr)

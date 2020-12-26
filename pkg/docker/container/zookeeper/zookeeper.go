@@ -10,7 +10,7 @@ import (
 	"github.com/docker/go-connections/nat"
 )
 
-const DefaultZookeeperImage = "confluentinc/cp-zookeeper:5.3.0"
+const DefaultZookeeperImage = "confluentinc/cp-zookeeper:5.4.3"
 const defaultHostPort = ""
 const DefaultZookeeperClientPort = "32181"
 

@@ -68,7 +68,7 @@ func (uc *sendTesseraMarkingTxUseCase) Execute(ctx context.Context, job *entitie
 
 	txHash, err := uc.sendTx(ctx, job)
 	if err != nil {
-		if err2 := uc.nonceChecker.DecreaseNonce(ctx, job, err); err2 != nil {
+		if err2 := uc.nonceChecker.CleanNonce(ctx, job, err); err2 != nil {
 			return errors.FromError(err2).ExtendComponent(sendTesseraMarkingTxComponent)
 		}
 		return errors.FromError(err).ExtendComponent(sendTesseraMarkingTxComponent)

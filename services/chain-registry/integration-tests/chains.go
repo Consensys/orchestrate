@@ -186,7 +186,7 @@ func (s *chainsTestSuite) TestChainRegistry_ChainErrors() {
 	chainName := fmt.Sprintf("TestChainErr%d", rand.Intn(1000))
 	var chainUUID string
 
-	s.T().Run("should fail to register a new invalid chain", func(t *testing.T) {
+	s.T().Run("should fail to register a new invalid chain with invalid backoff duration", func(t *testing.T) {
 		chain := models.Chain{
 			Name:                    chainName,
 			URLs:                    []string{"http://invalid:8545"},
@@ -197,7 +197,7 @@ func (s *chainsTestSuite) TestChainRegistry_ChainErrors() {
 		assert.True(t, errors.IsInvalidFormatError(err))
 	})
 
-	s.T().Run("should fail to register a new invalid chain", func(t *testing.T) {
+	s.T().Run("should fail to register a new invalid chain with invalid urls", func(t *testing.T) {
 		chain := models.Chain{
 			Name:                    chainName,
 			URLs:                    []string{"$%^^"},

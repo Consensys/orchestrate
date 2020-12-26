@@ -120,7 +120,7 @@ func (ec *Client) call(req *http.Request, processResult ProcessResultFunc) error
 	case err == nil && len(respMsg.Result) == 0:
 		return errors.NotFoundError("data not found")
 	case resp.StatusCode == 404:
-		return errors.ConnectionError("url %s not found", req.URL)
+		return errors.NotFoundError("url %s not found", req.URL)
 	case resp.StatusCode < 200 || resp.StatusCode >= 300:
 		return errors.EthConnectionError("%v (code=%v)", resp.Status, resp.StatusCode)
 	case err != nil:

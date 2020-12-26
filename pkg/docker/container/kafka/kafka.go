@@ -13,7 +13,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/docker/container/zookeeper"
 )
 
-const DefaultKafkaImage = "confluentinc/cp-kafka:5.3.0"
+const DefaultKafkaImage = "confluentinc/cp-kafka:5.4.3"
 const DefaultExternalHostname = "localhost:9092"
 
 type Kafka struct {

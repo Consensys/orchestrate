@@ -1,4 +1,5 @@
-@public-tx
+@nonce
+@testing
 Feature: Nonce manager
   As an external developer
   I want transaction with empty nonce to be calibrated, sent to blockchain and mined
@@ -75,7 +76,7 @@ Feature: Nonce manager
       """
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
-
+    
   Scenario: Nonce recalibrating
     Given I register the following alias
       | alias | value              |
@@ -162,7 +163,6 @@ Feature: Nonce manager
         "from": "{{account1}}",
         "to": "{{to3}}",
         "value": "109000",
-        "nonce": "2",
         "gas": "21000"
     },
     "labels": {
@@ -424,8 +424,7 @@ Feature: Nonce manager
     Then the response code should be 202
     When I send "PUT" request to "{{global.api}}/jobs/{{txThreeJobUUID}}/start"
     Then the response code should be 202
-    Then Envelopes should be in topic "tx.sender"
-    Given I sleep "2s"
+    Given I sleep "5s"
     When I send "GET" request to "{{global.api}}/jobs/{{txOneJobUUID}}"
     Then the response code should be 200
     And Response should have the following fields

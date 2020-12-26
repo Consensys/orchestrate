@@ -14,6 +14,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/tx"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sender/store"
 )
 
@@ -23,7 +24,7 @@ const fetchNonceErr = "cannot retrieve fetch nonce from chain"
 
 type Manager interface {
 	GetNonce(ctx context.Context, job *entities.Job) (uint64, error)
-	DecreaseNonce(ctx context.Context, job *entities.Job, jobErr error) error
+	CleanNonce(ctx context.Context, job *entities.Job, jobErr error) error
 	IncrementNonce(ctx context.Context, job *entities.Job) error
 }
 
@@ -74,15 +75,20 @@ func (nc *nonceManager) GetNonce(ctx context.Context, job *entities.Job) (uint64
 			return 0, err
 		}
 
-		logger.WithField("pending_nonce", expectedNonce).Debug("calibrating nonce")
+		logger.WithField("pending_nonce", expectedNonce).Info("calibrating nonce")
 	}
 
 	return expectedNonce, nil
 }
 
-func (nc *nonceManager) DecreaseNonce(ctx context.Context, job *entities.Job, jobErr error) error {
+func (nc *nonceManager) CleanNonce(ctx context.Context, job *entities.Job, jobErr error) error {
 	logger := log.WithContext(ctx).WithField("job_uuid", job.UUID)
 	logger.Debug("checking job nonce on failure")
+
+	if job.InternalData.ParentJobUUID == job.UUID {
+		logger.Debug("ignoring nonce errors in children jobs")
+		return nil
+	}
 
 	// TODO: update EthClient to process and standardize nonce too low errors
 	if !strings.Contains(strings.ToLower(jobErr.Error()), "nonce too low") &&
@@ -91,29 +97,24 @@ func (nc *nonceManager) DecreaseNonce(ctx context.Context, job *entities.Job, jo
 		return nil
 	}
 
-	if job.InternalData.ParentJobUUID == job.UUID {
-		logger.Debug("ignore nonce errors in children jobs")
-		return nil
-	}
-
 	nonceKey := partitionKey(job)
 	logger.Warnf("chain responded with invalid nonce error")
-	if nc.recovery.Recovering(job.UUID) > nc.maxRecovery {
-		return errors.InternalError("reached max nonce recovery max")
-	}
-
-	expectedNonce, err := nc.fetchNonceFromChain(ctx, job)
-	if err != nil {
-		logger.WithError(err).Error(fetchNonceErr)
+	if nc.recovery.Recovering(job.UUID) >= nc.maxRecovery {
+		err := errors.InternalError("reached max nonce recovery max")
+		logger.WithError(err).Error("cannot recover from nonce error")
 		return err
 	}
 
-	logger.WithField("nonce.pending", expectedNonce).Debug("recalibrating nonce")
-	err = nc.nonce.SetLastSent(nonceKey, expectedNonce-1)
-	if err != nil {
-		errMsg := "cannot set lastSent nonce"
-		logger.WithError(err).Error(errMsg)
-		return err
+	txNonce, _ := strconv.ParseUint(job.Transaction.Nonce, 10, 64)
+
+	// Clean nonce value only if it was used to set the txNonce
+	lastSentNonce, ok, _ := nc.nonce.GetLastSent(nonceKey)
+	if ok && txNonce == lastSentNonce+1 {
+		logger.Debug("cleaning noncemanager")
+		if err := nc.nonce.DeleteLastSent(nonceKey); err != nil {
+			logger.WithError(err).Error("cannot clean NonceManager LastSent")
+			return err
+		}
 	}
 
 	// In case of failing because "nonce too low" we reset tx nonce
@@ -128,21 +129,26 @@ func (nc *nonceManager) IncrementNonce(ctx context.Context, job *entities.Job) e
 	logger.Debug("checking job nonce on success")
 
 	nonceKey := partitionKey(job)
+	txNonce, _ := strconv.ParseUint(job.Transaction.Nonce, 10, 64)
 
-	nc.recovery.Recovered(job.UUID)
-	txNonce, _ := strconv.ParseUint(job.Transaction.Nonce, 10, 32)
-	err := nc.nonce.SetLastSent(nonceKey, txNonce)
-	if err != nil {
-		errMsg := "could not store last sent nonce"
-		logger.WithError(err).Error(errMsg)
-		return err
+	// Set nonce value only if txNonce was using previous value
+	lastSentNonce, ok, _ := nc.nonce.GetLastSent(nonceKey)
+	if !ok || txNonce == lastSentNonce+1 {
+		logger.WithField("lastSent", txNonce).Debug("set noncemanager value")
+		err := nc.nonce.SetLastSent(nonceKey, txNonce)
+		if err != nil {
+			errMsg := "could not store last sent nonce"
+			logger.WithError(err).Error(errMsg)
+			return err
+		}
 	}
 
+	nc.recovery.Recovered(job.UUID)
 	return nil
 }
 
 func (nc *nonceManager) fetchNonceFromChain(ctx context.Context, job *entities.Job) (n uint64, err error) {
-	url := fmt.Sprintf("%s/%s", nc.chainRegistryURL, job.ChainUUID)
+	url := utils.GetProxyURL(nc.chainRegistryURL, job.ChainUUID)
 	fromAddr := ethcommon.HexToAddress(job.Transaction.From)
 
 	switch {

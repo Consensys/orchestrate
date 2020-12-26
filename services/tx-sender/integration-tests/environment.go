@@ -41,6 +41,7 @@ const txSchedulerMetricsURL = "http://transaction-scheduler:8082"
 const keyManagerMetricsURL = "http://key-manager:8082"
 const chainRegistryURL = "http://chainregistry:8081"
 const networkName = "tx-sender"
+const maxRecoveryDefault = 1
 
 var envKafkaHostPort string
 var envMetricsPort string
@@ -68,6 +69,7 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 	if kafkaExternalHostname == "" {
 		kafkaExternalHostname = "localhost"
 	}
+
 	kafkaExternalHostname = fmt.Sprintf("%s:%s", kafkaExternalHostname, envKafkaHostPort)
 
 	// Initialize environment flags
@@ -233,10 +235,11 @@ func newTxSender(ctx context.Context, txSenderConfig *txsender.Config, redisCli 
 	conf2.MetricsURL = txSchedulerMetricsURL
 	apiClient := client.NewHTTPClient(httpClient, conf2)
 
+	txSenderConfig.NonceMaxRecovery = maxRecoveryDefault
 	return txsender.NewTxSender(txSenderConfig, sarama.GlobalConsumerGroup(), sarama.GlobalSyncProducer(),
 		keyManagerClient, apiClient, ec, redisCli)
 }
 
 func testBackOff() backoff.BackOff {
-	return backoff.WithMaxRetries(backoff.NewConstantBackOff(time.Second), 1)
+	return backoff.WithMaxRetries(backoff.NewConstantBackOff(time.Second), maxRecoveryDefault)
 }

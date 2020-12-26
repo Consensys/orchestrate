@@ -83,6 +83,8 @@ func (c *KafkaConsumer) Stop(ctx context.Context) error {
 }
 
 func (c *KafkaConsumer) WaitForEnvelope(id, topic string, timeout time.Duration) (*tx.Envelope, error) {
+	log.Infof("waiting for envelope %s on topic %s. Timeout %ds", id, topic, timeout/time.Millisecond)
+
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
@@ -91,7 +93,6 @@ func (c *KafkaConsumer) WaitForEnvelope(id, topic string, timeout time.Duration)
 		c.chanRegistry.Register(msgKey, make(chan *tx.Envelope, 1))
 	}
 
-	log.Infof("waiting for envelope %s on topic %s. Timeout %ds", id, topic, timeout/time.Millisecond)
 	ch := c.chanRegistry.GetChan(msgKey)
 	select {
 	case e := <-ch:

@@ -49,18 +49,18 @@ func (mr *MockManagerMockRecorder) GetNonce(ctx, job interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNonce", reflect.TypeOf((*MockManager)(nil).GetNonce), ctx, job)
 }
 
-// DecreaseNonce mocks base method
-func (m *MockManager) DecreaseNonce(ctx context.Context, job *entities.Job, jobErr error) error {
+// CleanNonce mocks base method
+func (m *MockManager) CleanNonce(ctx context.Context, job *entities.Job, jobErr error) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DecreaseNonce", ctx, job, jobErr)
+	ret := m.ctrl.Call(m, "CleanNonce", ctx, job, jobErr)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// DecreaseNonce indicates an expected call of DecreaseNonce
-func (mr *MockManagerMockRecorder) DecreaseNonce(ctx, job, jobErr interface{}) *gomock.Call {
+// CleanNonce indicates an expected call of CleanNonce
+func (mr *MockManagerMockRecorder) CleanNonce(ctx, job, jobErr interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DecreaseNonce", reflect.TypeOf((*MockManager)(nil).DecreaseNonce), ctx, job, jobErr)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CleanNonce", reflect.TypeOf((*MockManager)(nil).CleanNonce), ctx, job, jobErr)
 }
 
 // IncrementNonce mocks base method

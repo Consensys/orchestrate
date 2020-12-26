@@ -294,5 +294,5 @@ Feature: Deploy ERC20 contract using tx-sentry
     When I send "GET" request to "{{global.api}}/jobs/{{jobOneUUID}}"
     Then the response code should be 200
     And Response should have the following fields
-      | status  | logs.length | annotations.hasBeenRetried |
-      | PENDING | 23          | true                       |
+      | status  | annotations.hasBeenRetried |
+      | PENDING |  true                       |

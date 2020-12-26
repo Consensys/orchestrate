@@ -54,7 +54,7 @@ func (uc *sendEEAPrivateTxUseCase) Execute(ctx context.Context, job *entities.Jo
 
 	job.Transaction.Hash, err = uc.sendTx(ctx, job)
 	if err != nil {
-		if err2 := uc.nonceManager.DecreaseNonce(ctx, job, err); err2 != nil {
+		if err2 := uc.nonceManager.CleanNonce(ctx, job, err); err2 != nil {
 			return errors.FromError(err2).ExtendComponent(sendEEAPrivateTxComponent)
 		}
 		return err

@@ -141,7 +141,7 @@ func TestSendEth_Execute(t *testing.T) {
 			Transaction: job.Transaction,
 		})
 		ec.EXPECT().SendRawTransaction(ctx, proxyURL, job.Transaction.Raw).Return(ethcommon.HexToHash(""), expectedErr)
-		nonceManager.EXPECT().DecreaseNonce(ctx, job, expectedErr).Return(nil)
+		nonceManager.EXPECT().CleanNonce(ctx, job, expectedErr).Return(nil)
 		
 		err := usecase.Execute(ctx, job)
 		assert.Equal(t, err, expectedErr)

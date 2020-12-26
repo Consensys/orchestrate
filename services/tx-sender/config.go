@@ -22,8 +22,8 @@ func init() {
 	viper.SetDefault(MetricsURLViperKey, metricsURLDefault)
 	_ = viper.BindEnv(MetricsURLViperKey, metricsURLEnv)
 
-	viper.SetDefault(MaxRecoveryViperKey, maxRecoveryDefault)
-	_ = viper.BindEnv(MaxRecoveryViperKey, maxRecoveryEnv)
+	viper.SetDefault(NonceMaxRecoveryViperKey, nonceMaxRecoveryDefault)
+	_ = viper.BindEnv(NonceMaxRecoveryViperKey, nonceMaxRecoveryEnv)
 
 	viper.SetDefault(nonceManagerTypeViperKey, nonceManagerTypeDefault)
 	_ = viper.BindEnv(nonceManagerTypeViperKey, nonceManagerTypeEnv)
@@ -36,10 +36,10 @@ const (
 )
 
 const (
-	maxRecoveryFlag     = "checker-max-recovery"
-	MaxRecoveryViperKey = "checker.max.recovery"
-	maxRecoveryDefault  = 5
-	maxRecoveryEnv      = "NONCE_CHECKER_MAX_RECOVERY"
+	nonceMaxRecoveryFlag     = "nonce-max-recovery"
+	NonceMaxRecoveryViperKey = "nonce.max.recovery"
+	nonceMaxRecoveryDefault  = 5
+	nonceMaxRecoveryEnv      = "NONCE_MAX_RECOVERY"
 )
 
 const (
@@ -69,9 +69,9 @@ func Flags(f *pflag.FlagSet) {
 // MaxRecovery register a flag for Redis server MaxRecovery
 func MaxRecovery(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Maximum number of times tx-sender tries to recover an envelope with invalid nonce before outputing an error
-Environment variable: %q`, maxRecoveryEnv)
-	f.Int(maxRecoveryFlag, maxRecoveryDefault, desc)
-	_ = viper.BindPFlag(MaxRecoveryViperKey, f.Lookup(maxRecoveryFlag))
+Environment variable: %q`, nonceMaxRecoveryEnv)
+	f.Int(nonceMaxRecoveryFlag, nonceMaxRecoveryDefault, desc)
+	_ = viper.BindPFlag(NonceMaxRecoveryViperKey, f.Lookup(nonceMaxRecoveryFlag))
 }
 
 // Type register flag for Nonce Cooldown
@@ -83,29 +83,28 @@ Environment variable: %q`, []string{NonceManagerTypeInMemory, NonceManagerTypeRe
 }
 
 type Config struct {
-	App                *app.Config
-	GroupName          string
-	RecoverTopic       string
-	SenderTopic        string
-	ChainRegistryURL   string
-	CheckerMaxRecovery uint64
-	BckOff             backoff.BackOff
-	MaxRecovery        uint64
-	NonceManagerType   string
-	RedisCfg           *redis.Config
+	App              *app.Config
+	GroupName        string
+	RecoverTopic     string
+	SenderTopic      string
+	ChainRegistryURL string
+	BckOff           backoff.BackOff
+	NonceMaxRecovery uint64
+	NonceManagerType string
+	RedisCfg         *redis.Config
 }
 
 func NewConfig(vipr *viper.Viper) *Config {
 	return &Config{
-		App:                app.NewConfig(vipr),
-		GroupName:          "group-dispatcher",
-		RecoverTopic:       vipr.GetString(broker.TxRecoverViperKey),
-		SenderTopic:        vipr.GetString(broker.TxSenderViperKey),
-		ChainRegistryURL:   vipr.GetString(chnregclient.URLViperKey),
-		CheckerMaxRecovery: vipr.GetUint64(MaxRecoveryViperKey),
-		BckOff:             retryMessageBackOff(),
-		NonceManagerType:   viper.GetString(nonceManagerTypeViperKey),
-		RedisCfg:           redis.NewConfig(vipr),
+		App:              app.NewConfig(vipr),
+		GroupName:        "group-dispatcher",
+		RecoverTopic:     vipr.GetString(broker.TxRecoverViperKey),
+		SenderTopic:      vipr.GetString(broker.TxSenderViperKey),
+		ChainRegistryURL: vipr.GetString(chnregclient.URLViperKey),
+		NonceMaxRecovery: vipr.GetUint64(NonceMaxRecoveryViperKey),
+		BckOff:           retryMessageBackOff(),
+		NonceManagerType: viper.GetString(nonceManagerTypeViperKey),
+		RedisCfg:         redis.NewConfig(vipr),
 	}
 }
 

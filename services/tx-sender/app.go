@@ -45,10 +45,10 @@ func NewTxSender(
 	var nm nonce.Manager
 	if config.NonceManagerType == NonceManagerTypeInMemory {
 		nm = nonce.NewNonceManager(ec, memory.NewNonceSender(), memory.NewNonceRecoveryTracker(),
-			config.ChainRegistryURL, config.MaxRecovery)
+			config.ChainRegistryURL, config.NonceMaxRecovery)
 	} else if config.NonceManagerType == NonceManagerTypeRedis {
 		nm = nonce.NewNonceManager(ec, redis.NewNonceSender(redisCli), redis.NewNonceRecoveryTracker(redisCli),
-			config.ChainRegistryURL, config.MaxRecovery)
+			config.ChainRegistryURL, config.NonceMaxRecovery)
 	}
 
 	txSenderDaemon := &txSenderDaemon{
@@ -72,7 +72,7 @@ func (d *txSenderDaemon) Run(ctx context.Context) error {
 
 	// Create business layer use cases
 	useCases := builder.NewUseCases(d.jobClient, d.keyManagerClient, d.ec, d.nonceManager,
-		d.config.ChainRegistryURL, d.config.CheckerMaxRecovery)
+		d.config.ChainRegistryURL, d.config.NonceMaxRecovery)
 
 	// Create service layer listener
 	listener := service.NewMessageListener(useCases, d.jobClient, d.producer, d.config.RecoverTopic, d.config.SenderTopic,

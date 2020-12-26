@@ -68,7 +68,7 @@ func (uc *sendETHTxUseCase) Execute(ctx context.Context, job *entities.Job) erro
 
 	txHash, err := uc.sendTx(ctx, job)
 	if err != nil {
-		if err2 := uc.nonceChecker.DecreaseNonce(ctx, job, err); err2 != nil {
+		if err2 := uc.nonceChecker.CleanNonce(ctx, job, err); err2 != nil {
 			return errors.FromError(err2).ExtendComponent(sendETHTxComponent)
 		}
 		return errors.FromError(err).ExtendComponent(sendETHTxComponent)

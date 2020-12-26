@@ -101,7 +101,6 @@ func (listener *MessageListener) ConsumeClaim(session sarama.ConsumerGroupSessio
 					// Exits if not errors
 					case err == nil:
 						return nil
-					// Retry on IsConnectionError
 					case errors.IsConnectionError(err):
 						return err
 					case err == context.DeadlineExceeded || err == context.Canceled:
@@ -116,6 +115,11 @@ func (listener *MessageListener) ConsumeClaim(session sarama.ConsumerGroupSessio
 					case job.InternalData.ParentJobUUID == job.UUID:
 						serr = utils2.UpdateJobStatus(ctx, listener.jobClient, evlp.GetJobUUID(),
 							utils.StatusFailed, err.Error(), nil)
+						// IMPORTANT: We ignore invalid status update for CHILDREN as they can be updated to NEVER_MINED
+						if serr != nil && errors.IsDataError(err) {
+							logger.WithError(err).Warn("cannot update children job status")
+							return nil
+						}
 					// Retry over same message
 					case errors.IsInvalidNonceWarning(err):
 						resetEnvelopeTx(evlp)
@@ -139,6 +143,7 @@ func (listener *MessageListener) ConsumeClaim(session sarama.ConsumerGroupSessio
 						if errors.IsConnectionError(serr) {
 							return serr
 						}
+
 						return backoff.Permanent(serr)
 					}
 
