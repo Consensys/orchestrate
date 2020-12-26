@@ -1,5 +1,4 @@
 @nonce
-@testing
 Feature: Nonce manager
   As an external developer
   I want transaction with empty nonce to be calibrated, sent to blockchain and mined

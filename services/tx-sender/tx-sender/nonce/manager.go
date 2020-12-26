@@ -86,7 +86,7 @@ func (nc *nonceManager) CleanNonce(ctx context.Context, job *entities.Job, jobEr
 	logger.Debug("checking job nonce on failure")
 
 	if job.InternalData.ParentJobUUID == job.UUID {
-		logger.Debug("ignoring nonce errors in children jobs")
+		logger.Debug("ignored nonce errors in children jobs")
 		return nil
 	}
 

@@ -30,6 +30,7 @@ type MessageListener struct {
 	producer     sarama.SyncProducer
 	jobClient    client.JobClient
 	cancel       context.CancelFunc
+	err          error
 }
 
 func NewMessageListener(useCases usecases.UseCases, jobClient client.JobClient,
@@ -57,18 +58,23 @@ func (listener *MessageListener) Setup(session sarama.ConsumerGroupSession) erro
 func (listener *MessageListener) Cleanup(session sarama.ConsumerGroupSession) error {
 	log.WithContext(session.Context()).Info("listener: all claims consumed")
 	if listener.cancel != nil {
-		log.WithContext(session.Context()).Info("listener: cancel context")
+		log.WithContext(session.Context()).Debug("listener: canceling context")
 		listener.cancel()
 	}
-	return nil
+
+	return listener.err
 }
 
 func (listener *MessageListener) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
-	ctx := session.Context()
-	logger := log.WithContext(ctx)
-	logger.Info("tx-sender has started consuming claims")
-
+	var ctx context.Context
 	ctx, listener.cancel = context.WithCancel(session.Context())
+	listener.err = listener.consumeClaimLoop(ctx, session, claim)
+	return listener.err
+}
+
+func (listener *MessageListener) consumeClaimLoop(ctx context.Context, session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
+	logger := log.WithContext(ctx)
+	logger.Info("tx-sender has started consuming claims loop")
 	for {
 		select {
 		case <-ctx.Done():
@@ -115,11 +121,6 @@ func (listener *MessageListener) ConsumeClaim(session sarama.ConsumerGroupSessio
 					case job.InternalData.ParentJobUUID == job.UUID:
 						serr = utils2.UpdateJobStatus(ctx, listener.jobClient, evlp.GetJobUUID(),
 							utils.StatusFailed, err.Error(), nil)
-						// IMPORTANT: We ignore invalid status update for CHILDREN as they can be updated to NEVER_MINED
-						if serr != nil && errors.IsDataError(err) {
-							logger.WithError(err).Warn("cannot update children job status")
-							return nil
-						}
 					// Retry over same message
 					case errors.IsInvalidNonceWarning(err):
 						resetEnvelopeTx(evlp)
@@ -139,6 +140,13 @@ func (listener *MessageListener) ConsumeClaim(session sarama.ConsumerGroupSessio
 					}
 
 					if serr != nil {
+						// IMPORTANT: Jobs can be updated in parallel to NEVER_MINED or MINED, so that we should
+						// ignore it in this case
+						if errors.IsDataError(err) {
+							logger.WithError(err).Warn("ignored job status update error")
+							return nil
+						}
+
 						// Retry on IsConnectionError
 						if errors.IsConnectionError(serr) {
 							return serr
