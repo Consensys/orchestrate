@@ -27,6 +27,9 @@ func init() {
 
 	viper.SetDefault(nonceManagerTypeViperKey, nonceManagerTypeDefault)
 	_ = viper.BindEnv(nonceManagerTypeViperKey, nonceManagerTypeEnv)
+
+	viper.SetDefault(NonceManagerExpirationViperKey, nonceManagerExpirationDefault)
+	_ = viper.BindEnv(NonceManagerExpirationViperKey, nonceManagerExpirationEnv)
 }
 
 const (
@@ -52,6 +55,13 @@ const (
 	NonceManagerTypeRedis    = "redis"
 )
 
+const (
+	nonceManagerExpirationFlag     = "nonce-manager-expiration"
+	NonceManagerExpirationViperKey = "nonce.manager.expiration"
+	nonceManagerExpirationDefault  = 5 * time.Minute
+	nonceManagerExpirationEnv      = "NONCE_MANAGER_EXPIRATION"
+)
+
 // Flags register flags for tx sentry
 func Flags(f *pflag.FlagSet) {
 	broker.InitKafkaFlags(f)
@@ -61,6 +71,7 @@ func Flags(f *pflag.FlagSet) {
 	chnregclient.Flags(f)
 	MaxRecovery(f)
 	NonceManagerType(f)
+	NonceManagerExpirationFlag(f)
 	redis.Flags(f)
 	metricregistry.Flags(f, httpmetrics.ModuleName, tcpmetrics.ModuleName)
 	httputils.MetricFlags(f)
@@ -82,29 +93,42 @@ Environment variable: %q`, []string{NonceManagerTypeInMemory, NonceManagerTypeRe
 	_ = viper.BindPFlag(nonceManagerTypeViperKey, f.Lookup(nonceManagerTypeFlag))
 }
 
+// ExpirationFlag register a flag for Redis expiration
+func NonceManagerExpirationFlag(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`NonceManager values expiration time.
+Environment variable: %q`, nonceManagerExpirationEnv)
+	f.Duration(nonceManagerExpirationFlag, nonceManagerExpirationDefault, desc)
+	_ = viper.BindPFlag(NonceManagerExpirationViperKey, f.Lookup(nonceManagerExpirationFlag))
+}
+
 type Config struct {
-	App              *app.Config
-	GroupName        string
-	RecoverTopic     string
-	SenderTopic      string
-	ChainRegistryURL string
-	BckOff           backoff.BackOff
-	NonceMaxRecovery uint64
-	NonceManagerType string
-	RedisCfg         *redis.Config
+	App                    *app.Config
+	GroupName              string
+	RecoverTopic           string
+	SenderTopic            string
+	ChainRegistryURL       string
+	BckOff                 backoff.BackOff
+	NonceMaxRecovery       uint64
+	NonceManagerType       string
+	RedisCfg               *redis.Config
+	NonceManagerExpiration time.Duration
 }
 
 func NewConfig(vipr *viper.Viper) *Config {
+	redisCfg := redis.NewConfig(vipr)
+	redisCfg.Expiration = int(vipr.GetDuration(NonceManagerExpirationViperKey).Milliseconds())
+
 	return &Config{
-		App:              app.NewConfig(vipr),
-		GroupName:        "group-dispatcher",
-		RecoverTopic:     vipr.GetString(broker.TxRecoverViperKey),
-		SenderTopic:      vipr.GetString(broker.TxSenderViperKey),
-		ChainRegistryURL: vipr.GetString(chnregclient.URLViperKey),
-		NonceMaxRecovery: vipr.GetUint64(NonceMaxRecoveryViperKey),
-		BckOff:           retryMessageBackOff(),
-		NonceManagerType: viper.GetString(nonceManagerTypeViperKey),
-		RedisCfg:         redis.NewConfig(vipr),
+		App:                    app.NewConfig(vipr),
+		GroupName:              "group-dispatcher",
+		RecoverTopic:           vipr.GetString(broker.TxRecoverViperKey),
+		SenderTopic:            vipr.GetString(broker.TxSenderViperKey),
+		ChainRegistryURL:       vipr.GetString(chnregclient.URLViperKey),
+		NonceMaxRecovery:       vipr.GetUint64(NonceMaxRecoveryViperKey),
+		BckOff:                 retryMessageBackOff(),
+		NonceManagerType:       viper.GetString(nonceManagerTypeViperKey),
+		NonceManagerExpiration: vipr.GetDuration(NonceManagerExpirationViperKey),
+		RedisCfg:               redisCfg,
 	}
 }
 

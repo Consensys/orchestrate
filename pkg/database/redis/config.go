@@ -21,8 +21,6 @@ func init() {
 	_ = viper.BindEnv(PasswordViperKey, passwordEnv)
 	viper.SetDefault(DatabaseViperKey, databaseDefault)
 	_ = viper.BindEnv(DatabaseViperKey, databaseEnv)
-	viper.SetDefault(ExpirationViperKey, expirationDefault)
-	_ = viper.BindEnv(ExpirationViperKey, expirationEnv)
 	viper.SetDefault(TLSEnableViperKey, tlsEnableDefault)
 	_ = viper.BindEnv(TLSEnableViperKey, tlsEnableEnv)
 	viper.SetDefault(TLSCertViperKey, tlsCertDefault)
@@ -108,21 +106,6 @@ Environment variable: %q`, databaseEnv)
 }
 
 const (
-	expirationFlag     = "redis-expiration"
-	ExpirationViperKey = "redis.expiration"
-	expirationDefault  = 2 * time.Minute
-	expirationEnv      = "REDIS_EXPIRATION"
-)
-
-// ExpirationFlag register a flag for Redis expiration
-func ExpirationFlag(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`ExpirationFlag for redis Key.
-Environment variable: %q`, expirationEnv)
-	f.Duration(expirationFlag, expirationDefault, desc)
-	_ = viper.BindPFlag(ExpirationViperKey, f.Lookup(expirationFlag))
-}
-
-const (
 	tlsEnableFlag     = "redis-tls-enable"
 	TLSEnableViperKey = "redis.tls.enable"
 	tlsEnableDefault  = false
@@ -199,7 +182,6 @@ Environment variable: %q`, tlsSkipVerifyEnv)
 // Register Redis flags
 func Flags(f *pflag.FlagSet) {
 	URL(f)
-	ExpirationFlag(f)
 	UsernameFlag(f)
 	DatabaseFlag(f)
 	PasswordFlag(f)
@@ -227,7 +209,7 @@ func NewConfig(vipr *viper.Viper) *Config {
 		User:       vipr.GetString(UsernameViperKey),
 		Password:   vipr.GetString(PasswordViperKey),
 		Database:   vipr.GetInt(DatabaseViperKey),
-		Expiration: int(vipr.GetDuration(ExpirationViperKey).Milliseconds()),
+		Expiration: int(2 * time.Minute),
 	}
 
 	if vipr.GetBool(TLSEnableViperKey) {

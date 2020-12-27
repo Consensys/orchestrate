@@ -6,7 +6,6 @@ import (
 	"math/rand"
 	"reflect"
 	"regexp"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -480,45 +479,6 @@ func (sc *ScenarioContext) iRegisterTheFollowingAliasAs(table *gherkin.PickleSte
 	return nil
 }
 
-func (sc *ScenarioContext) iSetNonceRecords(table *gherkin.PickleStepArgument_PickleTable) error {
-	aliasTable := utils.ExtractColumns(table, []string{"Account", "ChainID", "Nonce"})
-	if aliasTable == nil {
-		return errors.DataError("Missing mandatory columns")
-	}
-
-	for _, row := range aliasTable.Rows[1:] {
-		acc := row.Cells[0].Value
-		chainID := row.Cells[1].Value
-		nonce, err := strconv.ParseInt(row.Cells[2].Value, 10, 64)
-		if err != nil {
-			return err
-		}
-
-		nonceKey := fmt.Sprintf("%v@%v", acc, chainID)
-		if nonce >= 0 {
-			if err := sc.nonceSender.SetLastSent(nonceKey, uint64(nonce)); err != nil {
-				return err
-			}
-
-			log.WithFields(log.Fields{
-				"SetLastSent": nonce,
-				"nonce_key":   nonceKey,
-			}).Debug("scenario: Set last seen nonce record")
-		} else {
-			if err := sc.nonceSender.DeleteLastSent(nonceKey); err != nil {
-				return err
-			}
-
-			log.WithFields(log.Fields{
-				"SetLastSent": nonce,
-				"nonce_key":   nonceKey,
-			}).Debug("scenario: delete nonce manager records")
-		}
-	}
-
-	return nil
-}
-
 func (sc *ScenarioContext) iTrackTheFollowingEnvelopes(table *gherkin.PickleStepArgument_PickleTable) error {
 	if len(table.Rows[0].Cells) != 1 {
 		return errors.DataError("invalid table")
@@ -630,7 +590,6 @@ func initEnvelopeSteps(s *godog.ScenarioContext, sc *ScenarioContext) {
 	s.Step(`^I have the following tenants$`, sc.preProcessTableStep(sc.iHaveTheFollowingTenant))
 	s.Step(`^I have the following account`, sc.preProcessTableStep(sc.iHaveTheFollowingAccount))
 	s.Step(`^I register the following alias$`, sc.preProcessTableStep(sc.iRegisterTheFollowingAliasAs))
-	s.Step(`^Set last seen nonce record$`, sc.preProcessTableStep(sc.iSetNonceRecords))
 	s.Step(`^I have created the following accounts$`, sc.preProcessTableStep(sc.iHaveCreatedTheFollowingAccounts))
 	s.Step(`^I track the following envelopes$`, sc.preProcessTableStep(sc.iTrackTheFollowingEnvelopes))
 	s.Step(`^I send envelopes to topic "([^"]*)"$`, sc.iSendEnvelopesToTopic)

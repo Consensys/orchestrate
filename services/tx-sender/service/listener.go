@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
@@ -142,8 +143,8 @@ func (listener *MessageListener) consumeClaimLoop(ctx context.Context, session s
 					if serr != nil {
 						// IMPORTANT: Jobs can be updated in parallel to NEVER_MINED or MINED, so that we should
 						// ignore it in this case
-						if errors.IsDataError(err) {
-							logger.WithError(err).Warn("ignored job status update error")
+						if strings.Contains(err.Error(), "42400@") {
+							logger.WithError(err).Warn("ignored error")
 							return nil
 						}
 

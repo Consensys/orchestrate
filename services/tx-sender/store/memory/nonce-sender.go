@@ -1,8 +1,10 @@
 package memory
 
 import (
-	"sync"
+	"reflect"
+	"time"
 
+	"github.com/dgraph-io/ristretto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sender/store"
 )
@@ -16,13 +18,21 @@ import (
 // Accessing the same key from 2 different goroutines could result
 // in discrepancies in nonce updates
 type nonceSender struct {
-	cache *sync.Map
+	cache *ristretto.Cache
+	ttl   time.Duration
 }
 
 // NewNonceSender creates a new mock NonceManager
-func NewNonceSender() store.NonceSender {
+func NewNonceSender(ttl time.Duration) store.NonceSender {
+	cache, _ := ristretto.NewCache(&ristretto.Config{
+		NumCounters: 1e7,     // number of keys to track frequency of (100k).
+		MaxCost:     1 << 32, // maximum cost of cache (100MB).
+		BufferItems: 64,      // number of keys per Get buffer.
+	})
+
 	return &nonceSender{
-		cache: &sync.Map{},
+		cache: cache,
+		ttl:   ttl,
 	}
 }
 
@@ -48,7 +58,7 @@ func (nm *nonceSender) DeleteLastSent(key string) (err error) {
 }
 
 func (nm *nonceSender) loadUint64(key string) (value uint64, ok bool, err error) {
-	v, ok := nm.cache.Load(key)
+	v, ok := nm.cache.Get(key)
 	if !ok {
 		return 0, false, nil
 	}
@@ -62,11 +72,12 @@ func (nm *nonceSender) loadUint64(key string) (value uint64, ok bool, err error)
 }
 
 func (nm *nonceSender) set(key string, value interface{}) {
-	nm.cache.Store(key, value)
+	size := int64(reflect.TypeOf(value).Size())
+	nm.cache.SetWithTTL(key, value, size, nm.ttl)
 }
 
 func (nm *nonceSender) delete(key string) {
-	nm.cache.Delete(key)
+	nm.cache.Del(key)
 }
 
 func (nm *nonceSender) incrUint64(key string) error {

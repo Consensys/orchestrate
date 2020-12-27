@@ -4,7 +4,7 @@ INTEGRATION_TEST_PACKAGES ?= $(shell go list ./... | grep integration-tests )
 ORCH_SERVICES = tx-sender tx-listener contract-registry chain-registry api key-manager
 ORCH_MIGRATE = contract-registry chain-registry api key-manager
 DEPS_VAULT = vault-init vault vault-import-secrets
-DEPS_POSTGRES_REDIS = postgres-chain-registry postgres-contract-registry postgres-api redis
+DEPS_POSTGRES = postgres-chain-registry postgres-contract-registry postgres-api
 DEPS_KAFKA = zookeeper kafka
 
 UNAME_S := $(shell uname -s)
@@ -145,8 +145,11 @@ stop-orchestrate: ## Stop Orchestrate
 down-orchestrate:## Down Orchestrate
 	@docker-compose down --volumes --timeout 0
 
-deps-postgres-redis:
-	@docker-compose -f scripts/deps/docker-compose.yml up --build -d $(DEPS_POSTGRES_REDIS)
+deps-postgres:
+	@docker-compose -f scripts/deps/docker-compose.yml up --build -d $(DEPS_POSTGRES)
+
+deps-redis:
+	@docker-compose -f scripts/deps/docker-compose.yml up --build -d redis
 
 deps-vault:
 	@docker-compose -f scripts/deps/docker-compose.yml up --build -d $(DEPS_VAULT)
@@ -154,7 +157,7 @@ deps-vault:
 deps-kafka:
 	@docker-compose -f scripts/deps/docker-compose.yml up --build -d $(DEPS_KAFKA)
 
-deps-persistent: deps-vault deps-postgres-redis
+deps-persistent: deps-vault deps-postgres deps-redis
 
 deps: deps-persistent deps-kafka
 

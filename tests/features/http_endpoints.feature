@@ -81,7 +81,6 @@ Feature: Verify HTTP Endpoints
     When I send "GET" request to "{{global.tx-sender-metrics}}/live"
     Then the response code should be 200
 
-
   ###################
   # TX-LISTENER
   ###################

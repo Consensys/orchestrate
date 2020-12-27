@@ -44,7 +44,7 @@ func NewTxSender(
 
 	var nm nonce.Manager
 	if config.NonceManagerType == NonceManagerTypeInMemory {
-		nm = nonce.NewNonceManager(ec, memory.NewNonceSender(), memory.NewNonceRecoveryTracker(),
+		nm = nonce.NewNonceManager(ec, memory.NewNonceSender(config.NonceManagerExpiration), memory.NewNonceRecoveryTracker(),
 			config.ChainRegistryURL, config.NonceMaxRecovery)
 	} else if config.NonceManagerType == NonceManagerTypeRedis {
 		nm = nonce.NewNonceManager(ec, redis.NewNonceSender(redisCli), redis.NewNonceRecoveryTracker(redisCli),

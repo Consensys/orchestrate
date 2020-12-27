@@ -23,7 +23,7 @@ func New(ctx context.Context) (*app.App, error) {
 	keymanager.Init()
 	client.Init()
 	ethclient.Init(ctx)
-	dbredis.Init()
+
 	if config.NonceManagerType == NonceManagerTypeRedis {
 		dbredis.Init()
 	}
