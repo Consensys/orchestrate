@@ -118,6 +118,7 @@ func InitClient(_ context.Context) (err error) {
 			return gr.Wait().ErrorOrNil()
 		}
 
+		sarama.Logger = log.StandardLogger().WithField("logger", "sarama")
 		log.Infof("sarama: client ready (connected to brokers: %v) at host %v", brokers, hostnames)
 	})
 

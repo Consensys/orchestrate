@@ -137,7 +137,16 @@ runningLoop:
 			err := backoff.RetryNotify(
 				func() error {
 					// Handle message
-					return e.handleMessage(ctx, msg)
+					err := e.handleMessage(ctx, msg)
+					if err == context.DeadlineExceeded || err == context.Canceled || ctx.Err() != nil {
+						if err == nil {
+							err = ctx.Err()
+						}
+						log.WithContext(ctx).WithError(err).Info("exiting listener session...")
+						return backoff.Permanent(err)
+					}
+
+					return err
 				},
 				bckOff,
 				func(err error, duration time.Duration) {

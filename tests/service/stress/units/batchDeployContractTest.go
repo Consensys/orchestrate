@@ -16,7 +16,6 @@ import (
 func BatchDeployContractTest(ctx context.Context, cfg *WorkloadConfig, client orchestrateclient.OrchestrateClient, chanReg *chanregistry.ChanRegistry) error {
 	accounts := utils2.ContextAccounts(ctx)
 	chains := utils2.ContextChains(ctx)
-	log.FromContext(ctx).Debugf("Running batchDeployContract()...")
 
 	nAcc := rand.Intn(cfg.nAccounts)
 	idempotency := utils.RandomString(30)

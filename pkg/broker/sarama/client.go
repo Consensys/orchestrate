@@ -1,8 +1,6 @@
 package sarama
 
 import (
-	"time"
-
 	"github.com/Shopify/sarama"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
@@ -22,15 +20,35 @@ func NewClient(addrs []string, conf *sarama.Config) (sarama.Client, error) {
 	return client, nil
 }
 
+var rebalanceStrategy = map[string]sarama.BalanceStrategy{
+	"Range":      sarama.BalanceStrategyRange,
+	"RoundRobin": sarama.BalanceStrategyRoundRobin,
+	"Sticky":     sarama.BalanceStrategySticky,
+}
+
 func NewSaramaConfig() (*sarama.Config, error) {
 	cfg := sarama.NewConfig()
-	cfg.Version = sarama.V1_0_0_0
-	cfg.Consumer.Return.Errors = true
+
+	// // If not able to parse version then use Min version by default
+	if version, err := sarama.ParseKafkaVersion(viper.GetString(kafkaVersionViperKey)); err == nil {
+		cfg.Version = version
+	} else {
+		cfg.Version = sarama.V1_0_0_0
+	}
+
+	cfg.ClientID = "sarama-orchestrate"
 	cfg.Producer.Return.Errors = true
 	cfg.Producer.Return.Successes = true
-	cfg.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
-	cfg.Consumer.MaxWaitTime = time.Duration(viper.GetInt64(kafkaConsumerMaxWaitTimeViperKey)) * time.Millisecond
-
+	cfg.Consumer.Return.Errors = true
+	cfg.Consumer.Offsets.AutoCommit.Enable = false
+	cfg.Consumer.MaxWaitTime = viper.GetDuration(kafkaConsumerMaxWaitTimeViperKey)
+	cfg.Consumer.MaxProcessingTime = viper.GetDuration(kafkaConsumerMaxProcessingTimeViperKey)
+	cfg.Consumer.Group.Session.Timeout = viper.GetDuration(kafkaConsumerGroupSessionTimeoutViperKey)
+	cfg.Consumer.Group.Heartbeat.Interval = viper.GetDuration(kafkaConsumerGroupHeartbeatIntervalViperKey)
+	cfg.Consumer.Group.Rebalance.Timeout = viper.GetDuration(kafkaConsumerGroupRebalanceTimeoutViperKey)
+	if strategy, ok := rebalanceStrategy[viper.GetString(kafkaConsumerGroupRebalanceStrategyViperKey)]; ok {
+		cfg.Consumer.Group.Rebalance.Strategy = strategy
+	}
 	cfg.Net.SASL.Enable = viper.GetBool(kafkaSASLEnabledViperKey)
 	cfg.Net.SASL.Mechanism = sarama.SASLMechanism(viper.GetString(kafkaSASLMechanismViperKey))
 	cfg.Net.SASL.Handshake = viper.GetBool(kafkaSASLHandshakeViperKey)

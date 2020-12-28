@@ -7,6 +7,26 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 )
 
+//go:generate mockgen -source=consumer_group.go -destination=mock/mock.go -package=mock
+type ConsumerGroupSession interface {
+	Claims() map[string][]int32
+	MemberID() string
+	GenerationID() int32
+	MarkOffset(topic string, partition int32, offset int64, metadata string)
+	Commit()
+	ResetOffset(topic string, partition int32, offset int64, metadata string)
+	MarkMessage(msg *sarama.ConsumerMessage, metadata string)
+	Context() context.Context
+}
+
+type ConsumerGroupClaim interface {
+	Topic() string
+	Partition() int32
+	InitialOffset() int64
+	HighWaterMarkOffset() int64
+	Messages() <-chan *sarama.ConsumerMessage
+}
+
 type consumerGroup struct {
 	g sarama.ConsumerGroup
 

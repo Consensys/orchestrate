@@ -47,7 +47,31 @@ func TestKafkaConsumerMaxWaitTime(t *testing.T) {
 	f := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	KafkaConsumerMaxWaitTime(f)
 
-	assert.Equal(t, kafkaConsumerMaxWaitTimeDefault, viper.GetInt(kafkaConsumerMaxWaitTimeViperKey), "Default")
+	assert.Equal(t, kafkaConsumerMaxWaitTimeDefault, viper.GetDuration(kafkaConsumerMaxWaitTimeViperKey), "Default")
+}
+
+func TestKafkaConsumerMaxProcessingTime(t *testing.T) {
+
+	f := pflag.NewFlagSet("test", pflag.ContinueOnError)
+	kafkaConsumerMaxProcessingTime(f)
+
+	assert.Equal(t, kafkaConsumerMaxProcessingTimeDefault, viper.GetDuration(kafkaConsumerMaxProcessingTimeViperKey), "Default")
+}
+
+func TestKafkaConsumerGroupHeartbeatInterval(t *testing.T) {
+
+	f := pflag.NewFlagSet("test", pflag.ContinueOnError)
+	kafkaConsumerGroupHeartbeatInterval(f)
+
+	assert.Equal(t, kafkaConsumerGroupHeartbeatIntervalDefault, viper.GetDuration(kafkaConsumerGroupHeartbeatIntervalViperKey), "Default")
+}
+
+func TestKafkaConsumerGroupRebalanceTimeout(t *testing.T) {
+
+	f := pflag.NewFlagSet("test", pflag.ContinueOnError)
+	kafkaConsumerGroupRebalanceTimeout(f)
+
+	assert.Equal(t, kafkaConsumerGroupRebalanceTimeoutDefault, viper.GetDuration(kafkaConsumerGroupRebalanceTimeoutViperKey), "Default")
 }
 
 func TestTopics(t *testing.T) {
@@ -77,7 +101,7 @@ func TestConsumerGroup(t *testing.T) {
 	assert.Equal(t, "group-sender", viper.GetString("kafka.group.sender"), "From default")
 
 	DecoderGroup(flgs)
-	assert.Equal(t, "group-decoder", viper.GetString("kafka.group.decoder"), "From default")
+	assert.Equal(t, "group-decoded", viper.GetString("kafka.group.decoded"), "From default")
 }
 
 func TestInitKafkaSASLFlags(t *testing.T) {
@@ -115,4 +139,7 @@ func TestInitKafkaFlags(t *testing.T) {
 	TestInitKafkaSASLFlags(t)
 	TestInitKafkaTLSFlags(t)
 	TestKafkaConsumerMaxWaitTime(t)
+	TestKafkaConsumerGroupRebalanceTimeout(t)
+	TestKafkaConsumerGroupHeartbeatInterval(t)
+	TestKafkaConsumerMaxProcessingTime(t)
 }

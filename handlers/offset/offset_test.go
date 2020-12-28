@@ -7,8 +7,8 @@ import (
 	"testing"
 
 	"github.com/Shopify/sarama"
+	"github.com/golang/mock/gomock"
 	log "github.com/sirupsen/logrus"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama/mock"
@@ -16,12 +16,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/engine/testutils"
 )
 
-var (
-	session = mock.NewConsumerGroupSession(context.Background(), "test-group", make(map[string][]int32))
-	c       = mock.NewConsumerGroupClaim("test-topic", 0, 0)
-)
-
-func makeMarkerContext(i int) *engine.TxContext {
+func makeMarkerContext(session sarama.ConsumerGroupSession, c sarama.ConsumerGroupClaim, i int) *engine.TxContext {
 	// Initialize context
 	txctx := engine.NewTxContext().Prepare(log.NewEntry(log.StandardLogger()), nil)
 	ctx := broker.WithConsumerGroupSessionAndClaim(context.Background(), session, c)
@@ -44,19 +39,27 @@ type MarkerTestSuite struct {
 
 func (s *MarkerTestSuite) SetupSuite() {
 	s.Handler = Marker
+
 }
 
 func (s *MarkerTestSuite) TestMarker() {
 	rounds := 100
+
+	ctrl := gomock.NewController(s.T())
+	defer ctrl.Finish()
+
+	mockConsumerGroupSession := mock.NewMockConsumerGroupSession(ctrl)
+	mockConsumerGroupSession.EXPECT().Commit().Times(rounds)
+	mockConsumerGroupSession.EXPECT().MarkMessage(gomock.Any(), "").Times(rounds)
+	mockConsumerGroupClaim := mock.NewMockConsumerGroupClaim(ctrl)
+
 	var txctxs []*engine.TxContext
 	for i := 0; i < rounds; i++ {
-		txctxs = append(txctxs, makeMarkerContext(i))
+		txctxs = append(txctxs, makeMarkerContext(mockConsumerGroupSession, mockConsumerGroupClaim, i))
 	}
 
 	// Handle contexts
 	s.Handle(txctxs)
-
-	assert.Equal(s.T(), int64(rounds), session.LastMarkedOffset("test-topic", 0).Offset, "Expected message to have been marked")
 }
 
 func TestLoader(t *testing.T) {

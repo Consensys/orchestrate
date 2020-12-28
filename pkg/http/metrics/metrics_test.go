@@ -1,5 +1,4 @@
 // +build unit
-// +build !race
 
 package metrics
 
@@ -122,7 +121,7 @@ func TestReloadConfiguration(t *testing.T) {
 	_ = httpCollector.Switch(dynCfg)
 
 	// Increase waiting time to complete dynamic cfg switch
-	time.Sleep(time.Second * 2)
+	time.Sleep(time.Second)
 
 	httpCollector.RequestsCounter().
 		With("tenant_id", "test-tenant", "entrypoint", "ep-foo", "protocol", "http", "service", "dashboard@provider1", "method", http.MethodGet, "code", strconv.Itoa(http.StatusOK)).
@@ -139,6 +138,8 @@ func TestReloadConfiguration(t *testing.T) {
 	httpCollector.ServerUpGauge().
 		With("tenant_id", "test-tenant", "entrypoint", "ep-foo", "service", "proxy@provider1", "url", "http://unknown.com").
 		Set(1)
+
+	time.Sleep(time.Second)
 
 	// #3 Gather a 1st time: should retrieve metrics
 	families, err = registry.Gather()

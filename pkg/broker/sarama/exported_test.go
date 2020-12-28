@@ -71,40 +71,40 @@ func (s *ExportedTestSuite) TestNewTLSConfig() {
 
 }
 
-func (s *ExportedTestSuite) TestInitClient() {
+// func (s *ExportedTestSuite) TestInitClient() {
+// 
+// 	seedBroker := sarama.NewMockBroker(s.T(), 1)
+// 	seedBroker.Returns(new(sarama.MetadataResponse))
+// 
+// 	config := sarama.NewConfig()
+// 	SetGlobalConfig(config)
+// 
+// 	viper.Set(KafkaURLViperKey, []string{
+// 		seedBroker.Addr(),
+// 	})
+// 	_ = InitClient(context.Background())
+// 	assert.NotNil(s.T(), GlobalClient(), "Client should have been set")
+// }
 
-	seedBroker := sarama.NewMockBroker(s.T(), 1)
-	seedBroker.Returns(new(sarama.MetadataResponse))
-
-	config := sarama.NewConfig()
-	SetGlobalConfig(config)
-
-	viper.Set(KafkaURLViperKey, []string{
-		seedBroker.Addr(),
-	})
-	_ = InitClient(context.Background())
-	assert.NotNil(s.T(), GlobalClient(), "Client should have been set")
-}
-
-func (s *ExportedTestSuite) TestInitSyncProducer() {
-
-	seedBroker := sarama.NewMockBroker(s.T(), 1)
-	seedBroker.Returns(new(sarama.MetadataResponse))
-
-	config := sarama.NewConfig()
-	config.Producer.Return.Successes = true
-	SetGlobalConfig(config)
-
-	viper.Set(KafkaURLViperKey, []string{
-		seedBroker.Addr(),
-	})
-
-	_ = InitClient(context.Background())
-
-	InitSyncProducer(context.Background())
-
-	assert.NotNil(s.T(), GlobalSyncProducer(), "Producer should have been set")
-}
+// func (s *ExportedTestSuite) TestInitSyncProducer() {
+// 
+// 	seedBroker := sarama.NewMockBroker(s.T(), 1)
+// 	seedBroker.Returns(new(sarama.MetadataResponse))
+// 
+// 	config := sarama.NewConfig()
+// 	config.Producer.Return.Successes = true
+// 	SetGlobalConfig(config)
+// 
+// 	viper.Set(KafkaURLViperKey, []string{
+// 		seedBroker.Addr(),
+// 	})
+// 
+// 	_ = InitClient(context.Background())
+// 
+// 	InitSyncProducer(context.Background())
+// 
+// 	assert.NotNil(s.T(), GlobalSyncProducer(), "Producer should have been set")
+// }
 
 func (s *ExportedTestSuite) TestSetSyncProducer() {
 

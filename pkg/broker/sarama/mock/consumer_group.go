@@ -147,6 +147,11 @@ func (s *ConsumerGroupSession) Claims() map[string][]int32 {
 }
 
 // MemberID returns the cluster member UUID.
+func (s *ConsumerGroupSession) Commit() {
+	return
+}
+
+// MemberID returns the cluster member UUID.
 func (s *ConsumerGroupSession) MemberID() string {
 	return s.memberID
 }
