@@ -98,13 +98,6 @@ func TestEthConnectionError(t *testing.T) {
 	assert.Equal(t, "08300", e.Hex(), "EthConnectionError Hex representation should be correct")
 }
 
-func TestGRPCConnectionError(t *testing.T) {
-	e := GRPCConnectionError("test")
-	assert.Equal(t, uint64(33792), e.GetCode(), "GRPCConnectionError code should be correct")
-	assert.True(t, IsConnectionError(e), "GRPCConnectionError should be a connection error")
-	assert.Equal(t, "08400", e.Hex(), "GRPCConnectionError Hex representation should be correct")
-}
-
 func TestRedisConnectionError(t *testing.T) {
 	e := RedisConnectionError("test")
 	assert.Equal(t, uint64(34048), e.GetCode(), "RedisConnectionError code should be correct")

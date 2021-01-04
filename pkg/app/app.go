@@ -16,11 +16,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/configwatcher"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/configwatcher/provider"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/configwatcher/provider/aggregator"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/grpc"
-	grpcinterceptor "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/grpc/interceptor/static"
-	grpcserver "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/grpc/server"
-	grpcstaticserver "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/grpc/server/static"
-	grpcservice "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/grpc/service/static"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/dynamic"
 	httphandler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/handler/dynamic"
@@ -64,9 +59,6 @@ type App struct {
 
 	http        *http.EntryPoints
 	httpBuilder router.Builder
-
-	grpc        *grpc.EntryPoint
-	grpcBuilder grpcserver.Builder
 
 	provider *aggregator.Provider
 	watcher  configwatcher.Watcher
@@ -114,10 +106,6 @@ func New(cfg *Config, opts ...Option) (*App, error) {
 	reg.Add(httpMidMetrics)
 	httpBuilder.Metrics = metricsmid.NewBuilder(httpMidMetrics)
 
-	grpcBuilder := grpcstaticserver.NewBuilder()
-	grpcBuilder.Interceptor = grpcinterceptor.NewBuilder()
-	grpcBuilder.Service = grpcservice.NewBuilder()
-
 	// Create watcher
 	prvdr := aggregator.New()
 	watcher := configwatcher.New(
@@ -131,7 +119,6 @@ func New(cfg *Config, opts ...Option) (*App, error) {
 	app := newApp(
 		cfg,
 		httpBuilder,
-		grpcBuilder,
 		watcher,
 		reg,
 		logger,
@@ -151,7 +138,6 @@ func New(cfg *Config, opts ...Option) (*App, error) {
 func newApp(
 	cfg *Config,
 	httpBuilder router.Builder,
-	grpcBuilder grpcserver.Builder,
 	watcher configwatcher.Watcher,
 	reg metrics.Registry,
 	logger *logrus.Logger,
@@ -159,7 +145,6 @@ func newApp(
 	return &App{
 		cfg:         cfg,
 		httpBuilder: httpBuilder,
-		grpcBuilder: grpcBuilder,
 		watcher:     watcher,
 		logger:      logger,
 		metricReg:   reg,
@@ -176,7 +161,7 @@ func (app *App) init(ctx context.Context) error {
 	traefiklog.FromContext(ctx).Infof("activated metric modules: %v", app.cfg.Metrics.Modules())
 
 	var tcpreg tcpmetrics.TPCMetrics
-	if app.cfg.HTTP != nil || (app.cfg.GRPC != nil && app.cfg.GRPC.Static != nil) {
+	if app.cfg.HTTP != nil {
 		if app.cfg.Metrics.IsActive(tcpmetrics.ModuleName) {
 			tcpreg = tcpmetrics.NewTCPMetrics(nil)
 		} else {
@@ -204,24 +189,11 @@ func (app *App) init(ctx context.Context) error {
 		)
 	}
 
-	// Create GRPC EntryPoint
-	if app.cfg.GRPC != nil && app.cfg.GRPC.Static != nil {
-		app.grpc = grpc.NewEntryPoint("", app.cfg.GRPC.EntryPoint, app.grpcBuilder, tcpreg)
-		err := app.grpc.BuildServer(ctx, app.cfg.GRPC.Static)
-		if err != nil {
-			return err
-		}
-	}
-
 	return nil
 }
 
 func (app *App) HTTP() router.Builder {
 	return app.httpBuilder
-}
-
-func (app *App) GRPC() grpcserver.Builder {
-	return app.grpcBuilder
 }
 
 func (app *App) MetricRegistry() metrics.Registry {
@@ -263,17 +235,6 @@ func (app *App) Start(ctx context.Context) error {
 				if err != nil && err != nethttp.ErrServerClosed {
 					app.errors <- err
 				}
-			}
-			app.serverWg.Done()
-		}()
-	}
-
-	if app.grpc != nil {
-		app.serverWg.Add(1)
-		go func() {
-			err := app.grpc.ListenAndServe(ctx)
-			if err != nil && err != nethttp.ErrServerClosed {
-				app.errors <- err
 			}
 			app.serverWg.Done()
 		}()
@@ -371,10 +332,6 @@ func (app *App) Stop(ctx context.Context) error {
 		gr.Go(func() error { return tcp.Shutdown(ctx, app.http) })
 	}
 
-	if app.grpc != nil {
-		gr.Go(func() error { return tcp.Shutdown(ctx, app.grpc) })
-	}
-
 	err := gr.Wait().ErrorOrNil()
 	if err != nil {
 		traefiklog.FromContext(ctx).WithError(err).Errorf("app could not shut down gracefully")
@@ -392,10 +349,6 @@ func (app *App) Close() (err error) {
 		gr := &multierror.Group{}
 		if app.http != nil {
 			gr.Go(func() error { return tcp.Close(app.http) })
-		}
-
-		if app.grpc != nil {
-			gr.Go(func() error { return tcp.Close(app.grpc) })
 		}
 
 		if app.watcher != nil {

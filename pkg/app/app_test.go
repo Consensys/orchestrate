@@ -13,13 +13,10 @@ import (
 	"github.com/stretchr/testify/require"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/configwatcher"
 	mockwatcher "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/configwatcher/mock"
-	grpcstatic "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/grpc/config/static"
-	mockgrpc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/grpc/server/mock"
 	mockhttp "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/router/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/metrics/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/metrics/registry"
 	tcpmetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tcp/metrics"
-	gogrpc "google.golang.org/grpc"
 )
 
 func newTestConfig() *Config {
@@ -35,16 +32,6 @@ func newTestConfig() *Config {
 				},
 			},
 		},
-		GRPC: &GRPC{
-			EntryPoint: &traefikstatic.EntryPoint{
-				Address: "127.0.0.1:2",
-				Transport: &traefikstatic.EntryPointsTransport{
-					RespondingTimeouts: &traefikstatic.RespondingTimeouts{},
-					LifeCycle:          &traefikstatic.LifeCycle{},
-				},
-			},
-			Static: &grpcstatic.Configuration{},
-		},
 		Watcher: &configwatcher.Config{
 			ProvidersThrottleDuration: time.Millisecond,
 		},
@@ -57,15 +44,12 @@ func TestApp(t *testing.T) {
 	ctrlr := gomock.NewController(t)
 	defer ctrlr.Finish()
 
-	grpcBuilder := mockgrpc.NewMockBuilder(ctrlr)
-	grpcBuilder.EXPECT().Build(gomock.Any(), gomock.Any(), gomock.Any()).Return(gogrpc.NewServer(), nil)
-
 	httpBuilder := mockhttp.NewMockBuilder(ctrlr)
 
 	watcher := mockwatcher.NewMockWatcher(ctrlr)
 
 	reg := mock.NewMockRegistry(ctrlr)
-	app := newApp(newTestConfig(), httpBuilder, grpcBuilder, watcher, reg, logrus.New())
+	app := newApp(newTestConfig(), httpBuilder, watcher, reg, logrus.New())
 
 	reg.EXPECT().Add(gomock.AssignableToTypeOf(tcpmetrics.NewTCPMetrics(nil)))
 	watcher.EXPECT().AddListener(gomock.Any()).Times(2)

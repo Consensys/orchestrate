@@ -8,20 +8,9 @@ import (
 	traefikdynamic "github.com/containous/traefik/v2/pkg/config/dynamic"
 	healthz "github.com/heptiolabs/healthcheck"
 	prom "github.com/prometheus/client_golang/prometheus"
-	"github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/auth"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/configwatcher/provider"
 	staticprovider "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/configwatcher/provider/static"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/grpc/config/static"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/grpc/interceptor"
-	grpcauth "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/grpc/interceptor/auth"
-	grpclogrus "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/grpc/interceptor/logrus"
-	grpcmetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/grpc/interceptor/metrics"
-	staticinterceptor "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/grpc/interceptor/static"
-	grpcmetrics2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/grpc/metrics"
-	staticgrpc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/grpc/server/static"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/grpc/service"
-	staticservice "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/grpc/service/static"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/dynamic"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/handler"
@@ -78,26 +67,6 @@ func HandlerOpt(typ reflect.Type, builder handler.Builder) Option {
 	}
 }
 
-func InterceptorOpt(typ reflect.Type, builder interceptor.Builder) Option {
-	return func(app *App) error {
-		grpcBuilder, ok := app.GRPC().(*staticgrpc.Builder)
-		if ok {
-			grpcBuilder.Interceptor.(*staticinterceptor.Builder).AddBuilder(typ, builder)
-		}
-		return nil
-	}
-}
-
-func ServiceOpt(typ reflect.Type, builder service.Builder) Option {
-	return func(app *App) error {
-		grpcBuilder, ok := app.GRPC().(*staticgrpc.Builder)
-		if ok {
-			grpcBuilder.Service.(*staticservice.Builder).AddBuilder(typ, builder)
-		}
-		return nil
-	}
-}
-
 func MultiTenancyOpt(authMidName string, jwt, key auth.Checker, multitenancy bool) Option {
 	// Auth HTTP middleware
 	authMidOpt := MiddlewareOpt(
@@ -111,12 +80,6 @@ func MultiTenancyOpt(authMidName string, jwt, key auth.Checker, multitenancy boo
 		multitenancymid.NewBuilder(),
 	)
 
-	// Auth GRPC Interceptor
-	interceptorOpt := InterceptorOpt(
-		reflect.TypeOf(&static.Auth{}),
-		grpcauth.NewBuilder(auth.CombineCheckers(key, jwt), multitenancy),
-	)
-
 	// Provider for Auth middleware dynamic configuration
 	cfg := dynamic.NewConfig()
 	cfg.HTTP.Middlewares[authMidName] = &dynamic.Middleware{
@@ -127,25 +90,14 @@ func MultiTenancyOpt(authMidName string, jwt, key auth.Checker, multitenancy boo
 	return CombineOptions(
 		authMidOpt,
 		multitenancyMidOpt,
-		interceptorOpt,
 		providerOpt,
 	)
 }
 
 func LoggerOpt(midName string) Option {
 	return CombineOptions(
-		LoggerInterceptorOpt(),
 		LoggerMiddlewareOpt(midName),
 	)
-}
-
-func LoggerInterceptorOpt() Option {
-	return func(app *App) error {
-		return InterceptorOpt(
-			reflect.TypeOf(&static.Logrus{}),
-			grpclogrus.NewBuilder(app.Logger(), logrus.Fields{"system": "grpc.internal"}),
-		)(app)
-	}
 }
 
 func LoggerMiddlewareOpt(midName string) Option {
@@ -240,25 +192,7 @@ func MetricsOpt(appMetrics ...metrics.Prometheus) Option {
 		healthzOpt,
 		PrometheusOpt(registry),
 		DashboardOpt(),
-		MetricsInterceptorOpt(),
 	)
-}
-
-func MetricsInterceptorOpt() Option {
-	return func(app *App) error {
-		var reg grpcmetrics2.GRPCMetrics
-		if app.cfg.Metrics.IsActive(grpcmetrics2.ModuleName) {
-			reg = grpcmetrics2.NewGRPCMetrics(nil)
-		} else {
-			reg = grpcmetrics2.NewGRPCNopMetrics(nil)
-		}
-
-		app.metricReg.Add(reg)
-		return InterceptorOpt(
-			reflect.TypeOf(&static.Metrics{}),
-			grpcmetrics.NewBuilder(reg),
-		)(app)
-	}
 }
 
 func DashboardOpt(middlewares ...string) Option {

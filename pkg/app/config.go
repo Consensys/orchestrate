@@ -5,8 +5,6 @@ import (
 	traefiktypes "github.com/containous/traefik/v2/pkg/types"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/configwatcher"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/grpc"
-	grpcstatic "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/grpc/config/static"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	metricsregister "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/metrics/registry"
@@ -14,7 +12,6 @@ import (
 
 type Config struct {
 	HTTP    *HTTP
-	GRPC    *GRPC
 	Watcher *configwatcher.Config
 	Log     *traefiktypes.TraefikLog
 	Metrics *metricsregister.Config
@@ -35,18 +32,10 @@ func (c *HTTP) TraefikStatic() *traefikstatic.Configuration {
 	}
 }
 
-type GRPC struct {
-	EntryPoint *traefikstatic.EntryPoint
-	Static     *grpcstatic.Configuration
-}
-
 func NewConfig(vipr *viper.Viper) *Config {
 	return &Config{
 		HTTP: &HTTP{
 			EntryPoints: http.NewEPsConfig(vipr),
-		},
-		GRPC: &GRPC{
-			EntryPoint: grpc.NewConfig(vipr),
 		},
 		Watcher: configwatcher.NewConfig(vipr),
 		Log:     log.NewConfig(vipr),

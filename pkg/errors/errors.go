@@ -23,7 +23,6 @@ const (
 	KafkaConnection                 = Connection + 1<<8 // Kafka Connection error (subclass 081XX)
 	HTTPConnection                  = Connection + 2<<8 // HTTP Connection error (subclass 082XX)
 	EthConnection                   = Connection + 3<<8 // Ethereum Connection error (subclass 083XX)
-	GRPCConnection                  = Connection + 4<<8 // gRPC Connection error (subclass 084XX)
 	RedisConnection                 = Connection + 5<<8 // Redis Connection error (subclass 085XX)
 	PostgresConnection              = Connection + 6<<8 // Postgres Connection error (subclass 086XX)
 	ServiceConnection               = Connection + 7<<8 // Service Connection error (subclass 087XX)
@@ -183,11 +182,6 @@ func EthConnectionError(format string, a ...interface{}) *ierror.Error {
 // IsEthConnectionError indicate whether an error is a EthConnection error
 func IsEthConnectionError(err error) bool {
 	return isErrorClass(FromError(err).GetCode(), EthConnection)
-}
-
-// GRPCConnectionError is raised when failing to connect to a gRPC server
-func GRPCConnectionError(format string, a ...interface{}) *ierror.Error {
-	return Errorf(GRPCConnection, format, a...)
 }
 
 // RedisConnectionError is raised when failing to connect to Redis

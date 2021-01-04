@@ -7,14 +7,9 @@ import (
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models"
-	"google.golang.org/grpc"
 )
 
 //go:generate mockgen -source=store.go -destination=mocks/mock.go -package=mocks
-
-type Builder interface {
-	Build(ctx context.Context, name string, configuration interface{}) (grpc.UnaryServerInterceptor, grpc.StreamServerInterceptor, func(srv *grpc.Server), error)
-}
 
 type Store interface {
 	Connect(ctx context.Context, conf interface{}) (DB, error)
