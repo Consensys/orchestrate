@@ -11,7 +11,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/httputil"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/service/formatters"
 )
@@ -35,27 +34,17 @@ func NewTransactionsController(ucs usecases.TransactionUseCases) *TransactionsCo
 // Add routes to router
 func (c *TransactionsController) Append(router *mux.Router) {
 	router.Methods(http.MethodPost).Path("/transactions/send").
-		Handler(idempotencyKeyMiddleware(http.HandlerFunc(c.send)))
+		Handler(http.HandlerFunc(c.send))
 	router.Methods(http.MethodPost).Path("/transactions/send-raw").
-		Handler(idempotencyKeyMiddleware(http.HandlerFunc(c.sendRaw)))
+		Handler(http.HandlerFunc(c.sendRaw))
 	router.Methods(http.MethodPost).Path("/transactions/transfer").
-		Handler(idempotencyKeyMiddleware(http.HandlerFunc(c.transfer)))
+		Handler(http.HandlerFunc(c.transfer))
 	router.Methods(http.MethodPost).Path("/transactions/deploy-contract").
-		Handler(idempotencyKeyMiddleware(http.HandlerFunc(c.deployContract)))
+		Handler(http.HandlerFunc(c.deployContract))
 	router.Methods(http.MethodGet).Path("/transactions/{uuid}").
 		Handler(http.HandlerFunc(c.getOne))
 	router.Methods(http.MethodGet).Path("/transactions").
 		Handler(http.HandlerFunc(c.search))
-}
-
-func idempotencyKeyMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Header.Get(IdempotencyKeyHeader) == "" {
-			r.Header.Set(IdempotencyKeyHeader, utils.RandomString(16))
-		}
-
-		next.ServeHTTP(w, r)
-	})
 }
 
 // @Summary Creates and sends a new contract transaction

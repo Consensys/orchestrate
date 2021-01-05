@@ -128,6 +128,10 @@ func (uc *sendTxUsecase) selectOrInsertTxRequest(
 	txRequest *entities.TxRequest,
 	txData, requestHash, chainUUID, tenantID string,
 ) (*entities.TxRequest, error) {
+	if txRequest.IdempotencyKey == "" {
+		return uc.insertNewTxRequest(ctx, txRequest, txData, requestHash, chainUUID, tenantID)
+	}
+
 	txRequestModel, err := uc.db.TransactionRequest().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey, tenantID)
 	switch {
 	case errors.IsNotFoundError(err):

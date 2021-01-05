@@ -299,7 +299,6 @@ func (s *transactionsTestSuite) TestSuccess() {
 			return
 		}
 		assert.NotEmpty(t, txResponse.UUID)
-		assert.NotEmpty(t, txResponse.IdempotencyKey)
 
 		txResponseGET, err := s.client.GetTxRequest(ctx, txResponse.UUID)
 		if err != nil {
@@ -354,7 +353,6 @@ func (s *transactionsTestSuite) TestSuccess() {
 			return
 		}
 		assert.NotEmpty(t, txResponse.UUID)
-		assert.NotEmpty(t, txResponse.IdempotencyKey)
 
 		txResponseGET, err := s.client.GetTxRequest(ctx, txResponse.UUID)
 		if err != nil {
@@ -433,7 +431,7 @@ func (s *transactionsTestSuite) TestSuccess() {
 			assert.Fail(t, err.Error())
 			return
 		}
-		assert.Len(t, txResponse.IdempotencyKey, 16)
+		
 		assert.NotEmpty(t, txResponse.UUID)
 
 		txResponseGET, err := s.client.GetTxRequest(ctx, txResponse.UUID)
@@ -466,8 +464,9 @@ func (s *transactionsTestSuite) TestSuccess() {
 	s.T().Run("should succeed if payloads and idempotency key are the same and return same schedule", func(t *testing.T) {
 		defer gock.Off()
 		txRequest := testutils.FakeSendTransactionRequest()
+		idempotencyKey := utils.RandomString(16)
 		rctx := context.WithValue(ctx, clientutils.RequestHeaderKey, map[string]string{
-			controllers.IdempotencyKeyHeader: utils.RandomString(16),
+			controllers.IdempotencyKeyHeader: idempotencyKey,
 		})
 
 		// Kill Kafka on first call so data is added in DB and status is CREATED but does not get updated to STARTED
@@ -498,6 +497,7 @@ func (s *transactionsTestSuite) TestSuccess() {
 			return
 		}
 		job := txResponse.Jobs[0]
+		assert.Equal(t, idempotencyKey, txResponse.IdempotencyKey)
 		assert.Equal(t, utils.StatusStarted, job.Status)
 	})
 }

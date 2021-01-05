@@ -129,15 +129,11 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_send() {
 
 		httpRequest := httptest.NewRequest(http.MethodPost, urlPath, bytes.NewReader(requestBytes)).WithContext(s.ctx)
 
-		testutils.FakeTxRequest()
 		txRequestEntityResp := testutils.FakeTxRequest()
 
 		s.sendContractTxUseCase.EXPECT().
 			Execute(gomock.Any(), gomock.Any(), s.tenantID).
 			DoAndReturn(func(ctx context.Context, txReq *entities.TxRequest, tenantID string) (*entities.TxRequest, error) {
-				if txReq.IdempotencyKey == "" {
-					return nil, errors.InvalidParameterError("missing required idempotencyKey")
-				}
 				txRequestEntityResp.IdempotencyKey = txReq.IdempotencyKey
 				return txRequestEntityResp, nil
 			})

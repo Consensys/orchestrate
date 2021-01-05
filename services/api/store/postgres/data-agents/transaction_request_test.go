@@ -72,6 +72,15 @@ func (s *txRequestTestSuite) TestPGTransactionRequest_Insert() {
 		assert.NotEmpty(t, txRequest.ID)
 		assert.Equal(t, txRequestUUID, txRequest.Schedule.UUID)
 	})
+	
+	s.T().Run("should insert model successfully if idempotencyKey is empty", func(t *testing.T) {
+		txRequest := testutils.FakeTxRequest(0)
+
+		err := insertTxRequest(ctx, s.agents, txRequest)
+
+		assert.NoError(t, err)
+		assert.NotEmpty(t, txRequest.ID)
+	})
 }
 
 func (s *txRequestTestSuite) TestPGTransactionRequest_FindOneByIdempotencyKey() {
