@@ -21,6 +21,7 @@ type OrchestrateClient interface {
 	MetricClient
 	AccountClient
 	FaucetClient
+	ContractClient
 }
 
 type TransactionClient interface {
@@ -70,4 +71,15 @@ type FaucetClient interface {
 	GetFaucet(ctx context.Context, uuid string) (*types.FaucetResponse, error)
 	SearchFaucets(ctx context.Context, filters *entities.FaucetFilters) ([]*types.FaucetResponse, error)
 	DeleteFaucet(ctx context.Context, uuid string) error
+}
+
+type ContractClient interface {
+	RegisterContract(ctx context.Context, req *types.RegisterContractRequest) (*types.ContractResponse, error)
+	DeregisterContract(ctx context.Context, name, tag string) error
+	GetContract(ctx context.Context, name, tag string) (*types.ContractResponse, error)
+	GetContractsCatalog(ctx context.Context) ([]string, error)
+	GetContractTags(ctx context.Context, name string) ([]string, error)
+	SetContractAddressCodeHash(ctx context.Context, req *types.SetContractCodeHashRequest) error
+	GetContractEventsBySigHash(ctx context.Context, address string, req *types.GetContractEventsBySignHashRequest) (*types.GetContractEventsBySignHashResponse, error)
+	GetContractMethodSignatures(ctx context.Context, name, tag, method string) ([]string, error)
 }

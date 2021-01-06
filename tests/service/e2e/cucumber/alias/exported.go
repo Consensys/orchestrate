@@ -11,7 +11,6 @@ import (
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/auth/key"
 	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/client"
-	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/contract-registry/client"
 	keymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client"
 	txlistener "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener"
 	txsender "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sender"
@@ -51,18 +50,15 @@ func importGlobalAlias(rawAliases string) {
 	}
 	// register internal aliases
 	internal := map[string]interface{}{
-		"chain-registry":            viper.GetString(chainregistry.URLViperKey),
-		"chain-registry-metrics":    viper.GetString(chainregistry.MetricsURLViperKey),
-		"contract-registry":         viper.GetString(contractregistry.GRPCURLViperKey),
-		"contract-registry-metrics": viper.GetString(contractregistry.MetricsURLViperKey),
-		"contract-registry-http":    viper.GetString(contractregistry.HTTPURLViperKey),
-		"api":                       viper.GetString(client.URLViperKey),
-		"api-metrics":               viper.GetString(client.MetricsURLViperKey),
-		"api-key":                   viper.GetString(key.APIKeyViperKey),
-		"tx-sender-metrics":         viper.GetString(txsender.MetricsURLViperKey),
-		"tx-listener-metrics":       viper.GetString(txlistener.MetricsURLViperKey),
-		"key-manager":               viper.GetString(keymanager.URLViperKey),
-		"key-manager-metrics":       viper.GetString(keymanager.MetricsURLViperKey),
+		"chain-registry":         viper.GetString(chainregistry.URLViperKey),
+		"chain-registry-metrics": viper.GetString(chainregistry.MetricsURLViperKey),
+		"api":                    viper.GetString(client.URLViperKey),
+		"api-metrics":            viper.GetString(client.MetricsURLViperKey),
+		"api-key":                viper.GetString(key.APIKeyViperKey),
+		"tx-sender-metrics":      viper.GetString(txsender.MetricsURLViperKey),
+		"tx-listener-metrics":    viper.GetString(txlistener.MetricsURLViperKey),
+		"key-manager":            viper.GetString(keymanager.URLViperKey),
+		"key-manager-metrics":    viper.GetString(keymanager.MetricsURLViperKey),
 	}
 
 	for k, v := range internal {

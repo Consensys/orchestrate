@@ -80,11 +80,7 @@ Error codes are `uint64` that maps to five hex character code
 
 ### APIs
 
-[Chain Registry HTTP](http://localhost:8011)
-
-[Contract Registry OpenAPI](http://localhost:8021/swagger)
-
-[Transaction Scheduler OpenAPI](http://localhost:8031/swagger)
+[Orchestrate OpenAPI](http://localhost:8031/swagger)
 
 ### Tools
 

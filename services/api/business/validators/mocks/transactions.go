@@ -7,7 +7,6 @@ package mocks
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
-	entities "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	reflect "reflect"
 )
 
@@ -47,34 +46,4 @@ func (m *MockTransactionValidator) ValidateChainExists(ctx context.Context, chai
 func (mr *MockTransactionValidatorMockRecorder) ValidateChainExists(ctx, chainUUID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateChainExists", reflect.TypeOf((*MockTransactionValidator)(nil).ValidateChainExists), ctx, chainUUID)
-}
-
-// ValidateMethodSignature mocks base method
-func (m *MockTransactionValidator) ValidateMethodSignature(methodSignature string, args []interface{}) (string, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ValidateMethodSignature", methodSignature, args)
-	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ValidateMethodSignature indicates an expected call of ValidateMethodSignature
-func (mr *MockTransactionValidatorMockRecorder) ValidateMethodSignature(methodSignature, args interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateMethodSignature", reflect.TypeOf((*MockTransactionValidator)(nil).ValidateMethodSignature), methodSignature, args)
-}
-
-// ValidateContract mocks base method
-func (m *MockTransactionValidator) ValidateContract(ctx context.Context, params *entities.ETHTransactionParams) (string, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ValidateContract", ctx, params)
-	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ValidateContract indicates an expected call of ValidateContract
-func (mr *MockTransactionValidatorMockRecorder) ValidateContract(ctx, params interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateContract", reflect.TypeOf((*MockTransactionValidator)(nil).ValidateContract), ctx, params)
 }

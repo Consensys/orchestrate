@@ -13,7 +13,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/metrics"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/multi"
 	chainnregistryclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/client"
-	contractregistryclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/contract-registry/client"
 	keymanagerclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client"
 )
 
@@ -25,7 +24,6 @@ func Flags(f *pflag.FlagSet) {
 
 	// Internal API clients
 	chainnregistryclient.Flags(f)
-	contractregistryclient.ContractRegistryURL(f)
 	keymanagerclient.Flags(f)
 
 	multi.Flags(f)

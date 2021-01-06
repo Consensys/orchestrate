@@ -20,7 +20,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/service/controllers"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/store/models"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/contract-registry/proto"
 	"gopkg.in/h2non/gock.v1"
 )
 
@@ -336,17 +335,17 @@ func (s *transactionsTestSuite) TestSuccess() {
 
 	s.T().Run("should send a deploy contract transaction successfully", func(t *testing.T) {
 		defer gock.Off()
+		contractReq := testutils.FakeRegisterContractRequest()
+		_, err := s.client.RegisterContract(ctx, contractReq)
+		if err != nil {
+			assert.Fail(t, err.Error())
+			return
+		}
+
 		txRequest := testutils.FakeDeployContractRequest()
+		txRequest.Params.ContractName = contractReq.Name
 		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
 		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Times(2).Reply(200).JSON(chain)
-
-		txRequest.Params.Args = testutils.ParseIArray(123) // FakeContract arguments
-
-		s.env.contractRegistryResponseFaker.GetContract = func() (*proto.GetContractResponse, error) {
-			return &proto.GetContractResponse{
-				Contract: testutils.FakeContract(),
-			}, nil
-		}
 		txResponse, err := s.client.SendDeployTransaction(ctx, txRequest)
 		if err != nil {
 			assert.Fail(t, err.Error())

@@ -22,8 +22,10 @@
     1. Instantiate HashiCorp with both engines: `kv-v2` and `orchestrate`
     1. Fill up ENV variables: `VAULT_V2_SECRET_PATH`, `VAULT_V2_MOUNT_POINT`, `VAULT_V2_TOKEN_FILE`
     1. Run command: `orchestrate key-manager migrate import-secrets` 
+* Remove support for environment variable `ABI` to register solidity contract at start
+* Remove support for GRPC contract API 
 
-## v2.5.5 (Unreleased)
+## v2.5.5 (2021-01-04)
 
 ### 🆕 Features
 * Add environment variables to control Sarama consumer group configuration, for more information see https://pkg.go.dev/github.com/Shopify/sarama#Config 
@@ -39,6 +41,7 @@
 * Exit service right away after Kakfa errors and 404 HTTP errors
 * Fix typo on group-decoded (KAFKA_GROUP_DECODER renamed to KAFKA_GROUP_DECODED)
 * Fix Kafka group value settings 
+* Set default value of `KAFKA_CONSUMER_MAX_WAIT_TIME` to `250ms`
 
 ## v2.5.4 (2020-12-08)
 

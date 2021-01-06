@@ -498,6 +498,124 @@ func (mr *MockOrchestrateClientMockRecorder) DeleteFaucet(ctx, uuid interface{})
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteFaucet", reflect.TypeOf((*MockOrchestrateClient)(nil).DeleteFaucet), ctx, uuid)
 }
 
+// RegisterContract mocks base method
+func (m *MockOrchestrateClient) RegisterContract(ctx context.Context, req *api.RegisterContractRequest) (*api.ContractResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RegisterContract", ctx, req)
+	ret0, _ := ret[0].(*api.ContractResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RegisterContract indicates an expected call of RegisterContract
+func (mr *MockOrchestrateClientMockRecorder) RegisterContract(ctx, req interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterContract", reflect.TypeOf((*MockOrchestrateClient)(nil).RegisterContract), ctx, req)
+}
+
+// DeregisterContract mocks base method
+func (m *MockOrchestrateClient) DeregisterContract(ctx context.Context, name, tag string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeregisterContract", ctx, name, tag)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeregisterContract indicates an expected call of DeregisterContract
+func (mr *MockOrchestrateClientMockRecorder) DeregisterContract(ctx, name, tag interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeregisterContract", reflect.TypeOf((*MockOrchestrateClient)(nil).DeregisterContract), ctx, name, tag)
+}
+
+// GetContract mocks base method
+func (m *MockOrchestrateClient) GetContract(ctx context.Context, name, tag string) (*api.ContractResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetContract", ctx, name, tag)
+	ret0, _ := ret[0].(*api.ContractResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetContract indicates an expected call of GetContract
+func (mr *MockOrchestrateClientMockRecorder) GetContract(ctx, name, tag interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetContract", reflect.TypeOf((*MockOrchestrateClient)(nil).GetContract), ctx, name, tag)
+}
+
+// GetContractsCatalog mocks base method
+func (m *MockOrchestrateClient) GetContractsCatalog(ctx context.Context) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetContractsCatalog", ctx)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetContractsCatalog indicates an expected call of GetContractsCatalog
+func (mr *MockOrchestrateClientMockRecorder) GetContractsCatalog(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetContractsCatalog", reflect.TypeOf((*MockOrchestrateClient)(nil).GetContractsCatalog), ctx)
+}
+
+// GetContractTags mocks base method
+func (m *MockOrchestrateClient) GetContractTags(ctx context.Context, name string) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetContractTags", ctx, name)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetContractTags indicates an expected call of GetContractTags
+func (mr *MockOrchestrateClientMockRecorder) GetContractTags(ctx, name interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetContractTags", reflect.TypeOf((*MockOrchestrateClient)(nil).GetContractTags), ctx, name)
+}
+
+// SetContractAddressCodeHash mocks base method
+func (m *MockOrchestrateClient) SetContractAddressCodeHash(ctx context.Context, req *api.SetContractCodeHashRequest) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetContractAddressCodeHash", ctx, req)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SetContractAddressCodeHash indicates an expected call of SetContractAddressCodeHash
+func (mr *MockOrchestrateClientMockRecorder) SetContractAddressCodeHash(ctx, req interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetContractAddressCodeHash", reflect.TypeOf((*MockOrchestrateClient)(nil).SetContractAddressCodeHash), ctx, req)
+}
+
+// GetContractEventsBySigHash mocks base method
+func (m *MockOrchestrateClient) GetContractEventsBySigHash(ctx context.Context, address string, req *api.GetContractEventsBySignHashRequest) (*api.GetContractEventsBySignHashResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetContractEventsBySigHash", ctx, address, req)
+	ret0, _ := ret[0].(*api.GetContractEventsBySignHashResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetContractEventsBySigHash indicates an expected call of GetContractEventsBySigHash
+func (mr *MockOrchestrateClientMockRecorder) GetContractEventsBySigHash(ctx, address, req interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetContractEventsBySigHash", reflect.TypeOf((*MockOrchestrateClient)(nil).GetContractEventsBySigHash), ctx, address, req)
+}
+
+// GetContractMethodSignatures mocks base method
+func (m *MockOrchestrateClient) GetContractMethodSignatures(ctx context.Context, name, tag, method string) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetContractMethodSignatures", ctx, name, tag, method)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetContractMethodSignatures indicates an expected call of GetContractMethodSignatures
+func (mr *MockOrchestrateClientMockRecorder) GetContractMethodSignatures(ctx, name, tag, method interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetContractMethodSignatures", reflect.TypeOf((*MockOrchestrateClient)(nil).GetContractMethodSignatures), ctx, name, tag, method)
+}
+
 // MockTransactionClient is a mock of TransactionClient interface
 type MockTransactionClient struct {
 	ctrl     *gomock.Controller
@@ -1093,4 +1211,145 @@ func (m *MockFaucetClient) DeleteFaucet(ctx context.Context, uuid string) error 
 func (mr *MockFaucetClientMockRecorder) DeleteFaucet(ctx, uuid interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteFaucet", reflect.TypeOf((*MockFaucetClient)(nil).DeleteFaucet), ctx, uuid)
+}
+
+// MockContractClient is a mock of ContractClient interface
+type MockContractClient struct {
+	ctrl     *gomock.Controller
+	recorder *MockContractClientMockRecorder
+}
+
+// MockContractClientMockRecorder is the mock recorder for MockContractClient
+type MockContractClientMockRecorder struct {
+	mock *MockContractClient
+}
+
+// NewMockContractClient creates a new mock instance
+func NewMockContractClient(ctrl *gomock.Controller) *MockContractClient {
+	mock := &MockContractClient{ctrl: ctrl}
+	mock.recorder = &MockContractClientMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockContractClient) EXPECT() *MockContractClientMockRecorder {
+	return m.recorder
+}
+
+// RegisterContract mocks base method
+func (m *MockContractClient) RegisterContract(ctx context.Context, req *api.RegisterContractRequest) (*api.ContractResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RegisterContract", ctx, req)
+	ret0, _ := ret[0].(*api.ContractResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RegisterContract indicates an expected call of RegisterContract
+func (mr *MockContractClientMockRecorder) RegisterContract(ctx, req interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterContract", reflect.TypeOf((*MockContractClient)(nil).RegisterContract), ctx, req)
+}
+
+// DeregisterContract mocks base method
+func (m *MockContractClient) DeregisterContract(ctx context.Context, name, tag string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeregisterContract", ctx, name, tag)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeregisterContract indicates an expected call of DeregisterContract
+func (mr *MockContractClientMockRecorder) DeregisterContract(ctx, name, tag interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeregisterContract", reflect.TypeOf((*MockContractClient)(nil).DeregisterContract), ctx, name, tag)
+}
+
+// GetContract mocks base method
+func (m *MockContractClient) GetContract(ctx context.Context, name, tag string) (*api.ContractResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetContract", ctx, name, tag)
+	ret0, _ := ret[0].(*api.ContractResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetContract indicates an expected call of GetContract
+func (mr *MockContractClientMockRecorder) GetContract(ctx, name, tag interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetContract", reflect.TypeOf((*MockContractClient)(nil).GetContract), ctx, name, tag)
+}
+
+// GetContractsCatalog mocks base method
+func (m *MockContractClient) GetContractsCatalog(ctx context.Context) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetContractsCatalog", ctx)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetContractsCatalog indicates an expected call of GetContractsCatalog
+func (mr *MockContractClientMockRecorder) GetContractsCatalog(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetContractsCatalog", reflect.TypeOf((*MockContractClient)(nil).GetContractsCatalog), ctx)
+}
+
+// GetContractTags mocks base method
+func (m *MockContractClient) GetContractTags(ctx context.Context, name string) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetContractTags", ctx, name)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetContractTags indicates an expected call of GetContractTags
+func (mr *MockContractClientMockRecorder) GetContractTags(ctx, name interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetContractTags", reflect.TypeOf((*MockContractClient)(nil).GetContractTags), ctx, name)
+}
+
+// SetContractAddressCodeHash mocks base method
+func (m *MockContractClient) SetContractAddressCodeHash(ctx context.Context, req *api.SetContractCodeHashRequest) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetContractAddressCodeHash", ctx, req)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SetContractAddressCodeHash indicates an expected call of SetContractAddressCodeHash
+func (mr *MockContractClientMockRecorder) SetContractAddressCodeHash(ctx, req interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetContractAddressCodeHash", reflect.TypeOf((*MockContractClient)(nil).SetContractAddressCodeHash), ctx, req)
+}
+
+// GetContractEventsBySigHash mocks base method
+func (m *MockContractClient) GetContractEventsBySigHash(ctx context.Context, address string, req *api.GetContractEventsBySignHashRequest) (*api.GetContractEventsBySignHashResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetContractEventsBySigHash", ctx, address, req)
+	ret0, _ := ret[0].(*api.GetContractEventsBySignHashResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetContractEventsBySigHash indicates an expected call of GetContractEventsBySigHash
+func (mr *MockContractClientMockRecorder) GetContractEventsBySigHash(ctx, address, req interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetContractEventsBySigHash", reflect.TypeOf((*MockContractClient)(nil).GetContractEventsBySigHash), ctx, address, req)
+}
+
+// GetContractMethodSignatures mocks base method
+func (m *MockContractClient) GetContractMethodSignatures(ctx context.Context, name, tag, method string) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetContractMethodSignatures", ctx, name, tag, method)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetContractMethodSignatures indicates an expected call of GetContractMethodSignatures
+func (mr *MockContractClientMockRecorder) GetContractMethodSignatures(ctx, name, tag, method interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetContractMethodSignatures", reflect.TypeOf((*MockContractClient)(nil).GetContractMethodSignatures), ctx, name, tag, method)
 }

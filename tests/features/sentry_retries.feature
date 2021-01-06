@@ -1,5 +1,4 @@
 @tx-sentry
-@testing
 Feature: Send transactions using tx-sentry
   As an external developer
   I want to send transactions using tx-sentry retry feature

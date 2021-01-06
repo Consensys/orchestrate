@@ -1,11 +1,11 @@
 {
   "Servers": {
     "1": {
-      "Name": "Contract Registry",
+      "Name": "Orchestrate API",
       "Group": "Orchestrate",
       "Port": 5432,
       "Username": "postgres",
-      "Host": "postgres-contract-registry",
+      "Host": "postgres-api",
       "SSLMode": "prefer",
       "MaintenanceDB": "postgres",
       "PassFile": "/pgadmin4/password",
@@ -18,30 +18,6 @@
       "Port": 5432,
       "Username": "postgres",
       "Host": "postgres-chain-registry",
-      "SSLMode": "prefer",
-      "MaintenanceDB": "postgres",
-      "PassFile": "/pgadmin4/password",
-      "BGColor": "#3E5D6B",
-      "FGColor": "#67C39B"
-    },
-    "3": {
-      "Name": "Transaction Scheduler",
-      "Group": "Orchestrate",
-      "Port": 5432,
-      "Username": "postgres",
-      "Host": "postgres-transaction-scheduler",
-      "SSLMode": "prefer",
-      "MaintenanceDB": "postgres",
-      "PassFile": "/pgadmin4/password",
-      "BGColor": "#3E5D6B",
-      "FGColor": "#67C39B"
-    },
-    "4": {
-      "Name": "Identity Manager",
-      "Group": "Orchestrate",
-      "Port": 5432,
-      "Username": "postgres",
-      "Host": "postgres-identity-manager",
       "SSLMode": "prefer",
       "MaintenanceDB": "postgres",
       "PassFile": "/pgadmin4/password",

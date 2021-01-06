@@ -14,7 +14,6 @@ import (
 	txschedulerclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	chnregclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/client"
-	registryclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/contract-registry/client"
 	txlistener "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener"
 	provider "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/providers/chain-registry"
 )
@@ -42,7 +41,6 @@ func newRunCommand() *cobra.Command {
 	// Listener flags
 	provider.Flags(runCmd.Flags())
 	chnregclient.Flags(runCmd.Flags())
-	registryclient.ContractRegistryURL(runCmd.Flags())
 	txschedulerclient.Flags(runCmd.Flags())
 	txsentry.Flags(runCmd.Flags())
 	metrics.Flags(runCmd.Flags(), tcpmetrics.ModuleName)

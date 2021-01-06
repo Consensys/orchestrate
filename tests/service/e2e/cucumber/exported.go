@@ -16,7 +16,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/client"
-	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/contract-registry/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/e2e/cucumber/alias"
 )
 
@@ -37,7 +36,6 @@ func Init(ctx context.Context) {
 		generator.Init(ctx)
 		chainregistry.Init(ctx)
 		alias.Init(ctx)
-		contractregistry.Init(ctx)
 		client.Init()
 		redis.Init()
 		ethclient.Init(ctx)

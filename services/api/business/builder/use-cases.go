@@ -6,6 +6,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases/accounts"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases/contracts"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases/faucets"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases/jobs"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases/schedules"
@@ -14,7 +15,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/metrics"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/client"
-	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/contract-registry/proto"
 	keymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client"
 )
 
@@ -51,19 +51,30 @@ type useCases struct {
 	getFaucetUC      usecases.GetFaucetUseCase
 	searchFaucetUC   usecases.SearchFaucetsUseCase
 	deleteFaucetUC   usecases.DeleteFaucetUseCase
+
+	// Contracts
+	GetContractsCatalogUC        usecases.GetContractsCatalogUseCase
+	getContractEvents           usecases.GetContractEventsUseCase
+	getContractMethodSignatures usecases.GetContractMethodSignaturesUseCase
+	getContractMethods          usecases.GetContractMethodsUseCase
+	getContractTags             usecases.GetContractTagsUseCase
+	setContractCodeHash         usecases.SetContractCodeHashUseCase
+	registerContractUC          usecases.RegisterContractUseCase
+	getContractUC               usecases.GetContractUseCase
 }
 
 func NewUseCases(
 	db store.DB,
 	appMetrics metrics.TransactionSchedulerMetrics,
 	chainRegistryClient client.ChainRegistryClient,
-	contractRegistryClient contractregistry.ContractRegistryClient,
 	keyManagerClient keymanager.KeyManagerClient,
 	chainStateReader ethclient.ChainStateReader,
 	producer sarama.SyncProducer,
 	topicsCfg *pkgsarama.KafkaTopicConfig,
 ) usecases.UseCases {
-	txValidator := validators.NewTransactionValidator(chainRegistryClient, contractRegistryClient)
+	getContractUC := contracts.NewGetContractUseCase(db.Artifact())
+
+	txValidator := validators.NewTransactionValidator(chainRegistryClient)
 
 	createScheduleUC := schedules.NewCreateScheduleUseCase(db)
 	getScheduleUC := schedules.NewGetScheduleUseCase(db)
@@ -82,8 +93,8 @@ func NewUseCases(
 
 	return &useCases{
 		// Transaction
-		sendContractTransaction: transactions.NewSendContractTxUseCase(txValidator, sendTxUC),
-		sendDeployTransaction:   transactions.NewSendDeployTxUseCase(txValidator, sendTxUC),
+		sendContractTransaction: transactions.NewSendContractTxUseCase(sendTxUC),
+		sendDeployTransaction:   transactions.NewSendDeployTxUseCase(sendTxUC, getContractUC),
 		sendTransaction:         sendTxUC,
 		getTransaction:          getTransactionUC,
 		searchTransactions:      transactions.NewSearchTransactionsUseCase(db, getTransactionUC),
@@ -113,6 +124,16 @@ func NewUseCases(
 		getFaucetUC:      faucets.NewGetFaucetUseCase(db),
 		searchFaucetUC:   searchFaucetsUC,
 		deleteFaucetUC:   faucets.NewDeleteFaucetUseCase(db),
+
+		// Contracts
+		registerContractUC:          contracts.NewRegisterContractUseCase(db),
+		getContractUC:               getContractUC,
+		GetContractsCatalogUC:        contracts.NewGetCatalogUseCase(db.Repository()),
+		getContractEvents:           contracts.NewGetEventsUseCase(db.Event()),
+		getContractMethodSignatures: contracts.NewGetMethodSignaturesUseCase(getContractUC),
+		getContractMethods:          contracts.NewGetMethodsUseCase(db.Method()),
+		getContractTags:             contracts.NewGetTagsUseCase(db.Tag()),
+		setContractCodeHash:         contracts.NewSetCodeHashUseCase(db.CodeHash()),
 	}
 }
 
@@ -206,4 +227,36 @@ func (u *useCases) SearchFaucets() usecases.SearchFaucetsUseCase {
 
 func (u *useCases) DeleteFaucet() usecases.DeleteFaucetUseCase {
 	return u.deleteFaucetUC
+}
+
+func (u *useCases) GetContract() usecases.GetContractUseCase {
+	return u.getContractUC
+}
+
+func (u *useCases) RegisterContract() usecases.RegisterContractUseCase {
+	return u.registerContractUC
+}
+
+func (u *useCases) GetContractsCatalog() usecases.GetContractsCatalogUseCase {
+	return u.GetContractsCatalogUC
+}
+
+func (u *useCases) GetContractEvents() usecases.GetContractEventsUseCase {
+	return u.getContractEvents
+}
+
+func (u *useCases) GetContractMethodSignatures() usecases.GetContractMethodSignaturesUseCase {
+	return u.getContractMethodSignatures
+}
+
+func (u *useCases) GetContractMethods() usecases.GetContractMethodsUseCase {
+	return u.getContractMethods
+}
+
+func (u *useCases) GetContractTags() usecases.GetContractTagsUseCase {
+	return u.getContractTags
+}
+
+func (u *useCases) SetContractCodeHash() usecases.SetContractCodeHashUseCase {
+	return u.setContractCodeHash
 }

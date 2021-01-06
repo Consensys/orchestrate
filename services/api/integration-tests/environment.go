@@ -3,7 +3,6 @@ package integrationtests
 import (
 	"context"
 	"fmt"
-	http2 "net/http"
 	"os"
 	"strconv"
 	"time"
@@ -23,10 +22,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
 	httputils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http"
 	integrationtest "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/integration-test"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/integration-test/mocks"
 	chainClient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/client"
-	contractClient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/contract-registry/client"
-	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/contract-registry/proto"
 	"gopkg.in/h2non/gock.v1"
 	"k8s.io/apimachinery/pkg/util/rand"
 
@@ -48,7 +44,6 @@ const zookeeperContainerID = "zookeeper-api"
 const keyManagerURL = "http://key-manager:8081"
 const chainRegistryURL = "http://chain-registry:8081"
 const chainRegistryMetricsURL = "http://chain-registry:8082"
-const contractRegistryMetricsURL = "http://contract-registry:8082"
 const networkName = "api"
 
 var envPGHostPort string
@@ -57,16 +52,15 @@ var envHTTPPort string
 var envMetricsPort string
 
 type IntegrationEnvironment struct {
-	ctx                           context.Context
-	logger                        log.Logger
-	api                           *app.App
-	client                        *docker.Client
-	consumer                      *integrationtest.KafkaConsumer
-	pgmngr                        postgres.Manager
-	baseURL                       string
-	metricsURL                    string
-	contractRegistryResponseFaker *mocks.ContractRegistryFaker
-	kafkaTopicConfig              *sarama.KafkaTopicConfig
+	ctx              context.Context
+	logger           log.Logger
+	api              *app.App
+	client           *docker.Client
+	consumer         *integrationtest.KafkaConsumer
+	pgmngr           postgres.Manager
+	baseURL          string
+	metricsURL       string
+	kafkaTopicConfig *sarama.KafkaTopicConfig
 }
 
 func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, error) {
@@ -183,11 +177,8 @@ func (env *IntegrationEnvironment) Start(ctx context.Context) error {
 	}
 
 	env.kafkaTopicConfig = sarama.NewKafkaTopicConfig(viper.GetViper())
-	env.contractRegistryResponseFaker = &mocks.ContractRegistryFaker{}
 
-	env.api, err = newAPI(ctx,
-		mocks.NewContractRegistryClientMock(env.contractRegistryResponseFaker),
-		env.kafkaTopicConfig)
+	env.api, err = newAPI(ctx, env.kafkaTopicConfig)
 	if err != nil {
 		env.logger.WithError(err).Error("could initialize API")
 		return err
@@ -282,7 +273,6 @@ func (env *IntegrationEnvironment) migrate(ctx context.Context) error {
 
 func newAPI(
 	ctx context.Context,
-	contractRegistryClient contractregistry.ContractRegistryClient,
 	topicCfg *sarama.KafkaTopicConfig,
 ) (*app.App, error) {
 	// Initialize dependencies
@@ -308,26 +298,12 @@ func newAPI(
 
 	pgmngr := postgres.GetManager()
 	txSchedulerConfig := api.NewConfig(viper.GetViper())
-	contractClient.SetGlobalChecker(func() error {
-		req, _ := http2.NewRequest("GET", fmt.Sprintf("%s/live", contractRegistryMetricsURL), nil)
-		resp, err := httpClient.Do(req)
-		if err != nil {
-			return err
-		}
-
-		if resp.StatusCode == 200 {
-			return nil
-		}
-
-		return fmt.Errorf("service contract-registry cannot be reached")
-	})
 
 	return api.NewAPI(
 		txSchedulerConfig,
 		pgmngr,
 		authjwt.GlobalChecker(), authkey.GlobalChecker(),
 		chainRegistryClient,
-		contractRegistryClient,
 		keyManagerClient,
 		ethClient,
 		sarama.GlobalSyncProducer(),

@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/contract-registry/client/mock"
 
 	"github.com/Shopify/sarama/mocks"
 
@@ -33,7 +32,6 @@ func TestApp(t *testing.T) {
 		postgres.GetManager(),
 		mockauth.NewMockChecker(ctrl), mockauth.NewMockChecker(ctrl),
 		mockchainregistryclient.NewMockChainRegistryClient(ctrl),
-		mock.NewMockContractRegistryClient(ctrl),
 		keymanagerclient.NewMockKeyManagerClient(ctrl),
 		ethclientmock.NewMockChainStateReader(ctrl),
 		mocks.NewSyncProducer(t, nil),

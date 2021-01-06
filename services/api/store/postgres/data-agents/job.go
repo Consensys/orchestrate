@@ -6,6 +6,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
 
 	"github.com/go-pg/pg/v9/orm"
 
@@ -25,7 +26,7 @@ type PGJob struct {
 }
 
 // NewPGJob creates a new pgJob
-func NewPGJob(db pg.DB) *PGJob {
+func NewPGJob(db pg.DB) store.JobAgent {
 	return &PGJob{db: db}
 }
 

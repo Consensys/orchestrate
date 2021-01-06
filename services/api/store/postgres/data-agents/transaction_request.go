@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
 
 	gopg "github.com/go-pg/pg/v9"
 	log "github.com/sirupsen/logrus"
@@ -20,7 +21,7 @@ type PGTransactionRequest struct {
 }
 
 // NewPGTransactionRequest creates a new PGTransactionRequest
-func NewPGTransactionRequest(db pg.DB) *PGTransactionRequest {
+func NewPGTransactionRequest(db pg.DB) store.TransactionRequestAgent {
 	return &PGTransactionRequest{db: db}
 }
 

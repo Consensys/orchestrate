@@ -18,8 +18,6 @@ import (
 	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/tx"
 	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/client"
-	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/contract-registry/client"
-	registry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/contract-registry/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sender/store"
 	redis2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sender/store/redis"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/e2e/cucumber/alias"
@@ -52,9 +50,6 @@ type ScenarioContext struct {
 	// Chain-Registry
 	ChainRegistry chainregistry.ChainRegistryClient
 
-	// RegistryClient
-	ContractRegistry registry.ContractRegistryClient
-
 	// API
 	client orchestrateclient.OrchestrateClient
 
@@ -76,7 +71,6 @@ func NewScenarioContext(
 	chanReg *chanregistry.ChanRegistry,
 	httpClient *gohttp.Client,
 	chainReg chainregistry.ChainRegistryClient,
-	contractRegistry registry.ContractRegistryClient,
 	client orchestrateclient.OrchestrateClient,
 	producer sarama.SyncProducer,
 	aliasesReg *alias.Registry,
@@ -85,17 +79,16 @@ func NewScenarioContext(
 	nonceSender store.NonceSender,
 ) *ScenarioContext {
 	sc := &ScenarioContext{
-		chanReg:          chanReg,
-		httpClient:       httpClient,
-		aliases:          aliasesReg,
-		ChainRegistry:    chainReg,
-		ContractRegistry: contractRegistry,
-		client:           client,
-		producer:         producer,
-		logger:           log.NewEntry(log.StandardLogger()),
-		jwtGenerator:     jwtGenerator,
-		ec:               ec,
-		nonceSender:      nonceSender,
+		chanReg:       chanReg,
+		httpClient:    httpClient,
+		aliases:       aliasesReg,
+		ChainRegistry: chainReg,
+		client:        client,
+		producer:      producer,
+		logger:        log.NewEntry(log.StandardLogger()),
+		jwtGenerator:  jwtGenerator,
+		ec:            ec,
+		nonceSender:   nonceSender,
 	}
 
 	return sc
@@ -203,7 +196,6 @@ func InitializeScenario(s *godog.ScenarioContext) {
 		chanregistry.GlobalChanRegistry(),
 		http.NewClient(http.NewDefaultConfig()),
 		chainregistry.GlobalClient(),
-		contractregistry.GlobalClient(),
 		orchestrateclient.GlobalClient(),
 		broker.GlobalSyncProducer(),
 		alias.GlobalAliasRegistry(),

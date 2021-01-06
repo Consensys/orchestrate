@@ -10,7 +10,7 @@ import (
 	gherkin "github.com/cucumber/messages-go/v10"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/abi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 )
 
 type Artifact struct {
@@ -20,7 +20,7 @@ type Artifact struct {
 }
 
 type ContractSpec struct {
-	Contract *abi.Contract
+	Contract *entities.Contract
 	JWTToken string
 }
 
@@ -28,7 +28,7 @@ func ParseContracts(table *gherkin.PickleStepArgument_PickleTable) ([]*ContractS
 	var contractSpecs []*ContractSpec
 	headers := table.Rows[0]
 	for _, row := range table.Rows[1:] {
-		contractSpec := &ContractSpec{Contract: &abi.Contract{}}
+		contractSpec := &ContractSpec{Contract: &entities.Contract{}}
 		err := ParseContract(headers, row, contractSpec)
 		if err != nil {
 			return nil, err
@@ -63,21 +63,15 @@ func ParseContractCell(header, cell string, contractSpec *ContractSpec) error {
 		}
 
 		// Abi is a UTF-8 encoded string. Therefore, we can make the straightforward transition
-		contractSpec.Contract.Abi = string(a.Abi)
+		contractSpec.Contract.ABI = string(a.Abi)
 		// Bytecode is an hexstring encoded []byte
 		contractSpec.Contract.Bytecode = a.Bytecode
 		// Bytecode is an hexstring encoded []byte
 		contractSpec.Contract.DeployedBytecode = a.DeployedBytecode
 	case "name":
-		if contractSpec.Contract.Id == nil {
-			contractSpec.Contract.Id = &abi.ContractId{}
-		}
-		contractSpec.Contract.Id.Name = cell
+		contractSpec.Contract.ID.Name = cell
 	case "tag":
-		if contractSpec.Contract.Id == nil {
-			contractSpec.Contract.Id = &abi.ContractId{}
-		}
-		contractSpec.Contract.Id.Tag = cell
+		contractSpec.Contract.ID.Tag = cell
 	case "Headers.Authorization":
 		contractSpec.JWTToken = cell
 	default:

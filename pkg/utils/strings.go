@@ -6,6 +6,8 @@ import (
 	"math/rand"
 	"reflect"
 	"time"
+
+	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
 var seededRand = rand.New(rand.NewSource(time.Now().UnixNano()))
@@ -36,6 +38,11 @@ func RandHexString(n int) string {
 		b[i] = letterRunes[seededRand.Intn(len(letterRunes))]
 	}
 	return string(b)
+}
+
+func IsHexString(s string) bool {
+	_, err := hexutil.Decode(s)
+	return err == nil
 }
 
 func ParseIArrayToStringArray(ints []interface{}) ([]string, error) {

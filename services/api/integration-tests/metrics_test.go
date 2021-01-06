@@ -160,7 +160,6 @@ func (s *metricsTestSuite) TestZHealthCheck() {
 		assert.NoError(s.T(), err)
 
 		gock.New(chainRegistryMetricsURL).Get("/live").Reply(200)
-		gock.New(contractRegistryMetricsURL).Get("/live").Reply(200)
 		defer gock.Off()
 
 		err = s.env.client.Stop(ctx, kafkaContainerID)

@@ -5,6 +5,7 @@ import (
 
 	gopg "github.com/go-pg/pg/v9"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models"
 
 	"github.com/gofrs/uuid"
@@ -20,7 +21,7 @@ type PGFaucet struct {
 }
 
 // NewPGFaucet creates a new PGFaucet
-func NewPGFaucet(db pg.DB) *PGFaucet {
+func NewPGFaucet(db pg.DB) store.FaucetAgent {
 	return &PGFaucet{db: db}
 }
 

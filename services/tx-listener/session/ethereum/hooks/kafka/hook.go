@@ -22,34 +22,28 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethereum/abi"
-	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/common"
+	sdk "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	ierror "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/error"
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/tx"
-	svccontracts "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/contract-registry/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/dynamic"
 )
 
 type Hook struct {
-	conf *Config
-
-	registry svccontracts.ContractRegistryClient
+	conf     *Config
 	ec       ethclient.ChainStateReader
 	producer sarama.SyncProducer
-	client   orchestrateclient.OrchestrateClient
+	client   sdk.OrchestrateClient
 }
 
 func NewHook(
 	conf *Config,
-	registry svccontracts.ContractRegistryClient,
 	ec ethclient.ChainStateReader,
 	producer sarama.SyncProducer,
-	client orchestrateclient.OrchestrateClient,
+	client sdk.OrchestrateClient,
 ) *Hook {
 	return &Hook{
 		conf:     conf,
-		registry: registry,
 		ec:       ec,
 		producer: producer,
 		client:   client,
@@ -135,42 +129,51 @@ func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *etht
 }
 
 func (hk *Hook) decodeReceipt(ctx context.Context, c *dynamic.Chain, receipt *types.Receipt) error {
+	log.FromContext(ctx).Debug("decoding receipt...")
 	for _, l := range receipt.GetLogs() {
 		if len(l.GetTopics()) == 0 {
 			// This scenario is not supposed to happen
 			return errors.InternalError("invalid receipt (no topics in log)")
 		}
 
-		// Retrieve event ABI from contract-registry
-		eventResp, err := hk.registry.GetEventsBySigHash(
+		logger := log.FromContext(ctx).WithField("sig_hash", utils.ShortString(l.Topics[0], 5)).
+			WithField("address", l.GetAddress()).WithField("indexed", uint32(len(l.Topics)-1))
+		logger.Debug("decoding log...")
+
+		eventResp, err := hk.client.GetContractEventsBySigHash(
 			ctx,
-			&svccontracts.GetEventsBySigHashRequest{
-				SigHash: l.Topics[0],
-				AccountInstance: &common.AccountInstance{
-					ChainId: c.ChainID,
-					Account: l.GetAddress(),
-				},
+			l.GetAddress(),
+			&api.GetContractEventsBySignHashRequest{
+				SigHash:           l.Topics[0],
+				ChainID:           c.ChainID,
 				IndexedInputCount: uint32(len(l.Topics) - 1),
 			},
 		)
-		if err != nil || (eventResp.GetEvent() == "" && len(eventResp.GetDefaultEvents()) == 0) {
-			log.FromContext(ctx).WithError(err).Tracef("could not retrieve event ABI, txHash: %s sigHash: %s, ", l.GetTxHash(), l.GetTopics()[0])
+		if err != nil {
+			if errors.IsNotFoundError(err) {
+				continue
+			}
+
+			return err
+		}
+
+		if eventResp.Event == "" && len(eventResp.DefaultEvents) == 0 {
+			logger.WithError(err).WithField("tx_hash", l.GetTxHash()).Warnf("could not retrieve event ABI")
 			continue
 		}
 
-		// Decode log
 		var mapping map[string]string
 		event := &ethAbi.Event{}
 
-		if eventResp.GetEvent() != "" {
-			err = json.Unmarshal([]byte(eventResp.GetEvent()), event)
+		if eventResp.Event != "" {
+			err = json.Unmarshal([]byte(eventResp.Event), event)
 			if err != nil {
 				log.FromContext(ctx).WithError(err).Warnf("could not unmarshal event ABI provided by the Contract Registry, txHash: %s sigHash: %s, ", l.GetTxHash(), l.GetTopics()[0])
 				continue
 			}
 			mapping, err = abi.Decode(event, l)
 		} else {
-			for _, potentialEvent := range eventResp.GetDefaultEvents() {
+			for _, potentialEvent := range eventResp.DefaultEvents {
 				// Try to unmarshal
 				err = json.Unmarshal([]byte(potentialEvent), event)
 				if err != nil {
@@ -221,15 +224,12 @@ func (hk *Hook) registerDeployedContract(ctx context.Context, c *dynamic.Chain, 
 			return err
 		}
 
-		_, err = hk.registry.SetAccountCodeHash(ctx,
-			&svccontracts.SetAccountCodeHashRequest{
-				AccountInstance: &common.AccountInstance{
-					ChainId: c.ChainID,
-					Account: receipt.ContractAddress,
-				},
+		err = hk.client.SetContractAddressCodeHash(ctx,
+			&api.SetContractCodeHashRequest{
+				ChainID:  c.ChainID,
+				Address:  receipt.ContractAddress,
 				CodeHash: crypto.Keccak256Hash(code).String(),
-			},
-		)
+			})
 		if err != nil {
 			return err
 		}

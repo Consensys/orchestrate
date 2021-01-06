@@ -48,6 +48,11 @@ func ParseResponse(ctx context.Context, response *http.Response, resp interface{
 
 func parseResponseError(statusCode int, errMsg string) error {
 	switch statusCode {
+	case http.StatusBadRequest:
+		if errMsg == "" {
+			errMsg = "invalid request data"
+		}
+		return errors.InvalidParameterError(errMsg)
 	case http.StatusConflict:
 		if errMsg == "" {
 			errMsg = "invalid data message"
@@ -67,7 +72,7 @@ func parseResponseError(statusCode int, errMsg string) error {
 		if errMsg == "" {
 			errMsg = "invalid request format"
 		}
-		return errors.DataError(errMsg)
+		return errors.InvalidFormatError(errMsg)
 	default:
 		if errMsg == "" {
 			errMsg = "server error"
@@ -89,9 +94,8 @@ func ParseStringResponse(ctx context.Context, response *http.Response) (string, 
 
 	responseData, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		errMessage := "failed to decode response body"
-		log.FromContext(ctx).WithError(err).Error(errMessage)
-		return "", errors.ServiceConnectionError(errMessage)
+		log.FromContext(ctx).WithError(err).Error(invalidResponseBody)
+		return "", errors.ServiceConnectionError(invalidResponseBody)
 	}
 
 	return string(responseData), nil

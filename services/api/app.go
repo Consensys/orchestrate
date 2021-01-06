@@ -14,7 +14,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/builder"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/metrics"
-	contractregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/contract-registry/proto"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/app"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/auth"
@@ -30,7 +29,6 @@ func NewAPI(
 	pgmngr postgres.Manager,
 	jwt, key auth.Checker,
 	chainRegistryClient chainregistry.ChainRegistryClient,
-	contractRegistryClient contractregistry.ContractRegistryClient,
 	keyManagerClient keymanager.KeyManagerClient,
 	chainStateReader ethclient.ChainStateReader,
 	syncProducer sarama.SyncProducer,
@@ -49,7 +47,8 @@ func NewAPI(
 		appMetrics = metrics.NewTransactionSchedulerNopMetrics()
 	}
 
-	ucs := builder.NewUseCases(db, appMetrics, chainRegistryClient, contractRegistryClient, keyManagerClient, chainStateReader, syncProducer, topicCfg)
+	ucs := builder.NewUseCases(db, appMetrics, chainRegistryClient, keyManagerClient,
+		chainStateReader, syncProducer, topicCfg)
 
 	// Option of the API
 	apiHandlerOpt := app.HandlerOpt(reflect.TypeOf(&dynamic.API{}), controllers.NewBuilder(ucs, keyManagerClient))

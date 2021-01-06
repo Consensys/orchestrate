@@ -28,6 +28,12 @@ type Agents interface {
 	TransactionRequest() TransactionRequestAgent
 	Account() AccountAgent
 	Faucet() FaucetAgent
+	Artifact() ArtifactAgent
+	CodeHash() CodeHashAgent
+	Event() EventAgent
+	Method() MethodAgent
+	Repository() RepositoryAgent
+	Tag() TagAgent
 }
 
 type DB interface {
@@ -84,4 +90,38 @@ type FaucetAgent interface {
 	FindOneByUUID(ctx context.Context, uuid string, tenants []string) (*models.Faucet, error)
 	Search(ctx context.Context, filters *entities.FaucetFilters, tenants []string) ([]*models.Faucet, error)
 	Delete(ctx context.Context, faucet *models.Faucet, tenants []string) error
+}
+
+type ArtifactAgent interface {
+	FindOneByABIAndCodeHash(ctx context.Context, abi, codeHash string) (*models.ArtifactModel, error)
+	Insert(ctx context.Context, artifact *models.ArtifactModel) error
+	FindOneByNameAndTag(ctx context.Context, name, tag string) (*models.ArtifactModel, error)
+}
+
+type CodeHashAgent interface {
+	Insert(ctx context.Context, codehash *models.CodehashModel) error
+}
+
+type EventAgent interface {
+	InsertMultiple(ctx context.Context, events []*models.EventModel) error
+	FindOneByAccountAndSigHash(ctx context.Context, chainID, address, sighash string, indexedInputCount uint32) (*models.EventModel, error)
+	FindDefaultBySigHash(ctx context.Context, sighash string, indexedInputCount uint32) ([]*models.EventModel, error)
+}
+
+type MethodAgent interface {
+	InsertMultiple(ctx context.Context, methods []*models.MethodModel) error
+	FindOneByAccountAndSelector(ctx context.Context, chainID, address string, selector []byte) (*models.MethodModel, error)
+	FindDefaultBySelector(ctx context.Context, selector []byte) ([]*models.MethodModel, error)
+}
+
+type RepositoryAgent interface {
+	Insert(ctx context.Context, repository *models.RepositoryModel) error
+	FindOne(ctx context.Context, name string) (*models.RepositoryModel, error)
+	FindOneAndLock(ctx context.Context, name string) (*models.RepositoryModel, error)
+	FindAll(ctx context.Context) ([]string, error)
+}
+
+type TagAgent interface {
+	Insert(ctx context.Context, tag *models.TagModel) error
+	FindAllByName(ctx context.Context, name string) ([]string, error)
 }

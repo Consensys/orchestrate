@@ -6,24 +6,36 @@ import (
 )
 
 type PGAgents struct {
-	tx        *PGTransaction
-	job       *PGJob
-	log       *PGLog
-	schedule  *PGSchedule
-	txRequest *PGTransactionRequest
-	account   *PGAccount
-	faucet    *PGFaucet
+	tx         store.TransactionAgent
+	job        store.JobAgent
+	log        store.LogAgent
+	schedule   store.ScheduleAgent
+	txRequest  store.TransactionRequestAgent
+	account    store.AccountAgent
+	faucet     store.FaucetAgent
+	artifact   store.ArtifactAgent
+	codeHash   store.CodeHashAgent
+	event      store.EventAgent
+	method     store.MethodAgent
+	repository store.RepositoryAgent
+	tag        store.TagAgent
 }
 
 func New(db pg.DB) *PGAgents {
 	return &PGAgents{
-		tx:        NewPGTransaction(db),
-		job:       NewPGJob(db),
-		log:       NewPGLog(db),
-		schedule:  NewPGSchedule(db),
-		txRequest: NewPGTransactionRequest(db),
-		account:   NewPGAccount(db),
-		faucet:    NewPGFaucet(db),
+		tx:         NewPGTransaction(db),
+		job:        NewPGJob(db),
+		log:        NewPGLog(db),
+		schedule:   NewPGSchedule(db),
+		txRequest:  NewPGTransactionRequest(db),
+		account:    NewPGAccount(db),
+		faucet:     NewPGFaucet(db),
+		artifact:   NewPGArtifact(db),
+		codeHash:   NewPGCodeHash(db),
+		event:      NewPGEvent(db),
+		method:     NewPGMethod(db),
+		repository: NewPGRepository(db),
+		tag:        NewPGTag(db),
 	}
 }
 
@@ -53,4 +65,28 @@ func (a *PGAgents) Account() store.AccountAgent {
 
 func (a *PGAgents) Faucet() store.FaucetAgent {
 	return a.faucet
+}
+
+func (a *PGAgents) Artifact() store.ArtifactAgent {
+	return a.artifact
+}
+
+func (a *PGAgents) CodeHash() store.CodeHashAgent {
+	return a.codeHash
+}
+
+func (a *PGAgents) Event() store.EventAgent {
+	return a.event
+}
+
+func (a *PGAgents) Method() store.MethodAgent {
+	return a.method
+}
+
+func (a *PGAgents) Repository() store.RepositoryAgent {
+	return a.repository
+}
+
+func (a *PGAgents) Tag() store.TagAgent {
+	return a.tag
 }

@@ -14,7 +14,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/opentracing/opentracing-go"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/abi"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	error1 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/error"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
@@ -744,8 +744,8 @@ type Contract struct {
 	Args            []string
 }
 
-func (e *Envelope) GetContractID() *abi.ContractId {
-	return &abi.ContractId{
+func (e *Envelope) GetContractID() *entities.ContractID {
+	return &entities.ContractID{
 		Name: e.ContractName,
 		Tag:  e.ContractTag,
 	}

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
 
 	"github.com/gofrs/uuid"
 	pg "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database/postgres"
@@ -18,7 +19,7 @@ type PGLog struct {
 }
 
 // NewPGLog creates a new PGLog
-func NewPGLog(db pg.DB) *PGLog {
+func NewPGLog(db pg.DB) store.LogAgent {
 	return &PGLog{db: db}
 }
 

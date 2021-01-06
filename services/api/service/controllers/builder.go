@@ -24,6 +24,7 @@ import (
 // @description Chains represent list of endpoints pointing to a Blockchain network
 // @description Faucets represent funded accounts (holding ETH) linked to specific chains, allowed to fund newly created accounts automatically for them to be able to send transactions.
 // @description Accounts represent Ethereum accounts (private keys). By usage of the generated cryptographic key pair, accounts can be used to sign/verify and to encrypt/decrypt messages.
+// @description Contracts represent Solidity contracts management.
 
 // @contact.name Contact PegaSys Orchestrate
 // @contact.url https://pegasys.tech/contact/
@@ -46,6 +47,7 @@ type Builder struct {
 	jobsCtrl      *JobsController
 	accountsCtrl  *AccountsController
 	faucetsCtrl   *FaucetsController
+	contractsCtrl *ContractsController
 }
 
 func NewBuilder(ucs usecases.UseCases, keyManagerClient client.KeyManagerClient) *Builder {
@@ -55,10 +57,11 @@ func NewBuilder(ucs usecases.UseCases, keyManagerClient client.KeyManagerClient)
 		jobsCtrl:      NewJobsController(ucs),
 		accountsCtrl:  NewAccountsController(ucs, keyManagerClient),
 		faucetsCtrl:   NewFaucetsController(ucs),
+		contractsCtrl: NewContractsController(ucs),
 	}
 }
 
-func (b *Builder) Build(ctx context.Context, _ string, configuration interface{}, respModifier func(response *http.Response) error) (http.Handler, error) {
+func (b *Builder) Build(_ context.Context, _ string, configuration interface{}, _ func(response *http.Response) error) (http.Handler, error) {
 	cfg, ok := configuration.(*dynamic.API)
 	if !ok {
 		return nil, fmt.Errorf("invalid configuration type (expected %T but got %T)", cfg, configuration)
@@ -70,6 +73,7 @@ func (b *Builder) Build(ctx context.Context, _ string, configuration interface{}
 	b.jobsCtrl.Append(router)
 	b.accountsCtrl.Append(router)
 	b.faucetsCtrl.Append(router)
+	b.contractsCtrl.Append(router)
 
 	return router, nil
 }

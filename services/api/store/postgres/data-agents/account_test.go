@@ -50,7 +50,7 @@ func (s *accountTestSuite) TearDownSuite() {
 	s.pg.DropTestDB(s.T())
 }
 
-func (s *accountTestSuite) TestPGIdentity_Insert() {
+func (s *accountTestSuite) TestPGAccount_Insert() {
 	ctx := context.Background()
 
 	s.T().Run("should insert model successfully", func(t *testing.T) {
@@ -81,7 +81,7 @@ func (s *accountTestSuite) TestPGIdentity_Insert() {
 	})
 }
 
-func (s *accountTestSuite) TestPGIdentity_FindOneByAddress() {
+func (s *accountTestSuite) TestPGAccount_FindOneByAddress() {
 	ctx := context.Background()
 
 	s.T().Run("should find one model by address successfully", func(t *testing.T) {
@@ -105,7 +105,7 @@ func (s *accountTestSuite) TestPGIdentity_FindOneByAddress() {
 	})
 }
 
-func (s *accountTestSuite) TestPGIdentity_Search() {
+func (s *accountTestSuite) TestPGAccount_Search() {
 	ctx := context.Background()
 
 	s.T().Run("should search model successfully", func(t *testing.T) {
@@ -135,7 +135,7 @@ func (s *accountTestSuite) TestPGIdentity_Search() {
 	})
 }
 
-func (s *accountTestSuite) TestPGIdentity_Update() {
+func (s *accountTestSuite) TestPGAccount_Update() {
 	ctx := context.Background()
 
 	s.T().Run("should update model successfully", func(t *testing.T) {

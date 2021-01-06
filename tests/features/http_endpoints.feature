@@ -23,29 +23,6 @@ Feature: Verify HTTP Endpoints
     Then the response code should be 200
 
   ###################
-  # CONTRACT REGISTRY
-  ###################
-  Scenario: Get Contract Registry Swagger JSON file
-    When I send "GET" request to "{{global.contract-registry-http}}/swagger/swagger.json"
-    Then the response code should be 200
-
-  Scenario: Get Contract Registry metrics
-    When I send "GET" request to "{{global.contract-registry-metrics}}/metrics"
-    Then the response code should be 200
-
-  Scenario: Get Contract Registry readiness
-    When I send "GET" request to "{{global.contract-registry-metrics}}/ready?full=1"
-    Then the response code should be 200
-    And Response should have the following fields
-      | database |
-      | OK       |
-
-  Scenario: Get Contract Registry liveness
-    When I send "GET" request to "{{global.contract-registry-metrics}}/live"
-    Then the response code should be 200
-
-
-  ###################
   # API
   ###################
   Scenario: Get API Swagger JSON file

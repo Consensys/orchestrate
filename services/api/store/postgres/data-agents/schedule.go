@@ -7,6 +7,7 @@ import (
 	"github.com/gofrs/uuid"
 	pg "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database/postgres"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models"
 )
@@ -19,7 +20,7 @@ type PGSchedule struct {
 }
 
 // NewPGSchedule creates a new PGSchedule
-func NewPGSchedule(db pg.DB) *PGSchedule {
+func NewPGSchedule(db pg.DB) store.ScheduleAgent {
 	return &PGSchedule{db: db}
 }
 

@@ -10,8 +10,9 @@ import (
 
 	"github.com/containous/traefik/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/json"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/abi"
-	registry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/contract-registry/proto"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 )
 
 type Artifact struct {
@@ -20,18 +21,19 @@ type Artifact struct {
 	DeployedBytecode string
 }
 
-func RegisterNewContract(ctx context.Context, client registry.ContractRegistryClient, artifactPath, name string) error {
+func RegisterNewContract(ctx context.Context, cClient client.ContractClient, artifactPath, name string) error {
 	log.FromContext(ctx).Debugf("Registering new contract %s...", name)
 	contract, err := readContract(artifactPath, fmt.Sprintf("%s.json", name))
 	if err != nil {
 		return err
 	}
 
-	contract.Id = &abi.ContractId{
-		Name: name,
-	}
-	_, err = client.RegisterContract(ctx, &registry.RegisterContractRequest{
-		Contract: contract,
+	_, err = cClient.RegisterContract(ctx, &api.RegisterContractRequest{
+		Name:             name,
+		Tag:              contract.ID.Tag,
+		ABI:              contract.ABI,
+		Bytecode:         contract.Bytecode,
+		DeployedBytecode: contract.DeployedBytecode,
 	})
 
 	if err != nil {
@@ -42,7 +44,7 @@ func RegisterNewContract(ctx context.Context, client registry.ContractRegistryCl
 	return nil
 }
 
-func readContract(artifactsPath, fileName string) (*abi.Contract, error) {
+func readContract(artifactsPath, fileName string) (*entities.Contract, error) {
 	f, err := os.Open(path.Join(artifactsPath, fileName))
 	if err != nil {
 		return nil, err
@@ -65,8 +67,8 @@ func readContract(artifactsPath, fileName string) (*abi.Contract, error) {
 		return nil, err
 	}
 
-	var contract = &abi.Contract{}
-	contract.Abi = string(art.Abi)
+	var contract = &entities.Contract{}
+	contract.ABI = string(art.Abi)
 	// Bytecode is an hexstring encoded []byte
 	contract.Bytecode = art.Bytecode
 	// Bytecode is an hexstring encoded []byte

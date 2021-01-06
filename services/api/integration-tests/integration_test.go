@@ -127,6 +127,18 @@ func (s *apiTestSuite) TestAPI_Accounts() {
 	suite.Run(s.T(), testSuite)
 }
 
+func (s *apiTestSuite) TestAPI_Contracts() {
+	if s.err != nil {
+		s.env.logger.Warn("skipping test...")
+		return
+	}
+
+	testSuite := new(contractsTestSuite)
+	testSuite.env = s.env
+	testSuite.client = s.client
+	suite.Run(s.T(), testSuite)
+}
+
 func (s *apiTestSuite) TestAPI_Faucets() {
 	if s.err != nil {
 		s.env.logger.Warn("skipping test...")

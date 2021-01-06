@@ -3,14 +3,18 @@ package steps
 import (
 	"context"
 
+	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/cucumber/godog"
 	gherkin "github.com/cucumber/messages-go/v10"
 	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/auth/utils"
-	registry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/contract-registry/proto"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/json"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/e2e/utils"
 )
 
 func (sc *ScenarioContext) iRegisterTheFollowingContract(table *gherkin.PickleStepArgument_PickleTable) error {
+	ctx := context.Background()
+
 	// Parse table
 	parseContracts, err := utils.ParseContracts(table)
 	if err != nil {
@@ -19,23 +23,32 @@ func (sc *ScenarioContext) iRegisterTheFollowingContract(table *gherkin.PickleSt
 
 	// Register parseContracts on the registry
 	for _, parseContract := range parseContracts {
-		_, err := sc.ContractRegistry.RegisterContract(
-			authutils.WithAuthorization(context.Background(), parseContract.JWTToken),
-			&registry.RegisterContractRequest{
-				Contract: parseContract.Contract,
+		var abi interface{}
+		err := json.Unmarshal([]byte(parseContract.Contract.ABI), &abi)
+		if err != nil {
+			return err
+		}
+
+		_, err = sc.client.RegisterContract(
+			authutils.WithAuthorization(ctx, parseContract.JWTToken),
+			&api.RegisterContractRequest{
+				Name:             parseContract.Contract.ID.Name,
+				Tag:              parseContract.Contract.ID.Tag,
+				ABI:              abi,
+				Bytecode:         parseContract.Contract.Bytecode,
+				DeployedBytecode: parseContract.Contract.DeployedBytecode,
 			},
 		)
 
 		if err != nil {
 			return err
 		}
+
 		sc.TearDownFunc = append(sc.TearDownFunc, func() {
-			_, _ = sc.ContractRegistry.DeregisterContract(
-				authutils.WithAuthorization(context.Background(), parseContract.JWTToken),
-				&registry.DeregisterContractRequest{
-					ContractId: parseContract.Contract.Id,
-				},
-			)
+			log.FromContext(ctx).
+				WithField("name", parseContract.Contract.ID.Name).
+				WithField("tag", parseContract.Contract.ID.Tag).
+				Warn("DeregisterContract is not implemented")
 		})
 	}
 

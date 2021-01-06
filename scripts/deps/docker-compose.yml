@@ -82,15 +82,6 @@ services:
     ports:
       - 5432
 
-  postgres-contract-registry:
-    <<: *container-common
-    <<: *postgres-common
-    image: postgres:10.12-alpine
-    volumes:
-      - db-data-contract-registry:/var/lib/postgresql/data
-    ports:
-      - 5432
-
   postgres-api:
     <<: *container-common
     <<: *postgres-common
@@ -145,8 +136,6 @@ volumes:
   db-data-postgres-unit:
     driver: local
   db-data-chain-registry:
-    driver: local
-  db-data-contract-registry:
     driver: local
   db-data-api:
     driver: local

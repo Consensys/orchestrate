@@ -5,6 +5,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
 
 	"github.com/gofrs/uuid"
 	pg "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database/postgres"
@@ -19,7 +20,7 @@ type PGTransaction struct {
 }
 
 // NewPGLog creates a new PGLog
-func NewPGTransaction(db pg.DB) *PGTransaction {
+func NewPGTransaction(db pg.DB) store.TransactionAgent {
 	return &PGTransaction{db: db}
 }
 

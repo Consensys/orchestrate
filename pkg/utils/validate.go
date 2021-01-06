@@ -19,10 +19,15 @@ var (
 
 func isHex(fl validator.FieldLevel) bool {
 	if fl.Field().String() != "" {
-		_, err := hexutil.Decode(fl.Field().String())
-		if err != nil {
-			return false
-		}
+		return IsHexString(fl.Field().String())
+	}
+
+	return true
+}
+
+func isHexAddress(fl validator.FieldLevel) bool {
+	if fl.Field().String() != "" {
+		return ethcommon.IsHexAddress(fl.Field().String())
 	}
 
 	return true
@@ -190,6 +195,7 @@ func init() {
 
 	validate = validator.New()
 	_ = validate.RegisterValidation("isHex", isHex)
+	_ = validate.RegisterValidation("isHexAddress", isHexAddress)
 	_ = validate.RegisterValidation("isBig", isBig)
 	_ = validate.RegisterValidation("isHash", isHash)
 	_ = validate.RegisterValidation("isDuration", isDuration)

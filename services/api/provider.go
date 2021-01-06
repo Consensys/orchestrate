@@ -1,7 +1,9 @@
 package api
 
 import (
+	"fmt"
 	"math"
+	"strings"
 
 	traefikdynamic "github.com/containous/traefik/v2/pkg/config/dynamic"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/configwatcher/provider"
@@ -28,13 +30,18 @@ func NewInternalProvider() provider.Provider {
 func NewInternalConfig() *dynamic.Configuration {
 	cfg := dynamic.NewConfig()
 
+	pathPrefix := []string{"/transactions", "/schedules", "/jobs", "/accounts", "/faucets", "/contracts"}
+	for idx, path := range pathPrefix {
+		pathPrefix[idx] = fmt.Sprintf("PathPrefix(`%s`)", path)
+	}
+
 	// Router to API
 	cfg.HTTP.Routers["api"] = &dynamic.Router{
 		Router: &traefikdynamic.Router{
 			EntryPoints: []string{http.DefaultHTTPAppEntryPoint},
 			Service:     "api",
 			Priority:    math.MaxInt32,
-			Rule:        "PathPrefix(`/transactions`) || PathPrefix(`/schedules`) || PathPrefix(`/jobs`) || PathPrefix(`/accounts`) || PathPrefix(`/faucets`)",
+			Rule:        strings.Join(pathPrefix, " || "),
 			Middlewares: []string{"base@logger-base", "auth@multitenancy"},
 		},
 	}

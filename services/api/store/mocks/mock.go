@@ -214,6 +214,90 @@ func (mr *MockAgentsMockRecorder) Faucet() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Faucet", reflect.TypeOf((*MockAgents)(nil).Faucet))
 }
 
+// Artifact mocks base method
+func (m *MockAgents) Artifact() store.ArtifactAgent {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Artifact")
+	ret0, _ := ret[0].(store.ArtifactAgent)
+	return ret0
+}
+
+// Artifact indicates an expected call of Artifact
+func (mr *MockAgentsMockRecorder) Artifact() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Artifact", reflect.TypeOf((*MockAgents)(nil).Artifact))
+}
+
+// CodeHash mocks base method
+func (m *MockAgents) CodeHash() store.CodeHashAgent {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CodeHash")
+	ret0, _ := ret[0].(store.CodeHashAgent)
+	return ret0
+}
+
+// CodeHash indicates an expected call of CodeHash
+func (mr *MockAgentsMockRecorder) CodeHash() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CodeHash", reflect.TypeOf((*MockAgents)(nil).CodeHash))
+}
+
+// Event mocks base method
+func (m *MockAgents) Event() store.EventAgent {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Event")
+	ret0, _ := ret[0].(store.EventAgent)
+	return ret0
+}
+
+// Event indicates an expected call of Event
+func (mr *MockAgentsMockRecorder) Event() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Event", reflect.TypeOf((*MockAgents)(nil).Event))
+}
+
+// Method mocks base method
+func (m *MockAgents) Method() store.MethodAgent {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Method")
+	ret0, _ := ret[0].(store.MethodAgent)
+	return ret0
+}
+
+// Method indicates an expected call of Method
+func (mr *MockAgentsMockRecorder) Method() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Method", reflect.TypeOf((*MockAgents)(nil).Method))
+}
+
+// Repository mocks base method
+func (m *MockAgents) Repository() store.RepositoryAgent {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Repository")
+	ret0, _ := ret[0].(store.RepositoryAgent)
+	return ret0
+}
+
+// Repository indicates an expected call of Repository
+func (mr *MockAgentsMockRecorder) Repository() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Repository", reflect.TypeOf((*MockAgents)(nil).Repository))
+}
+
+// Tag mocks base method
+func (m *MockAgents) Tag() store.TagAgent {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Tag")
+	ret0, _ := ret[0].(store.TagAgent)
+	return ret0
+}
+
+// Tag indicates an expected call of Tag
+func (mr *MockAgentsMockRecorder) Tag() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Tag", reflect.TypeOf((*MockAgents)(nil).Tag))
+}
+
 // MockDB is a mock of DB interface
 type MockDB struct {
 	ctrl     *gomock.Controller
@@ -348,6 +432,90 @@ func (m *MockDB) Faucet() store.FaucetAgent {
 func (mr *MockDBMockRecorder) Faucet() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Faucet", reflect.TypeOf((*MockDB)(nil).Faucet))
+}
+
+// Artifact mocks base method
+func (m *MockDB) Artifact() store.ArtifactAgent {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Artifact")
+	ret0, _ := ret[0].(store.ArtifactAgent)
+	return ret0
+}
+
+// Artifact indicates an expected call of Artifact
+func (mr *MockDBMockRecorder) Artifact() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Artifact", reflect.TypeOf((*MockDB)(nil).Artifact))
+}
+
+// CodeHash mocks base method
+func (m *MockDB) CodeHash() store.CodeHashAgent {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CodeHash")
+	ret0, _ := ret[0].(store.CodeHashAgent)
+	return ret0
+}
+
+// CodeHash indicates an expected call of CodeHash
+func (mr *MockDBMockRecorder) CodeHash() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CodeHash", reflect.TypeOf((*MockDB)(nil).CodeHash))
+}
+
+// Event mocks base method
+func (m *MockDB) Event() store.EventAgent {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Event")
+	ret0, _ := ret[0].(store.EventAgent)
+	return ret0
+}
+
+// Event indicates an expected call of Event
+func (mr *MockDBMockRecorder) Event() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Event", reflect.TypeOf((*MockDB)(nil).Event))
+}
+
+// Method mocks base method
+func (m *MockDB) Method() store.MethodAgent {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Method")
+	ret0, _ := ret[0].(store.MethodAgent)
+	return ret0
+}
+
+// Method indicates an expected call of Method
+func (mr *MockDBMockRecorder) Method() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Method", reflect.TypeOf((*MockDB)(nil).Method))
+}
+
+// Repository mocks base method
+func (m *MockDB) Repository() store.RepositoryAgent {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Repository")
+	ret0, _ := ret[0].(store.RepositoryAgent)
+	return ret0
+}
+
+// Repository indicates an expected call of Repository
+func (mr *MockDBMockRecorder) Repository() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Repository", reflect.TypeOf((*MockDB)(nil).Repository))
+}
+
+// Tag mocks base method
+func (m *MockDB) Tag() store.TagAgent {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Tag")
+	ret0, _ := ret[0].(store.TagAgent)
+	return ret0
+}
+
+// Tag indicates an expected call of Tag
+func (mr *MockDBMockRecorder) Tag() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Tag", reflect.TypeOf((*MockDB)(nil).Tag))
 }
 
 // MockTx is a mock of Tx interface
@@ -526,6 +694,90 @@ func (m *MockTx) Faucet() store.FaucetAgent {
 func (mr *MockTxMockRecorder) Faucet() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Faucet", reflect.TypeOf((*MockTx)(nil).Faucet))
+}
+
+// Artifact mocks base method
+func (m *MockTx) Artifact() store.ArtifactAgent {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Artifact")
+	ret0, _ := ret[0].(store.ArtifactAgent)
+	return ret0
+}
+
+// Artifact indicates an expected call of Artifact
+func (mr *MockTxMockRecorder) Artifact() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Artifact", reflect.TypeOf((*MockTx)(nil).Artifact))
+}
+
+// CodeHash mocks base method
+func (m *MockTx) CodeHash() store.CodeHashAgent {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CodeHash")
+	ret0, _ := ret[0].(store.CodeHashAgent)
+	return ret0
+}
+
+// CodeHash indicates an expected call of CodeHash
+func (mr *MockTxMockRecorder) CodeHash() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CodeHash", reflect.TypeOf((*MockTx)(nil).CodeHash))
+}
+
+// Event mocks base method
+func (m *MockTx) Event() store.EventAgent {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Event")
+	ret0, _ := ret[0].(store.EventAgent)
+	return ret0
+}
+
+// Event indicates an expected call of Event
+func (mr *MockTxMockRecorder) Event() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Event", reflect.TypeOf((*MockTx)(nil).Event))
+}
+
+// Method mocks base method
+func (m *MockTx) Method() store.MethodAgent {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Method")
+	ret0, _ := ret[0].(store.MethodAgent)
+	return ret0
+}
+
+// Method indicates an expected call of Method
+func (mr *MockTxMockRecorder) Method() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Method", reflect.TypeOf((*MockTx)(nil).Method))
+}
+
+// Repository mocks base method
+func (m *MockTx) Repository() store.RepositoryAgent {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Repository")
+	ret0, _ := ret[0].(store.RepositoryAgent)
+	return ret0
+}
+
+// Repository indicates an expected call of Repository
+func (mr *MockTxMockRecorder) Repository() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Repository", reflect.TypeOf((*MockTx)(nil).Repository))
+}
+
+// Tag mocks base method
+func (m *MockTx) Tag() store.TagAgent {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Tag")
+	ret0, _ := ret[0].(store.TagAgent)
+	return ret0
+}
+
+// Tag indicates an expected call of Tag
+func (mr *MockTxMockRecorder) Tag() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Tag", reflect.TypeOf((*MockTx)(nil).Tag))
 }
 
 // MockTransactionRequestAgent is a mock of TransactionRequestAgent interface
@@ -1034,4 +1286,376 @@ func (m *MockFaucetAgent) Delete(ctx context.Context, faucet *models.Faucet, ten
 func (mr *MockFaucetAgentMockRecorder) Delete(ctx, faucet, tenants interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockFaucetAgent)(nil).Delete), ctx, faucet, tenants)
+}
+
+// MockArtifactAgent is a mock of ArtifactAgent interface
+type MockArtifactAgent struct {
+	ctrl     *gomock.Controller
+	recorder *MockArtifactAgentMockRecorder
+}
+
+// MockArtifactAgentMockRecorder is the mock recorder for MockArtifactAgent
+type MockArtifactAgentMockRecorder struct {
+	mock *MockArtifactAgent
+}
+
+// NewMockArtifactAgent creates a new mock instance
+func NewMockArtifactAgent(ctrl *gomock.Controller) *MockArtifactAgent {
+	mock := &MockArtifactAgent{ctrl: ctrl}
+	mock.recorder = &MockArtifactAgentMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockArtifactAgent) EXPECT() *MockArtifactAgentMockRecorder {
+	return m.recorder
+}
+
+// FindOneByABIAndCodeHash mocks base method
+func (m *MockArtifactAgent) FindOneByABIAndCodeHash(ctx context.Context, abi, codeHash string) (*models.ArtifactModel, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindOneByABIAndCodeHash", ctx, abi, codeHash)
+	ret0, _ := ret[0].(*models.ArtifactModel)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindOneByABIAndCodeHash indicates an expected call of FindOneByABIAndCodeHash
+func (mr *MockArtifactAgentMockRecorder) FindOneByABIAndCodeHash(ctx, abi, codeHash interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneByABIAndCodeHash", reflect.TypeOf((*MockArtifactAgent)(nil).FindOneByABIAndCodeHash), ctx, abi, codeHash)
+}
+
+// Insert mocks base method
+func (m *MockArtifactAgent) Insert(ctx context.Context, artifact *models.ArtifactModel) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Insert", ctx, artifact)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Insert indicates an expected call of Insert
+func (mr *MockArtifactAgentMockRecorder) Insert(ctx, artifact interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*MockArtifactAgent)(nil).Insert), ctx, artifact)
+}
+
+// FindOneByNameAndTag mocks base method
+func (m *MockArtifactAgent) FindOneByNameAndTag(ctx context.Context, name, tag string) (*models.ArtifactModel, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindOneByNameAndTag", ctx, name, tag)
+	ret0, _ := ret[0].(*models.ArtifactModel)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindOneByNameAndTag indicates an expected call of FindOneByNameAndTag
+func (mr *MockArtifactAgentMockRecorder) FindOneByNameAndTag(ctx, name, tag interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneByNameAndTag", reflect.TypeOf((*MockArtifactAgent)(nil).FindOneByNameAndTag), ctx, name, tag)
+}
+
+// MockCodeHashAgent is a mock of CodeHashAgent interface
+type MockCodeHashAgent struct {
+	ctrl     *gomock.Controller
+	recorder *MockCodeHashAgentMockRecorder
+}
+
+// MockCodeHashAgentMockRecorder is the mock recorder for MockCodeHashAgent
+type MockCodeHashAgentMockRecorder struct {
+	mock *MockCodeHashAgent
+}
+
+// NewMockCodeHashAgent creates a new mock instance
+func NewMockCodeHashAgent(ctrl *gomock.Controller) *MockCodeHashAgent {
+	mock := &MockCodeHashAgent{ctrl: ctrl}
+	mock.recorder = &MockCodeHashAgentMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockCodeHashAgent) EXPECT() *MockCodeHashAgentMockRecorder {
+	return m.recorder
+}
+
+// Insert mocks base method
+func (m *MockCodeHashAgent) Insert(ctx context.Context, codehash *models.CodehashModel) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Insert", ctx, codehash)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Insert indicates an expected call of Insert
+func (mr *MockCodeHashAgentMockRecorder) Insert(ctx, codehash interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*MockCodeHashAgent)(nil).Insert), ctx, codehash)
+}
+
+// MockEventAgent is a mock of EventAgent interface
+type MockEventAgent struct {
+	ctrl     *gomock.Controller
+	recorder *MockEventAgentMockRecorder
+}
+
+// MockEventAgentMockRecorder is the mock recorder for MockEventAgent
+type MockEventAgentMockRecorder struct {
+	mock *MockEventAgent
+}
+
+// NewMockEventAgent creates a new mock instance
+func NewMockEventAgent(ctrl *gomock.Controller) *MockEventAgent {
+	mock := &MockEventAgent{ctrl: ctrl}
+	mock.recorder = &MockEventAgentMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockEventAgent) EXPECT() *MockEventAgentMockRecorder {
+	return m.recorder
+}
+
+// InsertMultiple mocks base method
+func (m *MockEventAgent) InsertMultiple(ctx context.Context, events []*models.EventModel) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InsertMultiple", ctx, events)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// InsertMultiple indicates an expected call of InsertMultiple
+func (mr *MockEventAgentMockRecorder) InsertMultiple(ctx, events interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertMultiple", reflect.TypeOf((*MockEventAgent)(nil).InsertMultiple), ctx, events)
+}
+
+// FindOneByAccountAndSigHash mocks base method
+func (m *MockEventAgent) FindOneByAccountAndSigHash(ctx context.Context, chainID, address, sighash string, indexedInputCount uint32) (*models.EventModel, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindOneByAccountAndSigHash", ctx, chainID, address, sighash, indexedInputCount)
+	ret0, _ := ret[0].(*models.EventModel)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindOneByAccountAndSigHash indicates an expected call of FindOneByAccountAndSigHash
+func (mr *MockEventAgentMockRecorder) FindOneByAccountAndSigHash(ctx, chainID, address, sighash, indexedInputCount interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneByAccountAndSigHash", reflect.TypeOf((*MockEventAgent)(nil).FindOneByAccountAndSigHash), ctx, chainID, address, sighash, indexedInputCount)
+}
+
+// FindDefaultBySigHash mocks base method
+func (m *MockEventAgent) FindDefaultBySigHash(ctx context.Context, sighash string, indexedInputCount uint32) ([]*models.EventModel, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindDefaultBySigHash", ctx, sighash, indexedInputCount)
+	ret0, _ := ret[0].([]*models.EventModel)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindDefaultBySigHash indicates an expected call of FindDefaultBySigHash
+func (mr *MockEventAgentMockRecorder) FindDefaultBySigHash(ctx, sighash, indexedInputCount interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindDefaultBySigHash", reflect.TypeOf((*MockEventAgent)(nil).FindDefaultBySigHash), ctx, sighash, indexedInputCount)
+}
+
+// MockMethodAgent is a mock of MethodAgent interface
+type MockMethodAgent struct {
+	ctrl     *gomock.Controller
+	recorder *MockMethodAgentMockRecorder
+}
+
+// MockMethodAgentMockRecorder is the mock recorder for MockMethodAgent
+type MockMethodAgentMockRecorder struct {
+	mock *MockMethodAgent
+}
+
+// NewMockMethodAgent creates a new mock instance
+func NewMockMethodAgent(ctrl *gomock.Controller) *MockMethodAgent {
+	mock := &MockMethodAgent{ctrl: ctrl}
+	mock.recorder = &MockMethodAgentMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockMethodAgent) EXPECT() *MockMethodAgentMockRecorder {
+	return m.recorder
+}
+
+// InsertMultiple mocks base method
+func (m *MockMethodAgent) InsertMultiple(ctx context.Context, methods []*models.MethodModel) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InsertMultiple", ctx, methods)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// InsertMultiple indicates an expected call of InsertMultiple
+func (mr *MockMethodAgentMockRecorder) InsertMultiple(ctx, methods interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertMultiple", reflect.TypeOf((*MockMethodAgent)(nil).InsertMultiple), ctx, methods)
+}
+
+// FindOneByAccountAndSelector mocks base method
+func (m *MockMethodAgent) FindOneByAccountAndSelector(ctx context.Context, chainID, address string, selector []byte) (*models.MethodModel, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindOneByAccountAndSelector", ctx, chainID, address, selector)
+	ret0, _ := ret[0].(*models.MethodModel)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindOneByAccountAndSelector indicates an expected call of FindOneByAccountAndSelector
+func (mr *MockMethodAgentMockRecorder) FindOneByAccountAndSelector(ctx, chainID, address, selector interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneByAccountAndSelector", reflect.TypeOf((*MockMethodAgent)(nil).FindOneByAccountAndSelector), ctx, chainID, address, selector)
+}
+
+// FindDefaultBySelector mocks base method
+func (m *MockMethodAgent) FindDefaultBySelector(ctx context.Context, selector []byte) ([]*models.MethodModel, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindDefaultBySelector", ctx, selector)
+	ret0, _ := ret[0].([]*models.MethodModel)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindDefaultBySelector indicates an expected call of FindDefaultBySelector
+func (mr *MockMethodAgentMockRecorder) FindDefaultBySelector(ctx, selector interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindDefaultBySelector", reflect.TypeOf((*MockMethodAgent)(nil).FindDefaultBySelector), ctx, selector)
+}
+
+// MockRepositoryAgent is a mock of RepositoryAgent interface
+type MockRepositoryAgent struct {
+	ctrl     *gomock.Controller
+	recorder *MockRepositoryAgentMockRecorder
+}
+
+// MockRepositoryAgentMockRecorder is the mock recorder for MockRepositoryAgent
+type MockRepositoryAgentMockRecorder struct {
+	mock *MockRepositoryAgent
+}
+
+// NewMockRepositoryAgent creates a new mock instance
+func NewMockRepositoryAgent(ctrl *gomock.Controller) *MockRepositoryAgent {
+	mock := &MockRepositoryAgent{ctrl: ctrl}
+	mock.recorder = &MockRepositoryAgentMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockRepositoryAgent) EXPECT() *MockRepositoryAgentMockRecorder {
+	return m.recorder
+}
+
+// Insert mocks base method
+func (m *MockRepositoryAgent) Insert(ctx context.Context, repository *models.RepositoryModel) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Insert", ctx, repository)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Insert indicates an expected call of Insert
+func (mr *MockRepositoryAgentMockRecorder) Insert(ctx, repository interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*MockRepositoryAgent)(nil).Insert), ctx, repository)
+}
+
+// FindOne mocks base method
+func (m *MockRepositoryAgent) FindOne(ctx context.Context, name string) (*models.RepositoryModel, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindOne", ctx, name)
+	ret0, _ := ret[0].(*models.RepositoryModel)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindOne indicates an expected call of FindOne
+func (mr *MockRepositoryAgentMockRecorder) FindOne(ctx, name interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOne", reflect.TypeOf((*MockRepositoryAgent)(nil).FindOne), ctx, name)
+}
+
+// FindOneAndLock mocks base method
+func (m *MockRepositoryAgent) FindOneAndLock(ctx context.Context, name string) (*models.RepositoryModel, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindOneAndLock", ctx, name)
+	ret0, _ := ret[0].(*models.RepositoryModel)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindOneAndLock indicates an expected call of FindOneAndLock
+func (mr *MockRepositoryAgentMockRecorder) FindOneAndLock(ctx, name interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneAndLock", reflect.TypeOf((*MockRepositoryAgent)(nil).FindOneAndLock), ctx, name)
+}
+
+// FindAll mocks base method
+func (m *MockRepositoryAgent) FindAll(ctx context.Context) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindAll", ctx)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindAll indicates an expected call of FindAll
+func (mr *MockRepositoryAgentMockRecorder) FindAll(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockRepositoryAgent)(nil).FindAll), ctx)
+}
+
+// MockTagAgent is a mock of TagAgent interface
+type MockTagAgent struct {
+	ctrl     *gomock.Controller
+	recorder *MockTagAgentMockRecorder
+}
+
+// MockTagAgentMockRecorder is the mock recorder for MockTagAgent
+type MockTagAgentMockRecorder struct {
+	mock *MockTagAgent
+}
+
+// NewMockTagAgent creates a new mock instance
+func NewMockTagAgent(ctrl *gomock.Controller) *MockTagAgent {
+	mock := &MockTagAgent{ctrl: ctrl}
+	mock.recorder = &MockTagAgentMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockTagAgent) EXPECT() *MockTagAgentMockRecorder {
+	return m.recorder
+}
+
+// Insert mocks base method
+func (m *MockTagAgent) Insert(ctx context.Context, tag *models.TagModel) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Insert", ctx, tag)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Insert indicates an expected call of Insert
+func (mr *MockTagAgentMockRecorder) Insert(ctx, tag interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*MockTagAgent)(nil).Insert), ctx, tag)
+}
+
+// FindAllByName mocks base method
+func (m *MockTagAgent) FindAllByName(ctx context.Context, name string) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindAllByName", ctx, name)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindAllByName indicates an expected call of FindAllByName
+func (mr *MockTagAgentMockRecorder) FindAllByName(ctx, name interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAllByName", reflect.TypeOf((*MockTagAgent)(nil).FindAllByName), ctx, name)
 }

@@ -14,22 +14,44 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 )
 
+var alreadyExistErr = "entity already exists in DB"
+var integrityErr = "insert integrity violation"
+
 func Insert(ctx context.Context, db DB, models ...interface{}) *ierror.Error {
 	logger := log.WithContext(ctx)
 	_, err := db.ModelContext(ctx, models...).Insert()
 	if err != nil {
 		pgErr, ok := err.(pg.Error)
 		if ok && errors.IsAlreadyExistsError(err) {
-			errMsg := "entity already exists in DB"
-			logger.WithError(err).Error(errMsg)
-			return errors.AlreadyExistsError(errMsg)
+			logger.WithError(err).Error(alreadyExistErr)
+			return errors.AlreadyExistsError(alreadyExistErr)
 		} else if ok && pgErr.IntegrityViolation() {
-			errMsg := "insert integrity violation"
-			logger.WithError(err).Error(errMsg)
-			return errors.ConstraintViolatedError(errMsg)
+			logger.WithError(err).Error(integrityErr)
+			return errors.ConstraintViolatedError(integrityErr)
 		}
 
-		errMsg := "error executing insert"
+		errMsg := "error executing insert by model"
+		logger.WithError(err).Error(errMsg)
+		return errors.PostgresConnectionError(errMsg)
+	}
+
+	return nil
+}
+
+func InsertQuery(ctx context.Context, q *orm.Query) *ierror.Error {
+	logger := log.WithContext(ctx)
+	_, err := q.Insert()
+	if err != nil {
+		pgErr, ok := err.(pg.Error)
+		if ok && errors.IsAlreadyExistsError(err) {
+			logger.WithError(err).Error(alreadyExistErr)
+			return errors.AlreadyExistsError(alreadyExistErr)
+		} else if ok && pgErr.IntegrityViolation() {
+			logger.WithError(err).Error(integrityErr)
+			return errors.ConstraintViolatedError(integrityErr)
+		}
+
+		errMsg := "error executing insert by query"
 		logger.WithError(err).Error(errMsg)
 		return errors.PostgresConnectionError(errMsg)
 	}
@@ -109,6 +131,43 @@ func Select(ctx context.Context, q *orm.Query) *ierror.Error {
 		return errors.NotFoundError("entities cannot be found")
 	} else if err != nil {
 		errMsg := "could not load entities"
+		logger.WithError(err).Error(errMsg)
+		return errors.PostgresConnectionError(errMsg)
+	}
+
+	return nil
+}
+
+func SelectColumn(ctx context.Context, q *orm.Query, result interface{}) *ierror.Error {
+	logger := log.WithContext(ctx)
+
+	err := q.Context(ctx).Select(result)
+	if err != nil && err == pg.ErrNoRows {
+		return errors.NotFoundError("entities cannot be found")
+	} else if err != nil {
+		errMsg := "could not load columns"
+		logger.WithError(err).Error(errMsg)
+		return errors.PostgresConnectionError(errMsg)
+	}
+
+	return nil
+}
+
+func SelectOrInsert(ctx context.Context, q *orm.Query) *ierror.Error {
+	logger := log.WithContext(ctx)
+
+	_, err := q.Context(ctx).SelectOrInsert()
+	if err != nil {
+		pgErr, ok := err.(pg.Error)
+		if ok && errors.IsAlreadyExistsError(err) {
+			logger.WithError(err).Error(alreadyExistErr)
+			return errors.AlreadyExistsError(alreadyExistErr)
+		} else if ok && pgErr.IntegrityViolation() {
+			logger.WithError(err).Error(integrityErr)
+			return errors.ConstraintViolatedError(integrityErr)
+		}
+
+		errMsg := "error executing select or insert"
 		logger.WithError(err).Error(errMsg)
 		return errors.PostgresConnectionError(errMsg)
 	}

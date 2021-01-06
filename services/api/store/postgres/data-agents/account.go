@@ -4,6 +4,7 @@ import (
 	"context"
 
 	pg "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database/postgres"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models"
 
@@ -21,7 +22,7 @@ type PGAccount struct {
 }
 
 // NewPGAccount creates a new PGAccount
-func NewPGAccount(db pg.DB) *PGAccount {
+func NewPGAccount(db pg.DB) store.AccountAgent {
 	return &PGAccount{db: db}
 }
 

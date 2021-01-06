@@ -9,7 +9,6 @@ import (
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
 	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/rpc"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
-	crc "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/contract-registry/client"
 )
 
 var (
@@ -21,8 +20,6 @@ func initComponent(ctx context.Context) {
 	utils.InParallel(
 		// Initialize Ethereum Client
 		func() { ethclient.Init(ctx) },
-		// Initialize Contract Registry Client
-		func() { crc.Init(ctx) },
 		// Initialize Sync Producer
 		func() { broker.InitSyncProducer(ctx) },
 		// Initialize transaction scheduler client
@@ -37,7 +34,6 @@ func Init(ctx context.Context) {
 
 		hook = NewHook(
 			NewConfig(),
-			crc.GlobalClient(),
 			ethclient.GlobalClient(),
 			broker.GlobalSyncProducer(),
 			txscheduler.GlobalClient(),

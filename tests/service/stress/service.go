@@ -14,7 +14,6 @@ import (
 	utils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/store/models"
-	registry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/contract-registry/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/stress/units"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/stress/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/utils/chanregistry"
@@ -23,14 +22,13 @@ import (
 type WorkLoadTest func(context.Context, *units.WorkloadConfig, orchestrateclient.OrchestrateClient, *chanregistry.ChanRegistry) error
 
 type WorkLoadService struct {
-	cfg                    *Config
-	chainRegistryClient    chainregistry.ChainRegistryClient
-	contractRegistryClient registry.ContractRegistryClient
-	client                 orchestrateclient.OrchestrateClient
-	producer               sarama.SyncProducer
-	chanReg                *chanregistry.ChanRegistry
-	items                  []*workLoadItem
-	cancel                 context.CancelFunc
+	cfg                 *Config
+	chainRegistryClient chainregistry.ChainRegistryClient
+	client              orchestrateclient.OrchestrateClient
+	producer            sarama.SyncProducer
+	chanReg             *chanregistry.ChanRegistry
+	items               []*workLoadItem
+	cancel              context.CancelFunc
 }
 
 type workLoadItem struct {
@@ -49,17 +47,15 @@ const (
 func NewService(cfg *Config,
 	chanReg *chanregistry.ChanRegistry,
 	chainRegistryClient chainregistry.ChainRegistryClient,
-	contractRegistryClient registry.ContractRegistryClient,
 	client orchestrateclient.OrchestrateClient,
 	producer sarama.SyncProducer,
 ) *WorkLoadService {
 	return &WorkLoadService{
-		cfg:                    cfg,
-		chanReg:                chanReg,
-		chainRegistryClient:    chainRegistryClient,
-		contractRegistryClient: contractRegistryClient,
-		client:                 client,
-		producer:               producer,
+		cfg:                 cfg,
+		chanReg:             chanReg,
+		chainRegistryClient: chainRegistryClient,
+		client:              client,
+		producer:            producer,
 		items: []*workLoadItem{
 			{cfg.Iterations, cfg.Concurrency, "BatchDeployContract", units.BatchDeployContractTest},
 		},
@@ -118,7 +114,7 @@ func (c *WorkLoadService) preRun(ctx context.Context) (context.Context, error) {
 
 	ctx = utils.ContextWithAccounts(ctx, accounts)
 
-	err := utils.RegisterNewContract(ctx, c.contractRegistryClient, c.cfg.ArtifactPath, "SimpleToken")
+	err := utils.RegisterNewContract(ctx, c.client, c.cfg.ArtifactPath, "SimpleToken")
 	if err != nil {
 		return ctx, err
 	}
