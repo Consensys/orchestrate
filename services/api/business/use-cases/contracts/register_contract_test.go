@@ -38,11 +38,8 @@ func TestRegisterContract_Execute(t *testing.T) {
 	//@TODO Add more advance test flows
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		contract := testutils.FakeContract()
-		rawABI, _ := contract.GetABICompacted()
-		repositoryAgent.EXPECT().FindOneAndLock(ctx, contract.ID.Name).Return(nil, nil)
-		repositoryAgent.EXPECT().Insert(ctx, gomock.AssignableToTypeOf(&models.RepositoryModel{})).Return(nil)
-		artifactAgent.EXPECT().FindOneByABIAndCodeHash(ctx, rawABI, gomock.Any()).Return(nil, nil)
-		artifactAgent.EXPECT().Insert(ctx, gomock.AssignableToTypeOf(&models.ArtifactModel{})).Return(nil)
+		repositoryAgent.EXPECT().SelectOrInsert(ctx, gomock.AssignableToTypeOf(&models.RepositoryModel{})).Return(nil)
+		artifactAgent.EXPECT().SelectOrInsert(ctx, gomock.AssignableToTypeOf(&models.ArtifactModel{})).Return(nil)
 		tagAgent.EXPECT().Insert(ctx, gomock.AssignableToTypeOf(&models.TagModel{}))
 		methodAgent.EXPECT().InsertMultiple(ctx, gomock.AssignableToTypeOf([]*models.MethodModel{}))
 		eventAgent.EXPECT().InsertMultiple(ctx, gomock.AssignableToTypeOf([]*models.EventModel{}))

@@ -63,7 +63,7 @@ func (s *artifactTestSuite) TestPGArtifact_Insert() {
 		err := s.agents.Artifact().Insert(ctx, artifact)
 
 		assert.NoError(t, err)
-		assert.NotEmpty(t, artifact.ID, 1)
+		assert.Equal(t, artifact.ID, 1)
 	})
 
 	s.T().Run("should insert model successfully in TX", func(t *testing.T) {
@@ -83,7 +83,7 @@ func (s *artifactTestSuite) TestPGArtifact_Insert() {
 		assert.NotEmpty(t, artifact.ID)
 	})
 	
-	s.T().Run("should fail to insert model duplicated model", func(t *testing.T) {
+	s.T().Run("should select instead insert duplicated model", func(t *testing.T) {
 
 		artifact := &models.ArtifactModel{
 			ABI:              abi,
@@ -91,9 +91,10 @@ func (s *artifactTestSuite) TestPGArtifact_Insert() {
 			DeployedBytecode: "0x123",
 			Codehash:         codeHash,
 		}
-		err := s.agents.Artifact().Insert(ctx, artifact)
+		err := s.agents.Artifact().SelectOrInsert(ctx, artifact)
 
-		assert.Error(t, err)
+		assert.NoError(t, err)
+		assert.Equal(t, artifact.ID, 1)
 	})
 
 	s.T().Run("should return PostgresConnectionError if insert fails", func(t *testing.T) {

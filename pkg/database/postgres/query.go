@@ -159,10 +159,7 @@ func SelectOrInsert(ctx context.Context, q *orm.Query) *ierror.Error {
 	_, err := q.Context(ctx).SelectOrInsert()
 	if err != nil {
 		pgErr, ok := err.(pg.Error)
-		if ok && errors.IsAlreadyExistsError(err) {
-			logger.WithError(err).Error(alreadyExistErr)
-			return errors.AlreadyExistsError(alreadyExistErr)
-		} else if ok && pgErr.IntegrityViolation() {
+		if ok && pgErr.IntegrityViolation() {
 			logger.WithError(err).Error(integrityErr)
 			return errors.ConstraintViolatedError(integrityErr)
 		}

@@ -33,18 +33,13 @@ func FormatRegisterContractRequest(req *types.RegisterContractRequest) (*entitie
 	}, nil
 }
 
-func FormatGetContractEventsBySignHashRequest(req *http.Request) (*types.GetContractEventsBySignHashRequest, error) {
+func FormatGetContractEventsRequest(req *http.Request) (*types.GetContractEventsRequest, error) {
 	qSigHash := req.URL.Query().Get("sig_hash")
 	if qSigHash == "" {
 		return nil, errors.InvalidParameterError("sig_hash cannot be empty")
 	}
 	if !utils.IsHexString(qSigHash) {
 		return nil, errors.InvalidParameterError("sig_hash is not hex value")
-	}
-
-	qChainID := req.URL.Query().Get("chain_id")
-	if qChainID == "" {
-		return nil, errors.InvalidParameterError("chain_id cannot be empty")
 	}
 
 	qIndexedInputCount := req.URL.Query().Get("indexed_input_count")
@@ -57,9 +52,8 @@ func FormatGetContractEventsBySignHashRequest(req *http.Request) (*types.GetCont
 		return nil, errors.InvalidParameterError("indexed_input_count is not valid integer")
 	}
 
-	return &types.GetContractEventsBySignHashRequest{
+	return &types.GetContractEventsRequest{
 		SigHash:           qSigHash,
-		ChainID:           qChainID,
 		IndexedInputCount: uint32(qIndexedInputCountInt),
 	}, nil
 }

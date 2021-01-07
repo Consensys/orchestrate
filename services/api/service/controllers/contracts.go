@@ -29,8 +29,8 @@ func NewContractsController(contractUCs usecases.ContractUseCases) *ContractsCon
 func (c *ContractsController) Append(router *mux.Router) {
 	router.Methods(http.MethodGet).Path("/contracts").HandlerFunc(c.getCatalog)
 	router.Methods(http.MethodPost).Path("/contracts").HandlerFunc(c.register)
-	router.Methods(http.MethodPatch).Path("/contracts").HandlerFunc(c.setCodeHash)
-	router.Methods(http.MethodGet).Path("/contracts/{address}/events").HandlerFunc(c.getEvents)
+	router.Methods(http.MethodPost).Path("/contracts/accounts/{chain_id}/{address}").HandlerFunc(c.setCodeHash)
+	router.Methods(http.MethodGet).Path("/contracts/accounts/{chain_id}/{address}/events").HandlerFunc(c.getEvents)
 	router.Methods(http.MethodGet).Path("/contracts/{name}").HandlerFunc(c.getTags)
 	router.Methods(http.MethodGet).Path("/contracts/{name}/{tag}").HandlerFunc(c.getContract)
 	router.Methods(http.MethodGet).Path("/contracts/{name}/{tag}/method-signatures").HandlerFunc(c.getContractMethodSignatures)
@@ -108,13 +108,22 @@ func (c *ContractsController) register(rw http.ResponseWriter, request *http.Req
 // @Security ApiKeyAuth
 // @Security JWTAuth
 // @Param address path string true "contract deployed address"
+// @Param chain_id path string true "network chain id"
 // @Success 200 {array} []string "List of events"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
-// @Router /contracts [patch]
+// @Router /contracts/accounts/{chain_id}/{address} [post]
 func (c *ContractsController) setCodeHash(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	ctx := request.Context()
+
+	chainID := mux.Vars(request)["chain_id"]
+	address := mux.Vars(request)["address"]
+	if !ethcommon.IsHexAddress(address) {
+		err := errors.InvalidParameterError("expected valid address in path")
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	req := &api.SetContractCodeHashRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, req)
@@ -123,7 +132,7 @@ func (c *ContractsController) setCodeHash(rw http.ResponseWriter, request *http.
 		return
 	}
 
-	err = c.ucs.SetContractCodeHash().Execute(ctx, req.ChainID, ethcommon.HexToAddress(req.Address).String(), req.CodeHash)
+	err = c.ucs.SetContractCodeHash().Execute(ctx, chainID, ethcommon.HexToAddress(address).String(), req.CodeHash)
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -138,29 +147,31 @@ func (c *ContractsController) setCodeHash(rw http.ResponseWriter, request *http.
 // @Security ApiKeyAuth
 // @Security JWTAuth
 // @Param address path string true "contract deployed address"
+// @Param chain_id path string true "network chain id"
 // @Success 200 {object} api.GetContractEventsBySignHashResponse{} "List of events"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 404 {object} httputil.ErrorResponse "Events not found"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
-// @Router /contracts/{address}/events [get]
+// @Router /contracts/accounts/{chain_id}/{address}/events [get]
 func (c *ContractsController) getEvents(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	ctx := request.Context()
 
-	req, err := formatters.FormatGetContractEventsBySignHashRequest(request)
+	req, err := formatters.FormatGetContractEventsRequest(request)
 	if err != nil {
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	rawAddr := mux.Vars(request)["address"]
-	if !ethcommon.IsHexAddress(rawAddr) {
+	chainID := mux.Vars(request)["chain_id"]
+	address := mux.Vars(request)["address"]
+	if !ethcommon.IsHexAddress(address) {
 		err := errors.InvalidParameterError("expected valid address in path")
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	abi, abiEvents, err := c.ucs.GetContractEvents().Execute(ctx, req.ChainID, ethcommon.HexToAddress(rawAddr).String(),
+	abi, abiEvents, err := c.ucs.GetContractEvents().Execute(ctx, chainID, ethcommon.HexToAddress(address).String(),
 		req.SigHash, req.IndexedInputCount)
 
 	if err != nil {

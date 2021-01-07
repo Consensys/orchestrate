@@ -140,15 +140,16 @@ func (hk *Hook) decodeReceipt(ctx context.Context, c *dynamic.Chain, receipt *ty
 			WithField("address", l.GetAddress()).WithField("indexed", uint32(len(l.Topics)-1))
 		logger.Debug("decoding log...")
 
-		eventResp, err := hk.client.GetContractEventsBySigHash(
+		eventResp, err := hk.client.GetContractEvents(
 			ctx,
 			l.GetAddress(),
-			&api.GetContractEventsBySignHashRequest{
+			c.ChainID,
+			&api.GetContractEventsRequest{
 				SigHash:           l.Topics[0],
-				ChainID:           c.ChainID,
 				IndexedInputCount: uint32(len(l.Topics) - 1),
 			},
 		)
+
 		if err != nil {
 			if errors.IsNotFoundError(err) {
 				continue
@@ -224,10 +225,8 @@ func (hk *Hook) registerDeployedContract(ctx context.Context, c *dynamic.Chain, 
 			return err
 		}
 
-		err = hk.client.SetContractAddressCodeHash(ctx,
+		err = hk.client.SetContractAddressCodeHash(ctx, receipt.ContractAddress, c.ChainID,
 			&api.SetContractCodeHashRequest{
-				ChainID:  c.ChainID,
-				Address:  receipt.ContractAddress,
 				CodeHash: crypto.Keccak256Hash(code).String(),
 			})
 		if err != nil {

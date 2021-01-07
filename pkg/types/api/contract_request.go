@@ -16,8 +16,7 @@ type ContractResponse struct {
 	*entities.Contract
 }
 
-type GetContractEventsBySignHashRequest struct {
-	ChainID           string `json:"chain_id" validate:"required" example:"2017"`
+type GetContractEventsRequest struct {
 	SigHash           string `json:"sig_hash" validate:"required,isHex" example:"0x6080604052348015600f57600080f..."`
 	IndexedInputCount uint32 `json:"indexed_input_count" validate:"omitempty" example:"1"`
 }
@@ -28,7 +27,5 @@ type GetContractEventsBySignHashResponse struct {
 }
 
 type SetContractCodeHashRequest struct {
-	Address  string `json:"address" validate:"required,isHexAddress" example:"0xca35b7d915458ef540ade6068dfe2f44e8fa733c"`
-	ChainID  string `json:"chain_id" validate:"required" example:"2017"`
 	CodeHash string `json:"code_hash" validate:"required,isHex" example:"0x6080604052348015600f57600080f..."`
 }

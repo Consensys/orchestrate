@@ -90,11 +90,11 @@ func (c *HTTPClient) DeregisterContract(_ context.Context, _, _ string) error {
 	panic("method DeregisterContract is not implemented")
 }
 
-func (c *HTTPClient) SetContractAddressCodeHash(ctx context.Context, req *types.SetContractCodeHashRequest) error {
-	reqURL := fmt.Sprintf("%v/contracts", c.config.URL)
+func (c *HTTPClient) SetContractAddressCodeHash(ctx context.Context, address, chainID string, req *types.SetContractCodeHashRequest) error {
+	reqURL := fmt.Sprintf("%v/contracts/accounts/%s/%s", c.config.URL, chainID, address)
 
 	err := callWithBackOff(ctx, c.config.backOff, func() error {
-		response, err := clientutils.PatchRequest(ctx, c.client, reqURL, req)
+		response, err := clientutils.PostRequest(ctx, c.client, reqURL, req)
 		if err != nil {
 			errMessage := "error while setting contract code hash"
 			log.FromContext(ctx).WithError(err).Error(errMessage)
@@ -109,8 +109,8 @@ func (c *HTTPClient) SetContractAddressCodeHash(ctx context.Context, req *types.
 	return err
 }
 
-func (c *HTTPClient) GetContractEventsBySigHash(ctx context.Context, address string, req *types.GetContractEventsBySignHashRequest) (*types.GetContractEventsBySignHashResponse, error) {
-	reqURL := fmt.Sprintf("%v/contracts/%s/events?chain_id=%s&sig_hash=%s&indexed_input_count=%d", c.config.URL, address, req.ChainID, req.SigHash, req.IndexedInputCount)
+func (c *HTTPClient) GetContractEvents(ctx context.Context, address, chainID string, req *types.GetContractEventsRequest) (*types.GetContractEventsBySignHashResponse, error) {
+	reqURL := fmt.Sprintf("%v/contracts/accounts/%s/%s/events?&sig_hash=%s&indexed_input_count=%d", c.config.URL, chainID, address, req.SigHash, req.IndexedInputCount)
 	resp := &types.GetContractEventsBySignHashResponse{}
 
 	err := callWithBackOff(ctx, c.config.backOff, func() error {

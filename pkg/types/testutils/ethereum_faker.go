@@ -95,3 +95,11 @@ func FakeTransferTransactionParams() *entities.ETHTransactionParams {
 		Value: "10000000000",
 	}
 }
+
+func FakeAddress() ethcommon.Address {
+	return ethcommon.HexToAddress(utils.RandHexString(20))
+}
+
+func FakeHash() ethcommon.Hash {
+	return ethcommon.HexToHash(utils.RandHexString(40))
+}

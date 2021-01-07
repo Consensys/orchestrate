@@ -8,7 +8,6 @@ import (
 	"context"
 	"strconv"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -75,13 +74,14 @@ func (s *repositoryTestSuite) TestPGRepository_Insert() {
 		assert.NotEmpty(t, repo.ID)
 	})
 	
-	s.T().Run("should fail to insert model duplicated repo", func(t *testing.T) {
+	s.T().Run("should select instead of insert duplicated model repo", func(t *testing.T) {
 		repo := &models.RepositoryModel{
 			Name: "myRepository",
 		}
-		err := s.agents.Repository().Insert(ctx, repo)
+		err := s.agents.Repository().SelectOrInsert(ctx, repo)
 
-		assert.Error(t, err)
+		assert.NoError(t, err)
+		assert.Equal(t, 1, repo.ID)
 	})
 
 	s.T().Run("should return PostgresConnectionError if insert fails", func(t *testing.T) {
@@ -97,47 +97,6 @@ func (s *repositoryTestSuite) TestPGRepository_Insert() {
 
 		// We bring it back up
 		s.pg.InitTestDB(t)
-	})
-}
-
-func (s *repositoryTestSuite) TestPGRepository_LockOneByName() {
-	ctx := context.Background()
-	s.insertRepo(ctx, 1)
-
-	s.T().Run("should lock successfully", func(t *testing.T) {
-		dbtx0, err := s.pg.DB.Begin()
-		assert.NoError(t, err)
-		dbtx1, err := s.pg.DB.Begin()
-		assert.NoError(t, err)
-		newPGRepo0 := NewPGRepository(dbtx0)
-		newPGRepo1 := NewPGRepository(dbtx1)
-
-		waitChannel := make(chan string)
-		_, err = newPGRepo1.FindOneAndLock(ctx, "myRepository_0")
-		assert.NoError(t, err)
-		go func() {
-			time.Sleep(2000 * time.Millisecond)
-			waitChannel <- "repo1"
-
-			err = dbtx1.Commit()
-			assert.NoError(t, err)
-		}()
-
-		go func() {
-			_, err = newPGRepo0.FindOneAndLock(ctx, "myRepository_0")
-			assert.NoError(t, err)
-
-			err = dbtx0.Commit()
-			assert.NoError(t, err)
-
-			waitChannel <- "repo0"
-		}()
-
-		firstRepo := <-waitChannel
-		assert.Equal(t, firstRepo, "repo1")
-
-		secondRepo := <-waitChannel
-		assert.Equal(t, secondRepo, "repo0")
 	})
 }
 

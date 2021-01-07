@@ -74,8 +74,8 @@ func Test_AfterNewBlock(t *testing.T) {
 
 	t.Run("should process after new block successfully", func(t *testing.T) {
 		ec.EXPECT().CodeAt(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(ethcommon.Hex2Bytes("0xabcd"), nil)
-		client.EXPECT().SetContractAddressCodeHash(gomock.Any(), gomock.Any()).Return(nil)
-		client.EXPECT().GetContractEventsBySigHash(gomock.Any(), gomock.Any(), gomock.Any()).Return(&txschedulertypes.GetContractEventsBySignHashResponse{
+		client.EXPECT().SetContractAddressCodeHash(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+		client.EXPECT().GetContractEvents(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(&txschedulertypes.GetContractEventsBySignHashResponse{
 			Event: "{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"tokens\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"}",
 		}, nil)
 		client.EXPECT().UpdateJob(gomock.Any(), gomock.Any(), &txschedulertypes.UpdateJobRequest{
@@ -105,7 +105,7 @@ func Test_AfterNewBlock(t *testing.T) {
 
 	t.Run("should not fail if CodeAt' fails", func(t *testing.T) {
 		ec.EXPECT().CodeAt(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("CodeAt error"))
-		client.EXPECT().GetContractEventsBySigHash(gomock.Any(), gomock.Any(), gomock.Any()).Return(&txschedulertypes.GetContractEventsBySignHashResponse{
+		client.EXPECT().GetContractEvents(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(&txschedulertypes.GetContractEventsBySignHashResponse{
 			Event: "{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"tokens\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"}",
 		}, nil)
 		client.EXPECT().UpdateJob(gomock.Any(), gomock.Any(), &txschedulertypes.UpdateJobRequest{
@@ -122,8 +122,8 @@ func Test_AfterNewBlock(t *testing.T) {
 
 	t.Run("should not fail if SetAccountCodeHash fails", func(t *testing.T) {
 		ec.EXPECT().CodeAt(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(ethcommon.Hex2Bytes("0xabcd"), nil)
-		client.EXPECT().SetContractAddressCodeHash(gomock.Any(), gomock.Any()).Return(fmt.Errorf("SetAccountCodeHash error"))
-		client.EXPECT().GetContractEventsBySigHash(gomock.Any(), gomock.Any(), gomock.Any()).Return(&txschedulertypes.GetContractEventsBySignHashResponse{
+		client.EXPECT().SetContractAddressCodeHash(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(fmt.Errorf("SetAccountCodeHash error"))
+		client.EXPECT().GetContractEvents(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(&txschedulertypes.GetContractEventsBySignHashResponse{
 			Event: "{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"tokens\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"}",
 		}, nil)
 		client.EXPECT().UpdateJob(gomock.Any(), gomock.Any(), &txschedulertypes.UpdateJobRequest{
@@ -140,8 +140,8 @@ func Test_AfterNewBlock(t *testing.T) {
 
 	t.Run("should not fail if GetEventsBySigHash fails", func(t *testing.T) {
 		ec.EXPECT().CodeAt(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(ethcommon.Hex2Bytes("0xabcd"), nil)
-		client.EXPECT().SetContractAddressCodeHash(gomock.Any(), gomock.Any()).Return(nil)
-		client.EXPECT().GetContractEventsBySigHash(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error GetEventsBySigHash"))
+		client.EXPECT().SetContractAddressCodeHash(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+		client.EXPECT().GetContractEvents(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error GetEventsBySigHash"))
 		client.EXPECT().UpdateJob(gomock.Any(), gomock.Any(), &txschedulertypes.UpdateJobRequest{
 			Status:  utils.StatusMined,
 			Message: fmt.Sprintf("Transaction mined in block %v", block.NumberU64()),
@@ -156,8 +156,8 @@ func Test_AfterNewBlock(t *testing.T) {
 
 	t.Run("should not fail if tx scheduler client fails", func(t *testing.T) {
 		ec.EXPECT().CodeAt(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(ethcommon.Hex2Bytes("0xabcd"), nil)
-		client.EXPECT().SetContractAddressCodeHash(gomock.Any(), gomock.Any()).Return(nil)
-		client.EXPECT().GetContractEventsBySigHash(gomock.Any(), gomock.Any(), gomock.Any()).Return(&txschedulertypes.GetContractEventsBySignHashResponse{
+		client.EXPECT().SetContractAddressCodeHash(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+		client.EXPECT().GetContractEvents(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(&txschedulertypes.GetContractEventsBySignHashResponse{
 			Event: "{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"tokens\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"}",
 		}, nil)
 		client.EXPECT().UpdateJob(gomock.Any(), gomock.Any(), &txschedulertypes.UpdateJobRequest{
@@ -176,8 +176,8 @@ func Test_AfterNewBlock(t *testing.T) {
 		expectedErr := fmt.Errorf("error")
 
 		ec.EXPECT().CodeAt(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(ethcommon.Hex2Bytes("0xabcd"), nil)
-		client.EXPECT().SetContractAddressCodeHash(gomock.Any(), gomock.Any()).Return(nil)
-		client.EXPECT().GetContractEventsBySigHash(gomock.Any(), gomock.Any(), gomock.Any()).Return(&txschedulertypes.GetContractEventsBySignHashResponse{
+		client.EXPECT().SetContractAddressCodeHash(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+		client.EXPECT().GetContractEvents(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(&txschedulertypes.GetContractEventsBySignHashResponse{
 			Event: "{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"tokens\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"}",
 		}, nil)
 		client.EXPECT().UpdateJob(gomock.Any(), gomock.Any(), &txschedulertypes.UpdateJobRequest{
@@ -208,7 +208,7 @@ func Test_DecodeReceipt(t *testing.T) {
 	client := mock2.NewMockOrchestrateClient(ctrl)
 
 	t.Run("should decode receipt successfully", func(t *testing.T) {
-		client.EXPECT().GetContractEventsBySigHash(gomock.Any(), gomock.Any(), gomock.Any()).Return(&txschedulertypes.GetContractEventsBySignHashResponse{
+		client.EXPECT().GetContractEvents(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(&txschedulertypes.GetContractEventsBySignHashResponse{
 			Event: "{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"tokens\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"}",
 		}, nil)
 
@@ -248,7 +248,7 @@ func Test_DecodeReceipt(t *testing.T) {
 	})
 
 	t.Run("should not get error when not able to unmarshall event", func(t *testing.T) {
-		client.EXPECT().GetContractEventsBySigHash(gomock.Any(), gomock.Any(), gomock.Any()).Return(&txschedulertypes.GetContractEventsBySignHashResponse{
+		client.EXPECT().GetContractEvents(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(&txschedulertypes.GetContractEventsBySignHashResponse{
 			Event: "not json event",
 		}, nil)
 
@@ -281,7 +281,7 @@ func Test_DecodeReceipt(t *testing.T) {
 	})
 
 	t.Run("should decode receipt successfully with DefaultEvents", func(t *testing.T) {
-		client.EXPECT().GetContractEventsBySigHash(gomock.Any(), gomock.Any(), gomock.Any()).Return(&txschedulertypes.GetContractEventsBySignHashResponse{
+		client.EXPECT().GetContractEvents(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(&txschedulertypes.GetContractEventsBySignHashResponse{
 			DefaultEvents: []string{
 				"{\"anonymous\":false,\"inputs\":[{\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"tokens\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"}",
 				"{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"tokens\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"}",
@@ -324,7 +324,7 @@ func Test_DecodeReceipt(t *testing.T) {
 	})
 
 	t.Run("should not fail if not finding event in DefaultEvents", func(t *testing.T) {
-		client.EXPECT().GetContractEventsBySigHash(gomock.Any(), gomock.Any(), gomock.Any()).Return(&txschedulertypes.GetContractEventsBySignHashResponse{
+		client.EXPECT().GetContractEvents(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(&txschedulertypes.GetContractEventsBySignHashResponse{
 			DefaultEvents: []string{
 				"{\"anonymous\":false,\"inputs\":[{\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"tokens\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"}",
 				"{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"from\",\"type\":\"address\"},{\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"tokens\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"}",
@@ -360,7 +360,7 @@ func Test_DecodeReceipt(t *testing.T) {
 	})
 
 	t.Run("should not fail if could not unmarshal event in DefaultEvents", func(t *testing.T) {
-		client.EXPECT().GetContractEventsBySigHash(gomock.Any(), gomock.Any(), gomock.Any()).Return(&txschedulertypes.GetContractEventsBySignHashResponse{
+		client.EXPECT().GetContractEvents(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(&txschedulertypes.GetContractEventsBySignHashResponse{
 			DefaultEvents: []string{
 				"could not unmarshal this event",
 				"{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"from\",\"type\":\"address\"},{\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"tokens\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"}",

@@ -573,32 +573,32 @@ func (mr *MockOrchestrateClientMockRecorder) GetContractTags(ctx, name interface
 }
 
 // SetContractAddressCodeHash mocks base method
-func (m *MockOrchestrateClient) SetContractAddressCodeHash(ctx context.Context, req *api.SetContractCodeHashRequest) error {
+func (m *MockOrchestrateClient) SetContractAddressCodeHash(ctx context.Context, address, chainID string, req *api.SetContractCodeHashRequest) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SetContractAddressCodeHash", ctx, req)
+	ret := m.ctrl.Call(m, "SetContractAddressCodeHash", ctx, address, chainID, req)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // SetContractAddressCodeHash indicates an expected call of SetContractAddressCodeHash
-func (mr *MockOrchestrateClientMockRecorder) SetContractAddressCodeHash(ctx, req interface{}) *gomock.Call {
+func (mr *MockOrchestrateClientMockRecorder) SetContractAddressCodeHash(ctx, address, chainID, req interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetContractAddressCodeHash", reflect.TypeOf((*MockOrchestrateClient)(nil).SetContractAddressCodeHash), ctx, req)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetContractAddressCodeHash", reflect.TypeOf((*MockOrchestrateClient)(nil).SetContractAddressCodeHash), ctx, address, chainID, req)
 }
 
-// GetContractEventsBySigHash mocks base method
-func (m *MockOrchestrateClient) GetContractEventsBySigHash(ctx context.Context, address string, req *api.GetContractEventsBySignHashRequest) (*api.GetContractEventsBySignHashResponse, error) {
+// GetContractEvents mocks base method
+func (m *MockOrchestrateClient) GetContractEvents(ctx context.Context, address, chainID string, req *api.GetContractEventsRequest) (*api.GetContractEventsBySignHashResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetContractEventsBySigHash", ctx, address, req)
+	ret := m.ctrl.Call(m, "GetContractEvents", ctx, address, chainID, req)
 	ret0, _ := ret[0].(*api.GetContractEventsBySignHashResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetContractEventsBySigHash indicates an expected call of GetContractEventsBySigHash
-func (mr *MockOrchestrateClientMockRecorder) GetContractEventsBySigHash(ctx, address, req interface{}) *gomock.Call {
+// GetContractEvents indicates an expected call of GetContractEvents
+func (mr *MockOrchestrateClientMockRecorder) GetContractEvents(ctx, address, chainID, req interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetContractEventsBySigHash", reflect.TypeOf((*MockOrchestrateClient)(nil).GetContractEventsBySigHash), ctx, address, req)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetContractEvents", reflect.TypeOf((*MockOrchestrateClient)(nil).GetContractEvents), ctx, address, chainID, req)
 }
 
 // GetContractMethodSignatures mocks base method
@@ -1311,32 +1311,32 @@ func (mr *MockContractClientMockRecorder) GetContractTags(ctx, name interface{})
 }
 
 // SetContractAddressCodeHash mocks base method
-func (m *MockContractClient) SetContractAddressCodeHash(ctx context.Context, req *api.SetContractCodeHashRequest) error {
+func (m *MockContractClient) SetContractAddressCodeHash(ctx context.Context, address, chainID string, req *api.SetContractCodeHashRequest) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SetContractAddressCodeHash", ctx, req)
+	ret := m.ctrl.Call(m, "SetContractAddressCodeHash", ctx, address, chainID, req)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // SetContractAddressCodeHash indicates an expected call of SetContractAddressCodeHash
-func (mr *MockContractClientMockRecorder) SetContractAddressCodeHash(ctx, req interface{}) *gomock.Call {
+func (mr *MockContractClientMockRecorder) SetContractAddressCodeHash(ctx, address, chainID, req interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetContractAddressCodeHash", reflect.TypeOf((*MockContractClient)(nil).SetContractAddressCodeHash), ctx, req)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetContractAddressCodeHash", reflect.TypeOf((*MockContractClient)(nil).SetContractAddressCodeHash), ctx, address, chainID, req)
 }
 
-// GetContractEventsBySigHash mocks base method
-func (m *MockContractClient) GetContractEventsBySigHash(ctx context.Context, address string, req *api.GetContractEventsBySignHashRequest) (*api.GetContractEventsBySignHashResponse, error) {
+// GetContractEvents mocks base method
+func (m *MockContractClient) GetContractEvents(ctx context.Context, address, chainID string, req *api.GetContractEventsRequest) (*api.GetContractEventsBySignHashResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetContractEventsBySigHash", ctx, address, req)
+	ret := m.ctrl.Call(m, "GetContractEvents", ctx, address, chainID, req)
 	ret0, _ := ret[0].(*api.GetContractEventsBySignHashResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetContractEventsBySigHash indicates an expected call of GetContractEventsBySigHash
-func (mr *MockContractClientMockRecorder) GetContractEventsBySigHash(ctx, address, req interface{}) *gomock.Call {
+// GetContractEvents indicates an expected call of GetContractEvents
+func (mr *MockContractClientMockRecorder) GetContractEvents(ctx, address, chainID, req interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetContractEventsBySigHash", reflect.TypeOf((*MockContractClient)(nil).GetContractEventsBySigHash), ctx, address, req)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetContractEvents", reflect.TypeOf((*MockContractClient)(nil).GetContractEvents), ctx, address, chainID, req)
 }
 
 // GetContractMethodSignatures mocks base method

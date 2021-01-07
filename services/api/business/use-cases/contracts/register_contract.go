@@ -68,11 +68,12 @@ func (uc *registerContractUseCase) Execute(ctx context.Context, contract *entiti
 	}
 
 	err = database.ExecuteInDBTx(uc.db, func(tx database.Tx) error {
+		// @TODO Improve duplicate inserts when `DeployedBytecode` and `Name` and `Tag` already exists
 		dbtx := tx.(store.Tx)
-		if der := selectOrInsertRepository(ctx, dbtx, repository); der != nil {
+		if der := dbtx.Repository().SelectOrInsert(ctx, repository); der != nil {
 			return der
 		}
-		if der := selectOrInsertArtifact(ctx, dbtx, artifact); der != nil {
+		if der := dbtx.Artifact().SelectOrInsert(ctx, artifact); der != nil {
 			return der
 		}
 
@@ -109,34 +110,6 @@ func (uc *registerContractUseCase) Execute(ctx context.Context, contract *entiti
 
 	logger.Info("contract registered successfully")
 	return nil
-}
-
-func selectOrInsertRepository(ctx context.Context, dbtx store.Tx, repository *models.RepositoryModel) error {
-	repo, err := dbtx.Repository().FindOneAndLock(ctx, repository.Name)
-	if err != nil && !errors.IsNotFoundError(err) {
-		return err
-	}
-
-	if repo != nil {
-		repository.ID = repo.ID
-		return nil
-	}
-
-	return dbtx.Repository().Insert(ctx, repository)
-}
-
-func selectOrInsertArtifact(ctx context.Context, dbtx store.Tx, artifact *models.ArtifactModel) error {
-	arti, err := dbtx.Artifact().FindOneByABIAndCodeHash(ctx, artifact.ABI, artifact.Codehash)
-	if err != nil && !errors.IsNotFoundError(err) {
-		return err
-	}
-
-	if arti != nil {
-		artifact.ID = arti.ID
-		return nil
-	}
-
-	return dbtx.Artifact().Insert(ctx, artifact)
 }
 
 func getMethods(contractAbi *ethabi.ABI, deployedBytecode string, codeHash common.Hash, methodJSONs map[string]string) []*models.MethodModel {

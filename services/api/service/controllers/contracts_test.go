@@ -161,17 +161,19 @@ func (s *contractsCtrlTestSuite) TestContractsController_Register() {
 
 func (s *contractsCtrlTestSuite) TestContractsController_CodeHash() {
 	ctx := context.Background()
+	chainID := "2017"
+	address := testutils.FakeAddress().String()
 
 	s.T().Run("should execute set contract codeHash successfully", func(t *testing.T) {
 		rw := httptest.NewRecorder()
 		req := testutils.FakeSetContractCodeHashRequest()
 		requestBytes, _ := json.Marshal(req)
 		httpRequest := httptest.
-			NewRequest(http.MethodPatch, "/contracts", bytes.NewReader(requestBytes)).
+			NewRequest(http.MethodPost, fmt.Sprintf("/contracts/accounts/%s/%s", chainID, address), bytes.NewReader(requestBytes)).
 			WithContext(ctx)
 
 		s.setContractCodeHash.EXPECT().
-			Execute(gomock.Any(), req.ChainID, req.Address, req.CodeHash).
+			Execute(gomock.Any(), chainID, address, req.CodeHash).
 			Return(nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -181,10 +183,10 @@ func (s *contractsCtrlTestSuite) TestContractsController_CodeHash() {
 	s.T().Run("should fail set contract codeHash if address is not valid", func(t *testing.T) {
 		rw := httptest.NewRecorder()
 		req := testutils.FakeSetContractCodeHashRequest()
-		req.Address = "invalid_address_2"
+		address2 := "invalid_address_2"
 		requestBytes, _ := json.Marshal(req)
 		httpRequest := httptest.
-			NewRequest(http.MethodPatch, "/contracts", bytes.NewReader(requestBytes)).
+			NewRequest(http.MethodPost, fmt.Sprintf("/contracts/accounts/%s/%s", chainID, address2), bytes.NewReader(requestBytes)).
 			WithContext(ctx)
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -196,11 +198,11 @@ func (s *contractsCtrlTestSuite) TestContractsController_CodeHash() {
 		req := testutils.FakeSetContractCodeHashRequest()
 		requestBytes, _ := json.Marshal(req)
 		httpRequest := httptest.
-			NewRequest(http.MethodPatch, "/contracts", bytes.NewReader(requestBytes)).
+			NewRequest(http.MethodPost, fmt.Sprintf("/contracts/accounts/%s/%s", chainID, address), bytes.NewReader(requestBytes)).
 			WithContext(ctx)
 
 		s.setContractCodeHash.EXPECT().
-			Execute(gomock.Any(), req.ChainID, req.Address, req.CodeHash).
+			Execute(gomock.Any(), chainID, address, req.CodeHash).
 			Return(fmt.Errorf("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -258,8 +260,8 @@ func (s *contractsCtrlTestSuite) TestContractsController_GetContractEvents() {
 	s.T().Run("should execute get contract events successfully", func(t *testing.T) {
 		rw := httptest.NewRecorder()
 		httpRequest := httptest.
-			NewRequest(http.MethodGet, fmt.Sprintf("/contracts/%s/events?sig_hash=%s&chain_id=%s&indexed_input_count=%d",
-				address, sigHash, chainID, indexInput), nil).
+			NewRequest(http.MethodGet, fmt.Sprintf("/contracts/accounts/%s/%s/events?sig_hash=%s&indexed_input_count=%d",
+				chainID, address, sigHash, indexInput), nil).
 			WithContext(ctx)
 
 		s.getContractEvents.EXPECT().Execute(gomock.Any(), chainID, address, sigHash, indexInput).Return(string(rawEvent), []string{string(rawDefaultEvent)}, nil)
@@ -273,8 +275,8 @@ func (s *contractsCtrlTestSuite) TestContractsController_GetContractEvents() {
 		invalidAddr := "invalid_address"
 		rw := httptest.NewRecorder()
 		httpRequest := httptest.
-			NewRequest(http.MethodGet, fmt.Sprintf("/contracts/%s/events?sig_hash=%s&chain_id=%s&indexed_input_count=%d",
-				invalidAddr, sigHash, chainID, indexInput), nil).
+			NewRequest(http.MethodGet, fmt.Sprintf("/contracts/accounts/%s/%s/events?sig_hash=%s&indexed_input_count=%d",
+				chainID, invalidAddr, sigHash, indexInput), nil).
 			WithContext(ctx)
 
 		s.router.ServeHTTP(rw, httpRequest)

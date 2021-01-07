@@ -170,26 +170,21 @@ func (s *contractsTestSuite) TestContractRegistry_CodeHash() {
 	chainID := "2017"
 	
 	s.T().Run("should set contract code hashes successfully", func(t *testing.T) {
-		err := s.client.SetContractAddressCodeHash(ctx, &api.SetContractCodeHashRequest{
-			Address:  address.String(),
+		err := s.client.SetContractAddressCodeHash(ctx, address.String(), chainID, &api.SetContractCodeHashRequest{
 			CodeHash: codeHash.String(),
-			ChainID:  chainID,
 		})
 	
 		assert.NoError(t, err)
 		
-		err = s.client.SetContractAddressCodeHash(ctx, &api.SetContractCodeHashRequest{
-			Address:  address2.String(),
+		err = s.client.SetContractAddressCodeHash(ctx, address2.String(), chainID, &api.SetContractCodeHashRequest{
 			CodeHash: codeHash2,
-			ChainID:  chainID,
 		})
 	
 		assert.NoError(t, err)
 	})
 	
 	s.T().Run("should get default contract event by sigHash successfully", func(t *testing.T) {
-		resp, err := s.client.GetContractEventsBySigHash(ctx, address.String(), &api.GetContractEventsBySignHashRequest{
-			ChainID:           chainID,
+		resp, err := s.client.GetContractEvents(ctx, address.String(), chainID, &api.GetContractEventsRequest{
 			SigHash:           "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
 			IndexedInputCount: 2,
 		})
@@ -206,8 +201,7 @@ func (s *contractsTestSuite) TestContractRegistry_CodeHash() {
 	})
 	
 	s.T().Run("should get contract event by sigHash successfully", func(t *testing.T) {
-		resp, err := s.client.GetContractEventsBySigHash(ctx, address2.String(), &api.GetContractEventsBySignHashRequest{
-			ChainID:           chainID,
+		resp, err := s.client.GetContractEvents(ctx, address2.String(), chainID, &api.GetContractEventsRequest{
 			SigHash:           "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
 			IndexedInputCount: 2,
 		})
@@ -224,10 +218,8 @@ func (s *contractsTestSuite) TestContractRegistry_CodeHash() {
 	})
 	
 	s.T().Run("should fail to set contract code hashes if invalid address", func(t *testing.T) {
-		err := s.client.SetContractAddressCodeHash(ctx, &api.SetContractCodeHashRequest{
-			Address:  "InvalidAddress",
+		err := s.client.SetContractAddressCodeHash(ctx, "InvalidAddress", chainID, &api.SetContractCodeHashRequest{
 			CodeHash: codeHash.String(),
-			ChainID:  chainID,
 		})
 
 		assert.Error(t, err)
@@ -235,10 +227,8 @@ func (s *contractsTestSuite) TestContractRegistry_CodeHash() {
 	})
 	
 	s.T().Run("should fail to set contract code hashes if invalid codeHash", func(t *testing.T) {
-		err := s.client.SetContractAddressCodeHash(ctx, &api.SetContractCodeHashRequest{
-			Address:  address.String(),
+		err := s.client.SetContractAddressCodeHash(ctx, address.String(), chainID, &api.SetContractCodeHashRequest{
 			CodeHash: "{invalidCodeHash}",
-			ChainID:  chainID,
 		})
 	
 		assert.Error(t, err)

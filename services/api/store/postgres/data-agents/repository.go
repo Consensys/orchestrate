@@ -31,15 +31,16 @@ func (agent *PGRepository) FindOne(ctx context.Context, name string) (*models.Re
 	return model, nil
 }
 
-func (agent *PGRepository) FindOneAndLock(ctx context.Context, name string) (*models.RepositoryModel, error) {
-	model := &models.RepositoryModel{}
-	query := agent.db.ModelContext(ctx, model).Where("LOWER(name) = LOWER(?)", name).For("UPDATE")
-	err := pg.SelectOne(ctx, query)
+func (agent *PGRepository) SelectOrInsert(ctx context.Context, repository *models.RepositoryModel) error {
+	q := agent.db.ModelContext(ctx, repository).Column("id").Where("name = ?name").
+		OnConflict("DO NOTHING").Returning("id")
+
+	err := pg.SelectOrInsert(ctx, q)
 	if err != nil {
-		return nil, errors.FromError(err).ExtendComponent(repositoryDAComponent)
+		return errors.FromError(err).ExtendComponent(repositoryDAComponent)
 	}
 
-	return model, nil
+	return nil
 }
 
 func (agent *PGRepository) Insert(ctx context.Context, repository *models.RepositoryModel) error {

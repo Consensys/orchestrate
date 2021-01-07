@@ -79,7 +79,7 @@ type ContractClient interface {
 	GetContract(ctx context.Context, name, tag string) (*types.ContractResponse, error)
 	GetContractsCatalog(ctx context.Context) ([]string, error)
 	GetContractTags(ctx context.Context, name string) ([]string, error)
-	SetContractAddressCodeHash(ctx context.Context, req *types.SetContractCodeHashRequest) error
-	GetContractEventsBySigHash(ctx context.Context, address string, req *types.GetContractEventsBySignHashRequest) (*types.GetContractEventsBySignHashResponse, error)
+	SetContractAddressCodeHash(ctx context.Context, address, chainID string, req *types.SetContractCodeHashRequest) error
+	GetContractEvents(ctx context.Context, address, chainID string, req *types.GetContractEventsRequest) (*types.GetContractEventsBySignHashResponse, error)
 	GetContractMethodSignatures(ctx context.Context, name, tag, method string) ([]string, error)
 }

@@ -52,7 +52,7 @@ func parseResponseError(statusCode int, errMsg string) error {
 		if errMsg == "" {
 			errMsg = "invalid request data"
 		}
-		return errors.InvalidParameterError(errMsg)
+		return errors.InvalidFormatError(errMsg)
 	case http.StatusConflict:
 		if errMsg == "" {
 			errMsg = "invalid data message"
@@ -72,7 +72,7 @@ func parseResponseError(statusCode int, errMsg string) error {
 		if errMsg == "" {
 			errMsg = "invalid request format"
 		}
-		return errors.InvalidFormatError(errMsg)
+		return errors.InvalidParameterError(errMsg)
 	default:
 		if errMsg == "" {
 			errMsg = "server error"

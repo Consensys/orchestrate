@@ -1285,6 +1285,20 @@ func (mr *MockArtifactAgentMockRecorder) FindOneByABIAndCodeHash(ctx, abi, codeH
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneByABIAndCodeHash", reflect.TypeOf((*MockArtifactAgent)(nil).FindOneByABIAndCodeHash), ctx, abi, codeHash)
 }
 
+// SelectOrInsert mocks base method
+func (m *MockArtifactAgent) SelectOrInsert(ctx context.Context, artifact *models.ArtifactModel) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SelectOrInsert", ctx, artifact)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SelectOrInsert indicates an expected call of SelectOrInsert
+func (mr *MockArtifactAgentMockRecorder) SelectOrInsert(ctx, artifact interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SelectOrInsert", reflect.TypeOf((*MockArtifactAgent)(nil).SelectOrInsert), ctx, artifact)
+}
+
 // Insert mocks base method
 func (m *MockArtifactAgent) Insert(ctx context.Context, artifact *models.ArtifactModel) error {
 	m.ctrl.T.Helper()
@@ -1508,6 +1522,20 @@ func (m *MockRepositoryAgent) EXPECT() *MockRepositoryAgentMockRecorder {
 	return m.recorder
 }
 
+// SelectOrInsert mocks base method
+func (m *MockRepositoryAgent) SelectOrInsert(ctx context.Context, repository *models.RepositoryModel) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SelectOrInsert", ctx, repository)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SelectOrInsert indicates an expected call of SelectOrInsert
+func (mr *MockRepositoryAgentMockRecorder) SelectOrInsert(ctx, repository interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SelectOrInsert", reflect.TypeOf((*MockRepositoryAgent)(nil).SelectOrInsert), ctx, repository)
+}
+
 // Insert mocks base method
 func (m *MockRepositoryAgent) Insert(ctx context.Context, repository *models.RepositoryModel) error {
 	m.ctrl.T.Helper()
@@ -1535,21 +1563,6 @@ func (m *MockRepositoryAgent) FindOne(ctx context.Context, name string) (*models
 func (mr *MockRepositoryAgentMockRecorder) FindOne(ctx, name interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOne", reflect.TypeOf((*MockRepositoryAgent)(nil).FindOne), ctx, name)
-}
-
-// FindOneAndLock mocks base method
-func (m *MockRepositoryAgent) FindOneAndLock(ctx context.Context, name string) (*models.RepositoryModel, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindOneAndLock", ctx, name)
-	ret0, _ := ret[0].(*models.RepositoryModel)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// FindOneAndLock indicates an expected call of FindOneAndLock
-func (mr *MockRepositoryAgentMockRecorder) FindOneAndLock(ctx, name interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneAndLock", reflect.TypeOf((*MockRepositoryAgent)(nil).FindOneAndLock), ctx, name)
 }
 
 // FindAll mocks base method

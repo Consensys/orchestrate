@@ -41,6 +41,20 @@ func (agent *PGArtifact) Insert(ctx context.Context, artifact *models.ArtifactMo
 
 	return nil
 }
+
+func (agent *PGArtifact) SelectOrInsert(ctx context.Context, artifact *models.ArtifactModel) error {
+	q := agent.db.ModelContext(ctx, artifact).Column("id").
+		Where("abi = ?abi").Where("codehash = ?codehash").
+		OnConflict("DO NOTHING").Returning("id")
+
+	err := pg.SelectOrInsert(ctx, q)
+	if err != nil {
+		return errors.FromError(err).ExtendComponent(artifactDAComponent)
+	}
+
+	return nil
+}
+
 func (agent *PGArtifact) FindOneByNameAndTag(ctx context.Context, name, tag string) (*models.ArtifactModel, error) {
 	artifact := &models.ArtifactModel{}
 	query := agent.db.ModelContext(ctx, artifact).

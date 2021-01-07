@@ -89,6 +89,7 @@ type FaucetAgent interface {
 
 type ArtifactAgent interface {
 	FindOneByABIAndCodeHash(ctx context.Context, abi, codeHash string) (*models.ArtifactModel, error)
+	SelectOrInsert(ctx context.Context, artifact *models.ArtifactModel) error
 	Insert(ctx context.Context, artifact *models.ArtifactModel) error
 	FindOneByNameAndTag(ctx context.Context, name, tag string) (*models.ArtifactModel, error)
 }
@@ -110,9 +111,9 @@ type MethodAgent interface {
 }
 
 type RepositoryAgent interface {
+	SelectOrInsert(ctx context.Context, repository *models.RepositoryModel) error
 	Insert(ctx context.Context, repository *models.RepositoryModel) error
 	FindOne(ctx context.Context, name string) (*models.RepositoryModel, error)
-	FindOneAndLock(ctx context.Context, name string) (*models.RepositoryModel, error)
 	FindAll(ctx context.Context) ([]string, error)
 }
 

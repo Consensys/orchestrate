@@ -14,19 +14,11 @@ apis:
     tags:
       add:
         - "Chain Registry"
-  - url: 'public/swagger-specs/services/contract-registry/proto/registry.swagger.json'
-    tags:
-      rename:
-        ContractRegistry: "Contract Registry"
-  - url: 'public/swagger-specs/services/transaction-scheduler/swagger.json'
+  - url: 'public/swagger-specs/services/api/swagger.json'
     tags:
       add:
-        - "Transaction Scheduler"
+        - "Orchestrate API"
   - url: 'public/swagger-specs/services/key-manager/swagger.json'
     tags:
       add:
         - "Key Manager"
-  - url: 'public/swagger-specs/services/identity-manager/swagger.json'
-    tags:
-      add:
-        - "Identity Manager"
