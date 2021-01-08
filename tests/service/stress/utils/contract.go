@@ -28,10 +28,16 @@ func RegisterNewContract(ctx context.Context, cClient client.ContractClient, art
 		return err
 	}
 
+	var abi interface{}
+	err = json.Unmarshal([]byte(contract.ABI), &abi)
+	if err != nil {
+		return err
+	}
+
 	_, err = cClient.RegisterContract(ctx, &api.RegisterContractRequest{
 		Name:             name,
 		Tag:              contract.ID.Tag,
-		ABI:              contract.ABI,
+		ABI:              abi,
 		Bytecode:         contract.Bytecode,
 		DeployedBytecode: contract.DeployedBytecode,
 	})
