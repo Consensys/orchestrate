@@ -55,6 +55,6 @@ func (uc *registerFaucetUseCase) Execute(ctx context.Context, faucet *entities.F
 		return nil, errors.FromError(err).ExtendComponent(registerFaucetComponent)
 	}
 
-	logger.Info("faucet registered successfully")
+	logger.WithField("faucet_uuid", faucetModel.UUID).Info("faucet registered successfully")
 	return parsers.NewFaucetFromModel(faucetModel), nil
 }

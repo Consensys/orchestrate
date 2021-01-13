@@ -5,9 +5,9 @@ import (
 )
 
 type RegisterContractRequest struct {
-	ABI              interface{} `json:"abi,omitempty" validate:"required" example:"[{anonymous: false, inputs: [{indexed: false, name: account, type: address}, name: MinterAdded, type: event}]}]"`
+	ABI              interface{} `json:"abi,omitempty" validate:"required"`
 	Bytecode         string      `json:"bytecode,omitempty" validate:"omitempty,isHex" example:"0x6080604052348015600f57600080f..."`
-	DeployedBytecode string      `json:"deployed_byte_code,omitempty" validate:"omitempty,isHex" example:"0x6080604052348015600f57600080f..."`
+	DeployedBytecode string      `json:"deployedBytecode,omitempty" validate:"omitempty,isHex" example:"0x6080604052348015600f57600080f..."`
 	Name             string      `json:"name" validate:"required" example:"ERC20"`
 	Tag              string      `json:"tag,omitempty" example:"v1.0.0"`
 }
@@ -23,7 +23,7 @@ type GetContractEventsRequest struct {
 
 type GetContractEventsBySignHashResponse struct {
 	Event         string   `json:"event" validate:"omitempty" example:"{anonymous:false,inputs:[{indexed:true,name:from,type:address},{indexed:true,name:to,type:address},{indexed:false,name:value,type:uint256}],name:Transfer,type:event}"`
-	DefaultEvents []string `json:"default_events" validate:"omitempty" example:"[{anonymous:false,inputs:[{indexed:true,name:from,type:address},{indexed:true,name:to,type:address},{indexed:false,name:value,type:uint256}],name:Transfer,type:event},..."`
+	DefaultEvents []string `json:"defaultEvents" validate:"omitempty" example:"[{anonymous:false,inputs:[{indexed:true,name:from,type:address},{indexed:true,name:to,type:address},{indexed:false,name:value,type:uint256}],name:Transfer,type:event},..."`
 }
 
 type SetContractCodeHashRequest struct {

@@ -15,7 +15,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	mockauth "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/auth/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database/postgres"
-	mockchainregistryclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/client/mock"
 	keymanagerclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client/mock"
 )
 
@@ -31,9 +30,8 @@ func TestApp(t *testing.T) {
 		cfg,
 		postgres.GetManager(),
 		mockauth.NewMockChecker(ctrl), mockauth.NewMockChecker(ctrl),
-		mockchainregistryclient.NewMockChainRegistryClient(ctrl),
 		keymanagerclient.NewMockKeyManagerClient(ctrl),
-		ethclientmock.NewMockChainStateReader(ctrl),
+		ethclientmock.NewMockClient(ctrl),
 		mocks.NewSyncProducer(t, nil),
 		kCfg,
 	)

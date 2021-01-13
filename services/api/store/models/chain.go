@@ -1,0 +1,23 @@
+package models
+
+import (
+	"time"
+)
+
+type Chain struct {
+	tableName struct{} `pg:"chains"` // nolint:unused,structcheck // reason
+
+	UUID                      string `pg:",pk"`
+	Name                      string
+	TenantID                  string
+	URLs                      []string `pg:"urls,array"`
+	ChainID                   string
+	ListenerDepth             uint64
+	ListenerCurrentBlock      uint64
+	ListenerStartingBlock     uint64
+	ListenerBackOffDuration   string
+	ListenerExternalTxEnabled bool
+	PrivateTxManagers         []*PrivateTxManager
+	CreatedAt                 time.Time `pg:"default:now()"`
+	UpdatedAt                 time.Time `pg:"default:now()"`
+}

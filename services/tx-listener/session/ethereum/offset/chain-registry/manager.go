@@ -5,35 +5,38 @@ import (
 	"fmt"
 	"sync"
 
+	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	registry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/dynamic"
 )
 
 const component = "tx-listener.offset"
 
 type Manager struct {
-	sm       *sync.Map
-	registry registry.ChainRegistryClient
+	sm     *sync.Map
+	client orchestrateclient.ChainClient
 }
 
-func NewManager(r registry.ChainRegistryClient) *Manager {
+func NewManager(client orchestrateclient.ChainClient) *Manager {
 	return &Manager{
-		sm:       &sync.Map{},
-		registry: r,
+		sm:     &sync.Map{},
+		client: client,
 	}
 }
 
 func (m *Manager) GetLastBlockNumber(ctx context.Context, chain *dynamic.Chain) (uint64, error) {
-	n, err := m.registry.GetChainByUUID(ctx, chain.UUID)
+	chainRetrieved, err := m.client.GetChain(ctx, chain.UUID)
 	if err != nil {
 		return 0, errors.FromError(err).ExtendComponent(component)
 	}
-	return *n.ListenerCurrentBlock, nil
+
+	return chainRetrieved.ListenerCurrentBlock, nil
 }
 
 func (m *Manager) SetLastBlockNumber(ctx context.Context, chain *dynamic.Chain, blockNumber uint64) error {
-	err := m.registry.UpdateBlockPosition(ctx, chain.UUID, blockNumber)
+	_, err := m.client.UpdateChain(ctx, chain.UUID, &api.UpdateChainRequest{Listener: &api.UpdateListenerRequest{CurrentBlock: blockNumber}})
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(component)
 	}

@@ -6,13 +6,14 @@ package dataagents
 
 import (
 	"context"
+	"testing"
+
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models/testutils"
-	"testing"
 
 	"github.com/stretchr/testify/suite"
 	pgTestUtils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database/postgres/testutils"
@@ -50,7 +51,6 @@ func (s *faucetTestSuite) TearDownSuite() {
 	s.pg.DropTestDB(s.T())
 }
 
-/*
 func (s *faucetTestSuite) TestPGFaucet_Insert() {
 	ctx := context.Background()
 
@@ -65,6 +65,7 @@ func (s *faucetTestSuite) TestPGFaucet_Insert() {
 
 	s.T().Run("should insert model without UUID successfully", func(t *testing.T) {
 		faucet := testutils.FakeFaucetModel()
+		faucet.Name = "faucet-insert-2"
 		faucet.UUID = ""
 		err := s.agents.Faucet().Insert(ctx, faucet)
 		assert.NoError(s.T(), err)
@@ -73,7 +74,7 @@ func (s *faucetTestSuite) TestPGFaucet_Insert() {
 		assert.NotEmpty(t, faucet.UUID)
 	})
 }
-*/
+
 func (s *faucetTestSuite) TestPGFaucet_Update() {
 	ctx := context.Background()
 	faucet := testutils.FakeFaucetModel()
@@ -138,6 +139,7 @@ func (s *faucetTestSuite) TestPGFaucet_Search() {
 	assert.NoError(s.T(), err)
 
 	faucet1 := testutils.FakeFaucetModel()
+	faucet1.Name = "faucet-mainnet-2"
 	err = s.agents.Faucet().Insert(ctx, faucet1)
 	assert.NoError(s.T(), err)
 

@@ -15,8 +15,6 @@ type Service struct {
 	HealthCheck  *HealthCheck  `json:"healthcheck,omitempty" toml:"healthcheck,omitempty" yaml:"healthcheck,omitempty"`
 	Prometheus   *Prometheus   `json:"prometheus,omitempty" toml:"prometheus,omitempty" yaml:"prometheus,omitempty"`
 	Dashboard    *Dashboard    `json:"dashboard,omitempty" toml:"dashboard,omitempty" yaml:"dashboard,omitempty"`
-	Chains       *Chains       `json:"chains,omitempty" toml:"chains,omitempty" yaml:"chains,omitempty"`
-	Contracts    *Contracts    `json:"contracts,omitempty" toml:"contracts,omitempty" yaml:"contracts,omitempty"`
 	API          *API          `json:"api,omitempty" toml:"api,omitempty" yaml:"api,omitempty"`
 	KeyManager   *KeyManager   `json:"keyManager,omitempty" toml:"keymanager,omitempty" yaml:"keymanager,omitempty"`
 	Mock         *Mock         `json:"mock,omitempty" toml:"mock,omitempty" yaml:"mock,omitempty"`
@@ -158,18 +156,6 @@ type Prometheus struct{}
 // +k8s:deepcopy-gen=true
 
 type Dashboard struct{}
-
-// +k8s:deepcopy-gen=true
-
-type Chains struct{}
-
-// +k8s:deepcopy-gen=true
-
-type Contracts struct{}
-
-// +k8s:deepcopy-gen=true
-
-type Envelopes struct{}
 
 // +k8s:deepcopy-gen=true
 

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
+
 	"github.com/cenkalti/backoff/v4"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
@@ -14,7 +16,6 @@ import (
 	httpmetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/metrics"
 	metricregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/metrics/registry"
 	tcpmetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tcp/metrics"
-	chnregclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/client"
 	keymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client"
 )
 
@@ -66,9 +67,9 @@ const (
 func Flags(f *pflag.FlagSet) {
 	broker.InitKafkaFlags(f)
 	keymanager.Flags(f)
+	client.Flags(f)
 	broker.KafkaTopicTxSender(f)
 	broker.KafkaTopicTxRecover(f)
-	chnregclient.Flags(f)
 	MaxRecovery(f)
 	NonceManagerType(f)
 	NonceManagerExpirationFlag(f)
@@ -106,7 +107,7 @@ type Config struct {
 	GroupName              string
 	RecoverTopic           string
 	SenderTopic            string
-	ChainRegistryURL       string
+	ProxyURL               string
 	BckOff                 backoff.BackOff
 	NonceMaxRecovery       uint64
 	NonceManagerType       string
@@ -123,7 +124,7 @@ func NewConfig(vipr *viper.Viper) *Config {
 		GroupName:              "group-dispatcher",
 		RecoverTopic:           vipr.GetString(broker.TxRecoverViperKey),
 		SenderTopic:            vipr.GetString(broker.TxSenderViperKey),
-		ChainRegistryURL:       vipr.GetString(chnregclient.URLViperKey),
+		ProxyURL:               vipr.GetString(client.URLViperKey),
 		NonceMaxRecovery:       vipr.GetUint64(NonceMaxRecoveryViperKey),
 		BckOff:                 retryMessageBackOff(),
 		NonceManagerType:       viper.GetString(nonceManagerTypeViperKey),

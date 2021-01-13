@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	jsonutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/json"
@@ -75,9 +74,7 @@ func (c *FaucetsController) getOne(rw http.ResponseWriter, request *http.Request
 	rw.Header().Set("Content-Type", "application/json")
 	ctx := request.Context()
 
-	uuid := mux.Vars(request)["uuid"]
-
-	faucet, err := c.ucs.GetFaucet().Execute(ctx, uuid, multitenancy.AllowedTenantsFromContext(ctx))
+	faucet, err := c.ucs.GetFaucet().Execute(ctx, mux.Vars(request)["uuid"], multitenancy.AllowedTenantsFromContext(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -145,7 +142,6 @@ func (c *FaucetsController) update(rw http.ResponseWriter, request *http.Request
 	uuid := mux.Vars(request)["uuid"]
 	tenantID := multitenancy.TenantIDFromContext(ctx)
 	allowedTenants := multitenancy.AllowedTenantsFromContext(ctx)
-	fmt.Println(uuid)
 	faucet, err := c.ucs.UpdateFaucet().Execute(ctx, formatters.FormatUpdateFaucetRequest(faucetRequest, uuid, tenantID), allowedTenants)
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)

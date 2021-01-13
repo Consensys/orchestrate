@@ -15,7 +15,6 @@ import (
 	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/rpc"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
-	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/e2e/cucumber/alias"
 )
 
@@ -34,7 +33,6 @@ func Init(ctx context.Context) {
 		// Initialize Steps
 		broker.InitSyncProducer(ctx)
 		generator.Init(ctx)
-		chainregistry.Init(ctx)
 		alias.Init(ctx)
 		client.Init()
 		redis.Init()

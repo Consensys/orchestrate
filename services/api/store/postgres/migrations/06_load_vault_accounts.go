@@ -16,7 +16,7 @@ func loadVaultAccounts(db migrations.DB) error {
 
 	client := keymanagerclient.GlobalClient()
 	if client == nil {
-		log.Warnf("migration is ignored. Missing key-manager client")
+		log.Warnf("loading vault accounts ignored. Missing key-manager client")
 		return nil
 	}
 
@@ -60,7 +60,7 @@ func loadVaultAccounts(db migrations.DB) error {
 		}
 	}
 
-	log.Infof("%d Accounts imported successfully", len(queryInsertItems))
+	log.Infof("%d accounts imported successfully", len(queryInsertItems))
 
 	return nil
 }
@@ -71,10 +71,10 @@ func dropVaultAccounts(db migrations.DB) error {
 DELETE FROM accounts WHERE attributes @> '{"source": "kv-v2"}'
 `)
 	if err != nil {
-		log.WithError(err).Error("Could not drop tables")
+		log.WithError(err).Error("Could not drop vault accounts")
 		return err
 	}
-	log.Info("Dropped tables")
+	log.Info("Dropped vault accounts")
 
 	return nil
 }

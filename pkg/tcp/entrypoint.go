@@ -77,7 +77,7 @@ func (e *EntryPoint) with(ctx context.Context) context.Context {
 
 func (e *EntryPoint) Serve(ctx context.Context, l net.Listener) error {
 	logger := log.FromContext(e.with(ctx))
-	logger.WithField("address", l.Addr()).Infof("start serving tcp entrypoint")
+	logger.WithField("address", l.Addr()).Info("start serving tcp entrypoint")
 
 	e.lis.Store(&listenerValue{l})
 

@@ -257,6 +257,34 @@ func (mr *MockAgentsMockRecorder) Tag() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Tag", reflect.TypeOf((*MockAgents)(nil).Tag))
 }
 
+// Chain mocks base method
+func (m *MockAgents) Chain() store.ChainAgent {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Chain")
+	ret0, _ := ret[0].(store.ChainAgent)
+	return ret0
+}
+
+// Chain indicates an expected call of Chain
+func (mr *MockAgentsMockRecorder) Chain() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Chain", reflect.TypeOf((*MockAgents)(nil).Chain))
+}
+
+// PrivateTxManager mocks base method
+func (m *MockAgents) PrivateTxManager() store.PrivateTxManagerAgent {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PrivateTxManager")
+	ret0, _ := ret[0].(store.PrivateTxManagerAgent)
+	return ret0
+}
+
+// PrivateTxManager indicates an expected call of PrivateTxManager
+func (mr *MockAgentsMockRecorder) PrivateTxManager() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivateTxManager", reflect.TypeOf((*MockAgents)(nil).PrivateTxManager))
+}
+
 // MockDB is a mock of DB interface
 type MockDB struct {
 	ctrl     *gomock.Controller
@@ -475,6 +503,34 @@ func (m *MockDB) Tag() store.TagAgent {
 func (mr *MockDBMockRecorder) Tag() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Tag", reflect.TypeOf((*MockDB)(nil).Tag))
+}
+
+// Chain mocks base method
+func (m *MockDB) Chain() store.ChainAgent {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Chain")
+	ret0, _ := ret[0].(store.ChainAgent)
+	return ret0
+}
+
+// Chain indicates an expected call of Chain
+func (mr *MockDBMockRecorder) Chain() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Chain", reflect.TypeOf((*MockDB)(nil).Chain))
+}
+
+// PrivateTxManager mocks base method
+func (m *MockDB) PrivateTxManager() store.PrivateTxManagerAgent {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PrivateTxManager")
+	ret0, _ := ret[0].(store.PrivateTxManagerAgent)
+	return ret0
+}
+
+// PrivateTxManager indicates an expected call of PrivateTxManager
+func (mr *MockDBMockRecorder) PrivateTxManager() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivateTxManager", reflect.TypeOf((*MockDB)(nil).PrivateTxManager))
 }
 
 // MockTx is a mock of Tx interface
@@ -737,6 +793,34 @@ func (m *MockTx) Tag() store.TagAgent {
 func (mr *MockTxMockRecorder) Tag() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Tag", reflect.TypeOf((*MockTx)(nil).Tag))
+}
+
+// Chain mocks base method
+func (m *MockTx) Chain() store.ChainAgent {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Chain")
+	ret0, _ := ret[0].(store.ChainAgent)
+	return ret0
+}
+
+// Chain indicates an expected call of Chain
+func (mr *MockTxMockRecorder) Chain() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Chain", reflect.TypeOf((*MockTx)(nil).Chain))
+}
+
+// PrivateTxManager mocks base method
+func (m *MockTx) PrivateTxManager() store.PrivateTxManagerAgent {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PrivateTxManager")
+	ret0, _ := ret[0].(store.PrivateTxManagerAgent)
+	return ret0
+}
+
+// PrivateTxManager indicates an expected call of PrivateTxManager
+func (mr *MockTxMockRecorder) PrivateTxManager() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivateTxManager", reflect.TypeOf((*MockTx)(nil).PrivateTxManager))
 }
 
 // MockTransactionRequestAgent is a mock of TransactionRequestAgent interface
@@ -1245,6 +1329,181 @@ func (m *MockFaucetAgent) Delete(ctx context.Context, faucet *models.Faucet, ten
 func (mr *MockFaucetAgentMockRecorder) Delete(ctx, faucet, tenants interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockFaucetAgent)(nil).Delete), ctx, faucet, tenants)
+}
+
+// MockChainAgent is a mock of ChainAgent interface
+type MockChainAgent struct {
+	ctrl     *gomock.Controller
+	recorder *MockChainAgentMockRecorder
+}
+
+// MockChainAgentMockRecorder is the mock recorder for MockChainAgent
+type MockChainAgentMockRecorder struct {
+	mock *MockChainAgent
+}
+
+// NewMockChainAgent creates a new mock instance
+func NewMockChainAgent(ctrl *gomock.Controller) *MockChainAgent {
+	mock := &MockChainAgent{ctrl: ctrl}
+	mock.recorder = &MockChainAgentMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockChainAgent) EXPECT() *MockChainAgentMockRecorder {
+	return m.recorder
+}
+
+// Insert mocks base method
+func (m *MockChainAgent) Insert(ctx context.Context, chain *models.Chain) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Insert", ctx, chain)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Insert indicates an expected call of Insert
+func (mr *MockChainAgentMockRecorder) Insert(ctx, chain interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*MockChainAgent)(nil).Insert), ctx, chain)
+}
+
+// Update mocks base method
+func (m *MockChainAgent) Update(ctx context.Context, chain *models.Chain, tenants []string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Update", ctx, chain, tenants)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Update indicates an expected call of Update
+func (mr *MockChainAgentMockRecorder) Update(ctx, chain, tenants interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockChainAgent)(nil).Update), ctx, chain, tenants)
+}
+
+// Search mocks base method
+func (m *MockChainAgent) Search(ctx context.Context, filters *entities.ChainFilters, tenants []string) ([]*models.Chain, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Search", ctx, filters, tenants)
+	ret0, _ := ret[0].([]*models.Chain)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Search indicates an expected call of Search
+func (mr *MockChainAgentMockRecorder) Search(ctx, filters, tenants interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Search", reflect.TypeOf((*MockChainAgent)(nil).Search), ctx, filters, tenants)
+}
+
+// FindOneByUUID mocks base method
+func (m *MockChainAgent) FindOneByUUID(ctx context.Context, uuid string, tenants []string) (*models.Chain, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindOneByUUID", ctx, uuid, tenants)
+	ret0, _ := ret[0].(*models.Chain)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindOneByUUID indicates an expected call of FindOneByUUID
+func (mr *MockChainAgentMockRecorder) FindOneByUUID(ctx, uuid, tenants interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneByUUID", reflect.TypeOf((*MockChainAgent)(nil).FindOneByUUID), ctx, uuid, tenants)
+}
+
+// Delete mocks base method
+func (m *MockChainAgent) Delete(ctx context.Context, chain *models.Chain, tenants []string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Delete", ctx, chain, tenants)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Delete indicates an expected call of Delete
+func (mr *MockChainAgentMockRecorder) Delete(ctx, chain, tenants interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockChainAgent)(nil).Delete), ctx, chain, tenants)
+}
+
+// MockPrivateTxManagerAgent is a mock of PrivateTxManagerAgent interface
+type MockPrivateTxManagerAgent struct {
+	ctrl     *gomock.Controller
+	recorder *MockPrivateTxManagerAgentMockRecorder
+}
+
+// MockPrivateTxManagerAgentMockRecorder is the mock recorder for MockPrivateTxManagerAgent
+type MockPrivateTxManagerAgentMockRecorder struct {
+	mock *MockPrivateTxManagerAgent
+}
+
+// NewMockPrivateTxManagerAgent creates a new mock instance
+func NewMockPrivateTxManagerAgent(ctrl *gomock.Controller) *MockPrivateTxManagerAgent {
+	mock := &MockPrivateTxManagerAgent{ctrl: ctrl}
+	mock.recorder = &MockPrivateTxManagerAgentMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockPrivateTxManagerAgent) EXPECT() *MockPrivateTxManagerAgentMockRecorder {
+	return m.recorder
+}
+
+// Insert mocks base method
+func (m *MockPrivateTxManagerAgent) Insert(ctx context.Context, privateTxManager *models.PrivateTxManager) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Insert", ctx, privateTxManager)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Insert indicates an expected call of Insert
+func (mr *MockPrivateTxManagerAgentMockRecorder) Insert(ctx, privateTxManager interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*MockPrivateTxManagerAgent)(nil).Insert), ctx, privateTxManager)
+}
+
+// Update mocks base method
+func (m *MockPrivateTxManagerAgent) Update(ctx context.Context, privateTxManager *models.PrivateTxManager) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Update", ctx, privateTxManager)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Update indicates an expected call of Update
+func (mr *MockPrivateTxManagerAgentMockRecorder) Update(ctx, privateTxManager interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockPrivateTxManagerAgent)(nil).Update), ctx, privateTxManager)
+}
+
+// Search mocks base method
+func (m *MockPrivateTxManagerAgent) Search(ctx context.Context, chainUUID string) ([]*models.PrivateTxManager, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Search", ctx, chainUUID)
+	ret0, _ := ret[0].([]*models.PrivateTxManager)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Search indicates an expected call of Search
+func (mr *MockPrivateTxManagerAgentMockRecorder) Search(ctx, chainUUID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Search", reflect.TypeOf((*MockPrivateTxManagerAgent)(nil).Search), ctx, chainUUID)
+}
+
+// Delete mocks base method
+func (m *MockPrivateTxManagerAgent) Delete(ctx context.Context, privateTxManager *models.PrivateTxManager) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Delete", ctx, privateTxManager)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Delete indicates an expected call of Delete
+func (mr *MockPrivateTxManagerAgentMockRecorder) Delete(ctx, privateTxManager interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockPrivateTxManagerAgent)(nil).Delete), ctx, privateTxManager)
 }
 
 // MockArtifactAgent is a mock of ArtifactAgent interface

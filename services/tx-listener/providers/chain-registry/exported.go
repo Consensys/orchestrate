@@ -1,10 +1,9 @@
 package chainregistry
 
 import (
-	"context"
 	"sync"
 
-	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/client"
+	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 )
 
 var (
@@ -13,24 +12,17 @@ var (
 )
 
 // Init hook
-func Init(ctx context.Context) {
+func Init(client orchestrateclient.OrchestrateClient) {
 	initOnce.Do(func() {
 		if provider != nil {
 			return
 		}
 
-		chainregistry.Init(ctx)
-
 		provider = &Provider{
-			Client: chainregistry.GlobalClient(),
 			conf:   NewConfig(),
+			client: client,
 		}
 	})
-}
-
-// SetGlobalProvider sets global a chain-registry provider
-func SetGlobalProvider(p *Provider) {
-	provider = p
 }
 
 // GlobalSetProvider returns global a chain-registry provider

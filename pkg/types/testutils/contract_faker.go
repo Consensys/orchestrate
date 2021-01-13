@@ -281,10 +281,8 @@ const deployedBytecode = "0x6080604052348015600f57600080fd5b50600436106028576000
 // FakeContract returns a new fake contract
 func FakeContract() *entities.Contract {
 	return &entities.Contract{
-		ID: entities.ContractID{
-			Name: rand.String(5),
-			Tag:  "v1.0.0",
-		},
+		Name:             rand.String(5),
+		Tag:              "v1.0.0",
 		ABI:              contractABI,
 		Bytecode:         bytecode,
 		Methods:          []entities.Method{},

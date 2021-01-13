@@ -7,10 +7,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/cenkalti/backoff/v4"
-	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/rpc"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
+	ganacheDocker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/docker/container/ganache"
 
+	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/rpc"
 	logpkg "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api"
@@ -22,7 +21,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
 	httputils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http"
 	integrationtest "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/integration-test"
-	chainClient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/client"
 	"gopkg.in/h2non/gock.v1"
 	"k8s.io/apimachinery/pkg/util/rand"
 
@@ -41,26 +39,28 @@ import (
 const postgresContainerID = "postgres-api"
 const kafkaContainerID = "Kafka-api"
 const zookeeperContainerID = "zookeeper-api"
+const ganacheContainerID = "ganache-api"
 const keyManagerURL = "http://key-manager:8081"
-const chainRegistryURL = "http://chain-registry:8081"
-const chainRegistryMetricsURL = "http://chain-registry:8082"
 const networkName = "api"
+const localhost = "localhost"
 
 var envPGHostPort string
 var envKafkaHostPort string
 var envHTTPPort string
 var envMetricsPort string
+var envGanacheHostPort string
 
 type IntegrationEnvironment struct {
-	ctx              context.Context
-	logger           log.Logger
-	api              *app.App
-	client           *docker.Client
-	consumer         *integrationtest.KafkaConsumer
-	pgmngr           postgres.Manager
-	baseURL          string
-	metricsURL       string
-	kafkaTopicConfig *sarama.KafkaTopicConfig
+	ctx               context.Context
+	logger            log.Logger
+	api               *app.App
+	client            *docker.Client
+	consumer          *integrationtest.KafkaConsumer
+	pgmngr            postgres.Manager
+	baseURL           string
+	metricsURL        string
+	kafkaTopicConfig  *sarama.KafkaTopicConfig
+	blockchainNodeURL string
 }
 
 func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, error) {
@@ -69,13 +69,19 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 	envHTTPPort = strconv.Itoa(rand.IntnRange(20000, 28080))
 	envMetricsPort = strconv.Itoa(rand.IntnRange(30000, 38082))
 	envKafkaHostPort = strconv.Itoa(rand.IntnRange(20000, 29092))
+	envGanacheHostPort = strconv.Itoa(rand.IntnRange(10000, 15235))
 
 	// Define external hostname
 	kafkaExternalHostname := os.Getenv("KAFKA_HOST")
 	if kafkaExternalHostname == "" {
-		kafkaExternalHostname = "localhost"
+		kafkaExternalHostname = localhost
 	}
 	kafkaExternalHostname = fmt.Sprintf("%s:%s", kafkaExternalHostname, envKafkaHostPort)
+
+	ganacheExternalHostname := os.Getenv("GANACHE_HOST")
+	if ganacheExternalHostname == "" {
+		ganacheExternalHostname = localhost
+	}
 
 	// Initialize environment flags
 	flgs := pflag.NewFlagSet("api-integration-test", pflag.ContinueOnError)
@@ -90,7 +96,7 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 		"--rest-port=" + envHTTPPort,
 		"--db-port=" + envPGHostPort,
 		"--kafka-url=" + kafkaExternalHostname,
-		"--log-level=panic",
+		"--log-level=error",
 	}
 
 	err := flgs.Parse(args)
@@ -110,6 +116,7 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 				SetKafkaInternalHostname(kafkaContainerID).
 				SetKafkaExternalHostname(kafkaExternalHostname),
 			},
+			ganacheContainerID: {Ganache: ganacheDocker.NewDefault().SetHostPort(envGanacheHostPort).SetHost(ganacheExternalHostname)},
 		},
 	}
 
@@ -121,12 +128,13 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 	}
 
 	return &IntegrationEnvironment{
-		ctx:        ctx,
-		logger:     logger,
-		client:     dockerClient,
-		pgmngr:     postgres.NewManager(),
-		baseURL:    "http://localhost:" + envHTTPPort,
-		metricsURL: "http://localhost:" + envMetricsPort,
+		ctx:               ctx,
+		logger:            logger,
+		client:            dockerClient,
+		pgmngr:            postgres.NewManager(),
+		baseURL:           "http://localhost:" + envHTTPPort,
+		metricsURL:        "http://localhost:" + envMetricsPort,
+		blockchainNodeURL: fmt.Sprintf("http://%s:%s", ganacheExternalHostname, envGanacheHostPort),
 	}, nil
 }
 
@@ -162,10 +170,21 @@ func (env *IntegrationEnvironment) Start(ctx context.Context) error {
 		env.logger.WithError(err).Error("could not up Kafka")
 		return err
 	}
-
 	err = env.client.WaitTillIsReady(ctx, kafkaContainerID, 20*time.Second)
 	if err != nil {
 		env.logger.WithError(err).Error("could not start Kafka")
+		return err
+	}
+
+	// Start ganache
+	err = env.client.Up(ctx, ganacheContainerID, "")
+	if err != nil {
+		env.logger.WithError(err).Error("could not up ganache")
+		return err
+	}
+	err = env.client.WaitTillIsReady(ctx, ganacheContainerID, 10*time.Second)
+	if err != nil {
+		env.logger.WithError(err).Error("could not start ganache")
 		return err
 	}
 
@@ -222,6 +241,12 @@ func (env *IntegrationEnvironment) Teardown(ctx context.Context) {
 		env.logger.WithError(err).Error("could not stop API")
 	}
 
+	err = env.client.Down(ctx, ganacheContainerID)
+	if err != nil {
+		env.logger.WithError(err).Errorf("could not down ganache")
+		return
+	}
+
 	err = env.client.Down(ctx, postgresContainerID)
 	if err != nil {
 		env.logger.WithError(err).Errorf("could not down postgres")
@@ -271,30 +296,19 @@ func (env *IntegrationEnvironment) migrate(ctx context.Context) error {
 	return nil
 }
 
-func newAPI(
-	ctx context.Context,
-	topicCfg *sarama.KafkaTopicConfig,
-) (*app.App, error) {
+func newAPI(ctx context.Context, topicCfg *sarama.KafkaTopicConfig) (*app.App, error) {
 	// Initialize dependencies
 	authjwt.Init(ctx)
 	authkey.Init(ctx)
 	sarama.InitSyncProducer(ctx)
+	ethclient.Init(ctx)
 
-	httpClient := httputils.NewClient(httputils.NewDefaultConfig())
-	gock.InterceptClient(httpClient)
+	interceptedHTTPClient := httputils.NewClient(httputils.NewDefaultConfig())
+	gock.InterceptClient(interceptedHTTPClient)
 
 	// We mock the calls to the key-manager
 	conf := keymanagerclient.NewConfig(keyManagerURL, nil)
-	keyManagerClient := keymanagerclient.NewHTTPClient(httpClient, conf)
-
-	// We mock the calls to the chain registry
-	conf2 := chainClient.NewConfig(chainRegistryURL)
-	conf.MetricsURL = chainRegistryMetricsURL
-	chainRegistryClient := chainClient.NewHTTPClient(httpClient, conf2)
-
-	// We mock the calls to the blockchain node
-	newBackOff := func() backoff.BackOff { return utils.NewBackOff(utils.NewConfig(viper.GetViper())) }
-	ethClient := ethclient.NewClient(newBackOff, httpClient)
+	keyManagerClient := keymanagerclient.NewHTTPClient(interceptedHTTPClient, conf)
 
 	pgmngr := postgres.GetManager()
 	txSchedulerConfig := api.NewConfig(viper.GetViper())
@@ -303,9 +317,8 @@ func newAPI(
 		txSchedulerConfig,
 		pgmngr,
 		authjwt.GlobalChecker(), authkey.GlobalChecker(),
-		chainRegistryClient,
 		keyManagerClient,
-		ethClient,
+		ethclient.GlobalClient(),
 		sarama.GlobalSyncProducer(),
 		topicCfg,
 	)

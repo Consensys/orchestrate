@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"time"
 
+	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
+
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
-	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/client"
 )
 
 func init() {
@@ -34,13 +35,13 @@ Environment variable: %q`, providerRefreshIntervalEnv)
 }
 
 type Config struct {
-	RefreshInterval  time.Duration
-	ChainRegistryURL string
+	RefreshInterval time.Duration
+	ProxyURL        string
 }
 
 func NewConfig() *Config {
 	return &Config{
-		ChainRegistryURL: viper.GetString(chainregistry.URLViperKey),
-		RefreshInterval:  viper.GetDuration(ProviderRefreshIntervalViperKey),
+		ProxyURL:        viper.GetString(orchestrateclient.URLViperKey),
+		RefreshInterval: viper.GetDuration(ProviderRefreshIntervalViperKey),
 	}
 }

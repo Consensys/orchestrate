@@ -29,16 +29,12 @@ type Chain struct {
 	Name     string
 	URL      string
 	ChainID  string
-	Listener *Listener
+	Listener Listener
 	Active   bool
 }
 
 func (n *Chain) SetDefault() {
 	if n.UUID == "" {
 		n.UUID = uuid.Must(uuid.NewV4()).String()
-	}
-
-	if n.Listener == nil {
-		n.Listener = &Listener{}
 	}
 }

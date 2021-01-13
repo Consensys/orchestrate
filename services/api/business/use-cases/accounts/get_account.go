@@ -26,7 +26,7 @@ func NewGetAccountUseCase(db store.DB) usecases.GetAccountUseCase {
 
 func (uc *getAccountUseCase) Execute(ctx context.Context, address string, tenants []string) (*entities.Account, error) {
 	logger := log.WithContext(ctx).WithField("address", address).WithField("tenants", tenants)
-	logger.Debug("getting accounts")
+	logger.Debug("getting account")
 
 	model, err := uc.db.Account().FindOneByAddress(ctx, address, tenants)
 	if err != nil {

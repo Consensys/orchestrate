@@ -4,9 +4,10 @@ package integrationtests
 
 import (
 	"fmt"
+	"github.com/stretchr/testify/require"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
-	http2 "net/http"
+	"net/http"
 	"testing"
 	"time"
 
@@ -18,7 +19,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/store/models"
 	"gopkg.in/h2non/gock.v1"
 )
 
@@ -30,6 +30,8 @@ type accountsTestSuite struct {
 
 func (s *accountsTestSuite) TestCreateAccounts() {
 	ctx := s.env.ctx
+	chain := testutils.FakeChain()
+	chain.URLs = []string{s.env.blockchainNodeURL}
 
 	s.T().Run("should create account successfully by querying key-manager API", func(t *testing.T) {
 		ethAccRes := testutils.FakeETHAccountResponse()
@@ -70,30 +72,49 @@ func (s *accountsTestSuite) TestCreateAccounts() {
 	s.T().Run("should create account successfully and trigger funding transaction", func(t *testing.T) {
 		defer gock.Off()
 
+		chainWithFaucet, err := s.client.RegisterChain(s.env.ctx, &api.RegisterChainRequest{
+			Name: "ganache-with-faucet-accounts",
+			URLs: []string{s.env.blockchainNodeURL},
+			Listener: api.RegisterListenerRequest{
+				FromBlock:         "latest",
+				ExternalTxEnabled: false,
+			},
+		})
+		require.NoError(t, err)
+
+		accountFaucet := testutils.FakeAccount()
+		accountFaucet.Alias = "MyFaucetCreditor-accounts"
+		accountFaucet.Address = "0xcE187877Afa6C3830342958E1D9ab6E707e8f863"
+		gock.New(keyManagerURL).Post("/ethereum/accounts/import").Reply(200).JSON(accountFaucet)
+		_, err = s.client.ImportAccount(s.env.ctx, testutils.FakeImportAccountRequest())
+		require.NoError(t, err)
+
+		faucetRequest := testutils.FakeRegisterFaucetRequest()
+		faucetRequest.Name = "faucet-integration-tests"
+		faucetRequest.ChainRule = chainWithFaucet.UUID
+		faucetRequest.CreditorAccount = accountFaucet.Address
+		faucet, err := s.client.RegisterFaucet(s.env.ctx, faucetRequest)
+		require.NoError(s.T(), err)
+
 		account := testutils.FakeETHAccountResponse()
-		txRequest := testutils.FakeCreateAccountRequest()
-		faucet := testutils.FakeFaucet()
-		faucet.CreditorAccount = "0x12278c8C089ef98b4045f0b649b61Ed4316B1a50"
-		chain := testutils.FakeChain()
-		txRequest.Chain = chain.Name
+		accountRequest := testutils.FakeCreateAccountRequest()
+		accountRequest.Chain = chainWithFaucet.Name
 
 		// Create account and get faucet candidate for the newly created account
 		gock.New(keyManagerURL).Post("/ethereum/accounts").Reply(200).JSON(account)
-		gock.New(chainRegistryURL).URL(fmt.Sprintf("%s/chains?name=%s", chainRegistryURL, chain.Name)).Times(2).Reply(200).JSON([]*models.Chain{chain})
 
-		// Send funding tx (this will check if the faucet account itself needs funding)
-		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
-
-		resp, err := s.client.CreateAccount(ctx, txRequest)
-		if err != nil {
-			assert.Fail(t, err.Error())
-			return
-		}
+		resp, err := s.client.CreateAccount(ctx, accountRequest)
+		require.NoError(t, err)
 
 		assert.Equal(t, resp.Address, account.Address)
 		assert.Equal(t, resp.PublicKey, account.PublicKey)
-		assert.Equal(t, resp.Alias, txRequest.Alias)
+		assert.Equal(t, resp.Alias, accountRequest.Alias)
 		assert.Equal(t, resp.TenantID, "_")
+
+		err = s.client.DeleteChain(ctx, chainWithFaucet.UUID)
+		assert.NoError(t, err)
+		err = s.client.DeleteFaucet(ctx, faucet.UUID)
+		assert.NoError(t, err)
 	})
 
 	s.T().Run("should fail to create account if key-manager API fails", func(t *testing.T) {
@@ -275,7 +296,7 @@ func (s *accountsTestSuite) TestVerifySignature() {
 
 	s.T().Run("should verify signature successfully", func(t *testing.T) {
 		defer gock.Off()
-		gock.New(keyManagerURL).Post("/ethereum/accounts/verify-signature").Reply(http2.StatusNoContent)
+		gock.New(keyManagerURL).Post("/ethereum/accounts/verify-signature").Reply(http.StatusNoContent)
 
 		verifyRequest := testutils.FakeVerifyPayloadRequest()
 		err := s.client.VerifySignature(ctx, verifyRequest)
@@ -288,7 +309,7 @@ func (s *accountsTestSuite) TestVerifyTypedDataSignature() {
 
 	s.T().Run("should verify typed data signature successfully", func(t *testing.T) {
 		defer gock.Off()
-		gock.New(keyManagerURL).Post("/ethereum/accounts/verify-typed-data-signature").Reply(http2.StatusNoContent)
+		gock.New(keyManagerURL).Post("/ethereum/accounts/verify-typed-data-signature").Reply(http.StatusNoContent)
 
 		verifyRequest := testutils.FakeVerifyTypedDataPayloadRequest()
 		err := s.client.VerifyTypedDataSignature(ctx, verifyRequest)

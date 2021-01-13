@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"strings"
+	"time"
 
 	traefikdynamic "github.com/containous/traefik/v2/pkg/config/dynamic"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/configwatcher/provider"
@@ -11,26 +12,30 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/configwatcher/provider/static"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/dynamic"
+	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/proxy"
 )
 
 const (
 	InternalProvider = "internal"
 )
 
-func NewProvider() provider.Provider {
+func NewProvider(searchChains usecases.SearchChainsUseCase, refresh time.Duration, proxyCacheTTL *time.Duration) provider.Provider {
 	prvdr := aggregator.New()
 	prvdr.AddProvider(NewInternalProvider())
+	prvdr.AddProvider(proxy.NewChainsProxyProvider(searchChains, refresh, proxyCacheTTL))
 	return prvdr
+
 }
 
 func NewInternalProvider() provider.Provider {
-	return static.New(dynamic.NewMessage(InternalProvider, NewInternalConfig()))
+	return static.New(dynamic.NewMessage(InternalProvider, newInternalConfig()))
 }
 
-func NewInternalConfig() *dynamic.Configuration {
+func newInternalConfig() *dynamic.Configuration {
 	cfg := dynamic.NewConfig()
 
-	pathPrefix := []string{"/transactions", "/schedules", "/jobs", "/accounts", "/faucets", "/contracts"}
+	pathPrefix := []string{"/transactions", "/schedules", "/jobs", "/accounts", "/faucets", "/contracts", "/chains"}
 	for idx, path := range pathPrefix {
 		pathPrefix[idx] = fmt.Sprintf("PathPrefix(`%s`)", path)
 	}
@@ -51,5 +56,5 @@ func NewInternalConfig() *dynamic.Configuration {
 		API: &dynamic.API{},
 	}
 
-	return cfg
+	return proxy.NewInternalConfig(cfg)
 }

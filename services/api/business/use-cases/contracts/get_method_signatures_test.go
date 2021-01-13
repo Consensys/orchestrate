@@ -26,9 +26,9 @@ func TestGetMethodSignatures_Execute(t *testing.T) {
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		contract := testutils.FakeContract()
 
-		mockGetContractUC.EXPECT().Execute(ctx, &contract.ID).Return(contract, nil)
+		mockGetContractUC.EXPECT().Execute(ctx, contract.Name, contract.Tag).Return(contract, nil)
 
-		signatures, err := usecase.Execute(ctx, &contract.ID, "transfer")
+		signatures, err := usecase.Execute(ctx, contract.Name, contract.Tag, "transfer")
 
 		assert.NoError(t, err)
 		assert.Equal(t, signatures[0], "transfer(address,uint256)")
@@ -37,9 +37,9 @@ func TestGetMethodSignatures_Execute(t *testing.T) {
 	t.Run("should execute use case successfully if method name is constructor", func(t *testing.T) {
 		contract := testutils.FakeContract()
 
-		mockGetContractUC.EXPECT().Execute(ctx, &contract.ID).Return(contract, nil)
+		mockGetContractUC.EXPECT().Execute(ctx, contract.Name, contract.Tag).Return(contract, nil)
 
-		signatures, err := usecase.Execute(ctx, &contract.ID, constructorMethodName)
+		signatures, err := usecase.Execute(ctx, contract.Name, contract.Tag, constructorMethodName)
 
 		assert.NoError(t, err)
 		assert.Equal(t, signatures[0], "constructor()")
@@ -48,9 +48,9 @@ func TestGetMethodSignatures_Execute(t *testing.T) {
 	t.Run("should execute use case successfully and return an empty array if nothing is found", func(t *testing.T) {
 		contract := testutils.FakeContract()
 
-		mockGetContractUC.EXPECT().Execute(ctx, &contract.ID).Return(contract, nil)
+		mockGetContractUC.EXPECT().Execute(ctx, contract.Name, contract.Tag).Return(contract, nil)
 
-		signatures, err := usecase.Execute(ctx, &contract.ID, "inexistentMethod")
+		signatures, err := usecase.Execute(ctx, contract.Name, contract.Tag, "inexistentMethod")
 
 		assert.NoError(t, err)
 		assert.Empty(t, signatures)
@@ -60,9 +60,9 @@ func TestGetMethodSignatures_Execute(t *testing.T) {
 		contract := testutils.FakeContract()
 		expectedErr := fmt.Errorf("error")
 
-		mockGetContractUC.EXPECT().Execute(ctx, &contract.ID).Return(nil, expectedErr)
+		mockGetContractUC.EXPECT().Execute(ctx, contract.Name, contract.Tag).Return(nil, expectedErr)
 
-		signatures, err := usecase.Execute(ctx, &contract.ID, constructorMethodName)
+		signatures, err := usecase.Execute(ctx, contract.Name, contract.Tag, constructorMethodName)
 
 		assert.Nil(t, signatures)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(getMethodSignaturesComponent), err)
@@ -72,9 +72,9 @@ func TestGetMethodSignatures_Execute(t *testing.T) {
 		contract := testutils.FakeContract()
 		contract.ABI = "wrongABI"
 
-		mockGetContractUC.EXPECT().Execute(ctx, &contract.ID).Return(contract, nil)
+		mockGetContractUC.EXPECT().Execute(ctx, contract.Name, contract.Tag).Return(contract, nil)
 
-		signatures, err := usecase.Execute(ctx, &contract.ID, constructorMethodName)
+		signatures, err := usecase.Execute(ctx, contract.Name, contract.Tag, constructorMethodName)
 
 		assert.Nil(t, signatures)
 		assert.True(t, errors.IsDataCorruptedError(err))

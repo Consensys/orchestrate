@@ -84,7 +84,7 @@ func SetGlobalConfig(cfg *sarama.Config) {
 
 // InitClient initialize Sarama Client
 // It bases on viper configuration to get Kafka address
-func InitClient(_ context.Context) (err error) {
+func InitClient(ctx context.Context) (err error) {
 	initClientOnce.Do(func() {
 		if client != nil {
 			return
@@ -118,7 +118,10 @@ func InitClient(_ context.Context) (err error) {
 			return gr.Wait().ErrorOrNil()
 		}
 
-		sarama.Logger = log.StandardLogger().WithField("logger", "sarama")
+		saramaLogger := log.StandardLogger()
+		saramaLogger.SetLevel(log.DebugLevel)
+		sarama.Logger = saramaLogger.WithContext(ctx).WithField("logger", "sarama")
+
 		log.Infof("sarama: client ready (connected to brokers: %v) at host %v", brokers, hostnames)
 	})
 

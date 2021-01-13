@@ -23,3 +23,7 @@ type FaucetFilters struct {
 type AccountFilters struct {
 	Aliases []string `validate:"omitempty,unique"`
 }
+
+type ChainFilters struct {
+	Names []string `validate:"omitempty,unique"`
+}

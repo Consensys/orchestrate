@@ -15,7 +15,6 @@ import (
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
@@ -100,10 +99,7 @@ func (s *contractsCtrlTestSuite) TestContractsController_Register() {
 		s.registerContract.EXPECT().Execute(gomock.Any(), expectedContract).Return(nil)
 
 		contract := testutils.FakeContract()
-		s.getContract.EXPECT().Execute(gomock.Any(), &entities.ContractID{
-			Name: req.Name,
-			Tag:  req.Tag,
-		}).Return(contract, nil)
+		s.getContract.EXPECT().Execute(gomock.Any(), req.Name, req.Tag).Return(contract, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 		expectedBody, _ := json.Marshal(api.ContractResponse{Contract: contract})
@@ -149,10 +145,7 @@ func (s *contractsCtrlTestSuite) TestContractsController_Register() {
 		expectedContract, _ := formatters.FormatRegisterContractRequest(req)
 		s.registerContract.EXPECT().Execute(gomock.Any(), expectedContract).Return(nil)
 
-		s.getContract.EXPECT().Execute(gomock.Any(), &entities.ContractID{
-			Name: req.Name,
-			Tag:  req.Tag,
-		}).Return(nil, fmt.Errorf("error"))
+		s.getContract.EXPECT().Execute(gomock.Any(), req.Name, req.Tag).Return(nil, fmt.Errorf("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)
 		assert.Equal(t, http.StatusInternalServerError, rw.Code)
@@ -217,12 +210,10 @@ func (s *contractsCtrlTestSuite) TestContractsController_GetContract() {
 		rw := httptest.NewRecorder()
 		contract := testutils.FakeContract()
 		httpRequest := httptest.
-			NewRequest(http.MethodGet, fmt.Sprintf("/contracts/%s/%s", contract.ID.Name, contract.ID.Tag), nil).
+			NewRequest(http.MethodGet, fmt.Sprintf("/contracts/%s/%s", contract.Name, contract.Tag), nil).
 			WithContext(ctx)
 
-		s.getContract.EXPECT().
-			Execute(gomock.Any(), &contract.ID).
-			Return(contract, nil)
+		s.getContract.EXPECT().Execute(gomock.Any(), contract.Name, contract.Tag).Return(contract, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 		expectedBody, _ := json.Marshal(contract)
@@ -233,12 +224,10 @@ func (s *contractsCtrlTestSuite) TestContractsController_GetContract() {
 		rw := httptest.NewRecorder()
 		contract := testutils.FakeContract()
 		httpRequest := httptest.
-			NewRequest(http.MethodGet, fmt.Sprintf("/contracts/%s/%s", contract.ID.Name, contract.ID.Tag), nil).
+			NewRequest(http.MethodGet, fmt.Sprintf("/contracts/%s/%s", contract.Name, contract.Tag), nil).
 			WithContext(ctx)
 
-		s.getContract.EXPECT().
-			Execute(gomock.Any(), &contract.ID).
-			Return(nil, fmt.Errorf("error"))
+		s.getContract.EXPECT().Execute(gomock.Any(), contract.Name, contract.Tag).Return(nil, fmt.Errorf("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)
 		assert.Equal(t, http.StatusInternalServerError, rw.Code)
@@ -309,12 +298,12 @@ func (s *contractsCtrlTestSuite) TestContractsController_GetContractMethodSignat
 		rw := httptest.NewRecorder()
 		contract := testutils.FakeContract()
 		httpRequest := httptest.
-			NewRequest(http.MethodGet, fmt.Sprintf("/contracts/%s/%s/method-signatures", contract.ID.Name, contract.ID.Tag), nil).
+			NewRequest(http.MethodGet, fmt.Sprintf("/contracts/%s/%s/method-signatures", contract.Name, contract.Tag), nil).
 			WithContext(ctx)
 
 		methodSignatures := []string{"method1()", "method2()"}
 		s.getContractMethodSignatures.EXPECT().
-			Execute(gomock.Any(), &contract.ID, "").
+			Execute(gomock.Any(), contract.Name, contract.Tag, "").
 			Return(methodSignatures, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -327,12 +316,12 @@ func (s *contractsCtrlTestSuite) TestContractsController_GetContractMethodSignat
 		contract := testutils.FakeContract()
 		method := "method1"
 		httpRequest := httptest.
-			NewRequest(http.MethodGet, fmt.Sprintf("/contracts/%s/%s/method-signatures?method=%s", contract.ID.Name, contract.ID.Tag, method), nil).
+			NewRequest(http.MethodGet, fmt.Sprintf("/contracts/%s/%s/method-signatures?method=%s", contract.Name, contract.Tag, method), nil).
 			WithContext(ctx)
 
 		methodSignatures := []string{"method1()"}
 		s.getContractMethodSignatures.EXPECT().
-			Execute(gomock.Any(), &contract.ID, method).
+			Execute(gomock.Any(), contract.Name, contract.Tag, method).
 			Return(methodSignatures, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)

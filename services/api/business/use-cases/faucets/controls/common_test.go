@@ -3,9 +3,7 @@
 package controls
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/chainregistry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/store/models"
 	"sort"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
@@ -30,9 +28,9 @@ var (
 	}
 )
 
-func newFaucetReq(candidates map[string]*entities.Faucet, chainUUID, chainURL, beneficiary string) *chainregistry.Request {
-	return &chainregistry.Request{
-		Chain: &models.Chain{
+func newFaucetReq(candidates map[string]*entities.Faucet, chainUUID, chainURL, beneficiary string) *entities.FaucetRequest {
+	return &entities.FaucetRequest{
+		Chain: &entities.Chain{
 			UUID: chainUUID,
 			URLs: []string{chainURL},
 		},

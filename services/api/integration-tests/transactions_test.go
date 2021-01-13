@@ -4,7 +4,6 @@ package integrationtests
 
 import (
 	"context"
-	"fmt"
 	"github.com/stretchr/testify/require"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 	"testing"
@@ -19,7 +18,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/service/controllers"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/store/models"
 	"gopkg.in/h2non/gock.v1"
 )
 
@@ -31,13 +29,11 @@ const (
 type transactionsTestSuite struct {
 	suite.Suite
 	client client.OrchestrateClient
-	faucet *api.FaucetResponse
 	env    *IntegrationEnvironment
 }
 
 func (s *transactionsTestSuite) TestValidation() {
 	ctx := s.env.ctx
-	chain := testutils.FakeChain()
 
 	s.T().Run("should fail if payload is invalid", func(t *testing.T) {
 		defer gock.Off()
@@ -59,31 +55,22 @@ func (s *transactionsTestSuite) TestValidation() {
 	})
 
 	s.T().Run("should fail if idempotency key is identical but different params", func(t *testing.T) {
-		defer gock.Off()
 		txRequest := testutils.FakeSendTransactionRequest()
 		rctx := context.WithValue(ctx, clientutils.RequestHeaderKey, map[string]string{
 			controllers.IdempotencyKeyHeader: utils.RandomString(16),
 		})
 
-		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
-		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
-		gock.New(chainRegistryURL).
-			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", chainRegistryURL, chain.UUID, txRequest.Params.From)).
-			Reply(404).Done()
 		_, err := s.client.SendContractTransaction(rctx, txRequest)
 		assert.NoError(t, err)
 
-		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
-		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
 		txRequest.Params.MethodSignature = "differentMethodSignature()"
 		_, err = s.client.SendContractTransaction(rctx, txRequest)
 		assert.True(t, errors.IsConstraintViolatedError(err))
 	})
 
 	s.T().Run("should fail with 422 if chains cannot be fetched", func(t *testing.T) {
-		defer gock.Off()
-		gock.New(chainRegistryURL).Get("/chains").Reply(404)
 		txRequest := testutils.FakeSendTransactionRequest()
+		txRequest.ChainName = "inexistentChain"
 
 		_, err := s.client.SendContractTransaction(ctx, txRequest)
 
@@ -91,28 +78,9 @@ func (s *transactionsTestSuite) TestValidation() {
 	})
 
 	s.T().Run("should fail with 422 if account does not exist", func(t *testing.T) {
-		defer gock.Off()
-
 		// Create a txRequest with an inexisting account
 		txRequest := testutils.FakeSendTransactionRequest()
 		txRequest.Params.From = "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"
-
-		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
-		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
-
-		_, err := s.client.SendContractTransaction(ctx, txRequest)
-
-		assert.True(t, errors.IsInvalidParameterError(err))
-	})
-
-	s.T().Run("should fail with 422 if chainUUID does not exist", func(t *testing.T) {
-		defer gock.Off()
-		txRequest := testutils.FakeSendTransactionRequest()
-		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
-		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Reply(404)
-		gock.New(chainRegistryURL).
-			URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", chainRegistryURL, chain.UUID, txRequest.Params.From)).
-			Reply(404)
 
 		_, err := s.client.SendContractTransaction(ctx, txRequest)
 
@@ -122,14 +90,9 @@ func (s *transactionsTestSuite) TestValidation() {
 
 func (s *transactionsTestSuite) TestSuccess() {
 	ctx := s.env.ctx
-	chain := testutils.FakeChain()
 
 	s.T().Run("should send a contract transaction successfully", func(t *testing.T) {
-		defer gock.Off()
 		txRequest := testutils.FakeSendTransactionRequest()
-
-		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
-		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
 
 		txRequest.Params.From = ""
 		txRequest.Params.OneTimeKey = true
@@ -155,7 +118,6 @@ func (s *transactionsTestSuite) TestSuccess() {
 
 		assert.NotEmpty(t, txResponseGET.UUID)
 		assert.NotEmpty(t, job.UUID)
-		assert.Equal(t, job.ChainUUID, chain.UUID)
 		assert.Equal(t, utils.StatusStarted, job.Status)
 		assert.Equal(t, txRequest.Params.From, job.Transaction.From)
 		assert.Equal(t, txRequest.Params.To, job.Transaction.To)
@@ -170,21 +132,38 @@ func (s *transactionsTestSuite) TestSuccess() {
 		assert.Equal(t, job.UUID, evlp.GetJobUUID())
 		assert.True(t, evlp.IsOneTimeKeySignature())
 		assert.Equal(t, tx.JobTypeMap[utils.EthereumTransaction].String(), evlp.GetJobTypeString())
-		assert.Equal(t, evlp.GetChainIDString(), chain.ChainID)
 		assert.Equal(t, evlp.PartitionKey(), "")
 	})
 
 	s.T().Run("should send a transaction with an additional faucet job", func(t *testing.T) {
 		defer gock.Off()
+
+		chainWithFaucet, err := s.client.RegisterChain(s.env.ctx, &api.RegisterChainRequest{
+			Name: "ganache-with-faucet",
+			URLs: []string{s.env.blockchainNodeURL},
+			Listener: api.RegisterListenerRequest{
+				FromBlock:         "latest",
+				ExternalTxEnabled: false,
+			},
+		})
+		require.NoError(t, err)
+
+		accountFaucet := testutils.FakeAccount()
+		accountFaucet.Alias = "MyFaucetCreditor"
+		accountFaucet.Address = "0xc675Ad3c014706878f93d9d2c0a17a23DBFf3425"
+		gock.New(keyManagerURL).Post("/ethereum/accounts/import").Reply(200).JSON(accountFaucet)
+		_, err = s.client.ImportAccount(s.env.ctx, testutils.FakeImportAccountRequest())
+		require.NoError(t, err)
+
+		faucetRequest := testutils.FakeRegisterFaucetRequest()
+		faucetRequest.Name = "faucet-integration-tests"
+		faucetRequest.ChainRule = chainWithFaucet.UUID
+		faucetRequest.CreditorAccount = accountFaucet.Address
+		faucet, err := s.client.RegisterFaucet(s.env.ctx, faucetRequest)
+		require.NoError(s.T(), err)
+
 		txRequest := testutils.FakeSendTransferTransactionRequest()
-		chainWithFaucet := testutils.FakeChain()
-		chainWithFaucet.UUID = s.faucet.ChainRule
-
-		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chainWithFaucet})
-		gock.New(chainRegistryURL).Get("/chains/" + chainWithFaucet.UUID).Times(2).Reply(200).JSON(chainWithFaucet)
-		gock.New(chainWithFaucet.URLs[0]).Post("").Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"0x1000000000\"}")
-		gock.New(chainWithFaucet.URLs[0]).Post("").Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"0x0\"}")
-
+		txRequest.ChainName = chainWithFaucet.Name
 		IdempotencyKey := utils.RandomString(16)
 		rctx := context.WithValue(ctx, clientutils.RequestHeaderKey, map[string]string{
 			controllers.IdempotencyKeyHeader: IdempotencyKey,
@@ -200,69 +179,56 @@ func (s *transactionsTestSuite) TestSuccess() {
 
 		faucetJob := txResponseGET.Jobs[1]
 		txJob := txResponseGET.Jobs[0]
-		assert.Equal(t, faucetJob.ChainUUID, chainWithFaucet.UUID)
+		assert.Equal(t, faucetJob.ChainUUID, faucet.ChainRule)
 		assert.Equal(t, utils.StatusStarted, faucetJob.Status)
 		assert.Equal(t, utils.EthereumTransaction, faucetJob.Type)
 		assert.Equal(t, faucetJob.Transaction.To, txJob.Transaction.From)
-		assert.Equal(t, faucetJob.Transaction.Value, s.faucet.Amount)
+		assert.Equal(t, faucetJob.Transaction.Value, faucet.Amount)
 
 		assert.NotEmpty(t, txResponseGET.UUID)
 		assert.NotEmpty(t, txJob.UUID)
-		assert.Equal(t, txJob.ChainUUID, chainWithFaucet.UUID)
+		assert.Equal(t, txJob.ChainUUID, faucet.ChainRule)
 		assert.Equal(t, utils.StatusStarted, txJob.Status)
 		assert.Equal(t, txRequest.Params.From, txJob.Transaction.From)
 		assert.Equal(t, txRequest.Params.To, txJob.Transaction.To)
 		assert.Equal(t, utils.EthereumTransaction, txJob.Type)
 
 		fctEvlp, err := s.env.consumer.WaitForEnvelope(faucetJob.ScheduleUUID, s.env.kafkaTopicConfig.Sender, waitForEnvelopeTimeOut)
-		if err != nil {
-			assert.Fail(t, err.Error())
-			return
-		}
+		require.NoError(t, err)
 		assert.Equal(t, faucetJob.ScheduleUUID, fctEvlp.GetID())
 		assert.Equal(t, faucetJob.UUID, fctEvlp.GetJobUUID())
 		assert.Equal(t, tx.JobTypeMap[utils.EthereumTransaction].String(), fctEvlp.GetJobTypeString())
-		assert.Equal(t, fctEvlp.GetChainIDString(), chain.ChainID)
 
 		jobEvlp, err := s.env.consumer.WaitForEnvelope(txJob.ScheduleUUID, s.env.kafkaTopicConfig.Sender, waitForEnvelopeTimeOut)
-		if err != nil {
-			assert.Fail(t, err.Error())
-			return
-		}
+		require.NoError(t, err)
 		assert.Equal(t, txJob.ScheduleUUID, jobEvlp.GetID())
 		assert.Equal(t, txJob.UUID, jobEvlp.GetJobUUID())
+
+		err = s.client.DeleteChain(ctx, chainWithFaucet.UUID)
+		assert.NoError(t, err)
+		err = s.client.DeleteFaucet(ctx, faucet.UUID)
+		assert.NoError(t, err)
 	})
 
 	s.T().Run("should send a tessera transaction successfully", func(t *testing.T) {
-		defer gock.Off()
 		txRequest := testutils.FakeSendTesseraRequest()
-		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
-		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Times(2).Reply(200).JSON(chain)
 
 		IdempotencyKey := utils.RandomString(16)
 		rctx := context.WithValue(ctx, clientutils.RequestHeaderKey, map[string]string{
 			controllers.IdempotencyKeyHeader: IdempotencyKey,
 		})
 		txResponse, err := s.client.SendContractTransaction(rctx, txRequest)
-		if err != nil {
-			assert.Fail(t, err.Error())
-			return
-		}
+		require.NoError(t, err)
 		assert.NotEmpty(t, txResponse.UUID)
 		assert.NotEmpty(t, txResponse.IdempotencyKey)
 
 		txResponseGET, err := s.client.GetTxRequest(ctx, txResponse.UUID)
-		if err != nil {
-			assert.Fail(t, err.Error())
-			return
-		}
-
+		require.NoError(t, err)
 		assert.NotEmpty(t, txResponseGET.UUID)
 		assert.Len(t, txResponseGET.Jobs, 2)
 
 		privTxJob := txResponseGET.Jobs[0]
 		assert.NotEmpty(t, privTxJob.UUID)
-		assert.Equal(t, privTxJob.ChainUUID, chain.UUID)
 		assert.Equal(t, utils.StatusStarted, privTxJob.Status)
 		assert.Equal(t, txRequest.Params.From, privTxJob.Transaction.From)
 		assert.Equal(t, txRequest.Params.To, privTxJob.Transaction.To)
@@ -270,7 +236,6 @@ func (s *transactionsTestSuite) TestSuccess() {
 
 		markingTxJob := txResponseGET.Jobs[1]
 		assert.NotEmpty(t, markingTxJob.UUID)
-		assert.Equal(t, markingTxJob.ChainUUID, chain.UUID)
 		assert.Equal(t, utils.StatusCreated, markingTxJob.Status)
 		assert.Equal(t, utils.TesseraMarkingTransaction, markingTxJob.Type)
 
@@ -287,10 +252,7 @@ func (s *transactionsTestSuite) TestSuccess() {
 	})
 
 	s.T().Run("should send an orion transaction successfully", func(t *testing.T) {
-		defer gock.Off()
 		txRequest := testutils.FakeSendOrionRequest()
-		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
-		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Times(2).Reply(200).JSON(chain)
 
 		txResponse, err := s.client.SendContractTransaction(ctx, txRequest)
 		if err != nil {
@@ -310,7 +272,6 @@ func (s *transactionsTestSuite) TestSuccess() {
 
 		privTxJob := txResponseGET.Jobs[0]
 		assert.NotEmpty(t, privTxJob.UUID)
-		assert.Equal(t, privTxJob.ChainUUID, chain.UUID)
 		assert.Equal(t, utils.StatusStarted, privTxJob.Status)
 		assert.Equal(t, txRequest.Params.From, privTxJob.Transaction.From)
 		assert.Equal(t, txRequest.Params.To, privTxJob.Transaction.To)
@@ -318,7 +279,6 @@ func (s *transactionsTestSuite) TestSuccess() {
 
 		markingTxJob := txResponseGET.Jobs[1]
 		assert.NotEmpty(t, markingTxJob.UUID)
-		assert.Equal(t, markingTxJob.ChainUUID, chain.UUID)
 		assert.Equal(t, utils.StatusCreated, markingTxJob.Status)
 		assert.Equal(t, utils.OrionMarkingTransaction, markingTxJob.Type)
 
@@ -334,7 +294,6 @@ func (s *transactionsTestSuite) TestSuccess() {
 	})
 
 	s.T().Run("should send a deploy contract transaction successfully", func(t *testing.T) {
-		defer gock.Off()
 		contractReq := testutils.FakeRegisterContractRequest()
 		_, err := s.client.RegisterContract(ctx, contractReq)
 		if err != nil {
@@ -344,8 +303,6 @@ func (s *transactionsTestSuite) TestSuccess() {
 
 		txRequest := testutils.FakeDeployContractRequest()
 		txRequest.Params.ContractName = contractReq.Name
-		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
-		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Times(2).Reply(200).JSON(chain)
 		txResponse, err := s.client.SendDeployTransaction(ctx, txRequest)
 		if err != nil {
 			assert.Fail(t, err.Error())
@@ -363,7 +320,6 @@ func (s *transactionsTestSuite) TestSuccess() {
 
 		assert.NotEmpty(t, txResponseGET.UUID)
 		assert.NotEmpty(t, job.UUID)
-		assert.Equal(t, job.ChainUUID, chain.UUID)
 		assert.Equal(t, utils.StatusStarted, job.Status)
 		assert.Equal(t, txRequest.Params.From, job.Transaction.From)
 		assert.Equal(t, utils.EthereumTransaction, job.Type)
@@ -379,10 +335,7 @@ func (s *transactionsTestSuite) TestSuccess() {
 	})
 
 	s.T().Run("should send a raw transaction successfully", func(t *testing.T) {
-		defer gock.Off()
 		txRequest := testutils.FakeSendRawTransactionRequest()
-		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
-		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
 		IdempotencyKey := utils.RandomString(16)
 		rctx := context.WithValue(ctx, clientutils.RequestHeaderKey, map[string]string{
 			controllers.IdempotencyKeyHeader: IdempotencyKey,
@@ -420,17 +373,14 @@ func (s *transactionsTestSuite) TestSuccess() {
 	})
 
 	s.T().Run("should send a transfer transaction successfully", func(t *testing.T) {
-		defer gock.Off()
 		txRequest := testutils.FakeSendTransferTransactionRequest()
-		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
-		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
 
 		txResponse, err := s.client.SendTransferTransaction(ctx, txRequest)
 		if err != nil {
 			assert.Fail(t, err.Error())
 			return
 		}
-		
+
 		assert.NotEmpty(t, txResponse.UUID)
 
 		txResponseGET, err := s.client.GetTxRequest(ctx, txResponse.UUID)
@@ -461,7 +411,6 @@ func (s *transactionsTestSuite) TestSuccess() {
 	})
 
 	s.T().Run("should succeed if payloads and idempotency key are the same and return same schedule", func(t *testing.T) {
-		defer gock.Off()
 		txRequest := testutils.FakeSendTransactionRequest()
 		idempotencyKey := utils.RandomString(16)
 		rctx := context.WithValue(ctx, clientutils.RequestHeaderKey, map[string]string{
@@ -475,9 +424,6 @@ func (s *transactionsTestSuite) TestSuccess() {
 			return
 		}
 
-		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
-		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
-
 		_, err = s.client.SendContractTransaction(rctx, txRequest)
 		assert.Error(t, err)
 
@@ -486,9 +432,6 @@ func (s *transactionsTestSuite) TestSuccess() {
 			assert.Fail(t, err.Error())
 			return
 		}
-
-		gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
-		gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Reply(200).JSON(chain)
 
 		txResponse, err := s.client.SendContractTransaction(rctx, txRequest)
 		if err != nil {

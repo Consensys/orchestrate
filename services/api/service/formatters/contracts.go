@@ -23,10 +23,8 @@ func FormatRegisterContractRequest(req *types.RegisterContractRequest) (*entitie
 	}
 
 	return &entities.Contract{
-		ID: entities.ContractID{
-			Name: req.Name,
-			Tag:  tag,
-		},
+		Name:             req.Name,
+		Tag:              tag,
 		Bytecode:         req.Bytecode,
 		DeployedBytecode: req.DeployedBytecode,
 		ABI:              string(rawABI),

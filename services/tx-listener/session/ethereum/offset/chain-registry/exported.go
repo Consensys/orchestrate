@@ -1,10 +1,9 @@
 package chainregistry
 
 import (
-	"context"
 	"sync"
 
-	registry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/client"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 )
 
 var (
@@ -13,11 +12,11 @@ var (
 )
 
 // Init Offset manager
-func Init(ctx context.Context) {
+func Init() {
 	initOnce.Do(func() {
 
-		registry.Init(ctx)
-		manager = NewManager(registry.GlobalClient())
+		client.Init()
+		manager = NewManager(client.GlobalClient())
 	})
 }
 

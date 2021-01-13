@@ -20,7 +20,7 @@ ALTER TABLE transaction_requests
 		log.WithError(err).Error("Could not apply migration 04")
 		return err
 	}
-	log.Info("Migration completed")
+	log.Info("Migration 04 completed")
 
 	return nil
 }
@@ -44,7 +44,7 @@ ALTER TABLE transaction_requests
 		return err
 	}
 
-	log.Info("Rollback completed")
+	log.Info("Rollback migration 04 completed")
 	return nil
 }
 

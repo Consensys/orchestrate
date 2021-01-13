@@ -31,8 +31,9 @@ func NewSendDeployTxUseCase(sendTxUC usecases.SendTxUseCase, getContractUC useca
 
 // Execute validates, creates and starts a new contract deployment transaction
 func (uc *sendDeployTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequest, tenantID string) (*entities.TxRequest, error) {
-	logger := log.WithContext(ctx)
-	logger.WithField("idempotency_key", txRequest.IdempotencyKey).Debug("creating new deployment transaction")
+	log.WithContext(ctx).
+		WithField("idempotency_key", txRequest.IdempotencyKey).
+		Debug("creating new deployment transaction")
 
 	txData, err := uc.computeTxData(ctx, txRequest.Params)
 	if err != nil {
@@ -50,15 +51,14 @@ func (uc *sendDeployTxUsecase) computeTxData(ctx context.Context, params *entiti
 		params.ContractTag = "latest"
 	}
 
-	contract, err := uc.getContractUseCase.Execute(ctx, &entities.ContractID{
-		Name: params.ContractName,
-		Tag:  params.ContractTag,
-	})
-
+	contract, err := uc.getContractUseCase.Execute(ctx, params.ContractName, params.ContractTag)
+	if errors.IsNotFoundError(err) {
+		errMessage := "contract not found"
+		logger.WithError(err).Error(errMessage)
+		return "", errors.InvalidParameterError(errMessage)
+	}
 	if err != nil {
-		errMessage := "failed to fetch contract"
-		logger.Error(errMessage)
-		return "", errors.InvalidParameterError(errMessage).ExtendComponent(sendDeployTxComponent)
+		return "", errors.FromError(err)
 	}
 
 	// Craft bytecode
@@ -66,7 +66,7 @@ func (uc *sendDeployTxUsecase) computeTxData(ctx context.Context, params *entiti
 	if err != nil {
 		errMessage := "failed to decode bytecode"
 		logger.WithError(err).Error(errMessage)
-		return "", errors.DataCorruptedError(errMessage).ExtendComponent(sendDeployTxComponent)
+		return "", errors.EncodingError(errMessage)
 	}
 
 	// Craft constructor method signature
@@ -76,7 +76,7 @@ func (uc *sendDeployTxUsecase) computeTxData(ctx context.Context, params *entiti
 	if err != nil {
 		errMessage := "failed to parse constructor method arguments"
 		logger.WithError(err).Error(errMessage)
-		return "", errors.DataCorruptedError(errMessage).ExtendComponent(sendDeployTxComponent)
+		return "", errors.DataCorruptedError(errMessage)
 	}
 
 	txDataBytes, err := crafter.CraftConstructor(bytecode, constructorSignature, args...)

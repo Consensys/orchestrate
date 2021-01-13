@@ -6,36 +6,40 @@ import (
 )
 
 type PGAgents struct {
-	tx         store.TransactionAgent
-	job        store.JobAgent
-	log        store.LogAgent
-	schedule   store.ScheduleAgent
-	txRequest  store.TransactionRequestAgent
-	account    store.AccountAgent
-	faucet     store.FaucetAgent
-	artifact   store.ArtifactAgent
-	codeHash   store.CodeHashAgent
-	event      store.EventAgent
-	method     store.MethodAgent
-	repository store.RepositoryAgent
-	tag        store.TagAgent
+	tx               store.TransactionAgent
+	job              store.JobAgent
+	log              store.LogAgent
+	schedule         store.ScheduleAgent
+	txRequest        store.TransactionRequestAgent
+	account          store.AccountAgent
+	faucet           store.FaucetAgent
+	artifact         store.ArtifactAgent
+	codeHash         store.CodeHashAgent
+	event            store.EventAgent
+	method           store.MethodAgent
+	repository       store.RepositoryAgent
+	tag              store.TagAgent
+	chain            store.ChainAgent
+	privateTxManager store.PrivateTxManagerAgent
 }
 
 func New(db pg.DB) *PGAgents {
 	return &PGAgents{
-		tx:         NewPGTransaction(db),
-		job:        NewPGJob(db),
-		log:        NewPGLog(db),
-		schedule:   NewPGSchedule(db),
-		txRequest:  NewPGTransactionRequest(db),
-		account:    NewPGAccount(db),
-		faucet:     NewPGFaucet(db),
-		artifact:   NewPGArtifact(db),
-		codeHash:   NewPGCodeHash(db),
-		event:      NewPGEvent(db),
-		method:     NewPGMethod(db),
-		repository: NewPGRepository(db),
-		tag:        NewPGTag(db),
+		tx:               NewPGTransaction(db),
+		job:              NewPGJob(db),
+		log:              NewPGLog(db),
+		schedule:         NewPGSchedule(db),
+		txRequest:        NewPGTransactionRequest(db),
+		account:          NewPGAccount(db),
+		faucet:           NewPGFaucet(db),
+		artifact:         NewPGArtifact(db),
+		codeHash:         NewPGCodeHash(db),
+		event:            NewPGEvent(db),
+		method:           NewPGMethod(db),
+		repository:       NewPGRepository(db),
+		tag:              NewPGTag(db),
+		chain:            NewPGChain(db),
+		privateTxManager: NewPGPrivateTxManager(db),
 	}
 }
 
@@ -89,4 +93,12 @@ func (a *PGAgents) Repository() store.RepositoryAgent {
 
 func (a *PGAgents) Tag() store.TagAgent {
 	return a.tag
+}
+
+func (a *PGAgents) Chain() store.ChainAgent {
+	return a.chain
+}
+
+func (a *PGAgents) PrivateTxManager() store.PrivateTxManagerAgent {
+	return a.privateTxManager
 }

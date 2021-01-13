@@ -1,8 +1,6 @@
 version: "3.7"
 
 x-default-variables: &default-variables
-  CHAIN_REGISTRY_URL: ${CHAIN_REGISTRY_URL-http://chain-registry:8081}
-  CHAIN_REGISTRY_METRICS_URL: ${CHAIN_REGISTRY_METRICS_URL-http://chain-registry:8082}
   API_URL: ${API-http://api:8081}
   API_METRICS_URL: ${API-http://api:8082}
   KEY_MANAGER_URL: ${KEY_MANAGER_URL-http://key-manager:8081}
@@ -56,9 +54,9 @@ x-container-common: &container-common
   labels:
     filebeat: "true"
 
-x-chain-registry-common: &chain-registry-common
-  CHAIN_REGISTRY_TYPE: ${CHAIN_REGISTRY_TYPE-}
-  DB_HOST: postgres-chain-registry
+x-proxy-common: &proxy-common
+  PROXY_MAXIDLECONNSPERHOST: ${PROXY_MAXIDLECONNSPERHOST-}
+  PROXY_CACHE_TTL: ${PROXY_CACHE_TTL-}
 
 x-api-common: &api-common
   API_STORE_TYPE: ${API_STORE_TYPE-}
@@ -68,41 +66,6 @@ x-key-manager-common: &key-manager-common
   KEY_MANAGER_TYPE: ${KEY_MANAGER_TYPE-}
 
 services:
-  chain-registry-migration-init:
-    <<: *container-common
-    environment:
-      <<: *default-variables
-      <<: *chain-registry-common
-    restart: "no"
-    command: chain-registry migrate init
-
-  chain-registry-migration:
-    <<: *container-common
-    environment:
-      <<: *default-variables
-      <<: *chain-registry-common
-    restart: "no"
-    depends_on:
-      - chain-registry-migration-init
-    command: chain-registry migrate up
-
-  chain-registry:
-    <<: *container-common
-    ports:
-      - 8011:8081
-      - 8012:8082
-    environment:
-      <<: *default-variables
-      <<: *chain-registry-common
-      CHAIN_REGISTRY_INIT: ${CHAIN_REGISTRY_INIT-}
-      CHAIN_REGISTRY_CACHE_TTL: ${CHAIN_REGISTRY_CACHE_TTL-}
-      CHAIN_REGISTRY_MAXIDLECONNSPERHOST: ${CHAIN_REGISTRY_MAXIDLECONNSPERHOST-}
-    depends_on:
-      - chain-registry-migration
-    command: chain-registry run
-    labels:
-      filebeat: "false"
-
   api-migration-init:
     <<: *container-common
     environment:
@@ -129,11 +92,13 @@ services:
     environment:
       <<: *default-variables
       <<: *api-common
+      <<: *proxy-common
     depends_on:
       - api-migration
-      - chain-registry
       - key-manager
     command: api run
+    labels:
+      filebeat: "false"
 
   #  TODO: Remove after version 2.7.0
   keymanager-migration-import-secrets:
@@ -198,7 +163,6 @@ services:
       <<: *default-variables
     depends_on:
       - api
-      - chain-registry
     command: tx-listener run
 
   e2e:

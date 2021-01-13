@@ -3,14 +3,10 @@ package jobs
 import (
 	"context"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
-
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/validators"
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database"
@@ -24,15 +20,15 @@ const createJobComponent = "use-cases.create-job"
 
 // createJobUseCase is a use case to create a new transaction job
 type createJobUseCase struct {
-	validator validators.TransactionValidator
-	db        store.DB
+	db         store.DB
+	getChainUC usecases.GetChainUseCase
 }
 
 // NewCreateJobUseCase creates a new CreateJobUseCase
-func NewCreateJobUseCase(db store.DB, validator validators.TransactionValidator) usecases.CreateJobUseCase {
+func NewCreateJobUseCase(db store.DB, getChainUC usecases.GetChainUseCase) usecases.CreateJobUseCase {
 	return &createJobUseCase{
-		validator: validator,
-		db:        db,
+		db:         db,
+		getChainUC: getChainUC,
 	}
 }
 
@@ -49,14 +45,13 @@ func (uc *createJobUseCase) Execute(ctx context.Context, job *entities.Job, tena
 		WithField("tenants", tenants)
 	logger.Debug("creating new job")
 
-	chainID, err := uc.validator.ValidateChainExists(ctx, job.ChainUUID)
+	chainID, err := uc.getChainID(ctx, job.ChainUUID, tenants)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(createJobComponent)
 	}
 	job.InternalData.ChainID = chainID
 
 	if job.Transaction.From != "" {
-		// Validate account exists
 		err = uc.validateAccountExists(ctx, job.Transaction.From, tenants)
 		if err != nil {
 			return nil, errors.FromError(err).ExtendComponent(createJobComponent)
@@ -120,17 +115,25 @@ func (uc *createJobUseCase) Execute(ctx context.Context, job *entities.Job, tena
 }
 
 func (uc *createJobUseCase) validateAccountExists(ctx context.Context, address string, tenants []string) error {
-	_, err := uc.db.Account().FindOneByAddress(ctx, address, append(tenants, multitenancy.DefaultTenant))
-
+	_, err := uc.db.Account().FindOneByAddress(ctx, address, tenants)
 	if errors.IsNotFoundError(err) {
-		errMessage := "failed to get account"
-		log.WithError(err).WithField("account", address).WithField("tenants", tenants).Error(errMessage)
-		return errors.InvalidParameterError(errMessage)
+		return errors.InvalidParameterError("failed to get account")
 	}
-
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func (uc *createJobUseCase) getChainID(ctx context.Context, chainUUID string, tenants []string) (string, error) {
+	chain, err := uc.getChainUC.Execute(ctx, chainUUID, tenants)
+	if errors.IsNotFoundError(err) {
+		return "", errors.InvalidParameterError("failed to get chain")
+	}
+	if err != nil {
+		return "", errors.FromError(err)
+	}
+
+	return chain.ChainID, nil
 }

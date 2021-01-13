@@ -14,11 +14,11 @@ Feature: Chain-Proxy Authentication
     Given I set the headers
       | Key           | Value                |
       | Authorization | Bearer {{foo.token}} |
-    When I send "POST" request to "{{global.chain-registry}}/chains" with json:
+    When I send "POST" request to "{{global.api}}/chains" with json:
       """
       {
-        "name": "geth-foo-{{scenarioID}}",
-        "urls": {{global.nodes.geth.URLs}}
+      "name": "geth-foo-{{scenarioID}}",
+      "urls": {{global.nodes.geth.URLs}}
       }
       """
     Then the response code should be 200
@@ -28,11 +28,11 @@ Feature: Chain-Proxy Authentication
       | Key           | Value                |
       | Authorization | Bearer {{foo.token}} |
       | X-Tenant-ID   | _                    |
-    When I send "POST" request to "{{global.chain-registry}}/chains" with json:
+    When I send "POST" request to "{{global.api}}/chains" with json:
       """
       {
-        "name": "geth-default-{{scenarioID}}",
-        "urls": {{global.nodes.geth.URLs}}
+      "name": "geth-default-{{scenarioID}}",
+      "urls": {{global.nodes.geth.URLs}}
       }
       """
     Then the response code should be 200
@@ -44,26 +44,26 @@ Feature: Chain-Proxy Authentication
       | Key          | Value              |
       | X-API-Key    | {{global.api-key}} |
       | Content-Type | application/json   |
-    When I send "POST" request to "{{global.chain-registry}}/{{chainFoo}}" with json:
+    When I send "POST" request to "{{global.api}}/{{chainFoo}}" with json:
       """
       {
-        "jsonrpc": "2.0", 
-        "method": "eth_getBlockByNumber", 
+        "jsonrpc": "2.0",
+        "method": "eth_getBlockByNumber",
         "params": [
-          "latest", 
+          "latest",
           false
         ],
         "id": 1
       }
       """
     Then the response code should be 200
-    When I send "POST" request to "{{global.chain-registry}}/{{chainDefault}}" with json:
+    When I send "POST" request to "{{global.api}}/{{chainDefault}}" with json:
       """
       {
-        "jsonrpc": "2.0", 
-        "method": "eth_getBlockByNumber", 
+        "jsonrpc": "2.0",
+        "method": "eth_getBlockByNumber",
         "params": [
-          "latest", 
+          "latest",
           false
         ],
         "id": 1
@@ -75,26 +75,26 @@ Feature: Chain-Proxy Authentication
       | Key          | Value            |
       | X-API-Key    | unknown-key      |
       | Content-Type | application/json |
-    When I send "POST" request to "{{global.chain-registry}}/{{chainFoo}}" with json:
+    When I send "POST" request to "{{global.api}}/{{chainFoo}}" with json:
       """
       {
-        "jsonrpc": "2.0", 
-        "method": "eth_getBlockByNumber", 
+        "jsonrpc": "2.0",
+        "method": "eth_getBlockByNumber",
         "params": [
-          "latest", 
+          "latest",
           false
         ],
         "id": 1
       }
       """
     Then the response code should be 401
-    When I send "POST" request to "{{global.chain-registry}}/{{chainDefault}}" with json:
+    When I send "POST" request to "{{global.api}}/{{chainDefault}}" with json:
       """
       {
-        "jsonrpc": "2.0", 
-        "method": "eth_getBlockByNumber", 
+        "jsonrpc": "2.0",
+        "method": "eth_getBlockByNumber",
         "params": [
-          "latest", 
+          "latest",
           false
         ],
         "id": 1
@@ -106,26 +106,26 @@ Feature: Chain-Proxy Authentication
       | Key           | Value                |
       | Authorization | Bearer {{foo.token}} |
       | Content-Type  | application/json     |
-    When I send "POST" request to "{{global.chain-registry}}/{{chainFoo}}" with json:
+    When I send "POST" request to "{{global.api}}/{{chainFoo}}" with json:
       """
       {
-        "jsonrpc": "2.0", 
-        "method": "eth_getBlockByNumber", 
+        "jsonrpc": "2.0",
+        "method": "eth_getBlockByNumber",
         "params": [
-          "latest", 
+          "latest",
           false
         ],
         "id": 1
       }
       """
     Then the response code should be 200
-    When I send "POST" request to "{{global.chain-registry}}/{{chainDefault}}" with json:
+    When I send "POST" request to "{{global.api}}/{{chainDefault}}" with json:
       """
       {
-        "jsonrpc": "2.0", 
-        "method": "eth_getBlockByNumber", 
+        "jsonrpc": "2.0",
+        "method": "eth_getBlockByNumber",
         "params": [
-          "latest", 
+          "latest",
           false
         ],
         "id": 1
@@ -137,26 +137,26 @@ Feature: Chain-Proxy Authentication
       | Key           | Value                |
       | Authorization | Bearer {{bar.token}} |
       | Content-Type  | application/json     |
-    When I send "POST" request to "{{global.chain-registry}}/{{chainFoo}}" with json:
+    When I send "POST" request to "{{global.api}}/{{chainFoo}}" with json:
       """
       {
-        "jsonrpc": "2.0", 
-        "method": "eth_getBlockByNumber", 
+        "jsonrpc": "2.0",
+        "method": "eth_getBlockByNumber",
         "params": [
-          "latest", 
+          "latest",
           false
         ],
         "id": 1
       }
       """
     Then the response code should be 404
-    When I send "POST" request to "{{global.chain-registry}}/{{chainDefault}}" with json:
+    When I send "POST" request to "{{global.api}}/{{chainDefault}}" with json:
       """
       {
-        "jsonrpc": "2.0", 
-        "method": "eth_getBlockByNumber", 
+        "jsonrpc": "2.0",
+        "method": "eth_getBlockByNumber",
         "params": [
-          "latest", 
+          "latest",
           false
         ],
         "id": 1
@@ -168,26 +168,26 @@ Feature: Chain-Proxy Authentication
       | Key           | Value                     |
       | Authorization | Bearer {{wildcard.token}} |
       | Content-Type  | application/json          |
-    When I send "POST" request to "{{global.chain-registry}}/{{chainFoo}}" with json:
+    When I send "POST" request to "{{global.api}}/{{chainFoo}}" with json:
       """
       {
-        "jsonrpc": "2.0", 
-        "method": "eth_getBlockByNumber", 
+        "jsonrpc": "2.0",
+        "method": "eth_getBlockByNumber",
         "params": [
-          "latest", 
+          "latest",
           false
         ],
         "id": 1
       }
       """
     Then the response code should be 200
-    When I send "POST" request to "{{global.chain-registry}}/{{chainDefault}}" with json:
+    When I send "POST" request to "{{global.api}}/{{chainDefault}}" with json:
       """
       {
-        "jsonrpc": "2.0", 
-        "method": "eth_getBlockByNumber", 
+        "jsonrpc": "2.0",
+        "method": "eth_getBlockByNumber",
         "params": [
-          "latest", 
+          "latest",
           false
         ],
         "id": 1
@@ -199,7 +199,7 @@ Feature: Chain-Proxy Authentication
       | Key           | Value                     |
       | Authorization | Bearer {{wildcard.token}} |
       | Content-Type  | application/json          |
-    When I send "DELETE" request to "{{global.chain-registry}}/chains/{{chainFoo}}"
+    When I send "DELETE" request to "{{global.api}}/chains/{{chainFoo}}"
     Then the response code should be 204
-    When I send "DELETE" request to "{{global.chain-registry}}/chains/{{chainDefault}}"
+    When I send "DELETE" request to "{{global.api}}/chains/{{chainDefault}}"
     Then the response code should be 204

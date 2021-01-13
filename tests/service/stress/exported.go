@@ -15,7 +15,6 @@ import (
 	pkglog "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
-	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/handlers"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/handlers/consumer"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/handlers/dispatcher"
@@ -47,7 +46,6 @@ func Start(ctx context.Context) error {
 
 	workload = NewService(cfg,
 		chanregistry.GlobalChanRegistry(),
-		chainregistry.GlobalClient(),
 		client.GlobalClient(),
 		broker.GlobalSyncProducer())
 
@@ -113,7 +111,6 @@ func initComponents(ctx context.Context) {
 		},
 		func() {
 			broker.InitSyncProducer(ctx)
-			chainregistry.Init(ctx)
 			client.Init()
 		},
 		// Initialize ConsumerGroup

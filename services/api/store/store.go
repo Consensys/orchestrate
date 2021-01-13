@@ -29,6 +29,8 @@ type Agents interface {
 	Method() MethodAgent
 	Repository() RepositoryAgent
 	Tag() TagAgent
+	Chain() ChainAgent
+	PrivateTxManager() PrivateTxManagerAgent
 }
 
 type DB interface {
@@ -85,6 +87,21 @@ type FaucetAgent interface {
 	FindOneByUUID(ctx context.Context, uuid string, tenants []string) (*models.Faucet, error)
 	Search(ctx context.Context, filters *entities.FaucetFilters, tenants []string) ([]*models.Faucet, error)
 	Delete(ctx context.Context, faucet *models.Faucet, tenants []string) error
+}
+
+type ChainAgent interface {
+	Insert(ctx context.Context, chain *models.Chain) error
+	Update(ctx context.Context, chain *models.Chain, tenants []string) error
+	Search(ctx context.Context, filters *entities.ChainFilters, tenants []string) ([]*models.Chain, error)
+	FindOneByUUID(ctx context.Context, uuid string, tenants []string) (*models.Chain, error)
+	Delete(ctx context.Context, chain *models.Chain, tenants []string) error
+}
+
+type PrivateTxManagerAgent interface {
+	Insert(ctx context.Context, privateTxManager *models.PrivateTxManager) error
+	Update(ctx context.Context, privateTxManager *models.PrivateTxManager) error
+	Search(ctx context.Context, chainUUID string) ([]*models.PrivateTxManager, error)
+	Delete(ctx context.Context, privateTxManager *models.PrivateTxManager) error
 }
 
 type ArtifactAgent interface {

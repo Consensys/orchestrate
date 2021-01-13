@@ -122,3 +122,29 @@ func FakeFaucetModel() *models.Faucet {
 		Cooldown:        "10s",
 	}
 }
+
+func FakeChainModel() *models.Chain {
+	return &models.Chain{
+		UUID:                      uuid.Must(uuid.NewV4()).String(),
+		Name:                      "mainnet",
+		TenantID:                  "tenantID",
+		URLs:                      []string{"http://ganache:8545"},
+		ChainID:                   "888",
+		ListenerDepth:             0,
+		ListenerCurrentBlock:      1,
+		ListenerStartingBlock:     0,
+		ListenerBackOffDuration:   "5s",
+		ListenerExternalTxEnabled: false,
+		PrivateTxManagers:         []*models.PrivateTxManager{},
+	}
+}
+
+func FakePrivateTxManagerModel() *models.PrivateTxManager {
+	return &models.PrivateTxManager{
+		UUID:      uuid.Must(uuid.NewV4()).String(),
+		ChainUUID: "uuid.Must(uuid.NewV4()).String()",
+		URL:       "http://tessera:8000",
+		Type:      "Tessera",
+		CreatedAt: time.Now(),
+	}
+}

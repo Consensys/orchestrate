@@ -11,8 +11,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
 	tcpmetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tcp/metrics"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/metrics"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/proxy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/multi"
-	chainnregistryclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/client"
 	keymanagerclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client"
 )
 
@@ -23,18 +23,20 @@ func Flags(f *pflag.FlagSet) {
 	broker.KafkaTopicTxSender(f)
 
 	// Internal API clients
-	chainnregistryclient.Flags(f)
 	keymanagerclient.Flags(f)
 
 	multi.Flags(f)
 	http.Flags(f)
 	metricregistry.Flags(f, httpmetrics.ModuleName, tcpmetrics.ModuleName, metrics.ModuleName)
+
+	proxy.Flags(f)
 }
 
 type Config struct {
 	App          *app.Config
 	Store        *multi.Config
 	Multitenancy bool
+	Proxy        *proxy.Config
 }
 
 func NewConfig(vipr *viper.Viper) *Config {
@@ -42,5 +44,6 @@ func NewConfig(vipr *viper.Viper) *Config {
 		App:          app.NewConfig(vipr),
 		Store:        multi.NewConfig(vipr),
 		Multitenancy: viper.GetBool(multitenancy.EnabledViperKey),
+		Proxy:        proxy.NewConfig(),
 	}
 }

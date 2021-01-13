@@ -13,19 +13,15 @@ import (
 const DefaultTagValue = "latest"
 
 type Contract struct {
-	ID               ContractID `json:"id"`
-	ABI              string     `json:"abi" example:"[{anonymous: false, inputs: [{indexed: false, name: account, type: address}, name: MinterAdded, type: event}]}]"`
-	Bytecode         string     `json:"bytecode,omitempty" validate:"omitempty,isHex" example:"0x6080604052348015600f57600080f..."`
-	DeployedBytecode string     `json:"deployed_bytecode,omitempty" validate:"omitempty,isHex" example:"0x6080604052348015600f57600080f..."`
-	Constructor      Method     `json:"constructor"`
-	Methods          []Method   `json:"methods"`
-	Events           []Event    `json:"events"`
-}
-
-type ContractID struct {
-	Name     string `json:"name" validate:"required" example:"ERC20"`
-	Tag      string `json:"tag" example:"v1.0.0"`
-	Registry string `json:"registry" example:"registry.consensys.net/orchestrate"`
+	Name             string   `json:"name" example:"ERC20"`
+	Tag              string   `json:"tag" example:"v1.0.0"`
+	Registry         string   `json:"registry" example:"registry.consensys.net/orchestrate"`
+	ABI              string   `json:"abi" example:"[{anonymous: false, inputs: [{indexed: false, name: account, type: address}, name: MinterAdded, type: event}]}]"`
+	Bytecode         string   `json:"bytecode,omitempty" example:"0x6080604052348015600f57600080f..."`
+	DeployedBytecode string   `json:"deployedBytecode,omitempty" example:"0x6080604052348015600f57600080f..."`
+	Constructor      Method   `json:"constructor"`
+	Methods          []Method `json:"methods"`
+	Events           []Event  `json:"events"`
 }
 
 type Method struct {
@@ -60,7 +56,7 @@ type Artifact struct {
 }
 
 // Short returns a short string representation of contractId information
-func (c *ContractID) Short() string {
+func (c *Contract) Short() string {
 	if c.Name == "" {
 		return ""
 	}
@@ -70,11 +66,6 @@ func (c *ContractID) Short() string {
 	}
 
 	return fmt.Sprintf("%v[%v]", c.Name, c.Tag)
-}
-
-// Short returns a short string representation of contract information
-func (c *Contract) Short() string {
-	return c.ID.Short()
 }
 
 // Long return a long string representation of contract information

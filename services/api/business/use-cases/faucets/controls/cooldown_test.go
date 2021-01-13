@@ -13,7 +13,6 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/chainregistry"
 )
 
 func TestCooldownControl_Execute(t *testing.T) {
@@ -35,7 +34,7 @@ func TestCooldownControl_Execute(t *testing.T) {
 			faucet1.UUID: faucet1,
 			faucet2.UUID: faucet2,
 		}
-		reqs := []*chainregistry.Request{
+		reqs := []*entities.FaucetRequest{
 			newFaucetReq(candidates, chains[0], "", addresses[0]),
 			newFaucetReq(candidates, chains[0], "", addresses[0]),
 		}
@@ -45,7 +44,7 @@ func TestCooldownControl_Execute(t *testing.T) {
 		ch := make(chan bool, 1)
 		for idx, req := range reqs {
 			wg.Add(1)
-			go func(idx int, req *chainregistry.Request) {
+			go func(idx int, req *entities.FaucetRequest) {
 				err := ctrl.Control(ctx, req)
 				assert.NoError(t, err)
 				fct := electFirstFaucetCandidate(req.Candidates)
@@ -67,7 +66,7 @@ func TestCooldownControl_Execute(t *testing.T) {
 			faucet1.UUID: faucet1,
 			faucet2.UUID: faucet2,
 		}
-		reqs := []*chainregistry.Request{
+		reqs := []*entities.FaucetRequest{
 			newFaucetReq(candidates, chains[1], "", addresses[1]),
 			newFaucetReq(candidates, chains[1], "", addresses[1]),
 		}
@@ -77,7 +76,7 @@ func TestCooldownControl_Execute(t *testing.T) {
 		ch := make(chan bool, 1)
 		for idx, req := range reqs {
 			wg.Add(1)
-			go func(idx int, req *chainregistry.Request) {
+			go func(idx int, req *entities.FaucetRequest) {
 				err := ctrl.Control(ctx, req)
 				assert.NoError(t, err)
 				fct := electFirstFaucetCandidate(req.Candidates)
@@ -100,7 +99,7 @@ func TestCooldownControl_Execute(t *testing.T) {
 			faucet1.UUID: faucet1,
 			faucet2.UUID: faucet2,
 		}
-		reqs := []*chainregistry.Request{
+		reqs := []*entities.FaucetRequest{
 			newFaucetReq(candidates, chains[2], "", addresses[2]),
 			newFaucetReq(candidates, chains[2], "", addresses[2]),
 			newFaucetReq(candidates, chains[2], "", addresses[2]),
@@ -111,7 +110,7 @@ func TestCooldownControl_Execute(t *testing.T) {
 		ch := make(chan bool, 1)
 		for idx, req := range reqs {
 			wg.Add(1)
-			go func(idx int, req *chainregistry.Request) {
+			go func(idx int, req *entities.FaucetRequest) {
 				err := ctrl.Control(ctx, req)
 				if err == nil {
 					fct := electFirstFaucetCandidate(req.Candidates)

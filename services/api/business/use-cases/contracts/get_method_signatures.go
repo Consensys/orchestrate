@@ -6,7 +6,6 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
 )
 
@@ -25,11 +24,11 @@ func NewGetMethodSignaturesUseCase(getContractUseCase usecases.GetContractUseCas
 	}
 }
 
-func (uc *getMethodSignaturesUseCase) Execute(ctx context.Context, id *entities.ContractID, methodName string) ([]string, error) {
-	logger := log.WithContext(ctx).WithField("contract", id).WithField("method_name", methodName)
+func (uc *getMethodSignaturesUseCase) Execute(ctx context.Context, name, tag, methodName string) ([]string, error) {
+	logger := log.WithContext(ctx).WithField("name", name).WithField("tag", tag).WithField("method_name", methodName)
 	logger.Debug("get method signatures starting...")
 
-	contract, err := uc.getContractUseCase.Execute(ctx, id)
+	contract, err := uc.getContractUseCase.Execute(ctx, name, tag)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(getMethodSignaturesComponent)
 	}

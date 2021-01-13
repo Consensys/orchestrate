@@ -3,7 +3,6 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/cmd/api"
-	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/cmd/chain-registry"
 	keymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/cmd/key-manager"
 	txlistener "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/cmd/tx-listener"
 	txsender "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/cmd/tx-sender"
@@ -35,7 +34,6 @@ func NewCommand() *cobra.Command {
 	rootCmd.AddCommand(txsender.NewRootCommand())
 	rootCmd.AddCommand(txlistener.NewRootCommand())
 	rootCmd.AddCommand(api.NewRootCommand())
-	rootCmd.AddCommand(chainregistry.NewRootCommand())
 	rootCmd.AddCommand(keymanager.NewRootCommand())
 	rootCmd.AddCommand(utils.NewRootCommand())
 

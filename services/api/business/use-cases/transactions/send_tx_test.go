@@ -18,28 +18,24 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases/mocks"
-	mocks3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/validators/mocks"
 	mocks2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models"
 	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models/testutils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/client/mock"
-	models2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/store/models"
 )
 
 type sendTxSuite struct {
 	suite.Suite
-	usecase             usecases.SendTxUseCase
-	DB                  *mocks2.MockDB
-	DBTX                *mocks2.MockTx
-	Validators          *mocks3.MockTransactionValidator
-	ChainRegistryClient *mock.MockChainRegistryClient
-	TxRequestDA         *mocks2.MockTransactionRequestAgent
-	ScheduleDA          *mocks2.MockScheduleAgent
-	StartJobUC          *mocks.MockStartJobUseCase
-	CreateJobUC         *mocks.MockCreateJobUseCase
-	CreateScheduleUC    *mocks.MockCreateScheduleUseCase
-	GetTxUC             *mocks.MockGetTxUseCase
-	GetFaucetCandidate  *mocks.MockGetFaucetCandidateUseCase
+	usecase            usecases.SendTxUseCase
+	DB                 *mocks2.MockDB
+	DBTX               *mocks2.MockTx
+	SearchChainsUC     *mocks.MockSearchChainsUseCase
+	TxRequestDA        *mocks2.MockTransactionRequestAgent
+	ScheduleDA         *mocks2.MockScheduleAgent
+	StartJobUC         *mocks.MockStartJobUseCase
+	CreateJobUC        *mocks.MockCreateJobUseCase
+	CreateScheduleUC   *mocks.MockCreateScheduleUseCase
+	GetTxUC            *mocks.MockGetTxUseCase
+	GetFaucetCandidate *mocks.MockGetFaucetCandidateUseCase
 }
 
 var (
@@ -57,7 +53,7 @@ func (s *sendTxSuite) SetupTest() {
 
 	s.DB = mocks2.NewMockDB(ctrl)
 	s.DBTX = mocks2.NewMockTx(ctrl)
-	s.Validators = mocks3.NewMockTransactionValidator(ctrl)
+	s.SearchChainsUC = mocks.NewMockSearchChainsUseCase(ctrl)
 	s.TxRequestDA = mocks2.NewMockTransactionRequestAgent(ctrl)
 	s.ScheduleDA = mocks2.NewMockScheduleAgent(ctrl)
 	s.StartJobUC = mocks.NewMockStartJobUseCase(ctrl)
@@ -65,7 +61,6 @@ func (s *sendTxSuite) SetupTest() {
 	s.CreateScheduleUC = mocks.NewMockCreateScheduleUseCase(ctrl)
 	s.GetTxUC = mocks.NewMockGetTxUseCase(ctrl)
 	s.GetFaucetCandidate = mocks.NewMockGetFaucetCandidateUseCase(ctrl)
-	s.ChainRegistryClient = mock.NewMockChainRegistryClient(ctrl)
 
 	s.DB.EXPECT().Begin().Return(s.DBTX, nil).AnyTimes()
 	s.DB.EXPECT().TransactionRequest().Return(s.TxRequestDA).AnyTimes()
@@ -78,9 +73,8 @@ func (s *sendTxSuite) SetupTest() {
 	s.CreateJobUC.EXPECT().WithDBTransaction(s.DBTX).Return(s.CreateJobUC).AnyTimes()
 
 	s.usecase = NewSendTxUseCase(
-		s.Validators,
 		s.DB,
-		s.ChainRegistryClient,
+		s.SearchChainsUC,
 		s.StartJobUC,
 		s.CreateJobUC,
 		s.CreateScheduleUC,
@@ -160,16 +154,17 @@ func (s *sendTxSuite) TestSendTx_Success() {
 		tenantID := "tenantID"
 		tenants := []string{tenantID}
 		allowedTenants := []string{tenantID, multitenancy.DefaultTenant}
-		chain := &models2.Chain{UUID: "32da9731-0fb8-4235-a4cc-35070ffe5bf0"}
+		chains := []*entities.Chain{testutils3.FakeChain()}
+		chains[0].UUID = "myChainUUID"
 		jobUUID := txRequest.Schedule.Jobs[0].UUID
 		txData := ""
 		txRequestModel := testutils2.FakeTxRequest(0)
-		txRequestModel.RequestHash = "ea2d3e36db863014fdfaf49a88c31f1d"
+		txRequestModel.RequestHash = "8ba6ffc20366e5326fc7d4a3f4833306"
 
-		s.ChainRegistryClient.EXPECT().GetChainByName(ctx, txRequest.ChainName).Return(chain, nil)
+		s.SearchChainsUC.EXPECT().Execute(ctx, &entities.ChainFilters{Names: []string{txRequest.ChainName}}, []string{tenantID, multitenancy.DefaultTenant}).Return(chains, nil)
 		s.TxRequestDA.EXPECT().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey, tenantID).Return(txRequestModel, nil)
 		s.GetTxUC.EXPECT().Execute(ctx, txRequestModel.Schedule.UUID, tenants).Return(txRequest, nil)
-		s.GetFaucetCandidate.EXPECT().Execute(ctx, gomock.Any(), chain, allowedTenants).Return(nil, faucetNotFoundErr)
+		s.GetFaucetCandidate.EXPECT().Execute(ctx, gomock.Any(), chains[0], allowedTenants).Return(nil, faucetNotFoundErr)
 		s.StartJobUC.EXPECT().Execute(ctx, jobUUID, tenants).Return(nil)
 		s.GetTxUC.EXPECT().Execute(ctx, txRequest.Schedule.UUID, tenants).Return(txRequest, nil)
 
@@ -190,12 +185,13 @@ func (s *sendTxSuite) TestSendTx_Success() {
 		ctx := context.Background()
 		tenantID := "tenantID"
 		tenants := []string{tenantID}
-		chain := &models2.Chain{UUID: "32da9731-0fb8-4235-a4cc-35070ffe5bf0"}
 		txData := ""
 		txRequestModel := testutils2.FakeTxRequest(0)
-		txRequestModel.RequestHash = "ea2d3e36db863014fdfaf49a88c31f1d"
+		txRequestModel.RequestHash = "8ba6ffc20366e5326fc7d4a3f4833306"
+		chains := []*entities.Chain{testutils3.FakeChain()}
+		chains[0].UUID = "myChainUUID"
 
-		s.ChainRegistryClient.EXPECT().GetChainByName(ctx, txRequest.ChainName).Return(chain, nil)
+		s.SearchChainsUC.EXPECT().Execute(ctx, &entities.ChainFilters{Names: []string{txRequest.ChainName}}, []string{tenantID, multitenancy.DefaultTenant}).Return(chains, nil)
 		s.TxRequestDA.EXPECT().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey, tenantID).Return(txRequestModel, nil)
 		s.GetTxUC.EXPECT().Execute(ctx, txRequestModel.Schedule.UUID, tenants).Return(txRequest, nil)
 		s.GetTxUC.EXPECT().Execute(ctx, txRequest.Schedule.UUID, tenants).Return(txRequest, nil)
@@ -229,31 +225,30 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 	tenantID := "tenantID"
 	tenants := []string{tenantID}
 	allowedTenants := []string{tenantID, multitenancy.DefaultTenant}
-	chain := &models2.Chain{UUID: uuid.Must(uuid.NewV4()).String()}
+	chains := []*entities.Chain{testutils3.FakeChain()}
 	jobUUID := uuid.Must(uuid.NewV4()).String()
 	scheduleUUID := uuid.Must(uuid.NewV4()).String()
 	txData := ""
 
-	s.T().Run("should fail with same error if chain registry client fails", func(t *testing.T) {
+	s.T().Run("should fail with same error if chain agent fails", func(t *testing.T) {
 		expectedErr := fmt.Errorf("error")
 		txRequest := testutils3.FakeTxRequest()
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 
-		s.ChainRegistryClient.EXPECT().GetChainByName(ctx, txRequest.ChainName).Return(nil, expectedErr)
+		s.SearchChainsUC.EXPECT().Execute(ctx, gomock.Any(), []string{tenantID, multitenancy.DefaultTenant}).Return(nil, expectedErr)
 
 		response, err := s.usecase.Execute(ctx, txRequest, txData, tenantID)
 		assert.Nil(t, response)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(sendTxComponent), err)
 	})
 
-	s.T().Run("should fail with InvalidParameterError if chain registry client fails with NotFoundError", func(t *testing.T) {
-		expectedErr := errors.NotFoundError("error")
+	s.T().Run("should fail with InvalidParameterError if no chain is found", func(t *testing.T) {
 		txRequest := testutils3.FakeTxRequest()
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 
-		s.ChainRegistryClient.EXPECT().GetChainByName(ctx, txRequest.ChainName).Return(nil, expectedErr)
+		s.SearchChainsUC.EXPECT().Execute(ctx, gomock.Any(), []string{tenantID, multitenancy.DefaultTenant}).Return([]*entities.Chain{}, nil)
 
 		response, err := s.usecase.Execute(ctx, txRequest, txData, tenantID)
 		assert.Nil(t, response)
@@ -266,7 +261,7 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 
-		s.ChainRegistryClient.EXPECT().GetChainByName(ctx, txRequest.ChainName).Return(chain, nil)
+		s.SearchChainsUC.EXPECT().Execute(ctx, &entities.ChainFilters{Names: []string{txRequest.ChainName}}, []string{tenantID, multitenancy.DefaultTenant}).Return(chains, nil)
 		s.TxRequestDA.EXPECT().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey, tenantID).Return(nil, expectedErr)
 
 		response, err := s.usecase.Execute(ctx, txRequest, txData, tenantID)
@@ -280,7 +275,7 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 
-		s.ChainRegistryClient.EXPECT().GetChainByName(ctx, txRequest.ChainName).Return(chain, nil)
+		s.SearchChainsUC.EXPECT().Execute(ctx, &entities.ChainFilters{Names: []string{txRequest.ChainName}}, []string{tenantID, multitenancy.DefaultTenant}).Return(chains, nil)
 		s.TxRequestDA.EXPECT().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey, tenantID).Return(&models.TransactionRequest{
 			RequestHash: "differentRequestHash",
 		}, nil)
@@ -296,7 +291,7 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 
-		s.ChainRegistryClient.EXPECT().GetChainByName(ctx, txRequest.ChainName).Return(chain, nil)
+		s.SearchChainsUC.EXPECT().Execute(ctx, &entities.ChainFilters{Names: []string{txRequest.ChainName}}, []string{tenantID, multitenancy.DefaultTenant}).Return(chains, nil)
 		s.TxRequestDA.EXPECT().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey, tenantID).Return(nil, errors.NotFoundError(""))
 		s.CreateScheduleUC.EXPECT().Execute(gomock.Any(), gomock.Any()).Return(txRequest.Schedule, expectedErr)
 
@@ -312,7 +307,7 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 
-		s.ChainRegistryClient.EXPECT().GetChainByName(ctx, txRequest.ChainName).Return(chain, nil)
+		s.SearchChainsUC.EXPECT().Execute(ctx, &entities.ChainFilters{Names: []string{txRequest.ChainName}}, []string{tenantID, multitenancy.DefaultTenant}).Return(chains, nil)
 		s.TxRequestDA.EXPECT().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey, tenantID).Return(nil, errors.NotFoundError(""))
 		s.CreateScheduleUC.EXPECT().Execute(gomock.Any(), gomock.Any()).Return(txRequest.Schedule, nil)
 		s.ScheduleDA.EXPECT().FindOneByUUID(ctx, txRequest.Schedule.UUID, tenants).Return(nil, expectedErr)
@@ -329,7 +324,7 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 		scheduleModel := testutils2.FakeSchedule(tenants[0])
 
-		s.ChainRegistryClient.EXPECT().GetChainByName(ctx, txRequest.ChainName).Return(chain, nil)
+		s.SearchChainsUC.EXPECT().Execute(ctx, &entities.ChainFilters{Names: []string{txRequest.ChainName}}, []string{tenantID, multitenancy.DefaultTenant}).Return(chains, nil)
 		s.TxRequestDA.EXPECT().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey, tenantID).Return(nil, errors.NotFoundError(""))
 		s.CreateScheduleUC.EXPECT().Execute(gomock.Any(), gomock.Any()).Return(txRequest.Schedule, nil)
 		s.ScheduleDA.EXPECT().FindOneByUUID(ctx, txRequest.Schedule.UUID, tenants).Return(scheduleModel, nil)
@@ -348,13 +343,13 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 		txData = ""
 		scheduleModel := testutils2.FakeSchedule(tenants[0])
 
-		s.ChainRegistryClient.EXPECT().GetChainByName(ctx, txRequest.ChainName).Return(chain, nil)
+		s.SearchChainsUC.EXPECT().Execute(ctx, &entities.ChainFilters{Names: []string{txRequest.ChainName}}, allowedTenants).Return(chains, nil)
 		s.TxRequestDA.EXPECT().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey, tenantID).Return(nil, errors.NotFoundError(""))
 		s.CreateScheduleUC.EXPECT().Execute(gomock.Any(), gomock.Any()).Return(txRequest.Schedule, nil)
 		s.ScheduleDA.EXPECT().FindOneByUUID(ctx, txRequest.Schedule.UUID, tenants).Return(scheduleModel, nil)
 		s.TxRequestDA.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
-		s.GetFaucetCandidate.EXPECT().Execute(gomock.Any(), txRequest.Params.From, chain, allowedTenants).Return(nil, faucetNotFoundErr)
-		s.CreateJobUC.EXPECT().Execute(gomock.Any(), gomock.Any(), tenants).Return(txRequest.Schedule.Jobs[0], expectedErr)
+		s.GetFaucetCandidate.EXPECT().Execute(gomock.Any(), txRequest.Params.From, chains[0], allowedTenants).Return(nil, faucetNotFoundErr)
+		s.CreateJobUC.EXPECT().Execute(gomock.Any(), gomock.Any(), allowedTenants).Return(txRequest.Schedule.Jobs[0], expectedErr)
 
 		response, err := s.usecase.Execute(ctx, txRequest, txData, tenantID)
 
@@ -364,20 +359,20 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 
 	s.T().Run("should fail with same error if getFaucetCandidate request fails", func(t *testing.T) {
 		expectedErr := errors.PostgresConnectionError("error")
-		chain := &models2.Chain{UUID: uuid.Must(uuid.NewV4()).String()}
+		chains := []*entities.Chain{testutils3.FakeChain()}
 		txRequest := testutils3.FakeTxRequest()
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 		txData = ""
 		scheduleModel := testutils2.FakeSchedule(tenants[0])
 
-		s.ChainRegistryClient.EXPECT().GetChainByName(ctx, txRequest.ChainName).Return(chain, nil)
+		s.SearchChainsUC.EXPECT().Execute(ctx, &entities.ChainFilters{Names: []string{txRequest.ChainName}}, []string{tenantID, multitenancy.DefaultTenant}).Return(chains, nil)
 		s.TxRequestDA.EXPECT().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey, tenantID).Return(nil, errors.NotFoundError(""))
 		s.CreateScheduleUC.EXPECT().Execute(gomock.Any(), gomock.Any()).Return(txRequest.Schedule, nil)
 		s.ScheduleDA.EXPECT().FindOneByUUID(ctx, txRequest.Schedule.UUID, tenants).Return(scheduleModel, nil)
 		s.TxRequestDA.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
-		s.CreateJobUC.EXPECT().Execute(gomock.Any(), gomock.Any(), tenants).Return(txRequest.Schedule.Jobs[0], nil)
-		s.GetFaucetCandidate.EXPECT().Execute(gomock.Any(), txRequest.Params.From, chain, allowedTenants).Return(nil, expectedErr)
+		s.CreateJobUC.EXPECT().Execute(gomock.Any(), gomock.Any(), allowedTenants).Return(txRequest.Schedule.Jobs[0], nil)
+		s.GetFaucetCandidate.EXPECT().Execute(gomock.Any(), txRequest.Params.From, gomock.Any(), allowedTenants).Return(nil, expectedErr)
 
 		response, err := s.usecase.Execute(ctx, txRequest, txData, tenantID)
 
@@ -392,14 +387,14 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 		scheduleModel := testutils2.FakeSchedule(tenants[0])
 
-		s.ChainRegistryClient.EXPECT().GetChainByName(ctx, txRequest.ChainName).Return(chain, nil)
+		s.SearchChainsUC.EXPECT().Execute(ctx, &entities.ChainFilters{Names: []string{txRequest.ChainName}}, []string{tenantID, multitenancy.DefaultTenant}).Return(chains, nil)
 		s.TxRequestDA.EXPECT().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey, tenantID).Return(nil, errors.NotFoundError(""))
 		s.CreateScheduleUC.EXPECT().Execute(gomock.Any(), gomock.Any()).Return(txRequest.Schedule, nil)
 		s.ScheduleDA.EXPECT().FindOneByUUID(ctx, txRequest.Schedule.UUID, tenants).Return(scheduleModel, nil)
 		s.TxRequestDA.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
-		s.CreateJobUC.EXPECT().Execute(gomock.Any(), gomock.Any(), tenants).Return(txRequest.Schedule.Jobs[0], nil)
-		s.GetFaucetCandidate.EXPECT().Execute(gomock.Any(), txRequest.Params.From, chain, allowedTenants).Return(nil, faucetNotFoundErr)
-		s.StartJobUC.EXPECT().Execute(ctx, jobUUID, tenants).Return(expectedErr)
+		s.CreateJobUC.EXPECT().Execute(gomock.Any(), gomock.Any(), allowedTenants).Return(txRequest.Schedule.Jobs[0], nil)
+		s.GetFaucetCandidate.EXPECT().Execute(gomock.Any(), txRequest.Params.From, gomock.Any(), allowedTenants).Return(nil, faucetNotFoundErr)
+		s.StartJobUC.EXPECT().Execute(ctx, jobUUID, allowedTenants).Return(expectedErr)
 
 		response, err := s.usecase.Execute(ctx, txRequest, txData, tenantID)
 
@@ -414,16 +409,16 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 		scheduleModel := testutils2.FakeSchedule(tenants[0])
 
-		s.ChainRegistryClient.EXPECT().GetChainByName(ctx, txRequest.ChainName).Return(chain, nil)
+		s.SearchChainsUC.EXPECT().Execute(ctx, &entities.ChainFilters{Names: []string{txRequest.ChainName}}, []string{tenantID, multitenancy.DefaultTenant}).Return(chains, nil)
 		s.TxRequestDA.EXPECT().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey, tenantID).Return(nil, errors.NotFoundError(""))
 		s.CreateScheduleUC.EXPECT().Execute(gomock.Any(), gomock.Any()).Return(txRequest.Schedule, nil)
 		s.ScheduleDA.EXPECT().FindOneByUUID(ctx, txRequest.Schedule.UUID, tenants).Return(scheduleModel, nil)
 		s.TxRequestDA.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
 		s.GetFaucetCandidate.EXPECT().
-			Execute(gomock.Any(), txRequest.Params.From, chain, allowedTenants).
+			Execute(gomock.Any(), txRequest.Params.From, gomock.Any(), allowedTenants).
 			Return(nil, faucetNotFoundErr)
-		s.CreateJobUC.EXPECT().Execute(gomock.Any(), gomock.Any(), tenants).Return(txRequest.Schedule.Jobs[0], nil)
-		s.StartJobUC.EXPECT().Execute(ctx, jobUUID, tenants).Return(nil)
+		s.CreateJobUC.EXPECT().Execute(gomock.Any(), gomock.Any(), allowedTenants).Return(txRequest.Schedule.Jobs[0], nil)
+		s.StartJobUC.EXPECT().Execute(ctx, jobUUID, allowedTenants).Return(nil)
 		s.GetTxUC.EXPECT().Execute(ctx, txRequest.Schedule.UUID, tenants).Return(nil, expectedErr)
 
 		response, err := s.usecase.Execute(ctx, txRequest, txData, tenantID)
@@ -438,19 +433,19 @@ func successfulTestExecution(s *sendTxSuite, txRequest *entities.TxRequest, with
 	tenantID := "tenantID"
 	tenants := []string{"tenantID"}
 	allowedTenants := []string{tenantID, multitenancy.DefaultTenant}
-	chain := &models2.Chain{UUID: "32da9731-0fb8-4235-a4cc-35070ffe5bf0"}
+	chains := []*entities.Chain{testutils3.FakeChain()}
 	jobUUID := txRequest.Schedule.Jobs[0].UUID
 	txData := ""
 	scheduleModel := testutils2.FakeSchedule(tenants[0])
 	jobIdx := 0
 
-	s.ChainRegistryClient.EXPECT().GetChainByName(ctx, txRequest.ChainName).Return(chain, nil)
+	s.SearchChainsUC.EXPECT().Execute(ctx, &entities.ChainFilters{Names: []string{txRequest.ChainName}}, []string{tenantID, multitenancy.DefaultTenant}).Return(chains, nil)
 	s.TxRequestDA.EXPECT().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey, tenantID).Return(nil, errors.NotFoundError(""))
 	s.CreateScheduleUC.EXPECT().Execute(gomock.Any(), gomock.Any()).Return(txRequest.Schedule, nil)
 	s.ScheduleDA.EXPECT().FindOneByUUID(ctx, txRequest.Schedule.UUID, tenants).Return(scheduleModel, nil)
 	s.TxRequestDA.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
 	s.CreateJobUC.EXPECT().
-		Execute(gomock.Any(), gomock.Any(), tenants).
+		Execute(gomock.Any(), gomock.Any(), allowedTenants).
 		DoAndReturn(func(ctx context.Context, jobEntity *entities.Job, tenants []string) (*entities.Job, error) {
 			if jobEntity.Type != jobTypes[jobIdx] {
 				return nil, fmt.Errorf("invalid job type. Got %s, expected %s", jobEntity.Type, jobTypes[jobIdx])
@@ -465,13 +460,11 @@ func successfulTestExecution(s *sendTxSuite, txRequest *entities.TxRequest, with
 	// We flag this "special" scenario as faucet funding tx flow
 	if withFaucet {
 		faucet := testutils3.FakeFaucet()
-		s.GetFaucetCandidate.EXPECT().
-			Execute(multitenancy.WithTenantID(ctx, tenantID), txRequest.Params.From, chain, tenants).
-			Return(faucet, nil)
+		s.GetFaucetCandidate.EXPECT().Execute(ctx, txRequest.Params.From, chains[0], tenants).Return(faucet, nil)
 
 		expectedFaucetJob := &entities.Job{
 			ScheduleUUID: txRequest.Schedule.UUID,
-			ChainUUID:    chain.UUID,
+			ChainUUID:    chains[0].UUID,
 			Type:         utils.EthereumTransaction,
 			Labels: map[string]string{
 				"faucetUUID": faucet.UUID,
@@ -492,12 +485,12 @@ func successfulTestExecution(s *sendTxSuite, txRequest *entities.TxRequest, with
 				jobEntity.UUID = faucet.UUID
 				return jobEntity, nil
 			})
-		s.StartJobUC.EXPECT().Execute(ctx, jobUUID, tenants).Return(nil)
+		s.StartJobUC.EXPECT().Execute(ctx, jobUUID, allowedTenants).Return(nil)
 	} else {
-		s.GetFaucetCandidate.EXPECT().Execute(ctx, txRequest.Params.From, chain, allowedTenants).Return(nil, faucetNotFoundErr)
+		s.GetFaucetCandidate.EXPECT().Execute(ctx, txRequest.Params.From, chains[0], allowedTenants).Return(nil, faucetNotFoundErr)
 	}
 
-	s.StartJobUC.EXPECT().Execute(ctx, jobUUID, tenants).Return(nil)
+	s.StartJobUC.EXPECT().Execute(ctx, jobUUID, allowedTenants).Return(nil)
 	s.GetTxUC.EXPECT().Execute(ctx, txRequest.Schedule.UUID, tenants).Return(txRequest, nil)
 
 	return s.usecase.Execute(ctx, txRequest, txData, tenantID)

@@ -123,7 +123,7 @@ func (eps *EntryPoints) switchRouter(ctx context.Context, routers map[string]*ro
 			if err != nil {
 				logger.WithError(err).Errorf("error switching tcp router")
 			} else {
-				logger.Infof("switched tcp router")
+				logger.Info("switched tcp router")
 			}
 		}
 	}

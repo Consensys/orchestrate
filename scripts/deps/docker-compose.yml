@@ -73,15 +73,6 @@ services:
     volumes:
       - db-data-postgres-unit:/var/lib/postgresql/data
 
-  postgres-chain-registry:
-    <<: *container-common
-    <<: *postgres-common
-    image: postgres:10.12-alpine
-    volumes:
-      - db-data-chain-registry:/var/lib/postgresql/data
-    ports:
-      - 5432
-
   postgres-api:
     <<: *container-common
     <<: *postgres-common
@@ -134,8 +125,6 @@ services:
 
 volumes:
   db-data-postgres-unit:
-    driver: local
-  db-data-chain-registry:
     driver: local
   db-data-api:
     driver: local

@@ -30,7 +30,7 @@ func NewRegisterContractUseCase(agent store.DB) usecases.RegisterContractUseCase
 }
 
 func (uc *registerContractUseCase) Execute(ctx context.Context, contract *entities.Contract) error {
-	logger := log.WithContext(ctx).WithField("contract", contract.ID.Short())
+	logger := log.WithContext(ctx).WithField("contract", contract.Short())
 	logger.Debug("registering contract starting...")
 
 	abiRaw, err := contract.GetABICompacted()
@@ -58,7 +58,7 @@ func (uc *registerContractUseCase) Execute(ctx context.Context, contract *entiti
 	}
 
 	repository := &models.RepositoryModel{
-		Name: contract.ID.Name,
+		Name: contract.Name,
 	}
 	artifact := &models.ArtifactModel{
 		ABI:              abiRaw,
@@ -78,7 +78,7 @@ func (uc *registerContractUseCase) Execute(ctx context.Context, contract *entiti
 		}
 
 		tag := &models.TagModel{
-			Name:         contract.ID.Tag,
+			Name:         contract.Tag,
 			RepositoryID: repository.ID,
 			ArtifactID:   artifact.ID,
 		}

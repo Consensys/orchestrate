@@ -4,7 +4,8 @@ package jobs
 
 import (
 	"context"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
+	"fmt"
+	mocks2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases/mocks"
 	"testing"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
@@ -14,7 +15,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	testutils3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/parsers"
-	mocks2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/validators/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/mocks"
 	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models/testutils"
 )
@@ -31,7 +31,7 @@ func TestCreateJob_Execute(t *testing.T) {
 	mockTransactionDA := mocks.NewMockTransactionAgent(ctrl)
 	mockJobDA := mocks.NewMockJobAgent(ctrl)
 	mockLogDA := mocks.NewMockLogAgent(ctrl)
-	mockTxValidator := mocks2.NewMockTransactionValidator(ctrl)
+	mockGetChainUC := mocks2.NewMockGetChainUseCase(ctrl)
 
 	mockDB.EXPECT().Begin().Return(mockDBTX, nil).AnyTimes()
 	mockDBTX.EXPECT().Transaction().Return(mockTransactionDA).AnyTimes()
@@ -43,12 +43,11 @@ func TestCreateJob_Execute(t *testing.T) {
 	mockDBTX.EXPECT().Rollback().Return(nil).AnyTimes()
 	mockDBTX.EXPECT().Close().Return(nil).AnyTimes()
 
-	usecase := NewCreateJobUseCase(mockDB, mockTxValidator)
+	usecase := NewCreateJobUseCase(mockDB, mockGetChainUC)
 
 	tenantID := "tenantID"
 	tenants := []string{tenantID}
-	allowedAccountTenants := []string{tenantID, multitenancy.DefaultTenant}
-	chainID := "888"
+	fakeChain := testutils3.FakeChain()
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		jobEntity := testutils3.FakeJob()
@@ -57,8 +56,8 @@ func TestCreateJob_Execute(t *testing.T) {
 		fakeSchedule.UUID = jobEntity.ScheduleUUID
 		jobModel := parsers.NewJobModelFromEntities(jobEntity, &fakeSchedule.ID)
 
-		mockTxValidator.EXPECT().ValidateChainExists(ctx, jobEntity.ChainUUID).Return(chainID, nil)
-		mockAccountDA.EXPECT().FindOneByAddress(ctx, jobEntity.Transaction.From, allowedAccountTenants).Return(nil, nil)
+		mockGetChainUC.EXPECT().Execute(ctx, jobEntity.ChainUUID, tenants).Return(fakeChain, nil)
+		mockAccountDA.EXPECT().FindOneByAddress(ctx, jobEntity.Transaction.From, tenants).Return(nil, nil)
 		mockScheduleDA.EXPECT().FindOneByUUID(ctx, jobEntity.ScheduleUUID, tenants).Return(fakeSchedule, nil)
 		mockTransactionDA.EXPECT().Insert(gomock.Any(), jobModel.Transaction).Return(nil)
 		mockJobDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(nil)
@@ -79,8 +78,8 @@ func TestCreateJob_Execute(t *testing.T) {
 		parentJobModel := testutils2.FakeJobModel(fakeSchedule.ID)
 		parentJobModel.Logs[0].Status = utils.StatusPending
 
-		mockTxValidator.EXPECT().ValidateChainExists(ctx, jobEntity.ChainUUID).Return(chainID, nil)
-		mockAccountDA.EXPECT().FindOneByAddress(ctx, jobEntity.Transaction.From, allowedAccountTenants).Return(nil, nil)
+		mockGetChainUC.EXPECT().Execute(ctx, jobEntity.ChainUUID, tenants).Return(fakeChain, nil)
+		mockAccountDA.EXPECT().FindOneByAddress(ctx, jobEntity.Transaction.From, tenants).Return(nil, nil)
 		mockScheduleDA.EXPECT().FindOneByUUID(ctx, jobEntity.ScheduleUUID, tenants).Return(fakeSchedule, nil)
 		mockJobDA.EXPECT().LockOneByUUID(gomock.Any(), jobEntity.InternalData.ParentJobUUID).Return(nil)
 		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), jobEntity.InternalData.ParentJobUUID, tenants).Return(parentJobModel, nil)
@@ -93,11 +92,20 @@ func TestCreateJob_Execute(t *testing.T) {
 		assert.NoError(t, err)
 	})
 
-	t.Run("should fail with same error if chain is invalid", func(t *testing.T) {
-		expectedErr := errors.NotFoundError("error")
+	t.Run("should fail with InvalidParameterError if chain is not found", func(t *testing.T) {
 		jobEntity := testutils3.FakeJob()
 
-		mockTxValidator.EXPECT().ValidateChainExists(ctx, jobEntity.ChainUUID).Return("", expectedErr)
+		mockGetChainUC.EXPECT().Execute(ctx, jobEntity.ChainUUID, tenants).Return(nil, errors.NotFoundError("error"))
+
+		_, err := usecase.Execute(context.Background(), jobEntity, tenants)
+		assert.True(t, errors.IsInvalidParameterError(err))
+	})
+
+	t.Run("should fail with same error if chain is invalid", func(t *testing.T) {
+		expectedErr := fmt.Errorf("error")
+		jobEntity := testutils3.FakeJob()
+
+		mockGetChainUC.EXPECT().Execute(ctx, jobEntity.ChainUUID, tenants).Return(nil, expectedErr)
 
 		_, err := usecase.Execute(context.Background(), jobEntity, tenants)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createJobComponent), err)
@@ -106,8 +114,8 @@ func TestCreateJob_Execute(t *testing.T) {
 	t.Run("should fail with InvalidParameterError if account does not exist", func(t *testing.T) {
 		jobEntity := testutils3.FakeJob()
 
-		mockTxValidator.EXPECT().ValidateChainExists(ctx, jobEntity.ChainUUID).Return(chainID, nil)
-		mockAccountDA.EXPECT().FindOneByAddress(ctx, jobEntity.Transaction.From, allowedAccountTenants).Return(nil, errors.NotFoundError("error"))
+		mockGetChainUC.EXPECT().Execute(ctx, jobEntity.ChainUUID, tenants).Return(fakeChain, nil)
+		mockAccountDA.EXPECT().FindOneByAddress(ctx, jobEntity.Transaction.From, tenants).Return(nil, errors.NotFoundError("error"))
 
 		_, err := usecase.Execute(context.Background(), jobEntity, tenants)
 		assert.True(t, errors.IsInvalidParameterError(err))
@@ -121,8 +129,8 @@ func TestCreateJob_Execute(t *testing.T) {
 		fakeSchedule.ID = 1
 		fakeSchedule.UUID = jobEntity.ScheduleUUID
 
-		mockTxValidator.EXPECT().ValidateChainExists(ctx, jobEntity.ChainUUID).Return(chainID, nil)
-		mockAccountDA.EXPECT().FindOneByAddress(ctx, jobEntity.Transaction.From, allowedAccountTenants).Return(nil, nil)
+		mockGetChainUC.EXPECT().Execute(ctx, jobEntity.ChainUUID, tenants).Return(fakeChain, nil)
+		mockAccountDA.EXPECT().FindOneByAddress(ctx, jobEntity.Transaction.From, tenants).Return(nil, nil)
 		mockScheduleDA.EXPECT().FindOneByUUID(ctx, jobEntity.ScheduleUUID, tenants).Return(nil, expectedErr)
 
 		_, err := usecase.Execute(context.Background(), jobEntity, tenants)
@@ -137,8 +145,8 @@ func TestCreateJob_Execute(t *testing.T) {
 		fakeSchedule.UUID = jobEntity.ScheduleUUID
 		jobModel := parsers.NewJobModelFromEntities(jobEntity, &fakeSchedule.ID)
 
-		mockTxValidator.EXPECT().ValidateChainExists(ctx, jobEntity.ChainUUID).Return(chainID, nil)
-		mockAccountDA.EXPECT().FindOneByAddress(ctx, jobEntity.Transaction.From, allowedAccountTenants).Return(nil, nil)
+		mockGetChainUC.EXPECT().Execute(ctx, jobEntity.ChainUUID, tenants).Return(fakeChain, nil)
+		mockAccountDA.EXPECT().FindOneByAddress(ctx, jobEntity.Transaction.From, tenants).Return(nil, nil)
 		mockScheduleDA.EXPECT().FindOneByUUID(ctx, jobEntity.ScheduleUUID, tenants).Return(fakeSchedule, nil)
 		mockTransactionDA.EXPECT().Insert(gomock.Any(), jobModel.Transaction).Return(expectedErr)
 
@@ -157,8 +165,8 @@ func TestCreateJob_Execute(t *testing.T) {
 		parentJobModel := testutils2.FakeJobModel(fakeSchedule.ID)
 		parentJobModel.Logs[0].Status = utils.StatusMined
 
-		mockTxValidator.EXPECT().ValidateChainExists(ctx, jobEntity.ChainUUID).Return(chainID, nil)
-		mockAccountDA.EXPECT().FindOneByAddress(ctx, jobEntity.Transaction.From, allowedAccountTenants).Return(nil, nil)
+		mockGetChainUC.EXPECT().Execute(ctx, jobEntity.ChainUUID, tenants).Return(fakeChain, nil)
+		mockAccountDA.EXPECT().FindOneByAddress(ctx, jobEntity.Transaction.From, tenants).Return(nil, nil)
 		mockScheduleDA.EXPECT().FindOneByUUID(ctx, jobEntity.ScheduleUUID, tenants).Return(fakeSchedule, nil)
 		mockJobDA.EXPECT().LockOneByUUID(gomock.Any(), jobEntity.InternalData.ParentJobUUID).Return(nil)
 		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), jobEntity.InternalData.ParentJobUUID, tenants).Return(parentJobModel, nil)
@@ -176,8 +184,8 @@ func TestCreateJob_Execute(t *testing.T) {
 		fakeSchedule.UUID = jobEntity.ScheduleUUID
 		jobModel := parsers.NewJobModelFromEntities(jobEntity, &fakeSchedule.ID)
 
-		mockTxValidator.EXPECT().ValidateChainExists(ctx, jobEntity.ChainUUID).Return(chainID, nil)
-		mockAccountDA.EXPECT().FindOneByAddress(ctx, jobEntity.Transaction.From, allowedAccountTenants).Return(nil, nil)
+		mockGetChainUC.EXPECT().Execute(ctx, jobEntity.ChainUUID, tenants).Return(fakeChain, nil)
+		mockAccountDA.EXPECT().FindOneByAddress(ctx, jobEntity.Transaction.From, tenants).Return(nil, nil)
 		mockScheduleDA.EXPECT().FindOneByUUID(ctx, jobEntity.ScheduleUUID, tenants).Return(fakeSchedule, nil)
 		mockTransactionDA.EXPECT().Insert(gomock.Any(), jobModel.Transaction).Return(nil)
 		mockJobDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(expectedErr)
@@ -195,8 +203,8 @@ func TestCreateJob_Execute(t *testing.T) {
 		fakeSchedule.UUID = jobEntity.ScheduleUUID
 		jobModel := parsers.NewJobModelFromEntities(jobEntity, &fakeSchedule.ID)
 
-		mockTxValidator.EXPECT().ValidateChainExists(ctx, jobEntity.ChainUUID).Return(chainID, nil)
-		mockAccountDA.EXPECT().FindOneByAddress(ctx, jobEntity.Transaction.From, allowedAccountTenants).Return(nil, nil)
+		mockGetChainUC.EXPECT().Execute(ctx, jobEntity.ChainUUID, tenants).Return(fakeChain, nil)
+		mockAccountDA.EXPECT().FindOneByAddress(ctx, jobEntity.Transaction.From, tenants).Return(nil, nil)
 		mockScheduleDA.EXPECT().FindOneByUUID(ctx, jobEntity.ScheduleUUID, tenants).Return(fakeSchedule, nil)
 		mockTransactionDA.EXPECT().Insert(gomock.Any(), jobModel.Transaction).Return(nil)
 		mockJobDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(nil)

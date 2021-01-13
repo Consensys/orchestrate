@@ -3,6 +3,12 @@ package api
 import (
 	"context"
 	"reflect"
+	"time"
+
+	"github.com/dgraph-io/ristretto"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/middleware/httpcache"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/middleware/ratelimit"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/proxy"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient"
 
@@ -12,6 +18,7 @@ import (
 	"github.com/go-pg/pg/v9/orm"
 	pkgsarama "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database"
+	pkgproxy "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/handler/proxy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/builder"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/metrics"
 
@@ -21,16 +28,14 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/dynamic"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/service/controllers"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/multi"
-	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/client"
 )
 
 func NewAPI(
 	cfg *Config,
 	pgmngr postgres.Manager,
 	jwt, key auth.Checker,
-	chainRegistryClient chainregistry.ChainRegistryClient,
 	keyManagerClient keymanager.KeyManagerClient,
-	chainStateReader ethclient.ChainStateReader,
+	ec ethclient.Client,
 	syncProducer sarama.SyncProducer,
 	topicCfg *pkgsarama.KafkaTopicConfig,
 ) (*app.App, error) {
@@ -47,11 +52,37 @@ func NewAPI(
 		appMetrics = metrics.NewTransactionSchedulerNopMetrics()
 	}
 
-	ucs := builder.NewUseCases(db, appMetrics, chainRegistryClient, keyManagerClient,
-		chainStateReader, syncProducer, topicCfg)
+	ucs := builder.NewUseCases(db, appMetrics, keyManagerClient, ec, syncProducer, topicCfg)
 
 	// Option of the API
 	apiHandlerOpt := app.HandlerOpt(reflect.TypeOf(&dynamic.API{}), controllers.NewBuilder(ucs, keyManagerClient))
+
+	// ReverseProxy Handler
+	proxyBuilder, err := pkgproxy.NewBuilder(cfg.Proxy.ServersTransport, nil)
+	if err != nil {
+		return nil, err
+	}
+	reverseProxyOpt := app.HandlerOpt(
+		reflect.TypeOf(&dynamic.ReverseProxy{}),
+		proxyBuilder,
+	)
+
+	cache, err := ristretto.NewCache(cfg.Proxy.Cache)
+	if err != nil {
+		return nil, err
+	}
+
+	// RateLimit Middleware
+	rateLimitOpt := app.MiddlewareOpt(
+		reflect.TypeOf(&dynamic.RateLimit{}),
+		ratelimit.NewBuilder(ratelimit.NewManager(cache)),
+	)
+
+	// HTTPCache Middleware
+	httpCacheOpt := app.MiddlewareOpt(
+		reflect.TypeOf(&dynamic.HTTPCache{}),
+		httpcache.NewBuilder(cache, proxy.HTTPCacheRequest, proxy.HTTPCacheResponse),
+	)
 
 	// Create app
 	return app.New(
@@ -60,9 +91,12 @@ func NewAPI(
 		ReadinessOpt(db),
 		app.MetricsOpt(appMetrics),
 		app.LoggerMiddlewareOpt("base"),
+		rateLimitOpt,
 		app.SwaggerOpt("./public/swagger-specs/services/api/swagger.json", "base@logger-base"),
 		apiHandlerOpt,
-		app.ProviderOpt(NewProvider()),
+		httpCacheOpt,
+		reverseProxyOpt,
+		app.ProviderOpt(NewProvider(ucs.SearchChains(), time.Second, cfg.Proxy.ProxyCacheTTL)),
 	)
 }
 

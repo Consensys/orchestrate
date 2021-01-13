@@ -24,21 +24,21 @@ func NewGetContractUseCase(agent store.ArtifactAgent) usecases.GetContractUseCas
 }
 
 // Execute gets a contract from DB
-func (usecase *getContractUseCase) Execute(ctx context.Context, id *entities.ContractID) (*entities.Contract, error) {
-	logger := log.WithContext(ctx).WithField("contract", id.Short())
-	logger.Debug("get contract is starting...")
+func (usecase *getContractUseCase) Execute(ctx context.Context, name, tag string) (*entities.Contract, error) {
+	logger := log.WithContext(ctx).WithField("name", name).WithField("tag", tag)
+	logger.Debug("getting contract")
 
-	artifact, err := usecase.agent.FindOneByNameAndTag(ctx, id.Name, id.Tag)
+	artifact, err := usecase.agent.FindOneByNameAndTag(ctx, name, tag)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(getContractComponent)
 	}
 
 	contract := &entities.Contract{
-		ID:               *id,
+		Name:             name,
+		Tag:              tag,
 		ABI:              artifact.ABI,
 		Bytecode:         artifact.Bytecode,
 		DeployedBytecode: artifact.DeployedBytecode,
-		Methods:          []entities.Method{},
 	}
 
 	contractABI, err := contract.ToABI()
@@ -60,6 +60,6 @@ func (usecase *getContractUseCase) Execute(ctx context.Context, id *entities.Con
 	}
 	contract.Constructor = entities.Method{Signature: contractABI.Constructor.Sig()}
 
-	logger.Debug("get contract executed successfully")
+	logger.Debug("contract found successfully")
 	return contract, nil
 }

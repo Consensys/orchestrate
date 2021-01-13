@@ -5,9 +5,9 @@ import (
 
 	"github.com/go-pg/migrations/v7"
 	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/rpc"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/chain-registry/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/store/models"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models"
 )
 
 func addChainIDColumn(db migrations.DB) error {
@@ -84,12 +84,12 @@ func updateChainIDs(ctx context.Context, db migrations.DB) error {
 	}
 
 	for _, chain := range chains {
-		chainID, err := utils.GetChainID(ctx, ec, chain.URLs)
+		chainID, err := getChainID(ctx, ec, chain.URLs)
 		if err != nil {
 			return err
 		}
 
-		_, err = db.Model(&models.Chain{ChainID: chainID.String()}).
+		_, err = db.Model(&models.Chain{ChainID: chainID}).
 			Where("uuid = ?", chain.UUID).UpdateNotZero()
 
 		if err != nil {
@@ -103,4 +103,30 @@ func updateChainIDs(ctx context.Context, db migrations.DB) error {
 	}
 
 	return nil
+}
+
+func getChainID(ctx context.Context, ethClient *ethclient.Client, uris []string) (string, error) {
+	var prevChainID string
+	for i, uri := range uris {
+		chainID, err := ethClient.Network(ctx, uri)
+		if err != nil {
+			errMessage := "failed to fetch chain id"
+			log.WithContext(ctx).WithField("url", uri).WithError(err).Error(errMessage)
+			return "", errors.InvalidParameterError(errMessage)
+		}
+
+		if i > 0 && chainID.String() != prevChainID {
+			errMessage := "URLs in the list point to different networks"
+			log.WithContext(ctx).
+				WithField("url", uri).
+				WithField("previous_chain_id", prevChainID).
+				WithField("chain_id", chainID.String()).
+				Error(errMessage)
+			return "", errors.InvalidParameterError(errMessage)
+		}
+
+		prevChainID = chainID.String()
+	}
+
+	return prevChainID, nil
 }

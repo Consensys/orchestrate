@@ -17,8 +17,8 @@ Feature: Private transactions
       | name        | artifacts        | Headers.Authorization    |
       | SimpleToken | SimpleToken.json | Bearer {{tenant1.token}} |
     And I register the following chains
-      | alias  | Name                  | URLs                           | PrivateTxManagers                           | Headers.Authorization    |
-      | quorum | quorum-{{scenarioID}} | {{global.nodes.quorum_1.URLs}} | {{global.nodes.quorum_1.PrivateTxManagers}} | Bearer {{tenant1.token}} |
+      | alias  | Name                  | URLs                           | PrivateTxManager.URL                           | PrivateTxManager.Type                           | Headers.Authorization    |
+      | quorum | quorum-{{scenarioID}} | {{global.nodes.quorum_1.URLs}} | {{global.nodes.quorum_1.PrivateTxManager.url}} | {{global.nodes.quorum_1.PrivateTxManager.type}} | Bearer {{tenant1.token}} |
     And I register the following chains
       | alias  | Name                  | URLs                         | Headers.Authorization    |
       | besu   | besu-{{scenarioID}}   | {{global.nodes.besu_1.URLs}} | Bearer {{tenant1.token}} |
@@ -37,21 +37,23 @@ Feature: Private transactions
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "quorum-{{scenarioID}}",
-    "params": {
-        "from": "{{account1}}",
-        "protocol": "Tessera",
-        "privateFrom": "{{global.nodes.quorum_1.privateAddress}}",
-        "privateFor": ["{{global.nodes.quorum_2.privateAddress}}"],
-        "contractName": "SimpleToken"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{quorumDeployContractTxID}}"
-    }
-}
+      """
+      {
+        "chain": "quorum-{{scenarioID}}",
+        "params": {
+          "from": "{{account1}}",
+          "protocol": "Tessera",
+          "privateFrom": "{{global.nodes.quorum_1.privateAddress}}",
+          "privateFor": [
+            "{{global.nodes.quorum_2.privateAddress}}"
+          ],
+          "contractName": "SimpleToken"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{quorumDeployContractTxID}}"
+        }
+      }
       """
     Then the response code should be 202
     Then I register the following response fields
@@ -84,23 +86,28 @@ Feature: Private transactions
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/transactions/send" with json:
-  """
-{
-    "chain": "quorum-{{scenarioID}}",
-    "params": {
-        "from": "{{account1}}",
-        "to": "{{counterContractAddr}}",
-        "methodSignature": "transfer(address,uint256)",
-        "args": ["0x6009608A02a7A15fd6689D6DaD560C44E9ab61Ff","0x2"],
-        "protocol": "Tessera",
-        "privateFrom": "{{global.nodes.quorum_1.privateAddress}}",
-        "privateFor": ["{{global.nodes.quorum_2.privateAddress}}"]
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{quorumSentTxContractTxID}}"
-    }
-}
+      """
+      {
+        "chain": "quorum-{{scenarioID}}",
+        "params": {
+          "from": "{{account1}}",
+          "to": "{{counterContractAddr}}",
+          "methodSignature": "transfer(address,uint256)",
+          "args": [
+            "0x6009608A02a7A15fd6689D6DaD560C44E9ab61Ff",
+            "0x2"
+          ],
+          "protocol": "Tessera",
+          "privateFrom": "{{global.nodes.quorum_1.privateAddress}}",
+          "privateFor": [
+            "{{global.nodes.quorum_2.privateAddress}}"
+          ]
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{quorumSentTxContractTxID}}"
+        }
+      }
       """
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
@@ -111,20 +118,22 @@ Feature: Private transactions
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "UnknownChain",
-    "params": {
-        "from": "{{account1}}",
-        "protocol": "Tessera",
-        "privateFrom": "{{global.nodes.quorum_1.privateAddress}}",
-        "privateFor": ["{{global.nodes.quorum_2.privateAddress}}"],
-        "contractName": "SimpleToken"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}"
-    }
-}
+      """
+      {
+        "chain": "UnknownChain",
+        "params": {
+          "from": "{{account1}}",
+          "protocol": "Tessera",
+          "privateFrom": "{{global.nodes.quorum_1.privateAddress}}",
+          "privateFor": [
+            "{{global.nodes.quorum_2.privateAddress}}"
+          ],
+          "contractName": "SimpleToken"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}"
+        }
+      }
       """
     Then the response code should be 422
     And Response should have the following fields
@@ -144,18 +153,18 @@ Feature: Private transactions
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "quorum-{{scenarioID}}",
-    "params": {
-        "from": "{{account1}}",
-        "contractName": "SimpleToken"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{publicQuorumDeployContractTxID}}"
-    }
-}
+      """
+      {
+        "chain": "quorum-{{scenarioID}}",
+        "params": {
+          "from": "{{account1}}",
+          "contractName": "SimpleToken"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{publicQuorumDeployContractTxID}}"
+        }
+      }
       """
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
@@ -163,21 +172,23 @@ Feature: Private transactions
       | ID                                  |
       | {{privateQuorumDeployContractTxID}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "quorum-{{scenarioID}}",
-    "params": {
-        "from": "{{account1}}",
-        "protocol": "Tessera",
-        "privateFrom": "{{global.nodes.quorum_1.privateAddress}}",
-        "privateFor": ["{{global.nodes.quorum_2.privateAddress}}"],
-        "contractName": "SimpleToken"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{privateQuorumDeployContractTxID}}"
-    }
-}
+      """
+      {
+        "chain": "quorum-{{scenarioID}}",
+        "params": {
+          "from": "{{account1}}",
+          "protocol": "Tessera",
+          "privateFrom": "{{global.nodes.quorum_1.privateAddress}}",
+          "privateFor": [
+            "{{global.nodes.quorum_2.privateAddress}}"
+          ],
+          "contractName": "SimpleToken"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{privateQuorumDeployContractTxID}}"
+        }
+      }
       """
     Then the response code should be 202
     Then Envelopes should be in topic "tx.sender"
@@ -192,19 +203,19 @@ Feature: Private transactions
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "quorum-{{scenarioID}}",
-    "params": {
-        "from": "{{account1}}",
-        "protocol": "Tessera",
-        "privateFrom": "{{global.nodes.quorum_1.privateAddress}}",
-        "contractName": "SimpleToken"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}"
-    }
-}
+      """
+      {
+        "chain": "quorum-{{scenarioID}}",
+        "params": {
+          "from": "{{account1}}",
+          "protocol": "Tessera",
+          "privateFrom": "{{global.nodes.quorum_1.privateAddress}}",
+          "contractName": "SimpleToken"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}"
+        }
+      }
       """
     Then the response code should be 400
     And Response should have the following fields
@@ -217,20 +228,22 @@ Feature: Private transactions
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "quorum_2-{{scenarioID}}",
-    "params": {
-        "from": "{{account1}}",
-        "protocol": "Tessera",
-        "privateFrom": "{{global.nodes.quorum_1.privateAddress}}",
-        "privateFor": ["{{global.nodes.quorum_2.privateAddress}}"],
-        "contractName": "SimpleToken"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}"
-    }
-}
+      """
+      {
+        "chain": "quorum_2-{{scenarioID}}",
+        "params": {
+          "from": "{{account1}}",
+          "protocol": "Tessera",
+          "privateFrom": "{{global.nodes.quorum_1.privateAddress}}",
+          "privateFor": [
+            "{{global.nodes.quorum_2.privateAddress}}"
+          ],
+          "contractName": "SimpleToken"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}"
+        }
+      }
       """
     Then the response code should be 422
     And Response should have the following fields
@@ -250,21 +263,23 @@ Feature: Private transactions
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-        "from": "{{account2}}",
-        "protocol": "Orion",
-        "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
-        "privateFor": ["{{global.nodes.besu_2.privateAddress}}"],
-        "contractName": "SimpleToken"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{besuDeployContractTxID}}"
-    }
-}
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "from": "{{account2}}",
+          "protocol": "Orion",
+          "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+          "privateFor": [
+            "{{global.nodes.besu_2.privateAddress}}"
+          ],
+          "contractName": "SimpleToken"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{besuDeployContractTxID}}"
+        }
+      }
       """
     Then the response code should be 202
     Then I register the following response fields
@@ -295,23 +310,28 @@ Feature: Private transactions
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/transactions/send" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-        "from": "{{account2}}",
-        "to": "{{counterContractAddr}}",
-        "methodSignature": "transfer(address,uint256)",
-        "args": ["0x6009608A02a7A15fd6689D6DaD560C44E9ab61Ff","0x2"],
-        "protocol": "Orion",
-        "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
-        "privateFor": ["{{global.nodes.besu_2.privateAddress}}"]
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{besuSentTxContractTxID}}"
-    }
-}
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "from": "{{account2}}",
+          "to": "{{counterContractAddr}}",
+          "methodSignature": "transfer(address,uint256)",
+          "args": [
+            "0x6009608A02a7A15fd6689D6DaD560C44E9ab61Ff",
+            "0x2"
+          ],
+          "protocol": "Orion",
+          "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+          "privateFor": [
+            "{{global.nodes.besu_2.privateAddress}}"
+          ]
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{besuSentTxContractTxID}}"
+        }
+      }
       """
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
@@ -337,75 +357,83 @@ Feature: Private transactions
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-        "from": "{{account1}}",
-        "protocol": "Orion",
-        "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
-        "privateFor": ["{{global.nodes.besu_2.privateAddress}}"],
-        "contractName": "SimpleToken"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{besuDeployContractTxOneID}}"
-    }
-}
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "from": "{{account1}}",
+          "protocol": "Orion",
+          "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+          "privateFor": [
+            "{{global.nodes.besu_2.privateAddress}}"
+          ],
+          "contractName": "SimpleToken"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{besuDeployContractTxOneID}}"
+        }
+      }
       """
     Then the response code should be 202
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-        "from": "{{account2}}",
-        "protocol": "Orion",
-        "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
-        "privateFor": ["{{global.nodes.besu_3.privateAddress}}"],
-        "contractName": "SimpleToken"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{besuDeployContractTxTwoID}}"
-    }
-}
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "from": "{{account2}}",
+          "protocol": "Orion",
+          "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+          "privateFor": [
+            "{{global.nodes.besu_3.privateAddress}}"
+          ],
+          "contractName": "SimpleToken"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{besuDeployContractTxTwoID}}"
+        }
+      }
       """
     Then the response code should be 202
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-        "from": "{{account3}}",
-        "protocol": "Orion",
-        "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
-        "privateFor": ["{{global.nodes.besu_2.privateAddress}}"],
-        "contractName": "SimpleToken"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{besuDeployContractTxThreeID}}"
-    }
-}
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "from": "{{account3}}",
+          "protocol": "Orion",
+          "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+          "privateFor": [
+            "{{global.nodes.besu_2.privateAddress}}"
+          ],
+          "contractName": "SimpleToken"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{besuDeployContractTxThreeID}}"
+        }
+      }
       """
     Then the response code should be 202
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-        "from": "{{account4}}",
-        "protocol": "Orion",
-        "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
-        "privateFor": ["{{global.nodes.besu_3.privateAddress}}"],
-        "contractName": "SimpleToken"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{besuDeployContractTxFourID}}"
-    }
-}
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "from": "{{account4}}",
+          "protocol": "Orion",
+          "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+          "privateFor": [
+            "{{global.nodes.besu_3.privateAddress}}"
+          ],
+          "contractName": "SimpleToken"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{besuDeployContractTxFourID}}"
+        }
+      }
       """
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
@@ -434,75 +462,83 @@ Feature: Private transactions
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-        "from": "{{account1}}",
-        "protocol": "Orion",
-        "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
-        "privateFor": ["{{global.nodes.besu_3.privateAddress}}"],
-        "contractName": "SimpleToken"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{besuDeployContractTxOneID}}"
-    }
-}
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "from": "{{account1}}",
+          "protocol": "Orion",
+          "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+          "privateFor": [
+            "{{global.nodes.besu_3.privateAddress}}"
+          ],
+          "contractName": "SimpleToken"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{besuDeployContractTxOneID}}"
+        }
+      }
       """
     Then the response code should be 202
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "besu_2-{{scenarioID}}",
-    "params": {
-        "from": "{{account2}}",
-        "protocol": "Orion",
-        "privateFrom": "{{global.nodes.besu_2.privateAddress}}",
-        "privateFor": ["{{global.nodes.besu_3.privateAddress}}"],
-        "contractName": "SimpleToken"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{besuDeployContractTxTwoID}}"
-    }
-}
+      """
+      {
+        "chain": "besu_2-{{scenarioID}}",
+        "params": {
+          "from": "{{account2}}",
+          "protocol": "Orion",
+          "privateFrom": "{{global.nodes.besu_2.privateAddress}}",
+          "privateFor": [
+            "{{global.nodes.besu_3.privateAddress}}"
+          ],
+          "contractName": "SimpleToken"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{besuDeployContractTxTwoID}}"
+        }
+      }
       """
     Then the response code should be 202
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-        "from": "{{account3}}",
-        "protocol": "Orion",
-        "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
-        "privateFor": ["{{global.nodes.besu_3.privateAddress}}"],
-        "contractName": "SimpleToken"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{besuDeployContractTxThreeID}}"
-    }
-}
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "from": "{{account3}}",
+          "protocol": "Orion",
+          "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+          "privateFor": [
+            "{{global.nodes.besu_3.privateAddress}}"
+          ],
+          "contractName": "SimpleToken"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{besuDeployContractTxThreeID}}"
+        }
+      }
       """
     Then the response code should be 202
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "besu_2-{{scenarioID}}",
-    "params": {
-        "from": "{{account4}}",
-        "protocol": "Orion",
-        "privateFrom": "{{global.nodes.besu_2.privateAddress}}",
-        "privateFor": ["{{global.nodes.besu_3.privateAddress}}"],
-        "contractName": "SimpleToken"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{besuDeployContractTxFourID}}"
-    }
-}
+      """
+      {
+        "chain": "besu_2-{{scenarioID}}",
+        "params": {
+          "from": "{{account4}}",
+          "protocol": "Orion",
+          "privateFrom": "{{global.nodes.besu_2.privateAddress}}",
+          "privateFor": [
+            "{{global.nodes.besu_3.privateAddress}}"
+          ],
+          "contractName": "SimpleToken"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{besuDeployContractTxFourID}}"
+        }
+      }
       """
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
@@ -519,24 +555,24 @@ Feature: Private transactions
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
     Given I sleep "2s"
-    When I send "POST" request to "{{global.chain-registry}}/{{besu.UUID}}" with json:
+    When I send "POST" request to "{{global.api}}/{{besu.UUID}}" with json:
       """
-{
-    "jsonrpc": "2.0",
-    "method": "priv_createPrivacyGroup",
-    "params": [
-        {
+      {
+        "jsonrpc": "2.0",
+        "method": "priv_createPrivacyGroup",
+        "params": [
+          {
             "addresses": [
-                "{{global.nodes.besu_1.privateAddress}}",
-                "{{global.nodes.besu_2.privateAddress}}",
-                "{{global.nodes.besu_3.privateAddress}}"
+              "{{global.nodes.besu_1.privateAddress}}",
+              "{{global.nodes.besu_2.privateAddress}}",
+              "{{global.nodes.besu_3.privateAddress}}"
             ],
             "name": "TestGroup",
             "description": "TestGroup"
-        }
-    ],
-    "id": 1
-}
+          }
+        ],
+        "id": 1
+      }
       """
     Then the response code should be 200
     Then I register the following response fields
@@ -549,21 +585,21 @@ Feature: Private transactions
       | ID                              |
       | {{besuDeployContractTxGroupID}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-        "from": "{{account1}}",
-        "protocol": "Orion",
-        "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
-        "privacyGroupId": "{{privacyGroupId}}",
-        "contractName": "SimpleToken"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{besuDeployContractTxGroupID}}"
-    }
-}
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "from": "{{account1}}",
+          "protocol": "Orion",
+          "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+          "privacyGroupId": "{{privacyGroupId}}",
+          "contractName": "SimpleToken"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{besuDeployContractTxGroupID}}"
+        }
+      }
       """
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
@@ -581,24 +617,24 @@ Feature: Private transactions
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
     Then I sleep "2s"
-    When I send "POST" request to "{{global.chain-registry}}/{{besu.UUID}}" with json:
+    When I send "POST" request to "{{global.api}}/{{besu.UUID}}" with json:
       """
-{
-    "jsonrpc": "2.0",
-    "method": "priv_createPrivacyGroup",
-    "params": [
-        {
+      {
+        "jsonrpc": "2.0",
+        "method": "priv_createPrivacyGroup",
+        "params": [
+          {
             "addresses": [
-                "{{global.nodes.besu_1.privateAddress}}",
-                "{{global.nodes.besu_2.privateAddress}}",
-                "{{global.nodes.besu_3.privateAddress}}"
+              "{{global.nodes.besu_1.privateAddress}}",
+              "{{global.nodes.besu_2.privateAddress}}",
+              "{{global.nodes.besu_3.privateAddress}}"
             ],
             "name": "{{privacyGroupNameOne}}",
             "description": "TestGroup"
-        }
-    ],
-    "id": 1
-}
+          }
+        ],
+        "id": 1
+      }
       """
     Then the response code should be 200
     Then I register the following response fields
@@ -611,21 +647,21 @@ Feature: Private transactions
       | ID                              |
       | {{besuDeployContractTxGroupID}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-        "from": "{{account1}}",
-        "protocol": "Orion",
-        "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
-        "privacyGroupId": "{{privacyGroupId}}",
-        "contractName": "SimpleToken"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{besuDeployContractTxGroupID}}"
-    }
-}
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "from": "{{account1}}",
+          "protocol": "Orion",
+          "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+          "privacyGroupId": "{{privacyGroupId}}",
+          "contractName": "SimpleToken"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{besuDeployContractTxGroupID}}"
+        }
+      }
       """
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
@@ -642,24 +678,24 @@ Feature: Private transactions
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
     Then I sleep "2s"
-    When I send "POST" request to "{{global.chain-registry}}/{{besu.UUID}}" with json:
+    When I send "POST" request to "{{global.api}}/{{besu.UUID}}" with json:
       """
-{
-    "jsonrpc": "2.0",
-    "method": "priv_createPrivacyGroup",
-    "params": [
-        {
+      {
+        "jsonrpc": "2.0",
+        "method": "priv_createPrivacyGroup",
+        "params": [
+          {
             "addresses": [
-                "{{global.nodes.besu_1.privateAddress}}",
-                "{{global.nodes.besu_2.privateAddress}}",
-                "{{global.nodes.besu_3.privateAddress}}"
+              "{{global.nodes.besu_1.privateAddress}}",
+              "{{global.nodes.besu_2.privateAddress}}",
+              "{{global.nodes.besu_3.privateAddress}}"
             ],
             "name": "{{privacyGroupNameTwo}}",
             "description": "TestGroup"
-        }
-    ],
-    "id": 1
-}
+          }
+        ],
+        "id": 1
+      }
       """
     Then the response code should be 200
     Then I register the following response fields
@@ -672,22 +708,24 @@ Feature: Private transactions
       | ID                              |
       | {{besuDeployContractTxGroupID}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-        "from": "{{account1}}",
-        "protocol": "Orion",
-        "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
-        "privacyGroupId": "{{privacyGroupId}}",
-        "privateFor": ["{{global.nodes.besu_3.privateAddress}}"],
-        "contractName": "SimpleToken"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{besuDeployContractTxGroupID}}"
-    }
-}
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "from": "{{account1}}",
+          "protocol": "Orion",
+          "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+          "privacyGroupId": "{{privacyGroupId}}",
+          "privateFor": [
+            "{{global.nodes.besu_3.privateAddress}}"
+          ],
+          "contractName": "SimpleToken"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{besuDeployContractTxGroupID}}"
+        }
+      }
       """
     Then the response code should be 400
     And Response should have the following fields
@@ -707,21 +745,23 @@ Feature: Private transactions
       | ID                            |
       | {{besuDeployContractTxOTKID}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-        "oneTimeKey": true ,
-        "protocol": "Orion",
-        "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
-        "privateFor": ["{{global.nodes.besu_3.privateAddress}}"],
-        "contractName": "SimpleToken"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{besuDeployContractTxOTKID}}"
-    }
-}
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "oneTimeKey": true,
+          "protocol": "Orion",
+          "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+          "privateFor": [
+            "{{global.nodes.besu_3.privateAddress}}"
+          ],
+          "contractName": "SimpleToken"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{besuDeployContractTxOTKID}}"
+        }
+      }
       """
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
@@ -742,18 +782,18 @@ Feature: Private transactions
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-        "from": "{{account1}}",
-        "contractName": "SimpleToken"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{publicBesuDeployContractTxID}}"
-    }
-}
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "from": "{{account1}}",
+          "contractName": "SimpleToken"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{publicBesuDeployContractTxID}}"
+        }
+      }
       """
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
@@ -764,21 +804,24 @@ Feature: Private transactions
       | ID                                |
       | {{privateBesuDeployContractTxID}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
-  """
-{
-    "chain": "besu-{{scenarioID}}",
-    "params": {
-        "from": "{{account1}}",
-        "protocol": "Orion",
-        "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
-        "privateFor": ["{{global.nodes.besu_2.privateAddress}}","{{global.nodes.besu_3.privateAddress}}"],
-        "contractName": "SimpleToken"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}",
-    	"id": "{{privateBesuDeployContractTxID}}"
-    }
-}
+      """
+      {
+        "chain": "besu-{{scenarioID}}",
+        "params": {
+          "from": "{{account1}}",
+          "protocol": "Orion",
+          "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+          "privateFor": [
+            "{{global.nodes.besu_2.privateAddress}}",
+            "{{global.nodes.besu_3.privateAddress}}"
+          ],
+          "contractName": "SimpleToken"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{privateBesuDeployContractTxID}}"
+        }
+      }
       """
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
@@ -796,48 +839,50 @@ Feature: Private transactions
       | Authorization | Bearer {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/schedules" with json:
       """
-{}
+      {}
       """
     Then the response code should be 200
     Then I register the following response fields
       | alias        | path |
       | scheduleUUID | uuid |
     When I send "POST" request to "{{global.api}}/jobs" with json:
-  """
-{
-    "scheduleUUID": "{{scheduleUUID}}",
-	"chainUUID": "{{besu.UUID}}",
-    "type": "eth://orion/markingTransaction",
-    "transaction": {
-        "from": "{{account1}}"
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}"
-    }
-}
+      """
+      {
+        "scheduleUUID": "{{scheduleUUID}}",
+        "chainUUID": "{{besu.UUID}}",
+        "type": "eth://orion/markingTransaction",
+        "transaction": {
+          "from": "{{account1}}"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}"
+        }
+      }
       """
     Then the response code should be 200
     Then I register the following response fields
       | alias              | path |
       | txMarkingTxJobUUID | uuid |
     When I send "POST" request to "{{global.api}}/jobs" with json:
-  """
-{
-    "scheduleUUID": "{{scheduleUUID}}",
-	"chainUUID": "{{besu.UUID}}",
-	"nextJobUUID": "{{txMarkingTxJobUUID}}",
-    "type": "eth://orion/eeaTransaction",
-    "transaction": {
-        "from": "{{account1}}",
-        "to": "{{to1}}",
-        "nonce": "1000001",
-        "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
-        "privateFor": ["{{global.nodes.besu_2.privateAddress}}"]
-    },
-    "labels": {
-    	"scenario.id": "{{scenarioID}}"
-    }
-}
+      """
+      {
+        "scheduleUUID": "{{scheduleUUID}}",
+        "chainUUID": "{{besu.UUID}}",
+        "nextJobUUID": "{{txMarkingTxJobUUID}}",
+        "type": "eth://orion/eeaTransaction",
+        "transaction": {
+          "from": "{{account1}}",
+          "to": "{{to1}}",
+          "nonce": "1000001",
+          "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+          "privateFor": [
+            "{{global.nodes.besu_2.privateAddress}}"
+          ]
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}"
+        }
+      }
       """
     Then the response code should be 200
     Then I register the following response fields

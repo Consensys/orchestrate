@@ -3,8 +3,6 @@ package usecases
 import (
 	"context"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/store/models"
-
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 )
 
@@ -39,5 +37,5 @@ type DeleteFaucetUseCase interface {
 }
 
 type GetFaucetCandidateUseCase interface {
-	Execute(ctx context.Context, account string, chain *models.Chain, tenants []string) (*entities.Faucet, error)
+	Execute(ctx context.Context, account string, chain *entities.Chain, tenants []string) (*entities.Faucet, error)
 }

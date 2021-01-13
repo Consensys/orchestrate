@@ -1,28 +1,6 @@
 @http-endpoints
 Feature: Verify HTTP Endpoints
   ###################
-  # CHAIN REGISTRY
-  ###################
-  Scenario: Get Chain Registry Swagger JSON file
-    When I send "GET" request to "{{global.chain-registry}}/swagger/swagger.json"
-    Then the response code should be 200
-
-  Scenario: Get Chain Registry metrics
-    When I send "GET" request to "{{global.chain-registry-metrics}}/metrics"
-    Then the response code should be 200
-
-  Scenario: Get Chain Registry readiness
-    When I send "GET" request to "{{global.chain-registry-metrics}}/ready?full=1"
-    Then the response code should be 200
-    And Response should have the following fields
-      | database |
-      | OK       |
-
-  Scenario: Get Chain Registry liveness
-    When I send "GET" request to "{{global.chain-registry-metrics}}/live"
-    Then the response code should be 200
-
-  ###################
   # API
   ###################
   Scenario: Get API Swagger JSON file
@@ -65,8 +43,8 @@ Feature: Verify HTTP Endpoints
     When I send "GET" request to "{{global.tx-listener-metrics}}/ready?full=1"
     Then the response code should be 200
     And Response should have the following fields
-      | chain-registry | api | kafka |
-      | OK             | OK  | OK    |
+      | api | kafka |
+      | OK  | OK    |
 
   Scenario: Get tx-listener liveness
     When I send "GET" request to "{{global.tx-listener-metrics}}/live"

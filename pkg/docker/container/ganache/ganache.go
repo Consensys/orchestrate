@@ -54,6 +54,7 @@ func (*Ganache) GenerateContainerConfig(_ context.Context, configuration interfa
 		ExposedPorts: nat.PortSet{
 			"8545/tcp": struct{}{},
 		},
+		Cmd: []string{"ganache-cli", "--mnemonic", "surge arm pulse bus piano poet thrive erase angry dwarf cargo vanish", "--blockTime", "1"},
 	}
 
 	hostConfig := &dockercontainer.HostConfig{}

@@ -10,7 +10,7 @@ const FromAddress = "0x5Cc634233E4a454d47aACd9fC68801482Fb02610"
 
 func FakeSendTransactionRequest() *types.SendTransactionRequest {
 	return &types.SendTransactionRequest{
-		ChainName: "chainName",
+		ChainName: "ganache",
 		Params: types.TransactionParams{
 			From:            FromAddress,
 			MethodSignature: "transfer()",
@@ -21,7 +21,7 @@ func FakeSendTransactionRequest() *types.SendTransactionRequest {
 
 func FakeSendRawTransactionRequest() *types.RawTransactionRequest {
 	return &types.RawTransactionRequest{
-		ChainName: "chainName",
+		ChainName: "ganache",
 		Params: types.RawTransactionParams{
 			Raw: "0xabeabe",
 		},
@@ -30,7 +30,7 @@ func FakeSendRawTransactionRequest() *types.RawTransactionRequest {
 
 func FakeSendTransferTransactionRequest() *types.TransferRequest {
 	return &types.TransferRequest{
-		ChainName: "chainName",
+		ChainName: "ganache",
 		Params: types.TransferParams{
 			From:  FromAddress,
 			Value: "1000000000000000000",
@@ -41,7 +41,7 @@ func FakeSendTransferTransactionRequest() *types.TransferRequest {
 
 func FakeDeployContractRequest() *types.DeployContractRequest {
 	return &types.DeployContractRequest{
-		ChainName: "chainName",
+		ChainName: "ganache",
 		Params: types.DeployContractParams{
 			From:         FromAddress,
 			ContractName: "MyContract",
@@ -52,7 +52,7 @@ func FakeDeployContractRequest() *types.DeployContractRequest {
 
 func FakeSendTesseraRequest() *types.SendTransactionRequest {
 	return &types.SendTransactionRequest{
-		ChainName: "chainName",
+		ChainName: "ganache",
 		Params: types.TransactionParams{
 			From:            FromAddress,
 			MethodSignature: "transfer()",
@@ -66,7 +66,7 @@ func FakeSendTesseraRequest() *types.SendTransactionRequest {
 
 func FakeSendOrionRequest() *types.SendTransactionRequest {
 	return &types.SendTransactionRequest{
-		ChainName: "chainName",
+		ChainName: "ganache",
 		Params: types.TransactionParams{
 			From:            FromAddress,
 			MethodSignature: "transfer()",

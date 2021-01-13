@@ -12,24 +12,23 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/client"
 )
 
 const fundAccountComponent = "use-cases.fund-account"
 
 type fundAccountUseCase struct {
-	registryClient     client.ChainRegistryClient
+	searchChainsUC     usecases.SearchChainsUseCase
 	sendTxUseCase      usecases.SendTxUseCase
 	getFaucetCandidate usecases.GetFaucetCandidateUseCase
 }
 
 func NewFundAccountUseCase(
-	registryClient client.ChainRegistryClient,
+	searchChainsUC usecases.SearchChainsUseCase,
 	sendTxUseCase usecases.SendTxUseCase,
 	getFaucetCandidate usecases.GetFaucetCandidateUseCase,
 ) usecases.FundAccountUseCase {
 	return &fundAccountUseCase{
-		registryClient:     registryClient,
+		searchChainsUC:     searchChainsUC,
 		sendTxUseCase:      sendTxUseCase,
 		getFaucetCandidate: getFaucetCandidate,
 	}
@@ -39,12 +38,18 @@ func (uc *fundAccountUseCase) Execute(ctx context.Context, account *entities.Acc
 	logger := log.WithContext(ctx).WithField("address", account.Address)
 	logger.Debug("funding account...")
 
-	chain, err := uc.registryClient.GetChainByName(ctx, chainName)
+	tenants := []string{tenantID, multitenancy.DefaultTenant}
+
+	chains, err := uc.searchChainsUC.Execute(ctx, &entities.ChainFilters{Names: []string{chainName}}, tenants)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(fundAccountComponent)
 	}
 
-	faucet, err := uc.getFaucetCandidate.Execute(ctx, account.Address, chain, []string{tenantID, multitenancy.DefaultTenant})
+	if len(chains) == 0 {
+		return errors.InvalidParameterError("chain does not exist")
+	}
+
+	faucet, err := uc.getFaucetCandidate.Execute(ctx, account.Address, chains[0], tenants)
 	if err != nil {
 		if errors.IsNotFoundError(err) {
 			logger.Debug("unnecessary funding, skipping top-up")
@@ -56,7 +61,7 @@ func (uc *fundAccountUseCase) Execute(ctx context.Context, account *entities.Acc
 
 	txRequest := &entities.TxRequest{
 		IdempotencyKey: utils.RandomString(16),
-		ChainName:      chain.Name,
+		ChainName:      chains[0].Name,
 		Params: &entities.ETHTransactionParams{
 			From:  faucet.CreditorAccount,
 			To:    account.Address,

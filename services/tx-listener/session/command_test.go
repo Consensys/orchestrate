@@ -11,9 +11,9 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/dynamic"
 )
 
-var config1 = &dynamic.Chain{Name: "test", Listener: &dynamic.Listener{Depth: 1, Backoff: time.Second, ExternalTxEnabled: false}}
-var config2 = &dynamic.Chain{Name: "test2", Listener: &dynamic.Listener{Depth: 1, Backoff: time.Second, ExternalTxEnabled: false}}
-var configExternTxEnabled = &dynamic.Chain{Name: "test2", Listener: &dynamic.Listener{Depth: 1, Backoff: time.Second, ExternalTxEnabled: true}}
+var config1 = &dynamic.Chain{Name: "test", Listener: dynamic.Listener{Depth: 1, Backoff: time.Second, ExternalTxEnabled: false}}
+var config2 = &dynamic.Chain{Name: "test2", Listener: dynamic.Listener{Depth: 1, Backoff: time.Second, ExternalTxEnabled: false}}
+var configExternTxEnabled = &dynamic.Chain{Name: "test2", Listener: dynamic.Listener{Depth: 1, Backoff: time.Second, ExternalTxEnabled: true}}
 
 func TestCompareConfiguation(t *testing.T) {
 

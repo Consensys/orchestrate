@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"time"
 
+	logpkg "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
+
 	sarama2 "github.com/Shopify/sarama"
 	"github.com/alicebob/miniredis"
 	"github.com/cenkalti/backoff/v4"
@@ -35,11 +37,10 @@ import (
 
 const kafkaContainerID = "Kafka-tx-sender"
 const zookeeperContainerID = "zookeeper-tx-sender"
-const txSchedulerURL = "http://transaction-scheduler:8081"
+const apiURL = "http://api:8081"
 const keyManagerURL = "http://key-manager:8081"
-const txSchedulerMetricsURL = "http://transaction-scheduler:8082"
+const apiMetricsURL = "http://api:8082"
 const keyManagerMetricsURL = "http://key-manager:8082"
-const chainRegistryURL = "http://chainregistry:8081"
 const networkName = "tx-sender"
 const maxRecoveryDefault = 1
 
@@ -75,11 +76,13 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 	// Initialize environment flags
 	flgs := pflag.NewFlagSet("tx-sender-integration-test", pflag.ContinueOnError)
 	txsender.Flags(flgs)
+	logpkg.Level(flgs)
 	args := []string{
 		"--metrics-port=" + envMetricsPort,
 		"--kafka-url=" + kafkaExternalHostname,
 		"--nonce-manager-type=" + txsender.NonceManagerTypeRedis,
-		"--chain-registry-url=" + chainRegistryURL,
+		"--api-url=" + apiURL,
+		"--log-level=panic",
 	}
 
 	err := flgs.Parse(args)
@@ -231,8 +234,8 @@ func newTxSender(ctx context.Context, txSenderConfig *txsender.Config, redisCli 
 	conf.MetricsURL = keyManagerMetricsURL
 	keyManagerClient := keymanager.NewHTTPClient(httpClient, conf)
 
-	conf2 := client.NewConfig(txSchedulerURL, nil)
-	conf2.MetricsURL = txSchedulerMetricsURL
+	conf2 := client.NewConfig(apiURL, nil)
+	conf2.MetricsURL = apiMetricsURL
 	apiClient := client.NewHTTPClient(httpClient, conf2)
 
 	txSenderConfig.NonceMaxRecovery = maxRecoveryDefault

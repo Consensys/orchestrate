@@ -26,7 +26,7 @@ func TestGetContract_Execute(t *testing.T) {
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		artifactAgent.EXPECT().
-			FindOneByNameAndTag(ctx, contract.ID.Name, contract.ID.Tag).
+			FindOneByNameAndTag(ctx, contract.Name, contract.Tag).
 			Return(&models.ArtifactModel{
 				ID:               1,
 				ABI:              contract.ABI,
@@ -35,7 +35,7 @@ func TestGetContract_Execute(t *testing.T) {
 				Codehash:         "",
 			}, nil)
 
-		response, err := usecase.Execute(ctx, &contract.ID)
+		response, err := usecase.Execute(ctx, contract.Name, contract.Tag)
 
 		assert.NoError(t, err)
 		assert.Equal(t, contract.Bytecode, response.Bytecode)
@@ -47,11 +47,9 @@ func TestGetContract_Execute(t *testing.T) {
 
 	t.Run("should fail if data agent fails", func(t *testing.T) {
 		dataAgentError := fmt.Errorf("error")
-		artifactAgent.EXPECT().
-			FindOneByNameAndTag(ctx, contract.ID.Name, contract.ID.Tag).
-			Return(nil, dataAgentError)
+		artifactAgent.EXPECT().FindOneByNameAndTag(ctx, contract.Name, contract.Tag).Return(nil, dataAgentError)
 
-		response, err := usecase.Execute(ctx, &contract.ID)
+		response, err := usecase.Execute(ctx, contract.Name, contract.Tag)
 
 		assert.Nil(t, response)
 		assert.Equal(t, errors.FromError(dataAgentError).ExtendComponent(getContractComponent), err)

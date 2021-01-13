@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "PegaSys Orchestrate API. Enables dynamic management of transactions, identities, chains, faucets and contracts.\nTransaction requests are an abstraction over schedules and jobs representing one or more transactions executed on the Blockchain network\nSchedules are ordered lists of jobs executed in a predefined sequence\nJobs represent single transaction flows executed on the Blockchain network\nChains represent list of endpoints pointing to a Blockchain network\nFaucets represent funded accounts (holding ETH) linked to specific chains, allowed to fund newly created accounts automatically for them to be able to send transactions.\nAccounts represent Ethereum accounts (private keys). By usage of the generated cryptographic key pair, accounts can be used to sign/verify and to encrypt/decrypt messages.",
+        "description": "PegaSys Orchestrate API. Enables dynamic management of transactions, identities, chains, faucets and contracts.\nTransaction Requests are an abstraction over schedules and jobs representing one or more transactions executed on the Blockchain network\nSchedules are ordered lists of jobs executed in a predefined sequence\nJobs represent single transaction flows executed on the Blockchain network\nChains represent list of endpoints pointing to a Blockchain network\nFaucets represent funded accounts (holding ETH) linked to specific chains, allowed to fund newly created accounts automatically for them to be able to send transactions.\nAccounts represent Ethereum accounts (private keys). By usage of the generated cryptographic key pair, accounts can be used to sign/verify and to encrypt/decrypt messages.\nContracts represent Solidity contracts management.",
         "title": "Orchestrate API",
         "contact": {
             "name": "Contact PegaSys Orchestrate",
@@ -374,6 +374,691 @@
                 }
             }
         },
+        "/chains": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Retrieves a list of all registered chains",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/definitions/api.ChainResponse"
+                                    },
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "privateTxManager": {
+                                                "$ref": "#/definitions/entities.PrivateTxManager"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Registers a new chain",
+                "parameters": [
+                    {
+                        "description": "Chain registration request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.ChainResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "listener": {
+                                            "$ref": "#/definitions/api.RegisterListenerRequest"
+                                        },
+                                        "privateTxManager": {
+                                            "$ref": "#/definitions/api.PrivateTxManagerRequest"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.ChainResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "privateTxManager": {
+                                            "$ref": "#/definitions/entities.PrivateTxManager"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/chains/{uuid}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Retrieves a chain by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the chain",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.ChainResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "privateTxManager": {
+                                            "$ref": "#/definitions/entities.PrivateTxManager"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Chain not found",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Deletes a chain by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the chain",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Chain deleted successfully"
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Chain not found",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Updates a chain by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the chain",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Chain update request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.UpdateChainRequest"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "listener": {
+                                            "$ref": "#/definitions/api.UpdateListenerRequest"
+                                        },
+                                        "privateTxManager": {
+                                            "$ref": "#/definitions/api.PrivateTxManagerRequest"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.ChainResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "privateTxManager": {
+                                            "$ref": "#/definitions/entities.PrivateTxManager"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Chain not found",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/contracts": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "description": "Returns a list of all registered contracts",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Returns a list of all registered contracts",
+                "responses": {
+                    "200": {
+                        "description": "Registered contract List",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "description": "Register new solidity contract in Orchestrate",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Register new solidity contract",
+                "parameters": [
+                    {
+                        "description": "Contract register request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.RegisterContractRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Contract object",
+                        "schema": {
+                            "$ref": "#/definitions/api.ContractResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/contracts/accounts/{chain_id}/{address}": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "description": "Retrieve events using hash of signature",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Set the codeHash of the given contract address",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "contract deployed address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "network chain id",
+                        "name": "chain_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of events",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/contracts/accounts/{chain_id}/{address}/events": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "description": "Retrieve events using hash of signature",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Retrieve events using hash of signature",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "contract deployed address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "network chain id",
+                        "name": "chain_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of events",
+                        "schema": {
+                            "$ref": "#/definitions/api.GetContractEventsBySignHashResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Events not found",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/contracts/{name}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "description": "Returns a list of all tags from given contract name",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Returns a list of all tags",
+                "responses": {
+                    "200": {
+                        "description": "List of tags",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "contract not found",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/contracts/{name}/{tag}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "description": "Fetch solidity contract data by {name} and {tag}",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Fetch registered contract data",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "solidity contract registered name",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "solidity contract registered tag",
+                        "name": "tag",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Contract found",
+                        "schema": {
+                            "$ref": "#/definitions/api.ContractResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Contract not found",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/contracts/{name}/{tag}/method-signatures": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "description": "Get method signatures of registered contract by {name} and {tag}",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get method signatures of registered contract",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "solidity contract registered name",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "solidity contract registered tag",
+                        "name": "tag",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of signatures",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Contract not found",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/ethereum/accounts/verify-signature": {
             "post": {
                 "description": "Verifies if a message has been signed by the Ethereum account passed as argument",
@@ -540,6 +1225,246 @@
                     },
                     "422": {
                         "description": "Invalid parameters",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/faucets": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Retrieves a list of all registered faucets",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/api.FaucetResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Registers a new faucet",
+                "parameters": [
+                    {
+                        "description": "Faucet registration request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.RegisterFaucetRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.FaucetResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/faucets/{uuid}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Retrieves a faucet by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the faucet",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.FaucetResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Faucet not found",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "summary": "Deletes a faucet by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the faucet",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Faucet deleted successfully"
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Faucet not found",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Updates a faucet by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the faucet",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Faucet update request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.UpdateFaucetRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.FaucetResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Faucet not found",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
                         "schema": {
                             "$ref": "#/definitions/httputil.ErrorResponse"
                         }
@@ -1709,6 +2634,71 @@
                 }
             }
         },
+        "api.ChainResponse": {
+            "type": "object",
+            "properties": {
+                "chainID": {
+                    "type": "string",
+                    "example": "1"
+                },
+                "createdAt": {
+                    "type": "string",
+                    "example": "2020-07-09T12:35:42.115395Z"
+                },
+                "listenerBackOffDuration": {
+                    "type": "string",
+                    "example": "5s"
+                },
+                "listenerCurrentBlock": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "listenerDepth": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "listenerExternalTxEnabled": {
+                    "type": "boolean",
+                    "example": false
+                },
+                "listenerStartingBlock": {
+                    "type": "integer",
+                    "example": 5000
+                },
+                "name": {
+                    "type": "string",
+                    "example": "mainnet"
+                },
+                "privateTxManager": {
+                    "type": "object",
+                    "$ref": "#/definitions/entities.PrivateTxManager"
+                },
+                "tenantID": {
+                    "type": "string",
+                    "example": "tenant"
+                },
+                "updatedAt": {
+                    "type": "string",
+                    "example": "2020-07-09T12:35:42.115395Z"
+                },
+                "urls": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "https://mainnet.infura.io/v3/a73136601e6f4924a0baa4ed880b535e"
+                    ]
+                },
+                "uuid": {
+                    "type": "string",
+                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
+                }
+            }
+        },
+        "api.ContractResponse": {
+            "type": "object"
+        },
         "api.CreateAccountRequest": {
             "type": "object",
             "properties": {
@@ -1867,6 +2857,57 @@
                 }
             }
         },
+        "api.FaucetResponse": {
+            "type": "object",
+            "required": [
+                "amount",
+                "cooldown",
+                "maxBalance",
+                "name"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "string",
+                    "example": "60000000000000000 (wei)"
+                },
+                "chainRule": {
+                    "type": "string",
+                    "example": "mainnet"
+                },
+                "cooldown": {
+                    "type": "string",
+                    "example": "10s"
+                },
+                "createdAt": {
+                    "type": "string",
+                    "example": "2020-07-09T12:35:42.115395Z"
+                },
+                "creditorAccount": {
+                    "type": "string",
+                    "example": "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"
+                },
+                "maxBalance": {
+                    "type": "string",
+                    "example": "100000000000000000 (wei)"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "faucet-mainnet"
+                },
+                "tenantID": {
+                    "type": "string",
+                    "example": "foo"
+                },
+                "updatedAt": {
+                    "type": "string",
+                    "example": "2020-07-09T12:35:42.115395Z"
+                },
+                "uuid": {
+                    "type": "string",
+                    "example": "b4374e6f-b28a-4bad-b4fe-bda36eaf849c"
+                }
+            }
+        },
         "api.GasPriceParams": {
             "type": "object",
             "properties": {
@@ -1877,6 +2918,36 @@
                 "retryPolicy": {
                     "type": "object",
                     "$ref": "#/definitions/api.RetryParams"
+                }
+            }
+        },
+        "api.GetContractEventsBySignHashResponse": {
+            "type": "object",
+            "properties": {
+                "defaultEvents": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "[{anonymous:false",
+                        "inputs:[{indexed:true",
+                        "name:from",
+                        "type:address}",
+                        "{indexed:true",
+                        "name:to",
+                        "type:address}",
+                        "{indexed:false",
+                        "name:value",
+                        "type:uint256}]",
+                        "name:Transfer",
+                        "type:event}",
+                        "..."
+                    ]
+                },
+                "event": {
+                    "type": "string",
+                    "example": "{anonymous:false,inputs:[{indexed:true,name:from,type:address},{indexed:true,name:to,type:address},{indexed:false,name:value,type:uint256}],name:Transfer,type:event}"
                 }
             }
         },
@@ -1980,6 +3051,23 @@
                 }
             }
         },
+        "api.PrivateTxManagerRequest": {
+            "type": "object",
+            "required": [
+                "type",
+                "url"
+            ],
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "example": "Tessera"
+                },
+                "url": {
+                    "type": "string",
+                    "example": "http://tessera:3000"
+                }
+            }
+        },
         "api.RawTransactionParams": {
             "type": "object",
             "required": [
@@ -2016,6 +3104,92 @@
                 "params": {
                     "type": "object",
                     "$ref": "#/definitions/api.RawTransactionParams"
+                }
+            }
+        },
+        "api.RegisterContractRequest": {
+            "type": "object",
+            "required": [
+                "abi",
+                "name"
+            ],
+            "properties": {
+                "abi": {
+                    "type": "object"
+                },
+                "bytecode": {
+                    "type": "string",
+                    "example": "0x6080604052348015600f57600080f..."
+                },
+                "deployedBytecode": {
+                    "type": "string",
+                    "example": "0x6080604052348015600f57600080f..."
+                },
+                "name": {
+                    "type": "string",
+                    "example": "ERC20"
+                },
+                "tag": {
+                    "type": "string",
+                    "example": "v1.0.0"
+                }
+            }
+        },
+        "api.RegisterFaucetRequest": {
+            "type": "object",
+            "required": [
+                "amount",
+                "chainRule",
+                "cooldown",
+                "creditorAccount",
+                "maxBalance",
+                "name"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "string",
+                    "example": "60000000000000000 (wei)"
+                },
+                "chainRule": {
+                    "type": "string",
+                    "example": "mainnet"
+                },
+                "cooldown": {
+                    "type": "string",
+                    "example": "10s"
+                },
+                "creditorAccount": {
+                    "type": "string",
+                    "example": "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"
+                },
+                "maxBalance": {
+                    "type": "string",
+                    "example": "100000000000000000 (wei)"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "faucet-mainnet"
+                }
+            }
+        },
+        "api.RegisterListenerRequest": {
+            "type": "object",
+            "properties": {
+                "backOffDuration": {
+                    "type": "string",
+                    "example": "1s"
+                },
+                "depth": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "externalTxEnabled": {
+                    "type": "boolean",
+                    "example": false
+                },
+                "fromBlock": {
+                    "type": "string",
+                    "example": "latest"
                 }
             }
         },
@@ -2297,6 +3471,52 @@
                 }
             }
         },
+        "api.UpdateChainRequest": {
+            "type": "object",
+            "properties": {
+                "listener": {
+                    "type": "object",
+                    "$ref": "#/definitions/api.UpdateListenerRequest"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "mainnet"
+                },
+                "privateTxManager": {
+                    "type": "object",
+                    "$ref": "#/definitions/api.PrivateTxManagerRequest"
+                }
+            }
+        },
+        "api.UpdateFaucetRequest": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "string",
+                    "example": "60000000000000000 (wei)"
+                },
+                "chainRule": {
+                    "type": "string",
+                    "example": "mainnet"
+                },
+                "cooldown": {
+                    "type": "string",
+                    "example": "10s"
+                },
+                "creditorAccount": {
+                    "type": "string",
+                    "example": "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"
+                },
+                "maxBalance": {
+                    "type": "string",
+                    "example": "100000000000000000 (wei)"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "faucet-mainnet"
+                }
+            }
+        },
         "api.UpdateJobRequest": {
             "type": "object",
             "properties": {
@@ -2321,6 +3541,27 @@
                 "transaction": {
                     "type": "object",
                     "$ref": "#/definitions/entities.ETHTransaction"
+                }
+            }
+        },
+        "api.UpdateListenerRequest": {
+            "type": "object",
+            "properties": {
+                "backOffDuration": {
+                    "type": "string",
+                    "example": "1s"
+                },
+                "currentBlock": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "depth": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "externalTxEnabled": {
+                    "type": "boolean",
+                    "example": false
                 }
             }
         },
@@ -2409,6 +3650,26 @@
                 "status": {
                     "type": "string",
                     "example": "MINED"
+                }
+            }
+        },
+        "entities.PrivateTxManager": {
+            "type": "object",
+            "properties": {
+                "chainUUID": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "uuid": {
+                    "type": "string"
                 }
             }
         },

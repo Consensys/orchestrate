@@ -32,8 +32,8 @@ func (sc *ScenarioContext) iRegisterTheFollowingContract(table *gherkin.PickleSt
 		_, err = sc.client.RegisterContract(
 			authutils.WithAuthorization(ctx, parseContract.JWTToken),
 			&api.RegisterContractRequest{
-				Name:             parseContract.Contract.ID.Name,
-				Tag:              parseContract.Contract.ID.Tag,
+				Name:             parseContract.Contract.Name,
+				Tag:              parseContract.Contract.Tag,
 				ABI:              abi,
 				Bytecode:         parseContract.Contract.Bytecode,
 				DeployedBytecode: parseContract.Contract.DeployedBytecode,
@@ -46,8 +46,8 @@ func (sc *ScenarioContext) iRegisterTheFollowingContract(table *gherkin.PickleSt
 
 		sc.TearDownFunc = append(sc.TearDownFunc, func() {
 			log.FromContext(ctx).
-				WithField("name", parseContract.Contract.ID.Name).
-				WithField("tag", parseContract.Contract.ID.Tag).
+				WithField("name", parseContract.Contract.Name).
+				WithField("tag", parseContract.Contract.Tag).
 				Warn("DeregisterContract is not implemented")
 		})
 	}

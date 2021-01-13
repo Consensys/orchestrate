@@ -12,7 +12,6 @@ import (
 
 	stripedmutex "github.com/nmvalera/striped-mutex"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/chainregistry"
 )
 
 const cooldownComponent = "faucet.control.cooldown"
@@ -32,7 +31,7 @@ func NewCooldownControl() *CooldownControl {
 }
 
 // Control apply CoolDown controller on a credit function
-func (ctrl *CooldownControl) Control(ctx context.Context, req *types.Request) error {
+func (ctrl *CooldownControl) Control(ctx context.Context, req *entities.FaucetRequest) error {
 	log.WithContext(ctx).Debug("cooldown control check")
 
 	if len(req.Candidates) == 0 {
@@ -55,7 +54,7 @@ func (ctrl *CooldownControl) Control(ctx context.Context, req *types.Request) er
 
 	if len(req.Candidates) == 0 {
 		errMessage := "all faucets cooling down"
-		log.WithContext(ctx).WithField("beneficiary", req.Beneficiary).Debug(errMessage)
+		log.WithContext(ctx).WithField("beneficiary", req.Beneficiary).Error(errMessage)
 		return errors.FaucetWarning(errMessage).ExtendComponent(cooldownComponent)
 	}
 

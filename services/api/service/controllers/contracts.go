@@ -10,7 +10,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/httputil"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/service/formatters"
 )
@@ -93,7 +92,7 @@ func (c *ContractsController) register(rw http.ResponseWriter, request *http.Req
 		return
 	}
 
-	contract, err = c.ucs.GetContract().Execute(ctx, &contract.ID)
+	contract, err = c.ucs.GetContract().Execute(ctx, contract.Name, contract.Tag)
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -220,11 +219,7 @@ func (c *ContractsController) getContract(rw http.ResponseWriter, request *http.
 	rw.Header().Set("Content-Type", "application/json")
 	ctx := request.Context()
 
-	contract, err := c.ucs.GetContract().Execute(ctx, &entities.ContractID{
-		Name: mux.Vars(request)["name"],
-		Tag:  mux.Vars(request)["tag"],
-	})
-
+	contract, err := c.ucs.GetContract().Execute(ctx, mux.Vars(request)["name"], mux.Vars(request)["tag"])
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -249,11 +244,7 @@ func (c *ContractsController) getContractMethodSignatures(rw http.ResponseWriter
 	ctx := request.Context()
 
 	filterMethod := request.URL.Query().Get("method")
-	signatures, err := c.ucs.GetContractMethodSignatures().Execute(ctx, &entities.ContractID{
-		Name: mux.Vars(request)["name"],
-		Tag:  mux.Vars(request)["tag"],
-	}, filterMethod)
-
+	signatures, err := c.ucs.GetContractMethodSignatures().Execute(ctx, mux.Vars(request)["name"], mux.Vars(request)["tag"], filterMethod)
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return

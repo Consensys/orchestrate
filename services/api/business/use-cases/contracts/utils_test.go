@@ -12,6 +12,7 @@ import (
 
 //nolint
 var contractAddress = "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"
+
 //nolint
 var chainID = "chainId"
 
@@ -35,10 +36,8 @@ var ERC20 = `[{
 
 func TestGetIndexedCount(t *testing.T) {
 	var ERC20Contract = &entities.Contract{
-		ID: entities.ContractID{
-			Name: "ERC20",
-			Tag:  "v1.0.0",
-		},
+		Name:             "ERC20",
+		Tag:              "v1.0.0",
 		ABI:              ERC20,
 		Bytecode:         hexutil.Encode([]byte{1, 2}),
 		DeployedBytecode: hexutil.Encode([]byte{1, 2, 3}),

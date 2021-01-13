@@ -18,7 +18,7 @@ import (
 // @title Orchestrate API
 // @version 2.0
 // @description PegaSys Orchestrate API. Enables dynamic management of transactions, identities, chains, faucets and contracts.
-// @description Transaction requests are an abstraction over schedules and jobs representing one or more transactions executed on the Blockchain network
+// @description Transaction Requests are an abstraction over schedules and jobs representing one or more transactions executed on the Blockchain network
 // @description Schedules are ordered lists of jobs executed in a predefined sequence
 // @description Jobs represent single transaction flows executed on the Blockchain network
 // @description Chains represent list of endpoints pointing to a Blockchain network
@@ -47,6 +47,7 @@ type Builder struct {
 	jobsCtrl      *JobsController
 	accountsCtrl  *AccountsController
 	faucetsCtrl   *FaucetsController
+	chainsCtrl    *ChainsController
 	contractsCtrl *ContractsController
 }
 
@@ -57,6 +58,7 @@ func NewBuilder(ucs usecases.UseCases, keyManagerClient client.KeyManagerClient)
 		jobsCtrl:      NewJobsController(ucs),
 		accountsCtrl:  NewAccountsController(ucs, keyManagerClient),
 		faucetsCtrl:   NewFaucetsController(ucs),
+		chainsCtrl:    NewChainsController(ucs),
 		contractsCtrl: NewContractsController(ucs),
 	}
 }
@@ -73,6 +75,7 @@ func (b *Builder) Build(_ context.Context, _ string, configuration interface{}, 
 	b.jobsCtrl.Append(router)
 	b.accountsCtrl.Append(router)
 	b.faucetsCtrl.Append(router)
+	b.chainsCtrl.Append(router)
 	b.contractsCtrl.Append(router)
 
 	return router, nil

@@ -69,10 +69,8 @@ func StringToContract(s string) (*entities.Contract, error) {
 	}
 
 	c := &entities.Contract{
-		ID: entities.ContractID{
-			Name: parts[1],
-			Tag:  parts[2],
-		},
+		Name: parts[1],
+		Tag:  parts[2],
 	}
 
 	// Make sure bytecode is valid and set bytecode

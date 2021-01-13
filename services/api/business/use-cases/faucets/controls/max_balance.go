@@ -10,8 +10,6 @@ import (
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/chainregistry"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/chain-registry/utils"
 )
 
 const maxBalanceComponent = "faucet.control.max-balance"
@@ -29,7 +27,7 @@ func NewMaxBalanceControl(chainStateReader ethclient.ChainStateReader) *MaxBalan
 }
 
 // Control apply MaxBalance controller on a credit function
-func (ctrl *MaxBalanceControl) Control(ctx context.Context, req *types.Request) error {
+func (ctrl *MaxBalanceControl) Control(ctx context.Context, req *entities.FaucetRequest) error {
 	log.WithContext(ctx).Debug("max_balance control check")
 
 	if len(req.Candidates) == 0 {
@@ -37,7 +35,7 @@ func (ctrl *MaxBalanceControl) Control(ctx context.Context, req *types.Request) 
 	}
 
 	// Retrieve account balance
-	balance, err := utils.GetAddressBalance(ctx, ctrl.chainStateReader, req.Chain.URLs, req.Beneficiary)
+	balance, err := getAddressBalance(ctx, ctrl.chainStateReader, req.Chain.URLs, req.Beneficiary)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(maxBalanceComponent)
 	}

@@ -21,6 +21,7 @@ type OrchestrateClient interface {
 	MetricClient
 	AccountClient
 	FaucetClient
+	ChainClient
 	ContractClient
 }
 
@@ -71,6 +72,14 @@ type FaucetClient interface {
 	GetFaucet(ctx context.Context, uuid string) (*types.FaucetResponse, error)
 	SearchFaucets(ctx context.Context, filters *entities.FaucetFilters) ([]*types.FaucetResponse, error)
 	DeleteFaucet(ctx context.Context, uuid string) error
+}
+
+type ChainClient interface {
+	RegisterChain(ctx context.Context, request *types.RegisterChainRequest) (*types.ChainResponse, error)
+	UpdateChain(ctx context.Context, uuid string, request *types.UpdateChainRequest) (*types.ChainResponse, error)
+	GetChain(ctx context.Context, uuid string) (*types.ChainResponse, error)
+	SearchChains(ctx context.Context, filters *entities.ChainFilters) ([]*types.ChainResponse, error)
+	DeleteChain(ctx context.Context, uuid string) error
 }
 
 type ContractClient interface {

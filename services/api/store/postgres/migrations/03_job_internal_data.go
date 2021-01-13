@@ -31,7 +31,7 @@ CREATE TRIGGER job_trigger
 		log.WithError(err).Error("Could not apply migration 03")
 		return err
 	}
-	log.Info("Migration completed")
+	log.Info("Migration 03 completed")
 
 	return nil
 }
@@ -53,7 +53,7 @@ DROP FUNCTION updated();
 		return err
 	}
 
-	log.Info("Rollback completed")
+	log.Info("Rollback migration 03 completed")
 	return nil
 }
 

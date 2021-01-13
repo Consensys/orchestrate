@@ -10,8 +10,6 @@ import (
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/chainregistry"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/chain-registry/utils"
 )
 
 const creditorComponent = "faucet.control.creditor"
@@ -29,7 +27,7 @@ func NewCreditorControl(chainStateReader ethclient.ChainStateReader) *CreditorCo
 }
 
 // Control apply BlackList controller on a credit function
-func (ctrl *CreditorControl) Control(ctx context.Context, req *types.Request) error {
+func (ctrl *CreditorControl) Control(ctx context.Context, req *entities.FaucetRequest) error {
 	log.WithContext(ctx).Debug("creditor control check")
 
 	for key, candidate := range req.Candidates {
@@ -40,7 +38,7 @@ func (ctrl *CreditorControl) Control(ctx context.Context, req *types.Request) er
 			continue
 		}
 		// Retrieve creditor balance
-		balance, err := utils.GetAddressBalance(ctx, ctrl.chainStateReader, req.Chain.URLs, candidate.CreditorAccount)
+		balance, err := getAddressBalance(ctx, ctrl.chainStateReader, req.Chain.URLs, candidate.CreditorAccount)
 		if err != nil {
 			return errors.FromError(err).ExtendComponent(creditorComponent)
 		}

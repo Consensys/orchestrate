@@ -1081,6 +1081,7 @@ github.com/xiang90/probing v0.0.0-20190116061207-43a291ad63a2/go.mod h1:UETIi67q
 github.com/xordataexchange/crypt v0.0.3-0.20170626215501-b2862e3d0a77/go.mod h1:aYKd//L2LvnjZzWKhF00oedf4jCCReLcmhLdhm1A27Q=
 github.com/yuin/gopher-lua v0.0.0-20191220021717-ab39c6098bdb h1:ZkM6LRnq40pR1Ox0hTHlnpkcOTuFIDQpZ1IN8rKKhX0=
 github.com/yuin/gopher-lua v0.0.0-20191220021717-ab39c6098bdb/go.mod h1:gqRgreBUhTSL0GeU64rtZ3Uq3wtjOa/TB2YfrtkCbVQ=
+gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git v1.2.2 h1:sT/OvwrnoRJ8tcQbkt0JY0rZQIf8tBUwwxlThBB54Os=
 go.elastic.co/apm v1.7.0 h1:vd4ncfZ/Y2GIsWW7aFR4uQdqmfUbuHfUhglqOqEwrUI=
 go.elastic.co/apm v1.7.0/go.mod h1:IYfi/330rWC5Kfns1rM+kY+RPkIdgUziRF6Cbm9qlxQ=
 go.elastic.co/apm/module/apmhttp v1.7.0 h1:dwUkUHlGR6W7FSAxdsZvO3tz+IaLxlXSnwH7ABahJdc=

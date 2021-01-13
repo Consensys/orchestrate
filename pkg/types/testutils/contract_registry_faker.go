@@ -11,8 +11,8 @@ func FakeRegisterContractRequest() *api.RegisterContractRequest {
 	_ = json.Unmarshal([]byte(c.ABI), &abi)
 
 	return &api.RegisterContractRequest{
-		Name:             c.ID.Name,
-		Tag:              c.ID.Tag,
+		Name:             c.Name,
+		Tag:              c.Tag,
 		ABI:              abi,
 		Bytecode:         c.Bytecode,
 		DeployedBytecode: c.DeployedBytecode,

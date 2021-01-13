@@ -52,7 +52,6 @@ func NewSession(
 	callHook hook.Hook,
 	offsets offset.Manager,
 	m metrics.ListenerMetrics,
-
 ) *Session {
 	return &Session{
 		Chain:   chain,

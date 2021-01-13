@@ -28,16 +28,15 @@ CREATE TABLE faucets (
 	uuid UUID PRIMARY KEY,
 	name VARCHAR(66) NOT NULL,
 	tenant_id VARCHAR(66) NOT NULL,
-	
 	chain_rule VARCHAR(255), 
 	creditor_account CHAR(42) NOT NULL,
 	max_balance BIGINT,
 	amount BIGINT,
 	cooldown VARCHAR(66),
-	
 	created_at TIMESTAMPTZ DEFAULT (now() at time zone 'utc') NOT NULL, 
 	updated_at TIMESTAMPTZ DEFAULT (now() at time zone 'utc') NOT NULL
 );
+CREATE UNIQUE INDEX ON faucets (tenant_id, name);
 
 CREATE TRIGGER chain_trigger
 	BEFORE UPDATE ON chains

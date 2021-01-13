@@ -12,7 +12,6 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	ierror "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/error"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/ethereum"
 )
@@ -367,7 +366,9 @@ func TestEnvelope_ChainUUID(t *testing.T) {
 
 func TestEnvelope_Contract(t *testing.T) {
 	b := NewEnvelope().SetContractName("testContractName").SetContractTag("testContractTag").MustSetToString("0xto")
-	assert.Equal(t, &entities.ContractID{Name: "testContractName", Tag: "testContractTag"}, b.GetContractID(), "Should be equal")
+	assert.Equal(t, "testContractTag", b.ContractTag, "Should be equal")
+	assert.Equal(t, "testContractName", b.ContractName, "Should be equal")
+
 	assert.False(t, b.IsContractCreation())
 
 	assert.Equal(t, "testContractName[testContractTag]", b.ShortContract(), "Should be equal")
@@ -381,7 +382,8 @@ func TestEnvelope_Contract(t *testing.T) {
 
 func TestEnvelope_MethodSignature(t *testing.T) {
 	b := NewEnvelope().SetContractName("testContractName").SetContractTag("testContractTag").MustSetToString("0xto")
-	assert.Equal(t, &entities.ContractID{Name: "testContractName", Tag: "testContractTag"}, b.GetContractID(), "Should be equal")
+	assert.Equal(t, "testContractTag", b.ContractTag, "Should be equal")
+	assert.Equal(t, "testContractName", b.ContractName, "Should be equal")
 	assert.False(t, b.IsContractCreation())
 
 	assert.Equal(t, "testContractName[testContractTag]", b.ShortContract(), "Should be equal")

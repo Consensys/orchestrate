@@ -19,7 +19,7 @@ func New(msg provider.Message) *Provider {
 }
 
 func (p *Provider) Provide(ctx context.Context, msgs chan<- provider.Message) error {
-	log.FromContext(ctx).WithField("provider", fmt.Sprintf("%T", p)).Infof("start providing")
+	log.FromContext(ctx).WithField("provider", fmt.Sprintf("%T", p)).Debug("start providing")
 	msgs <- p.msg
 	return nil
 }

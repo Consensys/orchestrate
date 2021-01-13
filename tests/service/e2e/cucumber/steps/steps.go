@@ -17,7 +17,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http"
 	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/tx"
-	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sender/store"
 	redis2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sender/store/redis"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/e2e/cucumber/alias"
@@ -47,9 +46,6 @@ type ScenarioContext struct {
 
 	aliases *alias.Registry
 
-	// Chain-Registry
-	ChainRegistry chainregistry.ChainRegistryClient
-
 	// API
 	client orchestrateclient.OrchestrateClient
 
@@ -70,7 +66,6 @@ type ScenarioContext struct {
 func NewScenarioContext(
 	chanReg *chanregistry.ChanRegistry,
 	httpClient *gohttp.Client,
-	chainReg chainregistry.ChainRegistryClient,
 	client orchestrateclient.OrchestrateClient,
 	producer sarama.SyncProducer,
 	aliasesReg *alias.Registry,
@@ -79,16 +74,15 @@ func NewScenarioContext(
 	nonceSender store.NonceSender,
 ) *ScenarioContext {
 	sc := &ScenarioContext{
-		chanReg:       chanReg,
-		httpClient:    httpClient,
-		aliases:       aliasesReg,
-		ChainRegistry: chainReg,
-		client:        client,
-		producer:      producer,
-		logger:        log.NewEntry(log.StandardLogger()),
-		jwtGenerator:  jwtGenerator,
-		ec:            ec,
-		nonceSender:   nonceSender,
+		chanReg:      chanReg,
+		httpClient:   httpClient,
+		aliases:      aliasesReg,
+		client:       client,
+		producer:     producer,
+		logger:       log.NewEntry(log.StandardLogger()),
+		jwtGenerator: jwtGenerator,
+		ec:           ec,
+		nonceSender:  nonceSender,
 	}
 
 	return sc
@@ -190,12 +184,10 @@ func (sc *ScenarioContext) preProcessTableStep(tableFunc stepTable) stepTable {
 }
 
 func InitializeScenario(s *godog.ScenarioContext) {
-
 	nm := redis2.NewNonceSender(redis.GlobalClient())
 	sc := NewScenarioContext(
 		chanregistry.GlobalChanRegistry(),
 		http.NewClient(http.NewDefaultConfig()),
-		chainregistry.GlobalClient(),
 		orchestrateclient.GlobalClient(),
 		broker.GlobalSyncProducer(),
 		alias.GlobalAliasRegistry(),

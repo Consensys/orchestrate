@@ -111,9 +111,7 @@ func (w *watcher) loadMsg(ctx context.Context, msg provider.Message) {
 
 	// We got a new configuration so we update current config
 	w.currentConfigs[msg.ProviderName()] = msg.Configuration()
-	log.FromContext(ctx).
-		WithField(log.ProviderName, msg.ProviderName()).
-		Infof("got new configuration")
+	log.FromContext(ctx).WithField(log.ProviderName, msg.ProviderName()).Debug("got new configuration")
 
 	// Call listeners
 	conf := w.merge(w.currentConfigs)

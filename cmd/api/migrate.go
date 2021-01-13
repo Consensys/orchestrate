@@ -128,16 +128,6 @@ func migrate(db *pg.DB, a ...string) error {
 		return err
 	}
 
-	if newVersion != oldVersion {
-		log.WithFields(log.Fields{
-			"version.old": oldVersion,
-			"version.new": newVersion,
-		}).Infof("Migration completed")
-	} else {
-		log.WithFields(log.Fields{
-			"version": oldVersion,
-		}).Warnf("Nothing to migrate")
-	}
-
+	log.WithField("version", newVersion).WithField("previous_version", oldVersion).Info("All migrations completed")
 	return nil
 }

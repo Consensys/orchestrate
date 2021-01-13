@@ -157,8 +157,8 @@ func (app *App) init(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	traefiklog.FromContext(ctx).Infof("loaded app configuration %s", string(conf))
-	traefiklog.FromContext(ctx).Infof("activated metric modules: %v", app.cfg.Metrics.Modules())
+	traefiklog.FromContext(ctx).Info("loaded app configuration %s", string(conf))
+	traefiklog.FromContext(ctx).Info("activated metric modules: %v", app.cfg.Metrics.Modules())
 
 	var tcpreg tcpmetrics.TPCMetrics
 	if app.cfg.HTTP != nil {
@@ -226,7 +226,7 @@ func (app *App) Start(ctx context.Context) error {
 		return err
 	}
 
-	traefiklog.FromContext(ctx).Infof("starting app...")
+	traefiklog.FromContext(ctx).Info("starting app...")
 
 	if app.http != nil {
 		app.serverWg.Add(1)

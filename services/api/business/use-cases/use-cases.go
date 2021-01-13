@@ -6,5 +6,6 @@ type UseCases interface {
 	JobUseCases
 	AccountUseCases
 	FaucetUseCases
+	ChainUseCases
 	ContractUseCases
 }

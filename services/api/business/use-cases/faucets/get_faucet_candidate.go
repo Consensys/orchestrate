@@ -5,36 +5,30 @@ import (
 	"math/big"
 	"reflect"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/store/models"
-
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/chainregistry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases/faucets/controls"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/client"
 )
 
 const getFaucetCandidateComponent = "use-cases.faucet-candidate"
 
 type FaucetControl interface {
-	Control(ctx context.Context, req *types.Request) error
+	Control(ctx context.Context, req *entities.FaucetRequest) error
 	OnSelectedCandidate(ctx context.Context, faucet *entities.Faucet, beneficiary string) error
 }
 
 // RegisterContract is a use case to register a new contract
 type faucetCandidate struct {
-	chainRegistryClient client.ChainRegistryClient
-	chainStateReader    ethclient.ChainStateReader
-	searchFaucets       usecases.SearchFaucetsUseCase
-	controls            []FaucetControl
+	chainStateReader ethclient.ChainStateReader
+	searchFaucets    usecases.SearchFaucetsUseCase
+	controls         []FaucetControl
 }
 
 // NewGetFaucetCandidateUseCase creates a new GetFaucetCandidateUseCase
 func NewGetFaucetCandidateUseCase(
-	chainRegistryClient client.ChainRegistryClient,
 	searchFaucets usecases.SearchFaucetsUseCase,
 	chainStateReader ethclient.ChainStateReader,
 ) usecases.GetFaucetCandidateUseCase {
@@ -43,14 +37,13 @@ func NewGetFaucetCandidateUseCase(
 	creditorCtrl := controls.NewCreditorControl(chainStateReader)
 
 	return &faucetCandidate{
-		chainRegistryClient: chainRegistryClient,
-		chainStateReader:    chainStateReader,
-		searchFaucets:       searchFaucets,
-		controls:            []FaucetControl{creditorCtrl, cooldownCtrl, maxBalanceCtrl},
+		chainStateReader: chainStateReader,
+		searchFaucets:    searchFaucets,
+		controls:         []FaucetControl{creditorCtrl, cooldownCtrl, maxBalanceCtrl},
 	}
 }
 
-func (uc *faucetCandidate) Execute(ctx context.Context, account string, chain *models.Chain, tenants []string) (*entities.Faucet, error) {
+func (uc *faucetCandidate) Execute(ctx context.Context, account string, chain *entities.Chain, tenants []string) (*entities.Faucet, error) {
 	logger := log.WithContext(ctx).
 		WithField("chain_uuid", chain.UUID).
 		WithField("account", account).
@@ -72,7 +65,7 @@ func (uc *faucetCandidate) Execute(ctx context.Context, account string, chain *m
 	for _, faucet := range faucets {
 		candidates[faucet.UUID] = faucet
 	}
-	req := &types.Request{
+	req := &entities.FaucetRequest{
 		Beneficiary: account,
 		Candidates:  candidates,
 		Chain:       chain,

@@ -19,8 +19,6 @@ import (
 	tpcmetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tcp/metrics"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/metrics"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/store/models"
-	"gopkg.in/h2non/gock.v1"
 )
 
 type metricsTestSuite struct {
@@ -31,17 +29,10 @@ type metricsTestSuite struct {
 
 func (s *metricsTestSuite) TestApplicationMetrics() {
 	ctx := s.env.ctx
-	defer gock.Off()
-
-	chain := testutils.FakeChain()
-	txRequest := testutils.FakeSendTransferTransactionRequest()
-	gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
-	gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Times(2).Reply(200).JSON(chain)
-	gock.New(chainRegistryURL).
-		URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", chainRegistryURL, chain.UUID, txRequest.Params.From)).
-		Reply(404)
 
 	s.T().Run("should increase created job metrics", func(t *testing.T) {
+		txRequest := testutils.FakeSendTransferTransactionRequest()
+
 		mfsb, err := s.client.Prometheus(ctx)
 		assert.NoError(t, err)
 		expectedV, err := testutils2.FamilyValue(mfsb, fmt.Sprintf("%s_%s", metrics1.Namespace, metrics.Subsystem), metrics.JobLatencySeconds, nil)
@@ -61,15 +52,6 @@ func (s *metricsTestSuite) TestApplicationMetrics() {
 
 func (s *metricsTestSuite) TestTCP() {
 	ctx := s.env.ctx
-	defer gock.Off()
-
-	chain := testutils.FakeChain()
-	txRequest := testutils.FakeSendTransferTransactionRequest()
-	gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
-	gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Times(2).Reply(200).JSON(chain)
-	gock.New(chainRegistryURL).
-		URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", chainRegistryURL, chain.UUID, txRequest.Params.From)).
-		Reply(404)
 
 	s.T().Run("should have one open entrypoint connection per type ('app', 'metrics')", func(t *testing.T) {
 		mfs, err := s.client.Prometheus(ctx)
@@ -86,15 +68,8 @@ func (s *metricsTestSuite) TestTCP() {
 
 func (s *metricsTestSuite) TestHTTP() {
 	ctx := s.env.ctx
-	defer gock.Off()
 
-	chain := testutils.FakeChain()
 	txRequest := testutils.FakeSendTransferTransactionRequest()
-	gock.New(chainRegistryURL).Get("/chains").Reply(200).JSON([]*models.Chain{chain})
-	gock.New(chainRegistryURL).Get("/chains/" + chain.UUID).Times(2).Reply(200).JSON(chain)
-	gock.New(chainRegistryURL).
-		URL(fmt.Sprintf("%s?chain_uuid=%s&account=%s", chainRegistryURL, chain.UUID, txRequest.Params.From)).
-		Reply(404)
 
 	s.T().Run("should successfully increase application total requests", func(t *testing.T) {
 		mfsb, err := s.client.Prometheus(ctx)
@@ -158,9 +133,6 @@ func (s *metricsTestSuite) TestZHealthCheck() {
 	s.T().Run("should retrieve a negative health check over kafka service", func(t *testing.T) {
 		req, err := http2.NewRequest("GET", fmt.Sprintf("%s/ready?full=1", s.env.metricsURL), nil)
 		assert.NoError(s.T(), err)
-
-		gock.New(chainRegistryMetricsURL).Get("/live").Reply(200)
-		defer gock.Off()
 
 		err = s.env.client.Stop(ctx, kafkaContainerID)
 		assert.NoError(t, err)

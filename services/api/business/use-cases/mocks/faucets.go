@@ -9,7 +9,6 @@ import (
 	gomock "github.com/golang/mock/gomock"
 	entities "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
-	models "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/store/models"
 	reflect "reflect"
 )
 
@@ -319,7 +318,7 @@ func (m *MockGetFaucetCandidateUseCase) EXPECT() *MockGetFaucetCandidateUseCaseM
 }
 
 // Execute mocks base method
-func (m *MockGetFaucetCandidateUseCase) Execute(ctx context.Context, account string, chain *models.Chain, tenants []string) (*entities.Faucet, error) {
+func (m *MockGetFaucetCandidateUseCase) Execute(ctx context.Context, account string, chain *entities.Chain, tenants []string) (*entities.Faucet, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Execute", ctx, account, chain, tenants)
 	ret0, _ := ret[0].(*entities.Faucet)

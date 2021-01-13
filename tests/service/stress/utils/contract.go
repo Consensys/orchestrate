@@ -36,7 +36,7 @@ func RegisterNewContract(ctx context.Context, cClient client.ContractClient, art
 
 	_, err = cClient.RegisterContract(ctx, &api.RegisterContractRequest{
 		Name:             name,
-		Tag:              contract.ID.Tag,
+		Tag:              contract.Tag,
 		ABI:              abi,
 		Bytecode:         contract.Bytecode,
 		DeployedBytecode: contract.DeployedBytecode,

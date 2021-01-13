@@ -4,40 +4,31 @@ package chainregistry
 
 import (
 	"context"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/testutils"
 	"testing"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/client/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/store/models"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/dynamic"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/session/ethereum/offset"
 )
 
-var mockChain = &models.Chain{
-	UUID:                    "test-chain",
-	Name:                    "test",
-	TenantID:                "test",
-	URLs:                    []string{"test"},
-	ListenerDepth:           &(&struct{ x uint64 }{0}).x,
-	ListenerCurrentBlock:    &(&struct{ x uint64 }{0}).x,
-	ListenerStartingBlock:   &(&struct{ x uint64 }{0}).x,
-	ListenerBackOffDuration: &(&struct{ x string }{"0s"}).x,
-}
+var mockChain = testutils.FakeChainResponse()
 
 type ManagerTestSuite struct {
 	suite.Suite
 	Manager offset.Manager
+	client  *mock.MockOrchestrateClient
 }
-
-var mockChainRegistryClient *mock.MockChainRegistryClient
 
 func (s *ManagerTestSuite) SetupTest() {
 	ctrl := gomock.NewController(s.T())
-	mockChainRegistryClient = mock.NewMockChainRegistryClient(ctrl)
+	s.client = mock.NewMockOrchestrateClient(ctrl)
 
-	s.Manager = NewManager(mockChainRegistryClient)
+	s.Manager = NewManager(s.client)
 }
 
 func (s *ManagerTestSuite) TestManagerLastBlock() {
@@ -46,12 +37,14 @@ func (s *ManagerTestSuite) TestManagerLastBlock() {
 		UUID: mockChain.UUID,
 	}
 
-	mockChainRegistryClient.EXPECT().GetChainByUUID(gomock.Any(), chain.UUID).Return(mockChain, nil)
-	mockChainRegistryClient.EXPECT().UpdateBlockPosition(gomock.Any(), chain.UUID, updatedCurrentBlock)
+	s.client.EXPECT().GetChain(gomock.Any(), chain.UUID).Return(mockChain, nil)
+	s.client.EXPECT().UpdateChain(gomock.Any(), chain.UUID, &api.UpdateChainRequest{Listener: &api.UpdateListenerRequest{
+		CurrentBlock: updatedCurrentBlock,
+	}}).Return(mockChain, nil)
 
 	lastBlockNumber, err := s.Manager.GetLastBlockNumber(context.Background(), chain)
 	assert.NoError(s.T(), err, "GetLastBlockNumber should not error")
-	assert.Equal(s.T(), *mockChain.ListenerCurrentBlock, lastBlockNumber, "Lastblock should be correct")
+	assert.Equal(s.T(), mockChain.ListenerCurrentBlock, lastBlockNumber, "Lastblock should be correct")
 
 	err = s.Manager.SetLastBlockNumber(context.Background(), chain, updatedCurrentBlock)
 	assert.NoError(s.T(), err, "SetLastBlockNumber should not error")

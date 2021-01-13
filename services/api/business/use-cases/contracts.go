@@ -24,7 +24,7 @@ type GetContractsCatalogUseCase interface {
 }
 
 type GetContractUseCase interface {
-	Execute(ctx context.Context, id *entities.ContractID) (*entities.Contract, error)
+	Execute(ctx context.Context, name, tag string) (*entities.Contract, error)
 }
 
 type GetContractEventsUseCase interface {
@@ -32,7 +32,7 @@ type GetContractEventsUseCase interface {
 }
 
 type GetContractMethodSignaturesUseCase interface {
-	Execute(ctx context.Context, contract *entities.ContractID, methodName string) ([]string, error)
+	Execute(ctx context.Context, name, tag, methodName string) ([]string, error)
 }
 
 type GetContractMethodsUseCase interface {

@@ -5,56 +5,44 @@ package chainregistry
 import (
 	"context"
 	"fmt"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/store/models"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/testutils"
 	"testing"
 	"time"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/client/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/dynamic"
 )
-
-var mockChainRegistryClient *mock.MockChainRegistryClient
 
 type ProviderTestSuite struct {
 	suite.Suite
 	provider *Provider
+	client   *mock.MockOrchestrateClient
 }
 
 func (s *ProviderTestSuite) SetupTest() {
 	ctrl := gomock.NewController(s.T())
-	mockChainRegistryClient = mock.NewMockChainRegistryClient(ctrl)
+	s.client = mock.NewMockOrchestrateClient(ctrl)
 
 	s.provider = &Provider{
-		Client: mockChainRegistryClient,
+		client: s.client,
 		conf: &Config{
-			RefreshInterval:  time.Millisecond,
-			ChainRegistryURL: "http://test-proxy",
+			RefreshInterval: time.Millisecond,
+			ProxyURL:        "http://test-proxy",
 		},
 	}
 }
 
 func (s *ProviderTestSuite) TestRun() {
-	mockChains := []*models.Chain{
-		{
-			UUID:                      "0d60a85e-0b90-4482-a14c-108aea2557aa",
-			Name:                      "chainName",
-			TenantID:                  "0d60a85e-0b90-4482-a14c-108aea2557bb",
-			URLs:                      []string{"https://estcequecestbientotlapero.fr/"},
-			ListenerDepth:             &(&struct{ x uint64 }{1}).x,
-			ListenerCurrentBlock:      &(&struct{ x uint64 }{1}).x,
-			ListenerStartingBlock:     &(&struct{ x uint64 }{1}).x,
-			ListenerBackOffDuration:   &(&struct{ x string }{"1s"}).x,
-			ListenerExternalTxEnabled: &(&struct{ x bool }{true}).x,
-		},
-	}
+	mockChains := []*api.ChainResponse{testutils.FakeChainResponse()}
 
 	gomock.InOrder(
-		mockChainRegistryClient.EXPECT().GetChains(gomock.Any()).Return([]*models.Chain{}, nil),
-		mockChainRegistryClient.EXPECT().GetChains(gomock.Any()).Return(mockChains, nil).AnyTimes(),
-		mockChainRegistryClient.EXPECT().GetChains(gomock.Any()).Return(nil, fmt.Errorf("error")).AnyTimes(),
+		s.client.EXPECT().SearchChains(gomock.Any(), gomock.Any()).Return([]*api.ChainResponse{}, nil),
+		s.client.EXPECT().SearchChains(gomock.Any(), gomock.Any()).Return(mockChains, nil).AnyTimes(),
+		s.client.EXPECT().SearchChains(gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error")).AnyTimes(),
 	)
 
 	cancelableCtx, cancel := context.WithCancel(context.Background())
@@ -73,8 +61,8 @@ func (s *ProviderTestSuite) TestRun() {
 	assert.Len(s.T(), config.Configuration.Chains, 1)
 	assert.Equal(
 		s.T(),
-		"http://test-proxy/0d60a85e-0b90-4482-a14c-108aea2557aa",
-		config.Configuration.Chains["0d60a85e-0b90-4482-a14c-108aea2557aa"].URL,
+		"http://test-proxy/"+mockChains[0].UUID,
+		config.Configuration.Chains[mockChains[0].UUID].URL,
 		"Chain URL should be correct",
 	)
 

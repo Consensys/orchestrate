@@ -12,7 +12,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/backoff"
 	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/rpc"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http"
-	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
+	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	registryprovider "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/providers/chain-registry"
 	kafkahook "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/session/ethereum/hooks/kafka"
@@ -32,9 +32,8 @@ func NewApp(ctx context.Context) (*app.App, error) {
 	config := app.NewConfig(viper.GetViper())
 
 	utils.InParallel(
-		func() { registryprovider.Init(ctx) },
 		func() { kafkahook.Init(ctx) },
-		func() { registryoffset.Init(ctx) },
+		func() { registryoffset.Init() },
 		func() {
 			viper.Set(utils.RetryMaxIntervalViperKey, 30*time.Second)
 			viper.Set(utils.RetryMaxElapsedTimeViperKey, 1*time.Hour)
@@ -42,11 +41,13 @@ func NewApp(ctx context.Context) (*app.App, error) {
 		},
 	)
 	httpClient := http.NewClient(http.NewConfig(viper.GetViper()))
-	backoffConf := txscheduler.NewConfigFromViper(viper.GetViper(), backoff.ConstantBackOffWithMaxRetries(time.Second, 5))
-	txSchedulerClientListener := txscheduler.NewHTTPClient(httpClient, backoffConf)
+	backoffConf := orchestrateclient.NewConfigFromViper(viper.GetViper(), backoff.ConstantBackOffWithMaxRetries(time.Second, 5))
+	client := orchestrateclient.NewHTTPClient(httpClient, backoffConf)
 
-	conf := txscheduler.NewConfigFromViper(viper.GetViper(), nil)
-	txSchedulerClientSentry := txscheduler.NewHTTPClient(httpClient, conf)
+	conf := orchestrateclient.NewConfigFromViper(viper.GetViper(), nil)
+	txSchedulerClientSentry := orchestrateclient.NewHTTPClient(httpClient, conf)
+
+	registryprovider.Init(client)
 
 	return New(
 		config,
@@ -54,7 +55,7 @@ func NewApp(ctx context.Context) (*app.App, error) {
 		kafkahook.GlobalHook(),
 		registryoffset.GlobalManager(),
 		ethclient.GlobalClient(),
-		txSchedulerClientListener,
+		client,
 		txSchedulerClientSentry,
 	)
 }

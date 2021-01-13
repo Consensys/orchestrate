@@ -7,8 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/store/models"
-
 	"github.com/gofrs/uuid"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database"
@@ -18,30 +16,26 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/parsers"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/validators"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
-	chainregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/client"
 )
 
 const sendTxComponent = "use-cases.send-tx"
 
 // sendTxUsecase is a use case to create a new transaction
 type sendTxUsecase struct {
-	validator           validators.TransactionValidator
-	db                  store.DB
-	chainRegistryClient chainregistry.ChainRegistryClient
-	startJobUC          usecases.StartJobUseCase
-	createJobUC         usecases.CreateJobUseCase
-	createScheduleUC    usecases.CreateScheduleUseCase
-	getTxUC             usecases.GetTxUseCase
-	getFaucetCandidate  usecases.GetFaucetCandidateUseCase
+	db                 store.DB
+	searchChainsUC     usecases.SearchChainsUseCase
+	startJobUC         usecases.StartJobUseCase
+	createJobUC        usecases.CreateJobUseCase
+	createScheduleUC   usecases.CreateScheduleUseCase
+	getTxUC            usecases.GetTxUseCase
+	getFaucetCandidate usecases.GetFaucetCandidateUseCase
 }
 
 // NewSendTxUseCase creates a new SendTxUseCase
 func NewSendTxUseCase(
-	validator validators.TransactionValidator,
 	db store.DB,
-	chainRegistryClient chainregistry.ChainRegistryClient,
+	searchChainsUC usecases.SearchChainsUseCase,
 	startJobUseCase usecases.StartJobUseCase,
 	createJobUC usecases.CreateJobUseCase,
 	createScheduleUC usecases.CreateScheduleUseCase,
@@ -49,14 +43,13 @@ func NewSendTxUseCase(
 	getFaucetCandidate usecases.GetFaucetCandidateUseCase,
 ) usecases.SendTxUseCase {
 	return &sendTxUsecase{
-		validator:           validator,
-		db:                  db,
-		chainRegistryClient: chainRegistryClient,
-		startJobUC:          startJobUseCase,
-		createJobUC:         createJobUC,
-		createScheduleUC:    createScheduleUC,
-		getTxUC:             getTxUC,
-		getFaucetCandidate:  getFaucetCandidate,
+		db:                 db,
+		searchChainsUC:     searchChainsUC,
+		startJobUC:         startJobUseCase,
+		createJobUC:        createJobUC,
+		createScheduleUC:   createScheduleUC,
+		getTxUC:            getTxUC,
+		getFaucetCandidate: getFaucetCandidate,
 	}
 }
 
@@ -65,8 +58,10 @@ func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequ
 	logger := log.WithContext(ctx).WithField("idempotency_key", txRequest.IdempotencyKey)
 	logger.Debug("creating new transaction")
 
+	allowedTenants := []string{tenantID, multitenancy.DefaultTenant}
+
 	// Step 1: Get chain from chain registry
-	chain, err := uc.getChain(ctx, txRequest.ChainName)
+	chain, err := uc.getChain(ctx, txRequest.ChainName, allowedTenants)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
 	}
@@ -92,7 +87,7 @@ func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequ
 			return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
 		}
 
-		err = uc.startJobUC.Execute(ctx, job.UUID, []string{tenantID})
+		err = uc.startJobUC.Execute(ctx, job.UUID, allowedTenants)
 		if err != nil {
 			return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
 		}
@@ -108,19 +103,19 @@ func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequ
 	return txRequest, nil
 }
 
-func (uc *sendTxUsecase) getChain(ctx context.Context, chainName string) (*models.Chain, error) {
-	chain, err := uc.chainRegistryClient.GetChainByName(ctx, chainName)
+func (uc *sendTxUsecase) getChain(ctx context.Context, chainName string, tenants []string) (*entities.Chain, error) {
+	chains, err := uc.searchChainsUC.Execute(ctx, &entities.ChainFilters{Names: []string{chainName}}, tenants)
 	if err != nil {
-		errMessage := fmt.Sprintf("cannot load '%s' chain", chainName)
-		log.WithContext(ctx).WithError(err).Error(errMessage)
-		if errors.IsNotFoundError(err) {
-			return nil, errors.InvalidParameterError(errMessage)
-		}
-
-		return nil, err
+		return nil, errors.FromError(err)
 	}
 
-	return chain, nil
+	if len(chains) == 0 {
+		errMessage := fmt.Sprintf("chain '%s' does not exist", chainName)
+		log.WithContext(ctx).WithError(err).WithField("chain_name", chainName).Error(errMessage)
+		return nil, errors.InvalidParameterError(errMessage)
+	}
+
+	return chains[0], nil
 }
 
 func (uc *sendTxUsecase) selectOrInsertTxRequest(
@@ -183,7 +178,7 @@ func (uc *sendTxUsecase) insertNewTxRequest(
 				txJob.NextJobUUID = nextJobUUID
 			}
 
-			job, der := uc.createJobUC.WithDBTransaction(dbtx.(store.Tx)).Execute(ctx, txJob, []string{tenantID})
+			job, der := uc.createJobUC.WithDBTransaction(dbtx.(store.Tx)).Execute(ctx, txJob, []string{tenantID, multitenancy.DefaultTenant})
 			if der != nil {
 				return der
 			}
@@ -198,7 +193,7 @@ func (uc *sendTxUsecase) insertNewTxRequest(
 }
 
 // Execute validates, creates and starts a new transaction for pre funding users account
-func (uc *sendTxUsecase) startFaucetJob(ctx context.Context, account, scheduleUUID, tenantID string, chain *models.Chain) error {
+func (uc *sendTxUsecase) startFaucetJob(ctx context.Context, account, scheduleUUID, tenantID string, chain *entities.Chain) error {
 	if account == "" {
 		return nil
 	}
@@ -229,12 +224,12 @@ func (uc *sendTxUsecase) startFaucetJob(ctx context.Context, account, scheduleUU
 			Value: faucet.Amount,
 		},
 	}
-	fctJob, err := uc.createJobUC.Execute(ctx, txJob, []string{tenantID})
+	fctJob, err := uc.createJobUC.Execute(ctx, txJob, []string{tenantID, multitenancy.DefaultTenant})
 	if err != nil {
 		return err
 	}
 
-	return uc.startJobUC.Execute(ctx, fctJob.UUID, []string{tenantID})
+	return uc.startJobUC.Execute(ctx, fctJob.UUID, []string{tenantID, multitenancy.DefaultTenant})
 }
 
 func generateRequestHash(chainUUID string, params interface{}) (string, error) {

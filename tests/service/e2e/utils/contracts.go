@@ -69,9 +69,9 @@ func ParseContractCell(header, cell string, contractSpec *ContractSpec) error {
 		// Bytecode is an hexstring encoded []byte
 		contractSpec.Contract.DeployedBytecode = a.DeployedBytecode
 	case "name":
-		contractSpec.Contract.ID.Name = cell
+		contractSpec.Contract.Name = cell
 	case "tag":
-		contractSpec.Contract.ID.Tag = cell
+		contractSpec.Contract.Tag = cell
 	case "Headers.Authorization":
 		contractSpec.JWTToken = cell
 	default:

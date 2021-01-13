@@ -32,7 +32,6 @@ import (
 	utils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethereum/account"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/tx"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/chain-registry/store/models"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/e2e/cucumber/alias"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/e2e/utils"
 )
@@ -327,16 +326,14 @@ func (sc *ScenarioContext) iRegisterTheFollowingChains(table *gherkin.PickleStep
 	if utilsCols == nil {
 		return errors.DataError("One of the following columns is missing %q", utilsCols)
 	}
-	interfaceSlices, err := utils.ParseTable(models.Chain{}, table)
+	interfaceSlices, err := utils.ParseTable(api.RegisterChainRequest{}, table)
 	if err != nil {
 		return err
 	}
 
 	onTearDown := func(uuid, token string) func() {
 		return func() {
-			_ = sc.ChainRegistry.DeleteChainByUUID(
-				authutils.WithAuthorization(context.Background(), token),
-				uuid)
+			_ = sc.client.DeleteChain(authutils.WithAuthorization(context.Background(), token), uuid)
 		}
 	}
 
@@ -344,14 +341,14 @@ func (sc *ScenarioContext) iRegisterTheFollowingChains(table *gherkin.PickleStep
 	for i, chain := range interfaceSlices {
 		token := utilsCols.Rows[i+1].Cells[1].Value
 
-		res, err := sc.ChainRegistry.RegisterChain(authutils.WithAuthorization(ctx, token), chain.(*models.Chain))
+		res, err := sc.client.RegisterChain(authutils.WithAuthorization(ctx, token), chain.(*api.RegisterChainRequest))
 		if err != nil {
 			return err
 		}
 		sc.TearDownFunc = append(sc.TearDownFunc, onTearDown(res.UUID, token))
 
-		chainRegURL, _ := sc.aliases.Get(alias.GlobalAka, "chain-registry")
-		proxyURL := utils4.GetProxyURL(chainRegURL.(string), res.UUID)
+		apiURL, _ := sc.aliases.Get(alias.GlobalAka, "api")
+		proxyURL := utils4.GetProxyURL(apiURL.(string), res.UUID)
 		err = backoff.RetryNotify(
 			func() error {
 				_, err2 := sc.ec.Network(ctx, proxyURL)
@@ -516,7 +513,7 @@ func (sc *ScenarioContext) iSignTheFollowingTransactions(table *gherkin.PickleSt
 			helpersTable.Rows[i+1].Cells[1].Value,
 		)
 		if err != nil {
-			return nil
+			return err
 		}
 		sc.aliases.Set(e, sc.Pickle.Id, helpersTable.Rows[i+1].Cells[0].Value)
 	}
@@ -525,9 +522,9 @@ func (sc *ScenarioContext) iSignTheFollowingTransactions(table *gherkin.PickleSt
 }
 
 func (sc *ScenarioContext) craftAndSignEnvelope(ctx context.Context, e *tx.Envelope, privKey string) error {
-	chainRegistry, ok := sc.aliases.Get(alias.GlobalAka, "chain-registry")
+	chainRegistry, ok := sc.aliases.Get(alias.GlobalAka, "api")
 	if !ok {
-		return errors.DataError("Could not find the chain registry endpoint")
+		return errors.DataError("Could not find the api endpoint")
 	}
 	endpoint := fmt.Sprintf("%s/%s", chainRegistry.(string), e.GetChainUUID())
 	if e.GetChainID() == nil && e.GetChainUUID() != "" {
