@@ -54,6 +54,9 @@ func (c *ContractsController) getCatalog(rw http.ResponseWriter, request *http.R
 		return
 	}
 
+	if names == nil {
+		names = []string{}
+	}
 	_ = json.NewEncoder(rw).Encode(names)
 }
 
@@ -201,6 +204,9 @@ func (c *ContractsController) getTags(rw http.ResponseWriter, request *http.Requ
 		return
 	}
 
+	if tags == nil {
+		tags = []string{}
+	}
 	_ = json.NewEncoder(rw).Encode(tags)
 }
 

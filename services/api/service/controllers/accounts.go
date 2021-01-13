@@ -136,7 +136,7 @@ func (c *AccountsController) search(rw http.ResponseWriter, request *http.Reques
 		return
 	}
 
-	var response []*api.AccountResponse
+	response := []*api.AccountResponse{}
 	for _, iden := range accs {
 		response = append(response, formatters.FormatAccountResponse(iden))
 	}

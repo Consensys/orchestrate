@@ -103,15 +103,15 @@ func (c *SchedulesController) getAll(rw http.ResponseWriter, request *http.Reque
 	rw.Header().Set("Content-Type", "application/json")
 	ctx := request.Context()
 
-	scheduleEntities, err := c.ucs.SearchSchedules().Execute(ctx, multitenancy.AllowedTenantsFromContext(ctx))
+	schedules, err := c.ucs.SearchSchedules().Execute(ctx, multitenancy.AllowedTenantsFromContext(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
 	}
 
-	var response []*api.ScheduleResponse
-	for _, scheduleEntity := range scheduleEntities {
-		response = append(response, formatters.FormatScheduleResponse(scheduleEntity))
+	response := []*api.ScheduleResponse{}
+	for _, schedule := range schedules {
+		response = append(response, formatters.FormatScheduleResponse(schedule))
 	}
 
 	_ = json.NewEncoder(rw).Encode(response)

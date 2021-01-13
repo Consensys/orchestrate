@@ -65,7 +65,7 @@ func (c *JobsController) search(rw http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	var response []*api.JobResponse
+	response := []*api.JobResponse{}
 	for _, jb := range jobRes {
 		response = append(response, formatters.FormatJobResponse(jb))
 	}

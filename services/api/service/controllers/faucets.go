@@ -55,7 +55,7 @@ func (c *FaucetsController) search(rw http.ResponseWriter, request *http.Request
 		return
 	}
 
-	var response []*api.FaucetResponse
+	response := []*api.FaucetResponse{}
 	for _, faucet := range faucets {
 		response = append(response, formatters.FormatFaucetResponse(faucet))
 	}

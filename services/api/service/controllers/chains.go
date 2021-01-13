@@ -58,7 +58,7 @@ func (c *ChainsController) search(rw http.ResponseWriter, request *http.Request)
 		return
 	}
 
-	var response []*api.ChainResponse
+	response := []*api.ChainResponse{}
 	for _, chain := range chains {
 		response = append(response, formatters.FormatChainResponse(chain))
 	}

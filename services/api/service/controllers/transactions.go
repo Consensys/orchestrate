@@ -256,10 +256,10 @@ func (c *TransactionsController) search(rw http.ResponseWriter, request *http.Re
 		return
 	}
 
-	var responses []*api.TransactionResponse
+	response := []*api.TransactionResponse{}
 	for _, txRequest := range txRequests {
-		responses = append(responses, formatters.FormatTxResponse(txRequest))
+		response = append(response, formatters.FormatTxResponse(txRequest))
 	}
 
-	_ = json.NewEncoder(rw).Encode(responses)
+	_ = json.NewEncoder(rw).Encode(response)
 }

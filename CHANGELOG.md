@@ -1,23 +1,28 @@
 # Codefi Orchestrate Release Notes
 
-## v2.6.0 (Unreleased)
+## v21.1.0 (Unreleased)
 
 ### 🆕 Features
 * Support for enable/disable metric modules
-* Ability set set an custom keep alive interval for Postgres clients 
+* Ability set a custom keep alive interval for Postgres clients 
 * Add application metrics:
     * orchestrate_transaction_scheduler_job_latency_seconds: Histogram of job latency between status (second). Except PENDING and MINED (Histogram)
     * orchestrate_transaction_scheduler_mined_latency_seconds Histogram of latency between PENDING and MINED (Histogram)
     * orchestrate_transaction_listener_current_block: Last block processed by each listening session (Counter)
 * Integrate Orchestrate HashiCorp plugin
 
+### ⚠ BREAKING CHANGES
+
+* CHAIN_REGISTRY_CACHE_TTL is now PROXY_CACHE_TTL
+
 ### 🛠 Bug fixes
 * Incorrect counting of 429 http responses
+* Fixes 404 null return value when no resource found, now returns an empty array
 
 ### ⚠ BREAKING CHANGES
 
 * Remove account-generator and account-generated topic
-* JAEGER service is set as disabled by default
+* JAEGER service disabled by default
 * Remove support of `kv-v2` HashiCorp engine. Migration steps:
     1. Instantiate HashiCorp with both engines: `kv-v2` and `orchestrate`
     1. Fill up ENV variables: `VAULT_V2_SECRET_PATH`, `VAULT_V2_MOUNT_POINT`, `VAULT_V2_TOKEN_FILE`
