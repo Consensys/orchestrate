@@ -2,9 +2,9 @@ package utils
 
 import (
 	"context"
+	"time"
 
 	"github.com/containous/traefik/v2/pkg/log"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 )
@@ -17,14 +17,12 @@ func RegisterNewChain(ctx context.Context, client orchestrateclient.OrchestrateC
 		Name: chainName,
 		URLs: urls,
 	})
-
 	if err != nil {
 		return nil, err
 	}
 
-	if c.UUID == "" {
-		return nil, errors.DataError("cannot register chain '%s'", chainName)
-	}
+	// Give time to the proxy to be set
+	time.Sleep(2 * time.Second)
 
 	log.FromContext(ctx).Infof("New chain %s registered: %s", chainName, c.UUID)
 	return c, nil

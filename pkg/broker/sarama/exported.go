@@ -118,7 +118,7 @@ func InitClient(ctx context.Context) (err error) {
 			return gr.Wait().ErrorOrNil()
 		}
 
-		saramaLogger := log.StandardLogger()
+		saramaLogger := log.New()
 		saramaLogger.SetLevel(log.DebugLevel)
 		sarama.Logger = saramaLogger.WithContext(ctx).WithField("logger", "sarama")
 
