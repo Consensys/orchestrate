@@ -6,7 +6,7 @@ import (
 
 	"github.com/containous/traefik/v2/pkg/log"
 	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
-	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	utils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/stress/utils"
@@ -22,9 +22,9 @@ func BatchDeployContractTest(ctx context.Context, cfg *WorkloadConfig, client or
 	evlp := tx.NewEnvelope()
 	t := utils2.NewEnvelopeTracker(chanReg, evlp, idempotency)
 
-	_, err := client.SendDeployTransaction(ctx, &txschedulertypes.DeployContractRequest{
+	_, err := client.SendDeployTransaction(ctx, &api.DeployContractRequest{
 		ChainName: chains["besu"].Name,
-		Params: txschedulertypes.DeployContractParams{
+		Params: api.DeployContractParams{
 			From:         accounts[nAcc],
 			ContractName: "SimpleToken",
 		},

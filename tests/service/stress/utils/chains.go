@@ -3,12 +3,10 @@ package utils
 import (
 	"context"
 
-	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-
 	"github.com/containous/traefik/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 )
 
 var chainsCtxKey ctxKey = "chains"
@@ -36,10 +34,10 @@ func ContextWithChains(ctx context.Context, chains map[string]*api.ChainResponse
 	return context.WithValue(ctx, chainsCtxKey, chains)
 }
 
-func ContextChains(ctx context.Context) map[string]*entities.Chain {
-	v, ok := ctx.Value(chainsCtxKey).(map[string]*entities.Chain)
+func ContextChains(ctx context.Context) map[string]*api.ChainResponse {
+	v, ok := ctx.Value(chainsCtxKey).(map[string]*api.ChainResponse)
 	if !ok {
-		return make(map[string]*entities.Chain)
+		return make(map[string]*api.ChainResponse)
 	}
 
 	return v
