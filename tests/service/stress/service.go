@@ -7,6 +7,8 @@ import (
 	"sync"
 	"time"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 
 	"github.com/Shopify/sarama"
@@ -24,6 +26,7 @@ type WorkLoadTest func(context.Context, *units.WorkloadConfig, orchestrateclient
 type WorkLoadService struct {
 	cfg      *Config
 	client   orchestrateclient.OrchestrateClient
+	ec       ethclient.Client
 	producer sarama.SyncProducer
 	chanReg  *chanregistry.ChanRegistry
 	items    []*workLoadItem
@@ -46,12 +49,14 @@ const (
 func NewService(cfg *Config,
 	chanReg *chanregistry.ChanRegistry,
 	client orchestrateclient.OrchestrateClient,
+	ec ethclient.Client,
 	producer sarama.SyncProducer,
 ) *WorkLoadService {
 	return &WorkLoadService{
 		cfg:      cfg,
 		chanReg:  chanReg,
 		client:   client,
+		ec:       ec,
 		producer: producer,
 		items: []*workLoadItem{
 			{cfg.Iterations, cfg.Concurrency, "BatchDeployContract", units.BatchDeployContractTest},
@@ -117,7 +122,7 @@ func (c *WorkLoadService) preRun(ctx context.Context) (context.Context, error) {
 	}
 
 	chainName := fmt.Sprintf("besu-%s", utils2.RandomString(5))
-	chain, err := utils.RegisterNewChain(ctx, c.client, chainName, c.cfg.gData.Nodes.BesuOne.URLs)
+	chain, err := utils.RegisterNewChain(ctx, c.client, c.ec, chainName, c.cfg.gData.Nodes.BesuOne.URLs)
 	if err != nil {
 		return ctx, err
 	}

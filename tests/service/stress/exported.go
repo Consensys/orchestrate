@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"sync"
 
+	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/rpc"
+
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -47,6 +49,7 @@ func Start(ctx context.Context) error {
 	workload = NewService(cfg,
 		chanregistry.GlobalChanRegistry(),
 		client.GlobalClient(),
+		ethclient.GlobalClient(),
 		broker.GlobalSyncProducer())
 
 	// Start consuming on every topics of interest
@@ -112,6 +115,7 @@ func initComponents(ctx context.Context) {
 		func() {
 			broker.InitSyncProducer(ctx)
 			client.Init()
+			ethclient.Init(ctx)
 		},
 		// Initialize ConsumerGroup
 		func() {
