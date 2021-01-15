@@ -97,7 +97,29 @@ func (s *chainsTestSuite) TestRegister() {
 		assert.NotEmpty(t, resp.UpdatedAt)
 		assert.Equal(t, resp.CreatedAt, resp.UpdatedAt)
 
-		fmt.Println(resp.ListenerStartingBlock)
+		err = s.client.DeleteChain(ctx, resp.UUID)
+		assert.NoError(t, err)
+	})
+
+	s.T().Run("should register chain successfully from 666", func(t *testing.T) {
+		req := testutils.FakeRegisterChainRequest()
+		req.Listener.FromBlock = "666"
+		req.URLs = []string{s.env.blockchainNodeURL}
+
+		resp, err := s.client.RegisterChain(ctx, req)
+		require.NoError(t, err)
+
+		assert.Equal(t, req.Name, resp.Name)
+		assert.Equal(t, req.URLs, resp.URLs)
+		assert.Equal(t, multitenancy.DefaultTenant, resp.TenantID)
+		assert.Equal(t, req.Listener.ExternalTxEnabled, resp.ListenerExternalTxEnabled)
+		assert.Equal(t, "5s", resp.ListenerBackOffDuration)
+		assert.Equal(t, req.Listener.Depth, resp.ListenerDepth)
+		assert.NotEmpty(t, resp.UUID)
+		assert.Equal(t, uint64(666), resp.ListenerStartingBlock)
+		assert.NotEmpty(t, resp.CreatedAt)
+		assert.NotEmpty(t, resp.UpdatedAt)
+		assert.Equal(t, resp.CreatedAt, resp.UpdatedAt)
 
 		err = s.client.DeleteChain(ctx, resp.UUID)
 		assert.NoError(t, err)

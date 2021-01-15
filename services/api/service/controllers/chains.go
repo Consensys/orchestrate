@@ -146,7 +146,13 @@ func (c *ChainsController) register(rw http.ResponseWriter, request *http.Reques
 
 	fromLatest := chainRequest.Listener.FromBlock == "" || chainRequest.Listener.FromBlock == "latest"
 	tenantID := multitenancy.TenantIDFromContext(ctx)
-	chain, err := c.ucs.RegisterChain().Execute(ctx, formatters.FormatRegisterChainRequest(chainRequest, tenantID), fromLatest)
+	chain, err := formatters.FormatRegisterChainRequest(chainRequest, tenantID, fromLatest)
+	if err != nil {
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	chain, err = c.ucs.RegisterChain().Execute(ctx, chain, fromLatest)
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return

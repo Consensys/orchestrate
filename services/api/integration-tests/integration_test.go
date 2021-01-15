@@ -88,7 +88,7 @@ func TestAPI(t *testing.T) {
 
 	suite.Run(t, s)
 }
-/*
+
 func (s *apiTestSuite) TestAPI_Transactions() {
 	if s.err != nil {
 		s.env.logger.Warn("skipping test...")
@@ -136,7 +136,7 @@ func (s *apiTestSuite) TestAPI_Faucets() {
 	testSuite.client = s.client
 	suite.Run(s.T(), testSuite)
 }
-*/
+
 func (s *apiTestSuite) TestAPI_Chains() {
 	if s.err != nil {
 		s.env.logger.Warn("skipping test...")

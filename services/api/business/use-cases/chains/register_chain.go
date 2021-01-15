@@ -61,6 +61,7 @@ func (uc *registerChainUseCase) Execute(ctx context.Context, chain *entities.Cha
 			return nil, errors.FromError(der).ExtendComponent(registerChainComponent)
 		}
 		chain.ListenerStartingBlock = chainTip
+		chain.ListenerCurrentBlock = chainTip
 	}
 
 	chainModel := parsers.NewChainModelFromEntity(chain)

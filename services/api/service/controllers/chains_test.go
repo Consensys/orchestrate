@@ -97,7 +97,8 @@ func (s *chainsCtrlTestSuite) TestRegister() {
 			NewRequest(http.MethodPost, chainsEndpoint, bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 
-		s.registerChainUC.EXPECT().Execute(gomock.Any(), formatters.FormatRegisterChainRequest(req, s.tenants[0]), true).Return(chain, nil)
+		expectedChain, _ := formatters.FormatRegisterChainRequest(req, s.tenants[0], true)
+		s.registerChainUC.EXPECT().Execute(gomock.Any(), expectedChain, true).Return(chain, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -118,7 +119,8 @@ func (s *chainsCtrlTestSuite) TestRegister() {
 			NewRequest(http.MethodPost, chainsEndpoint, bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 
-		s.registerChainUC.EXPECT().Execute(gomock.Any(), formatters.FormatRegisterChainRequest(req, s.tenants[0]), false).Return(chain, nil)
+		expectedChain, _ := formatters.FormatRegisterChainRequest(req, s.tenants[0], false)
+		s.registerChainUC.EXPECT().Execute(gomock.Any(), expectedChain, false).Return(chain, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 

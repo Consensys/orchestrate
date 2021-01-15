@@ -4,6 +4,10 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/consensys/quorum/common/math"
+	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
@@ -27,7 +31,7 @@ func FormatChainResponse(chain *entities.Chain) *types.ChainResponse {
 	}
 }
 
-func FormatRegisterChainRequest(request *types.RegisterChainRequest, tenantID string) *entities.Chain {
+func FormatRegisterChainRequest(request *types.RegisterChainRequest, tenantID string, fromLatest bool) (*entities.Chain, error) {
 	chain := &entities.Chain{
 		Name:                      request.Name,
 		TenantID:                  tenantID,
@@ -41,6 +45,17 @@ func FormatRegisterChainRequest(request *types.RegisterChainRequest, tenantID st
 		chain.ListenerBackOffDuration = "5s"
 	}
 
+	if !fromLatest {
+		startingBlock, ok := math.ParseUint64(request.Listener.FromBlock)
+		if !ok {
+			errMessage := "fromBlock must be an integer value"
+			log.WithField("from_block", request.Listener.FromBlock).Error(errMessage)
+			return nil, errors.InvalidFormatError(errMessage)
+		}
+		chain.ListenerStartingBlock = startingBlock
+		chain.ListenerCurrentBlock = startingBlock
+	}
+
 	if request.PrivateTxManager != nil {
 		chain.PrivateTxManager = &entities.PrivateTxManager{
 			URL:  request.PrivateTxManager.URL,
@@ -48,7 +63,7 @@ func FormatRegisterChainRequest(request *types.RegisterChainRequest, tenantID st
 		}
 	}
 
-	return chain
+	return chain, nil
 }
 
 func FormatUpdateChainRequest(request *types.UpdateChainRequest, uuid string) *entities.Chain {

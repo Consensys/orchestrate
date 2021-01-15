@@ -73,6 +73,7 @@ func TestRegisterChain_Execute(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.Equal(t, uint64(1), resp.ListenerStartingBlock)
+		assert.Equal(t, uint64(1), resp.ListenerCurrentBlock)
 	})
 
 	t.Run("should execute use case successfully with private tx manager", func(t *testing.T) {
