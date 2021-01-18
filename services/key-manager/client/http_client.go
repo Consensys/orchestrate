@@ -6,15 +6,15 @@ import (
 	"net/http"
 	"time"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager"
-
 	"github.com/containous/traefik/v2/pkg/log"
 	healthz "github.com/heptiolabs/healthcheck"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	clientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/client-utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/httputil"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/ethereum"
 )
+
+const zksAccountType = "zk-snarks"
+const ethAccountType = "ethereum"
 
 func NewHTTPClient(h *http.Client, c *Config) KeyManagerClient {
 	return &HTTPClient{
@@ -28,120 +28,28 @@ type HTTPClient struct {
 	config *Config
 }
 
-func (c HTTPClient) Checker() healthz.Check {
+func (c *HTTPClient) Checker() healthz.Check {
 	return healthz.HTTPGetCheck(fmt.Sprintf("%s/live", c.config.MetricsURL), time.Second)
 }
 
-func (c HTTPClient) ETHCreateAccount(ctx context.Context, req *types.CreateETHAccountRequest) (*types.ETHAccountResponse, error) {
-	reqURL := fmt.Sprintf("%v/ethereum/accounts", c.config.URL)
-	resp := &types.ETHAccountResponse{}
+func (c *HTTPClient) listNamespaces(ctx context.Context, accountType string) ([]string, error) {
+	reqURL := fmt.Sprintf("%v/%s/namespaces", accountType, c.config.URL)
 
-	response, err := clientutils.PostRequest(ctx, c.client, reqURL, req)
+	response, err := clientutils.GetRequest(ctx, c.client, reqURL)
 	if err != nil {
-		errMessage := "error while creating ethereum account"
+		errMessage := "error while listing namespaces"
 		log.FromContext(ctx).WithError(err).Error(errMessage)
-		return nil, errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+		return []string{}, errors.ServiceConnectionError(errMessage).ExtendComponent(component)
 	}
 
 	defer clientutils.CloseResponse(response)
-	if err := httputil.ParseResponse(ctx, response, resp); err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
-	}
-
-	return resp, nil
+	var resp []string
+	err = httputil.ParseResponse(ctx, response, &resp)
+	return resp, err
 }
 
-func (c HTTPClient) ETHImportAccount(ctx context.Context, req *types.ImportETHAccountRequest) (*types.ETHAccountResponse, error) {
-	reqURL := fmt.Sprintf("%v/ethereum/accounts/import", c.config.URL)
-	resp := &types.ETHAccountResponse{}
-
-	response, err := clientutils.PostRequest(ctx, c.client, reqURL, req)
-	if err != nil {
-		errMessage := "error while importing ethereum account"
-		log.FromContext(ctx).WithError(err).Error(errMessage)
-		return nil, errors.ServiceConnectionError(errMessage).ExtendComponent(component)
-	}
-
-	defer clientutils.CloseResponse(response)
-	if err := httputil.ParseResponse(ctx, response, resp); err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
-	}
-
-	return resp, nil
-}
-
-func (c HTTPClient) ETHSign(ctx context.Context, address string, req *keymanager.PayloadRequest) (string, error) {
-	reqURL := fmt.Sprintf("%v/ethereum/accounts/%v/sign", c.config.URL, address)
-
-	response, err := clientutils.PostRequest(ctx, c.client, reqURL, req)
-	if err != nil {
-		errMessage := "error while signing data with Ethereum account"
-		log.FromContext(ctx).WithError(err).Error(errMessage)
-		return "", errors.ServiceConnectionError(errMessage).ExtendComponent(component)
-	}
-
-	defer clientutils.CloseResponse(response)
-	return httputil.ParseStringResponse(ctx, response)
-}
-
-func (c HTTPClient) ETHSignTypedData(ctx context.Context, address string, req *types.SignTypedDataRequest) (string, error) {
-	reqURL := fmt.Sprintf("%v/ethereum/accounts/%v/sign-typed-data", c.config.URL, address)
-
-	response, err := clientutils.PostRequest(ctx, c.client, reqURL, req)
-	if err != nil {
-		errMessage := "error while signing typed data with Ethereum account"
-		log.FromContext(ctx).WithError(err).Error(errMessage)
-		return "", errors.ServiceConnectionError(errMessage).ExtendComponent(component)
-	}
-
-	defer clientutils.CloseResponse(response)
-	return httputil.ParseStringResponse(ctx, response)
-}
-
-func (c HTTPClient) ETHSignTransaction(ctx context.Context, address string, req *types.SignETHTransactionRequest) (string, error) {
-	reqURL := fmt.Sprintf("%v/ethereum/accounts/%v/sign-transaction", c.config.URL, address)
-
-	response, err := clientutils.PostRequest(ctx, c.client, reqURL, req)
-	if err != nil {
-		errMessage := "error while signing transaction"
-		log.FromContext(ctx).WithError(err).Error(errMessage)
-		return "", errors.ServiceConnectionError(errMessage).ExtendComponent(component)
-	}
-
-	defer clientutils.CloseResponse(response)
-	return httputil.ParseStringResponse(ctx, response)
-}
-
-func (c HTTPClient) ETHSignQuorumPrivateTransaction(ctx context.Context, address string, req *types.SignQuorumPrivateTransactionRequest) (string, error) {
-	reqURL := fmt.Sprintf("%v/ethereum/accounts/%v/sign-quorum-private-transaction", c.config.URL, address)
-
-	response, err := clientutils.PostRequest(ctx, c.client, reqURL, req)
-	if err != nil {
-		errMessage := "error while signing quorum private transaction"
-		log.FromContext(ctx).WithError(err).Error(errMessage)
-		return "", errors.ServiceConnectionError(errMessage).ExtendComponent(component)
-	}
-
-	defer clientutils.CloseResponse(response)
-	return httputil.ParseStringResponse(ctx, response)
-}
-
-func (c HTTPClient) ETHSignEEATransaction(ctx context.Context, address string, req *types.SignEEATransactionRequest) (string, error) {
-	reqURL := fmt.Sprintf("%v/ethereum/accounts/%v/sign-eea-transaction", c.config.URL, address)
-
-	response, err := clientutils.PostRequest(ctx, c.client, reqURL, req)
-	if err != nil {
-		errMessage := "error while signing eea private transaction"
-		log.FromContext(ctx).WithError(err).Error(errMessage)
-		return "", errors.ServiceConnectionError(errMessage).ExtendComponent(component)
-	}
-
-	defer clientutils.CloseResponse(response)
-	return httputil.ParseStringResponse(ctx, response)
-}
-
-func (c HTTPClient) ETHListAccounts(ctx context.Context, namespace string) ([]string, error) {
-	reqURL := fmt.Sprintf("%v/ethereum/accounts", c.config.URL)
+func (c *HTTPClient) listAccounts(ctx context.Context, accountType, namespace string) ([]string, error) {
+	reqURL := fmt.Sprintf("%v/%s/accounts", c.config.URL, accountType)
 	if namespace != "" {
 		reqURL += fmt.Sprintf("?namespace=%s", namespace)
 	}
@@ -159,25 +67,8 @@ func (c HTTPClient) ETHListAccounts(ctx context.Context, namespace string) ([]st
 	return resp, err
 }
 
-func (c HTTPClient) ETHListNamespaces(ctx context.Context) ([]string, error) {
-	reqURL := fmt.Sprintf("%v/ethereum/namespaces", c.config.URL)
-
-	response, err := clientutils.GetRequest(ctx, c.client, reqURL)
-	if err != nil {
-		errMessage := "error while listing namespaces"
-		log.FromContext(ctx).WithError(err).Error(errMessage)
-		return []string{}, errors.ServiceConnectionError(errMessage).ExtendComponent(component)
-	}
-
-	defer clientutils.CloseResponse(response)
-	var resp []string
-	err = httputil.ParseResponse(ctx, response, &resp)
-	return resp, err
-}
-
-func (c HTTPClient) ETHGetAccount(ctx context.Context, address, namespace string) (*types.ETHAccountResponse, error) {
-	resp := &types.ETHAccountResponse{}
-	reqURL := fmt.Sprintf("%v/ethereum/accounts/%s", c.config.URL, address)
+func (c *HTTPClient) getAccount(ctx context.Context, accountType, address, namespace string, resp interface{}) error {
+	reqURL := fmt.Sprintf("%v/%s/accounts/%s", c.config.URL, accountType, address)
 	if namespace != "" {
 		reqURL += fmt.Sprintf("?namespace=%s", namespace)
 	}
@@ -186,41 +77,31 @@ func (c HTTPClient) ETHGetAccount(ctx context.Context, address, namespace string
 	if err != nil {
 		errMessage := "error while getting account"
 		log.FromContext(ctx).WithError(err).Error(errMessage)
-		return nil, errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+		return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
 	}
 
 	defer clientutils.CloseResponse(response)
 	if err := httputil.ParseResponse(ctx, response, resp); err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
+		return errors.FromError(err).ExtendComponent(component)
 	}
 
-	return resp, nil
+	return nil
 }
 
-func (c HTTPClient) ETHVerifySignature(ctx context.Context, request *keymanager.VerifyPayloadRequest) error {
-	reqURL := fmt.Sprintf("%v/ethereum/accounts/verify-signature", c.config.URL)
-
-	response, err := clientutils.PostRequest(ctx, c.client, reqURL, request)
+func (c *HTTPClient) createAccount(ctx context.Context, accountType string, req, resp interface{}) error {
+	reqURL := fmt.Sprintf("%v/%s/accounts", c.config.URL, accountType)
+	fmt.Println(reqURL)
+	response, err := clientutils.PostRequest(ctx, c.client, reqURL, req)
 	if err != nil {
-		errMessage := "error while verifying signature"
+		errMessage := "error while creating account"
 		log.FromContext(ctx).WithError(err).Error(errMessage)
 		return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
 	}
 
 	defer clientutils.CloseResponse(response)
-	return httputil.ParseEmptyBodyResponse(ctx, response)
-}
-
-func (c HTTPClient) ETHVerifyTypedDataSignature(ctx context.Context, request *types.VerifyTypedDataRequest) error {
-	reqURL := fmt.Sprintf("%v/ethereum/accounts/verify-typed-data-signature", c.config.URL)
-
-	response, err := clientutils.PostRequest(ctx, c.client, reqURL, request)
-	if err != nil {
-		errMessage := "error while verifying typed data signature"
-		log.FromContext(ctx).WithError(err).Error(errMessage)
-		return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+	if err := httputil.ParseResponse(ctx, response, resp); err != nil {
+		return errors.FromError(err).ExtendComponent(component)
 	}
 
-	defer clientutils.CloseResponse(response)
-	return httputil.ParseEmptyBodyResponse(ctx, response)
+	return nil
 }

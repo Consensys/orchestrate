@@ -6,11 +6,11 @@ import (
 	signer "github.com/ethereum/go-ethereum/signer/core"
 )
 
-//go:generate mockgen -source=use-cases.go -destination=mocks/use-cases.go -package=mocks
+//go:generate mockgen -source=ethereum.go -destination=mocks/ethereum.go -package=mocks
 
-type UseCases interface {
+type ETHUseCases interface {
 	SignTypedData() SignTypedDataUseCase
-	VerifySignature() VerifySignatureUseCase
+	VerifySignature() VerifyETHSignatureUseCase
 	VerifyTypedDataSignature() VerifyTypedDataSignatureUseCase
 }
 
@@ -18,7 +18,7 @@ type SignTypedDataUseCase interface {
 	Execute(ctx context.Context, address, namespace string, typedData *signer.TypedData) (string, error)
 }
 
-type VerifySignatureUseCase interface {
+type VerifyETHSignatureUseCase interface {
 	Execute(ctx context.Context, address, signature, payload string) error
 }
 

@@ -68,3 +68,15 @@ func (s *keyManagerTestSuite) TestTxScheduler_Ethereum() {
 	testSuite.baseURL = s.env.baseURL
 	suite.Run(s.T(), testSuite)
 }
+
+func (s *keyManagerTestSuite) TestTxScheduler_ZkSnarks() {
+	if s.err != nil {
+		s.env.logger.Warn("skipping test...")
+		return
+	}
+
+	testSuite := new(keyManagerZKSTestSuite)
+	testSuite.env = s.env
+	testSuite.baseURL = s.env.baseURL
+	suite.Run(s.T(), testSuite)
+}

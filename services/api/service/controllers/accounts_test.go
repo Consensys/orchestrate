@@ -6,15 +6,16 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/service/formatters"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client/mock"
-	"net/http"
-	"net/http/httptest"
-	"strings"
-	"testing"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/golang/mock/gomock"
@@ -277,7 +278,7 @@ func (s *accountsCtrlTestSuite) TestAccountController_SignPayload() {
 			NewRequest(http.MethodPost, fmt.Sprintf("/accounts/%v/sign", acc.Address), bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 
-		s.keyManagerClient.EXPECT().ETHSign(gomock.Any(), mixedCaseTestAddress, &keymanager.PayloadRequest{
+		s.keyManagerClient.EXPECT().ETHSign(gomock.Any(), mixedCaseTestAddress, &keymanager.SignPayloadRequest{
 			Data:      payload,
 			Namespace: s.tenants[0],
 		}).Return(signature, nil)

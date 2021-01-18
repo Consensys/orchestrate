@@ -13,11 +13,11 @@ import (
 	promcli "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/metrics/client"
 )
 
-func (c HTTPClient) Checker() healthz.Check {
+func (c *HTTPClient) Checker() healthz.Check {
 	return healthz.HTTPGetCheck(fmt.Sprintf("%s/live", c.config.MetricsURL), time.Second)
 }
 
-func (c HTTPClient) Prometheus(ctx context.Context) (map[string]*dto.MetricFamily, error) {
+func (c *HTTPClient) Prometheus(ctx context.Context) (map[string]*dto.MetricFamily, error) {
 	resp, err := clientutils.GetRequest(ctx, c.client, fmt.Sprintf("%s/metrics", c.config.MetricsURL))
 	if err != nil {
 		errMessage := "error while getting prometheus metrics"

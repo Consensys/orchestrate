@@ -3,13 +3,13 @@
 package integrationtests
 
 import (
-	"github.com/consensys/quorum/common"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/ethereum"
+	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client"
 	"testing"
@@ -68,7 +68,7 @@ func (s *keyManagerEthereumTestSuite) TestKeyManager_Ethereum_Sign() {
 	ctx := s.env.ctx
 
 	s.T().Run("should fail if payload is invalid", func(t *testing.T) {
-		signRequest := &keymanager.PayloadRequest{
+		signRequest := &keymanager.SignPayloadRequest{
 			Data: "",
 		}
 
@@ -86,7 +86,7 @@ func (s *keyManagerEthereumTestSuite) TestKeyManager_Ethereum_Sign() {
 		assert.NoError(t, err)
 		assert.Equal(t, expectedAddress, account.Address)
 
-		signRequest := &keymanager.PayloadRequest{
+		signRequest := &keymanager.SignPayloadRequest{
 			Data:      "my data to sign",
 			Namespace: "_",
 		}
@@ -259,11 +259,11 @@ func (s *keyManagerEthereumTestSuite) TestKeyManager_Ethereum_SignTypedData() {
 
 	s.T().Run("should sign data successfully with nested types", func(t *testing.T) {
 		signRequest := testutils.FakeSignTypedDataRequest()
-		signRequest.Types["Example"] = []ethereum.Type{
+		signRequest.Types["Example"] = []types.Type{
 			{Name: "testFieldString", Type: "string"},
 			{Name: "testFieldAddress", Type: "address"},
 		}
-		signRequest.Types["Mail"] = append(signRequest.Types["Mail"], ethereum.Type{Name: "example", Type: "Example"})
+		signRequest.Types["Mail"] = append(signRequest.Types["Mail"], types.Type{Name: "example", Type: "Example"})
 		signRequest.Message["example"] = map[string]interface{}{
 			"testFieldString":  "myString",
 			"testFieldAddress": "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18",
@@ -287,7 +287,7 @@ func (s *keyManagerEthereumTestSuite) TestKeyManager_Ethereum_VerifyTypedDataSig
 	signature, _ := s.client.ETHSignTypedData(ctx, account.Address, signRequest)
 
 	s.T().Run("should fail with 400 if payload is invalid", func(t *testing.T) {
-		err := s.client.ETHVerifyTypedDataSignature(ctx, &ethereum.VerifyTypedDataRequest{
+		err := s.client.ETHVerifyTypedDataSignature(ctx, &types.VerifyTypedDataRequest{
 			TypedData: *signRequest,
 			Signature: "",
 			Address:   account.Address,
@@ -297,7 +297,7 @@ func (s *keyManagerEthereumTestSuite) TestKeyManager_Ethereum_VerifyTypedDataSig
 	})
 
 	s.T().Run("should fail with 422 if signature is invalid", func(t *testing.T) {
-		err := s.client.ETHVerifyTypedDataSignature(ctx, &ethereum.VerifyTypedDataRequest{
+		err := s.client.ETHVerifyTypedDataSignature(ctx, &types.VerifyTypedDataRequest{
 			TypedData: *signRequest,
 			Signature: "0xfeee",
 			Address:   account.Address,
@@ -307,7 +307,7 @@ func (s *keyManagerEthereumTestSuite) TestKeyManager_Ethereum_VerifyTypedDataSig
 	})
 
 	s.T().Run("should fail with 422 if signature is invalid for the given address", func(t *testing.T) {
-		err := s.client.ETHVerifyTypedDataSignature(ctx, &ethereum.VerifyTypedDataRequest{
+		err := s.client.ETHVerifyTypedDataSignature(ctx, &types.VerifyTypedDataRequest{
 			TypedData: *signRequest,
 			Signature: signature,
 			Address:   "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18",
@@ -317,7 +317,7 @@ func (s *keyManagerEthereumTestSuite) TestKeyManager_Ethereum_VerifyTypedDataSig
 	})
 
 	s.T().Run("should verify signature successfully", func(t *testing.T) {
-		err := s.client.ETHVerifyTypedDataSignature(ctx, &ethereum.VerifyTypedDataRequest{
+		err := s.client.ETHVerifyTypedDataSignature(ctx, &types.VerifyTypedDataRequest{
 			TypedData: *signRequest,
 			Signature: signature,
 			Address:   account.Address,
@@ -334,14 +334,14 @@ func (s *keyManagerEthereumTestSuite) TestKeyManager_Ethereum_VerifySignature() 
 	accountRequest.PrivateKey = "fa88c4a5912f80503d6b5503880d0745f4b88a1ff90ce8f64cdd8f32cc3bc249"
 	account, _ := s.client.ETHImportAccount(ctx, accountRequest)
 
-	signRequest := &keymanager.PayloadRequest{
+	signRequest := &keymanager.SignPayloadRequest{
 		Data:      "my data to sign",
 		Namespace: "_",
 	}
 	signature, _ := s.client.ETHSign(ctx, account.Address, signRequest)
 
 	s.T().Run("should fail with 400 if payload is invalid", func(t *testing.T) {
-		err := s.client.ETHVerifySignature(ctx, &keymanager.VerifyPayloadRequest{
+		err := s.client.ETHVerifySignature(ctx, &types.VerifyPayloadRequest{
 			Data:      signRequest.Data,
 			Signature: "",
 			Address:   account.Address,
@@ -351,7 +351,7 @@ func (s *keyManagerEthereumTestSuite) TestKeyManager_Ethereum_VerifySignature() 
 	})
 
 	s.T().Run("should fail with 422 if signature is invalid", func(t *testing.T) {
-		err := s.client.ETHVerifySignature(ctx, &keymanager.VerifyPayloadRequest{
+		err := s.client.ETHVerifySignature(ctx, &types.VerifyPayloadRequest{
 			Data:      signRequest.Data,
 			Signature: "0xfeee",
 			Address:   account.Address,
@@ -361,7 +361,7 @@ func (s *keyManagerEthereumTestSuite) TestKeyManager_Ethereum_VerifySignature() 
 	})
 
 	s.T().Run("should fail with 422 if signature is invalid for the given address", func(t *testing.T) {
-		err := s.client.ETHVerifySignature(ctx, &keymanager.VerifyPayloadRequest{
+		err := s.client.ETHVerifySignature(ctx, &types.VerifyPayloadRequest{
 			Data:      signRequest.Data,
 			Signature: signature,
 			Address:   "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18",
@@ -371,7 +371,7 @@ func (s *keyManagerEthereumTestSuite) TestKeyManager_Ethereum_VerifySignature() 
 	})
 
 	s.T().Run("should verify signature successfully", func(t *testing.T) {
-		err := s.client.ETHVerifySignature(ctx, &keymanager.VerifyPayloadRequest{
+		err := s.client.ETHVerifySignature(ctx, &types.VerifyPayloadRequest{
 			Data:      signRequest.Data,
 			Signature: signature,
 			Address:   account.Address,

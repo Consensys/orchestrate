@@ -29,15 +29,17 @@ import (
 
 type Builder struct {
 	ethereumCtrl *EthereumController
+	zksCtrl      *ZKSController
 }
 
-func NewBuilder(vault store.Vault, useCases usecases.UseCases) *Builder {
+func NewBuilder(vault store.Vault, ethUseCases usecases.ETHUseCases, zksUseCases usecases.ZKSUseCases) *Builder {
 	return &Builder{
-		ethereumCtrl: NewEthereumController(vault, useCases),
+		ethereumCtrl: NewEthereumController(vault, ethUseCases),
+		zksCtrl:      NewZKSController(vault, zksUseCases),
 	}
 }
 
-func (b *Builder) Build(ctx context.Context, _ string, configuration interface{}, respModifier func(response *http.Response) error) (http.Handler, error) {
+func (b *Builder) Build(_ context.Context, _ string, configuration interface{}, respModifier func(response *http.Response) error) (http.Handler, error) {
 	cfg, ok := configuration.(*dynamic.KeyManager)
 	if !ok {
 		return nil, fmt.Errorf("invalid configuration type (expected %T but got %T)", cfg, configuration)
@@ -45,6 +47,7 @@ func (b *Builder) Build(ctx context.Context, _ string, configuration interface{}
 
 	router := mux.NewRouter()
 	b.ethereumCtrl.Append(router)
+	b.zksCtrl.Append(router)
 
 	return router, nil
 }

@@ -6,9 +6,7 @@ import (
 	"strings"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
-
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/ethereum"
+	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/ethereum"
 
 	"github.com/containous/traefik/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
@@ -149,7 +147,7 @@ func (c *HTTPClient) SignTypedData(ctx context.Context, address string, request 
 	return httputil.ParseStringResponse(ctx, response)
 }
 
-func (c *HTTPClient) VerifySignature(ctx context.Context, request *keymanager.VerifyPayloadRequest) error {
+func (c *HTTPClient) VerifySignature(ctx context.Context, request *types.VerifyPayloadRequest) error {
 	reqURL := fmt.Sprintf("%v/accounts/verify-signature", c.config.URL)
 
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, request)
@@ -163,7 +161,7 @@ func (c *HTTPClient) VerifySignature(ctx context.Context, request *keymanager.Ve
 	return httputil.ParseEmptyBodyResponse(ctx, response)
 }
 
-func (c *HTTPClient) VerifyTypedDataSignature(ctx context.Context, request *ethereum.VerifyTypedDataRequest) error {
+func (c *HTTPClient) VerifyTypedDataSignature(ctx context.Context, request *types.VerifyTypedDataRequest) error {
 	reqURL := fmt.Sprintf("%v/accounts/verify-typed-data-signature", c.config.URL)
 
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, request)

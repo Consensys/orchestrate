@@ -5,15 +5,16 @@ package controllers
 import (
 	"bytes"
 	"fmt"
-	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/key-manager/use-cases"
-	mocks2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/key-manager/use-cases/mocks"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/store/mocks"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager"
+	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/key-manager/use-cases"
+	mocks2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/key-manager/use-cases/mocks"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/store/mocks"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 
 	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"
@@ -28,7 +29,7 @@ type ethereumCtrlTestSuite struct {
 	suite.Suite
 	vault                      *mocks.MockVault
 	signTypedDataUC            *mocks2.MockSignTypedDataUseCase
-	verifySignatureUC          *mocks2.MockVerifySignatureUseCase
+	verifySignatureUC          *mocks2.MockVerifyETHSignatureUseCase
 	verifyTypedDataSignatureUC *mocks2.MockVerifyTypedDataSignatureUseCase
 	router                     *mux.Router
 }
@@ -38,7 +39,7 @@ const (
 	mixedCaseTestAddress = "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4"
 )
 
-var _ usecases.UseCases = &ethereumCtrlTestSuite{}
+var _ usecases.ETHUseCases = &ethereumCtrlTestSuite{}
 
 func (s ethereumCtrlTestSuite) SignTypedData() usecases.SignTypedDataUseCase {
 	return s.signTypedDataUC
@@ -48,7 +49,7 @@ func (s ethereumCtrlTestSuite) VerifyTypedDataSignature() usecases.VerifyTypedDa
 	return s.verifyTypedDataSignatureUC
 }
 
-func (s ethereumCtrlTestSuite) VerifySignature() usecases.VerifySignatureUseCase {
+func (s ethereumCtrlTestSuite) VerifySignature() usecases.VerifyETHSignatureUseCase {
 	return s.verifySignatureUC
 }
 
@@ -62,7 +63,7 @@ func (s *ethereumCtrlTestSuite) SetupTest() {
 	defer ctrl.Finish()
 
 	s.signTypedDataUC = mocks2.NewMockSignTypedDataUseCase(ctrl)
-	s.verifySignatureUC = mocks2.NewMockVerifySignatureUseCase(ctrl)
+	s.verifySignatureUC = mocks2.NewMockVerifyETHSignatureUseCase(ctrl)
 	s.verifyTypedDataSignatureUC = mocks2.NewMockVerifyTypedDataSignatureUseCase(ctrl)
 	s.vault = mocks.NewMockVault(ctrl)
 	s.router = mux.NewRouter()
@@ -77,7 +78,7 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_Create() {
 		requestBytes, _ := json.Marshal(createAccountRequest)
 
 		rw := httptest.NewRecorder()
-		httpRequest := httptest.NewRequest(http.MethodPost, "/ethereum/accounts", bytes.NewReader(requestBytes))
+		httpRequest := httptest.NewRequest(http.MethodPost, ethAccountPath, bytes.NewReader(requestBytes))
 
 		fakeETHAccount := testutils.FakeETHAccount()
 
@@ -97,7 +98,7 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_Create() {
 		requestBytes, _ := json.Marshal(createAccountRequest)
 
 		rw := httptest.NewRecorder()
-		httpRequest := httptest.NewRequest(http.MethodPost, "/ethereum/accounts", bytes.NewReader(requestBytes))
+		httpRequest := httptest.NewRequest(http.MethodPost, ethAccountPath, bytes.NewReader(requestBytes))
 
 		s.vault.EXPECT().ETHCreateAccount(gomock.Any()).Return(nil, errors.HashicorpVaultConnectionError("error"))
 
@@ -112,7 +113,7 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_Import() {
 		requestBytes, _ := json.Marshal(importAccountRequest)
 
 		rw := httptest.NewRecorder()
-		httpRequest := httptest.NewRequest(http.MethodPost, "/ethereum/accounts/import", bytes.NewReader(requestBytes))
+		httpRequest := httptest.NewRequest(http.MethodPost, ethAccountPath + "/import", bytes.NewReader(requestBytes))
 
 		fakeETHAccount := testutils.FakeETHAccount()
 
@@ -134,7 +135,7 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_Import() {
 		requestBytes, _ := json.Marshal(importAccountRequest)
 
 		rw := httptest.NewRecorder()
-		httpRequest := httptest.NewRequest(http.MethodPost, "/ethereum/accounts/import", bytes.NewReader(requestBytes))
+		httpRequest := httptest.NewRequest(http.MethodPost, ethAccountPath + "/import", bytes.NewReader(requestBytes))
 
 		s.vault.EXPECT().
 			ETHImportAccount(importAccountRequest.Namespace, importAccountRequest.PrivateKey).
@@ -146,11 +147,11 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_Import() {
 }
 
 func (s *ethereumCtrlTestSuite) TestEthereumController_Sign() {
-	url := fmt.Sprintf("/ethereum/accounts/%v/sign", inputTestAddress)
+	url := fmt.Sprintf("%s/%v/sign", ethAccountPath, inputTestAddress)
 
 	s.T().Run("should execute request successfully", func(t *testing.T) {
 		signature := "0xsignature"
-		payloadRequest := &keymanager.PayloadRequest{
+		payloadRequest := &keymanager.SignPayloadRequest{
 			Data:      "my data to sign",
 			Namespace: "namespace",
 		}
@@ -171,7 +172,7 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_Sign() {
 
 	// Sufficient test to check that the mapping to HTTP errors is working. All other status code tests are done in integration tests
 	s.T().Run("should fail with correct error code if use case fails", func(t *testing.T) {
-		payloadRequest := &keymanager.PayloadRequest{
+		payloadRequest := &keymanager.SignPayloadRequest{
 			Data:      "my data to sign",
 			Namespace: "namespace",
 		}
@@ -190,7 +191,7 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_Sign() {
 }
 
 func (s *ethereumCtrlTestSuite) TestEthereumController_SignTransaction() {
-	url := fmt.Sprintf("/ethereum/accounts/%v/sign-transaction", inputTestAddress)
+	url := fmt.Sprintf("%s/%v/sign-transaction", ethAccountPath, inputTestAddress)
 
 	s.T().Run("should execute request successfully", func(t *testing.T) {
 		signature := "0xsignature"
@@ -226,7 +227,7 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_SignTransaction() {
 }
 
 func (s *ethereumCtrlTestSuite) TestEthereumController_SignQuorumPrivateTransaction() {
-	url := fmt.Sprintf("/ethereum/accounts/%v/sign-quorum-private-transaction", inputTestAddress)
+	url := fmt.Sprintf("%s/%v/sign-quorum-private-transaction", ethAccountPath, inputTestAddress)
 
 	s.T().Run("should execute request successfully", func(t *testing.T) {
 		signature := "0xsignature"
@@ -264,7 +265,7 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_SignQuorumPrivateTransact
 }
 
 func (s *ethereumCtrlTestSuite) TestEthereumController_SignEEATransaction() {
-	url := fmt.Sprintf("/ethereum/accounts/%v/sign-eea-transaction", inputTestAddress)
+	url := fmt.Sprintf("%s/%v/sign-eea-transaction", ethAccountPath, inputTestAddress)
 
 	s.T().Run("should execute request successfully", func(t *testing.T) {
 		signature := "0xsignature"
@@ -300,7 +301,7 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_SignEEATransaction() {
 }
 
 func (s *ethereumCtrlTestSuite) TestEthereumController_SignTypedData() {
-	url := fmt.Sprintf("/ethereum/accounts/%v/sign-typed-data", inputTestAddress)
+	url := fmt.Sprintf("%s/%v/sign-typed-data", ethAccountPath, inputTestAddress)
 
 	s.T().Run("should execute request successfully", func(t *testing.T) {
 		signature := "0xsignature"
@@ -339,7 +340,7 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_SignTypedData() {
 }
 
 func (s *ethereumCtrlTestSuite) TestEthereumController_VerifySignature() {
-	url := "/ethereum/accounts/verify-signature"
+	url := ethAccountPath + "/verify-signature"
 
 	s.T().Run("should execute request successfully", func(t *testing.T) {
 		verifyRequest := testutils.FakeVerifyPayloadRequest()
@@ -375,7 +376,7 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_VerifySignature() {
 }
 
 func (s *ethereumCtrlTestSuite) TestEthereumController_VerifyTypedDataSignature() {
-	url := "/ethereum/accounts/verify-typed-data-signature"
+	url := ethAccountPath + "/verify-typed-data-signature"
 
 	s.T().Run("should execute request successfully", func(t *testing.T) {
 		verifyRequest := testutils.FakeVerifyTypedDataPayloadRequest()

@@ -21,7 +21,8 @@ func NewKeyManager(ctx context.Context, cfg *Config) (*app.App, error) {
 	}
 
 	// Option for key manager handler
-	keyManagerHandlerOpt := app.HandlerOpt(reflect.TypeOf(&dynamic.KeyManager{}), controllers.NewBuilder(vault, builder.NewUseCases(vault)))
+	keyManagerHandlerOpt := app.HandlerOpt(reflect.TypeOf(&dynamic.KeyManager{}),
+		controllers.NewBuilder(vault, builder.NewETHUseCases(vault), builder.NewZKSUseCases(vault)))
 
 	// Create app
 	return app.New(

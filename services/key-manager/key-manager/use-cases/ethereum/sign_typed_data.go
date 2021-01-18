@@ -12,7 +12,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/store"
 )
 
-const signTypedDataComponent = "use-cases.sign-typed-data"
+const signTypedDataComponent = "use-cases.eth.sign-typed-data"
 
 // signTypedDataUseCase is a use case to sign an arbitrary typed payload using an existing Ethereum account
 type signTypedDataUseCase struct {

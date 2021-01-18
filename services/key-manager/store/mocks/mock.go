@@ -169,6 +169,81 @@ func (mr *MockVaultMockRecorder) ETHGetAccount(address, namespace interface{}) *
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHGetAccount", reflect.TypeOf((*MockVault)(nil).ETHGetAccount), address, namespace)
 }
 
+// ZKSCreateAccount mocks base method
+func (m *MockVault) ZKSCreateAccount(namespace string) (*entities.ZKSAccount, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ZKSCreateAccount", namespace)
+	ret0, _ := ret[0].(*entities.ZKSAccount)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ZKSCreateAccount indicates an expected call of ZKSCreateAccount
+func (mr *MockVaultMockRecorder) ZKSCreateAccount(namespace interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ZKSCreateAccount", reflect.TypeOf((*MockVault)(nil).ZKSCreateAccount), namespace)
+}
+
+// ZKSListNamespaces mocks base method
+func (m *MockVault) ZKSListNamespaces() ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ZKSListNamespaces")
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ZKSListNamespaces indicates an expected call of ZKSListNamespaces
+func (mr *MockVaultMockRecorder) ZKSListNamespaces() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ZKSListNamespaces", reflect.TypeOf((*MockVault)(nil).ZKSListNamespaces))
+}
+
+// ZKSSign mocks base method
+func (m *MockVault) ZKSSign(pubKey, namespace, data string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ZKSSign", pubKey, namespace, data)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ZKSSign indicates an expected call of ZKSSign
+func (mr *MockVaultMockRecorder) ZKSSign(pubKey, namespace, data interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ZKSSign", reflect.TypeOf((*MockVault)(nil).ZKSSign), pubKey, namespace, data)
+}
+
+// ZKSListAccounts mocks base method
+func (m *MockVault) ZKSListAccounts(namespace string) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ZKSListAccounts", namespace)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ZKSListAccounts indicates an expected call of ZKSListAccounts
+func (mr *MockVaultMockRecorder) ZKSListAccounts(namespace interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ZKSListAccounts", reflect.TypeOf((*MockVault)(nil).ZKSListAccounts), namespace)
+}
+
+// ZKSGetAccount mocks base method
+func (m *MockVault) ZKSGetAccount(pubKey, namespace string) (*entities.ZKSAccount, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ZKSGetAccount", pubKey, namespace)
+	ret0, _ := ret[0].(*entities.ZKSAccount)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ZKSGetAccount indicates an expected call of ZKSGetAccount
+func (mr *MockVaultMockRecorder) ZKSGetAccount(pubKey, namespace interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ZKSGetAccount", reflect.TypeOf((*MockVault)(nil).ZKSGetAccount), pubKey, namespace)
+}
+
 // HealthCheck mocks base method
 func (m *MockVault) HealthCheck() error {
 	m.ctrl.T.Helper()

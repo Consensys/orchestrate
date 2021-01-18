@@ -228,17 +228,24 @@ func (sc *ScenarioContext) iRegisterTheFollowingResponseFields(table *gherkin.Pi
 	if err != nil {
 		return fmt.Errorf("expected response code body to math field but it errored with %s", err.Error())
 	}
+
 	sc.httpResponse.Body = ioutil.NopCloser(bytes.NewBuffer(body))
 	var resp interface{}
 	if err := json.Unmarshal(body, &resp); err != nil {
-		return err
+		resp = body
+		log.WithError(err).Warn("response is not a json object")
 	}
 
 	aliasTable := utils.ExtractColumns(table, []string{aliasHeaderValue})
 	for i, row := range aliasTable.Rows[1:] {
-
 		alias := row.Cells[0].Value
 		bodyPath := table.Rows[i+1].Cells[0].Value
+
+		if bodyPath == "." {
+			sc.aliases.Set(fmt.Sprintf("%s", resp), sc.Pickle.Id, alias)
+			continue
+		}
+
 		val, err := utils.GetField(bodyPath, reflect.ValueOf(resp))
 		if err != nil {
 			return err

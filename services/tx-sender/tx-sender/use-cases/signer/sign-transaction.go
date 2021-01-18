@@ -8,7 +8,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 
 	"github.com/ethereum/go-ethereum/crypto"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/crypto/ethereum/signing"
+	pkgcryto "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/crypto/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sender/tx-sender/parsers"
 
@@ -40,7 +40,7 @@ func (uc *signETHTransactionUseCase) Execute(ctx context.Context, job *entities.
 	logger := log.WithContext(ctx).WithField("job_uuid", job.UUID).WithField("one_time_key", job.InternalData.OneTimeKey)
 	logger.Debug("signing ethereum transaction")
 
-	signer := signing.GetEIP155Signer(job.InternalData.ChainID)
+	signer := pkgcryto.GetEIP155Signer(job.InternalData.ChainID)
 	transaction := parsers.ETHTransactionToTransaction(job.Transaction)
 
 	var decodedSignature []byte
@@ -80,7 +80,7 @@ func (*signETHTransactionUseCase) signWithOneTimeKey(transaction *types.Transact
 		return nil, errors.CryptoOperationError(errMessage)
 	}
 
-	return signing.SignTransaction(transaction, privKey, signer)
+	return pkgcryto.SignTransaction(transaction, privKey, signer)
 }
 
 func (uc *signETHTransactionUseCase) signWithAccount(ctx context.Context, job *entities.Job, tx *types.Transaction) ([]byte, error) {

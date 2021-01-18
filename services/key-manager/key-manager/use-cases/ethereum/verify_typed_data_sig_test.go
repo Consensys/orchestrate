@@ -20,7 +20,7 @@ func TestVerifyTypedDataSignature_Execute(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockVerifySignatureUC := mocks.NewMockVerifySignatureUseCase(ctrl)
+	mockVerifySignatureUC := mocks.NewMockVerifyETHSignatureUseCase(ctrl)
 	address := "0x5Cc634233E4a454d47aACd9fC68801482Fb02610"
 	payload := formatters.FormatSignTypedDataRequest(testutils.FakeSignTypedDataRequest())
 	signature := "0xsignature"

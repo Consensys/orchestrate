@@ -11,7 +11,6 @@ import (
 	io_prometheus_client "github.com/prometheus/client_model/go"
 	api "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 	entities "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	keymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager"
 	ethereum "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/ethereum"
 	reflect "reflect"
 )
@@ -397,7 +396,7 @@ func (mr *MockOrchestrateClientMockRecorder) SignTypedData(ctx, address, request
 }
 
 // VerifySignature mocks base method
-func (m *MockOrchestrateClient) VerifySignature(ctx context.Context, request *keymanager.VerifyPayloadRequest) error {
+func (m *MockOrchestrateClient) VerifySignature(ctx context.Context, request *ethereum.VerifyPayloadRequest) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "VerifySignature", ctx, request)
 	ret0, _ := ret[0].(error)
@@ -1163,7 +1162,7 @@ func (mr *MockAccountClientMockRecorder) SignTypedData(ctx, address, request int
 }
 
 // VerifySignature mocks base method
-func (m *MockAccountClient) VerifySignature(ctx context.Context, request *keymanager.VerifyPayloadRequest) error {
+func (m *MockAccountClient) VerifySignature(ctx context.Context, request *ethereum.VerifyPayloadRequest) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "VerifySignature", ctx, request)
 	ret0, _ := ret[0].(error)

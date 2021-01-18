@@ -6,7 +6,7 @@ import (
 
 	quorumtypes "github.com/consensys/quorum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/crypto/ethereum/signing"
+	pkgcryto "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/crypto/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/rlp"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
@@ -40,7 +40,7 @@ func (uc *signQuorumPrivateTransactionUseCase) Execute(ctx context.Context, job 
 	logger := log.WithContext(ctx).WithField("job_uuid", job.UUID).WithField("one_time_key", job.InternalData.OneTimeKey)
 	logger.Debug("signing quorum private transaction")
 
-	signer := signing.GetQuorumPrivateTxSigner()
+	signer := pkgcryto.GetQuorumPrivateTxSigner()
 	transaction := parsers.ETHTransactionToQuorumTransaction(job.Transaction)
 	transaction.SetPrivate()
 
@@ -81,7 +81,7 @@ func (*signQuorumPrivateTransactionUseCase) signWithOneTimeKey(transaction *quor
 		return nil, errors.CryptoOperationError(errMessage)
 	}
 
-	return signing.SignQuorumPrivateTransaction(transaction, privKey, signer)
+	return pkgcryto.SignQuorumPrivateTransaction(transaction, privKey, signer)
 }
 
 func (uc *signQuorumPrivateTransactionUseCase) signWithAccount(ctx context.Context, job *entities.Job, tx *quorumtypes.Transaction) ([]byte, error) {

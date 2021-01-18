@@ -6,7 +6,7 @@ import (
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/rlp"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/crypto/ethereum/signing"
+	pkgcryto "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/crypto/ethereum"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 
@@ -42,7 +42,7 @@ func (uc *signEEATransactionUseCase) Execute(ctx context.Context, job *entities.
 	logger := log.WithContext(ctx).WithField("job_uuid", job.UUID).WithField("one_time_key", job.InternalData.OneTimeKey)
 	logger.Debug("signing EEA transaction")
 
-	signer := signing.GetEIP155Signer(job.InternalData.ChainID)
+	signer := pkgcryto.GetEIP155Signer(job.InternalData.ChainID)
 	transaction := parsers.ETHTransactionToTransaction(job.Transaction)
 	privateArgs := &entities.PrivateETHTransactionParams{
 		PrivateFrom:    job.Transaction.PrivateFrom,
@@ -84,7 +84,7 @@ func (uc *signEEATransactionUseCase) signWithOneTimeKey(
 		return nil, errors.CryptoOperationError(errMessage)
 	}
 
-	return signing.SignEEATransaction(transaction, privateArgs, chainID, privKey)
+	return pkgcryto.SignEEATransaction(transaction, privateArgs, chainID, privKey)
 }
 
 func (uc *signEEATransactionUseCase) signWithAccount(ctx context.Context, job *entities.Job, tx *types.Transaction) ([]byte, error) {
@@ -134,12 +134,12 @@ func (*signEEATransactionUseCase) getSignedRawEEATransaction(
 	signature []byte,
 	signer types.Signer,
 ) ([]byte, error) {
-	privateFromEncoded, err := signing.GetEncodedPrivateFrom(privateArgs.PrivateFrom)
+	privateFromEncoded, err := pkgcryto.GetEncodedPrivateFrom(privateArgs.PrivateFrom)
 	if err != nil {
 		return nil, err
 	}
 
-	privateRecipientEncoded, err := signing.GetEncodedPrivateRecipient(privateArgs.PrivacyGroupID, privateArgs.PrivateFor)
+	privateRecipientEncoded, err := pkgcryto.GetEncodedPrivateRecipient(privateArgs.PrivacyGroupID, privateArgs.PrivateFor)
 	if err != nil {
 		return nil, err
 	}

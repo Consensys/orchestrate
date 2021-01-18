@@ -17,19 +17,19 @@ func TestNewInternalConfig(t *testing.T) {
 	expectedCfg := &dynamic.Configuration{
 		HTTP: &dynamic.HTTPConfiguration{
 			Routers: map[string]*dynamic.Router{
-				"ethereum": {
+				"key-manager": {
 					Router: &traefikdynamic.Router{
 						EntryPoints: []string{http.DefaultHTTPAppEntryPoint},
-						Service:     "ethereum",
+						Service:     "key-manager",
 						Priority:    math.MaxInt32,
-						Rule:        "PathPrefix(`/ethereum`)",
+						Rule:        "PathPrefix(`/ethereum`) || PathPrefix(`/zk-snarks`)",
 						Middlewares: []string{"base@logger-base"},
 					},
 				},
 			},
 			Middlewares: make(map[string]*dynamic.Middleware),
 			Services: map[string]*dynamic.Service{
-				"ethereum": {
+				"key-manager": {
 					KeyManager: &dynamic.KeyManager{},
 				},
 			},

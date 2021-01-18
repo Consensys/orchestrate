@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/crypto/ethereum/signing"
+	pkgcryto "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/crypto/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/rlp"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 	utils4 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
@@ -536,7 +536,7 @@ func (sc *ScenarioContext) craftAndSignEnvelope(ctx context.Context, e *tx.Envel
 		_ = e.SetChainID(chainID)
 	}
 
-	signer := signing.GetEIP155Signer(e.GetChainIDString())
+	signer := pkgcryto.GetEIP155Signer(e.GetChainIDString())
 	acc, err := crypto.HexToECDSA(privKey)
 	if err != nil {
 		log.WithError(err).WithField("private_key", privKey).Error("failed to create account using private key")
@@ -559,7 +559,7 @@ func (sc *ScenarioContext) craftAndSignEnvelope(ctx context.Context, e *tx.Envel
 		return err
 	}
 
-	signature, err := signing.SignTransaction(transaction, acc, signer)
+	signature, err := pkgcryto.SignTransaction(transaction, acc, signer)
 	if err != nil {
 		log.WithError(err).Error("failed to sign transaction")
 		return err

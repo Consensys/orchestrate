@@ -11,15 +11,15 @@ import (
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/key-manager/use-cases"
 )
 
-const verifyTypedDataSignatureComponent = "use-cases.verify-typed-data-signature"
+const verifyTypedDataSignatureComponent = "use-cases.eth.verify-typed-data-signature"
 
 // verifyTypedDataSignatureUseCase is a use case to verify the signature of a typed payload using an existing Ethereum account
 type verifyTypedDataSignatureUseCase struct {
-	verifySignatureUC usecases.VerifySignatureUseCase
+	verifySignatureUC usecases.VerifyETHSignatureUseCase
 }
 
 // NewVerifyTypedDataSignatureUseCase creates a new VerifyTypedDataSignatureUseCase
-func NewVerifyTypedDataSignatureUseCase(verifySignatureUC usecases.VerifySignatureUseCase) usecases.VerifyTypedDataSignatureUseCase {
+func NewVerifyTypedDataSignatureUseCase(verifySignatureUC usecases.VerifyETHSignatureUseCase) usecases.VerifyTypedDataSignatureUseCase {
 	return &verifyTypedDataSignatureUseCase{verifySignatureUC: verifySignatureUC}
 }
 

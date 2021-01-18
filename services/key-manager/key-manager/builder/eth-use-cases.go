@@ -6,30 +6,30 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/store"
 )
 
-type useCases struct {
+type ethUseCases struct {
 	signTypedDataUC            usecases.SignTypedDataUseCase
-	verifySignatureUC          usecases.VerifySignatureUseCase
+	verifySignatureUC          usecases.VerifyETHSignatureUseCase
 	verifyTypedDataSignatureUC usecases.VerifyTypedDataSignatureUseCase
 }
 
-func NewUseCases(vaultClient store.Vault) usecases.UseCases {
+func NewETHUseCases(vaultClient store.Vault) usecases.ETHUseCases {
 	verifySignatureUC := ethereum.NewVerifySignatureUseCase()
 
-	return &useCases{
+	return &ethUseCases{
 		signTypedDataUC:            ethereum.NewSignTypedDataUseCase(vaultClient),
 		verifySignatureUC:          verifySignatureUC,
 		verifyTypedDataSignatureUC: ethereum.NewVerifyTypedDataSignatureUseCase(verifySignatureUC),
 	}
 }
 
-func (u *useCases) SignTypedData() usecases.SignTypedDataUseCase {
+func (u *ethUseCases) SignTypedData() usecases.SignTypedDataUseCase {
 	return u.signTypedDataUC
 }
 
-func (u *useCases) VerifySignature() usecases.VerifySignatureUseCase {
+func (u *ethUseCases) VerifySignature() usecases.VerifyETHSignatureUseCase {
 	return u.verifySignatureUC
 }
 
-func (u *useCases) VerifyTypedDataSignature() usecases.VerifyTypedDataSignatureUseCase {
+func (u *ethUseCases) VerifyTypedDataSignature() usecases.VerifyTypedDataSignatureUseCase {
 	return u.verifyTypedDataSignatureUC
 }

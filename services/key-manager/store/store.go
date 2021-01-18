@@ -17,5 +17,12 @@ type Vault interface {
 	ETHListAccounts(namespace string) ([]string, error)
 	ETHListNamespaces() ([]string, error)
 	ETHGetAccount(address string, namespace string) (*entities.ETHAccount, error)
+
+	ZKSCreateAccount(namespace string) (*entities.ZKSAccount, error)
+	ZKSListNamespaces() ([]string, error)
+	ZKSSign(pubKey string, namespace, data string) (string, error)
+	ZKSListAccounts(namespace string) ([]string, error)
+	ZKSGetAccount(pubKey string, namespace string) (*entities.ZKSAccount, error)
+
 	HealthCheck() error
 }

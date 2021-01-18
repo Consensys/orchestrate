@@ -2,22 +2,21 @@ package ethereum
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/crypto"
 	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/crypto/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/key-manager/use-cases"
 )
 
-const verifySignatureComponent = "use-cases.verify-signature"
+const verifySignatureComponent = "use-cases.eth.verify-signature"
 
 // verifySignatureUseCase is a use case to verify the signature of a payload using an existing Ethereum account
 type verifySignatureUseCase struct{}
 
-// NewVerifySignatureUseCase creates a new VerifySignatureUseCase
-func NewVerifySignatureUseCase() usecases.VerifySignatureUseCase {
+// NewVerifySignatureUseCase creates a new VerifyETHSignatureUseCase
+func NewVerifySignatureUseCase() usecases.VerifyETHSignatureUseCase {
 	return &verifySignatureUseCase{}
 }
 
@@ -25,25 +24,15 @@ func NewVerifySignatureUseCase() usecases.VerifySignatureUseCase {
 func (uc *verifySignatureUseCase) Execute(ctx context.Context, address, signature, payload string) error {
 	logger := log.WithContext(ctx).
 		WithField("address", address).
-		WithField("signature", signature)
+		WithField("signature", utils.ShortString(signature, 10))
 	logger.Debug("verifying signature")
 
-	signatureBytes, err := hexutil.Decode(signature)
+	recoveredAddress, err := ethereum.GetSignatureSender(signature, payload)
 	if err != nil {
-		errMessage := "failed to decode signature"
-		logger.WithError(err).Error(errMessage)
-		return errors.InvalidParameterError(fmt.Sprintf("%s: %s", errMessage, err.Error())).ExtendComponent(verifySignatureComponent)
+		logger.WithError(err).Error("failed to signature extract sender")
+		return errors.InvalidParameterError(err.Error()).ExtendComponent(verifySignatureComponent)
 	}
 
-	hash := crypto.Keccak256([]byte(payload))
-	pubKey, err := crypto.SigToPub(hash, signatureBytes)
-	if err != nil {
-		errMessage := "failed to recover public key"
-		logger.WithError(err).Error(errMessage)
-		return errors.InvalidParameterError(fmt.Sprintf("%s: %s", errMessage, err.Error())).ExtendComponent(verifySignatureComponent)
-	}
-
-	recoveredAddress := crypto.PubkeyToAddress(*pubKey)
 	if address != recoveredAddress.Hex() {
 		errMessage := "failed to verify signature: recovered address does not match the expected one or payload is malformed"
 		logger.WithField("recovered_address", recoveredAddress.Hex()).Error(errMessage)

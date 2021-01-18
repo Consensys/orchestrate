@@ -10,6 +10,7 @@ import (
 	healthcheck "github.com/heptiolabs/healthcheck"
 	keymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager"
 	ethereum "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/ethereum"
+	zksnarks "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/zk-snarks"
 	reflect "reflect"
 )
 
@@ -67,7 +68,7 @@ func (mr *MockEthereumAccountClientMockRecorder) ETHImportAccount(ctx, request i
 }
 
 // ETHSign mocks base method
-func (m *MockEthereumAccountClient) ETHSign(ctx context.Context, address string, request *keymanager.PayloadRequest) (string, error) {
+func (m *MockEthereumAccountClient) ETHSign(ctx context.Context, address string, request *keymanager.SignPayloadRequest) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ETHSign", ctx, address, request)
 	ret0, _ := ret[0].(string)
@@ -187,7 +188,7 @@ func (mr *MockEthereumAccountClientMockRecorder) ETHGetAccount(ctx, address, nam
 }
 
 // ETHVerifySignature mocks base method
-func (m *MockEthereumAccountClient) ETHVerifySignature(ctx context.Context, request *keymanager.VerifyPayloadRequest) error {
+func (m *MockEthereumAccountClient) ETHVerifySignature(ctx context.Context, request *ethereum.VerifyPayloadRequest) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ETHVerifySignature", ctx, request)
 	ret0, _ := ret[0].(error)
@@ -212,6 +213,118 @@ func (m *MockEthereumAccountClient) ETHVerifyTypedDataSignature(ctx context.Cont
 func (mr *MockEthereumAccountClientMockRecorder) ETHVerifyTypedDataSignature(ctx, request interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHVerifyTypedDataSignature", reflect.TypeOf((*MockEthereumAccountClient)(nil).ETHVerifyTypedDataSignature), ctx, request)
+}
+
+// MockZKSAccountClient is a mock of ZKSAccountClient interface
+type MockZKSAccountClient struct {
+	ctrl     *gomock.Controller
+	recorder *MockZKSAccountClientMockRecorder
+}
+
+// MockZKSAccountClientMockRecorder is the mock recorder for MockZKSAccountClient
+type MockZKSAccountClientMockRecorder struct {
+	mock *MockZKSAccountClient
+}
+
+// NewMockZKSAccountClient creates a new mock instance
+func NewMockZKSAccountClient(ctrl *gomock.Controller) *MockZKSAccountClient {
+	mock := &MockZKSAccountClient{ctrl: ctrl}
+	mock.recorder = &MockZKSAccountClientMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockZKSAccountClient) EXPECT() *MockZKSAccountClientMockRecorder {
+	return m.recorder
+}
+
+// ZKSCreateAccount mocks base method
+func (m *MockZKSAccountClient) ZKSCreateAccount(ctx context.Context, request *zksnarks.CreateZKSAccountRequest) (*zksnarks.ZKSAccountResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ZKSCreateAccount", ctx, request)
+	ret0, _ := ret[0].(*zksnarks.ZKSAccountResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ZKSCreateAccount indicates an expected call of ZKSCreateAccount
+func (mr *MockZKSAccountClientMockRecorder) ZKSCreateAccount(ctx, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ZKSCreateAccount", reflect.TypeOf((*MockZKSAccountClient)(nil).ZKSCreateAccount), ctx, request)
+}
+
+// ZKSSign mocks base method
+func (m *MockZKSAccountClient) ZKSSign(ctx context.Context, address string, request *keymanager.SignPayloadRequest) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ZKSSign", ctx, address, request)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ZKSSign indicates an expected call of ZKSSign
+func (mr *MockZKSAccountClientMockRecorder) ZKSSign(ctx, address, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ZKSSign", reflect.TypeOf((*MockZKSAccountClient)(nil).ZKSSign), ctx, address, request)
+}
+
+// ZKSListAccounts mocks base method
+func (m *MockZKSAccountClient) ZKSListAccounts(ctx context.Context, namespace string) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ZKSListAccounts", ctx, namespace)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ZKSListAccounts indicates an expected call of ZKSListAccounts
+func (mr *MockZKSAccountClientMockRecorder) ZKSListAccounts(ctx, namespace interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ZKSListAccounts", reflect.TypeOf((*MockZKSAccountClient)(nil).ZKSListAccounts), ctx, namespace)
+}
+
+// ZKSListNamespaces mocks base method
+func (m *MockZKSAccountClient) ZKSListNamespaces(ctx context.Context) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ZKSListNamespaces", ctx)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ZKSListNamespaces indicates an expected call of ZKSListNamespaces
+func (mr *MockZKSAccountClientMockRecorder) ZKSListNamespaces(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ZKSListNamespaces", reflect.TypeOf((*MockZKSAccountClient)(nil).ZKSListNamespaces), ctx)
+}
+
+// ZKSGetAccount mocks base method
+func (m *MockZKSAccountClient) ZKSGetAccount(ctx context.Context, address, namespace string) (*zksnarks.ZKSAccountResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ZKSGetAccount", ctx, address, namespace)
+	ret0, _ := ret[0].(*zksnarks.ZKSAccountResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ZKSGetAccount indicates an expected call of ZKSGetAccount
+func (mr *MockZKSAccountClientMockRecorder) ZKSGetAccount(ctx, address, namespace interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ZKSGetAccount", reflect.TypeOf((*MockZKSAccountClient)(nil).ZKSGetAccount), ctx, address, namespace)
+}
+
+// ZKSVerifySignature mocks base method
+func (m *MockZKSAccountClient) ZKSVerifySignature(ctx context.Context, request *zksnarks.VerifyPayloadRequest) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ZKSVerifySignature", ctx, request)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ZKSVerifySignature indicates an expected call of ZKSVerifySignature
+func (mr *MockZKSAccountClientMockRecorder) ZKSVerifySignature(ctx, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ZKSVerifySignature", reflect.TypeOf((*MockZKSAccountClient)(nil).ZKSVerifySignature), ctx, request)
 }
 
 // MockKeyManagerClient is a mock of KeyManagerClient interface
@@ -282,7 +395,7 @@ func (mr *MockKeyManagerClientMockRecorder) ETHImportAccount(ctx, request interf
 }
 
 // ETHSign mocks base method
-func (m *MockKeyManagerClient) ETHSign(ctx context.Context, address string, request *keymanager.PayloadRequest) (string, error) {
+func (m *MockKeyManagerClient) ETHSign(ctx context.Context, address string, request *keymanager.SignPayloadRequest) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ETHSign", ctx, address, request)
 	ret0, _ := ret[0].(string)
@@ -402,7 +515,7 @@ func (mr *MockKeyManagerClientMockRecorder) ETHGetAccount(ctx, address, namespac
 }
 
 // ETHVerifySignature mocks base method
-func (m *MockKeyManagerClient) ETHVerifySignature(ctx context.Context, request *keymanager.VerifyPayloadRequest) error {
+func (m *MockKeyManagerClient) ETHVerifySignature(ctx context.Context, request *ethereum.VerifyPayloadRequest) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ETHVerifySignature", ctx, request)
 	ret0, _ := ret[0].(error)
@@ -427,4 +540,93 @@ func (m *MockKeyManagerClient) ETHVerifyTypedDataSignature(ctx context.Context, 
 func (mr *MockKeyManagerClientMockRecorder) ETHVerifyTypedDataSignature(ctx, request interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ETHVerifyTypedDataSignature", reflect.TypeOf((*MockKeyManagerClient)(nil).ETHVerifyTypedDataSignature), ctx, request)
+}
+
+// ZKSCreateAccount mocks base method
+func (m *MockKeyManagerClient) ZKSCreateAccount(ctx context.Context, request *zksnarks.CreateZKSAccountRequest) (*zksnarks.ZKSAccountResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ZKSCreateAccount", ctx, request)
+	ret0, _ := ret[0].(*zksnarks.ZKSAccountResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ZKSCreateAccount indicates an expected call of ZKSCreateAccount
+func (mr *MockKeyManagerClientMockRecorder) ZKSCreateAccount(ctx, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ZKSCreateAccount", reflect.TypeOf((*MockKeyManagerClient)(nil).ZKSCreateAccount), ctx, request)
+}
+
+// ZKSSign mocks base method
+func (m *MockKeyManagerClient) ZKSSign(ctx context.Context, address string, request *keymanager.SignPayloadRequest) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ZKSSign", ctx, address, request)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ZKSSign indicates an expected call of ZKSSign
+func (mr *MockKeyManagerClientMockRecorder) ZKSSign(ctx, address, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ZKSSign", reflect.TypeOf((*MockKeyManagerClient)(nil).ZKSSign), ctx, address, request)
+}
+
+// ZKSListAccounts mocks base method
+func (m *MockKeyManagerClient) ZKSListAccounts(ctx context.Context, namespace string) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ZKSListAccounts", ctx, namespace)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ZKSListAccounts indicates an expected call of ZKSListAccounts
+func (mr *MockKeyManagerClientMockRecorder) ZKSListAccounts(ctx, namespace interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ZKSListAccounts", reflect.TypeOf((*MockKeyManagerClient)(nil).ZKSListAccounts), ctx, namespace)
+}
+
+// ZKSListNamespaces mocks base method
+func (m *MockKeyManagerClient) ZKSListNamespaces(ctx context.Context) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ZKSListNamespaces", ctx)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ZKSListNamespaces indicates an expected call of ZKSListNamespaces
+func (mr *MockKeyManagerClientMockRecorder) ZKSListNamespaces(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ZKSListNamespaces", reflect.TypeOf((*MockKeyManagerClient)(nil).ZKSListNamespaces), ctx)
+}
+
+// ZKSGetAccount mocks base method
+func (m *MockKeyManagerClient) ZKSGetAccount(ctx context.Context, address, namespace string) (*zksnarks.ZKSAccountResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ZKSGetAccount", ctx, address, namespace)
+	ret0, _ := ret[0].(*zksnarks.ZKSAccountResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ZKSGetAccount indicates an expected call of ZKSGetAccount
+func (mr *MockKeyManagerClientMockRecorder) ZKSGetAccount(ctx, address, namespace interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ZKSGetAccount", reflect.TypeOf((*MockKeyManagerClient)(nil).ZKSGetAccount), ctx, address, namespace)
+}
+
+// ZKSVerifySignature mocks base method
+func (m *MockKeyManagerClient) ZKSVerifySignature(ctx context.Context, request *zksnarks.VerifyPayloadRequest) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ZKSVerifySignature", ctx, request)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ZKSVerifySignature indicates an expected call of ZKSVerifySignature
+func (mr *MockKeyManagerClientMockRecorder) ZKSVerifySignature(ctx, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ZKSVerifySignature", reflect.TypeOf((*MockKeyManagerClient)(nil).ZKSVerifySignature), ctx, request)
 }

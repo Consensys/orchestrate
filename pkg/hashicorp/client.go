@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"net/http"
 	"os"
 	"path"
 	"strings"
@@ -12,8 +11,6 @@ import (
 	"github.com/hashicorp/vault/api"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/ethereum"
 )
 
 const (
@@ -25,6 +22,9 @@ const (
 	nonceLabel     = "nonce"
 	gasLimitLabel  = "gasLimit"
 	amountLabel    = "amount"
+
+	zksAccountType = "zk-snarks"
+	ethAccountType = "ethereum"
 )
 
 // OrchestrateVaultClient wraps a HashiCorp client and manage the unsealing
@@ -61,196 +61,6 @@ func NewOrchestrateVaultClient(config *Config) (*OrchestrateVaultClient, error) 
 	return orchestrateVaultClient, nil
 }
 
-func (c *OrchestrateVaultClient) ETHCreateAccount(namespace string) (*entities.ETHAccount, error) {
-	c.client.SetNamespace(namespace)
-	res, err := c.client.Logical().Write(path.Join(c.config.MountPoint, "ethereum/accounts"), nil)
-	if err != nil {
-		return nil, parseErrorResponse(err)
-	}
-
-	if res == nil || res.Data == nil {
-		return nil, nil
-	}
-
-	ethAccount := &entities.ETHAccount{}
-	err = parseResponse(res.Data, ethAccount)
-	if err != nil {
-		return nil, err
-	}
-
-	return ethAccount, nil
-}
-
-func (c *OrchestrateVaultClient) ETHImportAccount(namespace, privateKey string) (*entities.ETHAccount, error) {
-	c.client.SetNamespace(namespace)
-	res, err := c.client.Logical().Write(path.Join(c.config.MountPoint, "ethereum/accounts/import"), map[string]interface{}{
-		"privateKey": privateKey,
-	})
-	if err != nil {
-		return nil, parseErrorResponse(err)
-	}
-
-	if res == nil || res.Data == nil {
-		return nil, nil
-	}
-
-	ethAccount := &entities.ETHAccount{}
-	err = parseResponse(res.Data, ethAccount)
-	if err != nil {
-		return nil, err
-	}
-
-	return ethAccount, nil
-}
-
-func (c *OrchestrateVaultClient) ETHSign(address, namespace, data string) (string, error) {
-	c.client.SetNamespace(namespace)
-	res, err := c.client.Logical().Write(path.Join(c.config.MountPoint, "ethereum/accounts", address, "sign"), map[string]interface{}{
-		dataLabel: data,
-	})
-	if err != nil {
-		return "", parseErrorResponse(err)
-	}
-
-	if res == nil || res.Data == nil {
-		return "", nil
-	}
-
-	return res.Data[signatureLabel].(string), nil
-}
-
-func (c *OrchestrateVaultClient) ETHSignTransaction(address string, request *types.SignETHTransactionRequest) (string, error) {
-	c.client.SetNamespace(request.Namespace)
-	res, err := c.client.Logical().Write(path.Join(c.config.MountPoint, "ethereum/accounts", address, "sign-transaction"), map[string]interface{}{
-		dataLabel:     request.Data,
-		chainIDLabel:  request.ChainID,
-		toLabel:       request.To,
-		gasPriceLabel: request.GasPrice,
-		nonceLabel:    request.Nonce,
-		gasLimitLabel: request.GasLimit,
-		amountLabel:   request.Amount,
-	})
-	if err != nil {
-		return "", parseErrorResponse(err)
-	}
-
-	if res == nil || res.Data == nil {
-		return "", nil
-	}
-
-	return res.Data[signatureLabel].(string), nil
-}
-
-func (c *OrchestrateVaultClient) ETHSignQuorumPrivateTransaction(address string, request *types.SignQuorumPrivateTransactionRequest) (string, error) {
-	c.client.SetNamespace(request.Namespace)
-	res, err := c.client.Logical().Write(path.Join(c.config.MountPoint, "ethereum/accounts", address, "sign-quorum-private-transaction"), map[string]interface{}{
-		dataLabel:     request.Data,
-		toLabel:       request.To,
-		gasPriceLabel: request.GasPrice,
-		nonceLabel:    request.Nonce,
-		gasLimitLabel: request.GasLimit,
-		amountLabel:   request.Amount,
-	})
-	if err != nil {
-		return "", parseErrorResponse(err)
-	}
-
-	if res == nil || res.Data == nil {
-		return "", nil
-	}
-
-	return res.Data[signatureLabel].(string), nil
-}
-
-func (c *OrchestrateVaultClient) ETHSignEEATransaction(address string, request *types.SignEEATransactionRequest) (string, error) {
-	c.client.SetNamespace(request.Namespace)
-	res, err := c.client.Logical().Write(path.Join(c.config.MountPoint, "ethereum/accounts", address, "sign-eea-transaction"), map[string]interface{}{
-		dataLabel:        request.Data,
-		toLabel:          request.To,
-		chainIDLabel:     request.ChainID,
-		nonceLabel:       request.Nonce,
-		"privateFrom":    request.PrivateFrom,
-		"privateFor":     request.PrivateFor,
-		"privacyGroupID": request.PrivacyGroupID,
-	})
-	if err != nil {
-		return "", parseErrorResponse(err)
-	}
-
-	if res == nil || res.Data == nil {
-		return "", nil
-	}
-
-	return res.Data[signatureLabel].(string), nil
-}
-
-func (c *OrchestrateVaultClient) ETHListAccounts(namespace string) ([]string, error) {
-	c.client.SetNamespace(namespace)
-	res, err := c.client.Logical().List(path.Join(c.config.MountPoint, "ethereum/accounts"))
-	if err != nil {
-		return []string{}, parseErrorResponse(err)
-	}
-
-	if res == nil || res.Data == nil {
-		return []string{}, nil
-	}
-
-	secrets, ok := res.Data["keys"].([]interface{})
-	if !ok {
-		return []string{}, nil
-	}
-
-	rv := make([]string, len(secrets))
-	for i, elem := range secrets {
-		rv[i] = fmt.Sprintf("%v", elem)
-	}
-
-	return rv, nil
-}
-
-func (c *OrchestrateVaultClient) ETHListNamespaces() ([]string, error) {
-	res, err := c.client.Logical().List(path.Join(c.config.MountPoint, "ethereum/namespaces"))
-	if err != nil {
-		return []string{}, parseErrorResponse(err)
-	}
-
-	if res == nil || res.Data == nil {
-		return []string{}, nil
-	}
-
-	secrets, ok := res.Data["keys"].([]interface{})
-	if !ok {
-		return []string{}, nil
-	}
-
-	rv := make([]string, len(secrets))
-	for i, elem := range secrets {
-		rv[i] = fmt.Sprintf("%v", elem)
-	}
-
-	return rv, nil
-}
-
-func (c *OrchestrateVaultClient) ETHGetAccount(address, namespace string) (*entities.ETHAccount, error) {
-	c.client.SetNamespace(namespace)
-	res, err := c.client.Logical().Read(path.Join(c.config.MountPoint, "ethereum/accounts", address))
-	if err != nil {
-		return nil, parseErrorResponse(err)
-	}
-
-	if res == nil || res.Data == nil {
-		return nil, nil
-	}
-
-	ethAccount := &entities.ETHAccount{}
-	err = parseResponse(res.Data, ethAccount)
-	if err != nil {
-		return nil, err
-	}
-
-	return ethAccount, nil
-}
-
 func (c *OrchestrateVaultClient) HealthCheck() error {
 	resp, err := c.client.Sys().Health()
 	if err != nil {
@@ -266,43 +76,89 @@ func (c *OrchestrateVaultClient) HealthCheck() error {
 	return nil
 }
 
-func parseResponse(data map[string]interface{}, resp interface{}) error {
-	jsonbody, err := json.Marshal(data)
+func (c *OrchestrateVaultClient) listNamespaces(accountType string) ([]string, error) {
+	res, err := c.client.Logical().List(path.Join(c.config.MountPoint, accountType, "/namespaces"))
 	if err != nil {
-		errMessage := "failed to marshal response data"
-		log.WithError(err).Error(errMessage)
-		return errors.EncodingError(errMessage)
+		return []string{}, parseErrorResponse(err)
 	}
 
-	if err := json.Unmarshal(jsonbody, &resp); err != nil {
-		errMessage := "failed to unmarshal response data"
-		log.WithError(err).Error(errMessage)
-		return errors.EncodingError(errMessage)
+	if res == nil || res.Data == nil {
+		return []string{}, nil
+	}
+
+	secrets, ok := res.Data["keys"].([]interface{})
+	if !ok {
+		return []string{}, nil
+	}
+
+	rv := make([]string, len(secrets))
+	for i, elem := range secrets {
+		rv[i] = fmt.Sprintf("%v", elem)
+	}
+
+	return rv, nil
+}
+
+func (c *OrchestrateVaultClient) listAccounts(accountType, namespace string) ([]string, error) {
+	c.client.SetNamespace(namespace)
+	res, err := c.client.Logical().List(path.Join(c.config.MountPoint, accountType, "/accounts"))
+	if err != nil {
+		return []string{}, parseErrorResponse(err)
+	}
+
+	if res == nil || res.Data == nil {
+		return []string{}, nil
+	}
+
+	secrets, ok := res.Data["keys"].([]interface{})
+	if !ok {
+		return []string{}, nil
+	}
+
+	rv := make([]string, len(secrets))
+	for i, elem := range secrets {
+		rv[i] = fmt.Sprintf("%v", elem)
+	}
+
+	return rv, nil
+}
+
+func (c *OrchestrateVaultClient) getAccount(accountType, accID, namespace string, account interface{}) error {
+	c.client.SetNamespace(namespace)
+	res, err := c.client.Logical().Read(path.Join(c.config.MountPoint, accountType, "/accounts", accID))
+	if err != nil {
+		return parseErrorResponse(err)
+	}
+
+	if res == nil || res.Data == nil {
+		return nil
+	}
+
+	err = parseResponse(res.Data, account)
+	if err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func parseErrorResponse(err error) error {
-	httpError, ok := err.(*api.ResponseError)
-	if !ok {
-		errMessage := "failed to parse error response"
-		log.WithError(err).Error(errMessage)
-		return errors.HashicorpVaultConnectionError(errMessage)
+func (c *OrchestrateVaultClient) createAccount(accountType, namespace string, account interface{}) error {
+	c.client.SetNamespace(namespace)
+	res, err := c.client.Logical().Write(path.Join(c.config.MountPoint, accountType, "/accounts"), nil)
+	if err != nil {
+		return parseErrorResponse(err)
 	}
 
-	switch httpError.StatusCode {
-	case http.StatusNotFound:
-		return errors.NotFoundError(httpError.Error())
-	case http.StatusBadRequest:
-		return errors.InvalidFormatError(httpError.Error())
-	case http.StatusUnprocessableEntity:
-		return errors.InvalidParameterError(httpError.Error())
-	case http.StatusConflict:
-		return errors.AlreadyExistsError(httpError.Error())
-	default:
-		return errors.HashicorpVaultConnectionError(httpError.Error())
+	if res == nil || res.Data == nil {
+		return nil
 	}
+
+	err = parseResponse(res.Data, account)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (c *OrchestrateVaultClient) manageToken() error {

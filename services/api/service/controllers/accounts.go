@@ -5,10 +5,10 @@ import (
 	"net/http"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/service/formatters"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client"
 
@@ -248,7 +248,7 @@ func (c *AccountsController) signPayload(rw http.ResponseWriter, request *http.R
 		return
 	}
 
-	signature, err := c.keyManagerClient.ETHSign(request.Context(), address, &keymanager.PayloadRequest{
+	signature, err := c.keyManagerClient.ETHSign(request.Context(), address, &keymanager.SignPayloadRequest{
 		Namespace: multitenancy.TenantIDFromContext(ctx),
 		Data:      payloadRequest.Data,
 	})
@@ -346,7 +346,7 @@ func (c *AccountsController) verifyTypedDataSignature(rw http.ResponseWriter, re
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /ethereum/accounts/verify-signature [post]
 func (c *AccountsController) verifySignature(rw http.ResponseWriter, request *http.Request) {
-	verifyRequest := &keymanager.VerifyPayloadRequest{}
+	verifyRequest := &ethereum.VerifyPayloadRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, verifyRequest)
 	if err != nil {
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)

@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/key-manager/use-cases"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/store"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 
 	"github.com/gorilla/mux"
@@ -23,17 +23,16 @@ const ethAccountPath = "/ethereum/accounts"
 
 type EthereumController struct {
 	vault    store.Vault
-	useCases usecases.UseCases
+	useCases usecases.ETHUseCases
 }
 
-func NewEthereumController(vault store.Vault, useCases usecases.UseCases) *EthereumController {
+func NewEthereumController(vault store.Vault, useCases usecases.ETHUseCases) *EthereumController {
 	return &EthereumController{vault: vault, useCases: useCases}
 }
 
 // Add routes to router
 func (c *EthereumController) Append(router *mux.Router) {
 	router.Methods(http.MethodGet).Path("/ethereum/namespaces").HandlerFunc(c.listNamespaces)
-
 	router.Methods(http.MethodPost).Path(ethAccountPath).HandlerFunc(c.createAccount)
 	router.Methods(http.MethodGet).Path(ethAccountPath).HandlerFunc(c.listAccounts)
 	router.Methods(http.MethodPost).Path(ethAccountPath + "/import").HandlerFunc(c.importAccount)
@@ -78,6 +77,7 @@ func (c *EthereumController) createAccount(rw http.ResponseWriter, request *http
 // @Summary List Ethereum Accounts
 // @Description List stored ethereum account in the Vault
 // @Produce json
+// @Param namespace query string false "namespace where key is stored"
 // @Success 200 {object} []string "List of ethereum public accounts"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /ethereum/accounts [get]
@@ -122,8 +122,12 @@ func (c *EthereumController) listNamespaces(rw http.ResponseWriter, _ *http.Requ
 func (c *EthereumController) getAccount(rw http.ResponseWriter, req *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 
-	address := mux.Vars(req)["address"]
 	namespace := req.URL.Query().Get("namespace")
+	address, err := utils.ParseHexToMixedCaseEthAddress(mux.Vars(req)["publicKey"])
+	if err != nil {
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	ethAcc, err := c.vault.ETHGetAccount(address, namespace)
 	if err != nil {
@@ -178,7 +182,7 @@ func (c *EthereumController) importAccount(rw http.ResponseWriter, request *http
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /ethereum/accounts/{address}/sign [post]
 func (c *EthereumController) signPayload(rw http.ResponseWriter, request *http.Request) {
-	signRequest := &keymanager.PayloadRequest{}
+	signRequest := &keymanager.SignPayloadRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, signRequest)
 	if err != nil {
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
@@ -380,11 +384,11 @@ func (c *EthereumController) verifyTypedDataSignature(rw http.ResponseWriter, re
 // @Param request body ethereum.VerifySignatureRequest true "signature and message to verify"
 // @Success 204
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
-// @Failure 404 {object} httputil.ErrorResponse "Account not found"
+// @Failure 422 {object} httputil.ErrorResponse "Failed to verify"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /ethereum/accounts/verify-signature [post]
 func (c *EthereumController) verifySignature(rw http.ResponseWriter, request *http.Request) {
-	verifyRequest := &keymanager.VerifyPayloadRequest{}
+	verifyRequest := &types.VerifyPayloadRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, verifyRequest)
 	if err != nil {
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)

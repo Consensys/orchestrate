@@ -29,18 +29,18 @@ func NewInternalConfig() *dynamic.Configuration {
 	cfg := dynamic.NewConfig()
 
 	// Router to Key management API
-	cfg.HTTP.Routers["ethereum"] = &dynamic.Router{
+	cfg.HTTP.Routers["key-manager"] = &dynamic.Router{
 		Router: &traefikdynamic.Router{
 			EntryPoints: []string{http.DefaultHTTPAppEntryPoint},
-			Service:     "ethereum",
+			Service:     "key-manager",
 			Priority:    math.MaxInt32,
-			Rule:        "PathPrefix(`/ethereum`)",
+			Rule:        "PathPrefix(`/ethereum`) || PathPrefix(`/zk-snarks`)",
 			Middlewares: []string{"base@logger-base"},
 		},
 	}
 
 	// Ethereum accounts API
-	cfg.HTTP.Services["ethereum"] = &dynamic.Service{
+	cfg.HTTP.Services["key-manager"] = &dynamic.Service{
 		KeyManager: &dynamic.KeyManager{},
 	}
 

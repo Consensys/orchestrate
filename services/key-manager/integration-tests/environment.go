@@ -141,7 +141,7 @@ func (env *IntegrationEnvironment) Start(ctx context.Context) error {
 		return err
 	}
 
-	err = env.client.WaitTillIsReady(ctx, vaultContainerID, 8*time.Second)
+	err = env.client.WaitTillIsReady(ctx, vaultContainerID, 10*time.Second)
 	if err != nil {
 		env.logger.WithError(err).Error("could not start vault")
 		return err
