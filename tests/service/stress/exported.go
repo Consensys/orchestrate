@@ -119,7 +119,7 @@ func initComponents(ctx context.Context) {
 		},
 		// Initialize ConsumerGroup
 		func() {
-			broker.InitConsumerGroup(ctx, "group-cucumber")
+			broker.InitConsumerGroup(ctx, "group-stress")
 		},
 		// Initialize Handlers
 		func() {

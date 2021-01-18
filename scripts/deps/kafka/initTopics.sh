@@ -4,14 +4,13 @@
 set -Eeu
 
 TX_SENDER=tx-sender
-TX_LISTENER=tx-listener
 TX_DECODED=tx-decoded
 TX_RECOVER=tx-recover
 
 echo "Creating topics if not exist..."
 RETRY=10
 PARTITIONS=2
-TOPICS=($TX_SENDER $TX_DECODED $TX_RECOVER $TX_LISTENER)
+TOPICS=($TX_SENDER $TX_DECODED $TX_RECOVER)
 
 for NAME in ${TOPICS[@]}
 do

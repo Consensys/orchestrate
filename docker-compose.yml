@@ -190,7 +190,7 @@ services:
     environment:
       <<: *default-variables
       ARTIFACTS_PATH: "/artifacts"
-      STRESS_CONCURRENCY: "50"
+      STRESS_CONCURRENCY: "25"
       STRESS_ITERATIONS: "500"
       STRESS_TIMEOUT: "10m"
       TEST_GLOBAL_DATA: ${TEST_GLOBAL_DATA-}
