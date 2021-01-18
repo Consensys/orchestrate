@@ -2,8 +2,11 @@ package txsender
 
 import (
 	"context"
+	"fmt"
+	"time"
 
 	"github.com/Shopify/sarama"
+	"github.com/cenkalti/backoff/v4"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/app"
 	pkgsarama "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
@@ -78,7 +81,23 @@ func (d *txSenderDaemon) Run(ctx context.Context) error {
 	listener := service.NewMessageListener(useCases, d.jobClient, d.producer, d.config.RecoverTopic, d.config.SenderTopic,
 		d.config.BckOff)
 
-	return d.consumerGroup.Consume(ctx, []string{d.config.SenderTopic}, listener)
+	// We retry once after consume exits to prevent entire stack to exit after kafka rebalance is triggered
+	return backoff.RetryNotify(
+		func() error {
+			err := d.consumerGroup.Consume(ctx, []string{d.config.SenderTopic}, listener)
+
+			// In this case, kafka rebalance was triggered and we want to retry
+			if err == nil && ctx.Err() == nil {
+				return fmt.Errorf("kafka rebalance was triggered")
+			}
+
+			return backoff.Permanent(err)
+		},
+		backoff.NewConstantBackOff(time.Millisecond*500),
+		func(err error, duration time.Duration) {
+			log.WithContext(ctx).WithError(err).Warnf("listener: consuming session exited, retrying in %s", duration.String())
+		},
+	)
 }
 
 func (d *txSenderDaemon) Close() error {

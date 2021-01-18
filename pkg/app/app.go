@@ -157,8 +157,8 @@ func (app *App) init(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	traefiklog.FromContext(ctx).Info("loaded app configuration %s", string(conf))
-	traefiklog.FromContext(ctx).Info("activated metric modules: %v", app.cfg.Metrics.Modules())
+	traefiklog.FromContext(ctx).Infof("loaded app configuration %s", string(conf))
+	traefiklog.FromContext(ctx).Infof("activated metric modules: %v", app.cfg.Metrics.Modules())
 
 	var tcpreg tcpmetrics.TPCMetrics
 	if app.cfg.HTTP != nil {
@@ -232,9 +232,7 @@ func (app *App) Start(ctx context.Context) error {
 		app.serverWg.Add(1)
 		go func() {
 			for err := range app.http.ListenAndServe(ctx) {
-				if err != nil && err != nethttp.ErrServerClosed {
-					app.errors <- err
-				}
+				app.errors <- err
 			}
 			app.serverWg.Done()
 		}()
@@ -247,9 +245,7 @@ func (app *App) Start(ctx context.Context) error {
 		app.daemonWg.Add(1)
 		go func() {
 			err := app.watcher.Run(cancelableCtx)
-			if err != nil && err != context.Canceled {
-				app.errors <- err
-			}
+			app.errors <- err
 			app.daemonWg.Done()
 		}()
 	}
@@ -258,9 +254,7 @@ func (app *App) Start(ctx context.Context) error {
 	for _, daemon := range app.daemons {
 		go func(daemon Daemon) {
 			err := daemon.Run(cancelableCtx)
-			if err != nil && err != context.Canceled {
-				app.errors <- err
-			}
+			app.errors <- err
 			app.daemonWg.Done()
 		}(daemon)
 	}
@@ -292,9 +286,14 @@ signalLoop:
 				traefiklog.FromContext(ctx).Infof("signal %q intercepted", sig.String())
 			}
 		case err = <-app.Errors():
-			traefiklog.FromContext(ctx).WithError(err).Error("app error")
+			if err != nil && err != context.Canceled && err != nethttp.ErrServerClosed {
+				traefiklog.FromContext(ctx).WithError(err).Error("app exited with errors")
+			} else {
+				traefiklog.FromContext(ctx).WithError(err).Info("app exited gracefully")
+			}
 			break signalLoop
 		case <-ctx.Done():
+			traefiklog.FromContext(ctx).WithError(ctx.Err()).Info("app exited gracefully")
 			break signalLoop
 		}
 	}

@@ -195,11 +195,11 @@ postgres:
 down-postgres:
 	@docker-compose -f scripts/deps/docker-compose.yml rm --force -s -v postgres-unit
 
-up: deps-persistent quorum geth besu deps-kafka hashicorp-vault-import-secrets bootstrap-deps orchestrate ## Start Orchestrate and deps
+up: deps-persistent quorum geth besu deps-kafka hashicorp-vault-import-secrets bootstrap-deps topics orchestrate ## Start Orchestrate and deps
 
 down: down-orchestrate down-quorum down-geth down-besu down-deps  ## Down Orchestrate and deps
 
-up-ci: deps-persistent quorum geth besu deps-kafka bootstrap-deps ci-orchestrate ## Start Orchestrate and deps
+up-ci: deps-persistent quorum geth besu deps-kafka bootstrap-deps topics ci-orchestrate ## Start Orchestrate and deps
 
 up-azure: deps-persistent quorum geth besu bootstrap orchestrate ## Start Blockchain and Orchestrate to be connect to Azure Event Hub
 
