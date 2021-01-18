@@ -1,7 +1,7 @@
 ############################
 # STEP 1 build executable binary
 ############################
-FROM golang:1.15 AS builder
+FROM golang:1.15.6-buster AS builder
 
 RUN useradd appuser && \
     mkdir /app

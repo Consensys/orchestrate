@@ -179,7 +179,7 @@ func MetricsOpt(appMetrics ...metrics.Prometheus) Option {
 	healthzOpt := func(app *App) error {
 		var h healthz.Handler
 		if app.cfg.Metrics.IsActive(metricregistry.HealthzMetricsModule) {
-			h = healthz.NewMetricsHandler(registry, "prometheus")
+			h = healthz.NewMetricsHandler(registry, metrics.Namespace)
 		} else {
 			h = healthz.NewHandler()
 		}

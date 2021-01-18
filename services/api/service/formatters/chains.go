@@ -2,9 +2,9 @@ package formatters
 
 import (
 	"net/http"
+	"strconv"
 	"strings"
 
-	"github.com/consensys/quorum/common/math"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 
@@ -46,8 +46,8 @@ func FormatRegisterChainRequest(request *types.RegisterChainRequest, tenantID st
 	}
 
 	if !fromLatest {
-		startingBlock, ok := math.ParseUint64(request.Listener.FromBlock)
-		if !ok {
+		startingBlock, err := strconv.ParseUint(request.Listener.FromBlock, 10, 64)
+		if err != nil {
 			errMessage := "fromBlock must be an integer value"
 			log.WithField("from_block", request.Listener.FromBlock).Error(errMessage)
 			return nil, errors.InvalidFormatError(errMessage)

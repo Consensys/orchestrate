@@ -75,7 +75,7 @@ func (s *metricsTestSuite) TestHTTP() {
 		mfsb, err := s.client.Prometheus(ctx)
 		assert.NoError(t, err)
 
-		expectedV, err := testutils2.FamilyValue(mfsb, httpmetrics.Namespace, httpmetrics.RequestsTotal, map[string]string{
+		expectedV, err := testutils2.FamilyValue(mfsb, fmt.Sprintf("%s_%s", metrics1.Namespace, httpmetrics.Subsystem), httpmetrics.RequestsTotal, map[string]string{
 			"method": "POST",
 		})
 		if err != nil {
@@ -97,7 +97,7 @@ func (s *metricsTestSuite) TestHTTP() {
 			return
 		}
 
-		testutils2.AssertFamilyValue(t, mfsa, httpmetrics.Namespace, httpmetrics.RequestsTotal, expectedV, "total POST requests", map[string]string{
+		testutils2.AssertFamilyValue(t, mfsa, fmt.Sprintf("%s_%s", metrics1.Namespace, httpmetrics.Subsystem), httpmetrics.RequestsTotal, expectedV, "total POST requests", map[string]string{
 			"method": "POST",
 		})
 	})

@@ -47,7 +47,7 @@ func (loop *renewTokenLoop) Refresh() error {
 		}
 
 		retry++
-		if retry < loop.maxRetries {
+		if retry > loop.maxRetries {
 			errMessage := "reached max number of retries to renew vault token"
 			log.WithField("retries", retry).Error(errMessage)
 			return errors.InternalError(errMessage)

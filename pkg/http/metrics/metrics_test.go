@@ -4,6 +4,7 @@
 package metrics
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"testing"
@@ -14,6 +15,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/dynamic"
+	metrics1 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/metrics"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/metrics/testutils"
 )
 
@@ -54,12 +56,12 @@ func TestHTTPMetrics(t *testing.T) {
 	require.NoError(t, err, "Gathering metrics should not error")
 	require.Len(t, families, 6, "Count of metrics families should be correct")
 
-	testutils.AssertGaugeFamily(t, families[0], Namespace, OpenConnections, []float64{1}, "OpenConns", nil)
-	testutils.AssertHistogramFamily(t, families[1], Namespace, RequestsLatencySeconds, []uint64{1}, "RequestsLatency", nil)
-	testutils.AssertCounterFamily(t, families[2], Namespace, RequestsTLSTotal, []float64{1}, "TLSRequests", nil)
-	testutils.AssertCounterFamily(t, families[3], Namespace, RequestsTotal, []float64{1}, "Requests", nil)
-	testutils.AssertCounterFamily(t, families[4], Namespace, RetriesTotal, []float64{1}, "Retries", nil)
-	testutils.AssertGaugeFamily(t, families[5], Namespace, ServerUp, []float64{1}, "ServerUp", nil)
+	testutils.AssertGaugeFamily(t, families[0], fmt.Sprintf("%s_%s", metrics1.Namespace, Subsystem), OpenConnections, []float64{1}, "OpenConns", nil)
+	testutils.AssertHistogramFamily(t, families[1], fmt.Sprintf("%s_%s", metrics1.Namespace, Subsystem), RequestsLatencySeconds, []uint64{1}, "RequestsLatency", nil)
+	testutils.AssertCounterFamily(t, families[2], fmt.Sprintf("%s_%s", metrics1.Namespace, Subsystem), RequestsTLSTotal, []float64{1}, "TLSRequests", nil)
+	testutils.AssertCounterFamily(t, families[3], fmt.Sprintf("%s_%s", metrics1.Namespace, Subsystem), RequestsTotal, []float64{1}, "Requests", nil)
+	testutils.AssertCounterFamily(t, families[4], fmt.Sprintf("%s_%s", metrics1.Namespace, Subsystem), RetriesTotal, []float64{1}, "Retries", nil)
+	testutils.AssertGaugeFamily(t, families[5], fmt.Sprintf("%s_%s", metrics1.Namespace, Subsystem), ServerUp, []float64{1}, "ServerUp", nil)
 }
 
 func TestReloadConfiguration(t *testing.T) {
