@@ -5,6 +5,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/cmd/api/scripts"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database/postgres"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/postgres/migrations"
 )
@@ -115,8 +116,17 @@ func newMigrateCmd() *cobra.Command {
 			return nil
 		},
 	}
-
 	migrateCmd.AddCommand(setVersionCmd)
+
+	// Register Migrate API DB
+	migrateAPIDBCmd := &cobra.Command{
+		Use:   "copy-db",
+		Short: "Copy Database from version 2.5.x to version 21.1.x",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return scripts.MigrateAPIDB(db)
+		},
+	}
+	migrateCmd.AddCommand(migrateAPIDBCmd)
 
 	return migrateCmd
 }
