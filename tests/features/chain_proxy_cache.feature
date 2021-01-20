@@ -18,7 +18,7 @@ Feature: Chain-Proxy Cache
     Given I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
-    When I send "POST" request to "{{global.api}}/{{besuOne.UUID}}" with json:
+    When I send "POST" request to "{{global.api}}/proxy/chains/{{besuOne.UUID}}" with json:
       """
       {
         "jsonrpc": "2.0",
@@ -37,7 +37,7 @@ Feature: Chain-Proxy Cache
     Given I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
-    When I send "POST" request to "{{global.api}}/{{besuOne.UUID}}" with json:
+    When I send "POST" request to "{{global.api}}/proxy/chains/{{besuOne.UUID}}" with json:
       """
       {
         "jsonrpc": "2.0",
@@ -54,7 +54,7 @@ Feature: Chain-Proxy Cache
       | X-Cache-Control | Content-Type     |
       | ~               | application/json |
     Given I sleep "3s"
-    When I send "POST" request to "{{global.api}}/{{besuOne.UUID}}" with json:
+    When I send "POST" request to "{{global.api}}/proxy/chains/{{besuOne.UUID}}" with json:
       """
       {
         "jsonrpc": "2.0",
@@ -75,7 +75,7 @@ Feature: Chain-Proxy Cache
     Given I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
-    When I send "POST" request to "{{global.api}}/{{besuOne.UUID}}" with json:
+    When I send "POST" request to "{{global.api}}/proxy/chains/{{besuOne.UUID}}" with json:
       """
       {
         "jsonrpc": "2.0",
@@ -91,7 +91,7 @@ Feature: Chain-Proxy Cache
     And Response should have the following headers
       | X-Cache-Control | Content-Type     |
       | -               | application/json |
-    When I send "POST" request to "{{global.api}}/{{besuTwo.UUID}}" with json:
+    When I send "POST" request to "{{global.api}}/proxy/chains/{{besuTwo.UUID}}" with json:
       """
       {
         "jsonrpc": "2.0",
@@ -112,7 +112,7 @@ Feature: Chain-Proxy Cache
     Given I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
-    When I send "POST" request to "{{global.api}}/{{besuOne.UUID}}" with json:
+    When I send "POST" request to "{{global.api}}/proxy/chains/{{besuOne.UUID}}" with json:
       """
       {
         "jsonrpc": "2.0",
@@ -132,7 +132,7 @@ Feature: Chain-Proxy Cache
       | Key             | Value                    |
       | X-Cache-Control | no-cache                 |
       | Authorization   | Bearer {{tenant1.token}} |
-    When I send "POST" request to "{{global.api}}/{{besuOne.UUID}}" with json:
+    When I send "POST" request to "{{global.api}}/proxy/chains/{{besuOne.UUID}}" with json:
       """
       {
         "jsonrpc": "2.0",

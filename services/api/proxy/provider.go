@@ -86,7 +86,7 @@ func NewInternalConfig(dynamicCfg *dynamic.Configuration) *dynamic.Configuration
 	dynamicCfg.HTTP.Middlewares["strip-path"] = &dynamic.Middleware{
 		Middleware: &traefikdynamic.Middleware{
 			StripPrefixRegex: &traefikdynamic.StripPrefixRegex{
-				Regex: []string{`/(?:tessera/)?(?:[a-zA-Z\d-]*)/?`},
+				Regex: []string{`/proxy/chains/(?:tessera/)?(?:[a-zA-Z\d-]*)/?`},
 			},
 		},
 	}
@@ -118,7 +118,7 @@ func appendChainServices(cfg *dynamic.Configuration, chain *entities.Chain, midd
 			EntryPoints: []string{http.DefaultHTTPAppEntryPoint},
 			Priority:    math.MaxInt32,
 			Service:     chainService,
-			Rule:        fmt.Sprintf("Path(`/%s`)", chain.UUID),
+			Rule:        fmt.Sprintf("Path(`/proxy/chains/%s`)", chain.UUID),
 			Middlewares: middlewares,
 		},
 	}
@@ -152,7 +152,7 @@ func appendTesseraPrivateTxServices(cfg *dynamic.Configuration, chain *entities.
 			EntryPoints: []string{http.DefaultHTTPAppEntryPoint},
 			Priority:    math.MaxInt32,
 			Service:     chainService,
-			Rule:        fmt.Sprintf("PathPrefix(`/tessera/%s`)", chain.UUID),
+			Rule:        fmt.Sprintf("PathPrefix(`/proxy/chains/tessera/%s`)", chain.UUID),
 			Middlewares: middlewares,
 		},
 	}

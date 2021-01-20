@@ -526,7 +526,7 @@ func (sc *ScenarioContext) craftAndSignEnvelope(ctx context.Context, e *tx.Envel
 	if !ok {
 		return errors.DataError("Could not find the api endpoint")
 	}
-	endpoint := fmt.Sprintf("%s/%s", chainRegistry.(string), e.GetChainUUID())
+	endpoint := utils4.GetProxyURL(chainRegistry.(string), e.GetChainUUID())
 	if e.GetChainID() == nil && e.GetChainUUID() != "" {
 		chainID, errNetwork := sc.ec.Network(utils2.RetryConnectionError(ctx, true), endpoint)
 		if errNetwork != nil {

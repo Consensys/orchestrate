@@ -555,7 +555,7 @@ Feature: Private transactions
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
     Given I sleep "2s"
-    When I send "POST" request to "{{global.api}}/{{besu.UUID}}" with json:
+    When I send "POST" request to "{{global.api}}/proxy/chains/{{besu.UUID}}" with json:
       """
       {
         "jsonrpc": "2.0",
@@ -617,7 +617,7 @@ Feature: Private transactions
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
     Then I sleep "2s"
-    When I send "POST" request to "{{global.api}}/{{besu.UUID}}" with json:
+    When I send "POST" request to "{{global.api}}/proxy/chains/{{besu.UUID}}" with json:
       """
       {
         "jsonrpc": "2.0",
@@ -678,7 +678,7 @@ Feature: Private transactions
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
     Then I sleep "2s"
-    When I send "POST" request to "{{global.api}}/{{besu.UUID}}" with json:
+    When I send "POST" request to "{{global.api}}/proxy/chains/{{besu.UUID}}" with json:
       """
       {
         "jsonrpc": "2.0",

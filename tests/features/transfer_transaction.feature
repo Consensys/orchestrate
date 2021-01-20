@@ -130,7 +130,7 @@ Feature: Send transfer transaction
     And Response should have the following fields
       | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status |
       | MINED  | CREATED        | STARTED        | PENDING        | MINED          |
-    When I send "POST" request to "{{global.api}}/{{besu.UUID}}" with json:
+    When I send "POST" request to "{{global.api}}/proxy/chains/{{besu.UUID}}" with json:
       """
       {
         "jsonrpc": "2.0",
@@ -146,7 +146,7 @@ Feature: Send transfer transaction
     And Response should have the following fields
       | result     |
       | 0x1dcd6500 |
-    When I send "POST" request to "{{global.api}}/{{geth.UUID}}" with json:
+    When I send "POST" request to "{{global.api}}/proxy/chains/{{geth.UUID}}" with json:
       """
       {
         "jsonrpc": "2.0",

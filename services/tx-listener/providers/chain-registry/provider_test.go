@@ -8,6 +8,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/testutils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	"testing"
 	"time"
 
@@ -61,7 +62,7 @@ func (s *ProviderTestSuite) TestRun() {
 	assert.Len(s.T(), config.Configuration.Chains, 1)
 	assert.Equal(
 		s.T(),
-		"http://test-proxy/"+mockChains[0].UUID,
+		utils.GetProxyURL(s.provider.conf.ProxyURL, mockChains[0].UUID),
 		config.Configuration.Chains[mockChains[0].UUID].URL,
 		"Chain URL should be correct",
 	)

@@ -44,7 +44,7 @@ Feature: Chain-Proxy Authentication
       | Key          | Value              |
       | X-API-Key    | {{global.api-key}} |
       | Content-Type | application/json   |
-    When I send "POST" request to "{{global.api}}/{{chainFoo}}" with json:
+    When I send "POST" request to "{{global.api}}/proxy/chains/{{chainFoo}}" with json:
       """
       {
         "jsonrpc": "2.0",
@@ -57,7 +57,7 @@ Feature: Chain-Proxy Authentication
       }
       """
     Then the response code should be 200
-    When I send "POST" request to "{{global.api}}/{{chainDefault}}" with json:
+    When I send "POST" request to "{{global.api}}/proxy/chains/{{chainDefault}}" with json:
       """
       {
         "jsonrpc": "2.0",
@@ -75,7 +75,7 @@ Feature: Chain-Proxy Authentication
       | Key          | Value            |
       | X-API-Key    | unknown-key      |
       | Content-Type | application/json |
-    When I send "POST" request to "{{global.api}}/{{chainFoo}}" with json:
+    When I send "POST" request to "{{global.api}}/proxy/chains/{{chainFoo}}" with json:
       """
       {
         "jsonrpc": "2.0",
@@ -88,7 +88,7 @@ Feature: Chain-Proxy Authentication
       }
       """
     Then the response code should be 401
-    When I send "POST" request to "{{global.api}}/{{chainDefault}}" with json:
+    When I send "POST" request to "{{global.api}}/proxy/chains/{{chainDefault}}" with json:
       """
       {
         "jsonrpc": "2.0",
@@ -106,7 +106,7 @@ Feature: Chain-Proxy Authentication
       | Key           | Value                |
       | Authorization | Bearer {{foo.token}} |
       | Content-Type  | application/json     |
-    When I send "POST" request to "{{global.api}}/{{chainFoo}}" with json:
+    When I send "POST" request to "{{global.api}}/proxy/chains/{{chainFoo}}" with json:
       """
       {
         "jsonrpc": "2.0",
@@ -119,7 +119,7 @@ Feature: Chain-Proxy Authentication
       }
       """
     Then the response code should be 200
-    When I send "POST" request to "{{global.api}}/{{chainDefault}}" with json:
+    When I send "POST" request to "{{global.api}}/proxy/chains/{{chainDefault}}" with json:
       """
       {
         "jsonrpc": "2.0",
@@ -137,7 +137,7 @@ Feature: Chain-Proxy Authentication
       | Key           | Value                |
       | Authorization | Bearer {{bar.token}} |
       | Content-Type  | application/json     |
-    When I send "POST" request to "{{global.api}}/{{chainFoo}}" with json:
+    When I send "POST" request to "{{global.api}}/proxy/chains/{{chainFoo}}" with json:
       """
       {
         "jsonrpc": "2.0",
@@ -150,7 +150,7 @@ Feature: Chain-Proxy Authentication
       }
       """
     Then the response code should be 404
-    When I send "POST" request to "{{global.api}}/{{chainDefault}}" with json:
+    When I send "POST" request to "{{global.api}}/proxy/chains/{{chainDefault}}" with json:
       """
       {
         "jsonrpc": "2.0",
@@ -168,7 +168,7 @@ Feature: Chain-Proxy Authentication
       | Key           | Value                     |
       | Authorization | Bearer {{wildcard.token}} |
       | Content-Type  | application/json          |
-    When I send "POST" request to "{{global.api}}/{{chainFoo}}" with json:
+    When I send "POST" request to "{{global.api}}/proxy/chains/{{chainFoo}}" with json:
       """
       {
         "jsonrpc": "2.0",
@@ -181,7 +181,7 @@ Feature: Chain-Proxy Authentication
       }
       """
     Then the response code should be 200
-    When I send "POST" request to "{{global.api}}/{{chainDefault}}" with json:
+    When I send "POST" request to "{{global.api}}/proxy/chains/{{chainDefault}}" with json:
       """
       {
         "jsonrpc": "2.0",

@@ -26,7 +26,7 @@ Feature: Faucet funding
       | Key             | Value                      |
       | Authorization   | Bearer {{tenantBar.token}} |
       | X-Cache-Control | no-cache                   |
-    When I send "POST" request to "{{global.api}}/{{besu.UUID}}" with json:
+    When I send "POST" request to "{{global.api}}/proxy/chains/{{besu.UUID}}" with json:
       """
       {
         "jsonrpc": "2.0",
@@ -92,7 +92,7 @@ Feature: Faucet funding
       | Key             | Value                      |
       | Authorization   | Bearer {{tenantBar.token}} |
       | X-Cache-Control | no-cache                   |
-    When I send "POST" request to "{{global.api}}/{{besu.UUID}}" with json:
+    When I send "POST" request to "{{global.api}}/proxy/chains/{{besu.UUID}}" with json:
       """
       {
         "jsonrpc": "2.0",

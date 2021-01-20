@@ -2,8 +2,9 @@ package chainregistry
 
 import (
 	"context"
-	"fmt"
 	"time"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 
 	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
@@ -87,7 +88,7 @@ func (p *Provider) buildConfiguration(ctx context.Context, chains []*api.ChainRe
 			UUID:     chain.UUID,
 			TenantID: chain.TenantID,
 			Name:     chain.Name,
-			URL:      fmt.Sprintf("%v/%v", p.conf.ProxyURL, chain.UUID),
+			URL:      utils.GetProxyURL(p.conf.ProxyURL, chain.UUID),
 			ChainID:  chain.ChainID,
 			Listener: dynamic.Listener{
 				StartingBlock:     chain.ListenerStartingBlock,

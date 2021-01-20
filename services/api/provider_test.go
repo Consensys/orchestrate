@@ -35,7 +35,7 @@ func TestNewInternalConfig(t *testing.T) {
 				"strip-path": {
 					Middleware: &traefikdynamic.Middleware{
 						StripPrefixRegex: &traefikdynamic.StripPrefixRegex{
-							Regex: []string{`/(?:tessera/)?(?:[a-zA-Z\d-]*)/?`},
+							Regex: []string{`/proxy/chains/(?:tessera/)?(?:[a-zA-Z\d-]*)/?`},
 						},
 					},
 				},
@@ -88,7 +88,7 @@ func TestNewChainsProxyConfig(t *testing.T) {
 						EntryPoints: []string{http.DefaultHTTPAppEntryPoint},
 						Priority:    math.MaxInt32,
 						Service:     "chain-0d60a85e-0b90-4482-a14c-108aea2557aa",
-						Rule:        "Path(`/0d60a85e-0b90-4482-a14c-108aea2557aa`)",
+						Rule:        "Path(`/proxy/chains/0d60a85e-0b90-4482-a14c-108aea2557aa`)",
 						Middlewares: []string{
 							"chain-proxy-accesslog@internal",
 							"auth@multitenancy",
@@ -149,7 +149,7 @@ func TestNewChainsProxyConfig(t *testing.T) {
 						EntryPoints: []string{http.DefaultHTTPAppEntryPoint},
 						Priority:    math.MaxInt32,
 						Service:     "chain-0d60a85e-0b90-4482-a14c-108aea2557aa",
-						Rule:        "Path(`/0d60a85e-0b90-4482-a14c-108aea2557aa`)",
+						Rule:        "Path(`/proxy/chains/0d60a85e-0b90-4482-a14c-108aea2557aa`)",
 						Middlewares: []string{
 							"chain-proxy-accesslog@internal",
 							"auth@multitenancy",
@@ -164,7 +164,7 @@ func TestNewChainsProxyConfig(t *testing.T) {
 						EntryPoints: []string{http.DefaultHTTPAppEntryPoint},
 						Priority:    math.MaxInt32,
 						Service:     "chain-39240e9f-ae09-4e95-9fd0-a712035c8ad7",
-						Rule:        "Path(`/39240e9f-ae09-4e95-9fd0-a712035c8ad7`)",
+						Rule:        "Path(`/proxy/chains/39240e9f-ae09-4e95-9fd0-a712035c8ad7`)",
 						Middlewares: []string{
 							"chain-proxy-accesslog@internal",
 							"auth@multitenancy",
@@ -179,7 +179,7 @@ func TestNewChainsProxyConfig(t *testing.T) {
 						EntryPoints: []string{http.DefaultHTTPAppEntryPoint},
 						Priority:    math.MaxInt32,
 						Service:     "tessera-chain-39240e9f-ae09-4e95-9fd0-a712035c8ad7",
-						Rule:        "PathPrefix(`/tessera/39240e9f-ae09-4e95-9fd0-a712035c8ad7`)",
+						Rule:        "PathPrefix(`/proxy/chains/tessera/39240e9f-ae09-4e95-9fd0-a712035c8ad7`)",
 						Middlewares: []string{
 							"chain-proxy-accesslog@internal",
 							"auth@multitenancy",
