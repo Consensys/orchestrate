@@ -4,31 +4,68 @@
 
 ### 🆕 Features
 * Support for enable/disable metric modules
-* Ability set a custom keep alive interval for Postgres clients 
+* Ability set a custom keep alive interval for Postgres clients
 * Add application metrics:
-    * orchestrate_transaction_scheduler_job_latency_seconds: Histogram of job latency between status (second). Except PENDING and MINED (Histogram)
-    * orchestrate_transaction_scheduler_mined_latency_seconds Histogram of latency between PENDING and MINED (Histogram)
-    * orchestrate_transaction_listener_current_block: Last block processed by each listening session (Counter)
-* Integrate Orchestrate HashiCorp plugin
-
-### ⚠ BREAKING CHANGES
-
-* CHAIN_REGISTRY_CACHE_TTL is now PROXY_CACHE_TTL
+    * `orchestrate_transaction_scheduler_job_latency_seconds`: Histogram of job latency between status (second). Except PENDING and MINED (Histogram)
+    * `orchestrate_transaction_scheduler_mined_latency_seconds` Histogram of latency between PENDING and MINED (Histogram)
+    * `orchestrate_transaction_listener_current_block`: Last block processed by each listening session (Counter)
+* Integrate Orchestrate HashiCorp vault engine
+* Support usage of `in-memory` as storage for Nonce Manager
+* Launch of new API service, `orchestate-api`, encapsulating every individual previous API services
+* Enhance `tx-sender` worker with crafting and signing responsibilities
 
 ### 🛠 Bug fixes
-* Incorrect counting of 429 http responses
-* Fixes 404 null return value when no resource found, now returns an empty array
+* Incorrect metrics counting for 429 http responses
+* Return empty array instead of 404 responses when matches when no resources are found on search queries
 
 ### ⚠ BREAKING CHANGES
 
-* Remove account-generator and account-generated topic
+* Remove `account-generator` and `account-generated` topics
+* Worker services `tx-crafter` and `tx-signer` were removed alogn with topics `tx-crafter` and `tx-sender`
 * JAEGER service disabled by default
-* Remove support of `kv-v2` HashiCorp engine. Migration steps:
-    1. Instantiate HashiCorp with both engines: `kv-v2` and `orchestrate`
-    1. Fill up ENV variables: `VAULT_V2_SECRET_PATH`, `VAULT_V2_MOUNT_POINT`, `VAULT_V2_TOKEN_FILE`
-    1. Run command: `orchestrate key-manager migrate import-secrets` 
 * Remove support for environment variable `ABI` to register solidity contract at start
+* Remove support for environment variable `SECRET_PKEY` to import ethereum keys to key vault
 * Remove support for GRPC contract API 
+* Remove API services `contract-registry`, `transaction-scheduler` and `chain-registry`
+* Replace support of `kv-v2` HashiCorp engine by `orchestrate` engine.
+* Environment variable `CHAIN_REGISTRY_CACHE_TTL` renamed to `PROXY_CACHE_TTL`
+* Environment variable `TRANSACTION_SCHEDULER_URL` replaced by `API_URL`
+* Environment variable `CONTRACT_REGISTRY_URL` replaced by `API_URL`
+* Environment variable `CHAIN_REGISTRY_URL` replaced by `API_URL`
+
+### Migrate steps from 2.5.x to 21.01.1
+
+#### HashiCorp keys
+In order to migrate your keys from `kv-v2` engine to `orchestrate` engine you need to follow the next steps:
+
+1. Instantiate HashiCorp with both engines enabled: `kv-v2` and `orchestrate`
+1. Initialize the following environment variables: 
+    - `VAULT_ADDR`: HashiCorp host URL 
+    - `VAULT_TOKEN_FILE`:  Disk path to token file valid for orchestrate engine
+    - `VAULT_MOUNT_POINT`: Mounting point of orchestrate engine
+    - `VAULT_V2_SECRET_PATH`: Path where keys are stored in kv-v2 engine 
+    - `VAULT_V2_MOUNT_POINT`: Mounting point of kv-v2 engine
+    - `VAULT_V2_TOKEN_FILE`:  Disk path to token file valid for kv-v2 engine
+1. Execute command: 
+```
+$> orchestrate key-manager migrate import-secrets
+```
+
+#### Orchestrate Service Data
+In previous versions of orchestrate each of the API service data was stored in a independent postgres DB. 
+Therefore to update to `v21.01.01` you need to import each of service's data by following the next steps for
+each of the service DBs you intend to migrate:
+
+1. Initialize the following:
+    - `DB_MIGRATION_SERVICE`: Source DB service name. Values are: "chain-registry", "transaction-scheduler" and "contract-registry"
+    - `DB_MIGRATION_ADDRESS`: Source DB URL
+    - `DB_MIGRATION_DATABASE`: Source DB name
+    - `DB_MIGRATION_USERNAME`: Source DB username
+    - `DB_MIGRATION_PASSWORD`: Source DB password
+1. Execute command:
+```
+$> orchestrate api migrate copy-db
+```
 
 ## v2.5.5 (2021-01-04)
 
