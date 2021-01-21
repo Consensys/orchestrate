@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"os"
 	"strings"
 	"time"
 
@@ -28,6 +29,16 @@ type Client struct {
 	containers  map[string]dockercontainer.ContainerCreateCreatedBody
 	networks    map[string]string
 }
+
+type dockerAuth struct {
+	Auths map[string]dockerAuthItem `json:"auths"`
+}
+
+type dockerAuthItem struct {
+	Auth string `json:"auth"`
+}
+
+var dockerRegistries = []string{"https://index.docker.io/v2/", "index.docker.io/v2/", "https://index.docker.io/v1/", "index.docker.io/v1/"}
 
 func NewClient(composition *config.Composition) (*Client, error) {
 	cli, err := client.NewClientWithOpts(
@@ -230,8 +241,21 @@ func (c *Client) getContainer(name string) (dockercontainer.ContainerCreateCreat
 func (c *Client) pullImage(ctx context.Context, imageName string) error {
 	logger := log.FromContext(ctx).WithField("image_name", imageName)
 
+	cfg := types.ImagePullOptions{}
+	dockerAthCfg := &dockerAuth{}
+	if err := json.Unmarshal([]byte(os.Getenv("DOCKER_AUTH_CONFIG")), dockerAthCfg); err == nil {
+		for _, reg := range dockerRegistries {
+			if crdt, ok := dockerAthCfg.Auths[reg]; ok {
+				cfg.RegistryAuth = crdt.Auth
+				logger.WithField("auth", crdt.Auth).WithField("reg", reg).Info("docker registry credential")
+				break
+			}
+		}
+	}
+
 	// Pull image
-	events, err := c.cli.ImagePull(ctx, imageName, types.ImagePullOptions{})
+	events, err := c.cli.ImagePull(ctx, imageName, cfg)
+
 	if err != nil {
 		return err
 	}
