@@ -128,5 +128,5 @@ func importFromFile(apiDB *pg.DB, tableName string) error {
 }
 
 func getFileName(tableName string) string {
-	return os.TempDir() + "dump-" + tableName + ".csv"
+	return os.TempDir() + "/dump-" + tableName + ".csv"
 }
