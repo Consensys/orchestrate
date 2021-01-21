@@ -2,20 +2,24 @@ package redis
 
 import (
 	"github.com/gomodule/redigo/redis"
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 )
+
+const cannotCloseConnErr = "could not close connection"
 
 // NonceManager manages nonce using an underlying redis cache
 type Client struct {
-	pool *redis.Pool
-	conf *Config
+	pool   *redis.Pool
+	conf   *Config
+	logger *log.Logger
 }
 
 func NewClient(pool *redis.Pool, conf *Config) *Client {
 	return &Client{
-		pool: pool,
-		conf: conf,
+		pool:   pool,
+		conf:   conf,
+		logger: log.NewLogger().SetComponent(component).WithField("host", conf.URL()),
 	}
 }
 
@@ -24,13 +28,13 @@ func (nm *Client) Load(key string) (value interface{}, ok bool, err error) {
 	defer func() {
 		closeErr := conn.Close()
 		if closeErr != nil {
-			log.WithError(closeErr).Warn("could not close redis connection")
+			nm.logger.WithError(closeErr).Error(cannotCloseConnErr)
 		}
 	}()
 
 	reply, err := conn.Do("GET", key)
 	if err != nil {
-		return reply, false, errors.FromError(err).SetComponent(component)
+		return reply, false, errors.RedisConnectionError("failed to set value").AppendReason(err.Error())
 	}
 
 	if reply == nil {
@@ -50,7 +54,7 @@ func (nm *Client) LoadUint64(key string) (value uint64, ok bool, err error) {
 	// Format reply to Uint64
 	value, err = redis.Uint64(reply, nil)
 	if err != nil {
-		return 0, false, FromRedisError(err).SetComponent(component)
+		return 0, false, parseRedisError(err, "failed to load UInt64 value")
 	}
 
 	return value, true, nil
@@ -66,7 +70,7 @@ func (nm *Client) LoadBool(key string) (value, ok bool, err error) {
 	// Format reply to Uint64
 	value, err = redis.Bool(reply, nil)
 	if err != nil {
-		return false, false, FromRedisError(err).SetComponent(component)
+		return false, false, parseRedisError(err, "failed to load Boolean value")
 	}
 
 	return value, true, nil
@@ -77,7 +81,7 @@ func (nm *Client) Set(key string, value interface{}) error {
 	defer func() {
 		closeErr := conn.Close()
 		if closeErr != nil {
-			log.WithError(closeErr).Warn("could not close redis connection")
+			nm.logger.WithError(closeErr).Error(cannotCloseConnErr)
 		}
 	}()
 
@@ -95,14 +99,14 @@ func (nm *Client) Delete(key string) error {
 	defer func() {
 		closeErr := conn.Close()
 		if closeErr != nil {
-			log.WithError(closeErr).Warn("could not close redis connection")
+			nm.logger.WithError(closeErr).Warn("could not close connection")
 		}
 	}()
 
 	// Delete value
 	_, err := conn.Do("DEL", key)
 	if err != nil {
-		return errors.FromError(err).SetComponent(component)
+		return parseRedisError(err, "failed to delete key")
 	}
 
 	return nil
@@ -113,13 +117,13 @@ func (nm *Client) Incr(key string) error {
 	defer func() {
 		closeErr := conn.Close()
 		if closeErr != nil {
-			log.WithError(closeErr).Warn("could not close redis connection")
+			nm.logger.WithError(closeErr).Warn("could not close redis connection")
 		}
 	}()
 
 	_, err := conn.Do("INCR", key)
 	if err != nil {
-		return errors.FromError(err).SetComponent(component)
+		return parseRedisError(err, "failed to increment value")
 	}
 
 	return nil
@@ -131,13 +135,13 @@ func (nm *Client) Ping() error {
 	defer func() {
 		closeErr := conn.Close()
 		if closeErr != nil {
-			log.WithError(closeErr).Warn("could not close redis connection")
+			nm.logger.WithError(closeErr).Warn("could not close redis connection")
 		}
 	}()
 
 	_, err := conn.Do("PING")
 	if err != nil {
-		return errors.FromError(err).SetComponent(component)
+		return parseRedisError(err, "failed to ping")
 	}
 
 	return nil

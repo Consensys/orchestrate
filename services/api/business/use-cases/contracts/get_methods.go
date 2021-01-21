@@ -3,8 +3,8 @@ package contracts
 import (
 	"context"
 
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
 )
@@ -12,20 +12,22 @@ import (
 const getMethodsComponent = "use-cases.get-methods"
 
 type getMethodsUseCase struct {
-	agent store.MethodAgent
+	agent  store.MethodAgent
+	logger *log.Logger
 }
 
 func NewGetMethodsUseCase(agent store.MethodAgent) usecases.GetContractMethodsUseCase {
 	return &getMethodsUseCase{
-		agent: agent,
+		agent:  agent,
+		logger: log.NewLogger().SetComponent(getMethodsComponent),
 	}
 }
 
-func (usecase *getMethodsUseCase) Execute(ctx context.Context, chainID, address string, selector []byte) (abi string, methodsABI []string, err error) {
-	logger := log.WithContext(ctx).WithField("chainID", chainID).WithField("address", address)
-	logger.Debug("get methods starting...")
+func (uc *getMethodsUseCase) Execute(ctx context.Context, chainID, address string, selector []byte) (abi string, methodsABI []string, err error) {
+	ctx = log.WithFields(ctx, log.Field("chain_id", chainID), log.Field("address", address))
+	logger := uc.logger.WithContext(ctx)
 
-	method, err := usecase.agent.FindOneByAccountAndSelector(ctx, chainID, address, selector)
+	method, err := uc.agent.FindOneByAccountAndSelector(ctx, chainID, address, selector)
 	if errors.IsConnectionError(err) {
 		return "", nil, errors.FromError(err).ExtendComponent(getMethodsComponent)
 	}
@@ -33,7 +35,7 @@ func (usecase *getMethodsUseCase) Execute(ctx context.Context, chainID, address 
 		return method.ABI, nil, nil
 	}
 
-	defaultMethods, err := usecase.agent.FindDefaultBySelector(ctx, selector)
+	defaultMethods, err := uc.agent.FindDefaultBySelector(ctx, selector)
 	if err != nil {
 		return "", nil, errors.FromError(err).ExtendComponent(getMethodsComponent)
 	}

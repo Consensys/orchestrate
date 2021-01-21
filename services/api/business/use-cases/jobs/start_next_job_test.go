@@ -50,14 +50,14 @@ func TestStartNextJob_Execute(t *testing.T) {
 		jobModel.Type = utils.OrionEEATransaction
 		nextJobModel.Type = utils.OrionMarkingTransaction
 
-		mockJobDA.EXPECT().FindOneByUUID(ctx, jobModel.UUID, tenants).
+		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), jobModel.UUID, tenants).
 			Return(jobModel, nil)
-		mockJobDA.EXPECT().FindOneByUUID(ctx, nextJobModel.UUID, tenants).
+		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), nextJobModel.UUID, tenants).
 			Return(nextJobModel, nil)
 		nextJobModel.Transaction.Data = txHash.String()
-		mockTxDA.EXPECT().Update(ctx, nextJobModel.Transaction).Return(nil)
+		mockTxDA.EXPECT().Update(gomock.Any(), nextJobModel.Transaction).Return(nil)
 
-		mockStartJobUC.EXPECT().Execute(ctx, nextJobModel.UUID, tenants)
+		mockStartJobUC.EXPECT().Execute(gomock.Any(), nextJobModel.UUID, tenants)
 		err := usecase.Execute(ctx, jobModel.UUID, tenants)
 
 		assert.NoError(t, err)
@@ -79,15 +79,15 @@ func TestStartNextJob_Execute(t *testing.T) {
 		jobModel.Type = utils.TesseraPrivateTransaction
 		nextJobModel.Type = utils.TesseraMarkingTransaction
 
-		mockJobDA.EXPECT().FindOneByUUID(ctx, jobModel.UUID, tenants).
+		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), jobModel.UUID, tenants).
 			Return(jobModel, nil)
-		mockJobDA.EXPECT().FindOneByUUID(ctx, nextJobModel.UUID, tenants).
+		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), nextJobModel.UUID, tenants).
 			Return(nextJobModel, nil)
 		nextJobModel.Transaction.Data = enclaveKey
 		nextJobModel.Transaction.Gas = "0x1"
-		mockTxDA.EXPECT().Update(ctx, nextJobModel.Transaction).Return(nil)
+		mockTxDA.EXPECT().Update(gomock.Any(), nextJobModel.Transaction).Return(nil)
 
-		mockStartJobUC.EXPECT().Execute(ctx, nextJobModel.UUID, tenants)
+		mockStartJobUC.EXPECT().Execute(gomock.Any(), nextJobModel.UUID, tenants)
 		err := usecase.Execute(ctx, jobModel.UUID, tenants)
 
 		assert.NoError(t, err)

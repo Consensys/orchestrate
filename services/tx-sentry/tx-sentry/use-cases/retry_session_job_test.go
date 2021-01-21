@@ -29,7 +29,7 @@ func TestCreateChildJob_Execute(t *testing.T) {
 		parentJob := testutils.FakeJob()
 		parentJobResponse := testutils.FakeJobResponse()
 
-		mockClient.EXPECT().GetJob(ctx, parentJob.UUID).Return(parentJobResponse, nil)
+		mockClient.EXPECT().GetJob(gomock.Any(), parentJob.UUID).Return(parentJobResponse, nil)
 		childJobUUID, err := usecase.Execute(ctx, parentJob.UUID, parentJob.UUID, 0)
 		assert.NoError(t, err)
 		assert.Empty(t, childJobUUID)
@@ -44,9 +44,9 @@ func TestCreateChildJob_Execute(t *testing.T) {
 		parentJobResponse.Annotations.GasPricePolicy.RetryPolicy.Increment = 0.1
 		parentJobResponse.Annotations.GasPricePolicy.RetryPolicy.Limit = 0.2
 
-		mockClient.EXPECT().GetJob(ctx, parentJob.UUID).Return(parentJobResponse, nil)
-		mockClient.EXPECT().CreateJob(ctx, gomock.Any()).Return(childJobResponse, nil)
-		mockClient.EXPECT().StartJob(ctx, childJobResponse.UUID).Return(nil)
+		mockClient.EXPECT().GetJob(gomock.Any(), parentJob.UUID).Return(parentJobResponse, nil)
+		mockClient.EXPECT().CreateJob(gomock.Any(), gomock.Any()).Return(childJobResponse, nil)
+		mockClient.EXPECT().StartJob(gomock.Any(), childJobResponse.UUID).Return(nil)
 
 		childJobUUID, err := usecase.Execute(ctx, parentJob.UUID, parentJob.UUID, 0)
 		assert.NoError(t, err)
@@ -59,8 +59,8 @@ func TestCreateChildJob_Execute(t *testing.T) {
 		parentJobResponse.Status = utils.StatusPending
 		parentJobResponse.Transaction.GasPrice = initialGasPrice
 
-		mockClient.EXPECT().GetJob(ctx, parentJob.UUID).Return(parentJobResponse, nil)
-		mockClient.EXPECT().ResendJobTx(ctx, parentJob.UUID).Return(nil)
+		mockClient.EXPECT().GetJob(gomock.Any(), parentJob.UUID).Return(parentJobResponse, nil)
+		mockClient.EXPECT().ResendJobTx(gomock.Any(), parentJob.UUID).Return(nil)
 
 		childJobUUID, err := usecase.Execute(ctx, parentJob.UUID, parentJob.UUID, 0)
 		assert.NoError(t, err)
@@ -76,8 +76,8 @@ func TestCreateChildJob_Execute(t *testing.T) {
 		parentJobResponse.Annotations.GasPricePolicy.RetryPolicy.Limit = 0.2
 		parentJobResponse.Transaction.GasPrice = initialGasPrice
 
-		mockClient.EXPECT().GetJob(ctx, parentJob.UUID).Return(parentJobResponse, nil)
-		mockClient.EXPECT().ResendJobTx(ctx, childJob.UUID).Return(nil)
+		mockClient.EXPECT().GetJob(gomock.Any(), parentJob.UUID).Return(parentJobResponse, nil)
+		mockClient.EXPECT().ResendJobTx(gomock.Any(), childJob.UUID).Return(nil)
 
 		childJobUUID, err := usecase.Execute(ctx, parentJob.UUID, childJob.UUID, 3)
 		assert.NoError(t, err)
@@ -93,8 +93,8 @@ func TestCreateChildJob_Execute(t *testing.T) {
 		parentJobResponse.Annotations.GasPricePolicy.RetryPolicy.Increment = 0.1
 		parentJobResponse.Annotations.GasPricePolicy.RetryPolicy.Limit = 0.2
 
-		mockClient.EXPECT().GetJob(ctx, parentJob.UUID).Return(parentJobResponse, nil)
-		mockClient.EXPECT().ResendJobTx(ctx, parentJob.UUID).Return(nil)
+		mockClient.EXPECT().GetJob(gomock.Any(), parentJob.UUID).Return(parentJobResponse, nil)
+		mockClient.EXPECT().ResendJobTx(gomock.Any(), parentJob.UUID).Return(nil)
 
 		childJobUUID, err := usecase.Execute(ctx, parentJob.UUID, parentJob.UUID, 0)
 		assert.NoError(t, err)
@@ -113,14 +113,14 @@ func TestCreateChildJob_Execute(t *testing.T) {
 		parentJobResponse.Annotations.GasPricePolicy.RetryPolicy.Increment = 0.06
 		parentJobResponse.Annotations.GasPricePolicy.RetryPolicy.Limit = 0.12
 
-		mockClient.EXPECT().GetJob(ctx, parentJob.UUID).Return(parentJobResponse, nil)
-		mockClient.EXPECT().CreateJob(ctx, gomock.Any()).
+		mockClient.EXPECT().GetJob(gomock.Any(), parentJob.UUID).Return(parentJobResponse, nil)
+		mockClient.EXPECT().CreateJob(gomock.Any(), gomock.Any()).
 			DoAndReturn(func(timeoutCtx context.Context, req *types.CreateJobRequest) (*types.JobResponse, error) {
 				assert.Equal(t, "1120000000", req.Transaction.GasPrice)
 				assert.Equal(t, parentJobResponse.Transaction.Nonce, req.Transaction.Nonce)
 				return childJobResponse, nil
 			})
-		mockClient.EXPECT().StartJob(ctx, childJobResponse.UUID).Return(nil)
+		mockClient.EXPECT().StartJob(gomock.Any(), childJobResponse.UUID).Return(nil)
 
 		childJobUUID, err := usecase.Execute(ctx, parentJob.UUID, childJob.UUID, 1)
 		assert.NoError(t, err)
@@ -139,14 +139,14 @@ func TestCreateChildJob_Execute(t *testing.T) {
 		parentJobResponse.Annotations.GasPricePolicy.RetryPolicy.Increment = 0.06
 		parentJobResponse.Annotations.GasPricePolicy.RetryPolicy.Limit = 0.05
 
-		mockClient.EXPECT().GetJob(ctx, parentJob.UUID).Return(parentJobResponse, nil)
-		mockClient.EXPECT().CreateJob(ctx, gomock.Any()).
+		mockClient.EXPECT().GetJob(gomock.Any(), parentJob.UUID).Return(parentJobResponse, nil)
+		mockClient.EXPECT().CreateJob(gomock.Any(), gomock.Any()).
 			DoAndReturn(func(timeoutCtx context.Context, req *types.CreateJobRequest) (*types.JobResponse, error) {
 				assert.Equal(t, "1050000000", req.Transaction.GasPrice)
 				assert.Equal(t, parentJobResponse.Transaction.Nonce, req.Transaction.Nonce)
 				return childJobResponse, nil
 			})
-		mockClient.EXPECT().StartJob(ctx, childJobResponse.UUID).Return(nil)
+		mockClient.EXPECT().StartJob(gomock.Any(), childJobResponse.UUID).Return(nil)
 
 		childJobUUID, err := usecase.Execute(ctx, parentJob.UUID, childJob.UUID, 1)
 		assert.NoError(t, err)

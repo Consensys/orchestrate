@@ -5,9 +5,9 @@ import (
 	"math/big"
 	"reflect"
 
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases/faucets/controls"
@@ -25,6 +25,7 @@ type faucetCandidate struct {
 	chainStateReader ethclient.ChainStateReader
 	searchFaucets    usecases.SearchFaucetsUseCase
 	controls         []FaucetControl
+	logger           *log.Logger
 }
 
 // NewGetFaucetCandidateUseCase creates a new GetFaucetCandidateUseCase
@@ -40,15 +41,13 @@ func NewGetFaucetCandidateUseCase(
 		chainStateReader: chainStateReader,
 		searchFaucets:    searchFaucets,
 		controls:         []FaucetControl{creditorCtrl, cooldownCtrl, maxBalanceCtrl},
+		logger:           log.NewLogger().SetComponent(getFaucetCandidateComponent),
 	}
 }
 
 func (uc *faucetCandidate) Execute(ctx context.Context, account string, chain *entities.Chain, tenants []string) (*entities.Faucet, error) {
-	logger := log.WithContext(ctx).
-		WithField("chain_uuid", chain.UUID).
-		WithField("account", account).
-		WithField("tenants", tenants)
-	logger.Debug("getting faucet candidate")
+	ctx = log.With(log.WithFields(ctx, log.Field("chain", chain.UUID), log.Field("account", account)), uc.logger)
+	logger := uc.logger.WithContext(ctx)
 
 	faucets, err := uc.searchFaucets.Execute(ctx, &entities.FaucetFilters{ChainRule: chain.UUID}, tenants)
 	if err != nil {

@@ -80,7 +80,7 @@ func Test_AfterNewBlock(t *testing.T) {
 		}, nil)
 		client.EXPECT().UpdateJob(gomock.Any(), gomock.Any(), &txschedulertypes.UpdateJobRequest{
 			Status:  utils.StatusMined,
-			Message: fmt.Sprintf("Transaction mined in block %v", block.NumberU64()),
+			Message: fmt.Sprintf("transaction mined in block %v", block.NumberU64()),
 		}).Return(&txschedulertypes.JobResponse{}, nil)
 		producer.ExpectSendMessageAndSucceed()
 
@@ -110,7 +110,7 @@ func Test_AfterNewBlock(t *testing.T) {
 		}, nil)
 		client.EXPECT().UpdateJob(gomock.Any(), gomock.Any(), &txschedulertypes.UpdateJobRequest{
 			Status:  utils.StatusMined,
-			Message: fmt.Sprintf("Transaction mined in block %v", block.NumberU64()),
+			Message: fmt.Sprintf("transaction mined in block %v", block.NumberU64()),
 		}).Return(&txschedulertypes.JobResponse{}, nil)
 		producer.ExpectSendMessageAndSucceed()
 
@@ -128,7 +128,7 @@ func Test_AfterNewBlock(t *testing.T) {
 		}, nil)
 		client.EXPECT().UpdateJob(gomock.Any(), gomock.Any(), &txschedulertypes.UpdateJobRequest{
 			Status:  utils.StatusMined,
-			Message: fmt.Sprintf("Transaction mined in block %v", block.NumberU64()),
+			Message: fmt.Sprintf("transaction mined in block %v", block.NumberU64()),
 		}).Return(&txschedulertypes.JobResponse{}, nil)
 		producer.ExpectSendMessageAndSucceed()
 
@@ -144,7 +144,7 @@ func Test_AfterNewBlock(t *testing.T) {
 		client.EXPECT().GetContractEvents(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error GetEventsBySigHash"))
 		client.EXPECT().UpdateJob(gomock.Any(), gomock.Any(), &txschedulertypes.UpdateJobRequest{
 			Status:  utils.StatusMined,
-			Message: fmt.Sprintf("Transaction mined in block %v", block.NumberU64()),
+			Message: fmt.Sprintf("transaction mined in block %v", block.NumberU64()),
 		}).Return(&txschedulertypes.JobResponse{}, nil)
 		producer.ExpectSendMessageAndSucceed()
 
@@ -162,7 +162,7 @@ func Test_AfterNewBlock(t *testing.T) {
 		}, nil)
 		client.EXPECT().UpdateJob(gomock.Any(), gomock.Any(), &txschedulertypes.UpdateJobRequest{
 			Status:  utils.StatusMined,
-			Message: fmt.Sprintf("Transaction mined in block %v", block.NumberU64()),
+			Message: fmt.Sprintf("transaction mined in block %v", block.NumberU64()),
 		}).Return(nil, fmt.Errorf("error"))
 		producer.ExpectSendMessageAndSucceed()
 
@@ -182,7 +182,7 @@ func Test_AfterNewBlock(t *testing.T) {
 		}, nil)
 		client.EXPECT().UpdateJob(gomock.Any(), gomock.Any(), &txschedulertypes.UpdateJobRequest{
 			Status:  utils.StatusMined,
-			Message: fmt.Sprintf("Transaction mined in block %v", block.NumberU64()),
+			Message: fmt.Sprintf("transaction mined in block %v", block.NumberU64()),
 		}).Return(&txschedulertypes.JobResponse{}, nil)
 		producer.ExpectSendMessageAndFail(expectedErr)
 

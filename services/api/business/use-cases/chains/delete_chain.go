@@ -6,8 +6,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/parsers"
 
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
 )
@@ -18,6 +18,7 @@ const deleteChainComponent = "use-cases.delete-chain"
 type deleteChainUseCase struct {
 	db         store.DB
 	getChainUC usecases.GetChainUseCase
+	logger     *log.Logger
 }
 
 // NewDeleteChainUseCase creates a new DeleteChainUseCase
@@ -25,12 +26,14 @@ func NewDeleteChainUseCase(db store.DB, getChainUC usecases.GetChainUseCase) use
 	return &deleteChainUseCase{
 		db:         db,
 		getChainUC: getChainUC,
+		logger:     log.NewLogger().SetComponent(deleteChainComponent),
 	}
 }
 
 // Execute deletes a chain
 func (uc *deleteChainUseCase) Execute(ctx context.Context, uuid string, tenants []string) error {
-	logger := log.WithContext(ctx).WithField("chain_uuid", uuid).WithField("tenants", tenants)
+	ctx = log.WithFields(ctx, log.Field("chain", uuid))
+	logger := uc.logger.WithContext(ctx)
 	logger.Debug("deleting chain")
 
 	chain, err := uc.getChainUC.Execute(ctx, uuid, tenants)
@@ -54,6 +57,7 @@ func (uc *deleteChainUseCase) Execute(ctx context.Context, uuid string, tenants 
 
 		return nil
 	})
+
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(updateChainComponent)
 	}

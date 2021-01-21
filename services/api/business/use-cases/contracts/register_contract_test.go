@@ -38,11 +38,11 @@ func TestRegisterContract_Execute(t *testing.T) {
 	//@TODO Add more advance test flows
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		contract := testutils.FakeContract()
-		repositoryAgent.EXPECT().SelectOrInsert(ctx, gomock.AssignableToTypeOf(&models.RepositoryModel{})).Return(nil)
-		artifactAgent.EXPECT().SelectOrInsert(ctx, gomock.AssignableToTypeOf(&models.ArtifactModel{})).Return(nil)
-		tagAgent.EXPECT().Insert(ctx, gomock.AssignableToTypeOf(&models.TagModel{}))
-		methodAgent.EXPECT().InsertMultiple(ctx, gomock.AssignableToTypeOf([]*models.MethodModel{}))
-		eventAgent.EXPECT().InsertMultiple(ctx, gomock.AssignableToTypeOf([]*models.EventModel{}))
+		repositoryAgent.EXPECT().SelectOrInsert(gomock.Any(), gomock.AssignableToTypeOf(&models.RepositoryModel{})).Return(nil)
+		artifactAgent.EXPECT().SelectOrInsert(gomock.Any(), gomock.AssignableToTypeOf(&models.ArtifactModel{})).Return(nil)
+		tagAgent.EXPECT().Insert(gomock.Any(), gomock.AssignableToTypeOf(&models.TagModel{}))
+		methodAgent.EXPECT().InsertMultiple(gomock.Any(), gomock.AssignableToTypeOf([]*models.MethodModel{}))
+		eventAgent.EXPECT().InsertMultiple(gomock.Any(), gomock.AssignableToTypeOf([]*models.EventModel{}))
 		mockDBTX.EXPECT().Commit().Return(nil)
 		mockDBTX.EXPECT().Close().Return(nil)
 		err := usecase.Execute(ctx, contract)

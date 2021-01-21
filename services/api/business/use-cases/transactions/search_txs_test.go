@@ -39,9 +39,9 @@ func TestSearchTxs_Execute(t *testing.T) {
 		txRequest0 := testutils3.FakeTxRequest()
 		txRequest1 := testutils3.FakeTxRequest()
 
-		mockTransactionRequestDA.EXPECT().Search(ctx, filter, []string{tenantID}).Return(txRequestModels, nil)
-		mockGetTxUC.EXPECT().Execute(ctx, txRequestModels[0].Schedule.UUID, []string{tenantID}).Return(txRequest0, nil)
-		mockGetTxUC.EXPECT().Execute(ctx, txRequestModels[1].Schedule.UUID, []string{tenantID}).Return(txRequest1, nil)
+		mockTransactionRequestDA.EXPECT().Search(gomock.Any(), filter, []string{tenantID}).Return(txRequestModels, nil)
+		mockGetTxUC.EXPECT().Execute(gomock.Any(), txRequestModels[0].Schedule.UUID, []string{tenantID}).Return(txRequest0, nil)
+		mockGetTxUC.EXPECT().Execute(gomock.Any(), txRequestModels[1].Schedule.UUID, []string{tenantID}).Return(txRequest1, nil)
 
 		result, err := usecase.Execute(ctx, filter, []string{tenantID})
 
@@ -61,7 +61,7 @@ func TestSearchTxs_Execute(t *testing.T) {
 	t.Run("should fail with same error if Search fails", func(t *testing.T) {
 		expectedErr := errors.NotFoundError("error")
 
-		mockTransactionRequestDA.EXPECT().Search(ctx, filter, []string{tenantID}).Return(nil, expectedErr)
+		mockTransactionRequestDA.EXPECT().Search(gomock.Any(), filter, []string{tenantID}).Return(nil, expectedErr)
 
 		response, err := usecase.Execute(ctx, filter, []string{tenantID})
 
@@ -73,8 +73,8 @@ func TestSearchTxs_Execute(t *testing.T) {
 		txRequestModels := []*models.TransactionRequest{testutils.FakeTxRequest(0)}
 		expectedErr := fmt.Errorf("error")
 
-		mockTransactionRequestDA.EXPECT().Search(ctx, filter, []string{tenantID}).Return(txRequestModels, nil)
-		mockGetTxUC.EXPECT().Execute(ctx, txRequestModels[0].Schedule.UUID, []string{tenantID}).Return(nil, expectedErr)
+		mockTransactionRequestDA.EXPECT().Search(gomock.Any(), filter, []string{tenantID}).Return(txRequestModels, nil)
+		mockGetTxUC.EXPECT().Execute(gomock.Any(), txRequestModels[0].Schedule.UUID, []string{tenantID}).Return(nil, expectedErr)
 
 		response, err := usecase.Execute(ctx, filter, []string{tenantID})
 

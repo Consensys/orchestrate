@@ -39,15 +39,15 @@ func TestSendEEAPrivate_Execute(t *testing.T) {
 		raw := "rawData"
 		txHash := "0x0000000000000000000000000000000000000000000000000000000000000abc"
 
-		crafter.EXPECT().Execute(ctx, job).Return(nil)
-		signTx.EXPECT().Execute(ctx, job).Return(raw, txHash, nil)
+		crafter.EXPECT().Execute(gomock.Any(), job).Return(nil)
+		signTx.EXPECT().Execute(gomock.Any(), job).Return(raw, txHash, nil)
 		job.Transaction.Raw = raw
 		job.Transaction.Hash = txHash
 		
 		proxyURL := utils.GetProxyURL(chainRegistryURL, job.ChainUUID)
-		ec.EXPECT().PrivDistributeRawTransaction(ctx, proxyURL, job.Transaction.Raw).Return(ethcommon.HexToHash(txHash), nil)
-		nonceManager.EXPECT().IncrementNonce(ctx, job).Return(nil)
-		jobClient.EXPECT().UpdateJob(ctx, job.UUID, &txschedulertypes.UpdateJobRequest{
+		ec.EXPECT().PrivDistributeRawTransaction(gomock.Any(), proxyURL, job.Transaction.Raw).Return(ethcommon.HexToHash(txHash), nil)
+		nonceManager.EXPECT().IncrementNonce(gomock.Any(), job).Return(nil)
+		jobClient.EXPECT().UpdateJob(gomock.Any(), job.UUID, &txschedulertypes.UpdateJobRequest{
 			Status:      utils.StatusStored,
 			Transaction: job.Transaction,
 		})
@@ -61,7 +61,7 @@ func TestSendEEAPrivate_Execute(t *testing.T) {
 		job := testutils.FakeJob()
 
 		expectedErr := errors.NonceTooLowWarning("invalid nonce")
-		crafter.EXPECT().Execute(ctx, job).Return(expectedErr)
+		crafter.EXPECT().Execute(gomock.Any(), job).Return(expectedErr)
 		
 		err := usecase.Execute(ctx, job)
 		assert.Equal(t, err, expectedErr)
@@ -72,10 +72,10 @@ func TestSendEEAPrivate_Execute(t *testing.T) {
 		raw := "rawData"
 		txHash := "0x0000000000000000000000000000000000000000000000000000000000000abc"
 
-		crafter.EXPECT().Execute(ctx, job).Return(nil)
+		crafter.EXPECT().Execute(gomock.Any(), job).Return(nil)
 		
 		expectedErr := errors.InternalError("internal error")
-		signTx.EXPECT().Execute(ctx, job).Return(raw, txHash, expectedErr)
+		signTx.EXPECT().Execute(gomock.Any(), job).Return(raw, txHash, expectedErr)
 		
 		err := usecase.Execute(ctx, job)
 		assert.Equal(t, err, expectedErr)
@@ -86,15 +86,15 @@ func TestSendEEAPrivate_Execute(t *testing.T) {
 		raw := "rawData"
 		txHash := "0x0000000000000000000000000000000000000000000000000000000000000abc"
 
-		crafter.EXPECT().Execute(ctx, job).Return(nil)
-		signTx.EXPECT().Execute(ctx, job).Return(raw, txHash, nil)
+		crafter.EXPECT().Execute(gomock.Any(), job).Return(nil)
+		signTx.EXPECT().Execute(gomock.Any(), job).Return(raw, txHash, nil)
 		job.Transaction.Raw = raw
 		job.Transaction.Hash = txHash
 
 		expectedErr := errors.InternalError("internal error")
 		proxyURL := utils.GetProxyURL(chainRegistryURL, job.ChainUUID)
-		ec.EXPECT().PrivDistributeRawTransaction(ctx, proxyURL, job.Transaction.Raw).Return(ethcommon.HexToHash(""), expectedErr)
-		nonceManager.EXPECT().CleanNonce(ctx, job, expectedErr).Return(nil)
+		ec.EXPECT().PrivDistributeRawTransaction(gomock.Any(), proxyURL, job.Transaction.Raw).Return(ethcommon.HexToHash(""), expectedErr)
+		nonceManager.EXPECT().CleanNonce(gomock.Any(), job, expectedErr).Return(nil)
 		
 		err := usecase.Execute(ctx, job)
 		assert.Equal(t, err, expectedErr)

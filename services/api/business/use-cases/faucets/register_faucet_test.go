@@ -33,8 +33,8 @@ func TestRegisterFaucet_Execute(t *testing.T) {
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		faucetModel := parsers.NewFaucetModelFromEntity(faucet)
 
-		mockSearchFaucetsUC.EXPECT().Execute(ctx, &entities.FaucetFilters{Names: []string{faucet.Name}}, []string{faucet.TenantID}).Return([]*entities.Faucet{}, nil)
-		faucetAgent.EXPECT().Insert(ctx, faucetModel).Return(nil)
+		mockSearchFaucetsUC.EXPECT().Execute(gomock.Any(), &entities.FaucetFilters{Names: []string{faucet.Name}}, []string{faucet.TenantID}).Return([]*entities.Faucet{}, nil)
+		faucetAgent.EXPECT().Insert(gomock.Any(), faucetModel).Return(nil)
 
 		resp, err := usecase.Execute(ctx, faucet)
 
@@ -44,7 +44,7 @@ func TestRegisterFaucet_Execute(t *testing.T) {
 
 	t.Run("should fail with AlreadyExistsError if search faucets returns results", func(t *testing.T) {
 		mockSearchFaucetsUC.EXPECT().
-			Execute(ctx, &entities.FaucetFilters{Names: []string{faucet.Name}}, []string{faucet.TenantID}).
+			Execute(gomock.Any(), &entities.FaucetFilters{Names: []string{faucet.Name}}, []string{faucet.TenantID}).
 			Return([]*entities.Faucet{faucet}, nil)
 
 		resp, err := usecase.Execute(ctx, faucet)
@@ -56,7 +56,7 @@ func TestRegisterFaucet_Execute(t *testing.T) {
 	t.Run("should fail with same error if search faucets fails", func(t *testing.T) {
 		expectedErr := errors.NotFoundError("error")
 
-		mockSearchFaucetsUC.EXPECT().Execute(ctx, &entities.FaucetFilters{Names: []string{faucet.Name}}, []string{faucet.TenantID}).Return(nil, expectedErr)
+		mockSearchFaucetsUC.EXPECT().Execute(gomock.Any(), &entities.FaucetFilters{Names: []string{faucet.Name}}, []string{faucet.TenantID}).Return(nil, expectedErr)
 
 		resp, err := usecase.Execute(ctx, faucet)
 
@@ -68,8 +68,8 @@ func TestRegisterFaucet_Execute(t *testing.T) {
 	t.Run("should fail with same error if insert faucet fails", func(t *testing.T) {
 		expectedErr := errors.NotFoundError("error")
 
-		mockSearchFaucetsUC.EXPECT().Execute(ctx, &entities.FaucetFilters{Names: []string{faucet.Name}}, []string{faucet.TenantID}).Return([]*entities.Faucet{}, nil)
-		faucetAgent.EXPECT().Insert(ctx, gomock.Any()).Return(expectedErr)
+		mockSearchFaucetsUC.EXPECT().Execute(gomock.Any(), &entities.FaucetFilters{Names: []string{faucet.Name}}, []string{faucet.TenantID}).Return([]*entities.Faucet{}, nil)
+		faucetAgent.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(expectedErr)
 
 		resp, err := usecase.Execute(ctx, faucet)
 

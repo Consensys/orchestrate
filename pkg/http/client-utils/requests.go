@@ -62,7 +62,7 @@ func request(ctx context.Context, client *http.Client, reqURL, method string, bo
 
 	r, err := client.Do(req)
 	if err != nil {
-		return nil, errors.FromError(err)
+		return nil, errors.HTTPConnectionError(err.Error())
 	}
 
 	return r, nil

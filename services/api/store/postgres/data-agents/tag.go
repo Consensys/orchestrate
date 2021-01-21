@@ -3,6 +3,8 @@ package dataagents
 import (
 	"context"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
+
 	pg "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database/postgres"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
@@ -13,12 +15,13 @@ const tagDAComponent = "data-agents.tag"
 
 // PGAccount is an Account data agent for PostgreSQL
 type PGTag struct {
-	db pg.DB
+	db     pg.DB
+	logger *log.Logger
 }
 
 // NewPGAccount creates a new PGAccount
 func NewPGTag(db pg.DB) store.TagAgent {
-	return &PGTag{db: db}
+	return &PGTag{db: db, logger: log.NewLogger().SetComponent(tagDAComponent)}
 }
 
 func (agent *PGTag) Insert(ctx context.Context, tag *models.TagModel) error {
@@ -28,6 +31,7 @@ func (agent *PGTag) Insert(ctx context.Context, tag *models.TagModel) error {
 
 	err := pg.InsertQuery(ctx, query)
 	if err != nil {
+		agent.logger.WithContext(ctx).WithError(err).Error("failed to insert tag")
 		return errors.FromError(err).ExtendComponent(tagDAComponent)
 	}
 
@@ -43,6 +47,9 @@ func (agent *PGTag) FindAllByName(ctx context.Context, name string) ([]string, e
 
 	err := pg.SelectColumn(ctx, query, &tags)
 	if err != nil {
+		if !errors.IsNotFoundError(err) {
+			agent.logger.WithContext(ctx).WithError(err).Error("failed to fetch tag names")
+		}
 		return nil, errors.FromError(err).ExtendComponent(tagDAComponent)
 	}
 

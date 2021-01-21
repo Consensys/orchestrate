@@ -1,7 +1,6 @@
 package postgres
 
 import (
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database"
 	pg "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database/postgres"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
@@ -29,9 +28,7 @@ func (db *PGDB) Begin() (database.Tx, error) {
 	db.Transaction()
 	tx, err := db.DB.Begin()
 	if err != nil {
-		errMessage := "failed to start postgres DB transaction"
-		log.WithError(err).Error(errMessage)
-		return nil, errors.PostgresConnectionError(errMessage)
+		return nil, errors.PostgresConnectionError("failed to start postgres DB transaction")
 	}
 
 	return &PGTX{
@@ -43,9 +40,7 @@ func (db *PGDB) Begin() (database.Tx, error) {
 func (pgTx *PGTX) Begin() (database.Tx, error) {
 	tx, err := pgTx.Tx.Begin()
 	if err != nil {
-		errMessage := "failed to start nested postgres DB transaction"
-		log.WithError(err).Error(errMessage)
-		return nil, errors.PostgresConnectionError(errMessage)
+		return nil, errors.PostgresConnectionError("failed to start nested postgres DB transaction")
 	}
 
 	return &PGTX{
@@ -57,9 +52,7 @@ func (pgTx *PGTX) Begin() (database.Tx, error) {
 func (pgTx *PGTX) Commit() error {
 	err := pgTx.Tx.Commit()
 	if err != nil {
-		errMessage := "failed to commit postgres DB transaction"
-		log.WithError(err).Error(errMessage)
-		return errors.PostgresConnectionError(errMessage)
+		return errors.PostgresConnectionError("failed to commit postgres DB transaction")
 	}
 
 	return nil
@@ -68,9 +61,7 @@ func (pgTx *PGTX) Commit() error {
 func (pgTx *PGTX) Close() error {
 	err := pgTx.Tx.Close()
 	if err != nil {
-		errMessage := "failed to close postgres DB transaction"
-		log.WithError(err).Error(errMessage)
-		return errors.PostgresConnectionError(errMessage)
+		return errors.PostgresConnectionError("failed to close postgres DB transaction")
 	}
 
 	return nil
@@ -79,9 +70,7 @@ func (pgTx *PGTX) Close() error {
 func (pgTx *PGTX) Rollback() error {
 	err := pgTx.Tx.Rollback()
 	if err != nil {
-		errMessage := "failed to rollback postgres DB transaction"
-		log.WithError(err).Error(errMessage)
-		return errors.PostgresConnectionError(errMessage)
+		return errors.PostgresConnectionError("failed to rollback postgres DB transaction")
 	}
 
 	return nil

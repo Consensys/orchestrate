@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/parsers"
@@ -24,6 +24,7 @@ type updateJobUseCase struct {
 	updateChildrenUseCase usecases.UpdateChildrenUseCase
 	startNextJobUseCase   usecases.StartNextJobUseCase
 	metrics               metrics.TransactionSchedulerMetrics
+	logger                *log.Logger
 }
 
 // NewUpdateJobUseCase creates a new UpdateJobUseCase
@@ -33,12 +34,14 @@ func NewUpdateJobUseCase(db store.DB, updateChildrenUseCase usecases.UpdateChild
 		updateChildrenUseCase: updateChildrenUseCase,
 		startNextJobUseCase:   startJobUC,
 		metrics:               m,
+		logger:                log.NewLogger().SetComponent(updateJobComponent),
 	}
 }
 
 // Execute validates and creates a new transaction job
 func (uc *updateJobUseCase) Execute(ctx context.Context, job *entities.Job, nextStatus, logMessage string, tenants []string) (*entities.Job, error) {
-	logger := log.WithContext(ctx).WithField("tenants", tenants).WithField("job_uuid", job.UUID)
+	ctx = log.WithFields(ctx, log.Field("job", job.UUID))
+	logger := uc.logger.WithContext(ctx)
 	logger.Debug("updating job")
 
 	var retrievedJob *entities.Job
@@ -59,14 +62,14 @@ func (uc *updateJobUseCase) Execute(ctx context.Context, job *entities.Job, next
 		if isFinalStatus(status) {
 			errMessage := "job status is final, cannot be updated"
 			logger.WithField("status", status).Error(errMessage)
-			return errors.InvalidParameterError(errMessage)
+			return errors.InvalidParameterError(errMessage).ExtendComponent(updateJobComponent)
 		}
 
 		// We are not forced to update the status
 		if nextStatus != "" && !canUpdateStatus(nextStatus, status) {
 			errMessage := "invalid status update for the current job state"
 			logger.WithField("status", status).WithField("next_status", nextStatus).Error(errMessage)
-			return errors.InvalidStateError(errMessage)
+			return errors.InvalidStateError(errMessage).ExtendComponent(updateJobComponent)
 		}
 
 		// We are not forced to update the transaction
@@ -117,7 +120,6 @@ func (uc *updateJobUseCase) Execute(ctx context.Context, job *entities.Job, next
 	if (nextStatus == utils.StatusMined || nextStatus == utils.StatusStored) && retrievedJob.NextJobUUID != "" {
 		err = uc.startNextJobUseCase.Execute(ctx, retrievedJob.UUID, tenants)
 		if err != nil {
-			logger.WithField("next_job_uuid", retrievedJob.NextJobUUID).WithError(err).Error("fail to start next job")
 			return nil, errors.FromError(err).ExtendComponent(updateJobComponent)
 		}
 	}
@@ -127,9 +129,7 @@ func (uc *updateJobUseCase) Execute(ctx context.Context, job *entities.Job, next
 		return nil, errors.FromError(err).ExtendComponent(updateJobComponent)
 	}
 
-	log.WithContext(ctx).WithField("job_uuid", job.UUID).
-		WithField("status", nextStatus).
-		Info("job updated successfully")
+	logger.WithField("status", nextStatus).Info("job updated successfully")
 	return parsers.NewJobEntityFromModels(jobModel), nil
 }
 

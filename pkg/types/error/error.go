@@ -43,6 +43,11 @@ func (err *Error) ExtendComponent(name string) *Error {
 	return err
 }
 
+func (err *Error) AppendReason(reason string) *Error {
+	err.Message = fmt.Sprintf("%v (%v)", err.Message, reason)
+	return err
+}
+
 // Hex returns error code in HEX representation
 func (err *Error) Hex() string {
 	return fmt.Sprintf("%05X", err.GetCode())

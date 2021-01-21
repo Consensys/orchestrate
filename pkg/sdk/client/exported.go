@@ -4,10 +4,10 @@ import (
 	"sync"
 	"time"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/backoff"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 )
 
 const component = "api.client"
@@ -23,9 +23,11 @@ func Init() {
 			return
 		}
 
+		logger := log.NewLogger().SetComponent(component)
+
 		conf := NewConfigFromViper(viper.GetViper(), backoff.ConstantBackOffWithMaxRetries(time.Second, 5))
 		client = NewHTTPClient(http.NewClient(http.NewConfig(viper.GetViper())), conf)
-		log.Infof("%s: client ready - url: %s", component, conf.URL)
+		logger.SetComponent(component).WithField("url", conf.URL).Info("ready")
 	})
 }
 

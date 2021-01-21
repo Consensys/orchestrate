@@ -3,10 +3,10 @@ package chains
 import (
 	"context"
 
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/parsers"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
@@ -20,6 +20,7 @@ type registerChainUseCase struct {
 	db             store.DB
 	searchChainsUC usecases.SearchChainsUseCase
 	ethClient      ethclient.Client
+	logger         *log.Logger
 }
 
 // NewRegisterChainUseCase creates a new RegisterChainUseCase
@@ -28,14 +29,14 @@ func NewRegisterChainUseCase(db store.DB, searchChainsUC usecases.SearchChainsUs
 		db:             db,
 		searchChainsUC: searchChainsUC,
 		ethClient:      ec,
+		logger:         log.NewLogger().SetComponent(registerChainComponent),
 	}
 }
 
 // Execute registers a new chain
 func (uc *registerChainUseCase) Execute(ctx context.Context, chain *entities.Chain, fromLatest bool) (*entities.Chain, error) {
-	logger := log.WithContext(ctx).
-		WithField("name", chain.Name).
-		WithField("tenant", chain.TenantID)
+	ctx = log.WithFields(ctx, log.Field("chain_name", chain.Name))
+	logger := uc.logger.WithContext(ctx)
 	logger.Debug("registering new chain")
 
 	chains, err := uc.searchChainsUC.Execute(ctx, &entities.ChainFilters{Names: []string{chain.Name}}, []string{chain.TenantID})
@@ -45,7 +46,7 @@ func (uc *registerChainUseCase) Execute(ctx context.Context, chain *entities.Cha
 
 	if len(chains) > 0 {
 		errMessage := "a chain with the same name already exists"
-		log.WithContext(ctx).Error(errMessage)
+		logger.Error(errMessage)
 		return nil, errors.AlreadyExistsError(errMessage).ExtendComponent(registerChainComponent)
 	}
 
@@ -60,6 +61,7 @@ func (uc *registerChainUseCase) Execute(ctx context.Context, chain *entities.Cha
 		if der != nil {
 			return nil, errors.FromError(der).ExtendComponent(registerChainComponent)
 		}
+
 		chain.ListenerStartingBlock = chainTip
 		chain.ListenerCurrentBlock = chainTip
 	}
@@ -82,14 +84,12 @@ func (uc *registerChainUseCase) Execute(ctx context.Context, chain *entities.Cha
 
 		return nil
 	})
+
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(registerChainComponent)
 	}
 
-	logger.
-		WithField("chain_uuid", chainModel.UUID).
-		WithField("chain_id", chainModel.ChainID).
-		Info("chain registered successfully")
+	logger.WithField("chain_uuid", chainModel.UUID).Info("chain registered successfully")
 	return parsers.NewChainFromModel(chainModel), nil
 }
 
@@ -99,13 +99,13 @@ func (uc *registerChainUseCase) getChainID(ctx context.Context, uris []string) (
 		chainID, err := uc.ethClient.Network(ctx, uri)
 		if err != nil {
 			errMessage := "failed to fetch chain id"
-			log.WithContext(ctx).WithField("url", uri).WithError(err).Error(errMessage)
+			uc.logger.WithContext(ctx).WithField("url", uri).WithError(err).Error(errMessage)
 			return "", errors.InvalidParameterError(errMessage)
 		}
 
 		if i > 0 && chainID.String() != prevChainID {
 			errMessage := "URLs in the list point to different networks"
-			log.WithContext(ctx).
+			uc.logger.WithContext(ctx).
 				WithField("url", uri).
 				WithField("previous_chain_id", prevChainID).
 				WithField("chain_id", chainID.String()).
@@ -124,7 +124,7 @@ func (uc *registerChainUseCase) getChainTip(ctx context.Context, uris []string) 
 		header, err := uc.ethClient.HeaderByNumber(ctx, uri, nil)
 		if err != nil {
 			errMessage := "failed to fetch chain tip"
-			log.WithContext(ctx).WithField("url", uri).WithError(err).Warning(errMessage)
+			uc.logger.WithContext(ctx).WithField("url", uri).WithError(err).Warn(errMessage)
 			continue
 		}
 
@@ -132,6 +132,6 @@ func (uc *registerChainUseCase) getChainTip(ctx context.Context, uris []string) 
 	}
 
 	errMessage := "failed to fetch chain tip for all urls"
-	log.WithContext(ctx).WithField("uris", uris).Error(errMessage)
+	uc.logger.WithContext(ctx).WithField("uris", uris).Error(errMessage)
 	return 0, errors.InvalidParameterError(errMessage)
 }

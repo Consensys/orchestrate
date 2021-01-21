@@ -29,7 +29,7 @@ func TestSetCodeHash_Execute(t *testing.T) {
 	usecase := NewSetCodeHashUseCase(codeHashAgent)
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
-		codeHashAgent.EXPECT().Insert(ctx, codeHashModel).Return(nil)
+		codeHashAgent.EXPECT().Insert(gomock.Any(), codeHashModel).Return(nil)
 
 		err := usecase.Execute(ctx, chainID, contractAddress, codeHash)
 
@@ -38,7 +38,7 @@ func TestSetCodeHash_Execute(t *testing.T) {
 
 	t.Run("should fail if data agent fails", func(t *testing.T) {
 		dataAgentError := fmt.Errorf("error")
-		codeHashAgent.EXPECT().Insert(ctx, codeHashModel).Return(dataAgentError)
+		codeHashAgent.EXPECT().Insert(gomock.Any(), codeHashModel).Return(dataAgentError)
 
 		err := usecase.Execute(ctx, chainID, contractAddress, codeHash)
 

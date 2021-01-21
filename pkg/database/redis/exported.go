@@ -5,11 +5,11 @@ import (
 	"time"
 
 	healthz "github.com/heptiolabs/healthcheck"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 )
 
-const component = "nonce.redis"
+const component = "database.redis"
 
 var (
 	nm       *Client
@@ -25,17 +25,18 @@ func Init() {
 		}
 
 		cfg := NewConfig(viper.GetViper())
+		logger := log.NewLogger().SetComponent(component).WithField("host", cfg.URL())
+
 		pool, err := NewPool(cfg)
 		if err != nil {
-			log.WithError(err).Fatalf("could not connect to redis server")
+			logger.Fatalf("could not connect to server")
 		}
 
 		// Initialize Nonce
 		nm = NewClient(pool, cfg)
 
 		checker = healthz.Timeout(nm.Ping, time.Second*2)
-
-		log.Info("redis: ready")
+		logger.Info("ready")
 	})
 }
 

@@ -7,9 +7,9 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
 
 	gopg "github.com/go-pg/pg/v9"
-	log "github.com/sirupsen/logrus"
 	pg "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database/postgres"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models"
 )
 
@@ -17,12 +17,13 @@ const txRequestDAComponent = "data-agents.transaction-request"
 
 // PGTransactionRequest is a transaction request data agent for PostgreSQL
 type PGTransactionRequest struct {
-	db pg.DB
+	db     pg.DB
+	logger *log.Logger
 }
 
 // NewPGTransactionRequest creates a new PGTransactionRequest
 func NewPGTransactionRequest(db pg.DB) store.TransactionRequestAgent {
-	return &PGTransactionRequest{db: db}
+	return &PGTransactionRequest{db: db, logger: log.NewLogger().SetComponent(txRequestDAComponent)}
 }
 
 // Insert Inserts a new transaction request in DB
@@ -34,7 +35,7 @@ func (agent *PGTransactionRequest) Insert(ctx context.Context, txRequest *models
 	err := pg.Insert(ctx, agent.db, txRequest)
 	if err != nil {
 		errMessage := "error executing selectOrInsert"
-		log.WithError(err).Error(errMessage)
+		agent.logger.WithContext(ctx).WithError(err).Error(errMessage)
 		return errors.PostgresConnectionError(errMessage).ExtendComponent(txRequestDAComponent)
 	}
 
@@ -51,6 +52,9 @@ func (agent *PGTransactionRequest) FindOneByIdempotencyKey(ctx context.Context, 
 
 	err := pg.SelectOne(ctx, query)
 	if err != nil {
+		if !errors.IsNotFoundError(err) {
+			agent.logger.WithContext(ctx).WithError(err).Error("failed to fetch tx-request by idempotency key")
+		}
 		return nil, errors.FromError(err).ExtendComponent(txRequestDAComponent)
 	}
 
@@ -67,6 +71,9 @@ func (agent *PGTransactionRequest) FindOneByUUID(ctx context.Context, scheduleUU
 
 	err := pg.SelectOne(ctx, query)
 	if err != nil {
+		if !errors.IsNotFoundError(err) {
+			agent.logger.WithContext(ctx).WithError(err).Error("failed to find tx-request by uuid")
+		}
 		return nil, errors.FromError(err).ExtendComponent(txRequestDAComponent)
 	}
 
@@ -86,6 +93,9 @@ func (agent *PGTransactionRequest) Search(ctx context.Context, filters *entities
 
 	err := pg.Select(ctx, query)
 	if err != nil {
+		if !errors.IsNotFoundError(err) {
+			agent.logger.WithContext(ctx).WithError(err).Error("failed to fetch tx-requests")
+		}
 		return nil, errors.FromError(err).ExtendComponent(txRequestDAComponent)
 	}
 

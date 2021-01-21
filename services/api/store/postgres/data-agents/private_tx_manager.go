@@ -3,6 +3,7 @@ package dataagents
 import (
 	"context"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models"
 
@@ -15,12 +16,13 @@ const privateTxManagerDAComponent = "data-agents.private-tx-manager"
 
 // PGPrivateTxManager is a Faucet data agent for PostgreSQL
 type PGPrivateTxManager struct {
-	db pg.DB
+	db     pg.DB
+	logger *log.Logger
 }
 
 // NewPGPrivateTxManager creates a new PGPrivateTxManager
 func NewPGPrivateTxManager(db pg.DB) store.PrivateTxManagerAgent {
-	return &PGPrivateTxManager{db: db}
+	return &PGPrivateTxManager{db: db, logger: log.NewLogger().SetComponent(privateTxManagerDAComponent)}
 }
 
 // Insert Inserts a new private transaction manager in DB
@@ -31,6 +33,7 @@ func (agent *PGPrivateTxManager) Insert(ctx context.Context, privateTxManager *m
 
 	err := pg.Insert(ctx, agent.db, privateTxManager)
 	if err != nil {
+		agent.logger.WithContext(ctx).WithError(err).Error("failed to insert private tx manager")
 		return errors.FromError(err).ExtendComponent(privateTxManagerDAComponent)
 	}
 
@@ -47,6 +50,9 @@ func (agent *PGPrivateTxManager) Search(ctx context.Context, chainUUID string) (
 
 	err := pg.Select(ctx, query)
 	if err != nil {
+		if !errors.IsNotFoundError(err) {
+			agent.logger.WithContext(ctx).WithError(err).Error("failed to search private tx managers")
+		}
 		return nil, errors.FromError(err).ExtendComponent(privateTxManagerDAComponent)
 	}
 
@@ -58,6 +64,7 @@ func (agent *PGPrivateTxManager) Update(ctx context.Context, privateTxManager *m
 
 	err := pg.UpdateNotZero(ctx, query)
 	if err != nil {
+		agent.logger.WithContext(ctx).WithError(err).Error("failed to update private tx manager")
 		return errors.FromError(err).ExtendComponent(privateTxManagerDAComponent)
 	}
 
@@ -69,6 +76,7 @@ func (agent *PGPrivateTxManager) Delete(ctx context.Context, privateTxManager *m
 
 	err := pg.Delete(ctx, query)
 	if err != nil {
+		agent.logger.WithContext(ctx).WithError(err).Error("failed to delete private tx manager")
 		return errors.FromError(err).ExtendComponent(privateTxManagerDAComponent)
 	}
 

@@ -37,7 +37,7 @@ func TestSearchFaucets_Execute(t *testing.T) {
 			ChainRule: "chainRule",
 		}
 		faucet := testutils.FakeFaucetModel()
-		faucetAgent.EXPECT().Search(ctx, filters, tenants).Return([]*models.Faucet{faucet}, nil)
+		faucetAgent.EXPECT().Search(gomock.Any(), filters, tenants).Return([]*models.Faucet{faucet}, nil)
 
 		resp, err := usecase.Execute(ctx, filters, tenants)
 
@@ -48,7 +48,7 @@ func TestSearchFaucets_Execute(t *testing.T) {
 	t.Run("should fail with same error if search faucets fails", func(t *testing.T) {
 		expectedErr := errors.PostgresConnectionError("error")
 
-		faucetAgent.EXPECT().Search(ctx, nil, tenants).Return(nil, expectedErr)
+		faucetAgent.EXPECT().Search(gomock.Any(), nil, tenants).Return(nil, expectedErr)
 
 		resp, err := usecase.Execute(ctx, nil, tenants)
 

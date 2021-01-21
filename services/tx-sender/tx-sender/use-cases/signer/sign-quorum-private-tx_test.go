@@ -39,7 +39,7 @@ func TestSignQuorumPrivateTransaction_Execute(t *testing.T) {
 			GasLimit:  gasLimit,
 			Data:      job.Transaction.Data,
 		}
-		mockKeyManagerClient.EXPECT().ETHSignQuorumPrivateTransaction(ctx, job.Transaction.From, expectedRequest).Return(signature, nil)
+		mockKeyManagerClient.EXPECT().ETHSignQuorumPrivateTransaction(gomock.Any(), job.Transaction.From, expectedRequest).Return(signature, nil)
 
 		raw, txHash, err := usecase.Execute(ctx, job)
 
@@ -62,7 +62,7 @@ func TestSignQuorumPrivateTransaction_Execute(t *testing.T) {
 			GasLimit:  gasLimit,
 			Data:      job.Transaction.Data,
 		}
-		mockKeyManagerClient.EXPECT().ETHSignQuorumPrivateTransaction(ctx, job.Transaction.From, expectedRequest).Return(signature, nil)
+		mockKeyManagerClient.EXPECT().ETHSignQuorumPrivateTransaction(gomock.Any(), job.Transaction.From, expectedRequest).Return(signature, nil)
 
 		raw, txHash, err := usecase.Execute(ctx, job)
 
@@ -84,7 +84,7 @@ func TestSignQuorumPrivateTransaction_Execute(t *testing.T) {
 
 	t.Run("should fail with same error if ETHSignQuorumPrivateTransaction fails", func(t *testing.T) {
 		expectedErr := errors.InvalidFormatError("error")
-		mockKeyManagerClient.EXPECT().ETHSignQuorumPrivateTransaction(ctx, gomock.Any(), gomock.Any()).Return("", expectedErr)
+		mockKeyManagerClient.EXPECT().ETHSignQuorumPrivateTransaction(gomock.Any(), gomock.Any(), gomock.Any()).Return("", expectedErr)
 
 		raw, txHash, err := usecase.Execute(ctx, testutils.FakeJob())
 
@@ -95,7 +95,7 @@ func TestSignQuorumPrivateTransaction_Execute(t *testing.T) {
 
 	t.Run("should fail with EncodingError if signature cannot be decoded", func(t *testing.T) {
 		signature := "invalidSignature"
-		mockKeyManagerClient.EXPECT().ETHSignQuorumPrivateTransaction(ctx, gomock.Any(), gomock.Any()).Return(signature, nil)
+		mockKeyManagerClient.EXPECT().ETHSignQuorumPrivateTransaction(gomock.Any(), gomock.Any(), gomock.Any()).Return(signature, nil)
 
 		raw, txHash, err := usecase.Execute(ctx, testutils.FakeJob())
 
@@ -106,7 +106,7 @@ func TestSignQuorumPrivateTransaction_Execute(t *testing.T) {
 
 	t.Run("should fail with InvalidParameterError if ETHSignQuorumPrivateTransaction fails to find tenant", func(t *testing.T) {
 		expectedErr := errors.NotFoundError("error")
-		mockKeyManagerClient.EXPECT().ETHSignQuorumPrivateTransaction(ctx, gomock.Any(), gomock.Any()).Return("", expectedErr).Times(2)
+		mockKeyManagerClient.EXPECT().ETHSignQuorumPrivateTransaction(gomock.Any(), gomock.Any(), gomock.Any()).Return("", expectedErr).Times(2)
 
 		raw, txHash, err := usecase.Execute(ctx, testutils.FakeJob())
 

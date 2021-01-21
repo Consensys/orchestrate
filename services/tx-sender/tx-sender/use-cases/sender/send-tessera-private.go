@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
@@ -21,6 +21,7 @@ type sendTesseraPrivateTxUseCase struct {
 	chainRegistryURL string
 	jobClient        client.JobClient
 	crafter          usecases.CraftTransactionUseCase
+	logger           *log.Logger
 }
 
 func NewSendTesseraPrivateTxUseCase(ec ethclient.QuorumTransactionSender, crafter usecases.CraftTransactionUseCase,
@@ -30,11 +31,13 @@ func NewSendTesseraPrivateTxUseCase(ec ethclient.QuorumTransactionSender, crafte
 		chainRegistryURL: chainRegistryURL,
 		jobClient:        jobClient,
 		crafter:          crafter,
+		logger:           log.NewLogger().SetComponent(sendTesseraPrivateTxComponent),
 	}
 }
 
 func (uc *sendTesseraPrivateTxUseCase) Execute(ctx context.Context, job *entities.Job) error {
-	logger := log.WithContext(ctx).WithField("job_uuid", job.UUID)
+	ctx = log.With(log.WithFields(ctx, log.Field("job", job.UUID)), uc.logger)
+	logger := uc.logger.WithContext(ctx)
 	logger.Debug("processing tessera private transaction job")
 
 	job.Transaction.Nonce = "0"
@@ -53,14 +56,12 @@ func (uc *sendTesseraPrivateTxUseCase) Execute(ctx context.Context, job *entitie
 		return errors.FromError(err).ExtendComponent(sendTesseraPrivateTxComponent)
 	}
 
-	logger.Info("Tessera private job was sent successfully")
+	logger.Info("tessera private job was sent successfully")
 	return nil
 }
 
 func (uc *sendTesseraPrivateTxUseCase) sendTx(ctx context.Context, job *entities.Job) (string, error) {
-	logger := log.WithContext(ctx).WithField("job_uuid", job.UUID)
-	logger.Debug("sending Tessera private transaction")
-
+	logger := uc.logger.WithContext(ctx)
 	proxyTessera := utils.GetProxyTesseraURL(uc.chainRegistryURL, job.ChainUUID)
 	data, err := hexutil.Decode(job.Transaction.Data)
 	if err != nil {

@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
@@ -24,6 +24,7 @@ type sendTesseraMarkingTxUseCase struct {
 	jobClient        client.JobClient
 	ec               ethclient.QuorumTransactionSender
 	chainRegistryURL string
+	logger           *log.Logger
 }
 
 func NewSendTesseraMarkingTxUseCase(signTx usecases.SignQuorumPrivateTransactionUseCase, crafter usecases.CraftTransactionUseCase,
@@ -36,11 +37,13 @@ func NewSendTesseraMarkingTxUseCase(signTx usecases.SignQuorumPrivateTransaction
 		jobClient:        jobClient,
 		chainRegistryURL: chainRegistryURL,
 		crafter:          crafter,
+		logger:           log.NewLogger().SetComponent(sendTesseraMarkingTxComponent),
 	}
 }
 
 func (uc *sendTesseraMarkingTxUseCase) Execute(ctx context.Context, job *entities.Job) error {
-	logger := log.WithContext(ctx).WithField("job_uuid", job.UUID)
+	ctx = log.With(log.WithFields(ctx, log.Field("job", job.UUID)), uc.logger)
+	logger := uc.logger.WithContext(ctx)
 	logger.Debug("processing tessera marking transaction job")
 
 	err := uc.crafter.Execute(ctx, job)
@@ -93,14 +96,10 @@ func (uc *sendTesseraMarkingTxUseCase) Execute(ctx context.Context, job *entitie
 }
 
 func (uc *sendTesseraMarkingTxUseCase) sendTx(ctx context.Context, job *entities.Job) (string, error) {
-	logger := log.WithContext(ctx).WithField("job_uuid", job.UUID)
-	logger.Debug("sending Tessera marking transaction")
-
 	proxyURL := utils.GetProxyURL(uc.chainRegistryURL, job.ChainUUID)
 	txHash, err := uc.ec.SendQuorumRawPrivateTransaction(ctx, proxyURL, job.Transaction.Raw, job.Transaction.PrivateFor)
 	if err != nil {
-		errMsg := "cannot send tessera marking transaction"
-		logger.WithError(err).Errorf(errMsg)
+		uc.logger.WithContext(ctx).WithError(err).Errorf("cannot send tessera marking transaction")
 		return "", err
 	}
 

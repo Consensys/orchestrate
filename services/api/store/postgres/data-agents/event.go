@@ -5,6 +5,7 @@ import (
 
 	pg "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database/postgres"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models"
 )
@@ -13,12 +14,13 @@ const eventDAComponent = "data-agents.event"
 
 // PGAccount is an Account data agent for PostgreSQL
 type PGEvent struct {
-	db pg.DB
+	db     pg.DB
+	logger *log.Logger
 }
 
 // NewPGAccount creates a new PGAccount
 func NewPGEvent(db pg.DB) store.EventAgent {
-	return &PGEvent{db: db}
+	return &PGEvent{db: db, logger: log.NewLogger().SetComponent(eventDAComponent)}
 }
 
 func (agent *PGEvent) InsertMultiple(ctx context.Context, events []*models.EventModel) error {
@@ -43,6 +45,9 @@ func (agent *PGEvent) FindOneByAccountAndSigHash(ctx context.Context, chainID, a
 
 	err := pg.SelectOne(ctx, query)
 	if err != nil {
+		if !errors.IsNotFoundError(err) {
+			agent.logger.WithContext(ctx).WithError(err).Error("failed to find event")
+		}
 		return nil, errors.FromError(err).ExtendComponent(eventDAComponent)
 	}
 
@@ -58,6 +63,9 @@ func (agent *PGEvent) FindDefaultBySigHash(ctx context.Context, sighash string, 
 
 	err := pg.Select(ctx, query)
 	if err != nil {
+		if !errors.IsNotFoundError(err) {
+			agent.logger.WithContext(ctx).WithError(err).Error("failed to find default event")
+		}
 		return nil, errors.FromError(err).ExtendComponent(eventDAComponent)
 	}
 

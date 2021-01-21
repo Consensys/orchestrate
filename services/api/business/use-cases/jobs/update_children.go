@@ -12,7 +12,7 @@ import (
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 
-	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models"
 )
@@ -21,13 +21,15 @@ const updateChildrenComponent = "use-cases.update-children"
 
 // createJobUseCase is a use case to create a new transaction job
 type updateChildrenUseCase struct {
-	db store.DB
+	db     store.DB
+	logger *log.Logger
 }
 
 // NewUpdateChildrenUseCase creates a new UpdateChildrenUseCase
 func NewUpdateChildrenUseCase(db store.DB) usecases.UpdateChildrenUseCase {
 	return &updateChildrenUseCase{
-		db: db,
+		db:     db,
+		logger: log.NewLogger().SetComponent(updateChildrenComponent),
 	}
 }
 
@@ -38,7 +40,8 @@ func (uc updateChildrenUseCase) WithDBTransaction(dbtx store.Tx) usecases.Update
 
 // Execute updates all children of a job to NEVER_MINED
 func (uc *updateChildrenUseCase) Execute(ctx context.Context, jobUUID, parentJobUUID, nextStatus string, tenants []string) error {
-	logger := log.WithContext(ctx).WithField("job_uuid", jobUUID).WithField("tenants", tenants)
+	ctx = log.WithFields(ctx, log.Field("job", jobUUID))
+	logger := uc.logger.WithContext(ctx)
 	logger.Debug("updating sibling and/or parent jobs")
 
 	if parentJobUUID == "" {
@@ -70,6 +73,6 @@ func (uc *updateChildrenUseCase) Execute(ctx context.Context, jobUUID, parentJob
 		}
 	}
 
-	logger.Info("children (and/or parent) jobs updated successfully")
+	logger.WithField("status", nextStatus).Info("children (and/or parent) jobs updated successfully")
 	return nil
 }

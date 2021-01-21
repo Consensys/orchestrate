@@ -30,7 +30,7 @@ func TestGetFaucet_Execute(t *testing.T) {
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		faucet := testutils.FakeFaucetModel()
-		faucetAgent.EXPECT().FindOneByUUID(ctx, faucet.UUID, tenants).Return(faucet, nil)
+		faucetAgent.EXPECT().FindOneByUUID(gomock.Any(), faucet.UUID, tenants).Return(faucet, nil)
 
 		resp, err := usecase.Execute(ctx, faucet.UUID, tenants)
 
@@ -41,7 +41,7 @@ func TestGetFaucet_Execute(t *testing.T) {
 	t.Run("should fail with same error if get faucet fails", func(t *testing.T) {
 		expectedErr := errors.NotFoundError("error")
 
-		faucetAgent.EXPECT().FindOneByUUID(ctx, "uuid", tenants).Return(nil, expectedErr)
+		faucetAgent.EXPECT().FindOneByUUID(gomock.Any(), "uuid", tenants).Return(nil, expectedErr)
 
 		resp, err := usecase.Execute(ctx, "uuid", tenants)
 

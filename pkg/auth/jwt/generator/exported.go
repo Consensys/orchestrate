@@ -22,7 +22,7 @@ func Init(ctx context.Context) {
 		var err error
 		jwtGenerator, err = New(NewConfig(viper.GetViper()))
 		if err != nil {
-			log.WithError(err).Fatalf("jwt-generator: could not create jwtGenerator")
+			log.WithContext(ctx).WithError(err).Fatalf("jwt-generator: could not create jwtGenerator")
 		}
 	})
 }

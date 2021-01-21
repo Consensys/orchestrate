@@ -69,13 +69,13 @@ func (h *EngineConsumerGroupHandler) ConsumeClaim(s sarama.ConsumerGroupSession,
 
 	logger.WithFields(log.Fields{
 		"offset": c.InitialOffset(),
-	}).Infof("sarama: start consuming claim")
+	}).Info("sarama: start consuming claim")
 
 	// Attach ConsumerGroupSession to context
 	ctx := WithConsumerGroupSessionAndClaim(s.Context(), s, c)
 	h.engine.Run(ctx, Pipe(ctx, c.Messages()))
 
-	logger.Infof("sarama: stopped consuming claim")
+	logger.Info("sarama: stopped consuming claim")
 
 	return nil
 }
@@ -84,6 +84,6 @@ func (h *EngineConsumerGroupHandler) ConsumeClaim(s sarama.ConsumerGroupSession,
 // but before the offsets are committed for the very last time.
 func (h *EngineConsumerGroupHandler) Cleanup(s sarama.ConsumerGroupSession) error {
 	h.engine.CleanUp()
-	log.Infof("sarama: all claims consumed")
+	log.Info("sarama: all claims consumed")
 	return nil
 }

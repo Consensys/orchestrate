@@ -10,10 +10,12 @@ import (
 	"time"
 
 	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
-	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tcp/metrics"
 )
+
+const component = "tcp"
 
 // EntryPoint is a TCP server
 type EntryPoint struct {
@@ -31,6 +33,8 @@ type EntryPoint struct {
 
 	doneOnce sync.Once
 	done     chan struct{}
+
+	logger *log.Logger
 }
 
 type listenerValue struct {
@@ -48,6 +52,7 @@ func NewEntryPoint(name string, config *traefikstatic.EntryPoint, handler Handle
 		lis:       &atomic.Value{},
 		metrics:   reg,
 		done:      make(chan struct{}),
+		logger:    log.NewLogger().SetComponent(component).WithField("entrypoint", name),
 	}
 }
 
@@ -71,13 +76,9 @@ func (e *EntryPoint) listener() net.Listener {
 	return nil
 }
 
-func (e *EntryPoint) with(ctx context.Context) context.Context {
-	return log.With(ctx, log.Str("entrypoint", e.name))
-}
-
 func (e *EntryPoint) Serve(ctx context.Context, l net.Listener) error {
-	logger := log.FromContext(e.with(ctx))
-	logger.WithField("address", l.Addr()).Info("start serving tcp entrypoint")
+	logger := e.logger.WithContext(ctx).WithField("address", l.Addr())
+	logger.Info("start serving tcp entrypoint")
 
 	e.lis.Store(&listenerValue{l})
 
@@ -152,12 +153,12 @@ func (e *EntryPoint) Shutdown(ctx context.Context) error {
 		close(e.done)
 	})
 
-	logger := log.FromContext(e.with(ctx))
-	logger.Infof("shutting down tcp entrypoint...")
+	logger := e.logger.WithContext(ctx)
+	logger.Infof("shutting down...")
 
 	reqAcceptGraceTimeOut := time.Duration(e.lifecycle.RequestAcceptGraceTimeout)
 	if reqAcceptGraceTimeOut > 0 {
-		logger.Infof("waiting %s for incoming requests to cease...", reqAcceptGraceTimeOut)
+		logger.Debugf("waiting %s for incoming requests to cease...", reqAcceptGraceTimeOut)
 		time.Sleep(reqAcceptGraceTimeOut)
 	}
 
@@ -172,18 +173,18 @@ func (e *EntryPoint) Shutdown(ctx context.Context) error {
 		var cancel func()
 		ctx, cancel = context.WithTimeout(ctx, graceTimeOut)
 		defer cancel()
-		logger.Infof("waiting %s seconds before killing connections...", graceTimeOut)
+		logger.Debugf("waiting %s seconds before killing connections...", graceTimeOut)
 	}
 
 	if handler, ok := e.handler.(Shutdownable); ok {
 		err := Shutdown(ctx, handler)
 		if err != nil {
-			logger.WithError(err).Errorf("error while shutting down tcp entrypoint")
+			logger.WithError(err).Errorf("error while shutting down")
 		}
 		return err
 	}
 
-	logger.Infof("tcp entrypoint shutted down")
+	logger.Infof("tcp shutted down")
 
 	return nil
 }

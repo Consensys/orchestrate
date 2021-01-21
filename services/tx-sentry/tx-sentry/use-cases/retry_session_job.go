@@ -5,8 +5,8 @@ import (
 	"math"
 	"math/big"
 
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
@@ -24,24 +24,26 @@ type RetrySessionJobUseCase interface {
 // retrySessionJobUseCase is a use case to create a new transaction job
 type retrySessionJobUseCase struct {
 	client orchestrateclient.OrchestrateClient
+	logger *log.Logger
 }
 
 // NewRetrySessionJobUseCase creates a new StartSessionUseCase
 func NewRetrySessionJobUseCase(client orchestrateclient.OrchestrateClient) RetrySessionJobUseCase {
 	return &retrySessionJobUseCase{
 		client: client,
+		logger: log.NewLogger().SetComponent(retrySessionJobComponent),
 	}
 }
 
 // Execute starts a job session
 func (uc *retrySessionJobUseCase) Execute(ctx context.Context, jobUUID, childUUID string, nChildren int) (string, error) {
-	logger := log.WithContext(ctx).WithField("job_uuid", jobUUID)
+	logger := uc.logger.WithContext(ctx).WithField("job", jobUUID)
+
 	logger.Debug("verifying job status")
 
 	job, err := uc.client.GetJob(ctx, jobUUID)
 	if err != nil {
-		errMessage := "failed to get job"
-		logger.Error(errMessage)
+		logger.WithError(err).Error("failed to get job")
 		return "", errors.FromError(err).ExtendComponent(retrySessionJobComponent)
 	}
 
@@ -56,29 +58,31 @@ func (uc *retrySessionJobUseCase) Execute(ctx context.Context, jobUUID, childUUI
 		(job.Annotations.GasPricePolicy.RetryPolicy.Increment > 0.0 &&
 			nChildren <= int(math.Ceil(job.Annotations.GasPricePolicy.RetryPolicy.Limit/job.Annotations.GasPricePolicy.RetryPolicy.Increment))) {
 
-		childJob, errr := uc.CreateAndStartNewChildJob(ctx, job, nChildren)
+		childJob, errr := uc.createAndStartNewChildJob(ctx, job, nChildren)
 		if errr != nil {
 			return "", errors.FromError(errr).ExtendComponent(retrySessionJobComponent)
 		}
 
+		logger.WithField("child_job", childJob.UUID).Info("new child job created and started")
 		return childJob.UUID, nil
 	}
 
 	// Otherwise we retry on last job
-	logger.Debug("resending last child job transaction...")
 	err = uc.client.ResendJobTx(ctx, childUUID)
 	if err != nil {
+		logger.WithError(err).Error("failed to resend job")
 		return "", errors.FromError(err).ExtendComponent(retrySessionJobComponent)
 	}
 
+	logger.Info("job has been resent")
 	return job.UUID, nil
 }
 
-func (uc *retrySessionJobUseCase) CreateAndStartNewChildJob(ctx context.Context,
+func (uc *retrySessionJobUseCase) createAndStartNewChildJob(ctx context.Context,
 	parentJob *types.JobResponse,
 	nChildrenJobs int,
 ) (*types.JobResponse, error) {
-	logger := log.WithContext(ctx).WithField("job_uuid", parentJob.UUID)
+	logger := uc.logger.WithContext(ctx).WithField("job", parentJob.UUID)
 	gasPriceMultiplier := getGasPriceMultiplier(
 		parentJob.Annotations.GasPricePolicy.RetryPolicy.Increment,
 		parentJob.Annotations.GasPricePolicy.RetryPolicy.Limit,
@@ -88,19 +92,15 @@ func (uc *retrySessionJobUseCase) CreateAndStartNewChildJob(ctx context.Context,
 	childJobRequest := newChildJobRequest(parentJob, gasPriceMultiplier)
 	childJob, err := uc.client.CreateJob(ctx, childJobRequest)
 	if err != nil {
-		errMessage := "failed create new child job"
-		logger.Error(errMessage)
+		logger.Error("failed create new child job")
 		return nil, errors.FromError(err).ExtendComponent(retrySessionJobComponent)
 	}
 
 	err = uc.client.StartJob(ctx, childJob.UUID)
 	if err != nil {
-		errMessage := "failed start child job"
-		logger.WithField("child_job_uuid", childJob.UUID).Error(errMessage)
+		logger.WithField("child_job", childJob.UUID).Error("failed start child job")
 		return nil, errors.FromError(err).ExtendComponent(retrySessionJobComponent)
 	}
-
-	logger.WithField("child_job_uuid", childJob.UUID).Info("new child job created")
 
 	return childJob, nil
 }

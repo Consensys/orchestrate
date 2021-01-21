@@ -29,7 +29,7 @@ func TestSendContractTx_Execute(t *testing.T) {
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		txRequestResponse := testutils2.FakeTxRequest()
 
-		mockSendTxUC.EXPECT().Execute(ctx, txRequest, gomock.Any(), tenantID).Return(txRequestResponse, nil)
+		mockSendTxUC.EXPECT().Execute(gomock.Any(), txRequest, gomock.Any(), tenantID).Return(txRequestResponse, nil)
 
 		response, err := usecase.Execute(ctx, txRequest, tenantID)
 
@@ -40,7 +40,7 @@ func TestSendContractTx_Execute(t *testing.T) {
 	t.Run("should fail with same error if send tx use case fails", func(t *testing.T) {
 		expectedErr := fmt.Errorf("error")
 
-		mockSendTxUC.EXPECT().Execute(ctx, txRequest, gomock.Any(), tenantID).Return(nil, expectedErr)
+		mockSendTxUC.EXPECT().Execute(gomock.Any(), txRequest, gomock.Any(), tenantID).Return(nil, expectedErr)
 
 		response, err := usecase.Execute(ctx, txRequest, tenantID)
 

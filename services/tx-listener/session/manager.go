@@ -2,15 +2,17 @@ package session
 
 import (
 	"context"
+	"fmt"
 	"sync"
 
-	"github.com/containous/traefik/v2/pkg/log"
-	"github.com/sirupsen/logrus"
 	ethclientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/dynamic"
 	provider "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/providers"
 )
+
+const component = "tx-listener.session-manager"
 
 type cancelableSession struct {
 	session Session
@@ -38,6 +40,8 @@ type Manager struct {
 	commands chan *Command
 
 	errors chan error
+
+	logger *log.Logger
 }
 
 func NewManager(sessionBuilder Builder, prvdr provider.Provider) *Manager {
@@ -51,6 +55,7 @@ func NewManager(sessionBuilder Builder, prvdr provider.Provider) *Manager {
 		provider:             prvdr,
 		commands:             make(chan *Command),
 		errors:               make(chan error),
+		logger:               log.NewLogger().SetComponent(component),
 	}
 }
 
@@ -66,7 +71,7 @@ func (m *Manager) Run(ctx context.Context) error {
 func (m *Manager) run(ctx context.Context) {
 	defer func() {
 		m.wg.Wait()
-		log.WithoutContext().Infof("TxListener stopped")
+		m.logger.Infof("service stopped")
 	}()
 
 	utils.InParallel(
@@ -80,18 +85,16 @@ func (m *Manager) run(ctx context.Context) {
 		func() { m.listenCommands(ctx) },
 		func() {
 			<-ctx.Done()
-			log.WithoutContext().Infof("TxListener gracefully stopping...")
+			m.logger.WithError(ctx.Err()).Infof("service finished gracefully")
 		},
 	)
 }
 
 func (m *Manager) listenProvider(ctx context.Context) {
-	log.FromContext(ctx).Infof("Starting provider %T", m.provider)
-	// Listener MUST BE allowed to fetch chains from every tenant
-	// ctx = multitenancy.WithTenantID(ctx, multitenancy.Wildcard)
+	m.logger.WithField("provider", fmt.Sprintf("%T", m.provider)).Debug("Starting provider")
 	err := m.provider.Run(ctx, m.msgInput)
 	if err != nil {
-		log.FromContext(ctx).WithError(err).Errorf("error while listening provider")
+		m.logger.WithError(err).Errorf("error while listening provider")
 	}
 	close(m.msgInput)
 }
@@ -116,37 +119,28 @@ func (m *Manager) listenCommands(ctx context.Context) {
 }
 
 func (m *Manager) executeCommand(ctx context.Context, command *Command) {
+	ctx = log.WithFields(ctx, log.Field("chain", command.Chain.UUID), log.Field("tenant_id", command.Chain.TenantID))
 	switch command.Type {
 	case START:
 		m.runSession(ethclientutils.RetryConnectionError(ctx, true), command.Chain)
 	case STOP:
-		m.stopSession(command.Chain)
+		m.stopSession(ctx, command.Chain)
 	case UPDATE:
-		m.stopSession(command.Chain)
+		m.stopSession(ctx, command.Chain)
 		m.runSession(ctx, command.Chain)
 	default:
-		log.WithoutContext().WithFields(logrus.Fields{
-			"type":      command.Type,
-			"chainUUID": command.Chain.UUID,
-			"tenantID":  command.Chain.TenantID,
-			"chainName": command.Chain.Name,
-		}).Errorf("Unknown command")
+		m.logger.WithContext(ctx).WithField("cmd_type", command.Type).Errorf("unknown command")
 	}
 }
 
 func (m *Manager) runSession(ctx context.Context, chain *dynamic.Chain) {
+	logger := m.logger.WithContext(ctx)
 	// Build session
 	s, err := m.builder.NewSession(chain)
 	if err != nil {
-		log.FromContext(ctx).WithError(err).Errorf("error while creating new session")
+		logger.WithError(err).Errorf("failed to create a new session")
 		return
 	}
-
-	ctx = log.With(
-		ctx,
-		log.Str("session.uuid", chain.UUID),
-		log.Str("session.name", chain.Name),
-	)
 
 	// Make session cancelable session so we can stop it later on
 	ctx, cancel := context.WithCancel(ctx)
@@ -158,25 +152,25 @@ func (m *Manager) runSession(ctx context.Context, chain *dynamic.Chain) {
 	// Add session
 	m.addSession(chain.UUID, sess)
 
-	logger := log.FromContext(ctx)
 	// Start goroutine to run session
 	m.wg.Add(1)
 	go func() {
-		logger.Infof("start session")
+		logger.Info("listener session started")
 		err := sess.session.Run(ctx)
 		m.removeSession(chain.UUID)
 		if err != nil {
-			logger.WithError(err).Errorf("session error")
+			logger.WithError(err).Error("failed to remove session")
 		}
-		logger.Infof("stop session")
+		m.logger.Info("session stopped")
 		m.wg.Done()
 	}()
 }
 
-func (m *Manager) stopSession(chain *dynamic.Chain) {
+func (m *Manager) stopSession(ctx context.Context, chain *dynamic.Chain) {
+	logger := m.logger.WithContext(ctx)
 	sess, ok := m.getSession(chain.UUID)
 	if ok {
-		log.WithoutContext().WithField("session.chain.uuid", chain.UUID).Infof("Stopping session")
+		logger.Debug("stopping session")
 		sess.cancel()
 	}
 }

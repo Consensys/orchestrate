@@ -1,6 +1,7 @@
 package httpcache
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -12,6 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	mockhandler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/handler/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/middleware/httpcache/mocks"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 )
 
@@ -25,7 +27,7 @@ func TestHTTPCache_SetCacheValueSuccessful(t *testing.T) {
 	mockHandler := mockhandler.NewMockHandler(ctrl)
 	cManager := mocks.NewMockCacheManager(ctrl)
 
-	httpCache := newHTTPCache(cManager, testCacheRequest, testCacheResponse, keySuffix)
+	httpCache := newHTTPCache(cManager, testCacheRequest, testCacheResponse, keySuffix, log.NewLogger())
 	h := httpCache.Handler(mockHandler)
 
 	rw := httptest.NewRecorder()
@@ -49,7 +51,7 @@ func TestHTTPCache_SetCacheValueOnlyOnceOnConcurrentCalls(t *testing.T) {
 	mockHandler := mockhandler.NewMockHandler(ctrl)
 	cManager := mocks.NewMockCacheManager(ctrl)
 
-	httpCache := newHTTPCache(cManager, testCacheRequest, testCacheResponse, keySuffix)
+	httpCache := newHTTPCache(cManager, testCacheRequest, testCacheResponse, keySuffix, log.NewLogger())
 	h := httpCache.Handler(mockHandler)
 
 	rw := httptest.NewRecorder()
@@ -84,7 +86,7 @@ func TestHTTPCache_GetCacheValueSuccessful(t *testing.T) {
 	mockHandler := mockhandler.NewMockHandler(ctrl)
 	cManager := mocks.NewMockCacheManager(ctrl)
 
-	httpCache := newHTTPCache(cManager, testCacheRequest, testCacheResponse, keySuffix)
+	httpCache := newHTTPCache(cManager, testCacheRequest, testCacheResponse, keySuffix, log.NewLogger())
 	h := httpCache.Handler(mockHandler)
 
 	rw := httptest.NewRecorder()
@@ -110,10 +112,10 @@ func TestHTTPCache_GetCacheValueSuccessful(t *testing.T) {
 	assert.Equal(t, rBody, []byte("responseBody"))
 }
 
-func testCacheRequest(_ *http.Request) (isCached bool, key string, ttl time.Duration, err error) {
+func testCacheRequest(_ context.Context, _ *http.Request) (isCached bool, key string, ttl time.Duration, err error) {
 	return true, generatedKey, 0, nil
 }
 
-func testCacheResponse(_ *http.Response) bool {
+func testCacheResponse(_ context.Context, _ *http.Response) bool {
 	return true
 }

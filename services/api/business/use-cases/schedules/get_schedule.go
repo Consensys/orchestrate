@@ -6,8 +6,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
 
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/parsers"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models"
@@ -17,27 +17,28 @@ const getScheduleComponent = "use-cases.get-schedule"
 
 // getScheduleUseCase is a use case to get a schedule
 type getScheduleUseCase struct {
-	db store.DB
+	db     store.DB
+	logger *log.Logger
 }
 
 // NewGetScheduleUseCase creates a new GetScheduleUseCase
 func NewGetScheduleUseCase(db store.DB) usecases.GetScheduleUseCase {
 	return &getScheduleUseCase{
-		db: db,
+		db:     db,
+		logger: log.NewLogger().SetComponent(getScheduleComponent),
 	}
 }
 
 // Execute gets a schedule
 func (uc *getScheduleUseCase) Execute(ctx context.Context, scheduleUUID string, tenants []string) (*entities.Schedule, error) {
-	logger := log.WithContext(ctx).WithField("schedule_uuid", scheduleUUID)
-	logger.Debug("getting schedule")
+	ctx = log.WithFields(ctx, log.Field("schedule", scheduleUUID))
 
 	scheduleModel, err := fetchScheduleByUUID(ctx, uc.db, scheduleUUID, tenants)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(getScheduleComponent)
 	}
 
-	log.WithContext(ctx).Debug("schedule found successfully")
+	uc.logger.Debug("schedule found successfully")
 	return parsers.NewScheduleEntityFromModels(scheduleModel), nil
 }
 

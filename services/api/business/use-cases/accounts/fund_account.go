@@ -9,8 +9,8 @@ import (
 
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
 
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 )
 
@@ -20,6 +20,7 @@ type fundAccountUseCase struct {
 	searchChainsUC     usecases.SearchChainsUseCase
 	sendTxUseCase      usecases.SendTxUseCase
 	getFaucetCandidate usecases.GetFaucetCandidateUseCase
+	logger             *log.Logger
 }
 
 func NewFundAccountUseCase(
@@ -31,12 +32,13 @@ func NewFundAccountUseCase(
 		searchChainsUC:     searchChainsUC,
 		sendTxUseCase:      sendTxUseCase,
 		getFaucetCandidate: getFaucetCandidate,
+		logger:             log.NewLogger().SetComponent(fundAccountComponent),
 	}
 }
 
 func (uc *fundAccountUseCase) Execute(ctx context.Context, account *entities.Account, chainName, tenantID string) error {
-	logger := log.WithContext(ctx).WithField("address", account.Address)
-	logger.Debug("funding account...")
+	ctx = log.WithFields(ctx, log.Field("address", account.Address))
+	logger := uc.logger.WithContext(ctx)
 
 	tenants := []string{tenantID, multitenancy.DefaultTenant}
 
@@ -46,7 +48,9 @@ func (uc *fundAccountUseCase) Execute(ctx context.Context, account *entities.Acc
 	}
 
 	if len(chains) == 0 {
-		return errors.InvalidParameterError("chain does not exist")
+		errMsg := "chain does not exist"
+		logger.Warn(errMsg)
+		return errors.InvalidParameterError(errMsg).ExtendComponent(fundAccountComponent)
 	}
 
 	faucet, err := uc.getFaucetCandidate.Execute(ctx, account.Address, chains[0], tenants)
@@ -77,9 +81,8 @@ func (uc *fundAccountUseCase) Execute(ctx context.Context, account *entities.Acc
 		return errors.FromError(err).ExtendComponent(fundAccountComponent)
 	}
 
-	logger.WithField("faucet_uuid", faucet.UUID).
-		WithField("value", faucet.Amount).
-		Info("account was topped successfully (funding transaction sent)")
+	logger.WithField("faucet", faucet.UUID).WithField("value", faucet.Amount).
+		Debug("account was topped successfully (funding transaction sent)")
 
 	return nil
 }

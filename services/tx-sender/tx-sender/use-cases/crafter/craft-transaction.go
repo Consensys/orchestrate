@@ -8,8 +8,8 @@ import (
 	"github.com/ethereum/go-ethereum"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
@@ -18,11 +18,13 @@ import (
 )
 
 const estimationGasError = "cannot estimate gas usage"
+const craftTransactionComponent = "use-cases.craft-transaction"
 
 type craftTxUseCase struct {
 	nonceManager     nonce.Manager
 	ec               ethclient.MultiClient
 	chainRegistryURL string
+	logger           *log.Logger
 }
 
 func NewCraftTransactionUseCase(ec ethclient.MultiClient, chainRegistryURL string, nonceManager nonce.Manager) usecases.CraftTransactionUseCase {
@@ -30,12 +32,12 @@ func NewCraftTransactionUseCase(ec ethclient.MultiClient, chainRegistryURL strin
 		ec:               ec,
 		chainRegistryURL: chainRegistryURL,
 		nonceManager:     nonceManager,
+		logger:           log.NewLogger().SetComponent(craftTransactionComponent),
 	}
 }
 
 func (uc *craftTxUseCase) Execute(ctx context.Context, job *entities.Job) error {
-	logger := log.WithContext(ctx).WithField("job_uuid", job.UUID)
-	logger.Debug("crafting transaction job")
+	logger := uc.logger.WithContext(ctx)
 
 	if job.InternalData.ParentJobUUID == job.UUID {
 		logger.Debug("skip crafting for job resending")
@@ -43,25 +45,25 @@ func (uc *craftTxUseCase) Execute(ctx context.Context, job *entities.Job) error 
 	}
 
 	if job.Type == tx.JobType_ETH_ORION_MARKING_TX.String() {
-		if err := uc.craftEEAMarkingTx(ctx, logger, job); err != nil {
+		if err := uc.craftEEAMarkingTx(ctx, job); err != nil {
 			return err
 		}
 	}
 
 	if job.Transaction.GasPrice == "" {
-		if err := uc.craftGasPrice(ctx, logger, job); err != nil {
+		if err := uc.craftGasPrice(ctx, job); err != nil {
 			return err
 		}
 	}
 
 	if job.Transaction.Gas == "" {
-		if err := uc.craftGasEstimation(ctx, logger, job); err != nil {
+		if err := uc.craftGasEstimation(ctx, job); err != nil {
 			return err
 		}
 	}
 
 	if job.Transaction.Nonce == "" {
-		if err := uc.craftNonce(ctx, logger, job); err != nil {
+		if err := uc.craftNonce(ctx, job); err != nil {
 			return err
 		}
 	}
@@ -69,9 +71,7 @@ func (uc *craftTxUseCase) Execute(ctx context.Context, job *entities.Job) error 
 	return nil
 }
 
-func (uc *craftTxUseCase) craftNonce(ctx context.Context, logger *log.Entry, job *entities.Job) error {
-	logger.Debug("crafting nonce")
-
+func (uc *craftTxUseCase) craftNonce(ctx context.Context, job *entities.Job) error {
 	if job.InternalData.OneTimeKey || job.Type == tx.JobType_ETH_TESSERA_PRIVATE_TX.String() {
 		job.Transaction.Nonce = "0"
 	} else {
@@ -82,11 +82,12 @@ func (uc *craftTxUseCase) craftNonce(ctx context.Context, logger *log.Entry, job
 		job.Transaction.Nonce = fmt.Sprintf("%d", n)
 	}
 
-	logger.WithField("value", job.Transaction.Nonce).Debug("crafted transaction nonce")
+	uc.logger.WithContext(ctx).WithField("value", job.Transaction.Nonce).Debug("crafted transaction nonce")
 	return nil
 }
 
-func (uc *craftTxUseCase) craftEEAMarkingTx(ctx context.Context, logger *log.Entry, job *entities.Job) error {
+func (uc *craftTxUseCase) craftEEAMarkingTx(ctx context.Context, job *entities.Job) error {
+	logger := uc.logger.WithContext(ctx)
 	logger.Debug("crafting EEA precompiled contract address")
 
 	proxyURL := utils.GetProxyURL(uc.chainRegistryURL, job.ChainUUID)
@@ -102,8 +103,8 @@ func (uc *craftTxUseCase) craftEEAMarkingTx(ctx context.Context, logger *log.Ent
 	return nil
 }
 
-func (uc *craftTxUseCase) craftGasEstimation(ctx context.Context, logger *log.Entry, job *entities.Job) error {
-	logger.Debug("crafting gas estimation")
+func (uc *craftTxUseCase) craftGasEstimation(ctx context.Context, job *entities.Job) error {
+	logger := uc.logger.WithContext(ctx)
 
 	if job.Type == tx.JobType_ETH_ORION_EEA_TX.String() {
 		logger.Debug("skip gas estimation for eea private transaction")
@@ -130,7 +131,7 @@ func (uc *craftTxUseCase) craftGasEstimation(ctx context.Context, logger *log.En
 		var err error
 		call.Data, err = hexutil.Decode(job.Transaction.Data)
 		if err != nil {
-			logger.WithError(err).Errorf(estimationGasError)
+			logger.WithError(err).Error(estimationGasError)
 			return err
 		}
 	}
@@ -144,7 +145,7 @@ func (uc *craftTxUseCase) craftGasEstimation(ctx context.Context, logger *log.En
 	proxyURL := utils.GetProxyURL(uc.chainRegistryURL, job.ChainUUID)
 	gasEstimated, err := uc.ec.EstimateGas(ctx, proxyURL, call)
 	if err != nil {
-		logger.WithError(err).Errorf(estimationGasError)
+		logger.WithError(err).Error(estimationGasError)
 		return err
 	}
 
@@ -153,8 +154,8 @@ func (uc *craftTxUseCase) craftGasEstimation(ctx context.Context, logger *log.En
 	return nil
 }
 
-func (uc *craftTxUseCase) craftGasPrice(ctx context.Context, logger *log.Entry, job *entities.Job) error {
-	logger.Debug("crafting gas price")
+func (uc *craftTxUseCase) craftGasPrice(ctx context.Context, job *entities.Job) error {
+	logger := uc.logger.WithContext(ctx)
 
 	if job.Type == tx.JobType_ETH_ORION_EEA_TX.String() {
 		logger.Debug("skip gas estimation for eea private transaction")
@@ -164,8 +165,7 @@ func (uc *craftTxUseCase) craftGasPrice(ctx context.Context, logger *log.Entry, 
 	proxyURL := utils.GetProxyURL(uc.chainRegistryURL, job.ChainUUID)
 	gasPrice, err := uc.ec.SuggestGasPrice(ctx, proxyURL)
 	if err != nil {
-		errMsg := "cannot suggest gas price"
-		logger.WithError(err).Errorf(errMsg)
+		logger.WithError(err).Errorf("cannot suggest gas price")
 		return err
 	}
 

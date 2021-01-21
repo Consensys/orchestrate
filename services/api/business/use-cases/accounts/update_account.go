@@ -6,8 +6,8 @@ import (
 	parsers2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/parsers"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
 
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
 )
@@ -15,19 +15,20 @@ import (
 const updateAccountComponent = "use-cases.update-account"
 
 type updateAccountUseCase struct {
-	db store.DB
+	db     store.DB
+	logger *log.Logger
 }
 
 func NewUpdateAccountUseCase(db store.DB) usecases.UpdateAccountUseCase {
 	return &updateAccountUseCase{
-		db: db,
+		db:     db,
+		logger: log.NewLogger().SetComponent(updateAccountComponent),
 	}
 }
 
 func (uc *updateAccountUseCase) Execute(ctx context.Context, account *entities.Account, tenants []string) (*entities.Account, error) {
-	log.WithContext(ctx).WithField("address", account.Address).
-		WithField("tenants", tenants).
-		Debug("updating account")
+	ctx = log.WithFields(ctx, log.Field("address", account.Address))
+	logger := uc.logger.WithContext(ctx)
 
 	model, err := uc.db.Account().FindOneByAddress(ctx, account.Address, tenants)
 	if err != nil {
@@ -48,6 +49,6 @@ func (uc *updateAccountUseCase) Execute(ctx context.Context, account *entities.A
 
 	resp := parsers2.NewAccountEntityFromModels(model)
 
-	log.WithContext(ctx).Debug("account updated successfully")
+	logger.Info("account updated successfully")
 	return resp, nil
 }

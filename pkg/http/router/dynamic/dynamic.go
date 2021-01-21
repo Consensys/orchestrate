@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
-	"github.com/containous/traefik/v2/pkg/log"
+	tlog "github.com/containous/traefik/v2/pkg/log"
 	"github.com/containous/traefik/v2/pkg/middlewares/requestdecorator"
 	"github.com/containous/traefik/v2/pkg/rules"
 	traefiktypes "github.com/containous/traefik/v2/pkg/types"
@@ -21,6 +21,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/middleware"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/middleware/accesslog"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/router"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	tlsmanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tls/manager"
 )
 
@@ -36,6 +37,7 @@ type Builder struct {
 	epaccesslogs map[string]func(http http.Handler) http.Handler
 
 	reqdecorator *requestdecorator.RequestDecorator
+	logger       *log.Logger
 }
 
 func NewBuilder(staticCfg *traefikstatic.Configuration, epLogConfigs map[string]*traefiktypes.AccessLog) *Builder {
@@ -44,13 +46,14 @@ func NewBuilder(staticCfg *traefikstatic.Configuration, epLogConfigs map[string]
 		accesslog:    accesslog.NewBuilder(),
 		epaccesslogs: make(map[string]func(http http.Handler) http.Handler),
 		reqdecorator: requestdecorator.New(staticCfg.HostResolver),
+		logger:       log.NewLogger().SetComponent("router"),
 	}
 
 	for epName, logConfig := range epLogConfigs {
-		ctx := log.With(context.Background(), log.Str("entrypoint", epName))
+		ctx := tlog.With(context.Background(), tlog.Str("entrypoint", epName))
 		mid, _, err := b.accesslog.Build(ctx, epName, logConfig)
 		if err != nil {
-			log.FromContext(ctx).WithError(err).Errorf("could not build entrypoint access log middleware")
+			b.logger.WithContext(ctx).WithError(err).Errorf("could not build entrypoint access log middleware")
 		}
 		b.epaccesslogs[epName] = mid
 	}
@@ -92,11 +95,12 @@ func (b *Builder) buildRouters(ctx context.Context, routers map[string]*router.R
 	}
 
 	for entryPointName, rtInfos := range infos.RouterInfosByEntryPoint(ctx, entryPointNames, isTLS) {
-		epCtx := log.With(
+		logger := b.logger.WithField("entrypoint", entryPointName)
+		epCtx := tlog.With(
 			httputil.WithEntryPoint(ctx, entryPointName),
-			log.Str("entrypoint", entryPointName),
+			tlog.Str("entrypoint", entryPointName),
 		)
-		log.FromContext(epCtx).WithField("tls", isTLS).Debugf("building entrypoint router")
+		logger.Debug("building entrypoint router")
 
 		mux, err := rules.NewRouter()
 		if err != nil {
@@ -105,22 +109,22 @@ func (b *Builder) buildRouters(ctx context.Context, routers map[string]*router.R
 
 		epAccessLogMiddleware, ok := b.epaccesslogs[entryPointName]
 		if ok {
-			log.FromContext(epCtx).Debugf("accesslog activated on entrypoint")
+			logger.Debugf("accesslog activated on entrypoint")
 		}
 
 		for routerName, rtInfo := range rtInfos {
-			rtCtx := log.With(
+			logger := b.logger.WithField("router_name", routerName)
+			rtCtx := tlog.With(
 				httputil.WithRouter(provider.WithName(epCtx, routerName), routerName),
-				log.Str("router", routerName),
+				tlog.Str("router_name", routerName),
 			)
-			logger := log.FromContext(rtCtx)
 
 			logger.WithFields(logrus.Fields{
 				"rule.name":    rtInfo.Router.Rule,
 				"middlewares":  rtInfo.Router.Middlewares,
 				"service.name": rtInfo.Router.Service,
 				"priority":     rtInfo.Router.Priority,
-			}).Debugf("building route")
+			}).Debug("building route")
 
 			var h http.Handler
 			h, err = b.buildHandler(rtCtx, routerName, rtInfo, infos, epAccessLogMiddleware)
@@ -190,7 +194,7 @@ func (b *Builder) buildHandler(ctx context.Context, routerName string, rtInfo *r
 	return mid(h), rvErr
 }
 
-func (b *Builder) buildMiddleware(ctx context.Context, routerName string, rtInfo *runtime.RouterInfo, infos *runtime.Infos, accessLog func(http.Handler) http.Handler) (func(http.Handler) http.Handler, func(*http.Response) error, error) { //nolint
+func (b *Builder) buildMiddleware(ctx context.Context, routerName string, rtInfo *runtime.RouterInfo, infos *runtime.Infos, accessLog func(http.Handler) http.Handler) (func(http.Handler) http.Handler, func(*http.Response) error, error) { // nolint
 	chain := alice.New()
 	var respModifiers []func(resp *http.Response) error
 	var rvErr error
@@ -203,7 +207,7 @@ func (b *Builder) buildMiddleware(ctx context.Context, routerName string, rtInfo
 			nil,
 		)
 		if err != nil {
-			log.FromContext(ctx).WithError(err).Error("could not build metrics middleware")
+			b.logger.WithError(err).Error("could not build metrics middleware")
 			rvErr = err
 		} else {
 			if mid != nil {
@@ -218,17 +222,17 @@ func (b *Builder) buildMiddleware(ctx context.Context, routerName string, rtInfo
 
 	for _, midName := range rtInfo.Middlewares {
 		midCtx := httputil.WithMiddleware(ctx, midName)
-		logger := log.FromContext(midCtx).WithField("middleware", midName)
+		logger := b.logger.WithContext(midCtx).WithField("middleware", midName)
 
 		// In case a services is missing one of the middleware configurationg we skip it usage and warning
 		if infos.Middlewares[midName] == nil {
-			logger.Warnf("middleware %q missing in dynamic configuration", midName)
+			logger.Warn("missing in dynamic configuration")
 			continue
 		}
 
 		if infos.Middlewares[midName].Middleware == nil {
 			rvErr = fmt.Errorf("middleware %q configuration is empty", midName)
-			logger.WithError(rvErr).Error("could not build middleware")
+			logger.Error("failed to build middleware with empty configuration")
 			rtInfo.AddError(rvErr, true)
 			continue
 		}
@@ -281,7 +285,7 @@ func (b *Builder) buildMiddleware(ctx context.Context, routerName string, rtInfo
 	}
 
 	if accessLog != nil {
-		log.FromContext(ctx).Debugf("add entrypoint accesslog")
+		b.logger.Debugf("added entrypoint accesslog")
 		chain = alice.New(accessLog).Extend(chain)
 	}
 
@@ -289,7 +293,7 @@ func (b *Builder) buildMiddleware(ctx context.Context, routerName string, rtInfo
 }
 
 func (b *Builder) buildService(ctx context.Context, serviceName string, srvInfo *runtime.ServiceInfo, infos *runtime.Infos, respModifier func(*http.Response) error) (http.Handler, error) {
-	logger := log.FromContext(ctx).WithField("service.name", serviceName)
+	logger := b.logger.WithField("service_name", serviceName)
 
 	switch {
 	case srvInfo.Service.Dashboard != nil:
@@ -319,7 +323,7 @@ func (b *Builder) buildService(ctx context.Context, serviceName string, srvInfo 
 		}
 		return h, nil
 	default:
-		logger.Debugf("no handler builder registered")
+		logger.Debug("no handler builder registered")
 		return http.NotFoundHandler(), fmt.Errorf("no handler to build (falling back on NotFound)")
 	}
 }

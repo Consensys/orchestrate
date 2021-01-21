@@ -3,8 +3,8 @@ package chains
 import (
 	"context"
 
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/parsers"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
@@ -15,20 +15,22 @@ const getChainComponent = "use-cases.get-chain"
 
 // getChainUseCase is a use case to get a faucet
 type getChainUseCase struct {
-	db store.DB
+	db     store.DB
+	logger *log.Logger
 }
 
 // NewGetChainUseCase creates a new GetChainUseCase
 func NewGetChainUseCase(db store.DB) usecases.GetChainUseCase {
 	return &getChainUseCase{
-		db: db,
+		db:     db,
+		logger: log.NewLogger().SetComponent(getChainComponent),
 	}
 }
 
 // Execute gets a chain
 func (uc *getChainUseCase) Execute(ctx context.Context, uuid string, tenants []string) (*entities.Chain, error) {
-	logger := log.WithContext(ctx).WithField("chain_uuid", uuid).WithField("tenants", tenants)
-	logger.Debug("getting chain")
+	ctx = log.WithFields(ctx, log.Field("chain", uuid))
+	logger := uc.logger.WithContext(ctx)
 
 	chainModel, err := uc.db.Chain().FindOneByUUID(ctx, uuid, tenants)
 	if err != nil {

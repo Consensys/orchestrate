@@ -5,7 +5,6 @@ import (
 	"time"
 
 	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
-	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/dgraph-io/ristretto"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
@@ -67,7 +66,6 @@ func NewConfig() *Config {
 	cacheStr := viper.GetDuration(CacheTTLViperKey)
 	if cacheStr != time.Duration(0) {
 		cfg.ProxyCacheTTL = &cacheStr
-		log.WithoutContext().Info("proxy cache is enabled.")
 	}
 
 	return cfg

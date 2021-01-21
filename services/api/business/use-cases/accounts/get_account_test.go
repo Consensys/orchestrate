@@ -31,7 +31,7 @@ func TestGetAccount_Execute(t *testing.T) {
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		iden := testutils.FakeAccountModel()
 
-		accountAgent.EXPECT().FindOneByAddress(ctx, iden.Address, tenants).Return(iden, nil)
+		accountAgent.EXPECT().FindOneByAddress(gomock.Any(), iden.Address, tenants).Return(iden, nil)
 
 		resp, err := usecase.Execute(ctx, iden.Address, tenants)
 
@@ -43,7 +43,7 @@ func TestGetAccount_Execute(t *testing.T) {
 		expectedErr := errors.NotFoundError("error")
 		acc := testutils.FakeAccountModel()
 
-		accountAgent.EXPECT().FindOneByAddress(ctx, acc.Address, tenants).Return(nil, expectedErr)
+		accountAgent.EXPECT().FindOneByAddress(gomock.Any(), acc.Address, tenants).Return(nil, expectedErr)
 
 		_, err := usecase.Execute(ctx, acc.Address, tenants)
 

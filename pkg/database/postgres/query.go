@@ -7,7 +7,6 @@ import (
 	"github.com/go-pg/pg/v9"
 	"github.com/go-pg/pg/v9/orm"
 	healthz "github.com/heptiolabs/healthcheck"
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
 	ierror "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/error"
@@ -18,41 +17,32 @@ var alreadyExistErr = "entity already exists in DB"
 var integrityErr = "insert integrity violation"
 
 func Insert(ctx context.Context, db DB, models ...interface{}) *ierror.Error {
-	logger := log.WithContext(ctx)
 	_, err := db.ModelContext(ctx, models...).Insert()
 	if err != nil {
 		pgErr, ok := err.(pg.Error)
 		if ok && errors.IsAlreadyExistsError(err) {
-			logger.WithError(err).Error(alreadyExistErr)
 			return errors.AlreadyExistsError(alreadyExistErr)
 		} else if ok && pgErr.IntegrityViolation() {
-			logger.WithError(err).Error(integrityErr)
 			return errors.ConstraintViolatedError(integrityErr)
 		}
 
-		errMsg := "error executing insert by model"
-		logger.WithError(err).Error(errMsg)
-		return errors.PostgresConnectionError(errMsg)
+		return errors.PostgresConnectionError("error executing insert by model")
 	}
 
 	return nil
 }
 
-func InsertQuery(ctx context.Context, q *orm.Query) *ierror.Error {
-	logger := log.WithContext(ctx)
+func InsertQuery(_ context.Context, q *orm.Query) *ierror.Error {
 	_, err := q.Insert()
 	if err != nil {
 		pgErr, ok := err.(pg.Error)
 		if ok && errors.IsAlreadyExistsError(err) {
-			logger.WithError(err).Error(alreadyExistErr)
 			return errors.AlreadyExistsError(alreadyExistErr)
 		} else if ok && pgErr.IntegrityViolation() {
-			logger.WithError(err).Error(integrityErr)
 			return errors.ConstraintViolatedError(integrityErr)
 		}
 
 		errMsg := "error executing insert by query"
-		logger.WithError(err).Error(errMsg)
 		return errors.PostgresConnectionError(errMsg)
 	}
 
@@ -60,127 +50,91 @@ func InsertQuery(ctx context.Context, q *orm.Query) *ierror.Error {
 }
 
 func Update(ctx context.Context, db DB, models ...interface{}) *ierror.Error {
-	logger := log.WithContext(ctx)
 	_, err := db.ModelContext(ctx, models...).WherePK().Update()
 	if err != nil {
 		pgErr, ok := err.(pg.Error)
 		if ok && errors.IsAlreadyExistsError(err) {
-			errMsg := "entity cannot be updated in DB"
-			logger.WithError(err).Error(errMsg)
-			return errors.AlreadyExistsError(errMsg)
+			return errors.AlreadyExistsError("entity cannot be updated in DB")
 		} else if ok && pgErr.IntegrityViolation() {
-			errMsg := "update integrity violation"
-			logger.WithError(err).Error(errMsg)
-			return errors.PostgresConnectionError(errMsg)
+			return errors.PostgresConnectionError("update integrity violation")
 		}
 
-		errMsg := "error executing update"
-		logger.WithError(err).Error(errMsg)
-		return errors.PostgresConnectionError(errMsg)
+		return errors.PostgresConnectionError("error executing update")
 	}
 	return nil
 }
 
 func UpdateNotZero(ctx context.Context, q *orm.Query) *ierror.Error {
-	logger := log.WithContext(ctx)
 	_, err := q.Context(ctx).UpdateNotZero()
 	if err != nil {
 		pgErr, ok := err.(pg.Error)
 		if ok && errors.IsAlreadyExistsError(err) {
-			errMsg := "entity cannot be non zero updated in DB"
-			logger.WithError(err).Error(errMsg)
-			return errors.AlreadyExistsError(errMsg)
+			return errors.AlreadyExistsError("entity cannot be non zero updated in DB")
 		} else if ok && pgErr.IntegrityViolation() {
-			errMsg := "non zero update integrity violation"
-			logger.WithError(err).Error(errMsg)
-			return errors.PostgresConnectionError(errMsg)
+			return errors.PostgresConnectionError("non zero update integrity violation")
 		}
 
-		errMsg := "error executing non zero update"
-		logger.WithError(err).Error(errMsg)
-		return errors.PostgresConnectionError(errMsg)
+		return errors.PostgresConnectionError("error executing non zero update")
 	}
 	return nil
 }
 
 func Delete(ctx context.Context, q *orm.Query) *ierror.Error {
-	logger := log.WithContext(ctx)
-
 	_, err := q.Context(ctx).Delete()
 	if err != nil {
 		pgErr, ok := err.(pg.Error)
 		if ok && pgErr.IntegrityViolation() {
-			errMsg := "delete integrity violation"
-			logger.WithError(err).Error(errMsg)
-			return errors.PostgresConnectionError(errMsg)
+			return errors.PostgresConnectionError("delete integrity violation")
 		}
 
-		errMsg := "error executing delete"
-		logger.WithError(err).Error(errMsg)
-		return errors.PostgresConnectionError(errMsg)
+		return errors.PostgresConnectionError("error executing delete")
 	}
 
 	return nil
 }
 
 func Select(ctx context.Context, q *orm.Query) *ierror.Error {
-	logger := log.WithContext(ctx)
-
 	err := q.Context(ctx).Select()
 	if err != nil && err == pg.ErrNoRows {
 		return errors.NotFoundError("entities cannot be found")
 	} else if err != nil {
-		errMsg := "could not load entities"
-		logger.WithError(err).Error(errMsg)
-		return errors.PostgresConnectionError(errMsg)
+		return errors.PostgresConnectionError("could not load entities")
 	}
 
 	return nil
 }
 
 func SelectColumn(ctx context.Context, q *orm.Query, result interface{}) *ierror.Error {
-	logger := log.WithContext(ctx)
-
 	err := q.Context(ctx).Select(result)
 	if err != nil && err == pg.ErrNoRows {
 		return errors.NotFoundError("entities cannot be found")
 	} else if err != nil {
-		errMsg := "could not load columns"
-		logger.WithError(err).Error(errMsg)
-		return errors.PostgresConnectionError(errMsg)
+		return errors.PostgresConnectionError("could not load columns")
 	}
 
 	return nil
 }
 
 func SelectOrInsert(ctx context.Context, q *orm.Query) *ierror.Error {
-	logger := log.WithContext(ctx)
-
 	_, err := q.Context(ctx).SelectOrInsert()
 	if err != nil {
 		pgErr, ok := err.(pg.Error)
 		if ok && pgErr.IntegrityViolation() {
-			logger.WithError(err).Error(integrityErr)
 			return errors.ConstraintViolatedError(integrityErr)
 		}
 
-		errMsg := "error executing select or insert"
-		logger.WithError(err).Error(errMsg)
-		return errors.PostgresConnectionError(errMsg)
+		return errors.PostgresConnectionError("error executing select or insert")
 	}
 
 	return nil
 }
 
 func SelectOne(ctx context.Context, q *orm.Query) *ierror.Error {
-	logger := log.WithContext(ctx)
 	err := q.Context(ctx).First()
 	if err != nil && err == pg.ErrNoRows {
 		return errors.NotFoundError("entity does not exist")
 	} else if err != nil {
-		errMsg := "could not load entity"
-		logger.WithError(err).Error(errMsg)
-		return errors.PostgresConnectionError(errMsg)
+		return errors.PostgresConnectionError("could not load entity")
 	}
 	return nil
 }

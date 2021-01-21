@@ -8,9 +8,9 @@ import (
 	"fmt"
 
 	"github.com/gofrs/uuid"
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
@@ -30,6 +30,7 @@ type sendTxUsecase struct {
 	createScheduleUC   usecases.CreateScheduleUseCase
 	getTxUC            usecases.GetTxUseCase
 	getFaucetCandidate usecases.GetFaucetCandidateUseCase
+	logger             *log.Logger
 }
 
 // NewSendTxUseCase creates a new SendTxUseCase
@@ -50,12 +51,14 @@ func NewSendTxUseCase(
 		createScheduleUC:   createScheduleUC,
 		getTxUC:            getTxUC,
 		getFaucetCandidate: getFaucetCandidate,
+		logger:             log.NewLogger().SetComponent(sendTxComponent),
 	}
 }
 
 // Execute validates, creates and starts a new transaction
 func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequest, txData, tenantID string) (*entities.TxRequest, error) {
-	logger := log.WithContext(ctx).WithField("idempotency_key", txRequest.IdempotencyKey)
+	ctx = log.WithFields(ctx, log.Field("idempotency-key", txRequest.IdempotencyKey))
+	logger := uc.logger.WithContext(ctx)
 	logger.Debug("creating new transaction")
 
 	allowedTenants := []string{tenantID, multitenancy.DefaultTenant}
@@ -63,12 +66,14 @@ func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequ
 	// Step 1: Get chain from chain registry
 	chain, err := uc.getChain(ctx, txRequest.ChainName, allowedTenants)
 	if err != nil {
+		logger.WithError(err).WithField("chain_name", txRequest.ChainName).Error("failed to get chain")
 		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
 	}
 
 	// Step 2: Generate request hash
 	requestHash, err := generateRequestHash(chain.UUID, txRequest.Params)
 	if err != nil {
+		logger.WithError(err).Error("failed to generate request hash")
 		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
 	}
 
@@ -99,7 +104,7 @@ func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequ
 		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
 	}
 
-	logger.WithField("schedule.uuid", txRequest.Schedule.UUID).Info("send transaction request created successfully")
+	logger.WithField("schedule", txRequest.Schedule.UUID).Info("transaction created successfully")
 	return txRequest, nil
 }
 
@@ -111,7 +116,6 @@ func (uc *sendTxUsecase) getChain(ctx context.Context, chainName string, tenants
 
 	if len(chains) == 0 {
 		errMessage := fmt.Sprintf("chain '%s' does not exist", chainName)
-		log.WithContext(ctx).WithError(err).WithField("chain_name", chainName).Error(errMessage)
 		return nil, errors.InvalidParameterError(errMessage)
 	}
 
@@ -134,8 +138,8 @@ func (uc *sendTxUsecase) selectOrInsertTxRequest(
 	case err != nil:
 		return nil, err
 	case txRequestModel != nil && txRequestModel.RequestHash != requestHash:
-		errMessage := "a transaction request with the same idempotency key and different params already exists"
-		log.WithField("idempotency_key", txRequestModel.IdempotencyKey).Error(errMessage)
+		errMessage := "transaction request with the same idempotency key and different params already exists"
+		uc.logger.Error(errMessage)
 		return nil, errors.AlreadyExistsError(errMessage)
 	default:
 		return uc.getTxUC.Execute(ctx, txRequestModel.Schedule.UUID, []string{tenantID})
@@ -198,8 +202,7 @@ func (uc *sendTxUsecase) startFaucetJob(ctx context.Context, account, scheduleUU
 		return nil
 	}
 
-	logger := log.WithContext(ctx).WithField("chain_uuid", chain.UUID)
-
+	logger := uc.logger.WithContext(ctx).WithField("chain", chain.UUID)
 	faucet, err := uc.getFaucetCandidate.Execute(ctx, account, chain, []string{tenantID, multitenancy.DefaultTenant})
 	if err != nil {
 		if errors.IsNotFoundError(err) {
@@ -208,7 +211,7 @@ func (uc *sendTxUsecase) startFaucetJob(ctx context.Context, account, scheduleUU
 
 		return errors.FromError(err).ExtendComponent(sendTxComponent)
 	}
-	logger.WithField("faucet_amount", faucet.Amount).Info("faucet: credit approved")
+	logger.WithField("faucet_amount", faucet.Amount).Debug("faucet: credit approved")
 
 	txJob := &entities.Job{
 		ScheduleUUID: scheduleUUID,

@@ -9,15 +9,16 @@ import (
 	"strings"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sender/store"
 )
 
+const component = "nonce-manager"
 const fetchNonceErr = "cannot retrieve fetch nonce from chain"
 
 //go:generate mockgen -source=manager.go -destination=mocks/manager.go -package=mocks
@@ -34,6 +35,7 @@ type nonceManager struct {
 	recovery         store.RecoveryTracker
 	maxRecovery      uint64
 	chainRegistryURL string
+	logger           *log.Logger
 }
 
 func NewNonceManager(ec ethclient.MultiClient, nm store.NonceSender, tracker store.RecoveryTracker, chainRegistryURL string,
@@ -44,12 +46,12 @@ func NewNonceManager(ec ethclient.MultiClient, nm store.NonceSender, tracker sto
 		recovery:         tracker,
 		maxRecovery:      maxRecovery,
 		chainRegistryURL: chainRegistryURL,
+		logger:           log.NewLogger().SetComponent(component),
 	}
 }
 
 func (nc *nonceManager) GetNonce(ctx context.Context, job *entities.Job) (uint64, error) {
-	logger := log.WithContext(ctx).WithField("job_uuid", job.UUID)
-	logger.Debug("crafting transaction nonce")
+	logger := nc.logger.WithContext(ctx).WithField("job", job.UUID)
 
 	nonceKey := partitionKey(job)
 	if nonceKey == "" {
@@ -75,15 +77,14 @@ func (nc *nonceManager) GetNonce(ctx context.Context, job *entities.Job) (uint64
 			return 0, err
 		}
 
-		logger.WithField("pending_nonce", expectedNonce).Info("calibrating nonce")
+		logger.WithField("pending_nonce", expectedNonce).Debug("calibrating nonce")
 	}
 
 	return expectedNonce, nil
 }
 
 func (nc *nonceManager) CleanNonce(ctx context.Context, job *entities.Job, jobErr error) error {
-	logger := log.WithContext(ctx).WithField("job_uuid", job.UUID)
-	logger.Debug("checking job nonce on failure")
+	logger := nc.logger.WithContext(ctx).WithField("job", job.UUID)
 
 	if job.InternalData.ParentJobUUID == job.UUID {
 		logger.Debug("ignored nonce errors in children jobs")
@@ -110,7 +111,7 @@ func (nc *nonceManager) CleanNonce(ctx context.Context, job *entities.Job, jobEr
 	// Clean nonce value only if it was used to set the txNonce
 	lastSentNonce, ok, _ := nc.nonce.GetLastSent(nonceKey)
 	if ok && txNonce == lastSentNonce+1 {
-		logger.Debug("cleaning noncemanager")
+		logger.WithField("last_sent", lastSentNonce).Debug("cleaning account nonce")
 		if err := nc.nonce.DeleteLastSent(nonceKey); err != nil {
 			logger.WithError(err).Error("cannot clean NonceManager LastSent")
 			return err
@@ -125,8 +126,7 @@ func (nc *nonceManager) CleanNonce(ctx context.Context, job *entities.Job, jobEr
 }
 
 func (nc *nonceManager) IncrementNonce(ctx context.Context, job *entities.Job) error {
-	logger := log.WithContext(ctx).WithField("job_uuid", job.UUID)
-	logger.Debug("checking job nonce on success")
+	logger := nc.logger.WithContext(ctx).WithField("job", job.UUID)
 
 	nonceKey := partitionKey(job)
 	txNonce, _ := strconv.ParseUint(job.Transaction.Nonce, 10, 64)
@@ -134,15 +134,14 @@ func (nc *nonceManager) IncrementNonce(ctx context.Context, job *entities.Job) e
 	// Set nonce value only if txNonce was using previous value
 	lastSentNonce, ok, _ := nc.nonce.GetLastSent(nonceKey)
 	if !ok || txNonce == lastSentNonce+1 {
-		logger.WithField("lastSent", txNonce).Debug("set noncemanager value")
 		err := nc.nonce.SetLastSent(nonceKey, txNonce)
 		if err != nil {
-			errMsg := "could not store last sent nonce"
-			logger.WithError(err).Error(errMsg)
+			logger.WithError(err).Error("could not store last sent nonce")
 			return err
 		}
 	}
 
+	logger.WithField("last_sent", txNonce).Debug("increment account nonce value")
 	nc.recovery.Recovered(job.UUID)
 	return nil
 }

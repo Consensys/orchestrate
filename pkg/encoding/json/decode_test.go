@@ -54,7 +54,7 @@ func TestUnmarshalBody(t *testing.T) {
 			body:           func() []byte { return []byte(`{"unknownField":"error"}`) },
 			input:          &mockBody{},
 			expectedOutput: &mockBody{},
-			expectedError:  errors.InvalidFormatError("json: unknown field \"unknownField\"").ExtendComponent(component),
+			expectedError:  errors.InvalidFormatError("failed to decode request body (json: unknown field \"unknownField\")"),
 		},
 		{
 			name: "twice same URL field",
@@ -67,7 +67,7 @@ func TestUnmarshalBody(t *testing.T) {
 			},
 			input:          &mockBody{},
 			expectedOutput: &mockBody{Name: "testName", URLs: []string{"http://test.com", "http://test.com"}},
-			expectedError:  errors.InvalidParameterError("invalid body, with: field validation for 'URLs' failed on the 'unique' tag").ExtendComponent(component),
+			expectedError:  errors.InvalidParameterError("invalid body (field validation for 'URLs' failed on the 'unique' tag)"),
 		},
 	}
 

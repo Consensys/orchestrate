@@ -3,9 +3,9 @@ package dataagents
 import (
 	"context"
 
-	log "github.com/sirupsen/logrus"
 	pkgpg "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database/postgres"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models"
 )
@@ -13,11 +13,12 @@ import (
 const codeHashDAComponent = "data-agents.code_hash"
 
 type PGCodeHash struct {
-	db pkgpg.DB
+	db     pkgpg.DB
+	logger *log.Logger
 }
 
 func NewPGCodeHash(db pkgpg.DB) store.CodeHashAgent {
-	return &PGCodeHash{db: db}
+	return &PGCodeHash{db: db, logger: log.NewLogger().SetComponent(codeHashDAComponent)}
 }
 
 func (agent *PGCodeHash) Insert(ctx context.Context, codehash *models.CodehashModel) error {
@@ -31,8 +32,8 @@ func (agent *PGCodeHash) Insert(ctx context.Context, codehash *models.CodehashMo
 		Insert()
 
 	if err != nil {
-		errMessage := "could not create codehash"
-		log.WithError(err).Error(errMessage)
+		errMessage := "could not insert codehash"
+		agent.logger.WithContext(ctx).WithError(err).Error(errMessage)
 		return errors.PostgresConnectionError(errMessage).ExtendComponent(codeHashDAComponent)
 	}
 

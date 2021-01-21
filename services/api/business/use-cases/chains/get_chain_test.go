@@ -32,7 +32,7 @@ func TestGetChain_Execute(t *testing.T) {
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		chainModel := testutils.FakeChainModel()
 
-		chainAgent.EXPECT().FindOneByUUID(ctx, chainModel.UUID, tenants).Return(chainModel, nil)
+		chainAgent.EXPECT().FindOneByUUID(gomock.Any(), chainModel.UUID, tenants).Return(chainModel, nil)
 
 		resp, err := usecase.Execute(ctx, chainModel.UUID, tenants)
 
@@ -43,7 +43,7 @@ func TestGetChain_Execute(t *testing.T) {
 	t.Run("should fail with same error if get chain fails", func(t *testing.T) {
 		expectedErr := errors.NotFoundError("error")
 
-		chainAgent.EXPECT().FindOneByUUID(ctx, "uuid", tenants).Return(nil, expectedErr)
+		chainAgent.EXPECT().FindOneByUUID(gomock.Any(), "uuid", tenants).Return(nil, expectedErr)
 
 		resp, err := usecase.Execute(ctx, "uuid", tenants)
 

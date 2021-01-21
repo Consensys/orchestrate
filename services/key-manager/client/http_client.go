@@ -90,7 +90,6 @@ func (c *HTTPClient) getAccount(ctx context.Context, accountType, address, names
 
 func (c *HTTPClient) createAccount(ctx context.Context, accountType string, req, resp interface{}) error {
 	reqURL := fmt.Sprintf("%v/%s/accounts", c.config.URL, accountType)
-	fmt.Println(reqURL)
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, req)
 	if err != nil {
 		errMessage := "error while creating account"

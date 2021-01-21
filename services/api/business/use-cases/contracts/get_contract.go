@@ -5,8 +5,8 @@ import (
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
 
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
 )
@@ -14,21 +14,23 @@ import (
 const getContractComponent = "use-cases.get-contract"
 
 type getContractUseCase struct {
-	agent store.ArtifactAgent
+	agent  store.ArtifactAgent
+	logger *log.Logger
 }
 
 func NewGetContractUseCase(agent store.ArtifactAgent) usecases.GetContractUseCase {
 	return &getContractUseCase{
-		agent: agent,
+		agent:  agent,
+		logger: log.NewLogger().SetComponent(getContractComponent),
 	}
 }
 
 // Execute gets a contract from DB
-func (usecase *getContractUseCase) Execute(ctx context.Context, name, tag string) (*entities.Contract, error) {
-	logger := log.WithContext(ctx).WithField("name", name).WithField("tag", tag)
-	logger.Debug("getting contract")
+func (uc *getContractUseCase) Execute(ctx context.Context, name, tag string) (*entities.Contract, error) {
+	ctx = log.WithFields(ctx, log.Field("contract_name", name), log.Field("contract_tag", name))
+	logger := uc.logger.WithContext(ctx)
 
-	artifact, err := usecase.agent.FindOneByNameAndTag(ctx, name, tag)
+	artifact, err := uc.agent.FindOneByNameAndTag(ctx, name, tag)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(getContractComponent)
 	}

@@ -5,6 +5,7 @@ import (
 
 	pg "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database/postgres"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models"
 )
@@ -13,12 +14,13 @@ const methodDAComponent = "data-agents.method"
 
 // PGAccount is an Account data agent for PostgreSQL
 type PGMethod struct {
-	db pg.DB
+	db     pg.DB
+	logger *log.Logger
 }
 
 // NewPGAccount creates a new PGAccount
 func NewPGMethod(db pg.DB) store.MethodAgent {
-	return &PGMethod{db: db}
+	return &PGMethod{db: db, logger: log.NewLogger().SetComponent(methodDAComponent)}
 }
 
 func (agent *PGMethod) InsertMultiple(ctx context.Context, methods []*models.MethodModel) error {
@@ -27,6 +29,7 @@ func (agent *PGMethod) InsertMultiple(ctx context.Context, methods []*models.Met
 
 	err := pg.InsertQuery(ctx, query)
 	if err != nil {
+		agent.logger.WithContext(ctx).WithError(err).Error("failed to insert multiple contract methods")
 		return errors.FromError(err).ExtendComponent(methodDAComponent)
 	}
 
@@ -43,6 +46,9 @@ func (agent *PGMethod) FindOneByAccountAndSelector(ctx context.Context, chainID,
 
 	err := pg.SelectOne(ctx, query)
 	if err != nil {
+		if !errors.IsNotFoundError(err) {
+			agent.logger.WithContext(ctx).WithError(err).Error("failed to find contract method by account")
+		}
 		return nil, errors.FromError(err).ExtendComponent(methodDAComponent)
 	}
 
@@ -56,6 +62,9 @@ func (agent *PGMethod) FindDefaultBySelector(ctx context.Context, selector []byt
 
 	err := pg.Select(ctx, query)
 	if err != nil {
+		if !errors.IsNotFoundError(err) {
+			agent.logger.WithContext(ctx).WithError(err).Error("failed to find default contract method")
+		}
 		return nil, errors.FromError(err).ExtendComponent(methodDAComponent)
 	}
 

@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/containous/traefik/v2/pkg/log"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	clientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/client-utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/httputil"
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
@@ -20,9 +18,7 @@ func (c *HTTPClient) GetChain(ctx context.Context, uuid string) (*types.ChainRes
 	err := callWithBackOff(ctx, c.config.backOff, func() error {
 		response, err := clientutils.GetRequest(ctx, c.client, reqURL)
 		if err != nil {
-			errMessage := "error while getting chain"
-			log.FromContext(ctx).WithError(err).Error(errMessage)
-			return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+			return err
 		}
 
 		defer clientutils.CloseResponse(response)
@@ -48,9 +44,7 @@ func (c *HTTPClient) SearchChains(ctx context.Context, filters *entities.ChainFi
 	err := callWithBackOff(ctx, c.config.backOff, func() error {
 		response, err := clientutils.GetRequest(ctx, c.client, reqURL)
 		if err != nil {
-			errMessage := "error while searching chains"
-			log.FromContext(ctx).WithError(err).Error(errMessage)
-			return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+			return err
 		}
 		defer clientutils.CloseResponse(response)
 		return httputil.ParseResponse(ctx, response, &resp)
@@ -66,9 +60,7 @@ func (c *HTTPClient) RegisterChain(ctx context.Context, request *types.RegisterC
 	err := callWithBackOff(ctx, c.config.backOff, func() error {
 		response, err := clientutils.PostRequest(ctx, c.client, reqURL, request)
 		if err != nil {
-			errMessage := "error while registering chain"
-			log.FromContext(ctx).WithError(err).Error(errMessage)
-			return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+			return err
 		}
 		defer clientutils.CloseResponse(response)
 		return httputil.ParseResponse(ctx, response, resp)
@@ -84,9 +76,7 @@ func (c *HTTPClient) UpdateChain(ctx context.Context, uuid string, request *type
 	err := callWithBackOff(ctx, c.config.backOff, func() error {
 		response, err := clientutils.PatchRequest(ctx, c.client, reqURL, request)
 		if err != nil {
-			errMessage := "error while updating chain"
-			log.FromContext(ctx).WithError(err).Error(errMessage)
-			return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+			return err
 		}
 
 		defer clientutils.CloseResponse(response)
@@ -101,9 +91,7 @@ func (c *HTTPClient) DeleteChain(ctx context.Context, uuid string) error {
 
 	response, err := clientutils.DeleteRequest(ctx, c.client, reqURL)
 	if err != nil {
-		errMessage := "error while deleting chain"
-		log.FromContext(ctx).WithError(err).Error(errMessage)
-		return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+		return err
 	}
 
 	defer clientutils.CloseResponse(response)

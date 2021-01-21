@@ -7,9 +7,9 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/parsers"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
@@ -20,17 +20,20 @@ import (
 const registerContractComponent = "use-cases.register-contract"
 
 type registerContractUseCase struct {
-	db store.DB
+	db     store.DB
+	logger *log.Logger
 }
 
 func NewRegisterContractUseCase(agent store.DB) usecases.RegisterContractUseCase {
 	return &registerContractUseCase{
-		db: agent,
+		db:     agent,
+		logger: log.NewLogger().SetComponent(registerContractComponent),
 	}
 }
 
 func (uc *registerContractUseCase) Execute(ctx context.Context, contract *entities.Contract) error {
-	logger := log.WithContext(ctx).WithField("contract", contract.Short())
+	ctx = log.WithFields(ctx, log.Field("contract_id", contract.Short()))
+	logger := uc.logger.WithContext(ctx)
 	logger.Debug("registering contract starting...")
 
 	abiRaw, err := contract.GetABICompacted()
@@ -40,7 +43,7 @@ func (uc *registerContractUseCase) Execute(ctx context.Context, contract *entiti
 
 	dByteCode, err := hexutil.Decode(contract.DeployedBytecode)
 	if err != nil {
-		logger.WithError(err).Error("cannot decode deployedByteCode")
+		logger.WithError(err).Error("failed to decode deployedByteCode")
 		return errors.FromError(err).ExtendComponent(registerContractComponent)
 	}
 
@@ -53,7 +56,7 @@ func (uc *registerContractUseCase) Execute(ctx context.Context, contract *entiti
 
 	methodJSONs, eventJSONs, err := parsers.ParseJSONABI(abiRaw)
 	if err != nil {
-		logger.WithError(err).Error("cannot parse json ABI")
+		logger.WithError(err).Error("failed to parse json ABI")
 		return errors.FromError(err).ExtendComponent(registerContractComponent)
 	}
 

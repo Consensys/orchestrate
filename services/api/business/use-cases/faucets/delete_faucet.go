@@ -3,29 +3,29 @@ package faucets
 import (
 	"context"
 
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
 )
 
 const deleteFaucetComponent = "use-cases.delete-faucet"
 
-// deleteFaucetUseCase is a use case to delete a faucet
 type deleteFaucetUseCase struct {
-	db store.DB
+	db     store.DB
+	logger *log.Logger
 }
 
-// NewDeleteFaucet creates a new DeleteFaucetUseCase
 func NewDeleteFaucetUseCase(db store.DB) usecases.DeleteFaucetUseCase {
 	return &deleteFaucetUseCase{
-		db: db,
+		db:     db,
+		logger: log.NewLogger().SetComponent(deleteFaucetComponent),
 	}
 }
 
-// Execute deletes a faucet
 func (uc *deleteFaucetUseCase) Execute(ctx context.Context, uuid string, tenants []string) error {
-	logger := log.WithContext(ctx).WithField("faucet_uuid", uuid).WithField("tenants", tenants)
+	ctx = log.WithFields(ctx, log.Field("faucet", uuid))
+	logger := uc.logger.WithContext(ctx)
 	logger.Debug("deleting faucet")
 
 	faucetModel, err := uc.db.Faucet().FindOneByUUID(ctx, uuid, tenants)
@@ -38,6 +38,6 @@ func (uc *deleteFaucetUseCase) Execute(ctx context.Context, uuid string, tenants
 		return errors.FromError(err).ExtendComponent(deleteFaucetComponent)
 	}
 
-	logger.Info("faucet deleted successfully")
+	logger.Info("faucet was deleted successfully")
 	return nil
 }

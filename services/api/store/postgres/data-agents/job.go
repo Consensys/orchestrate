@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
 
@@ -22,12 +22,13 @@ const jobDAComponent = "data-agents.job"
 
 // PGJob is a job data agent for PostgreSQL
 type PGJob struct {
-	db pg.DB
+	db     pg.DB
+	logger *log.Logger
 }
 
 // NewPGJob creates a new pgJob
 func NewPGJob(db pg.DB) store.JobAgent {
-	return &PGJob{db: db}
+	return &PGJob{db: db, logger: log.NewLogger().SetComponent(jobDAComponent)}
 }
 
 // Insert Inserts a new job in DB
@@ -46,6 +47,7 @@ func (agent *PGJob) Insert(ctx context.Context, job *models.Job) error {
 	agent.db.ModelContext(ctx, job)
 	err := pg.Insert(ctx, agent.db, job)
 	if err != nil {
+		agent.logger.WithContext(ctx).WithError(err).Error("failed to insert job")
 		return errors.FromError(err).ExtendComponent(jobDAComponent)
 	}
 
@@ -71,6 +73,7 @@ func (agent *PGJob) Update(ctx context.Context, job *models.Job) error {
 	err := pg.Update(ctx, agent.db, job)
 
 	if err != nil {
+		agent.logger.WithContext(ctx).WithError(err).Error("failed to update job")
 		return errors.FromError(err).ExtendComponent(jobDAComponent)
 	}
 
@@ -93,6 +96,9 @@ func (agent *PGJob) FindOneByUUID(ctx context.Context, jobUUID string, tenants [
 
 	err := pg.Select(ctx, query)
 	if err != nil {
+		if !errors.IsNotFoundError(err) {
+			agent.logger.WithContext(ctx).WithError(err).Error("failed to find job by uuid")
+		}
 		return nil, errors.FromError(err).ExtendComponent(jobDAComponent)
 	}
 
@@ -104,6 +110,9 @@ func (agent *PGJob) LockOneByUUID(ctx context.Context, jobUUID string) error {
 	query := agent.db.ModelContext(ctx, &models.Job{}).Where("job.uuid = ?", jobUUID).For("UPDATE")
 	err := pg.Select(ctx, query)
 	if err != nil {
+		if !errors.IsNotFoundError(err) {
+			agent.logger.WithError(err).Error("failed to lock job by uuid")
+		}
 		return errors.FromError(err).ExtendComponent(jobDAComponent)
 	}
 
@@ -144,6 +153,9 @@ func (agent *PGJob) Search(ctx context.Context, filters *entities.JobFilters, te
 
 	err := pg.Select(ctx, query)
 	if err != nil {
+		if !errors.IsNotFoundError(err) {
+			agent.logger.WithError(err).Error("failed to search jobs")
+		}
 		return nil, errors.FromError(err).ExtendComponent(jobDAComponent)
 	}
 

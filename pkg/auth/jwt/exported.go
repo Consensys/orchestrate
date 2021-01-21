@@ -13,22 +13,22 @@ var (
 	initOnce = &sync.Once{}
 )
 
-// Init initializes Faucet
 func Init(ctx context.Context) {
 	initOnce.Do(func() {
+		logger := log.WithContext(ctx)
 		if checker != nil {
 			return
 		}
 
 		conf := NewConfig(viper.GetViper())
 		if len(conf.Certificate) == 0 {
-			log.Infof("jwt: no certificate provided")
+			logger.Info("jwt: no certificate provided")
 		}
 
 		var err error
 		checker, err = New(conf)
 		if err != nil {
-			log.WithError(err).Fatalf("jwt: could not create checker")
+			logger.WithError(err).Fatalf("jwt: could not create checker")
 		}
 	})
 }
@@ -41,5 +41,4 @@ func GlobalChecker() *JWT {
 // SetGlobalAuth sets global Authentication Manager
 func SetGlobalChecker(c *JWT) {
 	checker = c
-	log.Debug("authentication manager: set")
 }

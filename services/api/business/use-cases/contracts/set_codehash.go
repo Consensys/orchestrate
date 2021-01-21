@@ -3,9 +3,8 @@ package contracts
 import (
 	"context"
 
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
 	models2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models"
@@ -14,19 +13,21 @@ import (
 const setCodeHashComponent = "use-cases.set-codehash"
 
 type setCodeHashUseCase struct {
-	agent store.CodeHashAgent
+	agent  store.CodeHashAgent
+	logger *log.Logger
 }
 
 func NewSetCodeHashUseCase(agent store.CodeHashAgent) usecases.SetContractCodeHashUseCase {
 	return &setCodeHashUseCase{
-		agent: agent,
+		agent:  agent,
+		logger: log.NewLogger().SetComponent(setCodeHashComponent),
 	}
 }
 
-func (usecase *setCodeHashUseCase) Execute(ctx context.Context, chainID, address, codeHash string) error {
-	logger := log.WithContext(ctx).WithField("chainID", chainID).WithField("address", address).
-		WithField("code_hash", utils.ShortString(codeHash, 10))
-	logger.Debug("setting CodeHash is starting ...")
+func (uc *setCodeHashUseCase) Execute(ctx context.Context, chainID, address, codeHash string) error {
+	ctx = log.WithFields(ctx, log.Field("chain_id", chainID), log.Field("address", chainID))
+	logger := uc.logger.WithContext(ctx)
+	logger.Debug("setting code-hash is starting ...")
 
 	codehash := &models2.CodehashModel{
 		ChainID:  chainID,
@@ -34,11 +35,11 @@ func (usecase *setCodeHashUseCase) Execute(ctx context.Context, chainID, address
 		Codehash: codeHash,
 	}
 
-	err := usecase.agent.Insert(ctx, codehash)
+	err := uc.agent.Insert(ctx, codehash)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(setCodeHashComponent)
 	}
 
-	logger.Debug("code hash was set successfully")
+	logger.Debug("code-hash updated successfully")
 	return nil
 }

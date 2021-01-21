@@ -6,8 +6,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
 
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
 )
 
@@ -17,6 +17,7 @@ const getTxComponent = "use-cases.get-tx"
 type getTxUseCase struct {
 	db                 store.DB
 	getScheduleUsecase usecases.GetScheduleUseCase
+	logger             *log.Logger
 }
 
 // NewGetTxUseCase creates a new GetTxUseCase
@@ -24,13 +25,13 @@ func NewGetTxUseCase(db store.DB, getScheduleUsecase usecases.GetScheduleUseCase
 	return &getTxUseCase{
 		db:                 db,
 		getScheduleUsecase: getScheduleUsecase,
+		logger:             log.NewLogger().SetComponent(getTxComponent),
 	}
 }
 
 // Execute gets a transaction request
 func (uc *getTxUseCase) Execute(ctx context.Context, scheduleUUID string, tenants []string) (*entities.TxRequest, error) {
-	logger := log.WithContext(ctx).WithField("tx_request_uuid", scheduleUUID)
-	logger.Debug("getting transaction request")
+	ctx = log.WithFields(ctx, log.Field("schedule", scheduleUUID))
 
 	txRequestModel, err := uc.db.TransactionRequest().FindOneByUUID(ctx, scheduleUUID, tenants)
 	if err != nil {
@@ -48,6 +49,6 @@ func (uc *getTxUseCase) Execute(ctx context.Context, scheduleUUID string, tenant
 		return nil, errors.FromError(err).ExtendComponent(getTxComponent)
 	}
 
-	logger.Debug("transaction request found successfully")
+	uc.logger.WithContext(ctx).Debug("transaction request found successfully")
 	return txRequest, nil
 }

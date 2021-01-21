@@ -8,7 +8,6 @@ import (
 
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/rlp"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
@@ -18,9 +17,7 @@ func SignTransaction(tx *types.Transaction, privKey *ecdsa.PrivateKey, signer ty
 	h := signer.Hash(tx)
 	decodedSignature, err := crypto.Sign(h[:], privKey)
 	if err != nil {
-		errMessage := "failed to sign ethereum transaction"
-		log.WithError(err).Error(errMessage)
-		return nil, errors.CryptoOperationError(errMessage)
+		return nil, errors.CryptoOperationError(err.Error())
 	}
 
 	return decodedSignature, nil
@@ -30,9 +27,7 @@ func SignQuorumPrivateTransaction(tx *quorumtypes.Transaction, privKey *ecdsa.Pr
 	h := signer.Hash(tx)
 	decodedSignature, err := crypto.Sign(h[:], privKey)
 	if err != nil {
-		errMessage := "failed to sign quorum private transaction"
-		log.WithError(err).Error(errMessage)
-		return nil, errors.CryptoOperationError(errMessage)
+		return nil, errors.CryptoOperationError(err.Error())
 	}
 
 	return decodedSignature, nil
@@ -41,9 +36,7 @@ func SignQuorumPrivateTransaction(tx *quorumtypes.Transaction, privKey *ecdsa.Pr
 func SignEEATransaction(tx *types.Transaction, privateArgs *entities.PrivateETHTransactionParams, chainID string, privKey *ecdsa.PrivateKey) ([]byte, error) {
 	chainIDBigInt, ok := new(big.Int).SetString(chainID, 10)
 	if !ok {
-		errMessage := "invalid chainID"
-		log.WithField("chain_id", chainID).Error(errMessage)
-		return nil, errors.InvalidParameterError(errMessage)
+		return nil, errors.InvalidParameterError("invalid chainID")
 	}
 
 	privateFromEncoded, err := GetEncodedPrivateFrom(privateArgs.PrivateFrom)
@@ -71,16 +64,12 @@ func SignEEATransaction(tx *types.Transaction, privateArgs *entities.PrivateETHT
 		privateArgs.PrivateTxType,
 	})
 	if err != nil {
-		errMessage := "failed to hash eea transaction"
-		log.WithError(err).Error(errMessage)
-		return nil, errors.CryptoOperationError(errMessage)
+		return nil, errors.CryptoOperationError("failed to hash eea transaction").AppendReason(err.Error())
 	}
 
 	signature, err := crypto.Sign(hash[:], privKey)
 	if err != nil {
-		errMessage := "failed to sign eea transaction"
-		log.WithError(err).Error(errMessage)
-		return nil, errors.CryptoOperationError(errMessage)
+		return nil, errors.CryptoOperationError("failed to sign eea transaction").AppendReason(err.Error())
 	}
 
 	return signature, err

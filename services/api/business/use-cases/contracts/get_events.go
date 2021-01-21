@@ -3,9 +3,8 @@ package contracts
 import (
 	"context"
 
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
 )
@@ -13,32 +12,33 @@ import (
 const getEventsComponent = "use-cases.get-events"
 
 type getEventsUseCase struct {
-	agent store.EventAgent
+	agent  store.EventAgent
+	logger *log.Logger
 }
 
 func NewGetEventsUseCase(agent store.EventAgent) usecases.GetContractEventsUseCase {
 	return &getEventsUseCase{
-		agent: agent,
+		agent:  agent,
+		logger: log.NewLogger().SetComponent(getEventsComponent),
 	}
 }
 
 // Execute validates and registers a new contract in DB
-func (usecase *getEventsUseCase) Execute(ctx context.Context, chainID, address, sighash string, indexedInputCount uint32) (abi string, eventsABI []string, err error) {
-	logger := log.WithContext(ctx).WithField("chainID", chainID).WithField("address", address).
-		WithField("sig_hash", utils.ShortString(sighash, 10))
-	logger.Debug("get events starting...")
+func (uc *getEventsUseCase) Execute(ctx context.Context, chainID, address, sighash string, indexedInputCount uint32) (abi string, eventsABI []string, err error) {
+	ctx = log.WithFields(ctx, log.Field("chain_id", chainID), log.Field("address", address))
+	logger := uc.logger.WithContext(ctx)
 
-	eventModel, err := usecase.agent.FindOneByAccountAndSigHash(ctx, chainID, address, sighash, indexedInputCount)
+	eventModel, err := uc.agent.FindOneByAccountAndSigHash(ctx, chainID, address, sighash, indexedInputCount)
 	if err != nil && !errors.IsNotFoundError(err) {
 		return "", nil, errors.FromError(err).ExtendComponent(getEventsComponent)
 	}
 
 	if eventModel != nil {
-		logger.Debug("get events executed successfully")
+		logger.Debug("events were fetched successfully")
 		return eventModel.ABI, nil, nil
 	}
 
-	defaultEventModels, err := usecase.agent.FindDefaultBySigHash(ctx, sighash, indexedInputCount)
+	defaultEventModels, err := uc.agent.FindDefaultBySigHash(ctx, sighash, indexedInputCount)
 	if err != nil {
 		return "", nil, errors.FromError(err).ExtendComponent(getEventsComponent)
 	}
@@ -47,6 +47,6 @@ func (usecase *getEventsUseCase) Execute(ctx context.Context, chainID, address, 
 		eventsABI = append(eventsABI, e.ABI)
 	}
 
-	logger.Debug("get events executed successfully")
+	logger.Debug("default events were fetched successfully")
 	return "", eventsABI, nil
 }

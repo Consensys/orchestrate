@@ -9,29 +9,30 @@ import (
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models"
 
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
 )
 
 const startNextJobComponent = "use-cases.next-job-start"
 
-// startNextJobUseCase is a use case to get a job
 type startNextJobUseCase struct {
 	db              store.DB
 	startJobUseCase usecases.StartJobUseCase
+	logger          *log.Logger
 }
 
-// NewStartNextJobUseCase creates a new StartNextJobUseCase
 func NewStartNextJobUseCase(db store.DB, startJobUC usecases.StartJobUseCase) usecases.StartNextJobUseCase {
 	return &startNextJobUseCase{
 		db:              db,
 		startJobUseCase: startJobUC,
+		logger:          log.NewLogger().SetComponent(startNextJobComponent),
 	}
 }
 
 // Execute gets a job
 func (uc *startNextJobUseCase) Execute(ctx context.Context, jobUUID string, tenants []string) error {
+	ctx = log.WithFields(ctx, log.Field("job", jobUUID))
 	jobModel, err := uc.db.Job().FindOneByUUID(ctx, jobUUID, tenants)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(startNextJobComponent)
@@ -41,10 +42,7 @@ func (uc *startNextJobUseCase) Execute(ctx context.Context, jobUUID string, tena
 		return errors.DataError("job %s does not have a next job to start", jobModel.NextJobUUID)
 	}
 
-	logger := log.WithContext(ctx).
-		WithField("job_uuid", jobUUID).
-		WithField("next_job_uuid", jobModel.NextJobUUID)
-
+	logger := uc.logger.WithContext(ctx).WithField("next_job", jobModel.NextJobUUID)
 	logger.Debug("start next job use-case")
 
 	nextJobModel, err := uc.db.Job().FindOneByUUID(ctx, jobModel.NextJobUUID, tenants)
@@ -60,6 +58,7 @@ func (uc *startNextJobUseCase) Execute(ctx context.Context, jobUUID string, tena
 	}
 
 	if err != nil {
+		logger.WithError(err).Error("failed to validate next transaction data")
 		return errors.FromError(err).ExtendComponent(startNextJobComponent)
 	}
 

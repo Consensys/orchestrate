@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/containous/traefik/v2/pkg/log"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	clientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/client-utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/httputil"
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
@@ -20,9 +18,7 @@ func (c *HTTPClient) GetFaucet(ctx context.Context, uuid string) (*types.FaucetR
 	err := callWithBackOff(ctx, c.config.backOff, func() error {
 		response, err := clientutils.GetRequest(ctx, c.client, reqURL)
 		if err != nil {
-			errMessage := "error while getting faucet"
-			log.FromContext(ctx).WithError(err).Error(errMessage)
-			return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+			return err
 		}
 
 		defer clientutils.CloseResponse(response)
@@ -52,9 +48,7 @@ func (c *HTTPClient) SearchFaucets(ctx context.Context, filters *entities.Faucet
 	err := callWithBackOff(ctx, c.config.backOff, func() error {
 		response, err := clientutils.GetRequest(ctx, c.client, reqURL)
 		if err != nil {
-			errMessage := "error while searching faucets"
-			log.FromContext(ctx).WithError(err).Error(errMessage)
-			return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+			return err
 		}
 		defer clientutils.CloseResponse(response)
 		return httputil.ParseResponse(ctx, response, &resp)
@@ -70,9 +64,7 @@ func (c *HTTPClient) RegisterFaucet(ctx context.Context, request *types.Register
 	err := callWithBackOff(ctx, c.config.backOff, func() error {
 		response, err := clientutils.PostRequest(ctx, c.client, reqURL, request)
 		if err != nil {
-			errMessage := "error while registering faucet"
-			log.FromContext(ctx).WithError(err).Error(errMessage)
-			return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+			return err
 		}
 		defer clientutils.CloseResponse(response)
 		return httputil.ParseResponse(ctx, response, resp)
@@ -88,9 +80,7 @@ func (c *HTTPClient) UpdateFaucet(ctx context.Context, uuid string, request *typ
 	err := callWithBackOff(ctx, c.config.backOff, func() error {
 		response, err := clientutils.PatchRequest(ctx, c.client, reqURL, request)
 		if err != nil {
-			errMessage := "error while updating faucet"
-			log.FromContext(ctx).WithError(err).Error(errMessage)
-			return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+			return err
 		}
 
 		defer clientutils.CloseResponse(response)
@@ -105,9 +95,7 @@ func (c *HTTPClient) DeleteFaucet(ctx context.Context, uuid string) error {
 
 	response, err := clientutils.DeleteRequest(ctx, c.client, reqURL)
 	if err != nil {
-		errMessage := "error while deleting faucet"
-		log.FromContext(ctx).WithError(err).Error(errMessage)
-		return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+		return err
 	}
 
 	defer clientutils.CloseResponse(response)

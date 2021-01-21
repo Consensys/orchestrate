@@ -2,12 +2,11 @@ package accounts
 
 import (
 	"context"
-	"fmt"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/parsers"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
 
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/ethereum"
@@ -22,6 +21,7 @@ type createAccountUseCase struct {
 	searchUC         usecases.SearchAccountsUseCase
 	fundAccountUC    usecases.FundAccountUseCase
 	keyManagerClient client.KeyManagerClient
+	logger           *log.Logger
 }
 
 func NewCreateAccountUseCase(db store.DB, searchUC usecases.SearchAccountsUseCase, fundAccountUC usecases.FundAccountUseCase,
@@ -31,12 +31,15 @@ func NewCreateAccountUseCase(db store.DB, searchUC usecases.SearchAccountsUseCas
 		searchUC:         searchUC,
 		keyManagerClient: keyManagerClient,
 		fundAccountUC:    fundAccountUC,
+		logger:           log.NewLogger().SetComponent(createAccountComponent),
 	}
 }
 
 func (uc *createAccountUseCase) Execute(ctx context.Context, account *entities.Account, privateKey, chainName, tenantID string) (*entities.Account, error) {
-	logger := log.WithContext(ctx).WithField("alias", account.Alias).WithField("chain", chainName)
-	logger.Debug("creating new Ethereum account")
+	ctx = log.WithFields(ctx, log.Field("alias", account.Alias), log.Field("address", account.Address))
+	logger := uc.logger.WithContext(ctx)
+
+	logger.Debug("creating new ethereum account")
 
 	accounts, err := uc.searchUC.Execute(ctx, &entities.AccountFilters{Aliases: []string{account.Alias}}, []string{tenantID})
 	if err != nil {
@@ -44,9 +47,9 @@ func (uc *createAccountUseCase) Execute(ctx context.Context, account *entities.A
 	}
 
 	if len(accounts) > 0 {
-		errMsg := fmt.Sprintf("alias %s already exists", account.Alias)
+		errMsg := "alias already exists"
 		logger.Error(errMsg)
-		return nil, errors.AlreadyExistsError(errMsg)
+		return nil, errors.AlreadyExistsError(errMsg).ExtendComponent(createAccountComponent)
 	}
 
 	// REMINDER: For now, Account API only support ETH accounts
@@ -63,6 +66,7 @@ func (uc *createAccountUseCase) Execute(ctx context.Context, account *entities.A
 	}
 
 	if err != nil {
+		logger.WithError(err).Error("failed to import/create ethereum account")
 		return nil, errors.FromError(err).ExtendComponent(createAccountComponent)
 	}
 
@@ -74,7 +78,7 @@ func (uc *createAccountUseCase) Execute(ctx context.Context, account *entities.A
 	// IMPORTANT: Addresses are unique across every tenant
 	_, err = uc.db.Account().FindOneByAddress(ctx, account.Address, []string{})
 	if err == nil {
-		errMsg := fmt.Sprintf("account %s already exists", account.Address)
+		errMsg := "account already exists"
 		logger.Error(errMsg)
 		return nil, errors.AlreadyExistsError(errMsg).ExtendComponent(createAccountComponent)
 	} else if !errors.IsNotFoundError(err) {
@@ -94,6 +98,6 @@ func (uc *createAccountUseCase) Execute(ctx context.Context, account *entities.A
 		}
 	}
 
-	logger.WithField("address", account.Address).Info("account created successfully")
+	logger.WithField("address", account.Address).Info("ethereum account created successfully")
 	return parsers.NewAccountEntityFromModels(accountModel), nil
 }

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
@@ -14,12 +15,11 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 
 	"github.com/cenkalti/backoff/v4"
-	log "github.com/sirupsen/logrus"
 )
 
 //go:generate mockgen -source=session_manager.go -destination=mocks/session_manager.go -package=mocks
 
-const sessionManagerComponent = "service.session-manager"
+const sessionManagerComponent = "tx-sentry.service.session-manager"
 
 type SessionManager interface {
 	Start(ctx context.Context, job *entities.Job)
@@ -31,6 +31,7 @@ type sessionManager struct {
 	sessions               map[string]bool
 	retrySessionJobUseCase usecases.RetrySessionJobUseCase
 	client                 orchestrateclient.OrchestrateClient
+	logger                 *log.Logger
 }
 
 type sessionData struct {
@@ -47,11 +48,13 @@ func NewSessionManager(client orchestrateclient.OrchestrateClient, retrySessionJ
 		sessions:               make(map[string]bool),
 		retrySessionJobUseCase: retrySessionJobUseCase,
 		client:                 client,
+		logger:                 log.NewLogger().SetComponent(sessionManagerComponent),
 	}
 }
 
 func (manager *sessionManager) Start(ctx context.Context, job *entities.Job) {
-	logger := log.WithContext(ctx).WithField("job_uuid", job.UUID)
+	logger := manager.logger.WithContext(ctx).WithField("job", job.UUID)
+	ctx = log.With(ctx, logger)
 
 	if manager.hasSession(job.UUID) {
 		logger.Debug("job session already exists, skipping session creation")
@@ -128,8 +131,8 @@ func (manager *sessionManager) hasSession(jobUUID string) bool {
 }
 
 func (manager *sessionManager) runSession(ctx context.Context, ses *sessionData) error {
-	logger := log.WithContext(ctx).WithField("job_uuid", ses.parentJob.UUID)
-	logger.Info("starting job session")
+	logger := log.FromContext(ctx)
+	logger.Info("job session started")
 
 	ticker := time.NewTicker(ses.parentJob.InternalData.RetryInterval)
 	defer ticker.Stop()

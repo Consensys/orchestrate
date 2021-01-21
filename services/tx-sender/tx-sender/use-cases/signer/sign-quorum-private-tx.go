@@ -8,6 +8,7 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	pkgcryto "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/crypto/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/rlp"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sender/tx-sender/parsers"
@@ -15,7 +16,6 @@ import (
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sender/tx-sender/use-cases"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client"
@@ -26,19 +26,20 @@ const signQuorumPrivateTransactionComponent = "use-cases.sign-quorum-private-tra
 // signQuorumPrivateTransactionUseCase is a use case to sign a quorum private transaction
 type signQuorumPrivateTransactionUseCase struct {
 	keyManagerClient client.KeyManagerClient
+	logger           *log.Logger
 }
 
 // NewSignQuorumPrivateTransactionUseCase creates a new signQuorumPrivateTransactionUseCase
 func NewSignQuorumPrivateTransactionUseCase(keyManagerClient client.KeyManagerClient) usecases.SignQuorumPrivateTransactionUseCase {
 	return &signQuorumPrivateTransactionUseCase{
 		keyManagerClient: keyManagerClient,
+		logger:           log.NewLogger().SetComponent(signQuorumPrivateTransactionComponent),
 	}
 }
 
 // Execute signs a quorum private transaction
 func (uc *signQuorumPrivateTransactionUseCase) Execute(ctx context.Context, job *entities.Job) (raw, txHash string, err error) {
-	logger := log.WithContext(ctx).WithField("job_uuid", job.UUID).WithField("one_time_key", job.InternalData.OneTimeKey)
-	logger.Debug("signing quorum private transaction")
+	logger := uc.logger.WithContext(ctx).WithField("one_time_key", job.InternalData.OneTimeKey)
 
 	signer := pkgcryto.GetQuorumPrivateTxSigner()
 	transaction := parsers.ETHTransactionToQuorumTransaction(job.Transaction)
@@ -46,7 +47,7 @@ func (uc *signQuorumPrivateTransactionUseCase) Execute(ctx context.Context, job 
 
 	var decodedSignature []byte
 	if job.InternalData.OneTimeKey {
-		decodedSignature, err = uc.signWithOneTimeKey(transaction, signer)
+		decodedSignature, err = uc.signWithOneTimeKey(ctx, transaction, signer)
 	} else {
 		decodedSignature, err = uc.signWithAccount(ctx, job, transaction)
 	}
@@ -57,34 +58,43 @@ func (uc *signQuorumPrivateTransactionUseCase) Execute(ctx context.Context, job 
 	signedTx, err := transaction.WithSignature(signer, decodedSignature)
 	if err != nil {
 		errMessage := "failed to set quorum private transaction signature"
-		log.WithError(err).Error(errMessage)
+		logger.WithError(err).Error(errMessage)
 		return "", "", errors.InvalidParameterError(errMessage).ExtendComponent(signQuorumPrivateTransactionComponent)
 	}
 
 	signedRaw, err := rlp.Encode(signedTx)
 	if err != nil {
 		errMessage := "failed to RLP encode signed quorum private transaction"
-		log.WithError(err).Error(errMessage)
+		logger.WithError(err).Error(errMessage)
 		return "", "", errors.CryptoOperationError(errMessage).ExtendComponent(signQuorumPrivateTransactionComponent)
 	}
 	txHash = signedTx.Hash().Hex()
 
-	logger.WithField("txHash", txHash).Info("quorum private transaction signed successfully")
+	logger.WithField("tx_hash", txHash).Debug("quorum private transaction signed successfully")
 	return hexutil.Encode(signedRaw), txHash, nil
 }
 
-func (*signQuorumPrivateTransactionUseCase) signWithOneTimeKey(transaction *quorumtypes.Transaction, signer quorumtypes.Signer) ([]byte, error) {
+func (uc *signQuorumPrivateTransactionUseCase) signWithOneTimeKey(ctx context.Context, transaction *quorumtypes.Transaction,
+	signer quorumtypes.Signer) ([]byte, error) {
+	logger := uc.logger.WithContext(ctx)
 	privKey, err := crypto.GenerateKey()
 	if err != nil {
 		errMessage := "failed to generate Ethereum account"
-		log.WithError(err).Error(errMessage)
+		logger.WithError(err).Error(errMessage)
 		return nil, errors.CryptoOperationError(errMessage)
 	}
 
-	return pkgcryto.SignQuorumPrivateTransaction(transaction, privKey, signer)
+	sign, err := pkgcryto.SignQuorumPrivateTransaction(transaction, privKey, signer)
+	if err != nil {
+		logger.WithError(err).Error("failed to sign private transaction")
+		return nil, err
+	}
+
+	return sign, nil
 }
 
 func (uc *signQuorumPrivateTransactionUseCase) signWithAccount(ctx context.Context, job *entities.Job, tx *quorumtypes.Transaction) ([]byte, error) {
+	logger := uc.logger.WithContext(ctx)
 	request := &ethereum.SignQuorumPrivateTransactionRequest{
 		Namespace: job.TenantID,
 		Nonce:     tx.Nonce(),
@@ -105,14 +115,14 @@ func (uc *signQuorumPrivateTransactionUseCase) signWithAccount(ctx context.Conte
 			continue
 		}
 		if err != nil {
-			log.WithError(err).Error("failed to sign quorum private transaction using key manager")
+			logger.WithError(err).Error("failed to sign quorum private transaction using key manager")
 			return nil, errors.FromError(err)
 		}
 
 		decodedSignature, err := hexutil.Decode(sig)
 		if err != nil {
 			errMessage := "failed to decode quorum signature"
-			log.WithField("encoded_signature", sig).WithError(err).Error(errMessage)
+			logger.WithError(err).Error(errMessage)
 			return nil, errors.EncodingError(errMessage)
 		}
 
@@ -120,6 +130,6 @@ func (uc *signQuorumPrivateTransactionUseCase) signWithAccount(ctx context.Conte
 	}
 
 	errMessage := fmt.Sprintf("account %s was not found on key-manager", job.Transaction.From)
-	log.WithField("from_account", job.Transaction.From).WithField("tenants", tenants).Error(errMessage)
+	logger.WithField("from_account", job.Transaction.From).WithField("tenants", tenants).Error(errMessage)
 	return nil, errors.InvalidParameterError(errMessage)
 }

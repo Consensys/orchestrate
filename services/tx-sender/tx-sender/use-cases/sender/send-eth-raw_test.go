@@ -41,9 +41,9 @@ func TestSendETHRaw_Execute(t *testing.T) {
 		job.Transaction.Hash = txHash
 
 		proxyURL := utils.GetProxyURL(chainRegistryURL, job.ChainUUID)
-		ec.EXPECT().SendRawTransaction(ctx, proxyURL, raw).Return(ethcommon.HexToHash(txHash), nil)
+		ec.EXPECT().SendRawTransaction(gomock.Any(), proxyURL, raw).Return(ethcommon.HexToHash(txHash), nil)
 
-		jobClient.EXPECT().UpdateJob(ctx, job.UUID, &txschedulertypes.UpdateJobRequest{
+		jobClient.EXPECT().UpdateJob(gomock.Any(), job.UUID, &txschedulertypes.UpdateJobRequest{
 			Status:      utils.StatusPending,
 			Transaction: decodeRaw(raw),
 		})
@@ -63,15 +63,15 @@ func TestSendETHRaw_Execute(t *testing.T) {
 
 		hash := "0x6621fbe1e2848446e38d99bfda159cdd83f555ae0ed7a4f3e1c3c79f7d6d74f2"
 		proxyURL := utils.GetProxyURL(chainRegistryURL, job.ChainUUID)
-		ec.EXPECT().SendRawTransaction(ctx, proxyURL, raw).
+		ec.EXPECT().SendRawTransaction(gomock.Any(), proxyURL, raw).
 			Return(ethcommon.HexToHash(hash), nil)
 
 		transaction := decodeRaw(raw)
-		jobClient.EXPECT().UpdateJob(ctx, job.UUID, &txschedulertypes.UpdateJobRequest{
+		jobClient.EXPECT().UpdateJob(gomock.Any(), job.UUID, &txschedulertypes.UpdateJobRequest{
 			Status:      utils.StatusPending,
 			Transaction: transaction,
 		})
-		jobClient.EXPECT().UpdateJob(ctx, job.UUID, gomock.Any())
+		jobClient.EXPECT().UpdateJob(gomock.Any(), job.UUID, gomock.Any())
 
 		err := usecase.Execute(ctx, job)
 		assert.NoError(t, err)

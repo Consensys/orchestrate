@@ -7,9 +7,9 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
@@ -23,6 +23,7 @@ type sendETHRawTxUseCase struct {
 	ec               ethclient.TransactionSender
 	chainRegistryURL string
 	jobClient        client.JobClient
+	logger           *log.Logger
 }
 
 func NewSendETHRawTxUseCase(ec ethclient.TransactionSender, jobClient client.JobClient,
@@ -31,11 +32,13 @@ func NewSendETHRawTxUseCase(ec ethclient.TransactionSender, jobClient client.Job
 		jobClient:        jobClient,
 		chainRegistryURL: chainRegistryURL,
 		ec:               ec,
+		logger:           log.NewLogger().SetComponent(sendETHRawTxComponent),
 	}
 }
 
 func (uc *sendETHRawTxUseCase) Execute(ctx context.Context, job *entities.Job) error {
-	logger := log.WithContext(ctx).WithField("job_uuid", job.UUID)
+	ctx = log.With(log.WithFields(ctx, log.Field("job", job.UUID)), uc.logger)
+	logger := uc.logger.WithContext(ctx)
 	logger.Debug("processing ethereum raw transaction job")
 
 	var err error
@@ -74,14 +77,11 @@ func (uc *sendETHRawTxUseCase) Execute(ctx context.Context, job *entities.Job) e
 }
 
 func (uc *sendETHRawTxUseCase) sendTx(ctx context.Context, job *entities.Job) (string, error) {
-	logger := log.WithContext(ctx).WithField("job_uuid", job.UUID)
-	logger.Debug("sending ethereum raw transaction")
-
 	proxyURL := utils.GetProxyURL(uc.chainRegistryURL, job.ChainUUID)
 	txHash, err := uc.ec.SendRawTransaction(ctx, proxyURL, job.Transaction.Raw)
 	if err != nil {
 		errMsg := "cannot send ethereum raw transaction"
-		logger.WithError(err).Errorf(errMsg)
+		uc.logger.WithContext(ctx).WithError(err).Errorf(errMsg)
 		return "", err
 	}
 

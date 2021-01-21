@@ -7,6 +7,7 @@ import (
 	"github.com/gofrs/uuid"
 	pg "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database/postgres"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models"
@@ -16,12 +17,13 @@ const scheduleDAComponent = "data-agents.schedule"
 
 // PGSchedule is a schedule data agent for PostgreSQL
 type PGSchedule struct {
-	db pg.DB
+	db     pg.DB
+	logger *log.Logger
 }
 
 // NewPGSchedule creates a new PGSchedule
 func NewPGSchedule(db pg.DB) store.ScheduleAgent {
-	return &PGSchedule{db: db}
+	return &PGSchedule{db: db, logger: log.NewLogger().SetComponent(scheduleDAComponent)}
 }
 
 // Insert Inserts a new schedule in DB
@@ -32,6 +34,7 @@ func (agent *PGSchedule) Insert(ctx context.Context, schedule *models.Schedule) 
 
 	err := pg.Insert(ctx, agent.db, schedule)
 	if err != nil {
+		agent.logger.WithContext(ctx).WithError(err).Error("failed to insert schedule")
 		return errors.FromError(err).ExtendComponent(scheduleDAComponent)
 	}
 
@@ -51,6 +54,9 @@ func (agent *PGSchedule) FindOneByUUID(ctx context.Context, scheduleUUID string,
 	query = pg.WhereAllowedTenants(query, "schedule.tenant_id", tenants)
 
 	if err := pg.SelectOne(ctx, query); err != nil {
+		if !errors.IsNotFoundError(err) {
+			agent.logger.WithContext(ctx).WithError(err).Error("failed to find schedule")
+		}
 		return nil, errors.FromError(err).ExtendComponent(scheduleDAComponent)
 	}
 
@@ -70,6 +76,9 @@ func (agent *PGSchedule) FindAll(ctx context.Context, tenants []string) ([]*mode
 
 	err := pg.Select(ctx, query)
 	if err != nil {
+		if !errors.IsNotFoundError(err) {
+			agent.logger.WithContext(ctx).WithError(err).Error("failed to insert all schedules")
+		}
 		return nil, errors.FromError(err).ExtendComponent(jobDAComponent)
 	}
 

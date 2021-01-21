@@ -40,16 +40,16 @@ func TestSendTesseraMarking_Execute(t *testing.T) {
 		raw := "rawData"
 		txHash := "0x0000000000000000000000000000000000000000000000000000000000000abc"
 
-		crafter.EXPECT().Execute(ctx, job).Return(nil)
-		signTx.EXPECT().Execute(ctx, job).Return(raw, txHash, nil)
+		crafter.EXPECT().Execute(gomock.Any(), job).Return(nil)
+		signTx.EXPECT().Execute(gomock.Any(), job).Return(raw, txHash, nil)
 		job.Transaction.Raw = raw
 		job.Transaction.Hash = txHash
 
 		proxyURL := utils.GetProxyURL(chainRegistryURL, job.ChainUUID)
-		ec.EXPECT().SendQuorumRawPrivateTransaction(ctx, proxyURL, job.Transaction.Raw, job.Transaction.PrivateFor).
+		ec.EXPECT().SendQuorumRawPrivateTransaction(gomock.Any(), proxyURL, job.Transaction.Raw, job.Transaction.PrivateFor).
 			Return(ethcommon.HexToHash(txHash), nil)
-		nonceChecker.EXPECT().IncrementNonce(ctx, job).Return(nil)
-		jobClient.EXPECT().UpdateJob(ctx, job.UUID, &api.UpdateJobRequest{
+		nonceChecker.EXPECT().IncrementNonce(gomock.Any(), job).Return(nil)
+		jobClient.EXPECT().UpdateJob(gomock.Any(), job.UUID, &api.UpdateJobRequest{
 			Status:      utils.StatusPending,
 			Transaction: job.Transaction,
 		})
@@ -65,21 +65,21 @@ func TestSendTesseraMarking_Execute(t *testing.T) {
 		txHash := "0x0000000000000000000000000000000000000000000000000000000000000abc"
 		txHash2 := "0x0000000000000000000000000000000000000000000000000000000000000aba"
 
-		crafter.EXPECT().Execute(ctx, job).Return(nil)
-		signTx.EXPECT().Execute(ctx, job).Return(raw, txHash, nil)
+		crafter.EXPECT().Execute(gomock.Any(), job).Return(nil)
+		signTx.EXPECT().Execute(gomock.Any(), job).Return(raw, txHash, nil)
 		job.Transaction.Raw = raw
 		job.Transaction.Hash = txHash
 
 		proxyURL := utils.GetProxyURL(chainRegistryURL, job.ChainUUID)
-		ec.EXPECT().SendQuorumRawPrivateTransaction(ctx, proxyURL, job.Transaction.Raw, job.Transaction.PrivateFor).
+		ec.EXPECT().SendQuorumRawPrivateTransaction(gomock.Any(), proxyURL, job.Transaction.Raw, job.Transaction.PrivateFor).
 			Return(ethcommon.HexToHash(txHash2), nil)
-		nonceChecker.EXPECT().IncrementNonce(ctx, job).Return(nil)
-		jobClient.EXPECT().UpdateJob(ctx, job.UUID, &api.UpdateJobRequest{
+		nonceChecker.EXPECT().IncrementNonce(gomock.Any(), job).Return(nil)
+		jobClient.EXPECT().UpdateJob(gomock.Any(), job.UUID, &api.UpdateJobRequest{
 			Status:      utils.StatusPending,
 			Transaction: job.Transaction,
 		})
 
-		jobClient.EXPECT().UpdateJob(ctx, job.UUID, gomock.Any())
+		jobClient.EXPECT().UpdateJob(gomock.Any(), job.UUID, gomock.Any())
 
 		err := usecase.Execute(ctx, job)
 		assert.NoError(t, err)
@@ -90,7 +90,7 @@ func TestSendTesseraMarking_Execute(t *testing.T) {
 		job := testutils.FakeJob()
 
 		expectedErr := errors.NonceTooLowWarning("invalid nonce")
-		crafter.EXPECT().Execute(ctx, job).Return(expectedErr)
+		crafter.EXPECT().Execute(gomock.Any(), job).Return(expectedErr)
 
 		err := usecase.Execute(ctx, job)
 		assert.Equal(t, err, expectedErr)
@@ -101,10 +101,10 @@ func TestSendTesseraMarking_Execute(t *testing.T) {
 		raw := "rawData"
 		txHash := "0x0000000000000000000000000000000000000000000000000000000000000abc"
 
-		crafter.EXPECT().Execute(ctx, job).Return(nil)
+		crafter.EXPECT().Execute(gomock.Any(), job).Return(nil)
 
 		expectedErr := errors.InternalError("internal error")
-		signTx.EXPECT().Execute(ctx, job).Return(raw, txHash, expectedErr)
+		signTx.EXPECT().Execute(gomock.Any(), job).Return(raw, txHash, expectedErr)
 
 		err := usecase.Execute(ctx, job)
 		assert.Equal(t, err, expectedErr)
@@ -115,13 +115,13 @@ func TestSendTesseraMarking_Execute(t *testing.T) {
 		raw := "rawData"
 		txHash := "0x0000000000000000000000000000000000000000000000000000000000000abc"
 
-		crafter.EXPECT().Execute(ctx, job).Return(nil)
-		signTx.EXPECT().Execute(ctx, job).Return(raw, txHash, nil)
+		crafter.EXPECT().Execute(gomock.Any(), job).Return(nil)
+		signTx.EXPECT().Execute(gomock.Any(), job).Return(raw, txHash, nil)
 		job.Transaction.Raw = raw
 		job.Transaction.Hash = txHash
 
 		expectedErr := errors.InternalError("internal error")
-		jobClient.EXPECT().UpdateJob(ctx, job.UUID, &api.UpdateJobRequest{
+		jobClient.EXPECT().UpdateJob(gomock.Any(), job.UUID, &api.UpdateJobRequest{
 			Status:      utils.StatusPending,
 			Transaction: job.Transaction,
 		}).Return(nil, expectedErr)
@@ -135,20 +135,20 @@ func TestSendTesseraMarking_Execute(t *testing.T) {
 		raw := "rawData"
 		txHash := "0x0000000000000000000000000000000000000000000000000000000000000abc"
 
-		crafter.EXPECT().Execute(ctx, job).Return(nil)
-		signTx.EXPECT().Execute(ctx, job).Return(raw, txHash, nil)
+		crafter.EXPECT().Execute(gomock.Any(), job).Return(nil)
+		signTx.EXPECT().Execute(gomock.Any(), job).Return(raw, txHash, nil)
 		job.Transaction.Raw = raw
 		job.Transaction.Hash = txHash
 
 		expectedErr := errors.InternalError("internal error")
 		proxyURL := utils.GetProxyURL(chainRegistryURL, job.ChainUUID)
-		jobClient.EXPECT().UpdateJob(ctx, job.UUID, &api.UpdateJobRequest{
+		jobClient.EXPECT().UpdateJob(gomock.Any(), job.UUID, &api.UpdateJobRequest{
 			Status:      utils.StatusPending,
 			Transaction: job.Transaction,
 		})
-		ec.EXPECT().SendQuorumRawPrivateTransaction(ctx, proxyURL, job.Transaction.Raw, job.Transaction.PrivateFor).
+		ec.EXPECT().SendQuorumRawPrivateTransaction(gomock.Any(), proxyURL, job.Transaction.Raw, job.Transaction.PrivateFor).
 			Return(ethcommon.HexToHash(txHash), expectedErr)
-		nonceChecker.EXPECT().CleanNonce(ctx, job, expectedErr).Return(nil)
+		nonceChecker.EXPECT().CleanNonce(gomock.Any(), job, expectedErr).Return(nil)
 
 		err := usecase.Execute(ctx, job)
 		assert.Equal(t, err, expectedErr)

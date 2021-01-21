@@ -8,9 +8,9 @@ import (
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/parsers"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models"
@@ -22,6 +22,7 @@ const createJobComponent = "use-cases.create-job"
 type createJobUseCase struct {
 	db         store.DB
 	getChainUC usecases.GetChainUseCase
+	logger     *log.Logger
 }
 
 // NewCreateJobUseCase creates a new CreateJobUseCase
@@ -29,6 +30,7 @@ func NewCreateJobUseCase(db store.DB, getChainUC usecases.GetChainUseCase) useca
 	return &createJobUseCase{
 		db:         db,
 		getChainUC: getChainUC,
+		logger:     log.NewLogger().SetComponent(createJobComponent),
 	}
 }
 
@@ -39,10 +41,8 @@ func (uc createJobUseCase) WithDBTransaction(dbtx store.Tx) usecases.CreateJobUs
 
 // Execute validates and creates a new transaction job
 func (uc *createJobUseCase) Execute(ctx context.Context, job *entities.Job, tenants []string) (*entities.Job, error) {
-	logger := log.WithContext(ctx).
-		WithField("chain_uuid", job.ChainUUID).
-		WithField("schedule_id", job.ScheduleUUID).
-		WithField("tenants", tenants)
+	ctx = log.WithFields(ctx, log.Field("chain", job.ChainUUID), log.Field("schedule", job.ScheduleUUID))
+	logger := uc.logger.WithContext(ctx)
 	logger.Debug("creating new job")
 
 	chainID, err := uc.getChainID(ctx, job.ChainUUID, tenants)
@@ -83,10 +83,8 @@ func (uc *createJobUseCase) Execute(ctx context.Context, job *entities.Job, tena
 			parentStatus := parsers.NewJobEntityFromModels(parentJobModel).Status
 			if parentStatus != utils.StatusPending {
 				errMessage := "cannot create a child job in a finalized schedule"
-				logger.
-					WithField("parent_job_uuid", jobModel.InternalData.ParentJobUUID).
-					WithField("parent_status", parentStatus).
-					Error(errMessage)
+				logger.WithField("parent_job", jobModel.InternalData.ParentJobUUID).
+					WithField("parent_status", parentStatus).Error(errMessage)
 				return errors.InvalidStateError(errMessage)
 			}
 		}
@@ -110,7 +108,7 @@ func (uc *createJobUseCase) Execute(ctx context.Context, job *entities.Job, tena
 		return nil, errors.FromError(err).ExtendComponent(createJobComponent)
 	}
 
-	log.WithContext(ctx).WithField("job_uuid", jobModel.UUID).Info("job created successfully")
+	logger.WithField("job", jobModel.UUID).Info("job created successfully")
 	return parsers.NewJobEntityFromModels(jobModel), nil
 }
 

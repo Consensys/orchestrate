@@ -3,30 +3,34 @@ package zksnarks
 import (
 	"context"
 
-	log "github.com/sirupsen/logrus"
 	zksnarks "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/crypto/zk-snarks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/key-manager/use-cases"
 )
 
 const verifySignatureComponent = "use-cases.zks.verify-signature"
 
-type verifySignatureUseCase struct{}
+type verifySignatureUseCase struct {
+	logger *log.Logger
+}
 
 func NewVerifySignatureUseCase() usecases.VerifyZKSSignatureUseCase {
-	return &verifySignatureUseCase{}
+	return &verifySignatureUseCase{
+		logger: log.NewLogger().SetComponent(verifySignatureComponent),
+	}
 }
 
 func (uc *verifySignatureUseCase) Execute(ctx context.Context, publicKey, signature, payload string) error {
-	logger := log.WithContext(ctx).
+	logger := uc.logger.WithContext(ctx).
+		WithField("component", verifySignatureComponent).
 		WithField("public_key", publicKey).
 		WithField("signature", utils.ShortString(signature, 10))
-	logger.Debug("verifying signature")
 
 	verified, err := zksnarks.VerifyZKSMessage(publicKey, signature, []byte(payload))
 	if err != nil || !verified {
-		errMessage := "failed to verify signature: publicKey does not match the expected one or payload is malformed"
+		errMessage := "failed to verify signature"
 		logger.WithError(err).Error(errMessage)
 		return errors.InvalidParameterError(errMessage).ExtendComponent(verifySignatureComponent)
 	}

@@ -4,12 +4,12 @@ import (
 	"context"
 
 	pg "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database/postgres"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models"
 
 	gopg "github.com/go-pg/pg/v9"
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 )
@@ -18,19 +18,25 @@ const accountDAComponent = "data-agents.account"
 
 // PGAccount is an Account data agent for PostgreSQL
 type PGAccount struct {
-	db pg.DB
+	db     pg.DB
+	logger *log.Logger
 }
 
 // NewPGAccount creates a new PGAccount
 func NewPGAccount(db pg.DB) store.AccountAgent {
-	return &PGAccount{db: db}
+	return &PGAccount{
+		db:     db,
+		logger: log.NewLogger().SetComponent(accountDAComponent),
+	}
 }
 
 func (agent *PGAccount) Insert(ctx context.Context, account *models.Account) error {
 	agent.db.ModelContext(ctx, account)
 	err := pg.Insert(ctx, agent.db, account)
 	if err != nil {
-		return errors.FromError(err).ExtendComponent(accountDAComponent)
+		errMsg := "failed to insert account"
+		agent.logger.WithContext(ctx).WithError(err).Error(errMsg)
+		return errors.FromError(err).SetMessage(errMsg).ExtendComponent(accountDAComponent)
 	}
 
 	return nil
@@ -38,10 +44,11 @@ func (agent *PGAccount) Insert(ctx context.Context, account *models.Account) err
 
 // Insert Inserts a new job in DB
 func (agent *PGAccount) Update(ctx context.Context, account *models.Account) error {
+
 	if account.ID == 0 {
 		errMsg := "cannot update account with missing ID"
-		log.WithContext(ctx).Error(errMsg)
-		return errors.InvalidArgError(errMsg)
+		agent.logger.WithContext(ctx).Error(errMsg)
+		return errors.InvalidArgError(errMsg).ExtendComponent(accountDAComponent)
 	}
 
 	agent.db.ModelContext(ctx, account)
@@ -65,7 +72,11 @@ func (agent *PGAccount) Search(ctx context.Context, filters *entities.AccountFil
 
 	err := pg.Select(ctx, query)
 	if err != nil {
-		return nil, errors.FromError(err).ExtendComponent(accountDAComponent)
+		errMsg := "failed to search accounts"
+		if !errors.IsNotFoundError(err) {
+			agent.logger.WithContext(ctx).WithError(err).Error(errMsg)
+		}
+		return nil, errors.FromError(err).SetMessage(errMsg).ExtendComponent(accountDAComponent)
 	}
 
 	return accounts, nil
@@ -79,7 +90,11 @@ func (agent *PGAccount) FindOneByAddress(ctx context.Context, address string, te
 
 	err := pg.SelectOne(ctx, query)
 	if err != nil {
-		return nil, errors.FromError(err).ExtendComponent(accountDAComponent)
+		errMsg := "failed to find one account by address"
+		if !errors.IsNotFoundError(err) {
+			agent.logger.WithContext(ctx).WithError(err).Error(errMsg)
+		}
+		return nil, errors.FromError(err).SetMessage(errMsg).ExtendComponent(accountDAComponent)
 	}
 
 	return account, nil

@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/rlp"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 
 	"github.com/ethereum/go-ethereum/crypto"
@@ -16,7 +17,6 @@ import (
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client"
@@ -27,25 +27,26 @@ const signTransactionComponent = "use-cases.sign-eth-transaction"
 // signETHTransactionUseCase is a use case to sign a public Ethereum transaction
 type signETHTransactionUseCase struct {
 	keyManagerClient client.KeyManagerClient
+	logger           *log.Logger
 }
 
 // NewSignETHTransactionUseCase creates a new SignTransactionUseCase
 func NewSignETHTransactionUseCase(keyManagerClient client.KeyManagerClient) usecases.SignETHTransactionUseCase {
 	return &signETHTransactionUseCase{
 		keyManagerClient: keyManagerClient,
+		logger:           log.NewLogger().SetComponent(signTransactionComponent),
 	}
 }
 
 func (uc *signETHTransactionUseCase) Execute(ctx context.Context, job *entities.Job) (raw, txHash string, err error) {
-	logger := log.WithContext(ctx).WithField("job_uuid", job.UUID).WithField("one_time_key", job.InternalData.OneTimeKey)
-	logger.Debug("signing ethereum transaction")
+	logger := uc.logger.WithContext(ctx).WithField("one_time_key", job.InternalData.OneTimeKey)
 
 	signer := pkgcryto.GetEIP155Signer(job.InternalData.ChainID)
 	transaction := parsers.ETHTransactionToTransaction(job.Transaction)
 
 	var decodedSignature []byte
 	if job.InternalData.OneTimeKey {
-		decodedSignature, err = uc.signWithOneTimeKey(transaction, signer)
+		decodedSignature, err = uc.signWithOneTimeKey(ctx, transaction, signer)
 	} else {
 		decodedSignature, err = uc.signWithAccount(ctx, job, transaction)
 	}
@@ -56,34 +57,43 @@ func (uc *signETHTransactionUseCase) Execute(ctx context.Context, job *entities.
 	signedTx, err := transaction.WithSignature(signer, decodedSignature)
 	if err != nil {
 		errMessage := "failed to set transaction signature"
-		log.WithError(err).Error(errMessage)
+		logger.WithError(err).Error(errMessage)
 		return "", "", errors.InvalidParameterError(errMessage).ExtendComponent(signTransactionComponent)
 	}
 
 	signedRaw, err := rlp.Encode(signedTx)
 	if err != nil {
 		errMessage := "failed to RLP encode signed transaction"
-		log.WithError(err).Error(errMessage)
+		logger.WithError(err).Error(errMessage)
 		return "", "", errors.CryptoOperationError(errMessage).ExtendComponent(signTransactionComponent)
 	}
 	txHash = signedTx.Hash().Hex()
 
-	logger.WithField("txHash", txHash).Info("ethereum transaction signed successfully")
+	logger.WithField("tx_hash", txHash).Debug("ethereum transaction signed successfully")
 	return hexutil.Encode(signedRaw), txHash, nil
 }
 
-func (*signETHTransactionUseCase) signWithOneTimeKey(transaction *types.Transaction, signer types.Signer) ([]byte, error) {
+func (uc *signETHTransactionUseCase) signWithOneTimeKey(ctx context.Context, transaction *types.Transaction,
+	signer types.Signer) ([]byte, error) {
+	logger := uc.logger.WithContext(ctx)
 	privKey, err := crypto.GenerateKey()
 	if err != nil {
-		errMessage := "failed to generate Ethereum private key"
-		log.WithError(err).Error(errMessage)
+		errMessage := "failed to generate Ethereum private one time key"
+		logger.WithError(err).Error(errMessage)
 		return nil, errors.CryptoOperationError(errMessage)
 	}
 
-	return pkgcryto.SignTransaction(transaction, privKey, signer)
+	sign, err := pkgcryto.SignTransaction(transaction, privKey, signer)
+	if err != nil {
+		logger.WithError(err).Error("failed to sign Ethereum transaction")
+		return nil, err
+	}
+
+	return sign, nil
 }
 
 func (uc *signETHTransactionUseCase) signWithAccount(ctx context.Context, job *entities.Job, tx *types.Transaction) ([]byte, error) {
+	logger := uc.logger.WithContext(ctx)
 	request := &ethereum.SignETHTransactionRequest{
 		Nonce:    tx.Nonce(),
 		Amount:   tx.Value().String(),
@@ -104,14 +114,14 @@ func (uc *signETHTransactionUseCase) signWithAccount(ctx context.Context, job *e
 			continue
 		}
 		if err != nil {
-			log.WithError(err).Error("failed to sign ethereum transaction using key manager")
+			logger.WithError(err).Error("failed to sign ethereum transaction using key manager")
 			return nil, errors.FromError(err)
 		}
 
 		decodedSignature, err := hexutil.Decode(sig)
 		if err != nil {
 			errMessage := "failed to decode signature"
-			log.WithField("encoded_signature", sig).WithError(err).Error(errMessage)
+			logger.WithError(err).Error(errMessage)
 			return nil, errors.EncodingError(errMessage)
 		}
 
@@ -119,6 +129,6 @@ func (uc *signETHTransactionUseCase) signWithAccount(ctx context.Context, job *e
 	}
 
 	errMessage := fmt.Sprintf("account %s was not found on key-manager", job.Transaction.From)
-	log.WithField("from_account", job.Transaction.From).WithField("tenants", tenants).Error(errMessage)
+	logger.WithField("from_account", job.Transaction.From).WithField("tenants", tenants).Error(errMessage)
 	return nil, errors.InvalidParameterError(errMessage)
 }

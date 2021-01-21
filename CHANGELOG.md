@@ -13,6 +13,7 @@
 * Support usage of `in-memory` as storage for Nonce Manager
 * Launch of new API service, `orchestate-api`, encapsulating every individual previous API services
 * Enhance `tx-sender` worker with crafting and signing responsibilities
+* Improve logging verbose and format
 
 ### 🛠 Bug fixes
 * Incorrect metrics counting for 429 http responses

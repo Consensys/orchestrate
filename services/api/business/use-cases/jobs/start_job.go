@@ -10,9 +10,9 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/metrics"
 
 	"github.com/Shopify/sarama"
-	log "github.com/sirupsen/logrus"
 	pkgsarama "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/parsers"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models"
@@ -26,6 +26,7 @@ type startJobUseCase struct {
 	kafkaProducer sarama.SyncProducer
 	topicsCfg     *pkgsarama.KafkaTopicConfig
 	metrics       metrics.TransactionSchedulerMetrics
+	logger        *log.Logger
 }
 
 // NewStartJobUseCase creates a new StartJobUseCase
@@ -40,12 +41,13 @@ func NewStartJobUseCase(
 		kafkaProducer: kafkaProducer,
 		topicsCfg:     topicsCfg,
 		metrics:       m,
+		logger:        log.NewLogger().SetComponent(startJobComponent),
 	}
 }
 
 // Execute sends a job to the Kafka topic
 func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID string, tenants []string) error {
-	logger := log.WithContext(ctx).WithField("job_uuid", jobUUID)
+	logger := uc.logger.WithContext(ctx).WithField("job", jobUUID)
 	logger.Debug("starting job")
 
 	jobModel, err := uc.db.Job().FindOneByUUID(ctx, jobUUID, tenants)
@@ -74,8 +76,9 @@ func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID string, tenants 
 		return errors.FromError(err).ExtendComponent(startJobComponent)
 	}
 
-	partition, offset, err := envelope.SendJobMessage(ctx, jobEntity, uc.kafkaProducer, uc.topicsCfg.Sender)
+	partition, offset, err := envelope.SendJobMessage(jobEntity, uc.kafkaProducer, uc.topicsCfg.Sender)
 	if err != nil {
+		logger.WithError(err).Error("failed to send job message")
 		_ = dbtx.Rollback()
 		return errors.FromError(err).ExtendComponent(startJobComponent)
 	}
@@ -84,9 +87,8 @@ func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID string, tenants 
 		return errors.FromError(err).ExtendComponent(startJobComponent)
 	}
 
-	logger.WithField("partition", partition).WithField("offset", offset).Info("job started successfully")
 	uc.addMetrics(jobLog, jobModel.Logs[len(jobModel.Logs)-1], jobModel.ChainUUID)
-
+	logger.WithField("partition", partition).WithField("offset", offset).Info("job started successfully")
 	return nil
 }
 

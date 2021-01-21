@@ -6,7 +6,6 @@ import (
 	"io"
 
 	"github.com/go-playground/validator/v10"
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
@@ -26,9 +25,7 @@ func UnmarshalBody(body io.Reader, req interface{}) error {
 	dec.DisallowUnknownFields() // Force errors if unknown fields
 	err := dec.Decode(req)
 	if err != nil {
-		errMessage := "failed to decode request body"
-		log.WithError(err).Error(errMessage)
-		return errors.InvalidFormatError(err.Error()).ExtendComponent(component)
+		return errors.InvalidFormatError("failed to decode request body").AppendReason(err.Error())
 	}
 
 	err = utils.GetValidator().Struct(req)
@@ -36,16 +33,13 @@ func UnmarshalBody(body io.Reader, req interface{}) error {
 		if ves, ok := err.(validator.ValidationErrors); ok {
 			var errMessage string
 			for _, fe := range ves {
-				errMessage += fmt.Sprintf(" field validation for '%s' failed on the '%s' tag", fe.Field(), fe.Tag())
+				errMessage += fmt.Sprintf("field validation for '%s' failed on the '%s' tag", fe.Field(), fe.Tag())
 			}
 
-			log.WithError(err).Error(errMessage)
-			return errors.InvalidParameterError("invalid body, with:%s", errMessage).ExtendComponent(component)
+			return errors.InvalidParameterError("invalid body").AppendReason(errMessage)
 		}
 
-		errMessage := "Invalid body"
-		log.WithError(err).Error(errMessage)
-		return errors.InvalidFormatError(errMessage).ExtendComponent(component)
+		return errors.InvalidFormatError("invalid body")
 	}
 
 	return nil

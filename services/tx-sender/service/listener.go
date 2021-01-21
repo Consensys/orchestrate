@@ -7,6 +7,7 @@ import (
 
 	"github.com/cenkalti/backoff/v4"
 	"github.com/golang/protobuf/proto"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
@@ -14,14 +15,13 @@ import (
 	utils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sender/tx-sender/utils"
 
 	"github.com/Shopify/sarama"
-	log "github.com/sirupsen/logrus"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/tx"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sender/tx-sender/use-cases"
 )
 
-const messageListenerComponent = "service.message-listener"
+const messageListenerComponent = "service.kafka-consumer"
 
 type MessageListener struct {
 	useCases     usecases.UseCases
@@ -32,6 +32,7 @@ type MessageListener struct {
 	jobClient    client.JobClient
 	cancel       context.CancelFunc
 	err          error
+	logger       *log.Logger
 }
 
 func NewMessageListener(useCases usecases.UseCases, jobClient client.JobClient,
@@ -43,23 +44,25 @@ func NewMessageListener(useCases usecases.UseCases, jobClient client.JobClient,
 		producer:     producer,
 		retryBackOff: bck,
 		jobClient:    jobClient,
+		logger:       log.NewLogger().SetComponent(messageListenerComponent),
 	}
 }
 
 func (listener *MessageListener) Setup(session sarama.ConsumerGroupSession) error {
-	log.WithContext(session.Context()).
+	listener.logger.WithContext(session.Context()).
 		WithField("kafka.generation_id", session.GenerationID()).
 		WithField("kafka.member_id", session.MemberID()).
 		WithField("claims", session.Claims()).
-		Info("listener ready to consume messages")
+		Info("ready to consume messages")
 
 	return nil
 }
 
 func (listener *MessageListener) Cleanup(session sarama.ConsumerGroupSession) error {
-	log.WithContext(session.Context()).Info("listener: all claims consumed")
+	logger := listener.logger.WithContext(session.Context())
+	logger.Info("all claims consumed")
 	if listener.cancel != nil {
-		log.WithContext(session.Context()).Debug("listener: canceling context")
+		logger.Debug("canceling context")
 		listener.cancel()
 	}
 
@@ -74,12 +77,13 @@ func (listener *MessageListener) ConsumeClaim(session sarama.ConsumerGroupSessio
 }
 
 func (listener *MessageListener) consumeClaimLoop(ctx context.Context, session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
-	logger := log.WithContext(ctx)
-	logger.Info("tx-sender has started consuming claims loop")
+	glogger := listener.logger.WithContext(ctx)
+	ctx = log.With(ctx, glogger)
+	glogger.Info("started consuming claims loop")
 	for {
 		select {
 		case <-ctx.Done():
-			logger.WithField("reason", ctx.Err().Error()).Info("gracefully stopping message listener...")
+			glogger.WithField("reason", ctx.Err().Error()).Info("gracefully stopping message listener...")
 			return nil
 		case msg, ok := <-claim.Messages():
 			// Input channel has been close so we leave the loop
@@ -87,22 +91,23 @@ func (listener *MessageListener) consumeClaimLoop(ctx context.Context, session s
 				return nil
 			}
 
-			evlp, err := decodeMessage(msg)
+			evlp, err := decodeMessage(glogger, msg)
 			if err != nil {
-				logger.WithError(err).Error("error decoding message", msg)
+				glogger.WithError(err).Error("error decoding message", msg)
 				session.MarkMessage(msg, "")
 				continue
 			}
 
-			logger.WithField("envelope_id", evlp.ID).WithField("timestamp", msg.Timestamp).
-				Info("message consumed")
+			glogger.WithField("envelope_id", evlp.ID).
+				WithField("timestamp", msg.Timestamp).
+				Debug("message consumed")
 
 			tenantID := evlp.GetHeadersValue(utils.TenantIDMetadata)
 			job := envelope.NewJobFromEnvelope(evlp, tenantID)
 
+			logger := glogger.WithField("schedule", job.ScheduleUUID).WithField("job", job.UUID)
 			err = backoff.RetryNotify(
 				func() error {
-					logger.WithField("job_uuid", job.UUID).Info("processing job")
 					err = listener.processJob(ctx, job)
 					switch {
 					// Exits if not errors
@@ -160,7 +165,7 @@ func (listener *MessageListener) consumeClaimLoop(ctx context.Context, session s
 				},
 				listener.retryBackOff,
 				func(err error, duration time.Duration) {
-					logger.WithError(err).WithField("job", job.UUID).Warnf("error processing job, retrying in %v...", duration)
+					logger.WithError(err).Warnf("error processing job, retrying in %v...", duration)
 				},
 			)
 
@@ -169,7 +174,7 @@ func (listener *MessageListener) consumeClaimLoop(ctx context.Context, session s
 				return err
 			}
 
-			logger.WithField("job_uuid", job.UUID).Info("job processed successfully")
+			logger.Debug("job processed successfully")
 			session.MarkMessage(msg, "")
 		}
 	}
@@ -192,19 +197,19 @@ func (listener *MessageListener) processJob(ctx context.Context, job *entities.J
 	}
 }
 
-func decodeMessage(msg *sarama.ConsumerMessage) (*tx.Envelope, error) {
+func decodeMessage(logger *log.Logger, msg *sarama.ConsumerMessage) (*tx.Envelope, error) {
 	txEnvelope := &tx.TxEnvelope{}
 	err := encoding.Unmarshal(msg.Value, txEnvelope)
 	if err != nil {
 		errMessage := "failed to decode request message"
-		log.WithError(err).Error(errMessage)
+		logger.WithError(err).Error(errMessage)
 		return nil, errors.EncodingError(errMessage).ExtendComponent(messageListenerComponent)
 	}
 
 	evlp, err := txEnvelope.Envelope()
 	if err != nil {
 		errMessage := "failed to extract envelope from request"
-		log.WithError(err).Error(errMessage)
+		logger.WithError(err).Error(errMessage)
 		return nil, errors.DataCorruptedError(errMessage).ExtendComponent(messageListenerComponent)
 	}
 
@@ -212,7 +217,7 @@ func decodeMessage(msg *sarama.ConsumerMessage) (*tx.Envelope, error) {
 }
 
 func (listener *MessageListener) sendEnvelope(ctx context.Context, msgID string, protoMessage proto.Message, topic, partitionKey string) error {
-	logger := log.WithContext(ctx).WithField("topic", topic).WithField("envelope_id", msgID)
+	logger := listener.logger.WithContext(ctx).WithField("topic", topic).WithField("envelope_id", msgID)
 	logger.Debug("sending envelope")
 
 	msg := &sarama.ProducerMessage{}
@@ -225,16 +230,16 @@ func (listener *MessageListener) sendEnvelope(ctx context.Context, msgID string,
 	b, err := encoding.Marshal(protoMessage)
 	if err != nil {
 		errMessage := "failed to marshal envelope as request"
-		log.WithError(err).Error(errMessage)
-		return errors.EncodingError(errMessage)
+		logger.WithError(err).Error(errMessage)
+		return errors.EncodingError(errMessage).ExtendComponent(messageListenerComponent)
 	}
 	msg.Value = sarama.ByteEncoder(b)
 
 	partition, offset, err := listener.producer.SendMessage(msg)
 	if err != nil {
 		errMessage := "failed to produce kafka message"
-		log.WithError(err).Error(errMessage)
-		return errors.KafkaConnectionError(errMessage)
+		logger.WithError(err).Error(errMessage)
+		return errors.KafkaConnectionError(errMessage).ExtendComponent(messageListenerComponent)
 	}
 
 	logger.WithField("partition", partition).

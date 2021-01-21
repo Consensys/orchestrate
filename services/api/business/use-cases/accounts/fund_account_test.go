@@ -40,9 +40,9 @@ func TestFundingAccount_Execute(t *testing.T) {
 		faucet := testutils.FakeFaucet()
 		chainName := "besu"
 
-		mockSearchChainsUC.EXPECT().Execute(ctx, &entities.ChainFilters{Names: []string{chainName}}, allowedTenants).Return(chains, nil)
-		mockGetFaucetCandidate.EXPECT().Execute(ctx, account.Address, chains[0], allowedTenants).Return(faucet, nil)
-		mockSendTxUC.EXPECT().Execute(ctx, gomock.Any(), "", tenantID).Return(nil, nil)
+		mockSearchChainsUC.EXPECT().Execute(gomock.Any(), &entities.ChainFilters{Names: []string{chainName}}, allowedTenants).Return(chains, nil)
+		mockGetFaucetCandidate.EXPECT().Execute(gomock.Any(), account.Address, chains[0], allowedTenants).Return(faucet, nil)
+		mockSendTxUC.EXPECT().Execute(gomock.Any(), gomock.Any(), "", tenantID).Return(nil, nil)
 
 		err := usecase.Execute(ctx, account, chainName, tenantID)
 
@@ -54,8 +54,8 @@ func TestFundingAccount_Execute(t *testing.T) {
 		chains := []*entities.Chain{testutils.FakeChain()}
 		chainName := "besu"
 
-		mockSearchChainsUC.EXPECT().Execute(ctx, &entities.ChainFilters{Names: []string{chainName}}, allowedTenants).Return(chains, nil)
-		mockGetFaucetCandidate.EXPECT().Execute(ctx, account.Address, chains[0], allowedTenants).Return(nil, faucetNotFoundErr)
+		mockSearchChainsUC.EXPECT().Execute(gomock.Any(), &entities.ChainFilters{Names: []string{chainName}}, allowedTenants).Return(chains, nil)
+		mockGetFaucetCandidate.EXPECT().Execute(gomock.Any(), account.Address, chains[0], allowedTenants).Return(nil, faucetNotFoundErr)
 
 		err := usecase.Execute(ctx, account, chainName, tenantID)
 
@@ -66,7 +66,7 @@ func TestFundingAccount_Execute(t *testing.T) {
 		account := testutils.FakeAccount()
 		chainName := "besu"
 
-		mockSearchChainsUC.EXPECT().Execute(ctx, &entities.ChainFilters{Names: []string{chainName}}, allowedTenants).Return([]*entities.Chain{}, nil)
+		mockSearchChainsUC.EXPECT().Execute(gomock.Any(), &entities.ChainFilters{Names: []string{chainName}}, allowedTenants).Return([]*entities.Chain{}, nil)
 
 		err := usecase.Execute(ctx, account, chainName, tenantID)
 
@@ -79,7 +79,7 @@ func TestFundingAccount_Execute(t *testing.T) {
 		account := testutils.FakeAccount()
 		chainName := "besu"
 
-		mockSearchChainsUC.EXPECT().Execute(ctx, &entities.ChainFilters{Names: []string{chainName}}, allowedTenants).Return(nil, expectedErr)
+		mockSearchChainsUC.EXPECT().Execute(gomock.Any(), &entities.ChainFilters{Names: []string{chainName}}, allowedTenants).Return(nil, expectedErr)
 
 		err := usecase.Execute(ctx, account, chainName, tenantID)
 
@@ -93,9 +93,9 @@ func TestFundingAccount_Execute(t *testing.T) {
 		chains := []*entities.Chain{testutils.FakeChain()}
 		chainName := "besu"
 
-		mockSearchChainsUC.EXPECT().Execute(ctx, &entities.ChainFilters{Names: []string{chainName}}, allowedTenants).Return(chains, nil)
+		mockSearchChainsUC.EXPECT().Execute(gomock.Any(), &entities.ChainFilters{Names: []string{chainName}}, allowedTenants).Return(chains, nil)
 		mockGetFaucetCandidate.EXPECT().
-			Execute(ctx, account.Address, gomock.Any(), allowedTenants).
+			Execute(gomock.Any(), account.Address, gomock.Any(), allowedTenants).
 			Return(nil, expectedErr)
 
 		err := usecase.Execute(ctx, account, chainName, tenantID)
@@ -111,9 +111,9 @@ func TestFundingAccount_Execute(t *testing.T) {
 		faucet := testutils.FakeFaucet()
 		chainName := "besu"
 
-		mockSearchChainsUC.EXPECT().Execute(ctx, &entities.ChainFilters{Names: []string{chainName}}, allowedTenants).Return(chains, nil)
-		mockGetFaucetCandidate.EXPECT().Execute(ctx, account.Address, gomock.Any(), allowedTenants).Return(faucet, nil)
-		mockSendTxUC.EXPECT().Execute(ctx, gomock.Any(), "", tenantID).Return(nil, expectedErr)
+		mockSearchChainsUC.EXPECT().Execute(gomock.Any(), &entities.ChainFilters{Names: []string{chainName}}, allowedTenants).Return(chains, nil)
+		mockGetFaucetCandidate.EXPECT().Execute(gomock.Any(), account.Address, gomock.Any(), allowedTenants).Return(faucet, nil)
+		mockSendTxUC.EXPECT().Execute(gomock.Any(), gomock.Any(), "", tenantID).Return(nil, expectedErr)
 
 		err := usecase.Execute(ctx, account, chainName, tenantID)
 

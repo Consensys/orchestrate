@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/containous/traefik/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	clientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/client-utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/httputil"
@@ -28,9 +27,7 @@ func (c *HTTPClient) ETHImportAccount(ctx context.Context, req *types.ImportETHA
 
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, req)
 	if err != nil {
-		errMessage := "error while importing ethereum account"
-		log.FromContext(ctx).WithError(err).Error(errMessage)
-		return nil, errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+		return nil, errors.ServiceConnectionError("error while importing ethereum account")
 	}
 
 	defer clientutils.CloseResponse(response)
@@ -46,9 +43,7 @@ func (c *HTTPClient) ETHSign(ctx context.Context, address string, req *keymanage
 
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, req)
 	if err != nil {
-		errMessage := "error while signing data with Ethereum account"
-		log.FromContext(ctx).WithError(err).Error(errMessage)
-		return "", errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+		return "", errors.ServiceConnectionError("error while signing data with Ethereum account")
 	}
 
 	defer clientutils.CloseResponse(response)
@@ -60,9 +55,7 @@ func (c *HTTPClient) ETHSignTypedData(ctx context.Context, address string, req *
 
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, req)
 	if err != nil {
-		errMessage := "error while signing typed data with Ethereum account"
-		log.FromContext(ctx).WithError(err).Error(errMessage)
-		return "", errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+		return "", errors.ServiceConnectionError("error while signing typed data with Ethereum account")
 	}
 
 	defer clientutils.CloseResponse(response)
@@ -74,9 +67,7 @@ func (c *HTTPClient) ETHSignTransaction(ctx context.Context, address string, req
 
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, req)
 	if err != nil {
-		errMessage := "error while signing transaction"
-		log.FromContext(ctx).WithError(err).Error(errMessage)
-		return "", errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+		return "", errors.ServiceConnectionError("error while signing transaction")
 	}
 
 	defer clientutils.CloseResponse(response)
@@ -88,9 +79,7 @@ func (c *HTTPClient) ETHSignQuorumPrivateTransaction(ctx context.Context, addres
 
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, req)
 	if err != nil {
-		errMessage := "error while signing quorum private transaction"
-		log.FromContext(ctx).WithError(err).Error(errMessage)
-		return "", errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+		return "", errors.ServiceConnectionError("error while signing quorum private transaction")
 	}
 
 	defer clientutils.CloseResponse(response)
@@ -102,9 +91,7 @@ func (c *HTTPClient) ETHSignEEATransaction(ctx context.Context, address string, 
 
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, req)
 	if err != nil {
-		errMessage := "error while signing eea private transaction"
-		log.FromContext(ctx).WithError(err).Error(errMessage)
-		return "", errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+		return "", errors.ServiceConnectionError("error while signing eea private transaction")
 	}
 
 	defer clientutils.CloseResponse(response)
@@ -133,9 +120,7 @@ func (c *HTTPClient) ETHVerifySignature(ctx context.Context, request *types.Veri
 
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, request)
 	if err != nil {
-		errMessage := "error while verifying ethereum signature"
-		log.FromContext(ctx).WithError(err).Error(errMessage)
-		return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+		return errors.ServiceConnectionError("error while verifying ethereum signature")
 	}
 
 	defer clientutils.CloseResponse(response)
@@ -147,9 +132,7 @@ func (c *HTTPClient) ETHVerifyTypedDataSignature(ctx context.Context, request *t
 
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, request)
 	if err != nil {
-		errMessage := "error while verifying typed data signature"
-		log.FromContext(ctx).WithError(err).Error(errMessage)
-		return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+		return errors.ServiceConnectionError("error while verifying typed data signature").ExtendComponent(component)
 	}
 
 	defer clientutils.CloseResponse(response)

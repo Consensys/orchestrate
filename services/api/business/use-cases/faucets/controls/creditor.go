@@ -4,7 +4,7 @@ import (
 	"context"
 	"math/big"
 
-	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 
@@ -28,8 +28,6 @@ func NewCreditorControl(chainStateReader ethclient.ChainStateReader) *CreditorCo
 
 // Control apply BlackList controller on a credit function
 func (ctrl *CreditorControl) Control(ctx context.Context, req *entities.FaucetRequest) error {
-	log.WithContext(ctx).Debug("creditor control check")
-
 	for key, candidate := range req.Candidates {
 		amountBigInt, _ := new(big.Int).SetString(candidate.Amount, 10)
 
@@ -40,16 +38,14 @@ func (ctrl *CreditorControl) Control(ctx context.Context, req *entities.FaucetRe
 		// Retrieve creditor balance
 		balance, err := getAddressBalance(ctx, ctrl.chainStateReader, req.Chain.URLs, candidate.CreditorAccount)
 		if err != nil {
+			log.FromContext(ctx).WithError(err).Error("failed to get faucet balance")
 			return errors.FromError(err).ExtendComponent(creditorComponent)
 		}
 
 		// In case balance is lower, remove candidate
 		if balance.Cmp(amountBigInt) == -1 {
-			log.WithContext(ctx).
-				WithField("balance", balance.String()).
-				WithField("amount", amountBigInt.String()).
-				WithField("creditor_account", candidate.CreditorAccount).
-				Warning("faucet candidate discarded due to insufficient balance")
+			log.FromContext(ctx).WithField("creditor_account", candidate.CreditorAccount).
+				Warn("faucet candidate discarded due to insufficient balance")
 
 			delete(req.Candidates, key)
 		}

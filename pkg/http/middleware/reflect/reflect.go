@@ -6,9 +6,11 @@ import (
 	"net/http"
 	"reflect"
 
-	"github.com/containous/traefik/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/middleware"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 )
+
+const component = "http.middleware"
 
 type Builder struct {
 	builders map[reflect.Type]middleware.Builder
@@ -21,10 +23,10 @@ func NewBuilder() *Builder {
 }
 
 func (b *Builder) Build(ctx context.Context, name string, configuration interface{}) (mid func(http.Handler) http.Handler, respModifier func(resp *http.Response) error, err error) {
-	log.FromContext(ctx).
-		WithField("middleware", name).
+	log.NewLogger().WithContext(ctx).SetComponent(component).
+		WithField("name", name).
 		WithField("type", fmt.Sprintf("%T", configuration)).
-		Debugf("building middleware")
+		Debug("building middleware")
 
 	builder, ok := b.builders[reflect.TypeOf(configuration)]
 	if !ok {

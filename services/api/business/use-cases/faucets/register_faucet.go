@@ -3,8 +3,8 @@ package faucets
 import (
 	"context"
 
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/parsers"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
@@ -17,6 +17,7 @@ const registerFaucetComponent = "use-cases.register-faucet"
 type registerFaucetUseCase struct {
 	db             store.DB
 	searchFaucetUC usecases.SearchFaucetsUseCase
+	logger         *log.Logger
 }
 
 // NewRegisterFaucetUseCase creates a new RegisterFaucetUseCase
@@ -24,16 +25,14 @@ func NewRegisterFaucetUseCase(db store.DB, searchFaucetUC usecases.SearchFaucets
 	return &registerFaucetUseCase{
 		db:             db,
 		searchFaucetUC: searchFaucetUC,
+		logger:         log.NewLogger().SetComponent(registerFaucetComponent),
 	}
 }
 
 // Execute registers a new faucet
 func (uc *registerFaucetUseCase) Execute(ctx context.Context, faucet *entities.Faucet) (*entities.Faucet, error) {
-	logger := log.WithContext(ctx).
-		WithField("name", faucet.Name).
-		WithField("chain_rule", faucet.ChainRule).
-		WithField("tenant", faucet.TenantID).
-		WithField("creditor_account", faucet.CreditorAccount)
+	ctx = log.WithFields(ctx, log.Field("faucet_name", faucet.Name), log.Field("chain", faucet.ChainRule))
+	logger := uc.logger.WithContext(ctx)
 	logger.Debug("registering new faucet")
 
 	faucetsRetrieved, err := uc.searchFaucetUC.Execute(ctx, &entities.FaucetFilters{

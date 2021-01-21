@@ -26,7 +26,7 @@ func TestGetMethodSignatures_Execute(t *testing.T) {
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		contract := testutils.FakeContract()
 
-		mockGetContractUC.EXPECT().Execute(ctx, contract.Name, contract.Tag).Return(contract, nil)
+		mockGetContractUC.EXPECT().Execute(gomock.Any(), contract.Name, contract.Tag).Return(contract, nil)
 
 		signatures, err := usecase.Execute(ctx, contract.Name, contract.Tag, "transfer")
 
@@ -37,7 +37,7 @@ func TestGetMethodSignatures_Execute(t *testing.T) {
 	t.Run("should execute use case successfully if method name is constructor", func(t *testing.T) {
 		contract := testutils.FakeContract()
 
-		mockGetContractUC.EXPECT().Execute(ctx, contract.Name, contract.Tag).Return(contract, nil)
+		mockGetContractUC.EXPECT().Execute(gomock.Any(), contract.Name, contract.Tag).Return(contract, nil)
 
 		signatures, err := usecase.Execute(ctx, contract.Name, contract.Tag, constructorMethodName)
 
@@ -48,7 +48,7 @@ func TestGetMethodSignatures_Execute(t *testing.T) {
 	t.Run("should execute use case successfully and return an empty array if nothing is found", func(t *testing.T) {
 		contract := testutils.FakeContract()
 
-		mockGetContractUC.EXPECT().Execute(ctx, contract.Name, contract.Tag).Return(contract, nil)
+		mockGetContractUC.EXPECT().Execute(gomock.Any(), contract.Name, contract.Tag).Return(contract, nil)
 
 		signatures, err := usecase.Execute(ctx, contract.Name, contract.Tag, "inexistentMethod")
 
@@ -60,7 +60,7 @@ func TestGetMethodSignatures_Execute(t *testing.T) {
 		contract := testutils.FakeContract()
 		expectedErr := fmt.Errorf("error")
 
-		mockGetContractUC.EXPECT().Execute(ctx, contract.Name, contract.Tag).Return(nil, expectedErr)
+		mockGetContractUC.EXPECT().Execute(gomock.Any(), contract.Name, contract.Tag).Return(nil, expectedErr)
 
 		signatures, err := usecase.Execute(ctx, contract.Name, contract.Tag, constructorMethodName)
 
@@ -72,7 +72,7 @@ func TestGetMethodSignatures_Execute(t *testing.T) {
 		contract := testutils.FakeContract()
 		contract.ABI = "wrongABI"
 
-		mockGetContractUC.EXPECT().Execute(ctx, contract.Name, contract.Tag).Return(contract, nil)
+		mockGetContractUC.EXPECT().Execute(gomock.Any(), contract.Name, contract.Tag).Return(contract, nil)
 
 		signatures, err := usecase.Execute(ctx, contract.Name, contract.Tag, constructorMethodName)
 

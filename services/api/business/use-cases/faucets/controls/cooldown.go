@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 
@@ -32,8 +32,6 @@ func NewCooldownControl() *CooldownControl {
 
 // Control apply CoolDown controller on a credit function
 func (ctrl *CooldownControl) Control(ctx context.Context, req *entities.FaucetRequest) error {
-	log.WithContext(ctx).Debug("cooldown control check")
-
 	if len(req.Candidates) == 0 {
 		return nil
 	}
@@ -44,17 +42,14 @@ func (ctrl *CooldownControl) Control(ctx context.Context, req *entities.FaucetRe
 		defer ctrl.unlock(key, req.Beneficiary)
 
 		if ctrl.IsCoolingDown(key, req.Beneficiary, candidate.Cooldown) {
-			log.WithContext(ctx).
-				WithField("beneficiary", req.Beneficiary).
-				WithField("faucet", key).
-				Debug("candidate removed due to CooldownControl")
+			log.FromContext(ctx).Debug("candidate removed due to CooldownControl")
 			delete(req.Candidates, key)
 		}
 	}
 
 	if len(req.Candidates) == 0 {
 		errMessage := "all faucets cooling down"
-		log.WithContext(ctx).WithField("beneficiary", req.Beneficiary).Error(errMessage)
+		log.FromContext(ctx).Error(errMessage)
 		return errors.FaucetWarning(errMessage).ExtendComponent(cooldownComponent)
 	}
 

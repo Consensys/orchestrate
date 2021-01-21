@@ -3,6 +3,7 @@ package proxy
 import (
 	"bytes"
 	"compress/gzip"
+	"context"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -11,9 +12,9 @@ import (
 	"strings"
 	"time"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/json"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/utils"
@@ -25,8 +26,8 @@ var rpcCachedMethods = map[string]bool{
 	"eth_getTransactionReceipt": true,
 }
 
-func HTTPCacheRequest(req *http.Request) (c bool, k string, ttl time.Duration, err error) {
-	logger := log.WithContext(req.Context())
+func HTTPCacheRequest(ctx context.Context, req *http.Request) (c bool, k string, ttl time.Duration, err error) {
+	logger := log.FromContext(ctx)
 	if req.Method != "POST" {
 		return false, "", 0, nil
 	}
@@ -47,12 +48,12 @@ func HTTPCacheRequest(req *http.Request) (c bool, k string, ttl time.Duration, e
 	err = json.Unmarshal(body, &msg)
 	// In case request does not correspond to one of expected call RPC call, we ignore
 	if err != nil {
-		logger.Debugf("HTTPCache: request is not an RPC message")
+		logger.Debugf("request is not an rpc")
 		return false, "", 0, nil
 	}
 
 	if _, ok := rpcCachedMethods[msg.Method]; !ok {
-		logger.Debugf("HTTPCache: RPC method is ignored: %s", msg.Method)
+		logger.WithField("method", msg.Method).Debug("rpc method is ignored")
 		return false, "", 0, nil
 	}
 
@@ -64,7 +65,8 @@ func HTTPCacheRequest(req *http.Request) (c bool, k string, ttl time.Duration, e
 	return true, cacheKey, 0, nil
 }
 
-func HTTPCacheResponse(resp *http.Response) bool {
+func HTTPCacheResponse(ctx context.Context, resp *http.Response) bool {
+	logger := log.FromContext(ctx)
 	var msg ethclient.JSONRpcMessage
 	// Check that the server actually sent compressed data
 	var reader io.ReadCloser
@@ -77,17 +79,17 @@ func HTTPCacheResponse(resp *http.Response) bool {
 	}
 	err := json.UnmarshalBody(reader, &msg)
 	if err != nil {
-		log.WithError(err).Debugf("HTTPCache: cannot decode response")
+		logger.WithError(err).Debug("failed to decode rpc response")
 		return false
 	}
 
 	if msg.Error != nil {
-		log.WithField("error", msg.Error.Message).Debugf("HTTPCache: skip RPC error responses")
+		logger.WithField("error", msg.Error.Message).Debug("skipped rpc error responses")
 		return false
 	}
 
 	if len(msg.Result) == 0 {
-		log.Debugf("HTTPCache: skip RPC empty response results")
+		logger.Debug("skipped rpc empty response results")
 		return false
 	}
 

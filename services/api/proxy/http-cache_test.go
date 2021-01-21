@@ -23,7 +23,7 @@ func TestHTTPCacheRequest_Valid(t *testing.T) {
 	body, _ := json.Marshal(msg)
 	req := httptest.NewRequest(http.MethodPost, "http://localhost", bytes.NewReader(body))
 
-	c, k, ttl, err := HTTPCacheRequest(req)
+	c, k, ttl, err := HTTPCacheRequest(req.Context(), req)
 	assert.NoError(t, err)
 	assert.True(t, c)
 	assert.Equal(t, time.Duration(0), ttl)
@@ -39,7 +39,7 @@ func TestHTTPCacheRequest_ValidWithCustomTTL(t *testing.T) {
 	body, _ := json.Marshal(msg)
 	req := httptest.NewRequest(http.MethodPost, "http://localhost", bytes.NewReader(body))
 
-	c, k, ttl, err := HTTPCacheRequest(req)
+	c, k, ttl, err := HTTPCacheRequest(req.Context(), req)
 	assert.NoError(t, err)
 	assert.True(t, c)
 	assert.Equal(t, time.Second, ttl)
@@ -49,7 +49,7 @@ func TestHTTPCacheRequest_ValidWithCustomTTL(t *testing.T) {
 func TestHTTPCacheRequest_IgnoreReqType(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "http://localhost", nil)
 
-	c, _, _, err := HTTPCacheRequest(req)
+	c, _, _, err := HTTPCacheRequest(req.Context(), req)
 	assert.NoError(t, err)
 	assert.False(t, c)
 }
@@ -62,7 +62,7 @@ func TestHTTPCacheRequest_IgnoreRPCMethod(t *testing.T) {
 	body, _ := json.Marshal(msg)
 	req := httptest.NewRequest(http.MethodPost, "http://localhost", bytes.NewReader(body))
 
-	c, _, _, err := HTTPCacheRequest(req)
+	c, _, _, err := HTTPCacheRequest(req.Context(), req)
 	assert.NoError(t, err)
 	assert.False(t, c)
 }

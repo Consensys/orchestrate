@@ -12,7 +12,6 @@ import (
 
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 
-	"github.com/containous/traefik/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	clientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/client-utils"
 )
@@ -25,8 +24,7 @@ func (c *HTTPClient) GetJob(ctx context.Context, jobUUID string) (*types.JobResp
 		response, err := clientutils.GetRequest(ctx, c.client, reqURL)
 		if err != nil {
 			errMessage := "error while getting job"
-			log.FromContext(ctx).WithError(err).Error(errMessage)
-			return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+			return errors.FromError(err).SetMessage(errMessage).AppendReason(err.Error()).ExtendComponent(component)
 		}
 
 		defer clientutils.CloseResponse(response)
@@ -44,8 +42,7 @@ func (c *HTTPClient) GetJobs(ctx context.Context) ([]*types.JobResponse, error) 
 		response, err := clientutils.GetRequest(ctx, c.client, reqURL)
 		if err != nil {
 			errMessage := "error while getting jobs"
-			log.FromContext(ctx).WithError(err).Error(errMessage)
-			return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+			return errors.FromError(err).SetMessage(errMessage).AppendReason(err.Error()).ExtendComponent(component)
 		}
 
 		defer clientutils.CloseResponse(response)
@@ -92,8 +89,7 @@ func (c *HTTPClient) SearchJob(ctx context.Context, filters *entities.JobFilters
 		response, err := clientutils.GetRequest(ctx, c.client, reqURL)
 		if err != nil {
 			errMessage := "error while searching jobs"
-			log.FromContext(ctx).WithError(err).Error(errMessage)
-			return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+			return errors.FromError(err).SetMessage(errMessage).AppendReason(err.Error()).ExtendComponent(component)
 		}
 		defer clientutils.CloseResponse(response)
 		return httputil.ParseResponse(ctx, response, &resp)
@@ -110,8 +106,7 @@ func (c *HTTPClient) CreateJob(ctx context.Context, request *types.CreateJobRequ
 		response, err := clientutils.PostRequest(ctx, c.client, reqURL, request)
 		if err != nil {
 			errMessage := "error while creating job"
-			log.FromContext(ctx).WithError(err).Error(errMessage)
-			return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+			return errors.FromError(err).SetMessage(errMessage).AppendReason(err.Error()).ExtendComponent(component)
 		}
 		defer clientutils.CloseResponse(response)
 		return httputil.ParseResponse(ctx, response, resp)
@@ -127,9 +122,7 @@ func (c *HTTPClient) UpdateJob(ctx context.Context, jobUUID string, request *typ
 	err := callWithBackOff(ctx, c.config.backOff, func() error {
 		response, err := clientutils.PatchRequest(ctx, c.client, reqURL, request)
 		if err != nil {
-			errMessage := "error while updating job"
-			log.FromContext(ctx).WithError(err).Error(errMessage)
-			return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+			return err
 		}
 
 		defer clientutils.CloseResponse(response)
@@ -145,9 +138,7 @@ func (c *HTTPClient) StartJob(ctx context.Context, jobUUID string) error {
 	return callWithBackOff(ctx, c.config.backOff, func() error {
 		response, err := clientutils.PutRequest(ctx, c.client, reqURL, nil)
 		if err != nil {
-			errMessage := "error while starting job"
-			log.FromContext(ctx).WithError(err).Error(errMessage)
-			return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+			return err
 		}
 
 		defer clientutils.CloseResponse(response)
@@ -161,9 +152,7 @@ func (c *HTTPClient) ResendJobTx(ctx context.Context, jobUUID string) error {
 	return callWithBackOff(ctx, c.config.backOff, func() error {
 		response, err := clientutils.PutRequest(ctx, c.client, reqURL, nil)
 		if err != nil {
-			errMessage := "error while resending job tx"
-			log.FromContext(ctx).WithError(err).Error(errMessage)
-			return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+			return err
 		}
 
 		defer clientutils.CloseResponse(response)

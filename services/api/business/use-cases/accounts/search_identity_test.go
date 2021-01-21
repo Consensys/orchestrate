@@ -37,7 +37,7 @@ func TestSearchAccounts_Execute(t *testing.T) {
 			Aliases: []string{"alias1"},
 		}
 
-		accountAgent.EXPECT().Search(ctx, filter, tenants).Return([]*models2.Account{acc}, nil)
+		accountAgent.EXPECT().Search(gomock.Any(), filter, tenants).Return([]*models2.Account{acc}, nil)
 
 		resp, err := usecase.Execute(ctx, filter, tenants)
 
@@ -52,7 +52,7 @@ func TestSearchAccounts_Execute(t *testing.T) {
 			Aliases: []string{"alias1"},
 		}
 
-		accountAgent.EXPECT().Search(ctx, filter, tenants).Return(nil, expectedErr)
+		accountAgent.EXPECT().Search(gomock.Any(), filter, tenants).Return(nil, expectedErr)
 
 		_, err := usecase.Execute(ctx, filter, tenants)
 

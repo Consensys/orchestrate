@@ -3,9 +3,9 @@ package sender
 import (
 	"context"
 
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
@@ -23,6 +23,7 @@ type sendEEAPrivateTxUseCase struct {
 	jobClient        client.JobClient
 	ec               ethclient.EEATransactionSender
 	chainRegistryURL string
+	logger           *log.Logger
 }
 
 func NewSendEEAPrivateTxUseCase(signTx usecases.SignEEATransactionUseCase, crafter usecases.CraftTransactionUseCase,
@@ -35,11 +36,14 @@ func NewSendEEAPrivateTxUseCase(signTx usecases.SignEEATransactionUseCase, craft
 		ec:               ec,
 		nonceManager:     nonceManager,
 		crafter:          crafter,
+		logger:           log.NewLogger().SetComponent(sendEEAPrivateTxComponent),
 	}
 }
 
 func (uc *sendEEAPrivateTxUseCase) Execute(ctx context.Context, job *entities.Job) error {
-	logger := log.WithContext(ctx).WithField("job_uuid", job.UUID)
+	ctx = log.With(log.WithFields(ctx, log.Field("job", job.UUID)), uc.logger)
+	logger := uc.logger.WithContext(ctx)
+
 	logger.Debug("processing EEA private transaction job")
 
 	err := uc.crafter.Execute(ctx, job)
@@ -75,13 +79,11 @@ func (uc *sendEEAPrivateTxUseCase) Execute(ctx context.Context, job *entities.Jo
 }
 
 func (uc *sendEEAPrivateTxUseCase) sendTx(ctx context.Context, job *entities.Job) (string, error) {
-	logger := log.WithContext(ctx).WithField("job_uuid", job.UUID)
-
 	proxyURL := utils.GetProxyURL(uc.chainRegistryURL, job.ChainUUID)
 	txHash, err := uc.ec.PrivDistributeRawTransaction(ctx, proxyURL, job.Transaction.Raw)
 	if err != nil {
 		errMsg := "cannot send EEA private transaction"
-		logger.WithError(err).Errorf(errMsg)
+		uc.logger.WithContext(ctx).WithError(err).Errorf(errMsg)
 		return "", err
 	}
 

@@ -52,8 +52,8 @@ func TestSignEEATransaction_Execute(t *testing.T) {
 		}
 
 		gomock.InOrder(
-			mockKeyManagerClient.EXPECT().ETHSignEEATransaction(ctx, job.Transaction.From, expectedRequest0).Return("", errors.NotFoundError("not found")),
-			mockKeyManagerClient.EXPECT().ETHSignEEATransaction(ctx, job.Transaction.From, expectedRequest1).Return(signature, nil),
+			mockKeyManagerClient.EXPECT().ETHSignEEATransaction(gomock.Any(), job.Transaction.From, expectedRequest0).Return("", errors.NotFoundError("not found")),
+			mockKeyManagerClient.EXPECT().ETHSignEEATransaction(gomock.Any(), job.Transaction.From, expectedRequest1).Return(signature, nil),
 		)
 
 		raw, txHash, err := usecase.Execute(ctx, job)
@@ -77,7 +77,7 @@ func TestSignEEATransaction_Execute(t *testing.T) {
 			PrivateFor:     job.Transaction.PrivateFor,
 			PrivacyGroupID: job.Transaction.PrivacyGroupID,
 		}
-		mockKeyManagerClient.EXPECT().ETHSignEEATransaction(ctx, job.Transaction.From, expectedRequest).Return(signature, nil)
+		mockKeyManagerClient.EXPECT().ETHSignEEATransaction(gomock.Any(), job.Transaction.From, expectedRequest).Return(signature, nil)
 
 		raw, txHash, err := usecase.Execute(ctx, job)
 
@@ -101,7 +101,7 @@ func TestSignEEATransaction_Execute(t *testing.T) {
 
 	t.Run("should fail with same error if ETHSignEEATransaction fails", func(t *testing.T) {
 		expectedErr := errors.InvalidFormatError("error")
-		mockKeyManagerClient.EXPECT().ETHSignEEATransaction(ctx, gomock.Any(), gomock.Any()).Return("", expectedErr)
+		mockKeyManagerClient.EXPECT().ETHSignEEATransaction(gomock.Any(), gomock.Any(), gomock.Any()).Return("", expectedErr)
 
 		raw, txHash, err := usecase.Execute(ctx, testutils.FakeJob())
 
@@ -112,7 +112,7 @@ func TestSignEEATransaction_Execute(t *testing.T) {
 
 	t.Run("should fail with EncodingError if signature cannot be decoded", func(t *testing.T) {
 		signature := "invalidSignature"
-		mockKeyManagerClient.EXPECT().ETHSignEEATransaction(ctx, gomock.Any(), gomock.Any()).Return(signature, nil)
+		mockKeyManagerClient.EXPECT().ETHSignEEATransaction(gomock.Any(), gomock.Any(), gomock.Any()).Return(signature, nil)
 
 		raw, txHash, err := usecase.Execute(ctx, testutils.FakeJob())
 
@@ -123,7 +123,7 @@ func TestSignEEATransaction_Execute(t *testing.T) {
 
 	t.Run("should fail with InvalidParameterError if ETHSignEEATransaction fails to find tenant", func(t *testing.T) {
 		expectedErr := errors.NotFoundError("error")
-		mockKeyManagerClient.EXPECT().ETHSignEEATransaction(ctx, gomock.Any(), gomock.Any()).Return("", expectedErr).Times(2)
+		mockKeyManagerClient.EXPECT().ETHSignEEATransaction(gomock.Any(), gomock.Any(), gomock.Any()).Return("", expectedErr).Times(2)
 
 		raw, txHash, err := usecase.Execute(ctx, testutils.FakeJob())
 

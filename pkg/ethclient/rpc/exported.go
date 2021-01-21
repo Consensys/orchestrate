@@ -6,9 +6,9 @@ import (
 
 	"github.com/cenkalti/backoff/v4"
 	"github.com/spf13/viper"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http"
 )
 
@@ -24,6 +24,7 @@ func Init(_ context.Context) {
 		if client != nil {
 			return
 		}
+		logger := log.NewLogger().SetComponent(component)
 
 		newBackOff := func() backoff.BackOff { return utils.NewBackOff(utils.NewConfig(viper.GetViper())) }
 
@@ -35,8 +36,7 @@ func Init(_ context.Context) {
 		// Set Client
 		client = NewClient(newBackOff, http.NewClient(httpCfg))
 
-		log.Infof("%s: ready", component)
-
+		logger.Info("ready")
 	})
 }
 

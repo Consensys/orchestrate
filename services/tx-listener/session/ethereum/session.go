@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/metrics"
 
@@ -14,7 +15,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 
 	"github.com/cenkalti/backoff/v4"
-	"github.com/containous/traefik/v2/pkg/log"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
@@ -25,6 +25,7 @@ import (
 )
 
 const MaxTxHashesLength = 30
+const component = "tx-listener.session.ethereum"
 
 type Session struct {
 	Chain         *dynamic.Chain
@@ -43,6 +44,7 @@ type Session struct {
 	// Channel stacking blocks waiting for receipts to be fetched
 	fetchedBlocks chan *Future
 	errors        chan error
+	logger        *log.Logger
 }
 
 func NewSession(
@@ -64,6 +66,7 @@ func NewSession(
 		metricsLabels: []string{
 			"chain_uuid", chain.UUID,
 		},
+		logger: log.NewLogger().SetComponent(component).WithField("chain", chain.UUID),
 	}
 }
 
@@ -109,9 +112,7 @@ func (s *Session) Run(ctx context.Context) error {
 					err = ctx.Err()
 				}
 
-				log.FromContext(ctx).
-					WithError(err).
-					Info("exiting listener session...")
+				s.logger.Debug("exiting listener session...")
 				return backoff.Permanent(err)
 			}
 
@@ -119,14 +120,11 @@ func (s *Session) Run(ctx context.Context) error {
 		},
 		s.bckOff,
 		func(err error, duration time.Duration) {
-			// Print the received error
-			log.FromContext(ctx).
-				WithError(err).
-				Warnf("error in session listener, rebooting in %v...", duration)
+			s.logger.WithError(err).Warnf("error in session listener, rebooting in %v...", duration)
 		},
 	)
 
-	log.FromContext(ctx).Info("listener session exited")
+	s.logger.WithError(err).Info("listener session exited")
 	return err
 }
 
@@ -166,14 +164,11 @@ func (s *Session) run(ctx context.Context) (err error) {
 	// We must drain channels before starting a new session
 	go func() {
 		for e := range s.errors {
-			log.FromContext(ctx).
-				WithError(e).
-				Error("error while listening")
+			s.logger.WithError(e).Error("error while listening")
 		}
 	}()
 
-	log.FromContext(ctx).Debug("waiting for go routines to complete....")
-	// Wait for goroutines to complete and close session
+	s.logger.Debug("waiting for go routines to complete....")
 	wg.Wait()
 
 	s.close(ctx)
@@ -181,7 +176,7 @@ func (s *Session) run(ctx context.Context) (err error) {
 }
 
 func (s *Session) init(ctx context.Context) error {
-	log.FromContext(ctx).Debug("initializing session listener...")
+	s.logger.Debug("initializing session listener...")
 
 	err := s.initPosition(ctx)
 	if err != nil {
@@ -225,17 +220,14 @@ func (s *Session) initPosition(ctx context.Context) error {
 }
 
 func (s *Session) listen(ctx context.Context) {
-	log.FromContext(ctx).
-		WithField("block.start", s.blockPosition).
-		Infof("starting fetch block listener")
+	s.logger.WithField("block_start", s.blockPosition).Info("starting fetch block listener")
 
 	ticker := time.NewTicker(s.Chain.Listener.Backoff)
 listeningLoop:
 	for {
 		select {
 		case <-ctx.Done():
-			log.FromContext(ctx).
-				WithField("block.stop", s.blockPosition).
+			s.logger.WithField("block_stop", s.blockPosition).
 				Debug("stopping fetch block listener")
 			break listeningLoop
 		case <-s.trigger:
@@ -262,9 +254,8 @@ listeningLoop:
 	ticker.Stop()
 	close(s.fetchedBlocks)
 
-	log.FromContext(ctx).
-		WithField("block.stop", s.blockPosition).
-		Infof("fetch block listener has been stopped")
+	s.logger.WithField("block_stop", s.blockPosition).
+		Info("fetch block listener has been stopped")
 }
 
 func (s *Session) callHooks(ctx context.Context) {
@@ -275,7 +266,7 @@ func (s *Session) callHooks(ctx context.Context) {
 		case res := <-futureBlock.Result():
 			// We MUST drain array chan and ignore blocks after an error happened
 			if err != nil {
-				log.FromContext(ctx).
+				s.logger.
 					WithField("blockNumber", res.(*fetchedBlock).block.NumberU64()).
 					Warn("ignoring fetched block")
 				continue
@@ -297,7 +288,7 @@ func (s *Session) callHooks(ctx context.Context) {
 		}
 	}
 
-	log.FromContext(ctx).Debug("call hooks loop has been stopped")
+	s.logger.Debug("call hooks loop has been stopped")
 }
 
 func (s *Session) callHook(ctx context.Context, block *fetchedBlock) error {
@@ -318,15 +309,15 @@ func (s *Session) fetchBlock(ctx context.Context, blockPosition uint64) *Future 
 		)
 		if err != nil {
 			errMessage := "failed to fetch block"
-			log.FromContext(ctx).WithError(err).WithField("block.number", blockPosition).Errorf(errMessage)
+			s.logger.WithError(err).WithField("block_number", blockPosition).Error(errMessage)
 			return nil, errors.ConnectionError(errMessage)
 		}
 
 		block := &fetchedBlock{block: blck}
 
 		for _, tx := range blck.Transactions() {
-			log.FromContext(ctx).WithField("txHash", tx.Hash().String()).
-				WithField("block", blck.NumberU64()).Debug("found transaction in block")
+			s.logger.WithField("tx_hash", tx.Hash().String()).
+				WithField("block_number", blck.NumberU64()).Debug("found transaction in block")
 		}
 
 		jobMap, err := s.fetchJobs(ctx, blck.Transactions())
@@ -368,12 +359,13 @@ func (s *Session) fetchJobs(ctx context.Context, transactions ethtypes.Transacti
 			Status:    utils.StatusPending,
 		})
 		if err != nil {
+			s.logger.WithError(err).Error("failed to search jobs")
 			return nil, err
 		}
 
 		for _, jobResponse := range jobResponses {
-			log.FromContext(ctx).WithField("txHash", jobResponse.Transaction.Hash).
-				WithField("jobUUID", jobResponse.UUID).Debug("transaction was matched to job")
+			s.logger.WithField("tx_hash", jobResponse.Transaction.Hash).
+				WithField("job", jobResponse.UUID).Debug("transaction was matched to a job")
 
 			// Filter by the jobs belonging to same session CHAIN_UUID
 			jobMap[jobResponse.Transaction.Hash] = &entities.Job{
@@ -455,15 +447,13 @@ func isEEAPrivTx(transaction *ethtypes.Transaction, eeaPrivPrecompiledContractAd
 
 func (s *Session) fetchReceipt(ctx context.Context, job *entities.Job, txHash ethcommon.Hash) *Future {
 	return NewFuture(func() (interface{}, error) {
-		logger := log.FromContext(ctx).
-			WithField("txHash", txHash.Hex()).
-			WithField("chainUUID", s.Chain.UUID)
+		logger := s.logger.WithField("tx_hash", txHash.Hex()).WithField("chain", s.Chain.UUID)
 
-		logger.Debug("fetching fetch receipt")
+		logger.Debug("fetching fetch receipt...")
 
 		receipt, err := s.ec.TransactionReceipt(ctx, s.Chain.URL, txHash)
 		if err != nil {
-			logger.WithError(err).Errorf("failed to fetch receipt")
+			logger.WithError(err).Error("failed to fetch receipt")
 			return nil, err
 		}
 
@@ -479,9 +469,7 @@ func (s *Session) fetchReceipt(ctx context.Context, job *entities.Job, txHash et
 
 func (s *Session) fetchPrivateReceipt(ctx context.Context, job *entities.Job, txHash ethcommon.Hash) *Future {
 	return NewFuture(func() (interface{}, error) {
-		logger := log.FromContext(ctx).
-			WithField("txHash", txHash.Hex()).
-			WithField("chainUUID", s.Chain.UUID)
+		logger := s.logger.WithField("tx_hash", txHash.Hex()).WithField("chain", s.Chain.UUID)
 
 		logger.Debug("fetching private receipt")
 
@@ -491,26 +479,19 @@ func (s *Session) fetchPrivateReceipt(ctx context.Context, job *entities.Job, tx
 			txHash,
 		)
 
-		// We exit ONLY when we even failed to fetch the marking tx receipt, otherwise
+		// We exit ONLY when we failed to fetch the marking tx receipt, otherwise
 		// error is being appended to the envelope
-		if err != nil && receipt == nil {
-			logger.Error("failed to fetch receipt")
+		if err != nil {
+			logger.Error("failed to fetch private receipt")
 			return nil, err
-		} else if err != nil {
-			log.FromContext(ctx).
-				WithError(err).
-				WithField("txHash", txHash.Hex()).
-				WithField("chainUUID", s.Chain.UUID).
-				Warn("failed to fetch private receipt")
 		}
 
-		logger.
-			WithField("txHash", receipt.TxHash).
-			WithField("privateFrom", receipt.PrivateFrom).
-			WithField("privateFor", receipt.PrivateFor).
-			WithField("privacyGroupID", receipt.PrivacyGroupId).
-			WithField("status", receipt.Status).
-			Debug("private Receipt fetched")
+		if receipt == nil {
+			logger.Debug("fetched an empty private receipt")
+			return nil, nil
+		}
+
+		logger.WithField("status", receipt.Status).Debug("private receipt was fetched")
 
 		// Bind the hybrid receipt to the envelope
 		job.Receipt = receipt.
@@ -526,7 +507,7 @@ func (s *Session) fetchPrivateReceipt(ctx context.Context, job *entities.Job, tx
 func (s *Session) getChainTip(ctx context.Context) (tip uint64, err error) {
 	head, err := s.ec.HeaderByNumber(ctx, s.Chain.URL, nil)
 	if err != nil {
-		log.FromContext(ctx).WithError(err).Errorf("failed to fetch chain head")
+		s.logger.WithError(err).Error("failed to fetch chain head")
 		return 0, err
 	}
 
@@ -545,8 +526,8 @@ func (s *Session) trig() {
 	}
 }
 
-func (s *Session) close(ctx context.Context) {
-	log.FromContext(ctx).Debug("closing listener session...")
+func (s *Session) close(_ context.Context) {
+	s.logger.Debug("closing session...")
 	close(s.errors)
 	close(s.trigger)
 }

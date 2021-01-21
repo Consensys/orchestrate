@@ -8,6 +8,7 @@ import (
 
 	"github.com/gofrs/uuid"
 	pg "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database/postgres"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models"
 )
 
@@ -15,12 +16,13 @@ const logDAComponent = "data-agents.log"
 
 // PGLog is a log data agent for PostgreSQL
 type PGLog struct {
-	db pg.DB
+	db     pg.DB
+	logger *log.Logger
 }
 
 // NewPGLog creates a new PGLog
 func NewPGLog(db pg.DB) store.LogAgent {
-	return &PGLog{db: db}
+	return &PGLog{db: db, logger: log.NewLogger().SetComponent(logDAComponent)}
 }
 
 // Insert Inserts a new log in DB
@@ -35,6 +37,7 @@ func (agent *PGLog) Insert(ctx context.Context, logModel *models.Log) error {
 
 	err := pg.Insert(ctx, agent.db, logModel)
 	if err != nil {
+		agent.logger.WithError(err).Error("failed to insert job log")
 		return errors.FromError(err).ExtendComponent(logDAComponent)
 	}
 

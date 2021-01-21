@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/containous/traefik/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	clientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/client-utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/httputil"
@@ -18,9 +17,7 @@ func (c *HTTPClient) RegisterContract(ctx context.Context, request *types.Regist
 	err := callWithBackOff(ctx, c.config.backOff, func() error {
 		response, err := clientutils.PostRequest(ctx, c.client, reqURL, request)
 		if err != nil {
-			errMessage := "error while registering contract"
-			log.FromContext(ctx).WithError(err).Error(errMessage)
-			return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+			return err
 		}
 		defer clientutils.CloseResponse(response)
 		return httputil.ParseResponse(ctx, response, resp)
@@ -36,9 +33,7 @@ func (c *HTTPClient) GetContract(ctx context.Context, name, tag string) (*types.
 	err := callWithBackOff(ctx, c.config.backOff, func() error {
 		response, err := clientutils.GetRequest(ctx, c.client, reqURL)
 		if err != nil {
-			errMessage := "error while getting contract"
-			log.FromContext(ctx).WithError(err).Error(errMessage)
-			return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+			return err
 		}
 
 		defer clientutils.CloseResponse(response)
@@ -55,9 +50,7 @@ func (c *HTTPClient) GetContractsCatalog(ctx context.Context) ([]string, error) 
 	err := callWithBackOff(ctx, c.config.backOff, func() error {
 		response, err := clientutils.GetRequest(ctx, c.client, reqURL)
 		if err != nil {
-			errMessage := "error while getting contract catalog"
-			log.FromContext(ctx).WithError(err).Error(errMessage)
-			return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+			return err
 		}
 
 		defer clientutils.CloseResponse(response)
@@ -74,9 +67,7 @@ func (c *HTTPClient) GetContractTags(ctx context.Context, name string) ([]string
 	err := callWithBackOff(ctx, c.config.backOff, func() error {
 		response, err := clientutils.GetRequest(ctx, c.client, reqURL)
 		if err != nil {
-			errMessage := "error while getting contract tags"
-			log.FromContext(ctx).WithError(err).Error(errMessage)
-			return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+			return err
 		}
 
 		defer clientutils.CloseResponse(response)
@@ -96,9 +87,7 @@ func (c *HTTPClient) SetContractAddressCodeHash(ctx context.Context, address, ch
 	err := callWithBackOff(ctx, c.config.backOff, func() error {
 		response, err := clientutils.PostRequest(ctx, c.client, reqURL, req)
 		if err != nil {
-			errMessage := "error while setting contract code hash"
-			log.FromContext(ctx).WithError(err).Error(errMessage)
-			return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+			return err
 		}
 
 		defer clientutils.CloseResponse(response)
@@ -116,9 +105,7 @@ func (c *HTTPClient) GetContractEvents(ctx context.Context, address, chainID str
 	err := callWithBackOff(ctx, c.config.backOff, func() error {
 		response, err := clientutils.GetRequest(ctx, c.client, reqURL)
 		if err != nil {
-			errMessage := "error while getting contract events by sigHash"
-			log.FromContext(ctx).WithError(err).Error(errMessage)
-			return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+			return err
 		}
 
 		defer clientutils.CloseResponse(response)
@@ -140,8 +127,7 @@ func (c *HTTPClient) GetContractMethodSignatures(ctx context.Context, name, tag,
 		response, err := clientutils.GetRequest(ctx, c.client, reqURL)
 		if err != nil {
 			errMessage := "error while getting contract method signatures"
-			log.FromContext(ctx).WithError(err).Error(errMessage)
-			return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+			return errors.FromError(err).SetMessage(errMessage).AppendReason(err.Error()).ExtendComponent(component)
 		}
 
 		defer clientutils.CloseResponse(response)

@@ -39,10 +39,10 @@ func TestSendTesseraPrivate_Execute(t *testing.T) {
 		proxyURL := utils.GetProxyTesseraURL(chainRegistryURL, job.ChainUUID)
 		
 		data, _ := hexutil.Decode(job.Transaction.Data)
-		crafter.EXPECT().Execute(ctx, job)
-		ec.EXPECT().StoreRaw(ctx, proxyURL, data, job.Transaction.PrivateFrom).Return(enclaveKey, nil)
+		crafter.EXPECT().Execute(gomock.Any(), job)
+		ec.EXPECT().StoreRaw(gomock.Any(), proxyURL, data, job.Transaction.PrivateFrom).Return(enclaveKey, nil)
 
-		jobClient.EXPECT().UpdateJob(ctx, job.UUID, &api.UpdateJobRequest{
+		jobClient.EXPECT().UpdateJob(gomock.Any(), job.UUID, &api.UpdateJobRequest{
 			Status: utils.StatusStored,
 			Transaction: job.Transaction,
 		})
@@ -59,10 +59,10 @@ func TestSendTesseraPrivate_Execute(t *testing.T) {
 		enclaveKey := "0xenclaveKey"
 
 		proxyURL := utils.GetProxyTesseraURL(chainRegistryURL, job.ChainUUID)
-		crafter.EXPECT().Execute(ctx, job)
+		crafter.EXPECT().Execute(gomock.Any(), job)
 		expectedErr := errors.InternalError("internal_err")
 		data, _ := hexutil.Decode(job.Transaction.Data)
-		ec.EXPECT().StoreRaw(ctx, proxyURL, data, job.Transaction.PrivateFrom).Return(enclaveKey, expectedErr)
+		ec.EXPECT().StoreRaw(gomock.Any(), proxyURL, data, job.Transaction.PrivateFrom).Return(enclaveKey, expectedErr)
 
 		err := usecase.Execute(ctx, job)
 		assert.Equal(t, err, expectedErr)

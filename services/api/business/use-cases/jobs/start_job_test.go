@@ -56,7 +56,7 @@ func TestStartJob_Execute(t *testing.T) {
 		job.Transaction.Sender = "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"
 		job.Schedule = testutils.FakeSchedule("")
 
-		mockJobDA.EXPECT().FindOneByUUID(ctx, job.UUID, tenants).Return(job, nil)
+		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), job.UUID, tenants).Return(job, nil)
 		mockKafkaProducer.ExpectSendMessageWithCheckerFunctionAndSucceed(func(val []byte) error {
 			txEnvelope := &tx.TxEnvelope{}
 			err := encoding.Unmarshal(val, txEnvelope)
@@ -72,7 +72,7 @@ func TestStartJob_Execute(t *testing.T) {
 			assert.False(t, envelope.IsOneTimeKeySignature())
 			return nil
 		})
-		mockLogDA.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
+		mockLogDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(nil)
 		mockDBTX.EXPECT().Commit().Return(nil)
 		err := usecase.Execute(ctx, job.UUID, tenants)
 
@@ -89,7 +89,7 @@ func TestStartJob_Execute(t *testing.T) {
 			OneTimeKey: true,
 		}
 
-		mockJobDA.EXPECT().FindOneByUUID(ctx, job.UUID, tenants).Return(job, nil)
+		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), job.UUID, tenants).Return(job, nil)
 		mockKafkaProducer.ExpectSendMessageWithCheckerFunctionAndSucceed(func(val []byte) error {
 			txEnvelope := &tx.TxEnvelope{}
 			err := encoding.Unmarshal(val, txEnvelope)
@@ -105,7 +105,7 @@ func TestStartJob_Execute(t *testing.T) {
 			assert.True(t, envelope.IsOneTimeKeySignature())
 			return nil
 		})
-		mockLogDA.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
+		mockLogDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(nil)
 		mockDBTX.EXPECT().Commit().Return(nil)
 		err := usecase.Execute(ctx, job.UUID, tenants)
 
@@ -117,7 +117,7 @@ func TestStartJob_Execute(t *testing.T) {
 		job.UUID = "6380e2b6-b828-43ee-abdc-de0f8d57dc5f"
 		expectedErr := errors.NotFoundError("error")
 
-		mockJobDA.EXPECT().FindOneByUUID(ctx, job.UUID, tenants).Return(nil, expectedErr)
+		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), job.UUID, tenants).Return(nil, expectedErr)
 
 		err := usecase.Execute(ctx, job.UUID, tenants)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(startJobComponent), err)
@@ -133,8 +133,8 @@ func TestStartJob_Execute(t *testing.T) {
 		job.Schedule.ID = 1
 		expectedErr := errors.PostgresConnectionError("error")
 
-		mockJobDA.EXPECT().FindOneByUUID(ctx, job.UUID, tenants).Return(job, nil)
-		mockLogDA.EXPECT().Insert(ctx, gomock.Any()).Return(expectedErr)
+		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), job.UUID, tenants).Return(job, nil)
+		mockLogDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(expectedErr)
 
 		err := usecase.Execute(ctx, job.UUID, tenants)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(startJobComponent), err)
@@ -146,8 +146,8 @@ func TestStartJob_Execute(t *testing.T) {
 		job.Transaction.Sender = "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"
 		job.Schedule = testutils.FakeSchedule("")
 
-		mockJobDA.EXPECT().FindOneByUUID(ctx, job.UUID, tenants).Return(job, nil)
-		mockLogDA.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
+		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), job.UUID, tenants).Return(job, nil)
+		mockLogDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(nil)
 		mockKafkaProducer.ExpectSendMessageAndFail(fmt.Errorf("error"))
 		mockDBTX.EXPECT().Rollback().Return(nil)
 		err := usecase.Execute(ctx, job.UUID, tenants)

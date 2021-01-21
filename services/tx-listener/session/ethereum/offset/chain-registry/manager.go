@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/containous/traefik/v2/pkg/log"
 	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 
@@ -29,6 +30,7 @@ func NewManager(client orchestrateclient.ChainClient) *Manager {
 func (m *Manager) GetLastBlockNumber(ctx context.Context, chain *dynamic.Chain) (uint64, error) {
 	chainRetrieved, err := m.client.GetChain(ctx, chain.UUID)
 	if err != nil {
+		log.FromContext(ctx).WithError(err).Error("failed to get last block by number")
 		return 0, errors.FromError(err).ExtendComponent(component)
 	}
 
@@ -38,6 +40,7 @@ func (m *Manager) GetLastBlockNumber(ctx context.Context, chain *dynamic.Chain) 
 func (m *Manager) SetLastBlockNumber(ctx context.Context, chain *dynamic.Chain, blockNumber uint64) error {
 	_, err := m.client.UpdateChain(ctx, chain.UUID, &api.UpdateChainRequest{Listener: &api.UpdateListenerRequest{CurrentBlock: blockNumber}})
 	if err != nil {
+		log.FromContext(ctx).WithError(err).Error("failed to set last block number")
 		return errors.FromError(err).ExtendComponent(component)
 	}
 	return nil

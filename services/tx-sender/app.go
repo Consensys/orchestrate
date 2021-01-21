@@ -7,11 +7,11 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/cenkalti/backoff/v4"
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/app"
 	pkgsarama "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
 	dbredis "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database/redis"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	api "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	keymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sender/service"
@@ -21,6 +21,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sender/tx-sender/nonce"
 )
 
+const component = "application"
+
 type txSenderDaemon struct {
 	keyManagerClient keymanager.KeyManagerClient
 	jobClient        api.JobClient
@@ -29,6 +31,7 @@ type txSenderDaemon struct {
 	consumerGroup    sarama.ConsumerGroup
 	producer         sarama.SyncProducer
 	config           *Config
+	logger           *log.Logger
 }
 
 func NewTxSender(
@@ -62,6 +65,7 @@ func NewTxSender(
 		config:           config,
 		ec:               ec,
 		nonceManager:     nm,
+		logger:           log.NewLogger().SetComponent(component),
 	}
 
 	appli.RegisterDaemon(txSenderDaemon)
@@ -70,8 +74,8 @@ func NewTxSender(
 }
 
 func (d *txSenderDaemon) Run(ctx context.Context) error {
-	logger := log.WithContext(ctx)
-	logger.Infof("starting transaction sender")
+	logger := d.logger.WithContext(ctx)
+	logger.Debug("starting transaction sender")
 
 	// Create business layer use cases
 	useCases := builder.NewUseCases(d.jobClient, d.keyManagerClient, d.ec, d.nonceManager,
@@ -95,7 +99,7 @@ func (d *txSenderDaemon) Run(ctx context.Context) error {
 		},
 		backoff.NewConstantBackOff(time.Millisecond*500),
 		func(err error, duration time.Duration) {
-			log.WithContext(ctx).WithError(err).Warnf("listener: consuming session exited, retrying in %s", duration.String())
+			logger.WithError(err).Warnf("consuming session exited, retrying in %s", duration.String())
 		},
 	)
 }

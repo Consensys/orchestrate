@@ -8,11 +8,12 @@ import (
 	"time"
 
 	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
-	"github.com/containous/traefik/v2/pkg/log"
+	tlog "github.com/containous/traefik/v2/pkg/log"
 	"github.com/containous/traefik/v2/pkg/middlewares/forwardedheaders"
 	"github.com/hashicorp/go-multierror"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/handler/switcher"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/router"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tcp"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tcp/metrics"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
@@ -29,6 +30,7 @@ type EntryPoints struct {
 	eps    map[string]*EntryPoint
 	router router.Builder
 	errors chan error
+	logger *log.Logger
 }
 
 func NewEntryPoints(
@@ -40,6 +42,7 @@ func NewEntryPoints(
 		eps:    make(map[string]*EntryPoint),
 		router: rt,
 		errors: make(chan error, len(epConfigs)),
+		logger: log.NewLogger().SetComponent("entrypoint"),
 	}
 
 	for epName, epConfig := range epConfigs {
@@ -105,7 +108,7 @@ func (eps *EntryPoints) Switch(ctx context.Context, conf interface{}) error {
 
 	rt, err := eps.router.Build(ctx, entryPointNames, conf)
 	if err != nil {
-		log.FromContext(ctx).WithError(err).Errorf("error building router")
+		eps.logger.WithContext(ctx).WithError(err).Error("error building router")
 		return err
 	}
 
@@ -116,14 +119,14 @@ func (eps *EntryPoints) Switch(ctx context.Context, conf interface{}) error {
 
 func (eps *EntryPoints) switchRouter(ctx context.Context, routers map[string]*router.Router) {
 	for epName, ep := range eps.eps {
-		logger := log.FromContext(ctx).WithField("entrypoint", epName)
+		logger := eps.logger.WithContext(ctx).WithField("name", epName)
 		rt, ok := routers[epName]
 		if ok {
 			err := ep.Switch(rt)
 			if err != nil {
 				logger.WithError(err).Errorf("error switching tcp router")
 			} else {
-				logger.Info("switched tcp router")
+				logger.Debug("switched tcp router")
 			}
 		}
 	}
@@ -133,7 +136,7 @@ func (eps *EntryPoints) Shutdown(ctx context.Context) error {
 	gr := &multierror.Group{}
 	for epName, ep := range eps.eps {
 		epName, ep := epName, ep
-		gr.Go(func() error { return tcp.Shutdown(log.With(ctx, log.Str("entrypoint", epName)), ep) })
+		gr.Go(func() error { return tcp.Shutdown(tlog.With(ctx, tlog.Str("entrypoint", epName)), ep) })
 	}
 
 	return gr.Wait().ErrorOrNil()

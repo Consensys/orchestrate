@@ -8,8 +8,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/ethereum"
 
-	"github.com/containous/traefik/v2/pkg/log"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	clientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/client-utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/httputil"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
@@ -21,14 +19,12 @@ func (c *HTTPClient) GetAccount(ctx context.Context, address string) (*api.Accou
 
 	response, err := clientutils.GetRequest(ctx, c.client, reqURL)
 	if err != nil {
-		errMessage := "error while getting account"
-		log.FromContext(ctx).WithError(err).Error(errMessage)
-		return nil, errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+		return nil, err
 	}
 
 	defer clientutils.CloseResponse(response)
 	if err := httputil.ParseResponse(ctx, response, resp); err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
+		return nil, err
 	}
 
 	return resp, nil
@@ -40,14 +36,12 @@ func (c *HTTPClient) CreateAccount(ctx context.Context, req *api.CreateAccountRe
 
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, req)
 	if err != nil {
-		errMessage := "error while creating account"
-		log.FromContext(ctx).WithError(err).Error(errMessage)
-		return nil, errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+		return nil, err
 	}
 
 	defer clientutils.CloseResponse(response)
 	if err := httputil.ParseResponse(ctx, response, resp); err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
+		return nil, err
 	}
 
 	return resp, nil
@@ -59,14 +53,12 @@ func (c *HTTPClient) ImportAccount(ctx context.Context, req *api.ImportAccountRe
 
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, req)
 	if err != nil {
-		errMessage := "error while importing account"
-		log.FromContext(ctx).WithError(err).Error(errMessage)
-		return nil, errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+		return nil, err
 	}
 
 	defer clientutils.CloseResponse(response)
 	if err := httputil.ParseResponse(ctx, response, resp); err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
+		return nil, err
 	}
 
 	return resp, nil
@@ -78,14 +70,12 @@ func (c *HTTPClient) UpdateAccount(ctx context.Context, address string, req *api
 
 	response, err := clientutils.PatchRequest(ctx, c.client, reqURL, req)
 	if err != nil {
-		errMessage := "error while updating account"
-		log.FromContext(ctx).WithError(err).Error(errMessage)
-		return nil, errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+		return nil, err
 	}
 
 	defer clientutils.CloseResponse(response)
 	if err := httputil.ParseResponse(ctx, response, resp); err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
+		return nil, err
 	}
 
 	return resp, nil
@@ -106,14 +96,12 @@ func (c *HTTPClient) SearchAccounts(ctx context.Context, filters *entities.Accou
 
 	response, err := clientutils.GetRequest(ctx, c.client, reqURL)
 	if err != nil {
-		errMessage := "error while searching accounts"
-		log.FromContext(ctx).WithError(err).Error(errMessage)
-		return nil, errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+		return nil, err
 	}
 
 	defer clientutils.CloseResponse(response)
 	if err := httputil.ParseResponse(ctx, response, &resp); err != nil {
-		return nil, errors.FromError(err).ExtendComponent(component)
+		return nil, err
 	}
 
 	return resp, nil
@@ -124,9 +112,7 @@ func (c *HTTPClient) SignPayload(ctx context.Context, address string, req *api.S
 
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, req)
 	if err != nil {
-		errMessage := "error while signing payload"
-		log.FromContext(ctx).WithError(err).Error(errMessage)
-		return "", errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+		return "", err
 	}
 
 	defer clientutils.CloseResponse(response)
@@ -138,9 +124,7 @@ func (c *HTTPClient) SignTypedData(ctx context.Context, address string, request 
 
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, request)
 	if err != nil {
-		errMessage := "error while signing typed data"
-		log.FromContext(ctx).WithError(err).Error(errMessage)
-		return "", errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+		return "", err
 	}
 
 	defer clientutils.CloseResponse(response)
@@ -152,9 +136,7 @@ func (c *HTTPClient) VerifySignature(ctx context.Context, request *types.VerifyP
 
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, request)
 	if err != nil {
-		errMessage := "error while verifying signature"
-		log.FromContext(ctx).WithError(err).Error(errMessage)
-		return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+		return err
 	}
 
 	defer clientutils.CloseResponse(response)
@@ -166,9 +148,7 @@ func (c *HTTPClient) VerifyTypedDataSignature(ctx context.Context, request *type
 
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, request)
 	if err != nil {
-		errMessage := "error while verifying typed data signature"
-		log.FromContext(ctx).WithError(err).Error(errMessage)
-		return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+		return err
 	}
 
 	defer clientutils.CloseResponse(response)

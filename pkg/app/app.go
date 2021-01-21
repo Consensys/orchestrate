@@ -9,7 +9,6 @@ import (
 	"sync"
 	"syscall"
 
-	traefiklog "github.com/containous/traefik/v2/pkg/log"
 	"github.com/hashicorp/go-multierror"
 	healthz "github.com/heptiolabs/healthcheck"
 	"github.com/sirupsen/logrus"
@@ -68,7 +67,7 @@ type App struct {
 	daemons        []Daemon
 	readinessCheck []*healthcheck.Checker
 
-	logger *logrus.Logger
+	logger *log.Logger
 
 	cancel func()
 
@@ -83,9 +82,7 @@ type App struct {
 }
 
 func New(cfg *Config, opts ...Option) (*App, error) {
-	// Create and configure logger
-	logger := logrus.StandardLogger()
-	err := log.ConfigureLogger(cfg.Log, logger)
+	err := log.ConfigureLogger(cfg.Log, logrus.StandardLogger())
 	if err != nil {
 		return nil, err
 	}
@@ -121,7 +118,7 @@ func New(cfg *Config, opts ...Option) (*App, error) {
 		httpBuilder,
 		watcher,
 		reg,
-		logger,
+		log.NewLogger().SetComponent("application"),
 	)
 	app.provider = prvdr
 
@@ -140,7 +137,7 @@ func newApp(
 	httpBuilder router.Builder,
 	watcher configwatcher.Watcher,
 	reg metrics.Registry,
-	logger *logrus.Logger,
+	logger *log.Logger,
 ) *App {
 	return &App{
 		cfg:         cfg,
@@ -152,14 +149,13 @@ func newApp(
 	}
 }
 
-func (app *App) init(ctx context.Context) error {
+func (app *App) init(_ context.Context) error {
 	conf, err := json.Marshal(app.cfg)
 	if err != nil {
 		return err
 	}
-	traefiklog.FromContext(ctx).Infof("loaded app configuration %s", string(conf))
-	traefiklog.FromContext(ctx).Infof("activated metric modules: %v", app.cfg.Metrics.Modules())
-
+	app.logger.WithField("conf", string(conf)).Debug("loaded app configuration")
+	app.logger.WithField("metrics", app.cfg.Metrics.Modules()).Info("activated metric modules")
 	var tcpreg tcpmetrics.TPCMetrics
 	if app.cfg.HTTP != nil {
 		if app.cfg.Metrics.IsActive(tcpmetrics.ModuleName) {
@@ -200,7 +196,7 @@ func (app *App) MetricRegistry() metrics.Registry {
 	return app.metricReg
 }
 
-func (app *App) Logger() *logrus.Logger {
+func (app *App) Logger() *log.Logger {
 	return app.logger
 }
 
@@ -226,7 +222,7 @@ func (app *App) Start(ctx context.Context) error {
 		return err
 	}
 
-	traefiklog.FromContext(ctx).Info("starting app...")
+	app.logger.Debug("starting...")
 
 	if app.http != nil {
 		app.serverWg.Add(1)
@@ -260,6 +256,8 @@ func (app *App) Start(ctx context.Context) error {
 	}
 
 	app.isReady = true
+
+	app.logger.Info("started")
 	return nil
 }
 
@@ -279,21 +277,21 @@ signalLoop:
 		case sig := <-signals:
 			switch sig {
 			case syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT:
-				traefiklog.FromContext(ctx).Infof("signal %q intercepted", sig.String())
+				app.logger.WithField("sig", sig.String()).Info("signal intercepted")
 				break signalLoop
 			case syscall.SIGPIPE:
 				// Ignore random broken pipe
-				traefiklog.FromContext(ctx).Infof("signal %q intercepted", sig.String())
+				app.logger.WithField("sig", sig.String()).Info("signal intercepted (ignored)")
 			}
 		case err = <-app.Errors():
 			if err != nil && err != context.Canceled && err != nethttp.ErrServerClosed {
-				traefiklog.FromContext(ctx).WithError(err).Error("app exited with errors")
+				app.logger.WithError(err).Error("exits with errors")
 			} else {
-				traefiklog.FromContext(ctx).WithError(err).Info("app exited gracefully")
+				app.logger.WithError(err).Info("exits")
 			}
 			break signalLoop
 		case <-ctx.Done():
-			traefiklog.FromContext(ctx).WithError(ctx.Err()).Info("app exited gracefully")
+			app.logger.WithError(ctx.Err()).Info("exits gracefully")
 			break signalLoop
 		}
 	}
@@ -312,7 +310,7 @@ signalLoop:
 }
 
 func (app *App) Stop(ctx context.Context) error {
-	traefiklog.FromContext(ctx).Infof("app gracefully shutting down...")
+	app.logger.Debug("shutting down...")
 
 	go func() {
 		for range app.errors {
@@ -333,12 +331,12 @@ func (app *App) Stop(ctx context.Context) error {
 
 	err := gr.Wait().ErrorOrNil()
 	if err != nil {
-		traefiklog.FromContext(ctx).WithError(err).Errorf("app could not shut down gracefully")
+		app.logger.WithError(err).Errorf("could not shut down gracefully")
 		return err // something went wrong while shutting down
 	}
 
 	app.isReady = false
-	traefiklog.FromContext(ctx).Infof("app gracefully shutted down")
+	app.logger.WithError(err).Infof("gracefully shutted down")
 	return nil // completed normally
 }
 

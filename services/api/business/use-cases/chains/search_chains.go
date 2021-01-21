@@ -3,8 +3,8 @@ package chains
 import (
 	"context"
 
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/parsers"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
@@ -15,20 +15,21 @@ const searchChainsComponent = "use-cases.search-chains"
 
 // searchChainsUseCase is a use case to search chains
 type searchChainsUseCase struct {
-	db store.DB
+	db     store.DB
+	logger *log.Logger
 }
 
 // NewSearchChainsUseCase creates a new SearchChainsUseCase
 func NewSearchChainsUseCase(db store.DB) usecases.SearchChainsUseCase {
 	return &searchChainsUseCase{
-		db: db,
+		db:     db,
+		logger: log.NewLogger().SetComponent(searchChainsComponent),
 	}
 }
 
 // Execute search faucets
 func (uc *searchChainsUseCase) Execute(ctx context.Context, filters *entities.ChainFilters, tenants []string) ([]*entities.Chain, error) {
-	logger := log.WithContext(ctx).WithField("filters", filters).WithField("tenants", tenants)
-	logger.Debug("searching chains")
+	logger := uc.logger.WithContext(ctx)
 
 	chainModels, err := uc.db.Chain().Search(ctx, filters, tenants)
 	if err != nil {

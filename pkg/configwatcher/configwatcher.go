@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/containous/traefik/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/configwatcher/provider"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 )
 
@@ -38,6 +38,8 @@ type watcher struct {
 	currentConfigs map[string]interface{}
 
 	throttle func(ctx context.Context, throttleDuration time.Duration, in <-chan interface{}, out chan<- interface{})
+
+	logger *log.Logger
 }
 
 func New(
@@ -57,6 +59,7 @@ func New(
 		dispatchedMsgs: make(map[string]chan provider.Message),
 		currentConfigs: make(map[string]interface{}),
 		throttle:       Throttle,
+		logger:         log.NewLogger().SetComponent("configwatcher"),
 	}
 }
 
@@ -103,6 +106,7 @@ func (w *watcher) watchPreloadedMsgs(ctx context.Context) {
 }
 
 func (w *watcher) loadMsg(ctx context.Context, msg provider.Message) {
+	logger := w.logger.WithField("provider_name", msg.ProviderName())
 	// Make sure that configuration has been updated
 	currentConfig, ok := w.currentConfigs[msg.ProviderName()]
 	if ok && reflect.DeepEqual(currentConfig, msg.Configuration()) {
@@ -111,7 +115,7 @@ func (w *watcher) loadMsg(ctx context.Context, msg provider.Message) {
 
 	// We got a new configuration so we update current config
 	w.currentConfigs[msg.ProviderName()] = msg.Configuration()
-	log.FromContext(ctx).WithField(log.ProviderName, msg.ProviderName()).Debug("got new configuration")
+	logger.Debug("got new configuration")
 
 	// Call listeners
 	conf := w.merge(w.currentConfigs)
@@ -119,17 +123,15 @@ func (w *watcher) loadMsg(ctx context.Context, msg provider.Message) {
 	for _, listener := range w.listeners {
 		err := listener(ctx, conf)
 		if err != nil {
-			log.FromContext(ctx).
-				WithField(log.ProviderName, msg.ProviderName()).
-				WithError(err).
-				Warning("config listener error")
+			logger.WithError(err).Warn("config listener error")
 		}
 	}
 }
 
 func (w *watcher) preloadMsg(ctx context.Context, msg provider.Message) {
 	if reflect.ValueOf(msg.Configuration()).IsZero() {
-		log.FromContext(ctx).Infof("Skipping empty Configuration for provider %s", msg.ProviderName)
+		w.logger.WithField("provider_name", msg.ProviderName()).
+			Info("skipping empty configuration")
 		return
 	}
 
@@ -145,6 +147,7 @@ func (w *watcher) preloadMsg(ctx context.Context, msg provider.Message) {
 			w.wg.Done()
 		}()
 	}
+
 	msgs <- msg
 }
 

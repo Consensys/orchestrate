@@ -4,7 +4,7 @@ import (
 	"context"
 	"math/big"
 
-	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 
@@ -28,8 +28,6 @@ func NewMaxBalanceControl(chainStateReader ethclient.ChainStateReader) *MaxBalan
 
 // Control apply MaxBalance controller on a credit function
 func (ctrl *MaxBalanceControl) Control(ctx context.Context, req *entities.FaucetRequest) error {
-	log.WithContext(ctx).Debug("max_balance control check")
-
 	if len(req.Candidates) == 0 {
 		return nil
 	}
@@ -37,6 +35,7 @@ func (ctrl *MaxBalanceControl) Control(ctx context.Context, req *entities.Faucet
 	// Retrieve account balance
 	balance, err := getAddressBalance(ctx, ctrl.chainStateReader, req.Chain.URLs, req.Beneficiary)
 	if err != nil {
+		log.FromContext(ctx).WithError(err).Error("failed to get faucet balance")
 		return errors.FromError(err).ExtendComponent(maxBalanceComponent)
 	}
 

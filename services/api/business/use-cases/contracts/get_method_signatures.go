@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
 )
 
@@ -16,17 +16,19 @@ const (
 
 type getMethodSignaturesUseCase struct {
 	getContractUseCase usecases.GetContractUseCase
+	logger             *log.Logger
 }
 
 func NewGetMethodSignaturesUseCase(getContractUseCase usecases.GetContractUseCase) usecases.GetContractMethodSignaturesUseCase {
 	return &getMethodSignaturesUseCase{
 		getContractUseCase: getContractUseCase,
+		logger:             log.NewLogger().SetComponent(getMethodSignaturesComponent),
 	}
 }
 
 func (uc *getMethodSignaturesUseCase) Execute(ctx context.Context, name, tag, methodName string) ([]string, error) {
-	logger := log.WithContext(ctx).WithField("name", name).WithField("tag", tag).WithField("method_name", methodName)
-	logger.Debug("get method signatures starting...")
+	ctx = log.WithFields(ctx, log.Field("contract_name", name), log.Field("tag", tag))
+	logger := uc.logger.WithContext(ctx)
 
 	contract, err := uc.getContractUseCase.Execute(ctx, name, tag)
 	if err != nil {
@@ -52,6 +54,6 @@ func (uc *getMethodSignaturesUseCase) Execute(ctx context.Context, name, tag, me
 		}
 	}
 
-	logger.Debug("get method signatures successfully")
+	logger.Debug("contract method signatures were fetched successfully")
 	return signatures, nil
 }

@@ -6,8 +6,8 @@ import (
 	parsers2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/parsers"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
 
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
 )
@@ -15,20 +15,18 @@ import (
 const searchAccountsComponent = "use-cases.search-accounts"
 
 type searchAccountsUseCase struct {
-	db store.DB
+	db     store.DB
+	logger *log.Logger
 }
 
 func NewSearchAccountsUseCase(db store.DB) usecases.SearchAccountsUseCase {
 	return &searchAccountsUseCase{
-		db: db,
+		db:     db,
+		logger: log.NewLogger().SetComponent(searchAccountsComponent),
 	}
 }
 
 func (uc *searchAccountsUseCase) Execute(ctx context.Context, filters *entities.AccountFilters, tenants []string) ([]*entities.Account, error) {
-	log.WithContext(ctx).WithField("filters", filters).
-		WithField("tenants", tenants).
-		Debug("searching accounts")
-
 	models, err := uc.db.Account().Search(ctx, filters, tenants)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(searchAccountsComponent)
@@ -40,6 +38,6 @@ func (uc *searchAccountsUseCase) Execute(ctx context.Context, filters *entities.
 		resp = append(resp, iden)
 	}
 
-	log.WithContext(ctx).Debug("accounts found successfully")
+	uc.logger.WithContext(ctx).Debug("accounts found successfully")
 	return resp, nil
 }

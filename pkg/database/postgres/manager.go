@@ -4,12 +4,15 @@ import (
 	"context"
 	"sync"
 
-	"github.com/containous/traefik/v2/pkg/log"
+	tlog "github.com/containous/traefik/v2/pkg/log"
 	"github.com/go-pg/pg/v9"
 	"github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 )
 
 //go:generate mockgen -source=manager.go -destination=mocks/manager.go -package=mocks
+
+const component = "database.postgres"
 
 func init() {
 	mngr = newManager()
@@ -26,14 +29,16 @@ func NewManager() Manager {
 }
 
 type manager struct {
-	mux   *sync.Mutex
-	cache map[*pg.Options]*pg.DB
+	mux    *sync.Mutex
+	cache  map[*pg.Options]*pg.DB
+	logger *log.Logger
 }
 
 func newManager() *manager {
 	return &manager{
-		mux:   &sync.Mutex{},
-		cache: make(map[*pg.Options]*pg.DB),
+		mux:    &sync.Mutex{},
+		cache:  make(map[*pg.Options]*pg.DB),
+		logger: log.NewLogger().SetComponent(component),
 	}
 }
 
@@ -48,30 +53,28 @@ func (m *manager) Connect(ctx context.Context, conf *pg.Options) *pg.DB {
 		conf.OnConnect = m.onConnect
 	}
 
-	logCtx := log.With(
+	logCtx := tlog.With(
 		ctx,
-		log.Str("database", conf.Database),
-		log.Str("addr", conf.Addr),
+		tlog.Str("database", conf.Database),
+		tlog.Str("addr", conf.Addr),
 	)
 
 	db := New(conf).WithContext(logCtx)
 
-	log.FromContext(logCtx).
-		WithFields(logrus.Fields{
-			"user":                 conf.User,
-			"pool.size":            conf.PoolSize,
-			"pool.timeout":         conf.PoolTimeout,
-			"dial.timeout":         conf.DialTimeout,
-			"idle.timeout":         conf.IdleTimeout,
-			"idle.check-frequency": conf.IdleCheckFrequency,
-		}).
-		Infof("creating postgres database connector")
+	m.logger.WithContext(logCtx).WithFields(logrus.Fields{
+		"user":                 conf.User,
+		"pool.size":            conf.PoolSize,
+		"pool.timeout":         conf.PoolTimeout,
+		"dial.timeout":         conf.DialTimeout,
+		"idle.timeout":         conf.IdleTimeout,
+		"idle.check-frequency": conf.IdleCheckFrequency,
+	}).Info("creating database connector")
 
 	return db
 }
 
 func (m *manager) onConnect(conn *pg.Conn) error {
-	log.FromContext(conn.Context()).Debugf("open connection to postgres")
+	m.logger.WithContext(conn.Context()).Debug("open new connection")
 	return nil
 }
 

@@ -7,8 +7,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/httputil"
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 
-	"github.com/containous/traefik/v2/pkg/log"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	clientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/client-utils"
 )
 
@@ -19,9 +17,7 @@ func (c *HTTPClient) SendContractTransaction(ctx context.Context, txRequest *typ
 	err := callWithBackOff(ctx, c.config.backOff, func() error {
 		response, err := clientutils.PostRequest(ctx, c.client, reqURL, txRequest)
 		if err != nil {
-			errMessage := "error while sending transaction"
-			log.FromContext(ctx).WithError(err).Error(errMessage)
-			return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+			return err
 		}
 
 		defer clientutils.CloseResponse(response)
@@ -38,9 +34,7 @@ func (c *HTTPClient) SendDeployTransaction(ctx context.Context, txRequest *types
 	err := callWithBackOff(ctx, c.config.backOff, func() error {
 		response, err := clientutils.PostRequest(ctx, c.client, reqURL, txRequest)
 		if err != nil {
-			errMessage := "error while sending deploy contract transaction"
-			log.FromContext(ctx).WithError(err).Error(errMessage)
-			return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+			return err
 		}
 
 		defer clientutils.CloseResponse(response)
@@ -57,9 +51,7 @@ func (c *HTTPClient) SendRawTransaction(ctx context.Context, txRequest *types.Ra
 	err := callWithBackOff(ctx, c.config.backOff, func() error {
 		response, err := clientutils.PostRequest(ctx, c.client, reqURL, txRequest)
 		if err != nil {
-			errMessage := "error while sending raw transaction"
-			log.FromContext(ctx).WithError(err).Error(errMessage)
-			return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+			return err
 		}
 
 		defer clientutils.CloseResponse(response)
@@ -76,9 +68,7 @@ func (c *HTTPClient) SendTransferTransaction(ctx context.Context, txRequest *typ
 	err := callWithBackOff(ctx, c.config.backOff, func() error {
 		response, err := clientutils.PostRequest(ctx, c.client, reqURL, txRequest)
 		if err != nil {
-			errMessage := "error while sending transfer transaction"
-			log.FromContext(ctx).WithError(err).Error(errMessage)
-			return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+			return err
 		}
 
 		defer clientutils.CloseResponse(response)
@@ -95,9 +85,7 @@ func (c *HTTPClient) GetTxRequest(ctx context.Context, txRequestUUID string) (*t
 	err := callWithBackOff(ctx, c.config.backOff, func() error {
 		response, err := clientutils.GetRequest(ctx, c.client, reqURL)
 		if err != nil {
-			errMessage := "error while getting transaction request"
-			log.FromContext(ctx).WithError(err).Error(errMessage)
-			return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+			return err
 		}
 
 		defer clientutils.CloseResponse(response)

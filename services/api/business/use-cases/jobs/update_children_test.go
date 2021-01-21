@@ -41,15 +41,15 @@ func TestUpdateChildren_Execute(t *testing.T) {
 		jobsToUpdate[0].Logs[0].Status = utils.StatusPending
 		jobsToUpdate[1].Logs[0].Status = utils.StatusPending
 
-		mockJobDA.EXPECT().LockOneByUUID(ctx, parentJobUUID).Return(nil)
-		mockJobDA.EXPECT().Search(ctx, &entities.JobFilters{ParentJobUUID: parentJobUUID}, tenants).Return(jobsToUpdate, nil)
-		mockLogDA.EXPECT().Insert(ctx, &models.Log{
+		mockJobDA.EXPECT().LockOneByUUID(gomock.Any(), parentJobUUID).Return(nil)
+		mockJobDA.EXPECT().Search(gomock.Any(), &entities.JobFilters{ParentJobUUID: parentJobUUID}, tenants).Return(jobsToUpdate, nil)
+		mockLogDA.EXPECT().Insert(gomock.Any(), &models.Log{
 			JobID:   &jobsToUpdate[0].ID,
 			Status:  status,
 			Message: fmt.Sprintf("sibling (or parent) job %s was mined instead", jobUUID),
 		}).
 			Return(nil)
-		mockLogDA.EXPECT().Insert(ctx, &models.Log{
+		mockLogDA.EXPECT().Insert(gomock.Any(), &models.Log{
 			JobID:   &jobsToUpdate[1].ID,
 			Status:  status,
 			Message: fmt.Sprintf("sibling (or parent) job %s was mined instead", jobUUID),
@@ -69,15 +69,15 @@ func TestUpdateChildren_Execute(t *testing.T) {
 		jobsToUpdate[0].Logs[0].Status = utils.StatusPending
 		jobsToUpdate[1].Logs[0].Status = utils.StatusPending
 
-		mockJobDA.EXPECT().LockOneByUUID(ctx, jobUUID).Return(nil)
-		mockJobDA.EXPECT().Search(ctx, &entities.JobFilters{ParentJobUUID: jobUUID}, tenants).Return(jobsToUpdate, nil)
-		mockLogDA.EXPECT().Insert(ctx, &models.Log{
+		mockJobDA.EXPECT().LockOneByUUID(gomock.Any(), jobUUID).Return(nil)
+		mockJobDA.EXPECT().Search(gomock.Any(), &entities.JobFilters{ParentJobUUID: jobUUID}, tenants).Return(jobsToUpdate, nil)
+		mockLogDA.EXPECT().Insert(gomock.Any(), &models.Log{
 			JobID:   &jobsToUpdate[0].ID,
 			Status:  status,
 			Message: fmt.Sprintf("sibling (or parent) job %s was mined instead", jobUUID),
 		}).
 			Return(nil)
-		mockLogDA.EXPECT().Insert(ctx, &models.Log{
+		mockLogDA.EXPECT().Insert(gomock.Any(), &models.Log{
 			JobID:   &jobsToUpdate[1].ID,
 			Status:  status,
 			Message: fmt.Sprintf("sibling (or parent) job %s was mined instead", jobUUID),
@@ -98,9 +98,9 @@ func TestUpdateChildren_Execute(t *testing.T) {
 		jobsToUpdate[0].Logs[0].Status = utils.StatusPending
 		jobsToUpdate[1].Logs[0].Status = utils.StatusPending
 
-		mockJobDA.EXPECT().LockOneByUUID(ctx, parentJobUUID).Return(nil)
-		mockJobDA.EXPECT().Search(ctx, &entities.JobFilters{ParentJobUUID: parentJobUUID}, tenants).Return(jobsToUpdate, nil)
-		mockLogDA.EXPECT().Insert(ctx, &models.Log{
+		mockJobDA.EXPECT().LockOneByUUID(gomock.Any(), parentJobUUID).Return(nil)
+		mockJobDA.EXPECT().Search(gomock.Any(), &entities.JobFilters{ParentJobUUID: parentJobUUID}, tenants).Return(jobsToUpdate, nil)
+		mockLogDA.EXPECT().Insert(gomock.Any(), &models.Log{
 			JobID:   &jobsToUpdate[1].ID,
 			Status:  status,
 			Message: fmt.Sprintf("sibling (or parent) job %s was mined instead", jobUUID),
@@ -115,7 +115,7 @@ func TestUpdateChildren_Execute(t *testing.T) {
 	t.Run("should fail with same error if LockOneByUUID fails", func(t *testing.T) {
 		expectedErr := fmt.Errorf("error")
 
-		mockJobDA.EXPECT().LockOneByUUID(ctx, gomock.Any()).Return(expectedErr)
+		mockJobDA.EXPECT().LockOneByUUID(gomock.Any(), gomock.Any()).Return(expectedErr)
 
 		err := usecase.Execute(ctx, "jobUUID", "parentJobUUID", status, tenants)
 
@@ -125,8 +125,8 @@ func TestUpdateChildren_Execute(t *testing.T) {
 	t.Run("should fail with same error if Search fails", func(t *testing.T) {
 		expectedErr := fmt.Errorf("error")
 
-		mockJobDA.EXPECT().LockOneByUUID(ctx, gomock.Any()).Return(nil)
-		mockJobDA.EXPECT().Search(ctx, gomock.Any(), tenants).Return(nil, expectedErr)
+		mockJobDA.EXPECT().LockOneByUUID(gomock.Any(), gomock.Any()).Return(nil)
+		mockJobDA.EXPECT().Search(gomock.Any(), gomock.Any(), tenants).Return(nil, expectedErr)
 
 		err := usecase.Execute(ctx, "jobUUID", "parentJobUUID", status, tenants)
 
@@ -139,9 +139,9 @@ func TestUpdateChildren_Execute(t *testing.T) {
 
 		expectedErr := fmt.Errorf("error")
 
-		mockJobDA.EXPECT().LockOneByUUID(ctx, gomock.Any()).Return(nil)
-		mockJobDA.EXPECT().Search(ctx, gomock.Any(), tenants).Return(jobsToUpdate, nil)
-		mockLogDA.EXPECT().Insert(ctx, gomock.Any()).Return(expectedErr)
+		mockJobDA.EXPECT().LockOneByUUID(gomock.Any(), gomock.Any()).Return(nil)
+		mockJobDA.EXPECT().Search(gomock.Any(), gomock.Any(), tenants).Return(jobsToUpdate, nil)
+		mockLogDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(expectedErr)
 
 		err := usecase.Execute(ctx, "jobUUID", "parentJobUUID", status, tenants)
 

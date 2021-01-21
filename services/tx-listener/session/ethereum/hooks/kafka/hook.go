@@ -6,13 +6,13 @@ import (
 	"fmt"
 	"strings"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 
 	"github.com/Shopify/sarama"
-	"github.com/containous/traefik/v2/pkg/log"
 	ethAbi "github.com/ethereum/go-ethereum/accounts/abi"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
@@ -29,11 +29,14 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/dynamic"
 )
 
+const component = "tx-listener.session.ethereum.hook"
+
 type Hook struct {
 	conf     *Config
 	ec       ethclient.ChainStateReader
 	producer sarama.SyncProducer
 	client   sdk.OrchestrateClient
+	logger   *log.Logger
 }
 
 func NewHook(
@@ -47,20 +50,21 @@ func NewHook(
 		ec:       ec,
 		producer: producer,
 		client:   client,
+		logger:   log.NewLogger().SetComponent(component),
 	}
 }
 
 func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *ethtypes.Block, jobs []*entities.Job) error {
-	blockLogCtx := log.With(ctx, log.Str("block.number", block.Number().String()))
+	blockLogCtx := log.WithFields(ctx, log.Field("chain", c.UUID), log.Field("block_number", block.Number().String()))
+	logger := hk.logger.WithContext(blockLogCtx)
+
 	var txResponses []*tx.TxResponse
-
 	for _, job := range jobs {
-		receiptLogCtx := log.With(blockLogCtx, log.Str("receipt.txhash", job.Receipt.TxHash))
-
+		receiptLogCtx := log.WithFields(blockLogCtx, log.Field("receipt_tx_hash", job.Receipt.TxHash))
 		// Register deployed contract
 		err := hk.registerDeployedContract(receiptLogCtx, c, job.Receipt, block)
 		if err != nil {
-			log.FromContext(receiptLogCtx).WithError(err).Errorf("could not register deployed contract on registry")
+			hk.logger.WithContext(receiptLogCtx).WithError(err).Errorf("could not register deployed contract on registry")
 		}
 
 		txResponse := &tx.TxResponse{
@@ -101,45 +105,44 @@ func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *etht
 			txResponse.GetJobUUID(),
 			&api.UpdateJobRequest{
 				Status:  utils.StatusMined,
-				Message: fmt.Sprintf("Transaction mined in block %v", block.NumberU64()),
+				Message: fmt.Sprintf("transaction mined in block %v", block.NumberU64()),
 			})
 
 		if err != nil {
-			log.FromContext(blockLogCtx).WithError(err).Warnf("failed to update status of %s to MINED", txResponse.Id)
+			logger.WithError(err).Warnf("failed to update status of %s to MINED", txResponse.Id)
 		}
 	}
 
 	// Prepare messages to be produced
 	msgs, err := hk.prepareEnvelopeMsgs(txResponses, hk.conf.OutTopic, c.UUID)
 	if err != nil {
-		log.FromContext(blockLogCtx).WithError(err).Errorf("failed to prepare messages")
+		logger.WithError(err).Errorf("failed to prepare messages")
 		return err
 	}
 
 	// Produce messages in Apache Kafka
 	err = hk.produce(msgs)
 	if err != nil {
-		log.FromContext(blockLogCtx).WithError(err).Errorf("failed to produce message")
+		logger.WithError(err).Errorf("failed to produce message")
 		return err
 	}
 
-	log.FromContext(blockLogCtx).Infof("block %v processed", block.NumberU64())
-
+	logger.Info("block processed")
 	return nil
 }
 
 func (hk *Hook) decodeReceipt(ctx context.Context, c *dynamic.Chain, receipt *types.Receipt) error {
-	log.FromContext(ctx).Debug("decoding receipt...")
+	hk.logger.WithContext(ctx).Debug("decoding receipt...")
 	for _, l := range receipt.GetLogs() {
 		if len(l.GetTopics()) == 0 {
 			// This scenario is not supposed to happen
 			return errors.InternalError("invalid receipt (no topics in log)")
 		}
 
-		logger := log.FromContext(ctx).WithField("sig_hash", utils.ShortString(l.Topics[0], 5)).
+		logger := hk.logger.WithContext(ctx).WithField("sig_hash", utils.ShortString(l.Topics[0], 5)).
 			WithField("address", l.GetAddress()).WithField("indexed", uint32(len(l.Topics)-1))
-		logger.Debug("decoding log...")
 
+		logger.Debug("decoding receipt logs")
 		eventResp, err := hk.client.GetContractEvents(
 			ctx,
 			l.GetAddress(),
@@ -155,11 +158,12 @@ func (hk *Hook) decodeReceipt(ctx context.Context, c *dynamic.Chain, receipt *ty
 				continue
 			}
 
+			logger.WithError(err).Error("failed to decode receipt logs")
 			return err
 		}
 
 		if eventResp.Event == "" && len(eventResp.DefaultEvents) == 0 {
-			logger.WithError(err).WithField("tx_hash", l.GetTxHash()).Warnf("could not retrieve event ABI")
+			logger.WithError(err).Warnf("could not retrieve event ABI")
 			continue
 		}
 
@@ -169,7 +173,8 @@ func (hk *Hook) decodeReceipt(ctx context.Context, c *dynamic.Chain, receipt *ty
 		if eventResp.Event != "" {
 			err = json.Unmarshal([]byte(eventResp.Event), event)
 			if err != nil {
-				log.FromContext(ctx).WithError(err).Warnf("could not unmarshal event ABI provided by the Contract Registry, txHash: %s sigHash: %s, ", l.GetTxHash(), l.GetTopics()[0])
+				logger.WithError(err).
+					Warnf("could not unmarshal event ABI provided by the Contract Registry, txHash: %s sigHash: %s, ", l.GetTxHash(), l.GetTopics()[0])
 				continue
 			}
 			mapping, err = abi.Decode(event, l)
@@ -179,7 +184,7 @@ func (hk *Hook) decodeReceipt(ctx context.Context, c *dynamic.Chain, receipt *ty
 				err = json.Unmarshal([]byte(potentialEvent), event)
 				if err != nil {
 					// If it fails to unmarshal, try the next potential event
-					log.FromContext(ctx).WithError(err).Tracef("could not unmarshal potential event ABI, txHash: %s sigHash: %s, ", l.GetTxHash(), l.GetTopics()[0])
+					logger.WithError(err).Tracef("could not unmarshal potential event ABI, txHash: %s sigHash: %s, ", l.GetTxHash(), l.GetTopics()[0])
 					continue
 				}
 
@@ -194,7 +199,7 @@ func (hk *Hook) decodeReceipt(ctx context.Context, c *dynamic.Chain, receipt *ty
 
 		if err != nil {
 			// As all potentialEvents fail to unmarshal, go to the next log
-			log.FromContext(ctx).WithError(err).Tracef("could not unmarshal potential event ABI, txHash: %s sigHash: %s, ", l.GetTxHash(), l.GetTopics()[0])
+			logger.WithError(err).Tracef("could not unmarshal potential event ABI, txHash: %s sigHash: %s, ", l.GetTxHash(), l.GetTopics()[0])
 			continue
 		}
 
@@ -202,8 +207,7 @@ func (hk *Hook) decodeReceipt(ctx context.Context, c *dynamic.Chain, receipt *ty
 		l.DecodedData = mapping
 		l.Event = GetAbi(event)
 
-		receiptLogCtx := log.With(ctx, log.Str("receipt.log", fmt.Sprintf("%v", mapping)))
-		log.FromContext(receiptLogCtx).Debug("decoder: log decoded")
+		logger.WithField("receipt_log", fmt.Sprintf("%v", mapping)).Debug("log decoded")
 	}
 	return nil
 }
@@ -219,7 +223,9 @@ func GetAbi(e *ethAbi.Event) string {
 
 func (hk *Hook) registerDeployedContract(ctx context.Context, c *dynamic.Chain, receipt *types.Receipt, block *ethtypes.Block) error {
 	if receipt.ContractAddress != "" && receipt.ContractAddress != "0x0000000000000000000000000000000000000000" {
-		log.FromContext(ctx).WithField("contract.address", receipt.ContractAddress).Infof("new contract deployed")
+		logger := hk.logger.WithContext(ctx).WithField("contract_address", receipt.ContractAddress)
+
+		logger.Debug("register new deployed contract")
 		code, err := hk.ec.CodeAt(ctx, c.URL, ethcommon.HexToAddress(receipt.ContractAddress), block.Number())
 		if err != nil {
 			return err
@@ -230,6 +236,7 @@ func (hk *Hook) registerDeployedContract(ctx context.Context, c *dynamic.Chain, 
 				CodeHash: crypto.Keccak256Hash(code).String(),
 			})
 		if err != nil {
+			logger.WithError(err).Error("failed to register contract")
 			return err
 		}
 	}

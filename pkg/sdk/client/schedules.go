@@ -7,8 +7,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/httputil"
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 
-	"github.com/containous/traefik/v2/pkg/log"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	clientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/client-utils"
 )
 
@@ -19,9 +17,7 @@ func (c *HTTPClient) CreateSchedule(ctx context.Context, request *types.CreateSc
 	err := callWithBackOff(ctx, c.config.backOff, func() error {
 		response, err := clientutils.PostRequest(ctx, c.client, reqURL, request)
 		if err != nil {
-			errMessage := "error while creating schedule"
-			log.FromContext(ctx).WithError(err).Error(errMessage)
-			return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+			return err
 		}
 
 		defer clientutils.CloseResponse(response)
@@ -38,9 +34,7 @@ func (c *HTTPClient) GetSchedule(ctx context.Context, scheduleUUID string) (*typ
 	err := callWithBackOff(ctx, c.config.backOff, func() error {
 		response, err := clientutils.GetRequest(ctx, c.client, reqURL)
 		if err != nil {
-			errMessage := "error while getting schedule"
-			log.FromContext(ctx).WithError(err).Error(errMessage)
-			return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+			return err
 		}
 
 		defer clientutils.CloseResponse(response)
@@ -57,9 +51,7 @@ func (c *HTTPClient) GetSchedules(ctx context.Context) ([]*types.ScheduleRespons
 	err := callWithBackOff(ctx, c.config.backOff, func() error {
 		response, err := clientutils.GetRequest(ctx, c.client, reqURL)
 		if err != nil {
-			errMessage := "error while getting schedules"
-			log.FromContext(ctx).WithError(err).Error(errMessage)
-			return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+			return err
 		}
 
 		defer clientutils.CloseResponse(response)

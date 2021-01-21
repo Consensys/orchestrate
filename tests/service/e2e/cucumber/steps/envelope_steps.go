@@ -141,7 +141,7 @@ func (sc *ScenarioContext) envelopesShouldHaveTheFollowingValues(table *gherkin.
 	for r, row := range rows {
 		val := reflect.ValueOf(sc.trackers[r].Current).Elem()
 		sEvlp, err := json.Marshal(*sc.trackers[r].Current)
-		log.WithError(err).Debugf("Marshaled envelope: %s", sEvlp)
+		log.WithError(err).Debugf("Marshaled envelope: %s", utils4.ShortString(fmt.Sprint(sEvlp), 30))
 		for c, col := range row.Cells {
 			fieldName := header.Cells[c].Value
 			field, err := utils.GetField(fieldName, val)

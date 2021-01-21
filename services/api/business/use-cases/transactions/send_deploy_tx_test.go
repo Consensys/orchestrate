@@ -34,8 +34,8 @@ func TestSendDeployTx_Execute(t *testing.T) {
 		txRequestResponse := testutils2.FakeTxRequest()
 		fakeContract := testutils2.FakeContract()
 
-		mockGetContractUC.EXPECT().Execute(ctx, txRequest.Params.ContractName, txRequest.Params.ContractTag).Return(fakeContract, nil)
-		mockSendTxUC.EXPECT().Execute(ctx, txRequest, gomock.Any(), tenantID).Return(txRequestResponse, nil)
+		mockGetContractUC.EXPECT().Execute(gomock.Any(), txRequest.Params.ContractName, txRequest.Params.ContractTag).Return(fakeContract, nil)
+		mockSendTxUC.EXPECT().Execute(gomock.Any(), txRequest, gomock.Any(), tenantID).Return(txRequestResponse, nil)
 
 		response, err := usecase.Execute(ctx, txRequest, tenantID)
 
@@ -46,7 +46,7 @@ func TestSendDeployTx_Execute(t *testing.T) {
 	t.Run("should fail with same error if validator fails", func(t *testing.T) {
 		expectedErr := fmt.Errorf("error")
 
-		mockGetContractUC.EXPECT().Execute(ctx, txRequest.Params.ContractName, txRequest.Params.ContractTag).Return(nil, expectedErr)
+		mockGetContractUC.EXPECT().Execute(gomock.Any(), txRequest.Params.ContractName, txRequest.Params.ContractTag).Return(nil, expectedErr)
 		response, err := usecase.Execute(ctx, txRequest, tenantID)
 
 		assert.Nil(t, response)
@@ -57,8 +57,8 @@ func TestSendDeployTx_Execute(t *testing.T) {
 		expectedErr := fmt.Errorf("error")
 		fakeContract := testutils2.FakeContract()
 
-		mockGetContractUC.EXPECT().Execute(ctx, txRequest.Params.ContractName, txRequest.Params.ContractTag).Return(fakeContract, nil)
-		mockSendTxUC.EXPECT().Execute(ctx, txRequest, gomock.Any(), tenantID).Return(nil, expectedErr)
+		mockGetContractUC.EXPECT().Execute(gomock.Any(), txRequest.Params.ContractName, txRequest.Params.ContractTag).Return(fakeContract, nil)
+		mockSendTxUC.EXPECT().Execute(gomock.Any(), txRequest, gomock.Any(), tenantID).Return(nil, expectedErr)
 
 		response, err := usecase.Execute(ctx, txRequest, tenantID)
 

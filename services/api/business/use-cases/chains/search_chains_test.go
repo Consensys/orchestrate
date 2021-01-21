@@ -38,7 +38,7 @@ func TestSearchChains_Execute(t *testing.T) {
 		}
 		chainModel := testutils.FakeChainModel()
 
-		chainAgent.EXPECT().Search(ctx, filters, tenants).Return([]*models.Chain{chainModel}, nil)
+		chainAgent.EXPECT().Search(gomock.Any(), filters, tenants).Return([]*models.Chain{chainModel}, nil)
 
 		resp, err := usecase.Execute(ctx, filters, tenants)
 
@@ -49,7 +49,7 @@ func TestSearchChains_Execute(t *testing.T) {
 	t.Run("should fail with same error if search chains fails", func(t *testing.T) {
 		expectedErr := errors.PostgresConnectionError("error")
 
-		chainAgent.EXPECT().Search(ctx, nil, tenants).Return(nil, expectedErr)
+		chainAgent.EXPECT().Search(gomock.Any(), nil, tenants).Return(nil, expectedErr)
 
 		resp, err := usecase.Execute(ctx, nil, tenants)
 

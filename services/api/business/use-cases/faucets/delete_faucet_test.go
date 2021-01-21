@@ -32,8 +32,8 @@ func TestDeleteFaucet_Execute(t *testing.T) {
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		faucetModel := testutils.FakeFaucetModel()
 
-		faucetAgent.EXPECT().FindOneByUUID(ctx, "uuid", tenants).Return(faucetModel, nil)
-		faucetAgent.EXPECT().Delete(ctx, faucetModel, tenants).Return(nil)
+		faucetAgent.EXPECT().FindOneByUUID(gomock.Any(), "uuid", tenants).Return(faucetModel, nil)
+		faucetAgent.EXPECT().Delete(gomock.Any(), faucetModel, tenants).Return(nil)
 
 		err := usecase.Execute(ctx, "uuid", tenants)
 
@@ -43,7 +43,7 @@ func TestDeleteFaucet_Execute(t *testing.T) {
 	t.Run("should fail with same error if findOne faucet fails", func(t *testing.T) {
 		expectedErr := errors.NotFoundError("error")
 
-		faucetAgent.EXPECT().FindOneByUUID(ctx, "uuid", tenants).Return(nil, expectedErr)
+		faucetAgent.EXPECT().FindOneByUUID(gomock.Any(), "uuid", tenants).Return(nil, expectedErr)
 
 		err := usecase.Execute(ctx, "uuid", tenants)
 
@@ -54,8 +54,8 @@ func TestDeleteFaucet_Execute(t *testing.T) {
 	t.Run("should fail with same error if delete faucet fails", func(t *testing.T) {
 		expectedErr := errors.NotFoundError("error")
 
-		faucetAgent.EXPECT().FindOneByUUID(ctx, "uuid", tenants).Return(testutils.FakeFaucetModel(), nil)
-		faucetAgent.EXPECT().Delete(ctx, gomock.Any(), tenants).Return(expectedErr)
+		faucetAgent.EXPECT().FindOneByUUID(gomock.Any(), "uuid", tenants).Return(testutils.FakeFaucetModel(), nil)
+		faucetAgent.EXPECT().Delete(gomock.Any(), gomock.Any(), tenants).Return(expectedErr)
 
 		err := usecase.Execute(ctx, "uuid", tenants)
 

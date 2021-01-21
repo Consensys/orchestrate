@@ -47,9 +47,9 @@ func TestRegisterChain_Execute(t *testing.T) {
 		chain.PrivateTxManager = nil
 		chainModel := parsers.NewChainModelFromEntity(chain)
 
-		mockSearchChainsUC.EXPECT().Execute(ctx, &entities.ChainFilters{Names: []string{chain.Name}}, []string{chain.TenantID}).Return([]*entities.Chain{}, nil)
-		mockEthClient.EXPECT().Network(ctx, chain.URLs[0]).Return(big.NewInt(888), nil)
-		chainAgent.EXPECT().Insert(ctx, chainModel).Return(nil)
+		mockSearchChainsUC.EXPECT().Execute(gomock.Any(), &entities.ChainFilters{Names: []string{chain.Name}}, []string{chain.TenantID}).Return([]*entities.Chain{}, nil)
+		mockEthClient.EXPECT().Network(gomock.Any(), chain.URLs[0]).Return(big.NewInt(888), nil)
+		chainAgent.EXPECT().Insert(gomock.Any(), chainModel).Return(nil)
 
 		resp, err := usecase.Execute(ctx, chain, false)
 
@@ -62,12 +62,12 @@ func TestRegisterChain_Execute(t *testing.T) {
 		chain.PrivateTxManager = nil
 		chainTip := big.NewInt(1)
 
-		mockSearchChainsUC.EXPECT().Execute(ctx, &entities.ChainFilters{Names: []string{chain.Name}}, []string{chain.TenantID}).Return([]*entities.Chain{}, nil)
-		mockEthClient.EXPECT().Network(ctx, chain.URLs[0]).Return(big.NewInt(888), nil)
-		mockEthClient.EXPECT().HeaderByNumber(ctx, chain.URLs[0], nil).Return(&types.Header{
+		mockSearchChainsUC.EXPECT().Execute(gomock.Any(), &entities.ChainFilters{Names: []string{chain.Name}}, []string{chain.TenantID}).Return([]*entities.Chain{}, nil)
+		mockEthClient.EXPECT().Network(gomock.Any(), chain.URLs[0]).Return(big.NewInt(888), nil)
+		mockEthClient.EXPECT().HeaderByNumber(gomock.Any(), chain.URLs[0], nil).Return(&types.Header{
 			Number: chainTip,
 		}, nil)
-		chainAgent.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
+		chainAgent.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(nil)
 
 		resp, err := usecase.Execute(ctx, chain, true)
 
@@ -81,10 +81,10 @@ func TestRegisterChain_Execute(t *testing.T) {
 		chainModel := parsers.NewChainModelFromEntity(chain)
 		chainModel.PrivateTxManagers[0].ChainUUID = chainModel.UUID
 
-		mockSearchChainsUC.EXPECT().Execute(ctx, &entities.ChainFilters{Names: []string{chain.Name}}, []string{chain.TenantID}).Return([]*entities.Chain{}, nil)
-		mockEthClient.EXPECT().Network(ctx, chain.URLs[0]).Return(big.NewInt(888), nil)
-		chainAgent.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
-		privateTxManagerAgent.EXPECT().Insert(ctx, chainModel.PrivateTxManagers[0]).Return(nil)
+		mockSearchChainsUC.EXPECT().Execute(gomock.Any(), &entities.ChainFilters{Names: []string{chain.Name}}, []string{chain.TenantID}).Return([]*entities.Chain{}, nil)
+		mockEthClient.EXPECT().Network(gomock.Any(), chain.URLs[0]).Return(big.NewInt(888), nil)
+		chainAgent.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(nil)
+		privateTxManagerAgent.EXPECT().Insert(gomock.Any(), chainModel.PrivateTxManagers[0]).Return(nil)
 
 		resp, err := usecase.Execute(ctx, chain, false)
 
@@ -96,7 +96,7 @@ func TestRegisterChain_Execute(t *testing.T) {
 		chain := testutils.FakeChain()
 
 		mockSearchChainsUC.EXPECT().
-			Execute(ctx, &entities.ChainFilters{Names: []string{chain.Name}}, []string{chain.TenantID}).
+			Execute(gomock.Any(), &entities.ChainFilters{Names: []string{chain.Name}}, []string{chain.TenantID}).
 			Return([]*entities.Chain{chain}, nil)
 
 		resp, err := usecase.Execute(ctx, chain, false)
@@ -109,7 +109,7 @@ func TestRegisterChain_Execute(t *testing.T) {
 		chain := testutils.FakeChain()
 		expectedErr := errors.NotFoundError("error")
 
-		mockSearchChainsUC.EXPECT().Execute(ctx, &entities.ChainFilters{Names: []string{chain.Name}}, []string{chain.TenantID}).Return(nil, expectedErr)
+		mockSearchChainsUC.EXPECT().Execute(gomock.Any(), &entities.ChainFilters{Names: []string{chain.Name}}, []string{chain.TenantID}).Return(nil, expectedErr)
 
 		resp, err := usecase.Execute(ctx, chain, false)
 
@@ -122,9 +122,9 @@ func TestRegisterChain_Execute(t *testing.T) {
 		chain := testutils.FakeChain()
 		expectedErr := errors.NotFoundError("error")
 
-		mockSearchChainsUC.EXPECT().Execute(ctx, &entities.ChainFilters{Names: []string{chain.Name}}, []string{chain.TenantID}).Return([]*entities.Chain{}, nil)
-		mockEthClient.EXPECT().Network(ctx, chain.URLs[0]).Return(big.NewInt(888), nil)
-		chainAgent.EXPECT().Insert(ctx, gomock.Any()).Return(expectedErr)
+		mockSearchChainsUC.EXPECT().Execute(gomock.Any(), &entities.ChainFilters{Names: []string{chain.Name}}, []string{chain.TenantID}).Return([]*entities.Chain{}, nil)
+		mockEthClient.EXPECT().Network(gomock.Any(), chain.URLs[0]).Return(big.NewInt(888), nil)
+		chainAgent.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(expectedErr)
 
 		resp, err := usecase.Execute(ctx, chain, false)
 
@@ -137,10 +137,10 @@ func TestRegisterChain_Execute(t *testing.T) {
 		chain := testutils.FakeChain()
 		expectedErr := errors.NotFoundError("error")
 
-		mockSearchChainsUC.EXPECT().Execute(ctx, &entities.ChainFilters{Names: []string{chain.Name}}, []string{chain.TenantID}).Return([]*entities.Chain{}, nil)
-		mockEthClient.EXPECT().Network(ctx, chain.URLs[0]).Return(big.NewInt(888), nil)
-		chainAgent.EXPECT().Insert(ctx, gomock.Any()).Return(nil)
-		privateTxManagerAgent.EXPECT().Insert(ctx, gomock.Any()).Return(expectedErr)
+		mockSearchChainsUC.EXPECT().Execute(gomock.Any(), &entities.ChainFilters{Names: []string{chain.Name}}, []string{chain.TenantID}).Return([]*entities.Chain{}, nil)
+		mockEthClient.EXPECT().Network(gomock.Any(), chain.URLs[0]).Return(big.NewInt(888), nil)
+		chainAgent.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(nil)
+		privateTxManagerAgent.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(expectedErr)
 
 		resp, err := usecase.Execute(ctx, chain, false)
 

@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/vault/api"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 )
 
@@ -18,9 +18,10 @@ type renewTokenLoop struct {
 	mut           *sync.Mutex
 	retryInterval int
 	maxRetries    int
+	logger        *log.Logger
 }
 
-func newRenewTokenLoop(tokenExpireIn64 int64, client *api.Client) *renewTokenLoop {
+func newRenewTokenLoop(tokenExpireIn64 int64, client *api.Client, logger *log.Logger) *renewTokenLoop {
 	return &renewTokenLoop{
 		ttl:           int(tokenExpireIn64),
 		quit:          make(chan bool, 1),
@@ -28,6 +29,7 @@ func newRenewTokenLoop(tokenExpireIn64 int64, client *api.Client) *renewTokenLoo
 		retryInterval: 2,
 		maxRetries:    3,
 		mut:           &sync.Mutex{},
+		logger:        logger,
 	}
 }
 
@@ -42,14 +44,14 @@ func (loop *renewTokenLoop) Refresh() error {
 			loop.mut.Lock()
 			loop.client.SetToken(newTokenSecret.Auth.ClientToken)
 			loop.mut.Unlock()
-			log.Info("Hashicorp Vault token was refreshed successfully")
+			loop.logger.Info("token was refreshed successfully")
 			return nil
 		}
 
 		retry++
 		if retry > loop.maxRetries {
 			errMessage := "reached max number of retries to renew vault token"
-			log.WithField("retries", retry).Error(errMessage)
+			loop.logger.WithField("retries", retry).Error(errMessage)
 			return errors.InternalError(errMessage)
 		}
 
@@ -66,14 +68,14 @@ func (loop *renewTokenLoop) Run() {
 
 		// Max token refresh loop of 1h
 		if timeToWait > time.Hour {
-			log.Info("HashiCorp: forcing token refresh to maximum one hour")
+			loop.logger.Info("forcing token refresh to maximum one hour")
 			timeToWait = time.Hour
 		}
 
 		ticker := time.NewTicker(timeToWait)
 		defer ticker.Stop()
 
-		log.Infof("HashiCorp: token refresh loop started (every %d seconds)", timeToWait/time.Second)
+		loop.logger.Infof("token refresh loop started (every %d seconds)", timeToWait/time.Second)
 		for {
 			select {
 			case <-ticker.C:
@@ -93,7 +95,7 @@ func (loop *renewTokenLoop) Run() {
 				// Wait 5 seconds for the ongoing requests to return
 				time.Sleep(time.Duration(5) * time.Second)
 				// Crash the tx-signer to force restart
-				log.Fatal("gracefully shutting down the vault client, the token has been revoked")
+				loop.logger.Fatal("gracefully shutting down the vault client, the token has been revoked")
 			}
 		}
 	}()

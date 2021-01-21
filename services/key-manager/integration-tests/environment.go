@@ -9,11 +9,9 @@ import (
 	"strconv"
 	"time"
 
-	logpkg "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 
 	"github.com/hashicorp/vault/api"
-
-	log "github.com/sirupsen/logrus"
 
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/hashicorp"
@@ -42,7 +40,7 @@ var envMetricsPort string
 
 type IntegrationEnvironment struct {
 	ctx        context.Context
-	logger     *log.Entry
+	logger     *log.Logger
 	keyManager *app.App
 	client     *docker.Client
 	baseURL    string
@@ -51,7 +49,7 @@ type IntegrationEnvironment struct {
 }
 
 func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, error) {
-	logger := log.WithContext(ctx)
+	logger := log.NewLogger().WithContext(ctx)
 
 	host := os.Getenv("VAULT_HOST")
 	if host == "" {
@@ -74,7 +72,7 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 	httputils.MetricFlags(flgs)
 	httputils.Flags(flgs)
 	hashicorp.InitFlags(flgs)
-	logpkg.Level(flgs)
+	log.Level(flgs)
 	args := []string{
 		"--metrics-port=" + envMetricsPort,
 		"--rest-port=" + envHTTPPort,
@@ -89,7 +87,7 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 		return nil, err
 	}
 
-	pluginPath, err := getPluginPath()
+	pluginPath, err := getPluginPath(logger)
 	if err != nil {
 		return nil, err
 	}
@@ -225,10 +223,10 @@ func generateTokenFile(rootToken string) (string, error) {
 	return file.Name(), nil
 }
 
-func getPluginPath() (string, error) {
+func getPluginPath(logger *log.Logger) (string, error) {
 	currDir, err := os.Getwd()
 	if err != nil {
-		log.WithError(err).Error("failed to get the current directory path")
+		logger.WithError(err).Error("failed to get the current directory path")
 		return "", err
 	}
 

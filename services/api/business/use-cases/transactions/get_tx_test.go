@@ -35,8 +35,8 @@ func TestGetTx_Execute(t *testing.T) {
 		txRequest := testutils.FakeTxRequest(0)
 		schedule := testutils2.FakeSchedule()
 
-		mockTransactionRequestDA.EXPECT().FindOneByUUID(ctx, txRequest.Schedule.UUID, tenants).Return(txRequest, nil)
-		mockGetScheduleUC.EXPECT().Execute(ctx, txRequest.Schedule.UUID, tenants).Return(schedule, nil)
+		mockTransactionRequestDA.EXPECT().FindOneByUUID(gomock.Any(), txRequest.Schedule.UUID, tenants).Return(txRequest, nil)
+		mockGetScheduleUC.EXPECT().Execute(gomock.Any(), txRequest.Schedule.UUID, tenants).Return(schedule, nil)
 
 		result, err := usecase.Execute(ctx, txRequest.Schedule.UUID, tenants)
 
@@ -52,7 +52,7 @@ func TestGetTx_Execute(t *testing.T) {
 		uuid := "uuid"
 		expectedErr := errors.NotFoundError("error")
 
-		mockTransactionRequestDA.EXPECT().FindOneByUUID(ctx, uuid, tenants).Return(nil, expectedErr)
+		mockTransactionRequestDA.EXPECT().FindOneByUUID(gomock.Any(), uuid, tenants).Return(nil, expectedErr)
 
 		response, err := usecase.Execute(ctx, uuid, tenants)
 
@@ -64,8 +64,8 @@ func TestGetTx_Execute(t *testing.T) {
 		txRequest := testutils.FakeTxRequest(0)
 		expectedErr := fmt.Errorf("error")
 
-		mockTransactionRequestDA.EXPECT().FindOneByUUID(ctx, txRequest.Schedule.UUID, tenants).Return(txRequest, nil)
-		mockGetScheduleUC.EXPECT().Execute(ctx, txRequest.Schedule.UUID, tenants).Return(nil, expectedErr)
+		mockTransactionRequestDA.EXPECT().FindOneByUUID(gomock.Any(), txRequest.Schedule.UUID, tenants).Return(txRequest, nil)
+		mockGetScheduleUC.EXPECT().Execute(gomock.Any(), txRequest.Schedule.UUID, tenants).Return(nil, expectedErr)
 
 		response, err := usecase.Execute(ctx, txRequest.Schedule.UUID, tenants)
 

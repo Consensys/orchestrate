@@ -10,7 +10,6 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/Shopify/sarama/mocks"
-	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	cgmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama/mock"
@@ -33,16 +32,6 @@ func (s *ExportedTestSuite) SetupTest() {
 
 func TestExampleTestSuite(t *testing.T) {
 	suite.Run(t, new(ExportedTestSuite))
-}
-
-func (s *ExportedTestSuite) TestInitConfig() {
-	viper.Set(kafkaTLSEnableViperKey, true)
-	viper.Set(kafkaTLSClientCertFilePathViperKey, "testdata/example-cert.pem")
-	viper.Set(kafkaTLSClientKeyFilePathViperKey, "testdata/example-key.pem")
-	viper.Set(kafkaTLSCACertFilePathViperKey, "testdata/example-ca-cert.pem")
-
-	InitConfig()
-	assert.NotNil(s.T(), GlobalConfig(), "Config should have been set")
 }
 
 func (s *ExportedTestSuite) TestNewTLSConfig() {
@@ -82,7 +71,7 @@ func (s *ExportedTestSuite) TestNewTLSConfig() {
 // 	viper.Set(KafkaURLViperKey, []string{
 // 		seedBroker.Addr(),
 // 	})
-// 	_ = InitClient(context.Background())
+// 	_ = initClient(context.Background())
 // 	assert.NotNil(s.T(), GlobalClient(), "Client should have been set")
 // }
 
@@ -99,7 +88,7 @@ func (s *ExportedTestSuite) TestNewTLSConfig() {
 // 		seedBroker.Addr(),
 // 	})
 // 
-// 	_ = InitClient(context.Background())
+// 	_ = initClient(context.Background())
 // 
 // 	InitSyncProducer(context.Background())
 // 

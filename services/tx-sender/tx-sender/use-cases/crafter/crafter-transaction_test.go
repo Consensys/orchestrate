@@ -37,9 +37,9 @@ func TestCrafterTransaction_Execute(t *testing.T) {
 		
 		proxyURL := utils.GetProxyURL(chainRegistryURL, job.ChainUUID)
 		expectedGasPrice, _ := new(big.Int).SetString("1000", 10)
-		ec.EXPECT().SuggestGasPrice(ctx, proxyURL).Return(expectedGasPrice, nil)
-		ec.EXPECT().EstimateGas(ctx, proxyURL, gomock.Any()).Return(uint64(1000), nil)
-		nm.EXPECT().GetNonce(ctx, gomock.Any()).Return(uint64(1), nil)
+		ec.EXPECT().SuggestGasPrice(gomock.Any(), proxyURL).Return(expectedGasPrice, nil)
+		ec.EXPECT().EstimateGas(gomock.Any(), proxyURL, gomock.Any()).Return(uint64(1000), nil)
+		nm.EXPECT().GetNonce(gomock.Any(), gomock.Any()).Return(uint64(1), nil)
 		err := usecase.Execute(ctx, job)
 
 		assert.NoError(t, err)
@@ -57,8 +57,8 @@ func TestCrafterTransaction_Execute(t *testing.T) {
 		
 		proxyURL := utils.GetProxyURL(chainRegistryURL, job.ChainUUID)
 		expectedGasPrice, _ := new(big.Int).SetString("1000", 10)
-		ec.EXPECT().SuggestGasPrice(ctx, proxyURL).Return(expectedGasPrice, nil)
-		ec.EXPECT().EstimateGas(ctx, proxyURL, gomock.Any()).Return(uint64(1000), nil)
+		ec.EXPECT().SuggestGasPrice(gomock.Any(), proxyURL).Return(expectedGasPrice, nil)
+		ec.EXPECT().EstimateGas(gomock.Any(), proxyURL, gomock.Any()).Return(uint64(1000), nil)
 		err := usecase.Execute(ctx, job)
 
 		assert.NoError(t, err)
@@ -76,8 +76,8 @@ func TestCrafterTransaction_Execute(t *testing.T) {
 		
 		proxyURL := utils.GetProxyURL(chainRegistryURL, job.ChainUUID)
 		expectedGasPrice, _ := new(big.Int).SetString("1000", 10)
-		ec.EXPECT().SuggestGasPrice(ctx, proxyURL).Return(expectedGasPrice, nil)
-		ec.EXPECT().EstimateGas(ctx, proxyURL, gomock.Any()).Return(uint64(1000), nil)
+		ec.EXPECT().SuggestGasPrice(gomock.Any(), proxyURL).Return(expectedGasPrice, nil)
+		ec.EXPECT().EstimateGas(gomock.Any(), proxyURL, gomock.Any()).Return(uint64(1000), nil)
 		err := usecase.Execute(ctx, job)
 
 		assert.NoError(t, err)
@@ -96,10 +96,10 @@ func TestCrafterTransaction_Execute(t *testing.T) {
 		proxyURL := utils.GetProxyURL(chainRegistryURL, job.ChainUUID)
 		expectedGasPrice, _ := new(big.Int).SetString("1000", 10)
 		expectedContractAddr := ethcommon.HexToAddress("0x1")
-		ec.EXPECT().SuggestGasPrice(ctx, proxyURL).Return(expectedGasPrice, nil)
-		ec.EXPECT().EstimateGas(ctx, proxyURL, gomock.Any()).Return(uint64(1000), nil)
-		ec.EXPECT().EEAPrivPrecompiledContractAddr(ctx, proxyURL).Return(expectedContractAddr, nil)
-		nm.EXPECT().GetNonce(ctx, gomock.Any()).Return(uint64(1), nil)
+		ec.EXPECT().SuggestGasPrice(gomock.Any(), proxyURL).Return(expectedGasPrice, nil)
+		ec.EXPECT().EstimateGas(gomock.Any(), proxyURL, gomock.Any()).Return(uint64(1000), nil)
+		ec.EXPECT().EEAPrivPrecompiledContractAddr(gomock.Any(), proxyURL).Return(expectedContractAddr, nil)
+		nm.EXPECT().GetNonce(gomock.Any(), gomock.Any()).Return(uint64(1), nil)
 		err := usecase.Execute(ctx, job)
 
 		assert.NoError(t, err)
@@ -116,7 +116,7 @@ func TestCrafterTransaction_Execute(t *testing.T) {
 		job.Transaction.GasPrice = ""
 		job.Transaction.Gas = ""
 
-		nm.EXPECT().GetNonce(ctx, gomock.Any()).Return(uint64(1), nil)
+		nm.EXPECT().GetNonce(gomock.Any(), gomock.Any()).Return(uint64(1), nil)
 		err := usecase.Execute(ctx, job)
 
 		assert.NoError(t, err)

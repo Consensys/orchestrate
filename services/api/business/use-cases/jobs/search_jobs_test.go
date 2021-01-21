@@ -44,7 +44,7 @@ func TestSearchJobs_Execute(t *testing.T) {
 		}
 
 		expectedResponse := []*entities.Job{parsers.NewJobEntityFromModels(jobs[0])}
-		mockJobDA.EXPECT().Search(ctx, filters, tenants).Return(jobs, nil)
+		mockJobDA.EXPECT().Search(gomock.Any(), filters, tenants).Return(jobs, nil)
 
 		jobResponse, err := usecase.Execute(ctx, filters, tenants)
 
@@ -56,7 +56,7 @@ func TestSearchJobs_Execute(t *testing.T) {
 		filters := &entities.JobFilters{}
 		expectedErr := errors.NotFoundError("error")
 
-		mockJobDA.EXPECT().Search(ctx, filters, tenants).Return(nil, expectedErr)
+		mockJobDA.EXPECT().Search(gomock.Any(), filters, tenants).Return(nil, expectedErr)
 
 		response, err := usecase.Execute(ctx, filters, tenants)
 

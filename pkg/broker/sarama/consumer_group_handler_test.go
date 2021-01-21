@@ -36,7 +36,7 @@ func (h *CounterHandler) Handle(txctx *engine.TxContext) {
 		"topic":     txctx.In.Entrypoint(),
 		"offset":    txctx.In.(*Msg).Offset,
 		"partition": txctx.In.(*Msg).Partition,
-	}).Infof("Handling message")
+	}).Info("handling message")
 	atomic.AddInt32(&h.counter, 1)
 }
 

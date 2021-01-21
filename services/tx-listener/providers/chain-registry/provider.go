@@ -4,17 +4,15 @@ import (
 	"context"
 	"time"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
-
 	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 
 	"github.com/cenkalti/backoff/v4"
 	"github.com/containous/traefik/v2/pkg/job"
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/containous/traefik/v2/pkg/safe"
-	"github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/dynamic"
 )
 
@@ -78,10 +76,8 @@ func (p *Provider) buildConfiguration(ctx context.Context, chains []*api.ChainRe
 	for _, chain := range chains {
 		duration, err := time.ParseDuration(chain.ListenerBackOffDuration)
 		if err != nil {
-			log.FromContext(ctx).WithFields(logrus.Fields{
-				"tenant.id":  chain.TenantID,
-				"chain.name": chain.Name,
-			}).Errorf("cannot parse duration: %s", chain.ListenerBackOffDuration)
+			log.FromContext(ctx).WithField("tenant_id", chain.TenantID).WithField("chain", chain.UUID).
+				Errorf("cannot parse duration: %s", chain.ListenerBackOffDuration)
 		}
 
 		msg.Configuration.Chains[chain.UUID] = &dynamic.Chain{

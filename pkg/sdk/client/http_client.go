@@ -42,7 +42,7 @@ func callWithBackOff(ctx context.Context, backOff backoff.BackOff, requestCall f
 		func(e error, duration time.Duration) {
 			log.FromContext(ctx).
 				WithError(e).
-				Warnf("transaction-scheduler: http call failed, retrying in %v...", duration)
+				Warnf("http call has failed, retrying in %v...", duration)
 		},
 	)
 }

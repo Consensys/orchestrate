@@ -47,7 +47,7 @@ func TestCreateSchedule_Execute(t *testing.T) {
 		scheduleEntity := testutils.FakeSchedule()
 		expectedErr := errors.PostgresConnectionError("error")
 
-		mockScheduleDA.EXPECT().Insert(ctx, gomock.Any()).Return(expectedErr)
+		mockScheduleDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(expectedErr)
 
 		scheduleResponse, err := usecase.Execute(ctx, scheduleEntity)
 		assert.Nil(t, scheduleResponse)

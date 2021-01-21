@@ -11,9 +11,10 @@ import (
 	"github.com/Shopify/sarama"
 	"github.com/hashicorp/go-multierror"
 	healthz "github.com/heptiolabs/healthcheck"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 )
 
 const component = "broker.sarama"
@@ -61,17 +62,6 @@ func NewTLSConfig(clientCertFilePath, clientKeyFilePath, caCertFilePath string) 
 	return &tlsConfig, err
 }
 
-// InitConfig initialize global Sarama configuration
-func InitConfig() {
-	// Init config
-	var err error
-	config, err = NewSaramaConfig()
-	if err != nil {
-		log.Fatalf("sarama: cannot init TLS configuration for Kafka - got error: %q)", err)
-		return
-	}
-}
-
 // GlobalConfig returns Sarama global configuration
 func GlobalConfig() *sarama.Config {
 	return config
@@ -82,24 +72,29 @@ func SetGlobalConfig(cfg *sarama.Config) {
 	config = cfg
 }
 
-// InitClient initialize Sarama Client
+// initialize Sarama Client
 // It bases on viper configuration to get Kafka address
-func InitClient(ctx context.Context) (err error) {
+func initClient(ctx context.Context) (err error) {
 	initClientOnce.Do(func() {
 		if client != nil {
 			return
 		}
 
+		logger := log.FromContext(ctx)
 		// We need a config no create client
 		if config == nil {
-			InitConfig()
+			config, err = NewSaramaConfig()
+			if err != nil {
+				logger.WithError(err).Fatal("failed to initialize kafka client")
+				return
+			}
 		}
 
 		// Create sarama client
 		hostnames := viper.GetStringSlice(KafkaURLViperKey)
 		client, err = NewClient(hostnames, config)
 		if err != nil {
-			log.WithError(err).Fatalf("sarama: could not to start client at host %v", hostnames)
+			logger.WithField("hosts", hostnames).Fatalf("could not to start client")
 			return
 		}
 
@@ -118,11 +113,8 @@ func InitClient(ctx context.Context) (err error) {
 			return gr.Wait().ErrorOrNil()
 		}
 
-		saramaLogger := log.New()
-		saramaLogger.SetLevel(log.DebugLevel)
-		sarama.Logger = saramaLogger.WithContext(ctx).WithField("logger", "sarama")
-
-		log.Infof("sarama: client ready (connected to brokers: %v) at host %v", brokers, hostnames)
+		sarama.Logger = newLogger(logger).SetLevel(logrus.DebugLevel)
+		logger.WithField("host", hostnames).WithField("broker", brokers).Info("client ready")
 	})
 
 	return nil
@@ -145,28 +137,30 @@ func SetGlobalClient(c sarama.Client) {
 // InitSyncProducer initialize Sarama SyncProducer
 func InitSyncProducer(ctx context.Context) {
 	initProducerOnce.Do(func() {
+		logger := log.NewLogger().WithContext(ctx).SetComponent(component + ".producer")
+		ctx = log.With(ctx, logger)
 		if producer != nil {
 			return
 		}
 
 		// Initialize client
-		err := InitClient(ctx)
+		err := initClient(ctx)
 		if err != nil {
 			return
 		}
 
 		if client == nil {
-			log.WithError(err).Fatalf("sarama: client is not initialize")
+			logger.WithError(err).Fatal("client is not initialize")
 			return
 		}
 
 		// Create sarama sync producer
 		producer, err = NewSyncProducerFromClient(client)
 		if err != nil {
-			log.WithError(err).Fatalf("sarama: could not create producer")
+			logger.WithError(err).Fatal("could not create producer")
 			return
 		}
-		log.Infof("sarama: producer ready")
+		logger.Info("producer ready")
 	})
 }
 
@@ -183,25 +177,24 @@ func SetGlobalSyncProducer(p sarama.SyncProducer) {
 // InitConsumerGroup initialize consumer group
 func InitConsumerGroup(ctx context.Context, kafkaGroup string) {
 	initConsumerGroupOnce.Do(func() {
+		logger := log.NewLogger().SetComponent(component + ".consumer").WithContext(ctx)
+		ctx = log.With(ctx, logger)
 		if group != nil {
 			return
 		}
 
-		// Initialize Client
-		err := InitClient(ctx)
+		err := initClient(ctx)
 		if err != nil {
 			return
 		}
 
-		// Create group
 		group, err = NewConsumerGroupFromClient(kafkaGroup, client)
 		if err != nil {
-			log.WithError(err).Fatalf("sarama: could not create consumer group")
+			logger.WithError(err).Fatal("could not create consumer group")
 			return
 		}
-		log.WithFields(log.Fields{
-			"group": kafkaGroup,
-		}).Infof("sarama: consumer group ready")
+
+		logger.WithField("group", kafkaGroup).Info("consumer group ready")
 	})
 }
 

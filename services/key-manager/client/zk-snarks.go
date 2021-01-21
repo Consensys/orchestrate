@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/containous/traefik/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	clientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/client-utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/httputil"
@@ -44,9 +43,7 @@ func (c *HTTPClient) ZKSSign(ctx context.Context, address string, req *keymanage
 
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, req)
 	if err != nil {
-		errMessage := "error while signing data with zk-snarks account"
-		log.FromContext(ctx).WithError(err).Error(errMessage)
-		return "", errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+		return "", errors.ServiceConnectionError("error while signing data with zk-snarks account")
 	}
 
 	defer clientutils.CloseResponse(response)
@@ -58,9 +55,7 @@ func (c *HTTPClient) ZKSVerifySignature(ctx context.Context, request *types.Veri
 
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, request)
 	if err != nil {
-		errMessage := "error while verifying zks signature"
-		log.FromContext(ctx).WithError(err).Error(errMessage)
-		return errors.ServiceConnectionError(errMessage).ExtendComponent(component)
+		return errors.ServiceConnectionError("error while verifying zks signature")
 	}
 
 	defer clientutils.CloseResponse(response)

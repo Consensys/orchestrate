@@ -5,6 +5,7 @@ import (
 
 	pg "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database/postgres"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models"
 )
@@ -12,11 +13,15 @@ import (
 const artifactDAComponent = "data-agents.artifact"
 
 type PGArtifact struct {
-	db pg.DB
+	db     pg.DB
+	logger *log.Logger
 }
 
 func NewPGArtifact(db pg.DB) store.ArtifactAgent {
-	return &PGArtifact{db: db}
+	return &PGArtifact{
+		db:     db,
+		logger: log.NewLogger().SetComponent(artifactDAComponent),
+	}
 }
 
 func (agent *PGArtifact) FindOneByABIAndCodeHash(ctx context.Context, abi, codeHash string) (*models.ArtifactModel, error) {
@@ -27,6 +32,9 @@ func (agent *PGArtifact) FindOneByABIAndCodeHash(ctx context.Context, abi, codeH
 
 	err := pg.SelectOne(ctx, query)
 	if err != nil {
+		if !errors.IsNotFoundError(err) {
+			agent.logger.WithContext(ctx).WithError(err).Error("failed to find artifact by ABI and CodeHash")
+		}
 		return nil, errors.FromError(err).ExtendComponent(repositoryDAComponent)
 	}
 
@@ -36,6 +44,7 @@ func (agent *PGArtifact) FindOneByABIAndCodeHash(ctx context.Context, abi, codeH
 func (agent *PGArtifact) Insert(ctx context.Context, artifact *models.ArtifactModel) error {
 	err := pg.Insert(ctx, agent.db, artifact)
 	if err != nil {
+		agent.logger.WithContext(ctx).WithError(err).Error("failed to insert artifact")
 		return errors.FromError(err).ExtendComponent(artifactDAComponent)
 	}
 
@@ -49,6 +58,7 @@ func (agent *PGArtifact) SelectOrInsert(ctx context.Context, artifact *models.Ar
 
 	err := pg.SelectOrInsert(ctx, q)
 	if err != nil {
+		agent.logger.WithContext(ctx).WithError(err).Error("failed to select or insert artifact")
 		return errors.FromError(err).ExtendComponent(artifactDAComponent)
 	}
 
@@ -65,8 +75,8 @@ func (agent *PGArtifact) FindOneByNameAndTag(ctx context.Context, name, tag stri
 		Where("LOWER(registry.name) = LOWER(?)", name)
 
 	err := pg.SelectOne(ctx, query)
-
 	if err != nil {
+		agent.logger.WithContext(ctx).WithError(err).Error("failed to select artifact by name and tag")
 		return nil, errors.FromError(err).ExtendComponent(artifactDAComponent)
 	}
 

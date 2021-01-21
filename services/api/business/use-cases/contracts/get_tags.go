@@ -3,8 +3,8 @@ package contracts
 import (
 	"context"
 
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
 )
@@ -12,22 +12,24 @@ import (
 const getTagsComponent = "use-cases.get-tags"
 
 type getTagsUseCase struct {
-	agent store.TagAgent
+	agent  store.TagAgent
+	logger *log.Logger
 }
 
 func NewGetTagsUseCase(agent store.TagAgent) usecases.GetContractTagsUseCase {
 	return &getTagsUseCase{
-		agent: agent,
+		agent:  agent,
+		logger: log.NewLogger().SetComponent(getTagsComponent),
 	}
 }
 
-func (usecase *getTagsUseCase) Execute(ctx context.Context, name string) ([]string, error) {
-	log.WithContext(ctx).Debug("get tags starting...")
-	names, err := usecase.agent.FindAllByName(ctx, name)
+func (uc *getTagsUseCase) Execute(ctx context.Context, name string) ([]string, error) {
+	ctx = log.WithFields(ctx, log.Field("contract_name", name))
+	names, err := uc.agent.FindAllByName(ctx, name)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(getTagsComponent)
 	}
 
-	log.WithContext(ctx).Debug("get tags executed successfully")
+	uc.logger.WithContext(ctx).Debug("get tags executed successfully")
 	return names, nil
 }

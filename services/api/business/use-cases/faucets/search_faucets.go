@@ -3,8 +3,8 @@ package faucets
 import (
 	"context"
 
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/parsers"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
@@ -15,21 +15,20 @@ const searchFaucetsComponent = "use-cases.search-faucets"
 
 // searchFaucetsUseCase is a use case to search faucets
 type searchFaucetsUseCase struct {
-	db store.DB
+	db     store.DB
+	logger *log.Logger
 }
 
 // NewSearchFaucets creates a new SearchFaucetsUseCase
 func NewSearchFaucets(db store.DB) usecases.SearchFaucetsUseCase {
 	return &searchFaucetsUseCase{
-		db: db,
+		db:     db,
+		logger: log.NewLogger().SetComponent(searchFaucetsComponent),
 	}
 }
 
 // Execute search faucets
 func (uc *searchFaucetsUseCase) Execute(ctx context.Context, filters *entities.FaucetFilters, tenants []string) ([]*entities.Faucet, error) {
-	logger := log.WithContext(ctx).WithField("filters", filters).WithField("tenants", tenants)
-	logger.Debug("searching faucets")
-
 	faucetModels, err := uc.db.Faucet().Search(ctx, filters, tenants)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(searchFaucetsComponent)
@@ -40,6 +39,6 @@ func (uc *searchFaucetsUseCase) Execute(ctx context.Context, filters *entities.F
 		faucets = append(faucets, parsers.NewFaucetFromModel(faucetModel))
 	}
 
-	logger.Debug("faucets found successfully")
+	uc.logger.Debug("faucets found successfully")
 	return faucets, nil
 }

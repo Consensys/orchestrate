@@ -5,8 +5,8 @@ import (
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database"
 
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/parsers"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
@@ -19,6 +19,7 @@ const updateChainComponent = "use-cases.update-chain"
 type updateChainUseCase struct {
 	db         store.DB
 	getChainUC usecases.GetChainUseCase
+	logger     *log.Logger
 }
 
 // NewUpdateChainUseCase creates a new UpdateChainUseCase
@@ -26,12 +27,14 @@ func NewUpdateChainUseCase(db store.DB, getChainUC usecases.GetChainUseCase) use
 	return &updateChainUseCase{
 		db:         db,
 		getChainUC: getChainUC,
+		logger:     log.NewLogger().SetComponent(updateChainComponent),
 	}
 }
 
 // Execute updates a chain
 func (uc *updateChainUseCase) Execute(ctx context.Context, chain *entities.Chain, tenants []string) (*entities.Chain, error) {
-	logger := log.WithContext(ctx).WithField("chain_uuid", chain.UUID).WithField("tenants", tenants)
+	ctx = log.WithFields(ctx, log.Field("chain", chain.UUID))
+	logger := uc.logger.WithContext(ctx)
 	logger.Debug("updating chain")
 
 	chainRetrieved, err := uc.getChainUC.Execute(ctx, chain.UUID, tenants)

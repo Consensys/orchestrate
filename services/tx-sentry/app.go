@@ -6,8 +6,8 @@ import (
 
 	"github.com/cenkalti/backoff/v4"
 	backoffjob "github.com/containous/traefik/v2/pkg/job"
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
 	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
@@ -17,27 +17,27 @@ import (
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sentry/tx-sentry/use-cases"
 )
 
-const txSentryComponent = "tx-sentry"
+const txSentryComponent = "application.tx-sentry"
 
 type TxSentry struct {
 	client         orchestrateclient.OrchestrateClient
 	sessionManager listeners.SessionManager
 	config         *Config
+	logger         *log.Logger
 }
 
 func NewTxSentry(client orchestrateclient.OrchestrateClient, config *Config) *TxSentry {
-	// Create business layer
 	createChildJobUC := usecases.NewRetrySessionJobUseCase(client)
 	return &TxSentry{
 		client:         client,
 		sessionManager: listeners.NewSessionManager(client, createChildJobUC),
 		config:         config,
+		logger:         log.NewLogger().SetComponent(txSentryComponent),
 	}
 }
 
 func (sentry *TxSentry) Run(ctx context.Context) error {
-	logger := log.WithContext(ctx)
-	logger.Infof("starting transaction sentry")
+	logger := sentry.logger.WithContext(ctx)
 
 	backff := backoff.WithContext(backoffjob.NewBackOff(backoff.NewExponentialBackOff()), ctx)
 	err := backoff.RetryNotify(
@@ -62,8 +62,8 @@ func (sentry *TxSentry) Close() error {
 }
 
 func (sentry *TxSentry) listen(ctx context.Context) error {
-	logger := log.WithContext(ctx)
-	logger.Info("starting tx-sentry jobs listener")
+	logger := sentry.logger.WithContext(ctx)
+	logger.Info("jobs listener started")
 
 	// Initial job creation fetching all pending jobs
 	jobFilters := &entities.JobFilters{
@@ -82,7 +82,8 @@ func (sentry *TxSentry) listen(ctx context.Context) error {
 		select {
 		case t := <-ticker.C:
 			lastCheckedAt := t.Add(-sentry.config.RefreshInterval)
-			logger.WithField("updated_after", lastCheckedAt).Debug("fetching new pending jobs")
+			logger.WithField("updated_after", lastCheckedAt.Format("2006-01-02 15:04:05")).
+				Debug("fetching new pending jobs")
 
 			jobFilters.UpdatedAfter = lastCheckedAt
 			err := sentry.createSessions(ctx, jobFilters)
@@ -100,7 +101,7 @@ func (sentry *TxSentry) createSessions(ctx context.Context, filters *entities.Jo
 	// We get all the pending jobs updated_after the last tick
 	jobResponses, err := sentry.client.SearchJob(ctx, filters)
 	if err != nil {
-		log.WithContext(ctx).WithError(err).Error("failed to fetch pending jobs")
+		sentry.logger.WithContext(ctx).WithError(err).Error("failed to fetch pending jobs")
 		return err
 	}
 

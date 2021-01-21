@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
@@ -24,6 +24,7 @@ type sendETHTxUseCase struct {
 	ec               ethclient.TransactionSender
 	chainRegistryURL string
 	jobClient        client.JobClient
+	logger           *log.Logger
 }
 
 func NewSendEthTxUseCase(signTx usecases.SignETHTransactionUseCase, crafter usecases.CraftTransactionUseCase,
@@ -36,11 +37,13 @@ func NewSendEthTxUseCase(signTx usecases.SignETHTransactionUseCase, crafter usec
 		signTx:           signTx,
 		nonceChecker:     nonceChecker,
 		crafter:          crafter,
+		logger:           log.NewLogger().SetComponent(sendETHTxComponent),
 	}
 }
 
 func (uc *sendETHTxUseCase) Execute(ctx context.Context, job *entities.Job) error {
-	logger := log.WithContext(ctx).WithField("job_uuid", job.UUID)
+	ctx = log.With(log.WithFields(ctx, log.Field("job", job.UUID)), uc.logger)
+	logger := uc.logger.WithContext(ctx)
 	logger.Debug("processing ethereum transaction job")
 
 	err := uc.crafter.Execute(ctx, job)
@@ -79,7 +82,7 @@ func (uc *sendETHTxUseCase) Execute(ctx context.Context, job *entities.Job) erro
 	}
 
 	if txHash != job.Transaction.Hash {
-		warnMessage := fmt.Sprintf("expected transaction hash %s, but got %s. Overriding", job.Transaction.Hash, txHash)
+		warnMessage := fmt.Sprintf("expected transaction hash %s, but got %s. overriding", job.Transaction.Hash, txHash)
 		job.Transaction.Hash = txHash
 		err = utils2.UpdateJobStatus(ctx, uc.jobClient, job.UUID, utils.StatusWarning, warnMessage, job.Transaction)
 		if err != nil {
@@ -92,14 +95,10 @@ func (uc *sendETHTxUseCase) Execute(ctx context.Context, job *entities.Job) erro
 }
 
 func (uc *sendETHTxUseCase) sendTx(ctx context.Context, job *entities.Job) (string, error) {
-	logger := log.WithContext(ctx).WithField("job_uuid", job.UUID)
-	logger.Debug("sending ethereum transaction")
-
 	proxyURL := utils.GetProxyURL(uc.chainRegistryURL, job.ChainUUID)
 	txHash, err := uc.ec.SendRawTransaction(ctx, proxyURL, job.Transaction.Raw)
 	if err != nil {
-		errMsg := "cannot send ethereum transaction"
-		logger.WithError(err).Errorf(errMsg)
+		uc.logger.WithContext(ctx).WithError(err).Error("cannot send raw ethereum transaction")
 		return "", err
 	}
 

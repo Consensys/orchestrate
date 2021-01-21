@@ -9,29 +9,30 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
 
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 )
 
 const sendContractTxComponent = "use-cases.send-contract-tx"
 
-// sendTxUsecase is a use case to create a new contract transaction
-type sendContractTxUsecase struct {
+type sendContractTxUseCase struct {
 	sendTxUseCase usecases.SendTxUseCase
+	logger        *log.Logger
 }
 
 // NewSendContractTxUseCase creates a n¬ew SendContractTxUseCase
 func NewSendContractTxUseCase(sendTxUseCase usecases.SendTxUseCase) usecases.SendContractTxUseCase {
-	return &sendContractTxUsecase{
+	return &sendContractTxUseCase{
 		sendTxUseCase: sendTxUseCase,
+		logger:        log.NewLogger().SetComponent(sendContractTxComponent),
 	}
 }
 
 // Execute validates, creates and starts a new contract transaction
-func (uc *sendContractTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequest, tenantID string) (*entities.TxRequest, error) {
-	logger := log.WithContext(ctx)
-	logger.WithField("idempotency_key", txRequest.IdempotencyKey).
-		Debug("creating new contract transaction")
+func (uc *sendContractTxUseCase) Execute(ctx context.Context, txRequest *entities.TxRequest, tenantID string) (*entities.TxRequest, error) {
+	ctx = log.WithFields(ctx, log.Field("idempotency-key", txRequest.IdempotencyKey))
+	logger := uc.logger.WithContext(ctx)
+	logger.Debug("creating new contract transaction")
 
 	txData, err := uc.computeTxData(txRequest.Params.MethodSignature, txRequest.Params.Args)
 	if err != nil {
@@ -41,15 +42,12 @@ func (uc *sendContractTxUsecase) Execute(ctx context.Context, txRequest *entitie
 	return uc.sendTxUseCase.Execute(ctx, txRequest, txData, tenantID)
 }
 
-func (uc *sendContractTxUsecase) computeTxData(method string, args []interface{}) (string, error) {
+func (uc *sendContractTxUseCase) computeTxData(method string, args []interface{}) (string, error) {
 	crafter := abi.BaseCrafter{}
 	sArgs, err := utils.ParseIArrayToStringArray(args)
 	if err != nil {
 		errMessage := "failed to parse method arguments"
-		log.WithError(err).
-			WithField("method", method).
-			WithField("args", args).
-			Error(errMessage)
+		uc.logger.WithError(err).WithField("method", method).WithField("args", args).Error(errMessage)
 		return "", errors.DataCorruptedError(errMessage).ExtendComponent(sendContractTxComponent)
 	}
 
@@ -57,11 +55,7 @@ func (uc *sendContractTxUsecase) computeTxData(method string, args []interface{}
 
 	if err != nil {
 		errMessage := "invalid method signature"
-		log.WithError(err).
-			WithField("method", method).
-			WithField("args", args).
-			Error(errMessage)
-
+		uc.logger.WithError(err).WithField("method", method).WithField("args", args).Error(errMessage)
 		return "", errors.InvalidParameterError(errMessage)
 	}
 

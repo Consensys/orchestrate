@@ -31,11 +31,11 @@ func TestUpdateAccount_Execute(t *testing.T) {
 	t.Run("should update identity successfully", func(t *testing.T) {
 		idenEntity := testutils3.FakeAccount()
 		idenModel := testutils.FakeAccountModel()
-		identityAgent.EXPECT().FindOneByAddress(ctx, idenEntity.Address, tenants).Return(idenModel, nil)
+		identityAgent.EXPECT().FindOneByAddress(gomock.Any(), idenEntity.Address, tenants).Return(idenModel, nil)
 
 		idenModel.Attributes = idenEntity.Attributes
 		idenModel.Alias = idenEntity.Alias
-		identityAgent.EXPECT().Update(ctx, idenModel).Return(nil)
+		identityAgent.EXPECT().Update(gomock.Any(), idenModel).Return(nil)
 		resp, err := usecase.Execute(ctx, idenEntity, tenants)
 
 		assert.NoError(t, err)
@@ -49,9 +49,9 @@ func TestUpdateAccount_Execute(t *testing.T) {
 		idenEntity.Alias = ""
 
 		idenModel := testutils.FakeAccountModel()
-		identityAgent.EXPECT().FindOneByAddress(ctx, idenEntity.Address, tenants).Return(idenModel, nil)
+		identityAgent.EXPECT().FindOneByAddress(gomock.Any(), idenEntity.Address, tenants).Return(idenModel, nil)
 
-		identityAgent.EXPECT().Update(ctx, idenModel).Return(nil)
+		identityAgent.EXPECT().Update(gomock.Any(), idenModel).Return(nil)
 		resp, err := usecase.Execute(ctx, idenEntity, tenants)
 
 		assert.NoError(t, err)
@@ -62,7 +62,7 @@ func TestUpdateAccount_Execute(t *testing.T) {
 	t.Run("should fail with same error if get identity fails", func(t *testing.T) {
 		expectedErr := errors.NotFoundError("error")
 		idenEntity := testutils3.FakeAccount()
-		identityAgent.EXPECT().FindOneByAddress(ctx, idenEntity.Address, tenants).Return(nil, expectedErr)
+		identityAgent.EXPECT().FindOneByAddress(gomock.Any(), idenEntity.Address, tenants).Return(nil, expectedErr)
 
 		_, err := usecase.Execute(ctx, idenEntity, tenants)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(updateAccountComponent), err)
@@ -72,9 +72,9 @@ func TestUpdateAccount_Execute(t *testing.T) {
 		expectedErr := errors.NotFoundError("error")
 		idenEntity := testutils3.FakeAccount()
 		idenModel := testutils.FakeAccountModel()
-		identityAgent.EXPECT().FindOneByAddress(ctx, idenEntity.Address, tenants).Return(idenModel, nil)
+		identityAgent.EXPECT().FindOneByAddress(gomock.Any(), idenEntity.Address, tenants).Return(idenModel, nil)
 
-		identityAgent.EXPECT().Update(ctx, gomock.Any()).Return(expectedErr)
+		identityAgent.EXPECT().Update(gomock.Any(), gomock.Any()).Return(expectedErr)
 		_, err := usecase.Execute(ctx, idenEntity, tenants)
 
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(updateAccountComponent), err)

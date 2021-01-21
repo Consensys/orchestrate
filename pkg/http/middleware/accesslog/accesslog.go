@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/containous/traefik/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/dynamic"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 )
+
+const component = "http.middleware.accesslog"
 
 type Builder struct {
 	handlers map[string]*Handler
@@ -29,10 +31,10 @@ func (b *Builder) Build(ctx context.Context, name string, configuration interfac
 			return nil, nil, fmt.Errorf("invalid configuration type (expected %T but got %T)", cfg, configuration)
 		}
 
-		log.FromContext(ctx).
+		log.NewLogger().WithContext(ctx).SetComponent(component).
 			WithField("middleware", name).
 			WithField("type", fmt.Sprintf("%T", configuration)).
-			Debugf("building middleware")
+			Debug("building middleware")
 
 		h, err = NewHandler(cfg.ToTraefikType())
 		if err != nil {

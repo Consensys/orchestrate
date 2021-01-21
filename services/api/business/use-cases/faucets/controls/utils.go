@@ -11,7 +11,6 @@ import (
 )
 
 func getAddressBalance(ctx context.Context, chainStateReader ethclient.ChainStateReader, uris []string, address string) (*big.Int, error) {
-	logger := log.WithContext(ctx).WithField("address", address)
 	for _, uri := range uris {
 		balance, err := chainStateReader.BalanceAt(ctx, uri, ethcommon.HexToAddress(address), nil)
 		if err != nil {
@@ -22,7 +21,5 @@ func getAddressBalance(ctx context.Context, chainStateReader ethclient.ChainStat
 		return balance, nil
 	}
 
-	errMessage := "All URLs in the list are unreachable"
-	logger.Error(errMessage)
-	return nil, errors.EthConnectionError(errMessage)
+	return nil, errors.EthConnectionError("all URLs in the list are unreachable")
 }
