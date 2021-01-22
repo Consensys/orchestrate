@@ -35,8 +35,12 @@ type MessageListener struct {
 	logger       *log.Logger
 }
 
-func NewMessageListener(useCases usecases.UseCases, jobClient client.JobClient,
-	producer sarama.SyncProducer, recoverTopic, crafterTopic string, bck backoff.BackOff) *MessageListener {
+func NewMessageListener(useCases usecases.UseCases,
+	jobClient client.JobClient,
+	producer sarama.SyncProducer,
+	recoverTopic, crafterTopic string,
+	bck backoff.BackOff,
+) *MessageListener {
 	return &MessageListener{
 		useCases:     useCases,
 		recoverTopic: recoverTopic,

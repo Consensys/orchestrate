@@ -14,6 +14,7 @@
 * Launch of new API service, `orchestate-api`, encapsulating every individual previous API services
 * Enhance `tx-sender` worker with crafting and signing responsibilities
 * Improve logging verbose and format
+* New environment variable `KAFKA_CONSUMER_GROUP_NAME` to set the Kafka consumer group name
 
 ### 🛠 Bug fixes
 * Incorrect metrics counting for 429 http responses

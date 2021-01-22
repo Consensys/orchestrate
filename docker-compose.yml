@@ -192,6 +192,7 @@ services:
       TEST_GLOBAL_DATA: ${TEST_GLOBAL_DATA-}
       AUTH_JWT_PRIVATE_KEY: ${AUTH_JWT_PRIVATE_KEY-}
       CUCUMBER_STEPS_TIMEOUT: ${CUCUMBER_STEPS_TIMEOUT-20s}
+      KAFKA_CONSUMER_GROUP_NAME: ${KAFKA_CONSUMER_GROUP_NAME-e2e}
     restart: "no"
     command: e2e
     volumes:
@@ -209,6 +210,7 @@ services:
       STRESS_ITERATIONS: "500"
       STRESS_TIMEOUT: "10m"
       TEST_GLOBAL_DATA: ${TEST_GLOBAL_DATA-}
+      KAFKA_CONSUMER_GROUP_NAME: ${KAFKA_CONSUMER_GROUP_NAME-stress}
     restart: "no"
     command: stress
     volumes:

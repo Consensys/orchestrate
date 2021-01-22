@@ -87,21 +87,11 @@ func TestTopics(t *testing.T) {
 	assert.Equal(t, "topic-tx-decoded", viper.GetString("topic.tx.decoded"), "From default")
 }
 
-func TestConsumerGroup(t *testing.T) {
-
+func TestConsumerGroupName(t *testing.T) {
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
 
-	CrafterGroup(flgs)
-	assert.Equal(t, "group-crafter", viper.GetString("kafka.group.crafter"), "From default")
-
-	SignerGroup(flgs)
-	assert.Equal(t, "group-signer", viper.GetString("kafka.group.signer"), "From default")
-
-	SenderGroup(flgs)
-	assert.Equal(t, "group-sender", viper.GetString("kafka.group.sender"), "From default")
-
-	DecoderGroup(flgs)
-	assert.Equal(t, "group-decoded", viper.GetString("kafka.group.decoded"), "From default")
+	ConsumerGroupName(flgs)
+	assert.Equal(t, "group-sender", viper.GetString("kafka.consumer.group.name"), "From default")
 }
 
 func TestInitKafkaSASLFlags(t *testing.T) {

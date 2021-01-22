@@ -24,15 +24,9 @@ func init() {
 	viper.SetDefault(TxRecoverViperKey, txRecoverTopicDefault)
 	_ = viper.BindEnv(TxRecoverViperKey, txRecoverTopicEnv)
 
-	// Kafka consumer groups for tx workflow
-	viper.SetDefault(CrafterGroupViperKey, crafterGroupDefault)
-	_ = viper.BindEnv(CrafterGroupViperKey, crafterGroupEnv)
-	viper.SetDefault(SignerGroupViperKey, signerGroupDefault)
-	_ = viper.BindEnv(SignerGroupViperKey, signerGroupEnv)
-	viper.SetDefault(SenderGroupViperKey, senderGroupDefault)
-	_ = viper.BindEnv(SenderGroupViperKey, senderGroupEnv)
-	viper.SetDefault(DecodedGroupViperKey, decodedGroupDefault)
-	_ = viper.BindEnv(DecodedGroupViperKey, decodedGroupEnv)
+	// Kafka consumer group for tx workflow
+	viper.SetDefault(ConsumerGroupNameViperKey, consumerGroupNameDefault)
+	_ = viper.BindEnv(ConsumerGroupNameViperKey, consumerGroupNameEnv)
 
 	// Kafka SASL
 	viper.SetDefault(kafkaSASLEnabledViperKey, kafkaSASLEnabledDefault)
@@ -181,53 +175,18 @@ Environment variable: %q`, txDecodedTopicEnv)
 
 // Kafka Consumer group environment variables
 const (
-	crafterGroupFlag     = "group-crafter"
-	CrafterGroupViperKey = "kafka.group.crafter"
-	crafterGroupEnv      = "KAFKA_GROUP_CRAFTER"
-	crafterGroupDefault  = "group-crafter"
-
-	signerGroupFlag     = "group-signer"
-	SignerGroupViperKey = "kafka.group.signer"
-	signerGroupEnv      = "KAFKA_GROUP_SIGNER"
-	signerGroupDefault  = "group-signer"
-
-	senderGroupFlag     = "group-sender"
-	SenderGroupViperKey = "kafka.group.sender"
-	senderGroupEnv      = "KAFKA_GROUP_SENDER"
-	senderGroupDefault  = "group-sender"
-
-	decodedGroupFlag     = "group-decoded"
-	DecodedGroupViperKey = "kafka.group.decoded"
-	decodedGroupEnv      = "KAFKA_GROUP_DECODED"
-	decodedGroupDefault  = "group-decoded"
+	consumerGroupNameFlag     = "consumer-group-name"
+	ConsumerGroupNameViperKey = "kafka.consumer.group.name"
+	consumerGroupNameEnv      = "KAFKA_CONSUMER_GROUP_NAME"
+	consumerGroupNameDefault  = "group-sender"
 )
 
-// consumerGroupFlag register flag for a kafka consumer group
-func consumerGroupFlag(f *pflag.FlagSet, flag, key, env, defaultValue string) {
+// SenderGroup register flag for a kafka consumer group
+func ConsumerGroupName(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Kafka consumer group name
-Environment variable: %q`, env)
-	f.String(flag, defaultValue, desc)
-	_ = viper.BindPFlag(key, f.Lookup(flag))
-}
-
-// CrafterGroup register flag for kafka crafter group
-func CrafterGroup(f *pflag.FlagSet) {
-	consumerGroupFlag(f, crafterGroupFlag, CrafterGroupViperKey, crafterGroupEnv, crafterGroupDefault)
-}
-
-// SignerGroup register flag for kafka signer group
-func SignerGroup(f *pflag.FlagSet) {
-	consumerGroupFlag(f, signerGroupFlag, SignerGroupViperKey, signerGroupEnv, signerGroupDefault)
-}
-
-// SenderGroup register flag for kafka sender group
-func SenderGroup(f *pflag.FlagSet) {
-	consumerGroupFlag(f, senderGroupFlag, SenderGroupViperKey, senderGroupEnv, senderGroupDefault)
-}
-
-// DecoderGroup register flag for kafka decoder group
-func DecoderGroup(f *pflag.FlagSet) {
-	consumerGroupFlag(f, decodedGroupFlag, DecodedGroupViperKey, decodedGroupEnv, decodedGroupDefault)
+Environment variable: %q`, consumerGroupNameEnv)
+	f.String(consumerGroupNameFlag, consumerGroupNameDefault, desc)
+	_ = viper.BindPFlag(ConsumerGroupNameViperKey, f.Lookup(consumerGroupNameFlag))
 }
 
 // InitKafkaSASLFlags register flags for SASL authentication

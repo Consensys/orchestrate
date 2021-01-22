@@ -119,7 +119,7 @@ func initComponents(ctx context.Context) {
 		},
 		// Initialize ConsumerGroup
 		func() {
-			broker.InitConsumerGroup(ctx, "group-stress")
+			broker.InitConsumerGroup(ctx, viper.GetString(broker.ConsumerGroupNameViperKey))
 		},
 		// Initialize Handlers
 		func() {

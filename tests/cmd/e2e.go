@@ -4,6 +4,8 @@ import (
 	"context"
 	"os"
 
+	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
+
 	traefiklog "github.com/containous/traefik/v2/pkg/log"
 	"github.com/spf13/cobra"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
@@ -25,6 +27,7 @@ func NewRunE2ECommand() *cobra.Command {
 	cucumber.InitFlags(runCmd.Flags())
 	steps.InitFlags(runCmd.Flags())
 	alias.InitFlags(runCmd.Flags())
+	broker.ConsumerGroupName(runCmd.Flags())
 
 	return runCmd
 }

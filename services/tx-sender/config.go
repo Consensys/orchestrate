@@ -70,6 +70,7 @@ func Flags(f *pflag.FlagSet) {
 	client.Flags(f)
 	broker.KafkaTopicTxSender(f)
 	broker.KafkaTopicTxRecover(f)
+	broker.ConsumerGroupName(f)
 	MaxRecovery(f)
 	NonceManagerType(f)
 	NonceManagerExpirationFlag(f)
@@ -121,7 +122,7 @@ func NewConfig(vipr *viper.Viper) *Config {
 
 	return &Config{
 		App:                    app.NewConfig(vipr),
-		GroupName:              "group-dispatcher",
+		GroupName:              vipr.GetString(broker.ConsumerGroupNameViperKey),
 		RecoverTopic:           vipr.GetString(broker.TxRecoverViperKey),
 		SenderTopic:            vipr.GetString(broker.TxSenderViperKey),
 		ProxyURL:               vipr.GetString(client.URLViperKey),
