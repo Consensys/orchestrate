@@ -13,7 +13,7 @@ type columnSchema struct {
 	DataType   string
 }
 
-func MigrateAPIDB(apiDB *pg.DB) error {
+func MigrateAPIDB(apiDB *pg.DB, oldDB *pg.DB) error {
 	var tables []string
 	switch os.Getenv("DB_MIGRATION_SERVICE") {
 	case "contract-registry":
@@ -26,18 +26,10 @@ func MigrateAPIDB(apiDB *pg.DB) error {
 		return errors.New("unknown service")
 	}
 
-	return migrate(apiDB, tables)
+	return migrate(apiDB, oldDB, tables)
 }
 
-func migrate(apiDB *pg.DB, tables []string) error {
-	oldDB := pg.Connect(&pg.Options{
-		User:     os.Getenv("DB_MIGRATION_USERNAME"),
-		Password: os.Getenv("DB_MIGRATION_PASSWORD"),
-		Database: os.Getenv("DB_MIGRATION_DATABASE"),
-		Addr:     os.Getenv("DB_MIGRATION_ADDRESS"),
-	})
-	defer oldDB.Close()
-
+func migrate(apiDB *pg.DB, oldDB *pg.DB, tables []string) error {
 	for _, tableName := range tables {
 		err := compareSchemas(oldDB, apiDB, tableName)
 		if err != nil {

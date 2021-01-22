@@ -1,6 +1,8 @@
 package api
 
 import (
+	"os"
+
 	"github.com/go-pg/pg/v9"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -123,7 +125,20 @@ func newMigrateCmd() *cobra.Command {
 		Use:   "copy-db",
 		Short: "Copy Database from version 2.5.x to version 21.1.x",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return scripts.MigrateAPIDB(db)
+			// Set database connection
+			opts, err := postgres.NewConfig(viper.GetViper()).PGOptions()
+			if err != nil {
+				return err
+			}
+
+			opts.User = os.Getenv("DB_MIGRATION_USERNAME")
+			opts.Password = os.Getenv("DB_MIGRATION_PASSWORD")
+			opts.Database = os.Getenv("DB_MIGRATION_DATABASE")
+			opts.Addr = os.Getenv("DB_MIGRATION_ADDRESS")
+
+			oldDB := pg.Connect(opts)
+
+			return scripts.MigrateAPIDB(db, oldDB)
 		},
 	}
 	migrateCmd.AddCommand(migrateAPIDBCmd)
