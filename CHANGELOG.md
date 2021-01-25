@@ -1,19 +1,28 @@
-# Codefi Orchestrate Release Notes
+# Orchestrate Release Notes
 
-## v21.1.0 (Unreleased)
+## v21.1.0 (2021-01-25)
 
 ### 🆕 Features
-* Support for enable/disable metric modules
-* Ability set a custom keep alive interval for Postgres clients
+
+#### Orchestrate simplification
+* Merge all previous APIs into a single service: `orchestate-api`, encapsulating every individual previous API services
+* Merge `tx-crafter` and `tx-signer` into the `tx-sender` worker to reduce maintenance complexity
+* Support usage of `in-memory` as storage for Nonce Manager
+
+#### Identity Management API
+* Release the Identity API on top of the `orchestate-api`, allowing dynamic CRUD operation over accounts whose keys are stored in Vault
+* Integrate [Orchestrate HashiCorp Vault plugin](https://github.com/Consensys/orchestrate-hashicorp-vault-plugin) to enhance security
+
+#### Metrics & logging
 * Add application metrics:
     * `orchestrate_transaction_scheduler_job_latency_seconds`: Histogram of job latency between status (second). Except PENDING and MINED (Histogram)
     * `orchestrate_transaction_scheduler_mined_latency_seconds` Histogram of latency between PENDING and MINED (Histogram)
     * `orchestrate_transaction_listener_current_block`: Last block processed by each listening session (Counter)
-* Integrate Orchestrate HashiCorp vault engine
-* Support usage of `in-memory` as storage for Nonce Manager
-* Launch of new API service, `orchestate-api`, encapsulating every individual previous API services
-* Enhance `tx-sender` worker with crafting and signing responsibilities
-* Improve logging verbose and format
+* Support for enable/disable metric modules
+* Harmonize and improve logging across all services
+
+#### Miscellaneous
+* Ability set a custom keep alive interval for Postgres clients
 * New environment variable `KAFKA_CONSUMER_GROUP_NAME` to set the Kafka consumer group name
 
 ### 🛠 Bug fixes
@@ -21,12 +30,12 @@
 * Return empty array instead of 404 responses when matches when no resources are found on search queries
 
 ### ⚠ BREAKING CHANGES
-
 * Remove `account-generator` and `account-generated` topics
-* Worker services `tx-crafter` and `tx-signer` were removed alogn with topics `tx-crafter` and `tx-sender`
-* JAEGER service disabled by default
+* Worker services `tx-crafter` and `tx-signer` were removed along with topics `tx-crafter` and `tx-sender`
+* Jaeger reporting disabled by default
 * Remove support for environment variable `ABI` to register solidity contract at start
-* Remove support for environment variable `SECRET_PKEY` to import ethereum keys to key vault
+* Remove support for environment variable `SECRET_PKEY` to import ethereum keys to key vault at start
+* Remove support for environment variable `CHAIN_REGISTRY_INIT` to import chains at start
 * Remove support for GRPC contract API 
 * Remove API services `contract-registry`, `transaction-scheduler` and `chain-registry`
 * Replace support of `kv-v2` HashiCorp engine by `orchestrate` engine.
@@ -35,7 +44,7 @@
 * Environment variable `CONTRACT_REGISTRY_URL` replaced by `API_URL`
 * Environment variable `CHAIN_REGISTRY_URL` replaced by `API_URL`
 
-### Migrate steps from 2.5.x to 21.01.1
+### Migrate steps from v2.5.x to v21.1.0
 
 #### HashiCorp keys
 In order to migrate your keys from `kv-v2` engine to `orchestrate` engine you need to follow the next steps:
@@ -55,7 +64,7 @@ $> orchestrate key-manager migrate import-secrets
 
 #### Orchestrate Service Data
 In previous versions of orchestrate each of the API service data was stored in a independent postgres DB. 
-Therefore to update to `v21.01.01` you need to import each of service's data by following the next steps for
+Therefore to update to `v21.1.0` you need to import each of service's data by following the next steps for
 each of the service DBs you intend to migrate:
 
 1. Initialize the following:
@@ -82,7 +91,7 @@ $> orchestrate api migrate copy-db
 
 ### 🛠 Bug fixes
 * Manual kafka offset commit
-* Exit service right away after Kakfa errors and 404 HTTP errors
+* Exit service right away after Kafka errors and 404 HTTP errors
 * Fix typo on group-decoded (KAFKA_GROUP_DECODER renamed to KAFKA_GROUP_DECODED)
 * Fix Kafka group value settings 
 * Set default value of `KAFKA_CONSUMER_MAX_WAIT_TIME` to `250ms`
