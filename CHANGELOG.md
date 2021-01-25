@@ -78,7 +78,12 @@ each of the service DBs you intend to migrate:
 $> orchestrate api migrate copy-db
 ```
 
-## v2.5.5 (2021-01-04)
+## v2.5.6 (2021-01-25)
+
+### 🛠 Bug fixes
+* Workers hanging after kafka trigger consumer rebalancing
+
+## v2.5.5 (2021-01-05)
 
 ### 🆕 Features
 * Add environment variables to control Sarama consumer group configuration, for more information see https://pkg.go.dev/github.com/Shopify/sarama#Config 
