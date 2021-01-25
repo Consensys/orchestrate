@@ -55,10 +55,10 @@ func Kvv2ImportSecrets(_ context.Context, vault store.Vault, v2Client *kvv2.Clie
 		}
 
 		logger.WithField("address", acc.Address).WithField("namespace", acc.Namespace).
-			Infof("Account was imported successfully")
+			Info("account was imported successfully")
 	}
 
-	logger.Info("Accounts have been imported successfully")
+	logger.Info("accounts have been imported successfully")
 
 	return nil
 }
