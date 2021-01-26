@@ -1073,7 +1073,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/keymanager.VerifyPayloadRequest"
+                            "$ref": "#/definitions/ethereum.VerifyPayloadRequest"
                         }
                     }
                 ],
@@ -1191,6 +1191,12 @@
                                     "properties": {
                                         "domainSeparator": {
                                             "$ref": "#/definitions/ethereum.DomainSeparator"
+                                        },
+                                        "types": {
+                                            "type": "object",
+                                            "additionalProperties": {
+                                                "$ref": "#/definitions/ethereum.Type"
+                                            }
                                         }
                                     }
                                 }
@@ -3703,6 +3709,45 @@
                 }
             }
         },
+        "ethereum.Type": {
+            "type": "object",
+            "required": [
+                "name",
+                "type"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "example": "fieldName"
+                },
+                "type": {
+                    "type": "string",
+                    "example": "string"
+                }
+            }
+        },
+        "ethereum.VerifyPayloadRequest": {
+            "type": "object",
+            "required": [
+                "address",
+                "data",
+                "signature"
+            ],
+            "properties": {
+                "address": {
+                    "type": "string",
+                    "example": "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"
+                },
+                "data": {
+                    "type": "string",
+                    "example": "my data to sign"
+                },
+                "signature": {
+                    "type": "string",
+                    "example": "0x6019a3c8..."
+                }
+            }
+        },
         "ethereum.VerifyTypedDataRequest": {
             "type": "object",
             "required": [
@@ -3734,28 +3779,6 @@
                 "message": {
                     "type": "string",
                     "example": "error message"
-                }
-            }
-        },
-        "keymanager.VerifyPayloadRequest": {
-            "type": "object",
-            "required": [
-                "address",
-                "data",
-                "signature"
-            ],
-            "properties": {
-                "address": {
-                    "type": "string",
-                    "example": "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"
-                },
-                "data": {
-                    "type": "string",
-                    "example": "my data to sign"
-                },
-                "signature": {
-                    "type": "string",
-                    "example": "0x6019a3c8..."
                 }
             }
         }

@@ -10,10 +10,6 @@ externalDocs:
   description: "📒 Documentation of PegaSys Orchestrate"
   url: "https://docs.orchestrate.pegasys.tech/en/latest/"
 apis:
-  - url: 'public/swagger-specs/services/chain-registry/swagger.json'
-    tags:
-      add:
-        - "Chain Registry"
   - url: 'public/swagger-specs/services/api/swagger.json'
     tags:
       add:

@@ -165,7 +165,7 @@ func (uc *craftTxUseCase) craftGasPrice(ctx context.Context, job *entities.Job) 
 	proxyURL := utils.GetProxyURL(uc.chainRegistryURL, job.ChainUUID)
 	gasPrice, err := uc.ec.SuggestGasPrice(ctx, proxyURL)
 	if err != nil {
-		logger.WithError(err).Errorf("cannot suggest gas price")
+		logger.WithError(err).Error("cannot suggest gas price")
 		return err
 	}
 

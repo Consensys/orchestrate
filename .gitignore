@@ -49,6 +49,7 @@ tests/report/output/report.json
 
 # API Doc
 combined-schema.json
+swagger-combine.yml
 redoc-static.html
 node_modules
 package-lock.json

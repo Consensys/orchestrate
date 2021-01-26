@@ -264,7 +264,7 @@ func (c *AccountsController) signPayload(rw http.ResponseWriter, request *http.R
 // @Description Signs typed data using ECDSA and the private key of an existing account following the EIP-712 standard
 // @Accept json
 // @Produce text/plain
-// @Param request body api.SignTypedDataRequest{domainSeparator=ethereum.DomainSeparator} true "Typed data to sign"
+// @Param request body api.SignTypedDataRequest{domainSeparator=ethereum.DomainSeparator,types=map[string]ethereum.Type} true "Typed data to sign"
 // @Success 200 {string} string "Signed payload"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 401 {object} httputil.ErrorResponse "Unauthorized"
@@ -338,7 +338,7 @@ func (c *AccountsController) verifyTypedDataSignature(rw http.ResponseWriter, re
 // @Summary Verifies the signature of a message
 // @Description Verifies if a message has been signed by the Ethereum account passed as argument
 // @Accept json
-// @Param request body keymanager.VerifyPayloadRequest true "signature and message to verify"
+// @Param request body ethereum.VerifyPayloadRequest true "signature and message to verify"
 // @Success 204
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 401 {object} httputil.ErrorResponse "Unauthorized"
