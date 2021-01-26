@@ -3,7 +3,9 @@ package hashicorp
 import (
 	"context"
 	"fmt"
+	"io"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/docker/docker/api/types/mount"
@@ -61,6 +63,17 @@ func (cfg *Config) SetHost(host string) *Config {
 func (cfg *Config) SetPluginSourceDirectory(dir string) *Config {
 	cfg.PluginSourceDirectory = dir
 	return cfg
+}
+
+func (cfg *Config) DownloadPlugin(filename, version string) error {
+	// url := fmt.Sprintf("%s/releases/download/%s/orchestrate-hashicorp-vault-plugin",
+	// 	"https://github.com/ConsenSys/orchestrate-hashicorp-vault-plugin", version)
+	url := "https://github.com/ConsenSys/orchestrate-hashicorp-vault-plugin/releases/download/v0.0.9/orchestrate-hashicorp-vault-plugin"
+	err := downloadPlugin(fmt.Sprintf("%s/%s", cfg.PluginSourceDirectory, filename), url)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (vault *Vault) GenerateContainerConfig(_ context.Context, configuration interface{}) (*dockercontainer.Config, *dockercontainer.HostConfig, *network.NetworkingConfig, error) {
@@ -137,4 +150,26 @@ waitForServiceLoop:
 	}
 
 	return cerr
+}
+
+func downloadPlugin(filepath, url string) error {
+	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	out, err := os.Create(filepath)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	err = os.Chmod(filepath, 0777)
+	if err != nil {
+		return err
+	}
+
+	_, err = io.Copy(out, resp.Body)
+	return err
 }

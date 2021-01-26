@@ -9,6 +9,8 @@ bin/
 vendor/
 .env
 
+!/**/.gitkeep
+
 # Test binary, build with `go test -c`
 *.test
 
@@ -46,6 +48,9 @@ atlassian-ide-plugin.xml
 tests/report/node_modules
 tests/report/output/report.html
 tests/report/output/report.json
+
+# Plugin download
+services/key-manager/integration-tests/plugins
 
 # API Doc
 combined-schema.json

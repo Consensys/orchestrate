@@ -33,6 +33,7 @@ const networkName = "key-manager"
 const vaultTokenFilePrefix = "orchestrate_vault_token_"
 const localhostPath = "http://localhost:"
 const pluginFilename = "orchestrate-hashicorp-vault-plugin"
+const pluginVersion = "v0.0.9"
 
 var envVaultHostPort string
 var envHTTPPort string
@@ -98,6 +99,11 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 		SetRootToken(rootToken).
 		SetHost(host).
 		SetPluginSourceDirectory(pluginPath)
+
+	err = vaultContainer.DownloadPlugin(pluginFilename, pluginVersion)
+	if err != nil {
+		return nil, err
+	}
 
 	// Initialize environment container setup
 	composition := &config.Composition{
@@ -184,14 +190,16 @@ func (env *IntegrationEnvironment) Start(ctx context.Context) error {
 }
 
 func (env *IntegrationEnvironment) Teardown(ctx context.Context) {
-	env.logger.Infof("tearing test suite down")
+	env.logger.Info("tearing test suite down")
 
-	err := env.keyManager.Stop(ctx)
-	if err != nil {
-		env.logger.WithError(err).Error("could not stop key-manager")
+	if env.keyManager.IsReady() {
+		err := env.keyManager.Stop(ctx)
+		if err != nil {
+			env.logger.WithError(err).Error("could not stop key-manager")
+		}
 	}
 
-	err = env.client.Down(ctx, vaultContainerID)
+	err := env.client.Down(ctx, vaultContainerID)
 	if err != nil {
 		env.logger.WithError(err).Errorf("could not down vault")
 	}

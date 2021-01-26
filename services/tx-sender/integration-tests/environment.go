@@ -197,7 +197,7 @@ func (env *IntegrationEnvironment) Start(ctx context.Context) error {
 }
 
 func (env *IntegrationEnvironment) Teardown(ctx context.Context) {
-	env.logger.Infof("tearing test suite down")
+	env.logger.Info("tearing test suite down")
 
 	err := env.txSender.Stop(ctx)
 	if err != nil {
