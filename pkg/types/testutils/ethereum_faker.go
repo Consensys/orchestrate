@@ -17,7 +17,7 @@ func ParseIArray(args ...interface{}) (ret []interface{}) {
 
 func FakeETHTransaction() *entities.ETHTransaction {
 	return &entities.ETHTransaction{
-		From:        "0x1aBAe27a0cBfb02945720425D3B80C7E09728534",
+		From:        FromAddress,
 		To:          "0x4FED1fC4144c223aE3C1553be203cDFcbD38C581",
 		Nonce:       "1",
 		Value:       "50000",

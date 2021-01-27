@@ -120,8 +120,22 @@ func TestCreateJob_Execute(t *testing.T) {
 		assert.True(t, errors.IsInvalidParameterError(err))
 	})
 
+	t.Run("should fail with InvalidParameterError if schedule is not found", func(t *testing.T) {
+		jobEntity := testutils3.FakeJob()
+		fakeSchedule := testutils2.FakeSchedule(tenantID)
+		fakeSchedule.ID = 1
+		fakeSchedule.UUID = jobEntity.ScheduleUUID
+
+		mockGetChainUC.EXPECT().Execute(gomock.Any(), jobEntity.ChainUUID, tenants).Return(fakeChain, nil)
+		mockAccountDA.EXPECT().FindOneByAddress(gomock.Any(), jobEntity.Transaction.From, tenants).Return(nil, nil)
+		mockScheduleDA.EXPECT().FindOneByUUID(gomock.Any(), jobEntity.ScheduleUUID, tenants).Return(nil, errors.NotFoundError("error"))
+
+		_, err := usecase.Execute(context.Background(), jobEntity, tenants)
+		assert.True(t, errors.IsInvalidParameterError(err))
+	})
+
 	t.Run("should fail with same error if cannot fetch selected ScheduleUUID", func(t *testing.T) {
-		expectedErr := errors.NotFoundError("error")
+		expectedErr := fmt.Errorf("error")
 
 		jobEntity := testutils3.FakeJob()
 		fakeSchedule := testutils2.FakeSchedule(tenantID)

@@ -142,7 +142,7 @@ func (c *HTTPClient) StartJob(ctx context.Context, jobUUID string) error {
 		}
 
 		defer clientutils.CloseResponse(response)
-		return nil
+		return httputil.ParseEmptyBodyResponse(ctx, response)
 	})
 }
 
@@ -156,6 +156,6 @@ func (c *HTTPClient) ResendJobTx(ctx context.Context, jobUUID string) error {
 		}
 
 		defer clientutils.CloseResponse(response)
-		return nil
+		return httputil.ParseEmptyBodyResponse(ctx, response)
 	})
 }

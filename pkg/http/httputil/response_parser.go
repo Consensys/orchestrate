@@ -102,7 +102,7 @@ func ParseStringResponse(ctx context.Context, response *http.Response) (string, 
 }
 
 func ParseEmptyBodyResponse(ctx context.Context, response *http.Response) error {
-	if response.StatusCode != http.StatusNoContent {
+	if response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusAccepted {
 		errResp := ErrorResponse{}
 		if err := json.NewDecoder(response.Body).Decode(&errResp); err != nil {
 			log.FromContext(ctx).WithError(err).Error(invalidResponseBody)

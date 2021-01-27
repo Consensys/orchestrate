@@ -3,7 +3,6 @@
 package integrationtests
 
 import (
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -70,8 +69,6 @@ func (s *chainsTestSuite) TestRegister() {
 		assert.NotEmpty(t, resp.CreatedAt)
 		assert.NotEmpty(t, resp.UpdatedAt)
 		assert.Equal(t, resp.CreatedAt, resp.UpdatedAt)
-
-		fmt.Println(resp.ListenerStartingBlock)
 
 		err = s.client.DeleteChain(ctx, resp.UUID)
 		assert.NoError(t, err)

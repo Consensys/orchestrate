@@ -59,6 +59,9 @@ func (uc *createJobUseCase) Execute(ctx context.Context, job *entities.Job, tena
 	}
 
 	schedule, err := uc.db.Schedule().FindOneByUUID(ctx, job.ScheduleUUID, tenants)
+	if errors.IsNotFoundError(err) {
+		return nil, errors.InvalidParameterError("schedule does not exist").ExtendComponent(createJobComponent)
+	}
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(createJobComponent)
 	}
@@ -67,6 +70,7 @@ func (uc *createJobUseCase) Execute(ctx context.Context, job *entities.Job, tena
 	jobModel.Logs = append(jobModel.Logs, &models.Log{
 		Status: utils.StatusCreated,
 	})
+	jobModel.Schedule = schedule
 
 	err = database.ExecuteInDBTx(uc.db, func(tx database.Tx) error {
 		// If it's a child job, only create it if parent status is PENDING
