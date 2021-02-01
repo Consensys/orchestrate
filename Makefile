@@ -53,10 +53,8 @@ e2e: run-e2e
 	@$(OPEN) build/report/report.html 2>/dev/null
 	@exit $(docker inspect orchestrategit_e2e_1 --format='{{.State.ExitCode}}')
 
-e2e-ci:
-	@docker-compose up e2e
-	@docker-compose -f scripts/report/docker-compose.yml up
-	@exit $(docker inspect orchestrate_e2e_1 --format='{{.State.ExitCode}}')
+e2e-remote:
+	@bash ./scripts/circleci-e2e.sh
 
 stress: run-stress
 	@exit $(docker inspect orchestrategit_stress_1 --format='{{.State.ExitCode}}')

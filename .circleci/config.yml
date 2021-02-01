@@ -9,6 +9,50 @@ commands:
     steps:
       - checkout
       - go/mod-download-cached
+  prepare_docker:
+    description: "Docker login"
+    steps:
+      - run:
+          name: Docker login
+          command: |
+            echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin $DOCKER_REGISTRY
+
+  docker_build_e2e_dev:
+    description: "Build Orchestrate E2E"
+    steps:
+      - run:
+          name: Build Orchestrate E2E
+          command: >-
+            DOCKER_BUILDKIT=1 docker build
+            --label org.label-schema.schema-version="1.0.0-rc1"
+            --label org.label-schema.build-date=`date -u +"%Y-%m-%dT%H:%M:%SZ"`
+            --label org.label-schema.name="${CIRCLE_PROJECT_REPONAME}-e2e"
+            --label org.label-schema.version="branch"
+            --label org.label-schema.url="https://docs.orchestrate.pegasys.tech"
+            --label org.label-schema.vcs-url="${CIRCLE_REPOSITORY_URL}"
+            --label org.label-schema.vcs-ref="${CIRCLE_SHA1:0:8}"
+            --label org.label-schema.vendor="PegaSys"
+            -f ./tests/Dockerfile
+            -q
+            -t ${DOCKER_REGISTRY_DEV_REPO}/orchestrate-e2e:${CIRCLE_SHA1:0:8} .
+
+  docker_build_dev:
+    description: "Build Orchestrate"
+    steps:
+      - run:
+          name: Build Orchestrate
+          command: >-
+            DOCKER_BUILDKIT=1 docker build
+            --label org.label-schema.schema-version="1.0.0-rc1"
+            --label org.label-schema.build-date=`date -u +"%Y-%m-%dT%H:%M:%SZ"`
+            --label org.label-schema.name="${CIRCLE_PROJECT_REPONAME}"
+            --label org.label-schema.version="branch"
+            --label org.label-schema.url="https://docs.orchestrate.pegasys.tech"
+            --label org.label-schema.vcs-url="${CIRCLE_REPOSITORY_URL}"
+            --label org.label-schema.vcs-ref="${CIRCLE_SHA1:0:8}"
+            --label org.label-schema.vendor="PegaSys"
+            -q
+            -t ${DOCKER_REGISTRY_DEV_REPO}/orchestrate:${CIRCLE_SHA1:0:8} .
 
 jobs:
   lint:
@@ -23,7 +67,7 @@ jobs:
             make lint-tools
             make lint-ci
 
-  build:
+  gobuild:
     executor:
       name: go/default
       tag: '1.15.7'
@@ -72,12 +116,176 @@ jobs:
           name: Integration tests
           command: make run-integration
 
+  push-orchestrate-image:
+    docker:
+      - image: cimg/base:2020.01
+    resource_class: large
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 19.03.13
+          docker_layer_caching: true
+      - prepare_docker
+      - docker_build_dev
+      - run:
+          name: Deploy image in dev repository
+          command: |
+            docker push ${DOCKER_REGISTRY_DEV_REPO}/orchestrate:${CIRCLE_SHA1:0:8}
+
+  push-orchestrate-e2e-image:
+    docker:
+      - image: cimg/base:2020.01
+    resource_class: large
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 19.03.13
+          docker_layer_caching: true
+      - prepare_docker
+      - docker_build_e2e_dev
+      - run:
+          name: Deploy e2e image in dev repository
+          command: |
+            docker push ${DOCKER_REGISTRY_DEV_REPO}/orchestrate-e2e:${CIRCLE_SHA1:0:8}
+
+  qa-e2e:
+    docker:
+      - image: cimg/base:2020.01
+    steps:
+      - checkout
+      - run:
+          name: QA tests (E2E)
+          command: >-
+            ORCHESTRATE_NAMESPACE=qa
+            ORCHESTRATE_TAG=${CIRCLE_SHA1:0:8}
+            TEST_TAG=${CIRCLE_SHA1:0:8}
+            ORCHESTRATE_REPOSITORY=${DOCKER_REGISTRY_DEV_REPO}/orchestrate
+            TEST_REPOSITORY=${DOCKER_REGISTRY_DEV_REPO}/orchestrate-e2e
+            make e2e-remote
+
+  qa-stress:
+    docker:
+      - image: cimg/base:2020.01
+    steps:
+      - checkout
+      - run:
+          name: QA tests (Stress tests)
+          command: >-
+            ORCHESTRATE_NAMESPACE=staging
+            ORCHESTRATE_TAG=${CIRCLE_TAG}
+            TEST_TAG=${CIRCLE_SHA1:0:8}
+            ORCHESTRATE_REPOSITORY=${DOCKER_REGISTRY_REPO}/orchestrate
+            TEST_REPOSITORY=${DOCKER_REGISTRY_DEV_REPO}/orchestrate-e2e
+            make e2e-remote
+
+  release-tag:
+    docker:
+      - image: cimg/base:2020.01
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 19.03.13
+          docker_layer_caching: true
+      - prepare_docker
+      - run:
+          name: Release tagged version
+          command: |
+            docker pull ${DOCKER_REGISTRY_DEV_REPO}/orchestrate:${CIRCLE_SHA1:0:8}
+            docker tag ${DOCKER_REGISTRY_DEV_REPO}/orchestrate:${CIRCLE_SHA1:0:8} ${DOCKER_REGISTRY_REPO}/orchestrate:${CIRCLE_TAG}
+            docker push ${DOCKER_REGISTRY_REPO}/orchestrate:${CIRCLE_TAG}
+
+  release-latest:
+    docker:
+      - image: cimg/base:2020.01
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 19.03.13
+          docker_layer_caching: true
+      - prepare_docker
+      - run:
+          name: Release latest
+          command: |
+            docker pull ${DOCKER_REGISTRY_DEV_REPO}/orchestrate:${CIRCLE_SHA1:0:8}
+            docker tag ${DOCKER_REGISTRY_DEV_REPO}/orchestrate:${CIRCLE_SHA1:0:8} ${DOCKER_REGISTRY_REPO}/orchestrate:latest
+            docker push ${DOCKER_REGISTRY_REPO}/orchestrate:latest
+
 workflows:
   version: 2
   default:
     jobs:
       - lint
-      - build
-      - race
+      - gobuild
       - test
+      - race
       - integration
+      - push-orchestrate-image:
+          filters:
+            branches:
+              only: master
+            tags:
+              ignore: /.*/
+          requires:
+            - lint
+            - gobuild
+            - test
+            - race
+            - integration
+      - push-orchestrate-e2e-image:
+          filters:
+            branches:
+              only: master
+            tags:
+              ignore: /.*/
+          requires:
+            - lint
+            - gobuild
+            - test
+            - race
+            - integration
+      - qa-e2e:
+          filters:
+            branches:
+              only: master
+            tags:
+              ignore: /.*/
+          requires:
+            - push-orchestrate-image
+            - push-orchestrate-e2e-image
+      - release-latest:
+          filters:
+            branches:
+              only: master
+            tags:
+              ignore: /.*/
+          requires:
+            - qa-e2e
+      - wait-for-approval: # Runs for tags only
+          type: approval
+          requires:
+            - lint
+            - gobuild
+            - test
+            - race
+            - integration
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+      - release-tag:
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+          requires:
+            - wait-for-approval
+      - qa-stress:
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+          requires:
+            - release-tag
