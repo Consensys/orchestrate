@@ -58,3 +58,7 @@ swagger-combine.yml
 redoc-static.html
 node_modules
 package-lock.json
+
+# Script logs
+scripts/besu/logs/**
+scripts/quorum/logs/**

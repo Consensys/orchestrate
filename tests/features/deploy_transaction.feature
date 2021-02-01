@@ -56,7 +56,7 @@ Feature: Deploy ERC20 contract
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
 
-  @besu @geth @testing
+  @besu @geth
   Scenario: Deploy ERC20
     Given I register the following contracts
       | name        | artifacts        | Headers.Authorization    |

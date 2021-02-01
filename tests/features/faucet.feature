@@ -80,9 +80,10 @@ Feature: Faucet funding
     Then Envelopes should be in topic "tx.recover"
     When I send "GET" request to "{{global.api}}/jobs/{{txJobUUID}}"
     Then the response code should be 200
+    Given I sleep "1s"
     And Response should have the following fields
-      | status | logs[0].status | logs[1].status | logs[2].status |
-      | FAILED | CREATED        | STARTED        | FAILED         |
+      | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status
+      | FAILED | CREATED        | STARTED        | PENDING        | FAILED
     Given I sleep "11s"
     When I send "GET" request to "{{global.api}}/jobs/{{faucetJobUUID}}"
     Then the response code should be 200

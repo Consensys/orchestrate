@@ -195,6 +195,8 @@ down-postgres:
 
 up: deps-persistent quorum geth besu deps-kafka hashicorp-vault-import-secrets bootstrap-deps topics orchestrate ## Start Orchestrate and deps
 
+dev: deps geth orchestrate ## Start Orchestrate and light deps
+
 down: down-orchestrate down-quorum down-geth down-besu down-deps  ## Down Orchestrate and deps
 
 up-ci: deps-persistent quorum geth besu deps-kafka bootstrap-deps topics ci-orchestrate ## Start Orchestrate and deps

@@ -271,7 +271,7 @@ func (c *AccountsController) signPayload(rw http.ResponseWriter, request *http.R
 // @Failure 404 {object} httputil.ErrorResponse "Account not found"
 // @Failure 422 {object} httputil.ErrorResponse "Invalid parameters"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
-// @Router /ethereum/accounts/{address}/sign-typed-data [post]
+// @Router /accounts/{address}/sign-typed-data [post]
 func (c *AccountsController) signTypedData(rw http.ResponseWriter, request *http.Request) {
 	ctx := request.Context()
 	signRequest := &api.SignTypedDataRequest{}
@@ -311,7 +311,7 @@ func (c *AccountsController) signTypedData(rw http.ResponseWriter, request *http
 // @Failure 401 {object} httputil.ErrorResponse "Unauthorized"
 // @Failure 422 {object} httputil.ErrorResponse "Invalid parameters"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
-// @Router /ethereum/accounts/verify-typed-data-signature [post]
+// @Router /accounts/verify-typed-data-signature [post]
 func (c *AccountsController) verifyTypedDataSignature(rw http.ResponseWriter, request *http.Request) {
 	verifyRequest := &ethereum.VerifyTypedDataRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, verifyRequest)
@@ -344,7 +344,7 @@ func (c *AccountsController) verifyTypedDataSignature(rw http.ResponseWriter, re
 // @Failure 401 {object} httputil.ErrorResponse "Unauthorized"
 // @Failure 422 {object} httputil.ErrorResponse "Invalid parameters"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
-// @Router /ethereum/accounts/verify-signature [post]
+// @Router /accounts/verify-signature [post]
 func (c *AccountsController) verifySignature(rw http.ResponseWriter, request *http.Request) {
 	verifyRequest := &ethereum.VerifyPayloadRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, verifyRequest)

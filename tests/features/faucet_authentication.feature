@@ -86,8 +86,8 @@ Feature: Faucet funding
     When I send "GET" request to "{{global.api}}/jobs/{{txJobUUID}}"
     Then the response code should be 200
     And Response should have the following fields
-      | status | logs[0].status | logs[1].status | logs[2].status |
-      | FAILED | CREATED        | STARTED        | FAILED         |
+      | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status |
+      | FAILED | CREATED        | STARTED        | PENDING        | FAILED         |
     Given I set the headers
       | Key             | Value                      |
       | Authorization   | Bearer {{tenantBar.token}} |

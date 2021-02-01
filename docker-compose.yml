@@ -236,4 +236,4 @@ networks:
       name: deps_orchestrate
   quorum:
     external:
-      name: deps_quorum-tessera
+      name: deps_quorum

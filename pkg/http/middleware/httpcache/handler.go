@@ -158,7 +158,7 @@ func (cm *HTTPCache) cacheRequest(ctx context.Context, req *http.Request) (c boo
 
 func (cm *HTTPCache) cacheResponse(ctx context.Context, res *http.Response) bool {
 	if res.StatusCode != 200 {
-		cm.logger.WithField("status", res.StatusCode).Debugf("skip responses with status code different than 200")
+		cm.logger.WithField("status", res.StatusCode).Debug("skip responses with status code different than 200")
 		return false
 	}
 

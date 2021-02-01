@@ -4,7 +4,7 @@ x-container-common: &container-common
   restart: ${CONTAINER_RESTART-on-failure}
   networks:
     - orchestrate
-    - quorum-tessera
+    - quorum
 
 x-postgres-common: &postgres-common
   environment:
@@ -141,9 +141,8 @@ volumes:
 networks:
   orchestrate:
     driver: bridge
-  quorum-tessera:
+  quorum:
     driver: bridge
     ipam:
-      driver: default
       config:
-        - subnet: 172.16.239.0/24
+        - subnet: 172.16.238.0/23
