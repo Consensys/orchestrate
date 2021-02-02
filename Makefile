@@ -42,6 +42,7 @@ lint-ci: ## Check linting
 	@golangci-lint run
 
 run-e2e: gobuild-e2e
+	@rm -f build/report/report.html
 	@docker-compose up -V e2e
 
 run-stress: gobuild-e2e
@@ -70,6 +71,7 @@ gen-mocks:
 
 gen-swagger:
 	@go generate gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/service/controllers
+	@go generate gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/service/controllers
 
 gen-deepcopy:
 	@bash scripts/deepcopy/generate.sh

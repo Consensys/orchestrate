@@ -16,6 +16,38 @@
     },
     "paths": {
         "/ethereum/accounts": {
+            "get": {
+                "description": "List stored ethereum account in the Vault",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "List Ethereum Accounts",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "namespace where key is stored",
+                        "name": "namespace",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of ethereum public accounts",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "Creates a new private key, stores it in the Vault and generates a public key given a chosen elliptic curve",
                 "consumes": [
@@ -107,6 +139,129 @@
                 }
             }
         },
+        "/ethereum/accounts/verify-signature": {
+            "post": {
+                "description": "Verifies if a message has been signed by the Ethereum account passed as argument",
+                "consumes": [
+                    "application/json"
+                ],
+                "summary": "Verifies the signature of a message",
+                "parameters": [
+                    {
+                        "description": "signature and message to verify",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ethereum.VerifyPayloadRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {},
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Failed to verify",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/ethereum/accounts/verify-typed-data-signature": {
+            "post": {
+                "description": "Verifies if a typed data message has been signed by the Ethereum account passed as argument following the EIP-712 standard",
+                "consumes": [
+                    "application/json"
+                ],
+                "summary": "Verifies the signature of a typed data message following the EIP-712 standard",
+                "parameters": [
+                    {
+                        "description": "Typed data to sign",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/ethereum.SignTypedDataRequest"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "domainSeparator": {
+                                            "$ref": "#/definitions/ethereum.DomainSeparator"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {},
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Account not found",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Invalid parameters",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/ethereum/accounts/{address}": {
+            "get": {
+                "description": "Get selected stored ethereum account in the Vault",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Fetch Ethereum Account",
+                "responses": {
+                    "200": {
+                        "description": "Ethereum account",
+                        "schema": {
+                            "$ref": "#/definitions/ethereum.ETHAccountResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/ethereum/accounts/{address}/sign": {
             "post": {
                 "description": "Signs an arbitrary message using ECDSA and the private key of an existing Ethereum account",
@@ -124,7 +279,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/keymanager.PayloadRequest"
+                            "$ref": "#/definitions/keymanager.SignPayloadRequest"
                         }
                     }
                 ],
@@ -302,6 +457,321 @@
                     }
                 }
             }
+        },
+        "/ethereum/accounts/{address}/sign-typed-data": {
+            "post": {
+                "description": "Signs typed data using ECDSA and the private key of an existing account following the EIP-712 standard",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/plain"
+                ],
+                "summary": "Signs typed data using an existing account following the EIP-712 standard",
+                "parameters": [
+                    {
+                        "description": "Typed data to sign",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/ethereum.SignTypedDataRequest"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "domainSeparator": {
+                                            "$ref": "#/definitions/ethereum.DomainSeparator"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Signed payload",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Account not found",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Invalid parameters",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/ethereum/namespaces": {
+            "get": {
+                "description": "List ethereum namespaces in the Vault",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "List Ethereum Namespaces",
+                "responses": {
+                    "200": {
+                        "description": "List of ethereum public namespaces",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/zk-snarks/accounts": {
+            "get": {
+                "description": "List stored zk-snarks account in the Vault",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "List zk-snarks Accounts",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "namespace where key is stored",
+                        "name": "namespace",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of zk-snarks public accounts",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a new private key, stores it in the Vault and generates a public key given a chosen elliptic curve",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Creates a new zk-snarks Account",
+                "parameters": [
+                    {
+                        "description": "zk-snarks account creation request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/zk-snarks.CreateZKSAccountRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Created zk-snarks account",
+                        "schema": {
+                            "$ref": "#/definitions/zk-snarks.ZKSAccountResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/zk-snarks/accounts/verify-signature": {
+            "post": {
+                "description": "Verifies if a message has been signed by the zk-snarks account passed as argument",
+                "consumes": [
+                    "application/json"
+                ],
+                "summary": "Verifies the signature of a message",
+                "parameters": [
+                    {
+                        "description": "signature and message to verify",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/zk-snarks.VerifyPayloadRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {},
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Failed to verify",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/zk-snarks/accounts/{publicKey}": {
+            "get": {
+                "description": "Get selected stored zk-snarks account in the Vault",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Fetch zk-snarks Account",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "namespace where key is stored",
+                        "name": "namespace",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "zk-snarks account",
+                        "schema": {
+                            "$ref": "#/definitions/zk-snarks.ZKSAccountResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/zk-snarks/accounts/{publicKey}/sign": {
+            "post": {
+                "description": "Signs an arbitrary message using EDDSA and the private key of an existing zk-snarks account",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/plain"
+                ],
+                "summary": "Signs an arbitrary message using an existing zk-snarks account",
+                "parameters": [
+                    {
+                        "description": "Payload to sign",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/keymanager.SignPayloadRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Signed payload",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Account not found",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/zk-snarks/namespaces": {
+            "get": {
+                "description": "List zk-snarks namespaces in the Vault",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "List zk-snarks Namespaces",
+                "responses": {
+                    "200": {
+                        "description": "List of zk-snarks public namespaces",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -311,6 +781,36 @@
                 "namespace": {
                     "type": "string",
                     "example": "tenant_id"
+                }
+            }
+        },
+        "ethereum.DomainSeparator": {
+            "type": "object",
+            "required": [
+                "chainID",
+                "name",
+                "version"
+            ],
+            "properties": {
+                "chainID": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "name": {
+                    "type": "string",
+                    "example": "MyDApp"
+                },
+                "salt": {
+                    "type": "string",
+                    "example": "some-random-string"
+                },
+                "verifyingContract": {
+                    "type": "string",
+                    "example": "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"
+                },
+                "version": {
+                    "type": "string",
+                    "example": "v1.0.0"
                 }
             }
         },
@@ -430,6 +930,64 @@
                 }
             }
         },
+        "ethereum.SignTypedDataRequest": {
+            "type": "object",
+            "required": [
+                "domainSeparator",
+                "message",
+                "messageType",
+                "types"
+            ],
+            "properties": {
+                "domainSeparator": {
+                    "type": "object",
+                    "$ref": "#/definitions/ethereum.DomainSeparator"
+                },
+                "message": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "messageType": {
+                    "type": "string",
+                    "example": "Mail"
+                },
+                "namespace": {
+                    "type": "string",
+                    "example": "tenant_id"
+                },
+                "types": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/ethereum.Type"
+                        }
+                    }
+                }
+            }
+        },
+        "ethereum.VerifyPayloadRequest": {
+            "type": "object",
+            "required": [
+                "address",
+                "data",
+                "signature"
+            ],
+            "properties": {
+                "address": {
+                    "type": "string",
+                    "example": "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"
+                },
+                "data": {
+                    "type": "string",
+                    "example": "my data to sign"
+                },
+                "signature": {
+                    "type": "string",
+                    "example": "0x6019a3c8..."
+                }
+            }
+        },
         "httputil.ErrorResponse": {
             "type": "object",
             "properties": {
@@ -439,11 +997,11 @@
                 },
                 "message": {
                     "type": "string",
-                    "example": "invalid status update for the current job state"
+                    "example": "error message"
                 }
             }
         },
-        "keymanager.PayloadRequest": {
+        "keymanager.SignPayloadRequest": {
             "type": "object",
             "required": [
                 "data"
@@ -456,6 +1014,58 @@
                 "namespace": {
                     "type": "string",
                     "example": "tenant_id"
+                }
+            }
+        },
+        "zk-snarks.CreateZKSAccountRequest": {
+            "type": "object",
+            "properties": {
+                "namespace": {
+                    "type": "string",
+                    "example": "tenant_id"
+                }
+            }
+        },
+        "zk-snarks.VerifyPayloadRequest": {
+            "type": "object",
+            "required": [
+                "data",
+                "publicKey",
+                "signature"
+            ],
+            "properties": {
+                "data": {
+                    "type": "string",
+                    "example": "my data to sign"
+                },
+                "publicKey": {
+                    "type": "string",
+                    "example": "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"
+                },
+                "signature": {
+                    "type": "string",
+                    "example": "0x6019a3c8..."
+                }
+            }
+        },
+        "zk-snarks.ZKSAccountResponse": {
+            "type": "object",
+            "properties": {
+                "curve": {
+                    "type": "string",
+                    "example": "bn256"
+                },
+                "namespace": {
+                    "type": "string",
+                    "example": "tenant_id"
+                },
+                "publicKey": {
+                    "type": "string",
+                    "example": "20199690451585786844338768304582194735444460424798515739606133903768949456887"
+                },
+                "signingAlgorithm": {
+                    "type": "string",
+                    "example": "eddsa"
                 }
             }
         }

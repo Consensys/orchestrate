@@ -175,7 +175,7 @@ func (c *EthereumController) importAccount(rw http.ResponseWriter, request *http
 // @Description Signs an arbitrary message using ECDSA and the private key of an existing Ethereum account
 // @Accept json
 // @Produce text/plain
-// @Param request body keymanager.PayloadRequest true "Payload to sign"
+// @Param request body keymanager.SignPayloadRequest true "Payload to sign"
 // @Success 200 {string} string "Signed payload"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 404 {object} httputil.ErrorResponse "Account not found"
@@ -313,7 +313,7 @@ func (c *EthereumController) signEEA(rw http.ResponseWriter, request *http.Reque
 // @Description Signs typed data using ECDSA and the private key of an existing account following the EIP-712 standard
 // @Accept json
 // @Produce text/plain
-// @Param request body ethereum.SignTypedDataRequest{domainSeparator=types.DomainSeparator} true "Typed data to sign"
+// @Param request body ethereum.SignTypedDataRequest{domainSeparator=ethereum.DomainSeparator} true "Typed data to sign"
 // @Success 200 {string} string "Signed payload"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 404 {object} httputil.ErrorResponse "Account not found"
@@ -347,7 +347,7 @@ func (c *EthereumController) signTypedData(rw http.ResponseWriter, request *http
 // @Summary Verifies the signature of a typed data message following the EIP-712 standard
 // @Description Verifies if a typed data message has been signed by the Ethereum account passed as argument following the EIP-712 standard
 // @Accept json
-// @Param request body ethereum.SignTypedDataRequest{domainSeparator=types.DomainSeparator} true "Typed data to sign"
+// @Param request body ethereum.SignTypedDataRequest{domainSeparator=ethereum.DomainSeparator} true "Typed data to sign"
 // @Success 204
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 404 {object} httputil.ErrorResponse "Account not found"
@@ -381,7 +381,7 @@ func (c *EthereumController) verifyTypedDataSignature(rw http.ResponseWriter, re
 // @Summary Verifies the signature of a message
 // @Description Verifies if a message has been signed by the Ethereum account passed as argument
 // @Accept json
-// @Param request body ethereum.VerifySignatureRequest true "signature and message to verify"
+// @Param request body ethereum.VerifyPayloadRequest true "signature and message to verify"
 // @Success 204
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 422 {object} httputil.ErrorResponse "Failed to verify"
