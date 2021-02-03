@@ -1,0 +1,7 @@
+{
+  "chain": "besu",
+  "params": {
+    "contractName": "SimpleToken",
+    "oneTimeKey": true
+  }
+}

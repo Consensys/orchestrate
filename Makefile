@@ -83,6 +83,7 @@ lint-tools: ## Install linting tools
 tools: lint-tools ## Install test tools
 	@GO111MODULE=on go get github.com/golang/mock/mockgen@v1.4.3
 	@GO111MODULE=on go get github.com/swaggo/swag/cmd/swag@v1.6.7
+	@GO111MODULE=on go get github.com/tsenart/vegeta
 
 # Help
 help: ## Display this help screen
@@ -260,3 +261,11 @@ nginx:
 
 down-nginx:
 	@docker-compose -f scripts/deps/docker-compose-tools.yml rm --force -s -v nginx nginx-prometheus-exporter
+
+vegeta:
+	@mkdir -p build/vegeta
+	@cat scripts/vegeta/test | vegeta attack -format=http -duration=30s -rate=50/s | tee build/vegeta/results.bin | vegeta report
+	@vegeta report -type=json build/vegeta/results.bin > build/vegeta/metrics.json
+	@cat build/vegeta/results.bin | vegeta plot > build/vegeta/plot.html
+	@cat build/vegeta/results.bin | vegeta report -type="hist[0,100ms,200ms,300ms]"
+	@$(OPEN) build/vegeta/plot.html 2>/dev/null

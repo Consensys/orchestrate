@@ -1,0 +1,4 @@
+POST http://localhost:8031/transactions/deploy-contract
+x-api-key: with-key
+Content-Type: application/json
+@scripts/vegeta/body.json
