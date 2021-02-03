@@ -4,6 +4,7 @@ package dispatcher
 
 import (
 	"fmt"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/e2e/cucumber/alias"
 	"testing"
 
 	"github.com/Shopify/sarama"
@@ -49,6 +50,8 @@ func makeContext(key1, key2 string) *engine.TxContext {
 		txctx.Set("key2", key2)
 	}
 
+	txctx.Envelope = txctx.Envelope.SetJobUUID("jobUUID")
+
 	return txctx
 }
 
@@ -56,6 +59,7 @@ func TestDispatcher(t *testing.T) {
 	reg := chanregistry.NewChanRegistry()
 	ch := make(chan *tx.Envelope, 10)
 	reg.Register("known-key", ch)
+	reg.Register("tx.decoded/"+alias.ExternalTxLabel, ch)
 	h := Dispatcher(reg, testKeyOf1, testKeyOf2)
 
 	// Handle context
@@ -86,5 +90,16 @@ func TestDispatcher(t *testing.T) {
 	case <-ch:
 		t.Errorf("#3: No envelope should have been dispatched")
 	default:
+	}
+
+	// external tx
+	txctx = makeContext("known-key", "")
+	txctx.Envelope = txctx.Envelope.SetJobUUID("")
+	h(txctx)
+	select {
+	case e := <-ch:
+		assert.Equal(t, txctx.Envelope, e, "#1: Envelope should match")
+	default:
+		t.Errorf("#1: Envelope should have been dispatched")
 	}
 }

@@ -16,6 +16,7 @@ import (
 )
 
 const GlobalAka = "global"
+const ExternalTxLabel = "externalTx"
 
 var (
 	aliases  *Registry
@@ -56,6 +57,7 @@ func importGlobalAlias(rawAliases string) {
 		"tx-listener-metrics": viper.GetString(txlistener.MetricsURLViperKey),
 		"key-manager":         viper.GetString(keymanager.URLViperKey),
 		"key-manager-metrics": viper.GetString(keymanager.MetricsURLViperKey),
+		"external-tx-label":   ExternalTxLabel,
 	}
 
 	for k, v := range internal {

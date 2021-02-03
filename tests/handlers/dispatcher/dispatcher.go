@@ -3,6 +3,7 @@ package dispatcher
 import (
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/e2e/cucumber/alias"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/utils/chanregistry"
 )
 
@@ -26,34 +27,35 @@ func Dispatcher(reg *chanregistry.ChanRegistry, keyOfs ...KeyOfFunc) engine.Hand
 		// Copy envelope before dispatching (it ensures that envelope can de manipulated in a concurrent safe manner once dispatched)
 		envelope := *txctx.Envelope
 
-		// Loop over key functions until we succeed in dispatching envelope to channel indexed by key
-		for _, keyOf := range keyOfs {
-			// Compute envelope key
-			key, err := keyOf(txctx)
+		if envelope.GetJobUUID() == "" {
+			key := "tx.decoded/" + alias.ExternalTxLabel
+			err := reg.Send(key, &envelope)
 			if err != nil {
-				// Could not compute key
-				continue
+				txctx.Logger.WithFields(log.Fields{"key": key}).WithError(err).Error("dispatcher: failed to dispatch external tx envelope")
+				return
 			}
 
-			// Dispatch envelope
-			err = reg.Send(
-				key,
-				&envelope,
-			)
-			if err != nil {
-				// Could not dispatch
-				continue
-			}
-
-			txctx.Logger.WithFields(log.Fields{
-				"key": key,
-			}).Debugf("dispatcher: envelope dispatched")
-
-			// Envelope has been successfully dispatched so we return
+			txctx.Logger.WithFields(log.Fields{"key": key}).Debug("dispatcher: external tx envelope dispatched")
 			return
 		}
 
-		// Failed in dispatching envelope thus we ignore
+		// Loop over key functions until we succeed in dispatching envelope to channel indexed by key
+		for _, keyOf := range keyOfs {
+			key, err := keyOf(txctx)
+			if err != nil {
+				continue
+			}
+
+			err = reg.Send(key, &envelope)
+			if err != nil {
+				txctx.Logger.WithFields(log.Fields{"key": key}).WithError(err).Error("dispatcher: failed to dispatch envelope")
+				continue
+			}
+
+			txctx.Logger.WithFields(log.Fields{"key": key}).Debug("dispatcher: envelope dispatched")
+			return
+		}
+
 		txctx.Logger.Warnf("dispatcher: untracked envelope not dispatched")
 	}
 }

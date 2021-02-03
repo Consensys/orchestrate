@@ -107,6 +107,10 @@ func (m *TxResponse) Envelope() (*Envelope, error) {
 	return envelope, nil
 }
 
+func (m *TxResponse) ExternalTxEnvelope() *Envelope {
+	return NewEnvelope().SetReceipt(m.GetReceipt()).SetChainName(m.GetChain())
+}
+
 func (p *Params) GetParsedContract() (contractName, contractTag string, err error) {
 	if p.GetContract() == "" {
 		return "", "", nil

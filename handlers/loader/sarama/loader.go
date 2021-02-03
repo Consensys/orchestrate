@@ -87,9 +87,17 @@ func loadTxResponse(txctx *engine.TxContext) {
 	}
 	txctx.Logger.Tracef("loader: tx response loaded: %v", txResponse)
 
-	envelope, err := txResponse.Envelope()
+	var envelope *tx.Envelope
+
+	// If it's an external tx
+	if txResponse.GetJobUUID() == "" {
+		envelope = txResponse.ExternalTxEnvelope()
+	} else {
+		envelope, err = txResponse.Envelope()
+	}
 	if err != nil {
-		loadTxEnvelope(txctx)
+		e := txctx.AbortWithError(err).ExtendComponent(component)
+		txctx.Logger.WithError(e).Errorf("loader: failed to cast TxResponse to Envelope")
 		return
 	}
 
