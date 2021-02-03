@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/containous/traefik/v2/pkg/log"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 
@@ -38,6 +38,11 @@ func (m *Manager) GetLastBlockNumber(ctx context.Context, chain *dynamic.Chain) 
 }
 
 func (m *Manager) SetLastBlockNumber(ctx context.Context, chain *dynamic.Chain, blockNumber uint64) error {
+	if chain.Listener.CurrentBlock == blockNumber {
+		log.FromContext(ctx).WithField("block_number", blockNumber).Warn("ignored set last block number. Chain is already at same block")
+		return nil
+	}
+
 	_, err := m.client.UpdateChain(ctx, chain.UUID, &api.UpdateChainRequest{Listener: &api.UpdateListenerRequest{CurrentBlock: blockNumber}})
 	if err != nil {
 		log.FromContext(ctx).WithError(err).Error("failed to set last block number")

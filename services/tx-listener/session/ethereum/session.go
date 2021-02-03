@@ -104,6 +104,7 @@ type fetchedBlock struct {
 }
 
 func (s *Session) Run(ctx context.Context) error {
+	ctx = log.With(ctx, s.logger)
 	err := backoff.RetryNotify(
 		func() error {
 			err := s.run(ctx)

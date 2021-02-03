@@ -32,9 +32,12 @@ func (s *ManagerTestSuite) SetupTest() {
 }
 
 func (s *ManagerTestSuite) TestManagerLastBlock() {
-	updatedCurrentBlock := uint64(12)
+	updatedCurrentBlock := uint64(1)
 	chain := &dynamic.Chain{
 		UUID: mockChain.UUID,
+		Listener: dynamic.Listener{
+			CurrentBlock: 0,
+		},
 	}
 
 	s.client.EXPECT().GetChain(gomock.Any(), chain.UUID).Return(mockChain, nil)
@@ -48,6 +51,24 @@ func (s *ManagerTestSuite) TestManagerLastBlock() {
 
 	err = s.Manager.SetLastBlockNumber(context.Background(), chain, updatedCurrentBlock)
 	assert.NoError(s.T(), err, "SetLastBlockNumber should not error")
+}
+
+func (s *ManagerTestSuite) TestManagerLastBlock_ignored() {
+	updatedCurrentBlock := uint64(0)
+	chain := &dynamic.Chain{
+		UUID: mockChain.UUID,
+		Listener: dynamic.Listener{
+			CurrentBlock: 0,
+		},
+	}
+
+	s.client.EXPECT().GetChain(gomock.Any(), chain.UUID).Return(mockChain, nil)
+
+	lastBlockNumber, err := s.Manager.GetLastBlockNumber(context.Background(), chain)
+	assert.NoError(s.T(), err, "GetLastBlockNumber should not error")
+	assert.Equal(s.T(), mockChain.ListenerCurrentBlock, lastBlockNumber, "Lastblock should be correct")
+
+	err = s.Manager.SetLastBlockNumber(context.Background(), chain, updatedCurrentBlock)
 }
 
 func (s *ManagerTestSuite) TestManagerLastIndex() {
