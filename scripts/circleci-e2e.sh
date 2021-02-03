@@ -54,7 +54,7 @@ done
 
 echo "Final status: ${STATUS}"
 
-PIPELINE_ID=$(curl -s --request GET --header "${TOKEN_HEADER}" --header "Content-Type: application/json" https://circleci.com/api/v2/pipeline/${ID}/workflow | jq '.items[0].pipeline_id' -r)
+PIPELINE_ID=$(curl -s --request GET --header "${TOKEN_HEADER}" --header "Content-Type: application/json" https://circleci.com/api/v2/pipeline/${ID}/workflow | jq '.items[0].id' -r)
 echo "See the pipeline https://app.circleci.com/pipelines/github/ConsenSys/orchestrate-kubernetes/${NUMBER}/workflows/${PIPELINE_ID}"
 
 if [ "$STATUS" != "success" ]; then

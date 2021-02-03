@@ -158,7 +158,9 @@ jobs:
           command: >-
             ORCHESTRATE_NAMESPACE=qa
             ORCHESTRATE_TAG=${CIRCLE_SHA1:0:8}
+            TEST_TAG=${CIRCLE_SHA1:0:8}
             ORCHESTRATE_REPOSITORY=${DOCKER_REGISTRY_DEV_REPO}/orchestrate
+            TEST_REPOSITORY=${DOCKER_REGISTRY_DEV_REPO}/orchestrate-e2e
             make e2e-remote
 
   release-latest:

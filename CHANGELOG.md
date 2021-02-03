@@ -32,7 +32,7 @@
 
 ### 🛠 Bug fixes
 * Incorrect metrics counting for 429 http responses
-* Return empty array instead of 404 responses when matches when no resources are found on search queries
+* Retrieve nonce from latest block
 
 ### ⚠ BREAKING CHANGES
 * Remove `account-generator` and `account-generated` topics

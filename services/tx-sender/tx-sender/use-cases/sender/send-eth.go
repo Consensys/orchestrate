@@ -42,7 +42,12 @@ func NewSendEthTxUseCase(signTx usecases.SignETHTransactionUseCase, crafter usec
 }
 
 func (uc *sendETHTxUseCase) Execute(ctx context.Context, job *entities.Job) error {
-	ctx = log.With(log.WithFields(ctx, log.Field("job", job.UUID)), uc.logger)
+	ctx = log.With(log.WithFields(
+		ctx,
+		log.Field("job", job.UUID),
+		log.Field("tenant_id", job.TenantID),
+		log.Field("schedule_uuid", job.ScheduleUUID),
+	), uc.logger)
 	logger := uc.logger.WithContext(ctx)
 	logger.Debug("processing ethereum transaction job")
 
