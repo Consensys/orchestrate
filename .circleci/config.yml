@@ -148,51 +148,18 @@ jobs:
           command: |
             docker push ${DOCKER_REGISTRY_DEV_REPO}/orchestrate-e2e:${CIRCLE_SHA1:0:8}
 
-  qa-e2e:
+  deploy-qa:
     docker:
       - image: cimg/base:2020.01
     steps:
       - checkout
       - run:
-          name: QA tests (E2E)
+          name: Deploy QA environment
           command: >-
             ORCHESTRATE_NAMESPACE=qa
             ORCHESTRATE_TAG=${CIRCLE_SHA1:0:8}
-            TEST_TAG=${CIRCLE_SHA1:0:8}
             ORCHESTRATE_REPOSITORY=${DOCKER_REGISTRY_DEV_REPO}/orchestrate
-            TEST_REPOSITORY=${DOCKER_REGISTRY_DEV_REPO}/orchestrate-e2e
             make e2e-remote
-
-  qa-stress:
-    docker:
-      - image: cimg/base:2020.01
-    steps:
-      - checkout
-      - run:
-          name: QA tests (Stress tests)
-          command: >-
-            ORCHESTRATE_NAMESPACE=staging
-            ORCHESTRATE_TAG=${CIRCLE_TAG}
-            TEST_TAG=${CIRCLE_SHA1:0:8}
-            ORCHESTRATE_REPOSITORY=${DOCKER_REGISTRY_REPO}/orchestrate
-            TEST_REPOSITORY=${DOCKER_REGISTRY_DEV_REPO}/orchestrate-e2e
-            make e2e-remote
-
-  release-tag:
-    docker:
-      - image: cimg/base:2020.01
-    steps:
-      - checkout
-      - setup_remote_docker:
-          version: 19.03.13
-          docker_layer_caching: true
-      - prepare_docker
-      - run:
-          name: Release tagged version
-          command: |
-            docker pull ${DOCKER_REGISTRY_DEV_REPO}/orchestrate:${CIRCLE_SHA1:0:8}
-            docker tag ${DOCKER_REGISTRY_DEV_REPO}/orchestrate:${CIRCLE_SHA1:0:8} ${DOCKER_REGISTRY_REPO}/orchestrate:${CIRCLE_TAG}
-            docker push ${DOCKER_REGISTRY_REPO}/orchestrate:${CIRCLE_TAG}
 
   release-latest:
     docker:
@@ -210,6 +177,40 @@ jobs:
             docker tag ${DOCKER_REGISTRY_DEV_REPO}/orchestrate:${CIRCLE_SHA1:0:8} ${DOCKER_REGISTRY_REPO}/orchestrate:latest
             docker push ${DOCKER_REGISTRY_REPO}/orchestrate:latest
 
+  release-tag:
+    docker:
+      - image: cimg/base:2020.01
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 19.03.13
+          docker_layer_caching: true
+      - prepare_docker
+      - run:
+          name: Release tagged version
+          command: |
+            docker pull ${DOCKER_REGISTRY_DEV_REPO}/orchestrate:${CIRCLE_SHA1:0:8}
+            docker tag ${DOCKER_REGISTRY_DEV_REPO}/orchestrate:${CIRCLE_SHA1:0:8} ${DOCKER_REGISTRY_REPO}/orchestrate:${CIRCLE_TAG}
+            docker push ${DOCKER_REGISTRY_REPO}/orchestrate:${CIRCLE_TAG}
+            docker tag ${DOCKER_REGISTRY_DEV_REPO}/orchestrate-e2e:${CIRCLE_SHA1:0:8} ${DOCKER_REGISTRY_REPO}/orchestrate-e2e:${CIRCLE_TAG}
+            docker push ${DOCKER_REGISTRY_REPO}/orchestrate-e2e:${CIRCLE_TAG}
+
+  deploy-staging:
+    docker:
+      - image: cimg/base:2020.01
+    steps:
+      - checkout
+      - run:
+          name: Deploy staging environment
+          command: >-
+            ORCHESTRATE_NAMESPACE=staging-${CIRCLE_TAG}
+            ORCHESTRATE_TAG=${CIRCLE_TAG}
+            TEST_TAG=${CIRCLE_TAG}
+            ORCHESTRATE_REPOSITORY=${DOCKER_REGISTRY_REPO}/orchestrate
+            TEST_REPOSITORY=${DOCKER_REGISTRY_REPO}/orchestrate-e2e
+            ENVIRONMENT_VALUES=staging
+            make e2e-remote
+
 workflows:
   version: 2
   default:
@@ -224,7 +225,7 @@ workflows:
             branches:
               only: master
             tags:
-              ignore: /.*/
+              only: /^v.*/
           requires:
             - lint
             - gobuild
@@ -236,14 +237,14 @@ workflows:
             branches:
               only: master
             tags:
-              ignore: /.*/
+              only: /^v.*/
           requires:
             - lint
             - gobuild
             - test
             - race
             - integration
-      - qa-e2e:
+      - deploy-qa:
           filters:
             branches:
               only: master
@@ -259,15 +260,12 @@ workflows:
             tags:
               ignore: /.*/
           requires:
-            - qa-e2e
-      - wait-for-approval: # Runs for tags only
+            - deploy-qa
+      - wait-for-approval:
           type: approval
           requires:
-            - lint
-            - gobuild
-            - test
-            - race
-            - integration
+            - push-orchestrate-image
+            - push-orchestrate-e2e-image
           filters:
             tags:
               only: /^v.*/
@@ -281,11 +279,11 @@ workflows:
               ignore: /.*/
           requires:
             - wait-for-approval
-      - qa-stress:
+      - deploy-staging:
           filters:
             tags:
               only: /^v.*/
             branches:
               ignore: /.*/
           requires:
-            - release-tag
+            - wait-for-approval

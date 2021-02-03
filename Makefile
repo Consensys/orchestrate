@@ -42,7 +42,6 @@ lint-ci: ## Check linting
 	@golangci-lint run
 
 run-e2e: gobuild-e2e
-	@rm -f build/report/report.html
 	@docker-compose up -V e2e
 
 run-stress: gobuild-e2e
