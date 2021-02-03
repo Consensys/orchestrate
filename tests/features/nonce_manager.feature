@@ -12,7 +12,7 @@ Feature: Nonce manager
       | SimpleToken | SimpleToken.json | Bearer {{tenant1.token}} |
     And I register the following chains
       | alias | Name                | URLs                         | Headers.Authorization    |
-      | besu  | besu-{{scenarioID}} | {{global.nodes.besu_1.URLs}} | Bearer {{tenant1.token}} |
+      | besu  | besu-{{scenarioID}} | {{global.nodes.besu[0].URLs}} | Bearer {{tenant1.token}} |
     And I have created the following accounts
       | alias    | ID              | Headers.Authorization    |
       | account1 | {{random.uuid}} | Bearer {{tenant1.token}} |
@@ -31,7 +31,7 @@ Feature: Nonce manager
 {
     "chain": "besu-{{scenarioID}}",
     "params": {
-      "from": "{{global.nodes.besu_1.fundedPublicKeys[0]}}",
+      "from": "{{global.nodes.besu[0].fundedPublicKeys[0]}}",
       "to": "{{account1}}",
       "value": "100000000000000000"
     },
@@ -47,7 +47,7 @@ Feature: Nonce manager
 {
     "chain": "besu-{{scenarioID}}",
     "params": {
-      "from": "{{global.nodes.besu_1.fundedPublicKeys[0]}}",
+      "from": "{{global.nodes.besu[0].fundedPublicKeys[0]}}",
       "to": "{{account2}}",
       "value": "100000000000000000"
     },
@@ -63,7 +63,7 @@ Feature: Nonce manager
 {
     "chain": "besu-{{scenarioID}}",
     "params": {
-      "from": "{{global.nodes.besu_1.fundedPublicKeys[0]}}",
+      "from": "{{global.nodes.besu[0].fundedPublicKeys[0]}}",
       "to": "{{account3}}",
       "value": "100000000000000000"
     },
@@ -358,8 +358,8 @@ Feature: Nonce manager
         "from": "{{account1}}",
         "to": "{{to1}}",
         "nonce": "0",
-        "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
-        "privateFor": ["{{global.nodes.besu_2.privateAddress}}"]
+        "privateFrom": "{{global.nodes.besu[0].privateAddress[0]}}",
+        "privateFor": ["{{global.nodes.besu[1].privateAddress[0]}}"]
     },
     "labels": {
     	"scenario.id": "{{scenarioID}}"
@@ -379,8 +379,8 @@ Feature: Nonce manager
     "transaction": {
         "from": "{{account1}}",
         "to": "{{to1}}",
-        "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
-        "privateFor": ["{{global.nodes.besu_2.privateAddress}}"]
+        "privateFrom": "{{global.nodes.besu[0].privateAddress[0]}}",
+        "privateFor": ["{{global.nodes.besu[1].privateAddress[0]}}"]
     },
     "labels": {
     	"scenario.id": "{{scenarioID}}"
@@ -400,8 +400,8 @@ Feature: Nonce manager
     "transaction": {
         "from": "{{account1}}",
         "to": "{{to1}}",
-        "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
-        "privateFor": ["{{global.nodes.besu_2.privateAddress}}"]
+        "privateFrom": "{{global.nodes.besu[0].privateAddress[0]}}",
+        "privateFor": ["{{global.nodes.besu[1].privateAddress[0]}}"]
     },
     "labels": {
     	"scenario.id": "{{scenarioID}}"

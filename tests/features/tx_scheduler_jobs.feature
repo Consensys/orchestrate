@@ -9,7 +9,7 @@ Feature: Transaction Scheduler Jobs
       | tenant1 | {{random.uuid}} |
     Then I register the following chains
       | alias | Name                | URLs                         | Headers.Authorization    |
-      | besu  | besu-{{scenarioID}} | {{global.nodes.besu_1.URLs}} | Bearer {{tenant1.token}} |
+      | besu  | besu-{{scenarioID}} | {{global.nodes.besu[0].URLs}} | Bearer {{tenant1.token}} |
 
   @besu
   Scenario: Execute transfer transaction using jobs, step by step
@@ -27,7 +27,7 @@ Feature: Transaction Scheduler Jobs
       {
         "chain": "besu-{{scenarioID}}",
         "params": {
-          "from": "{{global.nodes.besu_1.fundedPublicKeys[0]}}",
+          "from": "{{global.nodes.besu[0].fundedPublicKeys[0]}}",
           "to": "{{account1}}",
           "value": "100000000000000000"
         },

@@ -29,6 +29,8 @@ type TransactionSender interface {
 type EEATransactionSender interface {
 	// PrivDistributeRawTransaction Returns the enclaveKey of sent private transaction
 	PrivDistributeRawTransaction(ctx context.Context, endpoint, raw string) (ethcommon.Hash, error)
+	// Creates a group of nodes, specified by their Orion public key.
+	PrivCreatePrivacyGroup(ctx context.Context, endpoint string, addresses []string) (string, error)
 }
 
 type QuorumTransactionSender interface {
@@ -107,6 +109,8 @@ type EEAChainStateReader interface {
 	// PrivNonce Returns the private transaction count for specified account and privacy group
 	PrivNonce(ctx context.Context, endpoint string, account ethcommon.Address, privacyGroupID string) (uint64, error)
 
+	PrivFindPrivacyGroup(ctx context.Context, endpoint string, members []string) ([]string, error)
+
 	// EEAPrivPrecompiledContractAddr Returns the private precompiled contract address of Besu/Orion
 	EEAPrivPrecompiledContractAddr(ctx context.Context, endpoint string) (ethcommon.Address, error)
 }
@@ -158,6 +162,7 @@ type MultiClient interface {
 	EEAChainStateReader
 	QuorumTransactionSender
 	QuorumChainStateReader
+	Call(ctx context.Context, endpoint string, processResult func(result json.RawMessage) error, method string, args ...interface{}) error
 }
 
 type Client interface {
@@ -172,21 +177,21 @@ type Client interface {
 }
 
 type EEAClient interface {
+	ContractCaller
+	GasEstimator
+	GasPricer
+	ChainSyncReader
 	EEATransactionSender
 	EEAChainLedgerReader
 	EEAChainStateReader
-	ContractCaller
-	GasEstimator
-	GasPricer
-	ChainSyncReader
 }
 
 type QuorumClient interface {
-	QuorumTransactionSender
-	ChainLedgerReader
-	QuorumChainStateReader
 	ContractCaller
 	GasEstimator
 	GasPricer
 	ChainSyncReader
+	ChainLedgerReader
+	QuorumTransactionSender
+	QuorumChainStateReader
 }

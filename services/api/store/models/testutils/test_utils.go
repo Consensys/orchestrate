@@ -38,7 +38,7 @@ func FakeTxRequest(scheduleID int) *models.TransactionRequest {
 	fakeSchedule.ID = scheduleID
 
 	return &models.TransactionRequest{
-		IdempotencyKey: utils.RandomString(16),
+		IdempotencyKey: utils.RandString(16),
 		ChainName:      "chain",
 		RequestHash:    "requestHash",
 		Params:         testutils.FakeETHTransactionParams(),
@@ -98,7 +98,7 @@ func FakeLog() *models.Log {
 
 func FakeAccountModel() *models.Account {
 	return &models.Account{
-		Alias:               utils.RandomString(10),
+		Alias:               utils.RandString(10),
 		TenantID:            "tenantID",
 		Address:             ethcommon.HexToAddress(utils.RandHexString(12)).String(),
 		PublicKey:           ethcommon.HexToHash(utils.RandHexString(12)).String(),

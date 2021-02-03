@@ -62,7 +62,7 @@ func (l *Logger) Debug(args ...interface{}) {
 }
 
 func (l *Logger) Debugf(format string, args ...interface{}) {
-	l.entry.WithFields(contextLogFields(l.ctx)).Debugf(l.format(format), args)
+	l.entry.WithFields(contextLogFields(l.ctx)).Debug(l.format(format), args)
 }
 
 func (l *Logger) Info(args ...interface{}) {

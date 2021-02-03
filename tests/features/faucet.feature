@@ -8,13 +8,13 @@ Feature: Faucet funding
       | alias   | tenantID        |
       | tenant1 | {{random.uuid}} |
     And I register the following chains
-      | alias | Name                | URLs                         | Headers.Authorization    |
-      | besu  | besu-{{scenarioID}} | {{global.nodes.besu_1.URLs}} | Bearer {{tenant1.token}} |
+      | alias | Name                | URLs                          | Headers.Authorization    |
+      | besu  | besu-{{scenarioID}} | {{global.nodes.besu[0].URLs}} | Bearer {{tenant1.token}} |
 
   Scenario: Generate account with faucet
     And I register the following faucets
-      | Name                | ChainRule     | CreditorAccount                             | MaxBalance       | Amount           | Cooldown | Headers.Authorization    |
-      | besu-{{scenarioID}} | {{besu.UUID}} | {{global.nodes.besu_1.fundedPublicKeys[0]}} | 1000000000000000 | 1000000000000000 | 1m       | Bearer {{tenant1.token}} |
+      | Name                | ChainRule     | CreditorAccount                              | MaxBalance       | Amount           | Cooldown | Headers.Authorization    |
+      | besu-{{scenarioID}} | {{besu.UUID}} | {{global.nodes.besu[0].fundedPublicKeys[0]}} | 1000000000000000 | 1000000000000000 | 1m       | Bearer {{tenant1.token}} |
     And I have created the following accounts
       | alias    | ID              | ChainName           | Headers.Authorization    |
       | account1 | {{random.uuid}} | besu-{{scenarioID}} | Bearer {{tenant1.token}} |
@@ -49,8 +49,8 @@ Feature: Faucet funding
       | alias    | ID              | ChainName           | Headers.Authorization    |
       | account1 | {{random.uuid}} | besu-{{scenarioID}} | Bearer {{tenant1.token}} |
     And I register the following faucets
-      | Name                | ChainRule     | CreditorAccount                             | MaxBalance       | Amount           | Cooldown | Headers.Authorization    |
-      | besu-{{scenarioID}} | {{besu.UUID}} | {{global.nodes.besu_1.fundedPublicKeys[0]}} | 1000000000000000 | 1000000000000000 | 1m       | Bearer {{tenant1.token}} |
+      | Name                | ChainRule     | CreditorAccount                              | MaxBalance       | Amount           | Cooldown | Headers.Authorization    |
+      | besu-{{scenarioID}} | {{besu.UUID}} | {{global.nodes.besu[0].fundedPublicKeys[0]}} | 1000000000000000 | 1000000000000000 | 1m       | Bearer {{tenant1.token}} |
     Then I track the following envelopes
       | ID                |
       | {{transferOneID}} |

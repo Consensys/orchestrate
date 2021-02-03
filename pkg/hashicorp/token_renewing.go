@@ -35,27 +35,27 @@ func newRenewTokenLoop(tokenExpireIn64 int64, client *api.Client, logger *log.Lo
 
 // Refresh the token
 func (loop *renewTokenLoop) Refresh() error {
-	retry := 0
+	nRetries := 0
 	for {
-		// Regularly try renewing the token
 		newTokenSecret, err := loop.client.Auth().Token().RenewSelf(0)
+		if err != nil {
+			loop.logger.WithError(err).Warn("failed to refresh token")
+			nRetries++
+			if nRetries > loop.maxRetries {
+				errMessage := "reached max number of retries to renew vault token"
+				loop.logger.WithField("retries", nRetries).Error(errMessage)
+				return errors.InternalError(errMessage)
+			}
 
-		if err == nil {
+			time.Sleep(time.Duration(loop.retryInterval) * time.Second)
+		} else {
 			loop.mut.Lock()
 			loop.client.SetToken(newTokenSecret.Auth.ClientToken)
 			loop.mut.Unlock()
-			loop.logger.Info("token was refreshed successfully")
+			secret, _ := loop.client.Auth().Token().LookupSelf()
+			loop.logger.WithField("ttl", secret.Data["ttl"]).Info("token was refreshed successfully")
 			return nil
 		}
-
-		retry++
-		if retry > loop.maxRetries {
-			errMessage := "reached max number of retries to renew vault token"
-			loop.logger.WithField("retries", retry).Error(errMessage)
-			return errors.InternalError(errMessage)
-		}
-
-		time.Sleep(time.Duration(loop.retryInterval) * time.Second)
 	}
 }
 

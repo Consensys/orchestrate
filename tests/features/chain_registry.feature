@@ -28,7 +28,7 @@ Feature: Chain registry
       """
       {
         "name": "gethTemp-{{scenarioID}}",
-        "urls": {{global.nodes.geth.URLs}},
+        "urls": {{global.nodes.geth[0].URLs}},
         "listener": {
           "depth": 1,
           "fromBlock": "1",
@@ -47,7 +47,7 @@ Feature: Chain registry
       """
       {
         "name": "gethTemp-{{scenarioID}}",
-        "urls": {{global.nodes.geth.URLs}},
+        "urls": {{global.nodes.geth[0].URLs}},
         "listener": {
           "depth": 1,
           "fromBlock": "1",
@@ -74,7 +74,7 @@ Feature: Chain registry
       """
       {
         "name": "gethTemp-{{scenarioID}}",
-        "urls": {{global.nodes.geth.URLs}},
+        "urls": {{global.nodes.geth[0].URLs}},
         "listener": {
           "depth": 1,
           "fromBlock": "1",
@@ -93,7 +93,7 @@ Feature: Chain registry
       """
       {
         "name": "gethTemp-{{scenarioID}}",
-        "urls": {{global.nodes.geth.URLs}},
+        "urls": {{global.nodes.geth[0].URLs}},
         "listener": {
           "depth": 1,
           "fromBlock": "1",
@@ -117,7 +117,7 @@ Feature: Chain registry
       """
       {
         "name": "gethTemp2-{{scenarioID}}",
-        "urls": {{global.nodes.geth.URLs}},
+        "urls": {{global.nodes.geth[0].URLs}},
         "listener": {
           "depth": 1,
           "fromBlock": "1",
@@ -173,7 +173,7 @@ Feature: Chain registry
       """
       {
         "name": "gethTemp2-{{scenarioID}}",
-        "urls": {{global.nodes.geth.URLs}},
+        "urls": {{global.nodes.geth[0].URLs}},
         "listener": {
           "depth": 1,
           "fromBlock": "1",
@@ -209,7 +209,7 @@ Feature: Chain registry
       """
       {
         "name": "gethInvalid-{{scenarioID}}",
-        "urls": {{global.nodes.geth.URLs}},
+        "urls": {{global.nodes.geth[0].URLs}},
         "listener": {
           "depth": 1,
           "fromBlock": "1",

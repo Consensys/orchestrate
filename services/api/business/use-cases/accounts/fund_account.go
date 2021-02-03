@@ -64,7 +64,7 @@ func (uc *fundAccountUseCase) Execute(ctx context.Context, account *entities.Acc
 	}
 
 	txRequest := &entities.TxRequest{
-		IdempotencyKey: utils.RandomString(16),
+		IdempotencyKey: utils.RandString(16),
 		ChainName:      chains[0].Name,
 		Params: &entities.ETHTransactionParams{
 			From:  faucet.CreditorAccount,

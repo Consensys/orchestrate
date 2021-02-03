@@ -10,7 +10,7 @@ Feature: Send raw transfer transaction
       | tenant1 | {{random.uuid}} |
     And I register the following chains
       | alias | Name                | URLs                         | Headers.Authorization    |
-      | besu  | besu-{{scenarioID}} | {{global.nodes.besu_1.URLs}} | Bearer {{tenant1.token}} |
+      | besu  | besu-{{scenarioID}} | {{global.nodes.besu[0].URLs}} | Bearer {{tenant1.token}} |
 
   Scenario: Send raw transaction
     Given I register the following alias

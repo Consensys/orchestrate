@@ -35,6 +35,16 @@ func (ec *Client) PrivDistributeRawTransaction(ctx context.Context, endpoint, ra
 	return txHash, nil
 }
 
+func (ec *Client) PrivCreatePrivacyGroup(ctx context.Context, endpoint string, addresses []string) (string, error) {
+	var privGroupID string
+	err := ec.Call(ctx, endpoint, utils.ProcessResult(&privGroupID), "priv_createPrivacyGroup",
+		map[string][]string{"addresses": addresses})
+	if err != nil {
+		return "", errors.FromError(err).ExtendComponent(component)
+	}
+	return privGroupID, nil
+}
+
 // PrivEEANonce Returns the private transaction count for specified account and privacy group
 func (ec *Client) PrivEEANonce(ctx context.Context, endpoint string, account ethcommon.Address, privateFrom string, privateFor []string) (uint64, error) {
 	var nonce hexutil.Uint64
@@ -53,6 +63,16 @@ func (ec *Client) PrivNonce(ctx context.Context, endpoint string, account ethcom
 		return 0, errors.FromError(err).ExtendComponent(component)
 	}
 	return uint64(nonce), nil
+}
+
+// Returns a list of privacy groups containing only the listed members. For example, if the listed members are A and B, a privacy group containing A, B, and C is not returned.
+func (ec *Client) PrivFindPrivacyGroup(ctx context.Context, endpoint string, members []string) ([]string, error) {
+	var groupIDs []string
+	err := ec.Call(ctx, endpoint, utils.ProcessResult(&members), "priv_findPrivacyGroup", members)
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
+	return groupIDs, nil
 }
 
 func (ec *Client) EEAPrivPrecompiledContractAddr(ctx context.Context, endpoint string) (ethcommon.Address, error) {

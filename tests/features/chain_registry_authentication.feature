@@ -13,7 +13,7 @@ Feature: Chain-Registry Authentication
       """
       {
       "name": "geth-{{scenarioID}}",
-      "urls": {{global.nodes.geth.URLs}}
+      "urls": {{global.nodes.geth[0].URLs}}
       }
       """
     Then the response code should be 200
@@ -43,7 +43,7 @@ Feature: Chain-Registry Authentication
       """
       {
       "name": "geth-{{scenarioID}}",
-      "urls": {{global.nodes.geth.URLs}}
+      "urls": {{global.nodes.geth[0].URLs}}
       }
       """
     Then the response code should be 200
@@ -68,7 +68,7 @@ Feature: Chain-Registry Authentication
       """
       {
       "name": "geth-{{scenarioID}}",
-      "urls": {{global.nodes.geth.URLs}}
+      "urls": {{global.nodes.geth[0].URLs}}
       }
       """
     Then the response code should be 200
@@ -101,7 +101,7 @@ Feature: Chain-Registry Authentication
       """
       {
       "name": "geth-{{scenarioID}}",
-      "urls": {{global.nodes.geth.URLs}}
+      "urls": {{global.nodes.geth[0].URLs}}
       }
       """
     Then the response code should be 200
@@ -128,7 +128,7 @@ Feature: Chain-Registry Authentication
       """
       {
       "name": "geth-{{scenarioID}}",
-      "urls": {{global.nodes.geth.URLs}}
+      "urls": {{global.nodes.geth[0].URLs}}
       }
       """
     Then the response code should be 200
@@ -170,7 +170,7 @@ Feature: Chain-Registry Authentication
       """
       {
       "name": "geth-{{scenarioID}}",
-      "urls": {{global.nodes.geth.URLs}}
+      "urls": {{global.nodes.geth[0].URLs}}
       }
       """
     Then the response code should be 200
@@ -205,7 +205,7 @@ Feature: Chain-Registry Authentication
       """
       {
       "name": "geth-{{scenarioID}}",
-      "urls": {{global.nodes.geth.URLs}}
+      "urls": {{global.nodes.geth[0].URLs}}
       }
       """
     Then the response code should be 200
@@ -244,7 +244,7 @@ Feature: Chain-Registry Authentication
       """
       {
       "name": "geth-{{scenarioID}}",
-      "urls": {{global.nodes.geth.URLs}}
+      "urls": {{global.nodes.geth[0].URLs}}
       }
       """
     Then the response code should be 200

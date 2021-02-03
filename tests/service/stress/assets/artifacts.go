@@ -1,4 +1,4 @@
-package utils
+package assets
 
 import (
 	"context"
@@ -8,12 +8,14 @@ import (
 	"os"
 	"path"
 
-	"github.com/containous/traefik/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/json"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 )
+
+var artifactsCtxKey ctxKey = "artifacts"
 
 type Artifact struct {
 	Abi              json2.RawMessage
@@ -21,20 +23,23 @@ type Artifact struct {
 	DeployedBytecode string
 }
 
-func RegisterNewContract(ctx context.Context, cClient client.ContractClient, artifactPath, name string) error {
-	log.FromContext(ctx).Debugf("Registering new contract %s...", name)
-	contract, err := readContract(artifactPath, fmt.Sprintf("%s.json", name))
+func RegisterNewContract(ctx context.Context, cClient client.ContractClient, artifactPath, name string) (context.Context, error) {
+	logger := log.FromContext(ctx).WithField("name", name)
+	logger.Debug("registering new contract")
+	contract, err := readContract(ctx, artifactPath, fmt.Sprintf("%s.json", name))
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	var abi interface{}
 	err = json.Unmarshal([]byte(contract.ABI), &abi)
 	if err != nil {
-		return err
+		errMsg := "failed to decode contract ABI"
+		logger.WithError(err).Error(errMsg)
+		return nil, fmt.Errorf(errMsg)
 	}
 
-	_, err = cClient.RegisterContract(ctx, &api.RegisterContractRequest{
+	resp, err := cClient.RegisterContract(ctx, &api.RegisterContractRequest{
 		Name:             name,
 		Tag:              contract.Tag,
 		ABI:              abi,
@@ -43,14 +48,16 @@ func RegisterNewContract(ctx context.Context, cClient client.ContractClient, art
 	})
 
 	if err != nil {
-		return err
+		errMsg := "failed to register contract"
+		logger.WithError(err).Error(errMsg)
+		return nil, fmt.Errorf(errMsg)
 	}
 
-	log.FromContext(ctx).Infof("New contract registered: %s", name)
-	return nil
+	logger.Info("new contract has been registered")
+	return contextWithArtifacts(ctx, append(ContextArtifacts(ctx), resp.Name)), nil
 }
 
-func readContract(artifactsPath, fileName string) (*entities.Contract, error) {
+func readContract(ctx context.Context, artifactsPath, fileName string) (*entities.Contract, error) {
 	f, err := os.Open(path.Join(artifactsPath, fileName))
 	if err != nil {
 		return nil, err
@@ -59,7 +66,7 @@ func readContract(artifactsPath, fileName string) (*entities.Contract, error) {
 	defer func() {
 		err = f.Close()
 		if err != nil {
-			log.WithoutContext().WithError(err).Error("cannot close artifact file")
+			log.FromContext(ctx).WithError(err).Error("cannot close artifact file")
 		}
 	}()
 	bytes, err := ioutil.ReadAll(f)
@@ -81,4 +88,16 @@ func readContract(artifactsPath, fileName string) (*entities.Contract, error) {
 	contract.DeployedBytecode = art.DeployedBytecode
 
 	return contract, nil
+}
+
+func contextWithArtifacts(ctx context.Context, artifacts []string) context.Context {
+	return context.WithValue(ctx, artifactsCtxKey, artifacts)
+}
+
+func ContextArtifacts(ctx context.Context) []string {
+	v, ok := ctx.Value(artifactsCtxKey).([]string)
+	if !ok {
+		return []string{}
+	}
+	return v
 }

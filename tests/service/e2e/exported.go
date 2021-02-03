@@ -150,17 +150,14 @@ func importTestIdentities(ctx context.Context) error {
 	aliases := alias.GlobalAliasRegistry()
 
 	var privKeys []interface{}
-
-	if besuPrivKeys, ok := aliases.Get("global.nodes.besu_1.fundedPrivateKeys"); ok {
-		privKeys = append(privKeys, besuPrivKeys.([]interface{})...)
-	}
-
-	if quorumPrivKeys, ok := aliases.Get("global.nodes.quorum_1.fundedPrivateKeys"); ok {
-		privKeys = append(privKeys, quorumPrivKeys.([]interface{})...)
-	}
-
-	if gethPrivKeys, ok := aliases.Get("global.nodes.geth.fundedPrivateKeys"); ok {
-		privKeys = append(privKeys, gethPrivKeys.([]interface{})...)
+	for _, netName := range []string{"besu", "quorum", "geth"} {
+		if netNodes, ok := aliases.Get("global.nodes." + netName); ok {
+			for _, node := range netNodes.([]interface{}) {
+				if pKeys, ok := node.(map[string]interface{})["fundedPrivateKeys"].([]interface{}); ok {
+					privKeys = append(privKeys, pKeys...)
+				}
+			}
+		}
 	}
 
 	for _, privKey := range privKeys {

@@ -57,7 +57,7 @@ func (s *transactionsTestSuite) TestValidation() {
 	s.T().Run("should fail if idempotency key is identical but different params", func(t *testing.T) {
 		txRequest := testutils.FakeSendTransactionRequest()
 		rctx := context.WithValue(ctx, clientutils.RequestHeaderKey, map[string]string{
-			controllers.IdempotencyKeyHeader: utils.RandomString(16),
+			controllers.IdempotencyKeyHeader: utils.RandString(16),
 		})
 
 		_, err := s.client.SendContractTransaction(rctx, txRequest)
@@ -96,7 +96,7 @@ func (s *transactionsTestSuite) TestSuccess() {
 
 		txRequest.Params.From = ""
 		txRequest.Params.OneTimeKey = true
-		IdempotencyKey := utils.RandomString(16)
+		IdempotencyKey := utils.RandString(16)
 		rctx := context.WithValue(ctx, clientutils.RequestHeaderKey, map[string]string{
 			controllers.IdempotencyKeyHeader: IdempotencyKey,
 		})
@@ -164,7 +164,7 @@ func (s *transactionsTestSuite) TestSuccess() {
 
 		txRequest := testutils.FakeSendTransferTransactionRequest()
 		txRequest.ChainName = chainWithFaucet.Name
-		IdempotencyKey := utils.RandomString(16)
+		IdempotencyKey := utils.RandString(16)
 		rctx := context.WithValue(ctx, clientutils.RequestHeaderKey, map[string]string{
 			controllers.IdempotencyKeyHeader: IdempotencyKey,
 		})
@@ -213,7 +213,7 @@ func (s *transactionsTestSuite) TestSuccess() {
 	s.T().Run("should send a tessera transaction successfully", func(t *testing.T) {
 		txRequest := testutils.FakeSendTesseraRequest()
 
-		IdempotencyKey := utils.RandomString(16)
+		IdempotencyKey := utils.RandString(16)
 		rctx := context.WithValue(ctx, clientutils.RequestHeaderKey, map[string]string{
 			controllers.IdempotencyKeyHeader: IdempotencyKey,
 		})
@@ -336,7 +336,7 @@ func (s *transactionsTestSuite) TestSuccess() {
 
 	s.T().Run("should send a raw transaction successfully", func(t *testing.T) {
 		txRequest := testutils.FakeSendRawTransactionRequest()
-		IdempotencyKey := utils.RandomString(16)
+		IdempotencyKey := utils.RandString(16)
 		rctx := context.WithValue(ctx, clientutils.RequestHeaderKey, map[string]string{
 			controllers.IdempotencyKeyHeader: IdempotencyKey,
 		})
@@ -412,7 +412,7 @@ func (s *transactionsTestSuite) TestSuccess() {
 
 	s.T().Run("should succeed if payloads and idempotency key are the same and return same schedule", func(t *testing.T) {
 		txRequest := testutils.FakeSendTransactionRequest()
-		idempotencyKey := utils.RandomString(16)
+		idempotencyKey := utils.RandString(16)
 		rctx := context.WithValue(ctx, clientutils.RequestHeaderKey, map[string]string{
 			controllers.IdempotencyKeyHeader: idempotencyKey,
 		})

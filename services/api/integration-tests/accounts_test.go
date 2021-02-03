@@ -177,7 +177,7 @@ func (s *accountsTestSuite) TestImport() {
 			return
 		}
 
-		txRequest.Alias = fmt.Sprintf("Alias_%s", utils.RandomString(5))
+		txRequest.Alias = fmt.Sprintf("Alias_%s", utils.RandString(5))
 		_, err = s.client.ImportAccount(ctx, txRequest)
 		assert.Error(t, err)
 		log.WithoutContext().Errorf("%v", err)

@@ -15,7 +15,7 @@ Feature: Transaction Scheduler Jobs
       | SimpleToken | SimpleToken.json | Bearer {{tenantDefault.token}} |
     Then I register the following chains
       | alias | Name                | URLs                         | Headers.Authorization          |
-      | besu  | besu-{{scenarioID}} | {{global.nodes.besu_1.URLs}} | Bearer {{tenantDefault.token}} |
+      | besu  | besu-{{scenarioID}} | {{global.nodes.besu[0].URLs}} | Bearer {{tenantDefault.token}} |
     And I have created the following accounts
       | alias    | ID              | Headers.Authorization          |
       | account1 | {{random.uuid}} | Bearer {{tenantDefault.token}} |
@@ -30,7 +30,7 @@ Feature: Transaction Scheduler Jobs
       {
         "chain": "besu-{{scenarioID}}",
         "params": {
-          "from": "{{global.nodes.besu_1.fundedPublicKeys[0]}}",
+          "from": "{{global.nodes.besu[0].fundedPublicKeys[0]}}",
           "to": "{{account1}}",
           "value": "100000000000000000"
         },

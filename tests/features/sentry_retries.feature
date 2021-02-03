@@ -9,8 +9,8 @@ Feature: Send transactions using tx-sentry
       | tenant1 | {{random.uuid}} |
     And I register the following chains
       | alias | Name                | URLs                         | Headers.Authorization    |
-      | besu  | besu-{{scenarioID}} | {{global.nodes.besu_1.URLs}} | Bearer {{tenant1.token}} |
-      | geth  | geth-{{scenarioID}} | {{global.nodes.geth.URLs}}   | Bearer {{tenant1.token}} |
+      | besu  | besu-{{scenarioID}} | {{global.nodes.besu[0].URLs}} | Bearer {{tenant1.token}} |
+      | geth  | geth-{{scenarioID}} | {{global.nodes.geth[0].URLs}}   | Bearer {{tenant1.token}} |
     And I have created the following accounts
       | alias    | ID              | Headers.Authorization    |
       | account1 | {{random.uuid}} | Bearer {{tenant1.token}} |
@@ -29,7 +29,7 @@ Feature: Send transactions using tx-sentry
       {
         "chain": "geth-{{scenarioID}}",
         "params": {
-          "from": "{{global.nodes.geth.fundedPublicKeys[0]}}",
+          "from": "{{global.nodes.geth[0].fundedPublicKeys[0]}}",
           "to": "{{account1}}",
           "value": "100000000000000000"
         },

@@ -86,7 +86,7 @@ func (s *contractsTestSuite) TestContractRegistry_Register() {
 }
 
 func (s *contractsTestSuite) TestContractRegistry_Get() {
-	contractName := "contract_" + utils.RandomString(5)
+	contractName := "contract_" + utils.RandString(5)
 	ctx := context.Background()
 	txRequest := testutils.FakeRegisterContractRequest()
 	txRequest.Name = contractName
@@ -154,7 +154,7 @@ func (s *contractsTestSuite) TestContractRegistry_Get() {
 
 func (s *contractsTestSuite) TestContractRegistry_CodeHash() {
 	ctx := context.Background()
-	contractName := "contract_" + utils.RandomString(5)
+	contractName := "contract_" + utils.RandString(5)
 	txRequest := testutils.FakeRegisterContractRequest()
 	txRequest.Name = contractName
 	_, err := s.client.RegisterContract(ctx, txRequest)

@@ -112,11 +112,11 @@ type Config struct {
 	Iterations   int
 	Concurrency  int
 	Timeout      time.Duration
-	gData        utils.GlobalData
+	gData        utils.TestData
 }
 
 func InitConfig(vipr *viper.Viper) (*Config, error) {
-	gd := utils.GlobalData{}
+	gd := utils.TestData{}
 	raw := vipr.GetString(globalDataViperKey)
 	err := json.Unmarshal([]byte(raw), &gd)
 	if err != nil {

@@ -17,14 +17,14 @@ Feature: Private transactions
       | name        | artifacts        | Headers.Authorization    |
       | SimpleToken | SimpleToken.json | Bearer {{tenant1.token}} |
     And I register the following chains
-      | alias  | Name                  | URLs                           | PrivateTxManager.URL                           | PrivateTxManager.Type                           | Headers.Authorization    |
-      | quorum | quorum-{{scenarioID}} | {{global.nodes.quorum_1.URLs}} | {{global.nodes.quorum_1.PrivateTxManager.url}} | {{global.nodes.quorum_1.PrivateTxManager.type}} | Bearer {{tenant1.token}} |
+      | alias  | Name                  | URLs                            | PrivateTxManager.URL                            | PrivateTxManager.Type                            | Headers.Authorization    |
+      | quorum | quorum-{{scenarioID}} | {{global.nodes.quorum[0].URLs}} | {{global.nodes.quorum[0].privateTxManager.url}} | {{global.nodes.quorum[0].privateTxManager.type}} | Bearer {{tenant1.token}} |
     And I register the following chains
-      | alias  | Name                  | URLs                         | Headers.Authorization    |
-      | besu   | besu-{{scenarioID}}   | {{global.nodes.besu_1.URLs}} | Bearer {{tenant1.token}} |
-      | besu_2 | besu_2-{{scenarioID}} | {{global.nodes.besu_2.URLs}} | Bearer {{tenant1.token}} |
+      | alias  | Name                  | URLs                          | Headers.Authorization    |
+      | besu   | besu-{{scenarioID}}   | {{global.nodes.besu[0].URLs}} | Bearer {{tenant1.token}} |
+      | besu_2 | besu_2-{{scenarioID}} | {{global.nodes.besu[1].URLs}} | Bearer {{tenant1.token}} |
 
-  @quorum
+  @quorum @testing
   Scenario: Deploy private ERC20 contract with Quorum and Tessera
     Given I register the following alias
       | alias                    | value           |
@@ -43,9 +43,9 @@ Feature: Private transactions
         "params": {
           "from": "{{account1}}",
           "protocol": "Tessera",
-          "privateFrom": "{{global.nodes.quorum_1.privateAddress}}",
+          "privateFrom": "{{global.nodes.quorum[0].privateAddress[0]}}",
           "privateFor": [
-            "{{global.nodes.quorum_2.privateAddress}}"
+            "{{global.nodes.quorum[1].privateAddress[0]}}"
           ],
           "contractName": "SimpleToken"
         },
@@ -98,9 +98,9 @@ Feature: Private transactions
             "0x2"
           ],
           "protocol": "Tessera",
-          "privateFrom": "{{global.nodes.quorum_1.privateAddress}}",
+          "privateFrom": "{{global.nodes.quorum[0].privateAddress[0]}}",
           "privateFor": [
-            "{{global.nodes.quorum_2.privateAddress}}"
+            "{{global.nodes.quorum[1].privateAddress[0]}}"
           ]
         },
         "labels": {
@@ -124,9 +124,9 @@ Feature: Private transactions
         "params": {
           "from": "{{account1}}",
           "protocol": "Tessera",
-          "privateFrom": "{{global.nodes.quorum_1.privateAddress}}",
+          "privateFrom": "{{global.nodes.quorum[0].privateAddress[0]}}",
           "privateFor": [
-            "{{global.nodes.quorum_2.privateAddress}}"
+            "{{global.nodes.quorum[1].privateAddress[0]}}"
           ],
           "contractName": "SimpleToken"
         },
@@ -178,9 +178,9 @@ Feature: Private transactions
         "params": {
           "from": "{{account1}}",
           "protocol": "Tessera",
-          "privateFrom": "{{global.nodes.quorum_1.privateAddress}}",
+          "privateFrom": "{{global.nodes.quorum[0].privateAddress[0]}}",
           "privateFor": [
-            "{{global.nodes.quorum_2.privateAddress}}"
+            "{{global.nodes.quorum[1].privateAddress[0]}}"
           ],
           "contractName": "SimpleToken"
         },
@@ -209,7 +209,7 @@ Feature: Private transactions
         "params": {
           "from": "{{account1}}",
           "protocol": "Tessera",
-          "privateFrom": "{{global.nodes.quorum_1.privateAddress}}",
+          "privateFrom": "{{global.nodes.quorum[0].privateAddress[0]}}",
           "contractName": "SimpleToken"
         },
         "labels": {
@@ -234,9 +234,9 @@ Feature: Private transactions
         "params": {
           "from": "{{account1}}",
           "protocol": "Tessera",
-          "privateFrom": "{{global.nodes.quorum_1.privateAddress}}",
+          "privateFrom": "{{global.nodes.quorum[0].privateAddress[0]}}",
           "privateFor": [
-            "{{global.nodes.quorum_2.privateAddress}}"
+            "{{global.nodes.quorum[1].privateAddress[0]}}"
           ],
           "contractName": "SimpleToken"
         },
@@ -269,9 +269,9 @@ Feature: Private transactions
         "params": {
           "from": "{{account2}}",
           "protocol": "Orion",
-          "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+          "privateFrom": "{{global.nodes.besu[0].privateAddress[0]}}",
           "privateFor": [
-            "{{global.nodes.besu_2.privateAddress}}"
+            "{{global.nodes.besu[1].privateAddress[0]}}"
           ],
           "contractName": "SimpleToken"
         },
@@ -288,8 +288,8 @@ Feature: Private transactions
       | jobMarkingTxTwo | jobs[1].uuid |
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
-      | Receipt.Status | Receipt.Output | Receipt.ContractAddress | Receipt.PrivateFrom                    | Receipt.PrivateFor                         |
-      | 1              | ~              | ~                       | {{global.nodes.besu_1.privateAddress}} | ["{{global.nodes.besu_2.privateAddress}}"] |
+      | Receipt.Status | Receipt.Output | Receipt.ContractAddress | Receipt.PrivateFrom                        | Receipt.PrivateFor                             |
+      | 1              | ~              | ~                       | {{global.nodes.besu[0].privateAddress[0]}} | ["{{global.nodes.besu[1].privateAddress[0]}}"] |
     And I register the following envelope fields
       | id                         | alias               | path                    |
       | {{besuDeployContractTxID}} | counterContractAddr | Receipt.ContractAddress |
@@ -322,9 +322,9 @@ Feature: Private transactions
             "0x2"
           ],
           "protocol": "Orion",
-          "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+          "privateFrom": "{{global.nodes.besu[0].privateAddress[0]}}",
           "privateFor": [
-            "{{global.nodes.besu_2.privateAddress}}"
+            "{{global.nodes.besu[1].privateAddress[0]}}"
           ]
         },
         "labels": {
@@ -363,9 +363,9 @@ Feature: Private transactions
         "params": {
           "from": "{{account1}}",
           "protocol": "Orion",
-          "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+          "privateFrom": "{{global.nodes.besu[0].privateAddress[0]}}",
           "privateFor": [
-            "{{global.nodes.besu_2.privateAddress}}"
+            "{{global.nodes.besu[1].privateAddress[0]}}"
           ],
           "contractName": "SimpleToken"
         },
@@ -383,9 +383,9 @@ Feature: Private transactions
         "params": {
           "from": "{{account2}}",
           "protocol": "Orion",
-          "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+          "privateFrom": "{{global.nodes.besu[0].privateAddress[0]}}",
           "privateFor": [
-            "{{global.nodes.besu_3.privateAddress}}"
+            "{{global.nodes.besu[2].privateAddress[0]}}"
           ],
           "contractName": "SimpleToken"
         },
@@ -403,9 +403,9 @@ Feature: Private transactions
         "params": {
           "from": "{{account3}}",
           "protocol": "Orion",
-          "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+          "privateFrom": "{{global.nodes.besu[0].privateAddress[0]}}",
           "privateFor": [
-            "{{global.nodes.besu_2.privateAddress}}"
+            "{{global.nodes.besu[1].privateAddress[0]}}"
           ],
           "contractName": "SimpleToken"
         },
@@ -423,9 +423,9 @@ Feature: Private transactions
         "params": {
           "from": "{{account4}}",
           "protocol": "Orion",
-          "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+          "privateFrom": "{{global.nodes.besu[0].privateAddress[0]}}",
           "privateFor": [
-            "{{global.nodes.besu_3.privateAddress}}"
+            "{{global.nodes.besu[2].privateAddress[0]}}"
           ],
           "contractName": "SimpleToken"
         },
@@ -438,11 +438,11 @@ Feature: Private transactions
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
-      | Receipt.Status | Receipt.Output | Receipt.PrivateFrom                    | Receipt.PrivateFor                         |
-      | 1              | ~              | {{global.nodes.besu_1.privateAddress}} | ["{{global.nodes.besu_2.privateAddress}}"] |
-      | 1              | ~              | {{global.nodes.besu_1.privateAddress}} | ["{{global.nodes.besu_3.privateAddress}}"] |
-      | 1              | ~              | {{global.nodes.besu_1.privateAddress}} | ["{{global.nodes.besu_2.privateAddress}}"] |
-      | 1              | ~              | {{global.nodes.besu_1.privateAddress}} | ["{{global.nodes.besu_3.privateAddress}}"] |
+      | Receipt.Status | Receipt.Output | Receipt.PrivateFrom                        | Receipt.PrivateFor                             |
+      | 1              | ~              | {{global.nodes.besu[0].privateAddress[0]}} | ["{{global.nodes.besu[1].privateAddress[0]}}"] |
+      | 1              | ~              | {{global.nodes.besu[0].privateAddress[0]}} | ["{{global.nodes.besu[2].privateAddress[0]}}"] |
+      | 1              | ~              | {{global.nodes.besu[0].privateAddress[0]}} | ["{{global.nodes.besu[1].privateAddress[0]}}"] |
+      | 1              | ~              | {{global.nodes.besu[0].privateAddress[0]}} | ["{{global.nodes.besu[2].privateAddress[0]}}"] |
 
   @besu
   Scenario: Batch deploy private ERC20 contract with Besu and Orion with different PrivateFrom
@@ -468,9 +468,9 @@ Feature: Private transactions
         "params": {
           "from": "{{account1}}",
           "protocol": "Orion",
-          "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+          "privateFrom": "{{global.nodes.besu[0].privateAddress[0]}}",
           "privateFor": [
-            "{{global.nodes.besu_3.privateAddress}}"
+            "{{global.nodes.besu[2].privateAddress[0]}}"
           ],
           "contractName": "SimpleToken"
         },
@@ -488,9 +488,9 @@ Feature: Private transactions
         "params": {
           "from": "{{account2}}",
           "protocol": "Orion",
-          "privateFrom": "{{global.nodes.besu_2.privateAddress}}",
+          "privateFrom": "{{global.nodes.besu[1].privateAddress[0]}}",
           "privateFor": [
-            "{{global.nodes.besu_3.privateAddress}}"
+            "{{global.nodes.besu[2].privateAddress[0]}}"
           ],
           "contractName": "SimpleToken"
         },
@@ -508,9 +508,9 @@ Feature: Private transactions
         "params": {
           "from": "{{account3}}",
           "protocol": "Orion",
-          "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+          "privateFrom": "{{global.nodes.besu[0].privateAddress[0]}}",
           "privateFor": [
-            "{{global.nodes.besu_3.privateAddress}}"
+            "{{global.nodes.besu[2].privateAddress[0]}}"
           ],
           "contractName": "SimpleToken"
         },
@@ -528,9 +528,9 @@ Feature: Private transactions
         "params": {
           "from": "{{account4}}",
           "protocol": "Orion",
-          "privateFrom": "{{global.nodes.besu_2.privateAddress}}",
+          "privateFrom": "{{global.nodes.besu[1].privateAddress[0]}}",
           "privateFor": [
-            "{{global.nodes.besu_3.privateAddress}}"
+            "{{global.nodes.besu[2].privateAddress[0]}}"
           ],
           "contractName": "SimpleToken"
         },
@@ -543,11 +543,11 @@ Feature: Private transactions
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
-      | Receipt.Status | Receipt.Output | Receipt.PrivateFrom                    | Receipt.PrivateFor                         |
-      | 1              | ~              | {{global.nodes.besu_1.privateAddress}} | ["{{global.nodes.besu_3.privateAddress}}"] |
-      | 1              | ~              | {{global.nodes.besu_2.privateAddress}} | ["{{global.nodes.besu_3.privateAddress}}"] |
-      | 1              | ~              | {{global.nodes.besu_1.privateAddress}} | ["{{global.nodes.besu_3.privateAddress}}"] |
-      | 1              | ~              | {{global.nodes.besu_2.privateAddress}} | ["{{global.nodes.besu_3.privateAddress}}"] |
+      | Receipt.Status | Receipt.Output | Receipt.PrivateFrom                        | Receipt.PrivateFor                             |
+      | 1              | ~              | {{global.nodes.besu[0].privateAddress[0]}} | ["{{global.nodes.besu[2].privateAddress[0]}}"] |
+      | 1              | ~              | {{global.nodes.besu[1].privateAddress[0]}} | ["{{global.nodes.besu[2].privateAddress[0]}}"] |
+      | 1              | ~              | {{global.nodes.besu[0].privateAddress[0]}} | ["{{global.nodes.besu[2].privateAddress[0]}}"] |
+      | 1              | ~              | {{global.nodes.besu[1].privateAddress[0]}} | ["{{global.nodes.besu[2].privateAddress[0]}}"] |
 
   @besu
   Scenario: Deploy private ERC20 for a privacy group
@@ -563,9 +563,9 @@ Feature: Private transactions
         "params": [
           {
             "addresses": [
-              "{{global.nodes.besu_1.privateAddress}}",
-              "{{global.nodes.besu_2.privateAddress}}",
-              "{{global.nodes.besu_3.privateAddress}}"
+              "{{global.nodes.besu[0].privateAddress[0]}}",
+              "{{global.nodes.besu[1].privateAddress[0]}}",
+              "{{global.nodes.besu[2].privateAddress[0]}}"
             ],
             "name": "TestGroup",
             "description": "TestGroup"
@@ -591,7 +591,7 @@ Feature: Private transactions
         "params": {
           "from": "{{account1}}",
           "protocol": "Orion",
-          "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+          "privateFrom": "{{global.nodes.besu[0].privateAddress[0]}}",
           "privacyGroupId": "{{privacyGroupId}}",
           "contractName": "SimpleToken"
         },
@@ -604,8 +604,8 @@ Feature: Private transactions
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
-      | Receipt.Status | Receipt.Output | Receipt.PrivateFrom                    | Receipt.PrivacyGroupId |
-      | 1              | ~              | {{global.nodes.besu_1.privateAddress}} | {{privacyGroupId}}     |
+      | Receipt.Status | Receipt.Output | Receipt.PrivateFrom                        | Receipt.PrivacyGroupId |
+      | 1              | ~              | {{global.nodes.besu[0].privateAddress[0]}} | {{privacyGroupId}}     |
 
 
   @besu
@@ -625,9 +625,9 @@ Feature: Private transactions
         "params": [
           {
             "addresses": [
-              "{{global.nodes.besu_1.privateAddress}}",
-              "{{global.nodes.besu_2.privateAddress}}",
-              "{{global.nodes.besu_3.privateAddress}}"
+              "{{global.nodes.besu[0].privateAddress[0]}}",
+              "{{global.nodes.besu[1].privateAddress[0]}}",
+              "{{global.nodes.besu[2].privateAddress[0]}}"
             ],
             "name": "{{privacyGroupNameOne}}",
             "description": "TestGroup"
@@ -653,7 +653,7 @@ Feature: Private transactions
         "params": {
           "from": "{{account1}}",
           "protocol": "Orion",
-          "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+          "privateFrom": "{{global.nodes.besu[0].privateAddress[0]}}",
           "privacyGroupId": "{{privacyGroupId}}",
           "contractName": "SimpleToken"
         },
@@ -666,8 +666,8 @@ Feature: Private transactions
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
-      | Receipt.Status | Receipt.Output | Receipt.ContractAddress | Receipt.PrivateFrom                    | Receipt.PrivacyGroupId |
-      | 1              | ~              | ~                       | {{global.nodes.besu_1.privateAddress}} | {{privacyGroupId}}     |
+      | Receipt.Status | Receipt.Output | Receipt.ContractAddress | Receipt.PrivateFrom                        | Receipt.PrivacyGroupId |
+      | 1              | ~              | ~                       | {{global.nodes.besu[0].privateAddress[0]}} | {{privacyGroupId}}     |
 
   @besu
   Scenario: Fail to deploy private ERC20 with a privacy group and privateFor
@@ -686,9 +686,9 @@ Feature: Private transactions
         "params": [
           {
             "addresses": [
-              "{{global.nodes.besu_1.privateAddress}}",
-              "{{global.nodes.besu_2.privateAddress}}",
-              "{{global.nodes.besu_3.privateAddress}}"
+              "{{global.nodes.besu[0].privateAddress[0]}}",
+              "{{global.nodes.besu[1].privateAddress[0]}}",
+              "{{global.nodes.besu[2].privateAddress[0]}}"
             ],
             "name": "{{privacyGroupNameTwo}}",
             "description": "TestGroup"
@@ -714,10 +714,10 @@ Feature: Private transactions
         "params": {
           "from": "{{account1}}",
           "protocol": "Orion",
-          "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+          "privateFrom": "{{global.nodes.besu[0].privateAddress[0]}}",
           "privacyGroupId": "{{privacyGroupId}}",
           "privateFor": [
-            "{{global.nodes.besu_3.privateAddress}}"
+            "{{global.nodes.besu[2].privateAddress[0]}}"
           ],
           "contractName": "SimpleToken"
         },
@@ -751,9 +751,9 @@ Feature: Private transactions
         "params": {
           "oneTimeKey": true,
           "protocol": "Orion",
-          "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+          "privateFrom": "{{global.nodes.besu[0].privateAddress[0]}}",
           "privateFor": [
-            "{{global.nodes.besu_3.privateAddress}}"
+            "{{global.nodes.besu[2].privateAddress[0]}}"
           ],
           "contractName": "SimpleToken"
         },
@@ -766,8 +766,8 @@ Feature: Private transactions
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
-      | Receipt.Status | Receipt.Output | Receipt.ContractAddress | Receipt.PrivateFrom                    |
-      | 1              | ~              | ~                       | {{global.nodes.besu_1.privateAddress}} |
+      | Receipt.Status | Receipt.Output | Receipt.ContractAddress | Receipt.PrivateFrom                        |
+      | 1              | ~              | ~                       | {{global.nodes.besu[0].privateAddress[0]}} |
 
   @besu
   Scenario: Force not correlative nonce for private and public txs
@@ -810,10 +810,10 @@ Feature: Private transactions
         "params": {
           "from": "{{account1}}",
           "protocol": "Orion",
-          "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+          "privateFrom": "{{global.nodes.besu[0].privateAddress[0]}}",
           "privateFor": [
-            "{{global.nodes.besu_2.privateAddress}}",
-            "{{global.nodes.besu_3.privateAddress}}"
+            "{{global.nodes.besu[1].privateAddress[0]}}",
+            "{{global.nodes.besu[2].privateAddress[0]}}"
           ],
           "contractName": "SimpleToken"
         },
@@ -826,8 +826,8 @@ Feature: Private transactions
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
-      | Receipt.Status | Receipt.Output | Receipt.ContractAddress | Receipt.PrivateFrom                    | Receipt.PrivateFor                         |
-      | 1              | ~              | ~                       | {{global.nodes.besu_1.privateAddress}} | ["{{global.nodes.besu_2.privateAddress}}"] |
+      | Receipt.Status | Receipt.Output | Receipt.ContractAddress | Receipt.PrivateFrom                        | Receipt.PrivateFor                             |
+      | 1              | ~              | ~                       | {{global.nodes.besu[0].privateAddress[0]}} | ["{{global.nodes.besu[1].privateAddress[0]}}"] |
 
   @besu
   Scenario: Private Transaction using Job and too high nonce
@@ -874,9 +874,9 @@ Feature: Private transactions
           "from": "{{account1}}",
           "to": "{{to1}}",
           "nonce": "1000001",
-          "privateFrom": "{{global.nodes.besu_1.privateAddress}}",
+          "privateFrom": "{{global.nodes.besu[0].privateAddress[0]}}",
           "privateFor": [
-            "{{global.nodes.besu_2.privateAddress}}"
+            "{{global.nodes.besu[1].privateAddress[0]}}"
           ]
         },
         "labels": {

@@ -175,6 +175,7 @@ func (c *OrchestrateVaultClient) manageToken() error {
 		return errors.HashicorpVaultConnectionError(errMessage)
 	}
 
+	c.logger.Errorf("SECRET: %q", secret)
 	tokenTTL64, err := secret.Data["creation_ttl"].(json.Number).Int64()
 	if err != nil {
 		errMessage := "failed to get 'creation_ttl' field"
@@ -182,14 +183,18 @@ func (c *OrchestrateVaultClient) manageToken() error {
 		return errors.HashicorpVaultConnectionError(errMessage)
 	}
 
-	if int(tokenTTL64) == 0 {
-		c.logger.Debug("token in use never expires")
+	tokenRenewable := secret.Data["renewable"].(bool)
+	if int(tokenTTL64) == 0 || !tokenRenewable {
+		c.logger.Debug("token in use never expires or cannot be renewed")
 		return nil
 	}
 
 	tokenExpireIn64, err := secret.Data["ttl"].(json.Number).Int64()
 	if err != nil {
-		return errors.InternalError("HashiCorp: Could not read vault ttl: %v", err)
+		return errors.InternalError("could not read vault ttl").AppendReason(err.Error())
+	}
+	if int(tokenExpireIn64) == 0 {
+		return errors.InternalError("token is expired")
 	}
 
 	c.logger.WithField("expiration_duration", tokenExpireIn64).Debug("token expiration time")
@@ -200,8 +205,6 @@ func (c *OrchestrateVaultClient) manageToken() error {
 	if err != nil {
 		return err
 	}
-
-	c.logger.Info("initial token was refreshed successfully")
 
 	rtl.Run()
 	return nil

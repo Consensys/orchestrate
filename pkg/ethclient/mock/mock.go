@@ -123,6 +123,21 @@ func (mr *MockEEATransactionSenderMockRecorder) PrivDistributeRawTransaction(ctx
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivDistributeRawTransaction", reflect.TypeOf((*MockEEATransactionSender)(nil).PrivDistributeRawTransaction), ctx, endpoint, raw)
 }
 
+// PrivCreatePrivacyGroup mocks base method
+func (m *MockEEATransactionSender) PrivCreatePrivacyGroup(ctx context.Context, endpoint string, addresses []string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PrivCreatePrivacyGroup", ctx, endpoint, addresses)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PrivCreatePrivacyGroup indicates an expected call of PrivCreatePrivacyGroup
+func (mr *MockEEATransactionSenderMockRecorder) PrivCreatePrivacyGroup(ctx, endpoint, addresses interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivCreatePrivacyGroup", reflect.TypeOf((*MockEEATransactionSender)(nil).PrivCreatePrivacyGroup), ctx, endpoint, addresses)
+}
+
 // MockQuorumTransactionSender is a mock of QuorumTransactionSender interface
 type MockQuorumTransactionSender struct {
 	ctrl     *gomock.Controller
@@ -522,6 +537,21 @@ func (m *MockEEAChainStateReader) PrivNonce(ctx context.Context, endpoint string
 func (mr *MockEEAChainStateReaderMockRecorder) PrivNonce(ctx, endpoint, account, privacyGroupID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivNonce", reflect.TypeOf((*MockEEAChainStateReader)(nil).PrivNonce), ctx, endpoint, account, privacyGroupID)
+}
+
+// PrivFindPrivacyGroup mocks base method
+func (m *MockEEAChainStateReader) PrivFindPrivacyGroup(ctx context.Context, endpoint string, members []string) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PrivFindPrivacyGroup", ctx, endpoint, members)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PrivFindPrivacyGroup indicates an expected call of PrivFindPrivacyGroup
+func (mr *MockEEAChainStateReaderMockRecorder) PrivFindPrivacyGroup(ctx, endpoint, members interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivFindPrivacyGroup", reflect.TypeOf((*MockEEAChainStateReader)(nil).PrivFindPrivacyGroup), ctx, endpoint, members)
 }
 
 // EEAPrivPrecompiledContractAddr mocks base method
@@ -1143,6 +1173,21 @@ func (mr *MockMultiClientMockRecorder) PrivDistributeRawTransaction(ctx, endpoin
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivDistributeRawTransaction", reflect.TypeOf((*MockMultiClient)(nil).PrivDistributeRawTransaction), ctx, endpoint, raw)
 }
 
+// PrivCreatePrivacyGroup mocks base method
+func (m *MockMultiClient) PrivCreatePrivacyGroup(ctx context.Context, endpoint string, addresses []string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PrivCreatePrivacyGroup", ctx, endpoint, addresses)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PrivCreatePrivacyGroup indicates an expected call of PrivCreatePrivacyGroup
+func (mr *MockMultiClientMockRecorder) PrivCreatePrivacyGroup(ctx, endpoint, addresses interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivCreatePrivacyGroup", reflect.TypeOf((*MockMultiClient)(nil).PrivCreatePrivacyGroup), ctx, endpoint, addresses)
+}
+
 // PrivateTransactionReceipt mocks base method
 func (m *MockMultiClient) PrivateTransactionReceipt(ctx context.Context, url string, txHash common.Hash) (*ethereum0.Receipt, error) {
 	m.ctrl.T.Helper()
@@ -1186,6 +1231,21 @@ func (m *MockMultiClient) PrivNonce(ctx context.Context, endpoint string, accoun
 func (mr *MockMultiClientMockRecorder) PrivNonce(ctx, endpoint, account, privacyGroupID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivNonce", reflect.TypeOf((*MockMultiClient)(nil).PrivNonce), ctx, endpoint, account, privacyGroupID)
+}
+
+// PrivFindPrivacyGroup mocks base method
+func (m *MockMultiClient) PrivFindPrivacyGroup(ctx context.Context, endpoint string, members []string) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PrivFindPrivacyGroup", ctx, endpoint, members)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PrivFindPrivacyGroup indicates an expected call of PrivFindPrivacyGroup
+func (mr *MockMultiClientMockRecorder) PrivFindPrivacyGroup(ctx, endpoint, members interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivFindPrivacyGroup", reflect.TypeOf((*MockMultiClient)(nil).PrivFindPrivacyGroup), ctx, endpoint, members)
 }
 
 // EEAPrivPrecompiledContractAddr mocks base method
@@ -1246,6 +1306,25 @@ func (m *MockMultiClient) GetStatus(ctx context.Context, endpoint string) (strin
 func (mr *MockMultiClientMockRecorder) GetStatus(ctx, endpoint interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStatus", reflect.TypeOf((*MockMultiClient)(nil).GetStatus), ctx, endpoint)
+}
+
+// Call mocks base method
+func (m *MockMultiClient) Call(ctx context.Context, endpoint string, processResult func(json.RawMessage) error, method string, args ...interface{}) error {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, endpoint, processResult, method}
+	for _, a := range args {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "Call", varargs...)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Call indicates an expected call of Call
+func (mr *MockMultiClientMockRecorder) Call(ctx, endpoint, processResult, method interface{}, args ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, endpoint, processResult, method}, args...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Call", reflect.TypeOf((*MockMultiClient)(nil).Call), varargs...)
 }
 
 // MockClient is a mock of Client interface
@@ -1659,81 +1738,6 @@ func (m *MockEEAClient) EXPECT() *MockEEAClientMockRecorder {
 	return m.recorder
 }
 
-// PrivDistributeRawTransaction mocks base method
-func (m *MockEEAClient) PrivDistributeRawTransaction(ctx context.Context, endpoint, raw string) (common.Hash, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "PrivDistributeRawTransaction", ctx, endpoint, raw)
-	ret0, _ := ret[0].(common.Hash)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// PrivDistributeRawTransaction indicates an expected call of PrivDistributeRawTransaction
-func (mr *MockEEAClientMockRecorder) PrivDistributeRawTransaction(ctx, endpoint, raw interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivDistributeRawTransaction", reflect.TypeOf((*MockEEAClient)(nil).PrivDistributeRawTransaction), ctx, endpoint, raw)
-}
-
-// PrivateTransactionReceipt mocks base method
-func (m *MockEEAClient) PrivateTransactionReceipt(ctx context.Context, url string, txHash common.Hash) (*ethereum0.Receipt, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "PrivateTransactionReceipt", ctx, url, txHash)
-	ret0, _ := ret[0].(*ethereum0.Receipt)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// PrivateTransactionReceipt indicates an expected call of PrivateTransactionReceipt
-func (mr *MockEEAClientMockRecorder) PrivateTransactionReceipt(ctx, url, txHash interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivateTransactionReceipt", reflect.TypeOf((*MockEEAClient)(nil).PrivateTransactionReceipt), ctx, url, txHash)
-}
-
-// PrivEEANonce mocks base method
-func (m *MockEEAClient) PrivEEANonce(ctx context.Context, endpoint string, account common.Address, privateFrom string, privateFor []string) (uint64, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "PrivEEANonce", ctx, endpoint, account, privateFrom, privateFor)
-	ret0, _ := ret[0].(uint64)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// PrivEEANonce indicates an expected call of PrivEEANonce
-func (mr *MockEEAClientMockRecorder) PrivEEANonce(ctx, endpoint, account, privateFrom, privateFor interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivEEANonce", reflect.TypeOf((*MockEEAClient)(nil).PrivEEANonce), ctx, endpoint, account, privateFrom, privateFor)
-}
-
-// PrivNonce mocks base method
-func (m *MockEEAClient) PrivNonce(ctx context.Context, endpoint string, account common.Address, privacyGroupID string) (uint64, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "PrivNonce", ctx, endpoint, account, privacyGroupID)
-	ret0, _ := ret[0].(uint64)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// PrivNonce indicates an expected call of PrivNonce
-func (mr *MockEEAClientMockRecorder) PrivNonce(ctx, endpoint, account, privacyGroupID interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivNonce", reflect.TypeOf((*MockEEAClient)(nil).PrivNonce), ctx, endpoint, account, privacyGroupID)
-}
-
-// EEAPrivPrecompiledContractAddr mocks base method
-func (m *MockEEAClient) EEAPrivPrecompiledContractAddr(ctx context.Context, endpoint string) (common.Address, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "EEAPrivPrecompiledContractAddr", ctx, endpoint)
-	ret0, _ := ret[0].(common.Address)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// EEAPrivPrecompiledContractAddr indicates an expected call of EEAPrivPrecompiledContractAddr
-func (mr *MockEEAClientMockRecorder) EEAPrivPrecompiledContractAddr(ctx, endpoint interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EEAPrivPrecompiledContractAddr", reflect.TypeOf((*MockEEAClient)(nil).EEAPrivPrecompiledContractAddr), ctx, endpoint)
-}
-
 // CallContract mocks base method
 func (m *MockEEAClient) CallContract(ctx context.Context, url string, msg *ethereum.CallMsg, blockNumber *big.Int) ([]byte, error) {
 	m.ctrl.T.Helper()
@@ -1824,6 +1828,111 @@ func (mr *MockEEAClientMockRecorder) SyncProgress(ctx, url interface{}) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SyncProgress", reflect.TypeOf((*MockEEAClient)(nil).SyncProgress), ctx, url)
 }
 
+// PrivDistributeRawTransaction mocks base method
+func (m *MockEEAClient) PrivDistributeRawTransaction(ctx context.Context, endpoint, raw string) (common.Hash, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PrivDistributeRawTransaction", ctx, endpoint, raw)
+	ret0, _ := ret[0].(common.Hash)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PrivDistributeRawTransaction indicates an expected call of PrivDistributeRawTransaction
+func (mr *MockEEAClientMockRecorder) PrivDistributeRawTransaction(ctx, endpoint, raw interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivDistributeRawTransaction", reflect.TypeOf((*MockEEAClient)(nil).PrivDistributeRawTransaction), ctx, endpoint, raw)
+}
+
+// PrivCreatePrivacyGroup mocks base method
+func (m *MockEEAClient) PrivCreatePrivacyGroup(ctx context.Context, endpoint string, addresses []string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PrivCreatePrivacyGroup", ctx, endpoint, addresses)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PrivCreatePrivacyGroup indicates an expected call of PrivCreatePrivacyGroup
+func (mr *MockEEAClientMockRecorder) PrivCreatePrivacyGroup(ctx, endpoint, addresses interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivCreatePrivacyGroup", reflect.TypeOf((*MockEEAClient)(nil).PrivCreatePrivacyGroup), ctx, endpoint, addresses)
+}
+
+// PrivateTransactionReceipt mocks base method
+func (m *MockEEAClient) PrivateTransactionReceipt(ctx context.Context, url string, txHash common.Hash) (*ethereum0.Receipt, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PrivateTransactionReceipt", ctx, url, txHash)
+	ret0, _ := ret[0].(*ethereum0.Receipt)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PrivateTransactionReceipt indicates an expected call of PrivateTransactionReceipt
+func (mr *MockEEAClientMockRecorder) PrivateTransactionReceipt(ctx, url, txHash interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivateTransactionReceipt", reflect.TypeOf((*MockEEAClient)(nil).PrivateTransactionReceipt), ctx, url, txHash)
+}
+
+// PrivEEANonce mocks base method
+func (m *MockEEAClient) PrivEEANonce(ctx context.Context, endpoint string, account common.Address, privateFrom string, privateFor []string) (uint64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PrivEEANonce", ctx, endpoint, account, privateFrom, privateFor)
+	ret0, _ := ret[0].(uint64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PrivEEANonce indicates an expected call of PrivEEANonce
+func (mr *MockEEAClientMockRecorder) PrivEEANonce(ctx, endpoint, account, privateFrom, privateFor interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivEEANonce", reflect.TypeOf((*MockEEAClient)(nil).PrivEEANonce), ctx, endpoint, account, privateFrom, privateFor)
+}
+
+// PrivNonce mocks base method
+func (m *MockEEAClient) PrivNonce(ctx context.Context, endpoint string, account common.Address, privacyGroupID string) (uint64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PrivNonce", ctx, endpoint, account, privacyGroupID)
+	ret0, _ := ret[0].(uint64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PrivNonce indicates an expected call of PrivNonce
+func (mr *MockEEAClientMockRecorder) PrivNonce(ctx, endpoint, account, privacyGroupID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivNonce", reflect.TypeOf((*MockEEAClient)(nil).PrivNonce), ctx, endpoint, account, privacyGroupID)
+}
+
+// PrivFindPrivacyGroup mocks base method
+func (m *MockEEAClient) PrivFindPrivacyGroup(ctx context.Context, endpoint string, members []string) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PrivFindPrivacyGroup", ctx, endpoint, members)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PrivFindPrivacyGroup indicates an expected call of PrivFindPrivacyGroup
+func (mr *MockEEAClientMockRecorder) PrivFindPrivacyGroup(ctx, endpoint, members interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivFindPrivacyGroup", reflect.TypeOf((*MockEEAClient)(nil).PrivFindPrivacyGroup), ctx, endpoint, members)
+}
+
+// EEAPrivPrecompiledContractAddr mocks base method
+func (m *MockEEAClient) EEAPrivPrecompiledContractAddr(ctx context.Context, endpoint string) (common.Address, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "EEAPrivPrecompiledContractAddr", ctx, endpoint)
+	ret0, _ := ret[0].(common.Address)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EEAPrivPrecompiledContractAddr indicates an expected call of EEAPrivPrecompiledContractAddr
+func (mr *MockEEAClientMockRecorder) EEAPrivPrecompiledContractAddr(ctx, endpoint interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EEAPrivPrecompiledContractAddr", reflect.TypeOf((*MockEEAClient)(nil).EEAPrivPrecompiledContractAddr), ctx, endpoint)
+}
+
 // MockQuorumClient is a mock of QuorumClient interface
 type MockQuorumClient struct {
 	ctrl     *gomock.Controller
@@ -1847,34 +1956,94 @@ func (m *MockQuorumClient) EXPECT() *MockQuorumClientMockRecorder {
 	return m.recorder
 }
 
-// SendQuorumRawPrivateTransaction mocks base method
-func (m *MockQuorumClient) SendQuorumRawPrivateTransaction(ctx context.Context, url, signedTxHash string, privateFor []string) (common.Hash, error) {
+// CallContract mocks base method
+func (m *MockQuorumClient) CallContract(ctx context.Context, url string, msg *ethereum.CallMsg, blockNumber *big.Int) ([]byte, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SendQuorumRawPrivateTransaction", ctx, url, signedTxHash, privateFor)
-	ret0, _ := ret[0].(common.Hash)
+	ret := m.ctrl.Call(m, "CallContract", ctx, url, msg, blockNumber)
+	ret0, _ := ret[0].([]byte)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// SendQuorumRawPrivateTransaction indicates an expected call of SendQuorumRawPrivateTransaction
-func (mr *MockQuorumClientMockRecorder) SendQuorumRawPrivateTransaction(ctx, url, signedTxHash, privateFor interface{}) *gomock.Call {
+// CallContract indicates an expected call of CallContract
+func (mr *MockQuorumClientMockRecorder) CallContract(ctx, url, msg, blockNumber interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendQuorumRawPrivateTransaction", reflect.TypeOf((*MockQuorumClient)(nil).SendQuorumRawPrivateTransaction), ctx, url, signedTxHash, privateFor)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CallContract", reflect.TypeOf((*MockQuorumClient)(nil).CallContract), ctx, url, msg, blockNumber)
 }
 
-// StoreRaw mocks base method
-func (m *MockQuorumClient) StoreRaw(ctx context.Context, endpoint string, data []byte, privateFrom string) (string, error) {
+// PendingCallContract mocks base method
+func (m *MockQuorumClient) PendingCallContract(ctx context.Context, url string, msg *ethereum.CallMsg) ([]byte, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "StoreRaw", ctx, endpoint, data, privateFrom)
-	ret0, _ := ret[0].(string)
+	ret := m.ctrl.Call(m, "PendingCallContract", ctx, url, msg)
+	ret0, _ := ret[0].([]byte)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// StoreRaw indicates an expected call of StoreRaw
-func (mr *MockQuorumClientMockRecorder) StoreRaw(ctx, endpoint, data, privateFrom interface{}) *gomock.Call {
+// PendingCallContract indicates an expected call of PendingCallContract
+func (mr *MockQuorumClientMockRecorder) PendingCallContract(ctx, url, msg interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StoreRaw", reflect.TypeOf((*MockQuorumClient)(nil).StoreRaw), ctx, endpoint, data, privateFrom)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PendingCallContract", reflect.TypeOf((*MockQuorumClient)(nil).PendingCallContract), ctx, url, msg)
+}
+
+// EstimateGas mocks base method
+func (m *MockQuorumClient) EstimateGas(ctx context.Context, url string, msg *ethereum.CallMsg) (uint64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "EstimateGas", ctx, url, msg)
+	ret0, _ := ret[0].(uint64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EstimateGas indicates an expected call of EstimateGas
+func (mr *MockQuorumClientMockRecorder) EstimateGas(ctx, url, msg interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EstimateGas", reflect.TypeOf((*MockQuorumClient)(nil).EstimateGas), ctx, url, msg)
+}
+
+// SuggestGasPrice mocks base method
+func (m *MockQuorumClient) SuggestGasPrice(ctx context.Context, url string) (*big.Int, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SuggestGasPrice", ctx, url)
+	ret0, _ := ret[0].(*big.Int)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SuggestGasPrice indicates an expected call of SuggestGasPrice
+func (mr *MockQuorumClientMockRecorder) SuggestGasPrice(ctx, url interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SuggestGasPrice", reflect.TypeOf((*MockQuorumClient)(nil).SuggestGasPrice), ctx, url)
+}
+
+// Network mocks base method
+func (m *MockQuorumClient) Network(ctx context.Context, url string) (*big.Int, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Network", ctx, url)
+	ret0, _ := ret[0].(*big.Int)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Network indicates an expected call of Network
+func (mr *MockQuorumClientMockRecorder) Network(ctx, url interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Network", reflect.TypeOf((*MockQuorumClient)(nil).Network), ctx, url)
+}
+
+// SyncProgress mocks base method
+func (m *MockQuorumClient) SyncProgress(ctx context.Context, url string) (*ethereum.SyncProgress, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SyncProgress", ctx, url)
+	ret0, _ := ret[0].(*ethereum.SyncProgress)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SyncProgress indicates an expected call of SyncProgress
+func (mr *MockQuorumClientMockRecorder) SyncProgress(ctx, url interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SyncProgress", reflect.TypeOf((*MockQuorumClient)(nil).SyncProgress), ctx, url)
 }
 
 // BlockByHash mocks base method
@@ -1968,6 +2137,36 @@ func (mr *MockQuorumClientMockRecorder) TransactionReceipt(ctx, url, txHash inte
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TransactionReceipt", reflect.TypeOf((*MockQuorumClient)(nil).TransactionReceipt), ctx, url, txHash)
 }
 
+// SendQuorumRawPrivateTransaction mocks base method
+func (m *MockQuorumClient) SendQuorumRawPrivateTransaction(ctx context.Context, url, signedTxHash string, privateFor []string) (common.Hash, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SendQuorumRawPrivateTransaction", ctx, url, signedTxHash, privateFor)
+	ret0, _ := ret[0].(common.Hash)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SendQuorumRawPrivateTransaction indicates an expected call of SendQuorumRawPrivateTransaction
+func (mr *MockQuorumClientMockRecorder) SendQuorumRawPrivateTransaction(ctx, url, signedTxHash, privateFor interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendQuorumRawPrivateTransaction", reflect.TypeOf((*MockQuorumClient)(nil).SendQuorumRawPrivateTransaction), ctx, url, signedTxHash, privateFor)
+}
+
+// StoreRaw mocks base method
+func (m *MockQuorumClient) StoreRaw(ctx context.Context, endpoint string, data []byte, privateFrom string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "StoreRaw", ctx, endpoint, data, privateFrom)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// StoreRaw indicates an expected call of StoreRaw
+func (mr *MockQuorumClientMockRecorder) StoreRaw(ctx, endpoint, data, privateFrom interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StoreRaw", reflect.TypeOf((*MockQuorumClient)(nil).StoreRaw), ctx, endpoint, data, privateFrom)
+}
+
 // GetStatus mocks base method
 func (m *MockQuorumClient) GetStatus(ctx context.Context, endpoint string) (string, error) {
 	m.ctrl.T.Helper()
@@ -1981,94 +2180,4 @@ func (m *MockQuorumClient) GetStatus(ctx context.Context, endpoint string) (stri
 func (mr *MockQuorumClientMockRecorder) GetStatus(ctx, endpoint interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStatus", reflect.TypeOf((*MockQuorumClient)(nil).GetStatus), ctx, endpoint)
-}
-
-// CallContract mocks base method
-func (m *MockQuorumClient) CallContract(ctx context.Context, url string, msg *ethereum.CallMsg, blockNumber *big.Int) ([]byte, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CallContract", ctx, url, msg, blockNumber)
-	ret0, _ := ret[0].([]byte)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// CallContract indicates an expected call of CallContract
-func (mr *MockQuorumClientMockRecorder) CallContract(ctx, url, msg, blockNumber interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CallContract", reflect.TypeOf((*MockQuorumClient)(nil).CallContract), ctx, url, msg, blockNumber)
-}
-
-// PendingCallContract mocks base method
-func (m *MockQuorumClient) PendingCallContract(ctx context.Context, url string, msg *ethereum.CallMsg) ([]byte, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "PendingCallContract", ctx, url, msg)
-	ret0, _ := ret[0].([]byte)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// PendingCallContract indicates an expected call of PendingCallContract
-func (mr *MockQuorumClientMockRecorder) PendingCallContract(ctx, url, msg interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PendingCallContract", reflect.TypeOf((*MockQuorumClient)(nil).PendingCallContract), ctx, url, msg)
-}
-
-// EstimateGas mocks base method
-func (m *MockQuorumClient) EstimateGas(ctx context.Context, url string, msg *ethereum.CallMsg) (uint64, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "EstimateGas", ctx, url, msg)
-	ret0, _ := ret[0].(uint64)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// EstimateGas indicates an expected call of EstimateGas
-func (mr *MockQuorumClientMockRecorder) EstimateGas(ctx, url, msg interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EstimateGas", reflect.TypeOf((*MockQuorumClient)(nil).EstimateGas), ctx, url, msg)
-}
-
-// SuggestGasPrice mocks base method
-func (m *MockQuorumClient) SuggestGasPrice(ctx context.Context, url string) (*big.Int, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SuggestGasPrice", ctx, url)
-	ret0, _ := ret[0].(*big.Int)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// SuggestGasPrice indicates an expected call of SuggestGasPrice
-func (mr *MockQuorumClientMockRecorder) SuggestGasPrice(ctx, url interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SuggestGasPrice", reflect.TypeOf((*MockQuorumClient)(nil).SuggestGasPrice), ctx, url)
-}
-
-// Network mocks base method
-func (m *MockQuorumClient) Network(ctx context.Context, url string) (*big.Int, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Network", ctx, url)
-	ret0, _ := ret[0].(*big.Int)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Network indicates an expected call of Network
-func (mr *MockQuorumClientMockRecorder) Network(ctx, url interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Network", reflect.TypeOf((*MockQuorumClient)(nil).Network), ctx, url)
-}
-
-// SyncProgress mocks base method
-func (m *MockQuorumClient) SyncProgress(ctx context.Context, url string) (*ethereum.SyncProgress, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SyncProgress", ctx, url)
-	ret0, _ := ret[0].(*ethereum.SyncProgress)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// SyncProgress indicates an expected call of SyncProgress
-func (mr *MockQuorumClientMockRecorder) SyncProgress(ctx, url interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SyncProgress", reflect.TypeOf((*MockQuorumClient)(nil).SyncProgress), ctx, url)
 }

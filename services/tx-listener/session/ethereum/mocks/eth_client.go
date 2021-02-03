@@ -278,6 +278,21 @@ func (mr *MockEthClientMockRecorder) PrivNonce(ctx, endpoint, account, privacyGr
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivNonce", reflect.TypeOf((*MockEthClient)(nil).PrivNonce), ctx, endpoint, account, privacyGroupID)
 }
 
+// PrivFindPrivacyGroup mocks base method
+func (m *MockEthClient) PrivFindPrivacyGroup(ctx context.Context, endpoint string, members []string) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PrivFindPrivacyGroup", ctx, endpoint, members)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PrivFindPrivacyGroup indicates an expected call of PrivFindPrivacyGroup
+func (mr *MockEthClientMockRecorder) PrivFindPrivacyGroup(ctx, endpoint, members interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivFindPrivacyGroup", reflect.TypeOf((*MockEthClient)(nil).PrivFindPrivacyGroup), ctx, endpoint, members)
+}
+
 // EEAPrivPrecompiledContractAddr mocks base method
 func (m *MockEthClient) EEAPrivPrecompiledContractAddr(ctx context.Context, endpoint string) (common.Address, error) {
 	m.ctrl.T.Helper()

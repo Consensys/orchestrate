@@ -75,7 +75,7 @@ func (s *accountTestSuite) TestPGAccount_Insert() {
 		err := s.agents.Account().Insert(ctx, acc)
 		assert.NoError(s.T(), err)
 
-		acc.Alias = utils.RandomString(10)
+		acc.Alias = utils.RandString(10)
 		err = s.agents.Account().Insert(ctx, acc)
 		assert.Error(s.T(), err)
 	})

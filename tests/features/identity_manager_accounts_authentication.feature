@@ -15,7 +15,7 @@ Feature: Account management
       | SimpleToken | SimpleToken.json | Bearer {{wildcard.token}} |
     And I register the following chains
       | alias | Name                | URLs                         | Headers.Authorization     |
-      | besu  | besu-{{scenarioID}} | {{global.nodes.besu_1.URLs}} | Bearer {{wildcard.token}} |
+      | besu  | besu-{{scenarioID}} | {{global.nodes.besu[0].URLs}} | Bearer {{wildcard.token}} |
 
   Scenario: Accounts own by default tenant can be used by other authorized tenants
     Given I register the following alias

@@ -5,16 +5,16 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/rpc"
 
-	"github.com/containous/traefik/v2/pkg/log"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	loader "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/handlers/loader/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/handlers/offset"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/engine"
-	pkglog "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/handlers"
@@ -24,6 +24,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/utils/chanregistry"
 )
 
+const component = "stress-test"
+
 var (
 	workload *WorkLoadService
 	cancel   func()
@@ -31,7 +33,9 @@ var (
 
 // Start starts application
 func Start(ctx context.Context) error {
-	log.FromContext(ctx).Info("Starting execution...")
+	logger := log.WithContext(ctx).SetComponent(component)
+	ctx = log.With(ctx, logger)
+	logger.Info("starting execution...")
 
 	var gerr error
 	// Create context for application
@@ -54,7 +58,7 @@ func Start(ctx context.Context) error {
 
 	// Start consuming on every topics of interest
 	var topics []string
-	for _, topic := range utils2.TOPICS {
+	for _, topic := range utils2.Topics {
 		topics = append(topics, viper.GetString(fmt.Sprintf("topic.%v", topic)))
 	}
 
@@ -63,13 +67,12 @@ func Start(ctx context.Context) error {
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func() {
-		log.FromContext(ctx).WithFields(logrus.Fields{
-			"topics": topics,
-		}).Info("connecting")
+		logger.WithField("topics", topics).Info("connecting to kafka")
 
 		err := broker.Consume(ctx, topics, cg)
 		if err != nil {
-			log.FromContext(ctx).WithError(err).Error("error on consumer")
+			gerr = errors.CombineErrors(gerr, err)
+			logger.WithError(err).Error("error on consumer")
 		}
 
 		cancel()
@@ -81,8 +84,8 @@ func Start(ctx context.Context) error {
 		<-cg.IsReady()
 		err := workload.Run(ctx)
 		if err != nil {
-			gerr = err
-			log.FromContext(ctx).WithError(err).Error("error on workload test")
+			gerr = errors.CombineErrors(gerr, err)
+			logger.WithError(err).Error("error on workload test")
 		}
 
 		cancel()
@@ -94,7 +97,7 @@ func Start(ctx context.Context) error {
 }
 
 func Stop(ctx context.Context) error {
-	log.FromContext(ctx).Info("Stopping Cucumber execution...")
+	log.WithContext(ctx).Info("stopping stress test execution...")
 	cancel()
 	return nil
 }
@@ -125,7 +128,7 @@ func initComponents(ctx context.Context) {
 		func() {
 			// Prepare topics map for dispatcher
 			topics := make(map[string]string)
-			for _, topic := range utils2.TOPICS {
+			for _, topic := range utils2.Topics {
 				topics[viper.GetString(fmt.Sprintf("topic.%v", topic))] = topic
 			}
 			dispatcher.SetKeyOfFuncs(
@@ -136,10 +139,10 @@ func initComponents(ctx context.Context) {
 		},
 		// Initialize logger
 		func() {
-			cfg := pkglog.NewConfig(viper.GetViper())
+			cfg := log.NewConfig(viper.GetViper())
 			// Create and configure logger
 			logger := logrus.StandardLogger()
-			_ = pkglog.ConfigureLogger(cfg, logger)
+			_ = log.ConfigureLogger(cfg, logger)
 		},
 	)
 }

@@ -10,8 +10,8 @@ Feature: Chain-Proxy Cache
       | tenant2 | {{random.uuid}} |
     Then I register the following chains
       | alias   | Name                 | URLs                         | Headers.Authorization    |
-      | besuOne | besu-{{scenarioID}}  | {{global.nodes.besu_2.URLs}} | Bearer {{tenant1.token}} |
-      | besuTwo | besu2-{{scenarioID}} | {{global.nodes.besu_2.URLs}} | Bearer {{tenant1.token}} |
+      | besuOne | besu-{{scenarioID}}  | {{global.nodes.besu[1].URLs}} | Bearer {{tenant1.token}} |
+      | besuTwo | besu2-{{scenarioID}} | {{global.nodes.besu[1].URLs}} | Bearer {{tenant1.token}} |
     Given I sleep "3s"
 
   Scenario: Chain registry should cache "eth_getBlockByNumber" request for same chainUUID

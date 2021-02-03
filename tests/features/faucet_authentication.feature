@@ -12,12 +12,12 @@ Feature: Faucet funding
       | tenantDefault | _        |
     And I register the following chains
       | alias | Name                | URLs                         | Headers.Authorization          |
-      | besu  | besu-{{scenarioID}} | {{global.nodes.besu_1.URLs}} | Bearer {{tenantDefault.token}} |
+      | besu  | besu-{{scenarioID}} | {{global.nodes.besu[0].URLs}} | Bearer {{tenantDefault.token}} |
 
   Scenario: Generate account with faucet and different tenant
     And I register the following faucets
       | Name                | ChainRule     | CreditorAccount                             | MaxBalance       | Amount           | Cooldown | Headers.Authorization      |
-      | besu-{{scenarioID}} | {{besu.UUID}} | {{global.nodes.besu_1.fundedPublicKeys[0]}} | 1000000000000000 | 1000000000000000 | 1m       | Bearer {{tenantFoo.token}} |
+      | besu-{{scenarioID}} | {{besu.UUID}} | {{global.nodes.besu[0].fundedPublicKeys[0]}} | 1000000000000000 | 1000000000000000 | 1m       | Bearer {{tenantFoo.token}} |
     And I have created the following accounts
       | alias    | ID              | ChainName           | Headers.Authorization      |
       | account1 | {{random.uuid}} | besu-{{scenarioID}} | Bearer {{tenantBar.token}} |
@@ -53,7 +53,7 @@ Feature: Faucet funding
       | account1 | {{random.uuid}} | besu-{{scenarioID}} | Bearer {{tenantBar.token}} |
     And I register the following faucets
       | Name                | ChainRule     | CreditorAccount                             | MaxBalance       | Amount           | Cooldown | Headers.Authorization      |
-      | besu-{{scenarioID}} | {{besu.UUID}} | {{global.nodes.besu_1.fundedPublicKeys[0]}} | 1000000000000000 | 1000000000000000 | 1m       | Bearer {{tenantFoo.token}} |
+      | besu-{{scenarioID}} | {{besu.UUID}} | {{global.nodes.besu[0].fundedPublicKeys[0]}} | 1000000000000000 | 1000000000000000 | 1m       | Bearer {{tenantFoo.token}} |
     Then I track the following envelopes
       | ID                |
       | {{transferOneID}} |

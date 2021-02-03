@@ -12,8 +12,8 @@ Feature: Transaction Scheduler Idempotency
       | SimpleToken | SimpleToken.json | Bearer {{tenant1.token}} |
     Then I register the following chains
       | alias  | Name                  | URLs                         | Headers.Authorization    |
-      | besu_1 | besu_1-{{scenarioID}} | {{global.nodes.besu_1.URLs}} | Bearer {{tenant1.token}} |
-      | besu_2 | besu_2-{{scenarioID}} | {{global.nodes.besu_1.URLs}} | Bearer {{tenant1.token}} |
+      | besu_1 | besu_1-{{scenarioID}} | {{global.nodes.besu[0].URLs}} | Bearer {{tenant1.token}} |
+      | besu_2 | besu_2-{{scenarioID}} | {{global.nodes.besu[0].URLs}} | Bearer {{tenant1.token}} |
     And I have created the following accounts
       | alias    | ID              | Headers.Authorization    |
       | account1 | {{random.uuid}} | Bearer {{tenant1.token}} |
