@@ -3,7 +3,7 @@ version: '3.6'
 
 x-default-variables: &default-variables
   LOG4J_CONFIGURATION_FILE: /config/log-config.xml
-  JAVA_OPTS: -Xms512m -Xmx512m -XX:MaxPermSize=256m
+  JAVA_OPTS: -Xms512m -Xmx512m -XX:MaxMetaspaceSize=256m
   
 x-besu-bootnode-def:
   &besu-bootnode-def
@@ -68,7 +68,6 @@ services:
       - ./config/besu/ibft2Genesis.json:/config/genesis.json
       - ./config/besu/networkFiles/validator1/keys:/opt/besu/keys
       - ./config/orion/networkFiles/orion1/nodeKey.pub:/config/orion/orion.pub
-      - ./data/besu:/opt/besu/data
     depends_on:
       - orion1
     ports:
@@ -85,7 +84,6 @@ services:
       ORION_OTHERNODES: http://orion2:8080/,http://orion3:8080/,http://orion4:8080/
       ORION_NODEURL: http://orion1:8080
       ORION_CLIENTURL: http://orion1:8888
-      JAVA_OPTS: -Xms512m -Xmx512m -XX:MaxPermSize=256m
     volumes:
       - ./config/orion/orion.conf:/config/orion.conf
       - ./config/orion/networkFiles/orion1:/keys/

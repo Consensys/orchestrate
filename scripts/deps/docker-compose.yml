@@ -77,6 +77,7 @@ services:
     <<: *container-common
     <<: *postgres-common
     image: postgres:10.12-alpine
+    command: ["postgres", "-c", "max_connections=500"]
     volumes:
       - db-data-api:/var/lib/postgresql/data
     ports:

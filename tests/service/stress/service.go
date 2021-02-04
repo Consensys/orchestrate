@@ -163,7 +163,7 @@ func (c *WorkLoadService) run(ctx context.Context, test *workLoadItem, cfg *unit
 	buffer := make(chan bool, test.threads)
 
 	var gerr error
-	for idx := 0; idx < test.iteration && gerr == nil; idx++ {
+	for idx := 0; idx <= test.iteration && gerr == nil; idx++ {
 		buffer <- true
 		wg.Add(1)
 		go func(idx int) {
