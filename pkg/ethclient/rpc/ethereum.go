@@ -294,7 +294,7 @@ func (ec *Client) PendingCodeAt(ctx context.Context, endpoint string, account et
 // This is the nonce that should be used for the next transaction.
 func (ec *Client) PendingNonceAt(ctx context.Context, endpoint string, account ethcommon.Address) (uint64, error) {
 	var nonce hexutil.Uint64
-	err := ec.Call(ctx, endpoint, utils.ProcessResult(&nonce), "eth_getTransactionCount", account, "latest")
+	err := ec.Call(ctx, endpoint, utils.ProcessResult(&nonce), "eth_getTransactionCount", account, "pending")
 	if err != nil {
 		return 0, errors.FromError(err).ExtendComponent(component)
 	}

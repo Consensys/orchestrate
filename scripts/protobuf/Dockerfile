@@ -1,4 +1,4 @@
-FROM golang:1.15
+FROM golang:1.15-buster
 
 ARG PROTOC_TAG
 ARG PROTOC_GEN_GO_TAG

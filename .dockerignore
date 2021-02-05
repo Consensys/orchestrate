@@ -7,8 +7,8 @@ docker-compose*
 .gitlab-ci.yml
 
 build/
-e2e/
 scripts/
+vendor/
 
 AUTHORS
 CONTRIBUTING.md

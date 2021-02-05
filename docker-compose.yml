@@ -40,7 +40,7 @@ x-default-variables: &default-variables
   METRICS_MODULES: ${METRICS_MODULES-}
 
 x-container-common: &container-common
-  image: golang:1.15.6-buster
+  image: golang:1.15-buster
   restart: ${CONTAINER_RESTART-on-failure}
   entrypoint: /bin/main
   tty: true

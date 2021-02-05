@@ -32,7 +32,7 @@ commands:
             --label org.label-schema.vcs-url="${CIRCLE_REPOSITORY_URL}"
             --label org.label-schema.vcs-ref="${CIRCLE_SHA1:0:8}"
             --label org.label-schema.vendor="PegaSys"
-            -f ./tests/Dockerfile
+            -f ./Dockerfile.e2e
             -q
             -t ${DOCKER_REGISTRY_DEV_REPO}/orchestrate-e2e:${CIRCLE_SHA1:0:8} .
 

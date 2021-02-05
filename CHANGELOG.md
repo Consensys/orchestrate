@@ -32,7 +32,6 @@
 
 ### 🛠 Bug fixes
 * Incorrect metrics counting for 429 http responses
-* Retrieve nonce from latest block
 
 ### ⚠ BREAKING CHANGES
 * Remove `account-generator` and `account-generated` topics

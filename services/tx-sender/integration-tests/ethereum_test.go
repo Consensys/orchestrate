@@ -93,7 +93,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Public() {
 
 		gock.New(apiURL).
 			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
-			AddMatcher(ethCallMatcher(wg, "eth_getTransactionCount", envelope.From.String(), "latest")).
+			AddMatcher(ethCallMatcher(wg, "eth_getTransactionCount", envelope.From.String(), "pending")).
 			Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"0x0\"}")
 
 		gock.New(keyManagerURL).
@@ -201,7 +201,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Public() {
 
 		gock.New(apiURL).
 			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
-			AddMatcher(ethCallMatcher(wg, "eth_getTransactionCount", envelope.From.String(), "latest")).
+			AddMatcher(ethCallMatcher(wg, "eth_getTransactionCount", envelope.From.String(), "pending")).
 			Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"0x0\"}")
 
 		gock.New(keyManagerURL).
@@ -694,7 +694,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_XNonceManager() {
 			if idx == 0 {
 				gock.New(apiURL).
 					Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
-					AddMatcher(ethCallMatcher(wg, "eth_getTransactionCount", envelope.From.String(), "latest")).
+					AddMatcher(ethCallMatcher(wg, "eth_getTransactionCount", envelope.From.String(), "pending")).
 					Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"0x0\"}")
 			}
 
@@ -746,7 +746,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_XNonceManager() {
 			if idx == 0 {
 				gock.New(apiURL).
 					Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
-					AddMatcher(ethCallMatcher(wg, "eth_getTransactionCount", envelope.From.String(), "latest")).
+					AddMatcher(ethCallMatcher(wg, "eth_getTransactionCount", envelope.From.String(), "pending")).
 					Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"0x0\"}")
 
 				gock.New(keyManagerURL).
@@ -783,7 +783,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_XNonceManager() {
 
 				gock.New(apiURL).
 					Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
-					AddMatcher(ethCallMatcher(wg, "eth_getTransactionCount", envelope.From.String(), "latest")).
+					AddMatcher(ethCallMatcher(wg, "eth_getTransactionCount", envelope.From.String(), "pending")).
 					Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"0x2\"}")
 
 				gock.New(apiURL).
@@ -852,7 +852,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_XNonceManager() {
 
 			gock.New(apiURL).
 				Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
-				AddMatcher(ethCallMatcher(wg, "eth_getTransactionCount", envelope.From.String(), "latest")).
+				AddMatcher(ethCallMatcher(wg, "eth_getTransactionCount", envelope.From.String(), "pending")).
 				Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"0x0\"}")
 
 			gock.New(keyManagerURL).
