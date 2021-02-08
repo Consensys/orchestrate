@@ -38,6 +38,7 @@ func NewRetrySessionJobUseCase(client orchestrateclient.OrchestrateClient) Retry
 // Execute starts a job session
 func (uc *retrySessionJobUseCase) Execute(ctx context.Context, jobUUID, childUUID string, nChildren int) (string, error) {
 	logger := uc.logger.WithContext(ctx).WithField("job", jobUUID)
+	ctx = log.With(ctx, logger)
 
 	logger.Debug("verifying job status")
 

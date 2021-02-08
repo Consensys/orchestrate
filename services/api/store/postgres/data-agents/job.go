@@ -147,9 +147,11 @@ func (agent *PGJob) Search(ctx context.Context, filters *entities.JobFilters, te
 		query = query.Where("job.internal_data->'parentJobUUID' is null")
 	}
 
-	query = pg.WhereAllowedTenants(query, "schedule.tenant_id", tenants).
-		Where("job.updated_at > ?", filters.UpdatedAfter). // No need to check this filter as the zero value is 1/1/0001 0h:0m:0s
-		Order("id ASC")
+	if filters.UpdatedAfter.Second() > 0 {
+		query = query.Where("job.updated_at >= ?", filters.UpdatedAfter)
+	}
+
+	query = pg.WhereAllowedTenants(query, "schedule.tenant_id", tenants).Order("id ASC")
 
 	err := pg.Select(ctx, query)
 	if err != nil {

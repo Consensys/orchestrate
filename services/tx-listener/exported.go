@@ -33,7 +33,6 @@ func NewApp(ctx context.Context) (*app.App, error) {
 
 	utils.InParallel(
 		func() { kafkahook.Init(ctx) },
-		func() { registryoffset.Init() },
 		func() {
 			viper.Set(utils.RetryMaxIntervalViperKey, 30*time.Second)
 			viper.Set(utils.RetryMaxElapsedTimeViperKey, 1*time.Hour)
@@ -41,13 +40,12 @@ func NewApp(ctx context.Context) (*app.App, error) {
 		},
 	)
 	httpClient := http.NewClient(http.NewConfig(viper.GetViper()))
-	backoffConf := orchestrateclient.NewConfigFromViper(viper.GetViper(), backoff.ConstantBackOffWithMaxRetries(time.Second, 5))
+	backoffConf := orchestrateclient.NewConfigFromViper(viper.GetViper(),
+		backoff.IncrementalBackOff(time.Second*5, time.Minute))
 	client := orchestrateclient.NewHTTPClient(httpClient, backoffConf)
 
-	conf := orchestrateclient.NewConfigFromViper(viper.GetViper(), nil)
-	txSchedulerClientSentry := orchestrateclient.NewHTTPClient(httpClient, conf)
-
 	registryprovider.Init(client)
+	registryoffset.Init(client)
 
 	return New(
 		config,
@@ -56,7 +54,6 @@ func NewApp(ctx context.Context) (*app.App, error) {
 		registryoffset.GlobalManager(),
 		ethclient.GlobalClient(),
 		client,
-		txSchedulerClientSentry,
 	)
 }
 

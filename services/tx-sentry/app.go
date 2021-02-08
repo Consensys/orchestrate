@@ -37,22 +37,22 @@ func NewTxSentry(client orchestrateclient.OrchestrateClient, config *Config) *Tx
 }
 
 func (sentry *TxSentry) Run(ctx context.Context) error {
-	logger := sentry.logger.WithContext(ctx)
+	ctx = log.With(ctx, sentry.logger)
 
 	backff := backoff.WithContext(backoffjob.NewBackOff(backoff.NewExponentialBackOff()), ctx)
 	err := backoff.RetryNotify(
 		func() error { return sentry.listen(ctx) },
 		backff,
 		func(err error, duration time.Duration) {
-			logger.WithError(err).Warnf("error in job listening, restarting in %v...", duration)
+			sentry.logger.WithError(err).Warnf("error in job listening, restarting in %v...", duration)
 		},
 	)
 
 	if err != nil && err != context.Canceled {
-		logger.WithError(err).Errorf("sentry stopped after catching an error")
+		sentry.logger.WithError(err).Errorf("sentry stopped after catching an error")
 	}
 
-	logger.Infof("transaction sentry stopped without error")
+	sentry.logger.Info("transaction sentry stopped without error")
 
 	return nil
 }
@@ -62,8 +62,7 @@ func (sentry *TxSentry) Close() error {
 }
 
 func (sentry *TxSentry) listen(ctx context.Context) error {
-	logger := sentry.logger.WithContext(ctx)
-	logger.Info("jobs listener started")
+	sentry.logger.Info("jobs listener started")
 
 	// Initial job creation fetching all pending jobs
 	jobFilters := &entities.JobFilters{
@@ -82,7 +81,7 @@ func (sentry *TxSentry) listen(ctx context.Context) error {
 		select {
 		case t := <-ticker.C:
 			lastCheckedAt := t.Add(-sentry.config.RefreshInterval)
-			logger.WithField("updated_after", lastCheckedAt.Format("2006-01-02 15:04:05")).
+			sentry.logger.WithField("updated_after", lastCheckedAt.Format("2006-01-02 15:04:05")).
 				Debug("fetching new pending jobs")
 
 			jobFilters.UpdatedAfter = lastCheckedAt
@@ -91,7 +90,7 @@ func (sentry *TxSentry) listen(ctx context.Context) error {
 				return errors.FromError(err).ExtendComponent(txSentryComponent)
 			}
 		case <-ctx.Done():
-			logger.WithField("reason", ctx.Err().Error()).Info("gracefully stopping transaction sentry...")
+			sentry.logger.WithField("reason", ctx.Err().Error()).Info("gracefully stopping transaction sentry...")
 			return nil
 		}
 	}
@@ -101,7 +100,7 @@ func (sentry *TxSentry) createSessions(ctx context.Context, filters *entities.Jo
 	// We get all the pending jobs updated_after the last tick
 	jobResponses, err := sentry.client.SearchJob(ctx, filters)
 	if err != nil {
-		sentry.logger.WithContext(ctx).WithError(err).Error("failed to fetch pending jobs")
+		sentry.logger.WithError(err).Error("failed to fetch pending jobs")
 		return err
 	}
 

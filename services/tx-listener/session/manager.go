@@ -94,7 +94,7 @@ func (m *Manager) listenProvider(ctx context.Context) {
 	m.logger.WithField("provider", fmt.Sprintf("%T", m.provider)).Debug("Starting provider")
 	err := m.provider.Run(ctx, m.msgInput)
 	if err != nil {
-		m.logger.WithError(err).Errorf("error while listening provider")
+		m.logger.WithError(err).Error("error while listening provider")
 	}
 	close(m.msgInput)
 }

@@ -3,7 +3,7 @@ package chainregistry
 import (
 	"sync"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
+	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 )
 
 var (
@@ -12,11 +12,9 @@ var (
 )
 
 // Init Offset manager
-func Init() {
+func Init(client orchestrateclient.ChainClient) {
 	initOnce.Do(func() {
-
-		client.Init()
-		manager = NewManager(client.GlobalClient())
+		manager = NewManager(client)
 	})
 }
 

@@ -197,7 +197,13 @@ down-postgres:
 
 up: deps-persistent quorum geth besu deps-kafka hashicorp-vault-import-secrets bootstrap-deps topics orchestrate ## Start Orchestrate and deps
 
-dev: deps geth orchestrate ## Start Orchestrate and light deps
+dev: deps orchestrate ## Start Orchestrate and light deps
+
+geth-dev: deps geth orchestrate ## Start Orchestrate and light deps
+
+besu-dev: deps besu orchestrate ## Start Orchestrate and light besu deps
+
+quorum-dev: deps quorum orchestrate ## Start Orchestrate and light quorum deps
 
 down: down-orchestrate down-quorum down-geth down-besu down-deps  ## Down Orchestrate and deps
 
@@ -264,7 +270,7 @@ down-nginx:
 
 vegeta:
 	@mkdir -p build/vegeta
-	@cat scripts/vegeta/test | vegeta attack -format=http -duration=30s -rate=50/s | tee build/vegeta/results.bin | vegeta report
+	@cat scripts/vegeta/test | vegeta attack -format=http -duration=60s -rate=150/s | tee build/vegeta/results.bin | vegeta report
 	@vegeta report -type=json build/vegeta/results.bin > build/vegeta/metrics.json
 	@cat build/vegeta/results.bin | vegeta plot > build/vegeta/plot.html
 	@cat build/vegeta/results.bin | vegeta report -type="hist[0,100ms,200ms,300ms]"

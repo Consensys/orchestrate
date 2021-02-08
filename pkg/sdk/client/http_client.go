@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
-	"github.com/containous/traefik/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 )
 
 type HTTPClient struct {
@@ -32,7 +32,7 @@ func callWithBackOff(ctx context.Context, backOff backoff.BackOff, requestCall f
 			}
 
 			// Retry on following errors
-			if errors.IsInvalidStateError(err) || errors.IsServiceConnectionError(err) {
+			if errors.IsInvalidStateError(err) || errors.IsServiceConnectionError(err) || errors.IsDependencyFailureError(err) {
 				return err
 			}
 

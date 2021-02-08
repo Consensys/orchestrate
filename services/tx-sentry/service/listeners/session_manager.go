@@ -15,6 +15,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 
 	"github.com/cenkalti/backoff/v4"
+	pkgbackoff "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/backoff"
 )
 
 //go:generate mockgen -source=session_manager.go -destination=mocks/session_manager.go -package=mocks
@@ -53,7 +54,7 @@ func NewSessionManager(client orchestrateclient.OrchestrateClient, retrySessionJ
 }
 
 func (manager *sessionManager) Start(ctx context.Context, job *entities.Job) {
-	logger := manager.logger.WithContext(ctx).WithField("job", job.UUID)
+	logger := manager.logger.WithContext(ctx).WithField("job", job.UUID).WithField("tenant", job.TenantID)
 	ctx = log.With(ctx, logger)
 
 	if manager.hasSession(job.UUID) {
@@ -85,15 +86,12 @@ func (manager *sessionManager) Start(ctx context.Context, job *entities.Job) {
 	manager.addSession(job.UUID)
 
 	go func() {
-		bckOff := backoff.NewExponentialBackOff()
-		bckOff.MaxInterval = 5 * time.Second
-		bckOff.MaxElapsedTime = time.Minute
 		err := backoff.RetryNotify(
 			func() error {
 				err := manager.runSession(ctx, ses)
 				return err
 			},
-			bckOff,
+			pkgbackoff.IncrementalBackOff(5*time.Second, time.Minute),
 			func(err error, d time.Duration) {
 				logger.WithError(err).Warnf("error in job retry session, restarting in %v...", d)
 			},

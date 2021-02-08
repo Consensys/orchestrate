@@ -80,7 +80,7 @@ jobs:
   test:
     docker:
       - image: cimg/go:1.15.7
-      - image: postgres:10.12-alpine
+      - image: postgres:13.1-alpine
         environment:
           POSTGRES_PASSWORD: "postgres"
           DB_HOST: "postgres"

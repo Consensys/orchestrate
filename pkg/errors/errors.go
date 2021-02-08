@@ -495,6 +495,14 @@ func IsInternalError(err error) bool {
 	return isErrorClass(FromError(err).GetCode(), Internal)
 }
 
+func DependencyFailureError(format string, a ...interface{}) *ierror.Error {
+	return Errorf(Internal, format, a...)
+}
+
+func IsDependencyFailureError(err error) bool {
+	return isErrorClass(FromError(err).GetCode(), Internal)
+}
+
 // DataCorruptedError is raised loading a corrupted Data
 func DataCorruptedError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(DataCorrupted, format, a...)

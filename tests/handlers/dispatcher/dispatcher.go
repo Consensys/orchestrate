@@ -30,12 +30,9 @@ func Dispatcher(reg *chanregistry.ChanRegistry, keyOfs ...KeyOfFunc) engine.Hand
 		if envelope.GetJobUUID() == "" {
 			key := "tx.decoded/" + alias.ExternalTxLabel
 			err := reg.Send(key, &envelope)
-			if err != nil {
-				txctx.Logger.WithFields(log.Fields{"key": key}).WithError(err).Error("dispatcher: failed to dispatch external tx envelope")
-				return
+			if err == nil {
+				txctx.Logger.WithFields(log.Fields{"key": key}).Debug("dispatcher: external tx envelope dispatched")
 			}
-
-			txctx.Logger.WithFields(log.Fields{"key": key}).Debug("dispatcher: external tx envelope dispatched")
 			return
 		}
 
@@ -48,7 +45,6 @@ func Dispatcher(reg *chanregistry.ChanRegistry, keyOfs ...KeyOfFunc) engine.Hand
 
 			err = reg.Send(key, &envelope)
 			if err != nil {
-				txctx.Logger.WithFields(log.Fields{"key": key}).WithError(err).Error("dispatcher: failed to dispatch envelope")
 				continue
 			}
 

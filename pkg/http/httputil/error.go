@@ -8,6 +8,7 @@ import (
 )
 
 var internalErrMsg = "Internal server error. Please ask an admin for help or try again later"
+var internalDepErrMsg = "Failed dependency. Please ask an admin for help or try again later"
 
 type ErrorResponse struct {
 	Message string `json:"message" example:"error message"`
@@ -45,6 +46,8 @@ func WriteHTTPErrorResponse(rw http.ResponseWriter, err error) {
 		writeErrorResponse(rw, http.StatusBadRequest, err)
 	case errors.IsInvalidParameterError(err), errors.IsEncodingError(err):
 		writeErrorResponse(rw, http.StatusUnprocessableEntity, err)
+	case errors.IsPostgresConnectionError(err), errors.IsKafkaConnectionError(err):
+		writeErrorResponse(rw, http.StatusFailedDependency, errors.DependencyFailureError(internalDepErrMsg))
 	case err != nil:
 		writeErrorResponse(rw, http.StatusInternalServerError, errors.InternalError(internalErrMsg))
 	}

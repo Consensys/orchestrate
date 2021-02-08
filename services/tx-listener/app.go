@@ -19,7 +19,7 @@ func New(
 	hk hook.Hook,
 	offsets offset.Manager,
 	ec ethereum.EthClient,
-	listenerClient, sentryClient orchestrateclient.OrchestrateClient,
+	client orchestrateclient.OrchestrateClient,
 ) (*app.App, error) {
 
 	var listenerMetrics listenermetrics.ListenerMetrics
@@ -29,18 +29,9 @@ func New(
 		listenerMetrics = listenermetrics.NewListenerNopMetrics()
 	}
 
-	listener = NewTxListener(
-		prvdr,
-		hk,
-		offsets,
-		ec,
-		listenerClient,
-		listenerMetrics,
-	)
-
-	sentry = txsentry.NewTxSentry(sentryClient, txsentry.NewConfig(viper.GetViper()))
-
-	appli, err := app.New(cfg, ReadinessOpt(listenerClient), app.MetricsOpt(listenerMetrics))
+	listener = NewTxListener(prvdr, hk, offsets, ec, client, listenerMetrics)
+	sentry = txsentry.NewTxSentry(client, txsentry.NewConfig(viper.GetViper()))
+	appli, err := app.New(cfg, ReadinessOpt(client), app.MetricsOpt(listenerMetrics))
 	if err != nil {
 		return nil, err
 	}

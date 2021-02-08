@@ -48,6 +48,10 @@ func (l Logger) SetComponent(c string) *Logger {
 	return &l
 }
 
+func (l *Logger) Component() string {
+	return l.component
+}
+
 func (l Logger) WithFields(fields logrus.Fields) *Logger {
 	l.entry = l.entry.WithFields(fields)
 	return &l

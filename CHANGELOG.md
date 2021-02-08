@@ -3,7 +3,8 @@
 ## v21.1.1 (Unreleased)
 
 ### 🛠 Bug fixes
-* Hanging issue during synchronization from block 0  
+* Hanging issue during synchronization from block 0 
+* Tx-listener crashes on heavy load over API
 
 ## v21.1.0 (2021-01-25)
 

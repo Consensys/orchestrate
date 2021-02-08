@@ -42,7 +42,7 @@ func (p *Provider) Provide(ctx context.Context, msgs chan<- provider.Message) er
 
 				msgs <- msg
 			case <-ctx.Done():
-				logger.Infof("stopped providing")
+				logger.Info("stopped providing")
 				return nil
 			}
 		}

@@ -222,7 +222,7 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_SignTransaction() {
 			Return("", errors.ServiceConnectionError("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)
-		assert.Equal(t, http.StatusInternalServerError, rw.Code)
+		assert.Equal(t, http.StatusFailedDependency, rw.Code)
 	})
 }
 
@@ -260,7 +260,7 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_SignQuorumPrivateTransact
 			Return("", errors.ServiceConnectionError("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)
-		assert.Equal(t, http.StatusInternalServerError, rw.Code)
+		assert.Equal(t, http.StatusFailedDependency, rw.Code)
 	})
 }
 

@@ -14,7 +14,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database/postgres"
 )
 
-const DefaultPostgresImage = "postgres:10.12-alpine"
+const DefaultPostgresImage = "postgres:13.1-alpine"
 
 const defaultPassword = "postgres"
 const defaultHostPort = "5432"

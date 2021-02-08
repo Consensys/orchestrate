@@ -4,10 +4,13 @@ import (
 	"context"
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/backoff"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/rpc"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http"
 
 	"github.com/spf13/viper"
 	loader "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/handlers/loader/sarama"
@@ -15,7 +18,7 @@ import (
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
+	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/handlers"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/handlers/consumer"
@@ -50,9 +53,14 @@ func Start(ctx context.Context) error {
 		return err
 	}
 
+	httpClient := http.NewClient(http.NewConfig(viper.GetViper()))
+	backoffConf := orchestrateclient.NewConfigFromViper(viper.GetViper(),
+		backoff.IncrementalBackOff(time.Second*5, time.Minute))
+	client := orchestrateclient.NewHTTPClient(httpClient, backoffConf)
+
 	workload = NewService(cfg,
 		chanregistry.GlobalChanRegistry(),
-		client.GlobalClient(),
+		client,
 		ethclient.GlobalClient(),
 		broker.GlobalSyncProducer())
 
@@ -117,7 +125,6 @@ func initComponents(ctx context.Context) {
 		},
 		func() {
 			broker.InitSyncProducer(ctx)
-			client.Init()
 			ethclient.Init(ctx)
 		},
 		// Initialize ConsumerGroup

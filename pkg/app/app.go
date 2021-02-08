@@ -331,12 +331,12 @@ func (app *App) Stop(ctx context.Context) error {
 
 	err := gr.Wait().ErrorOrNil()
 	if err != nil {
-		app.logger.WithError(err).Errorf("could not shut down gracefully")
+		app.logger.WithError(err).Error("could not shut down gracefully")
 		return err // something went wrong while shutting down
 	}
 
 	app.isReady = false
-	app.logger.WithError(err).Infof("gracefully shutted down")
+	app.logger.WithError(err).Info("gracefully shutted down")
 	return nil // completed normally
 }
 

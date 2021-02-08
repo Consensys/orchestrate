@@ -64,7 +64,7 @@ func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *etht
 		// Register deployed contract
 		err := hk.registerDeployedContract(receiptLogCtx, c, job.Receipt, block)
 		if err != nil {
-			hk.logger.WithContext(receiptLogCtx).WithError(err).Errorf("could not register deployed contract on registry")
+			hk.logger.WithContext(receiptLogCtx).WithError(err).Error("could not register deployed contract on registry")
 		}
 
 		txResponse := &tx.TxResponse{
@@ -163,7 +163,7 @@ func (hk *Hook) decodeReceipt(ctx context.Context, c *dynamic.Chain, receipt *ty
 		}
 
 		if eventResp.Event == "" && len(eventResp.DefaultEvents) == 0 {
-			logger.WithError(err).Warnf("could not retrieve event ABI")
+			logger.WithError(err).Warn("could not retrieve event ABI")
 			continue
 		}
 
