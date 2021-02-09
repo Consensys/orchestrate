@@ -2,7 +2,6 @@ package stress
 
 import (
 	"context"
-	"fmt"
 	"sync"
 	"time"
 
@@ -66,8 +65,8 @@ func Start(ctx context.Context) error {
 
 	// Start consuming on every topics of interest
 	var topics []string
-	for _, topic := range utils2.Topics {
-		topics = append(topics, viper.GetString(fmt.Sprintf("topic.%v", topic)))
+	for _, viprTopicKey := range utils2.Topics {
+		topics = append(topics, viper.GetString(viprTopicKey))
 	}
 
 	cg := consumer.NewEmbeddingConsumerGroupHandler(engine.GlobalEngine())
@@ -135,8 +134,8 @@ func initComponents(ctx context.Context) {
 		func() {
 			// Prepare topics map for dispatcher
 			topics := make(map[string]string)
-			for _, topic := range utils2.Topics {
-				topics[viper.GetString(fmt.Sprintf("topic.%v", topic))] = topic
+			for topic, viprTopicKey := range utils2.Topics {
+				topics[viper.GetString(viprTopicKey)] = topic
 			}
 			dispatcher.SetKeyOfFuncs(
 				dispatcher.LongKeyOf(topics),

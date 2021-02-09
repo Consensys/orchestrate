@@ -12,11 +12,12 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/stress/assets"
 	utils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/stress/utils"
+	utils3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/utils/chanregistry"
 )
 
 func BatchPrivateTxsTest(ctx context.Context, cfg *WorkloadConfig, client orchestrateclient.OrchestrateClient, chanReg *chanregistry.ChanRegistry) error {
-	logger := log.WithContext(ctx).SetComponent("privateTxsTest")
+	logger := log.WithContext(ctx).SetComponent("stress-test.private-txs")
 
 	account := cfg.accounts[utils.RandInt(len(cfg.accounts))]
 	contractName := cfg.artifacts[utils.RandInt(len(cfg.artifacts))]
@@ -72,7 +73,7 @@ func BatchPrivateTxsTest(ctx context.Context, cfg *WorkloadConfig, client orches
 		return err
 	}
 
-	logger.Debug("envelope was found in tx-decoded")
+	logger.WithField("topic", utils3.TxDecodedTopicKey).Debug("envelope was found")
 	return nil
 }
 

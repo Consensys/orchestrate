@@ -4,6 +4,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/e2e/cucumber/alias"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/utils/chanregistry"
 )
 
@@ -28,10 +29,10 @@ func Dispatcher(reg *chanregistry.ChanRegistry, keyOfs ...KeyOfFunc) engine.Hand
 		envelope := *txctx.Envelope
 
 		if envelope.GetJobUUID() == "" {
-			key := "tx.decoded/" + alias.ExternalTxLabel
+			key := utils.TxDecodedTopicKey + "/" + alias.ExternalTxLabel
 			err := reg.Send(key, &envelope)
 			if err == nil {
-				txctx.Logger.WithFields(log.Fields{"key": key}).Debug("dispatcher: external tx envelope dispatched")
+				txctx.Logger.WithFields(log.Fields{"key": key}).Debug("dispatcher - external tx envelope dispatched")
 			}
 			return
 		}
@@ -48,10 +49,10 @@ func Dispatcher(reg *chanregistry.ChanRegistry, keyOfs ...KeyOfFunc) engine.Hand
 				continue
 			}
 
-			txctx.Logger.WithFields(log.Fields{"key": key}).Debug("dispatcher: envelope dispatched")
+			txctx.Logger.WithFields(log.Fields{"key": key}).Debug("dispatcher - envelope dispatched")
 			return
 		}
 
-		txctx.Logger.Warnf("dispatcher: untracked envelope not dispatched")
+		txctx.Logger.Warnf("dispatcher - untracked envelope not dispatched")
 	}
 }

@@ -4,11 +4,12 @@ package dispatcher
 
 import (
 	"fmt"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/e2e/cucumber/alias"
 	"testing"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/e2e/cucumber/alias"
+
 	"github.com/Shopify/sarama"
-	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"github.com/stretchr/testify/assert"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/engine"
@@ -35,7 +36,7 @@ func testKeyOf2(txctx *engine.TxContext) (string, error) {
 func makeContext(key1, key2 string) *engine.TxContext {
 	txctx := engine.NewTxContext()
 	txctx.Reset()
-	txctx.Logger = log.NewEntry(log.StandardLogger())
+	txctx.Logger = log.NewLogger()
 	txctx.In = &broker.Msg{
 		ConsumerMessage: sarama.ConsumerMessage{
 			Topic: "testTopic",

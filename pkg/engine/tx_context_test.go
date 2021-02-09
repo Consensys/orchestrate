@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"testing"
 
-	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"github.com/stretchr/testify/assert"
 	ierror "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/error"
 )
@@ -94,7 +94,7 @@ func TestCtxError(t *testing.T) {
 func TestLogger(t *testing.T) {
 	logHandler := func(txctx *TxContext) { txctx.Logger.Info("Test") }
 	txctx := NewTxContext()
-	txctx.Prepare(log.NewEntry(log.StandardLogger()), nil)
+	txctx.Prepare(log.NewLogger(), nil)
 	txctx.applyHandlers(logHandler)
 }
 
@@ -102,7 +102,7 @@ type testingKey string
 
 func TestWithContext(t *testing.T) {
 	txctx := NewTxContext()
-	txctx.Prepare(log.NewEntry(log.StandardLogger()), nil)
+	txctx.Prepare(log.NewLogger(), nil)
 
 	// Update go context attached to Envelope
 	txctx.WithContext(context.WithValue(context.Background(), testingKey("test-key"), "test-value"))

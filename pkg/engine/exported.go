@@ -3,6 +3,8 @@ package engine
 import (
 	"context"
 	"sync"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 )
 
 const component = "engine"
@@ -20,7 +22,7 @@ func Init(ctx context.Context) {
 			return
 		}
 		conf := NewConfig()
-		e = NewEngine(&conf)
+		e = NewEngine(log.FromContext(ctx), &conf)
 	})
 }
 

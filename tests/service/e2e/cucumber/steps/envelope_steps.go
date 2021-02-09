@@ -15,6 +15,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/rlp"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 	utils4 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
+	utils3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/utils"
 
 	"github.com/Shopify/sarama"
 	"github.com/cucumber/godog"
@@ -125,7 +126,7 @@ func (sc *ScenarioContext) envelopeShouldBeInTopic(topic string) error {
 	}
 
 	// Waiting for job to be updated after notifying (Hacky and ugly)
-	if topic == "tx.decoded" || topic == "tx.recover" {
+	if topic == utils3.TxDecodedTopicKey || topic == utils3.TxRecoverTopicKey {
 		time.Sleep(time.Second)
 	}
 	return nil

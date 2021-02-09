@@ -4,6 +4,10 @@ import (
 	"fmt"
 )
 
+const TxDecodedTopicKey = "tx.decoded"
+const TxRecoverTopicKey = "tx.recover"
+const TxSenderTopicKey = "tx.sender"
+
 func LongKeyOf(topic, metadataID string) string {
 	return fmt.Sprintf(
 		"%v/%v",

@@ -9,7 +9,7 @@ Feature: Listen to external transactions
       | tenant1 | {{random.uuid}} |
     And I register the following chains
       | alias | Name                | URLs                         | Headers.Authorization    | Listener.ExternalTxEnabled |
-      | besu  | besu-{{scenarioID}} | {{global.nodes.besu_1.URLs}} | Bearer {{tenant1.token}} | true                       |
+      | besu  | besu-{{scenarioID}} | {{global.nodes.besu[0].URLs}} | Bearer {{tenant1.token}} | true                       |
 
   Scenario: Listen to external tx
     Given I register the following alias

@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/Shopify/sarama"
-	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/engine"
@@ -32,17 +32,16 @@ type CounterHandler struct {
 }
 
 func (h *CounterHandler) Handle(txctx *engine.TxContext) {
-	txctx.Logger.WithFields(log.Fields{
-		"topic":     txctx.In.Entrypoint(),
-		"offset":    txctx.In.(*Msg).Offset,
-		"partition": txctx.In.(*Msg).Partition,
-	}).Info("handling message")
+	txctx.Logger.WithField("topic", txctx.In.Entrypoint()).
+		WithField("offset", txctx.In.(*Msg).Offset).
+		WithField("partition",txctx.In.(*Msg).Partition).
+		Info("handling message")
 	atomic.AddInt32(&h.counter, 1)
 }
 
 func TestConsumerGroupHandler(t *testing.T) {
 	conf := engine.NewConfig()
-	e := engine.NewEngine(&conf)
+	e := engine.NewEngine(log.NewLogger(), &conf)
 
 	counter := CounterHandler{}
 	e.Register(counter.Handle)

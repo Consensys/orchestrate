@@ -98,7 +98,8 @@ func (sc *ScenarioContext) iSendRequestToWithJSON(method, endpoint string, body 
 		return err
 	}
 
-	sc.logger.Debugf("Request %s %s with body %v", method, endpoint, reqBody)
+	sc.logger.WithField("method", method).WithField("endpoint", endpoint).
+		Debug(fmt.Sprintf("request with body %v", reqBody))
 
 	req, err := http.NewRequest(method, endpoint, bytes.NewBuffer([]byte(reqBody)))
 	if err != nil {

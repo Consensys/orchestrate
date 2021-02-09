@@ -7,12 +7,11 @@ import (
 	"sync"
 
 	"github.com/cucumber/godog"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/auth/jwt/generator"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database/redis"
 	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/rpc"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/e2e/cucumber/alias"
@@ -30,12 +29,13 @@ func Init(ctx context.Context) {
 			return
 		}
 
+		logger := log.FromContext(ctx)
+
 		// Initialize Steps
 		broker.InitSyncProducer(ctx)
 		generator.Init(ctx)
 		alias.Init(ctx)
 		client.Init()
-		redis.Init()
 		ethclient.Init(ctx)
 
 		tags := listTagCucumber()
@@ -52,18 +52,20 @@ func Init(ctx context.Context) {
 			Paths:               viper.GetStringSlice(PathsViperKey),
 		}
 
-		if outputPath := viper.GetString(OutputPathViperKey); outputPath != "" {
+		outputPath := viper.GetString(OutputPathViperKey)
+		if outputPath != "" {
 			f, err := os.Create(viper.GetString(OutputPathViperKey))
 			if err != nil {
-				log.WithError(err).Fatalf("cucumber: could not write output in %s", outputPath)
+				logger.WithError(err).Fatalf("could not write output in %s", outputPath)
 			}
 			options.Output = f
 		}
 
-		log.WithField("tags", options.Tags).
+		logger.WithField("tags", options.Tags).
 			WithField("concurrency", options.Concurrency).
 			WithField("paths", options.Paths).
-			Infof("cucumber: service ready")
+			WithField("output", outputPath).
+			Info("service ready")
 	})
 }
 

@@ -8,7 +8,7 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/golang/mock/gomock"
-	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"github.com/stretchr/testify/suite"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama/mock"
@@ -18,7 +18,7 @@ import (
 
 func makeMarkerContext(session sarama.ConsumerGroupSession, c sarama.ConsumerGroupClaim, i int) *engine.TxContext {
 	// Initialize context
-	txctx := engine.NewTxContext().Prepare(log.NewEntry(log.StandardLogger()), nil)
+	txctx := engine.NewTxContext().Prepare(log.NewLogger(), nil)
 	ctx := broker.WithConsumerGroupSessionAndClaim(context.Background(), session, c)
 	txctx.WithContext(ctx)
 

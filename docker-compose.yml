@@ -49,7 +49,6 @@ x-container-common: &container-common
     - quorum
   volumes:
     - ./build/bin/orchestrate:/bin/main:ro
-    - ./public:/go/public:ro
   labels:
     filebeat: "true"
 
@@ -178,44 +177,6 @@ services:
     depends_on:
       - api
     command: tx-listener run
-
-  e2e:
-    <<: *container-common
-    environment:
-      <<: *default-variables
-      CUCUMBER_OUTPUTPATH: "/report/output/report.json"
-      CUCUMBER_PATHS: "/features"
-      ARTIFACTS_PATH: "/artifacts"
-      CUCUMBER_FORMAT: "cucumber"
-      CUCUMBER_CONCURRENCY: ${CUCUMBER_CONCURRENCY-}
-      CUCUMBER_TAGS: ${CUCUMBER_TAGS-}
-      TEST_GLOBAL_DATA: ${TEST_GLOBAL_DATA-}
-      AUTH_JWT_PRIVATE_KEY: ${AUTH_JWT_PRIVATE_KEY-}
-      CUCUMBER_STEPS_TIMEOUT: ${CUCUMBER_STEPS_TIMEOUT-20s}
-      KAFKA_CONSUMER_GROUP_NAME: ${KAFKA_CONSUMER_GROUP_NAME-e2e}
-    restart: "no"
-    command: e2e
-    volumes:
-      - ./build/bin/test:/bin/main
-      - ./build/report:/report/output
-      - ./tests/features:/features
-      - ./tests/artifacts:/artifacts
-
-  stress:
-    <<: *container-common
-    environment:
-      <<: *default-variables
-      ARTIFACTS_PATH: "/artifacts"
-      STRESS_CONCURRENCY: "50"
-      STRESS_ITERATIONS: "500"
-      STRESS_TIMEOUT: "5m"
-      TEST_GLOBAL_DATA: ${TEST_GLOBAL_DATA-}
-      KAFKA_CONSUMER_GROUP_NAME: ${KAFKA_CONSUMER_GROUP_NAME-stress}
-    restart: "no"
-    command: stress
-    volumes:
-      - ./build/bin/test:/bin/main
-      - ./tests/artifacts:/artifacts
 
   generate-jwt:
     <<: *container-common

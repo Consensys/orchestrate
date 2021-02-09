@@ -24,7 +24,7 @@ Feature: Private transactions
       | besu   | besu-{{scenarioID}}   | {{global.nodes.besu[0].URLs}} | Bearer {{tenant1.token}} |
       | besu_2 | besu_2-{{scenarioID}} | {{global.nodes.besu[1].URLs}} | Bearer {{tenant1.token}} |
 
-  @quorum @testing
+  @quorum
   Scenario: Deploy private ERC20 contract with Quorum and Tessera
     Given I register the following alias
       | alias                    | value           |

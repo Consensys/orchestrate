@@ -17,6 +17,31 @@ commands:
           command: |
             echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin $DOCKER_REGISTRY
 
+  prepare_e2e:
+    description: "Orchestrate e2e environment"
+    steps:
+      - run:
+          name: Build test binary
+          command: make gobuild-e2e
+      - run:
+          name: Setup QA environment
+          command: |
+            echo 'export API_URL=https://qa.orchestrate.ops.consensys.net' >> $BASH_ENV
+            echo 'export KAFKA_URL=kafka-qa-0.kafka.ops.consensys.net:9094' >> $BASH_ENV
+            echo 'export KAFKA_SASL_ENABLED=true' >> $BASH_ENV
+            echo 'export KAFKA_SASL_MECHANISM=PLAIN' >> $BASH_ENV
+            echo 'export KAFKA_SASL_USER=${QA_KAFKA_SASL_USER}' >> $BASH_ENV
+            echo 'export KAFKA_SASL_PASSWORD=${QA_KAFKA_SASL_PASSWORD}' >> $BASH_ENV
+            echo 'export TOPIC_TX_SENDER=qa-tx-sender' >> $BASH_ENV
+            echo 'export TOPIC_TX_RECOVER=qa-tx-recover' >> $BASH_ENV
+            echo 'export TOPIC_TX_DECODED=qa-tx-decoded' >> $BASH_ENV
+            echo 'export MULTI_TENANCY_ENABLED=true' >> $BASH_ENV
+            echo 'export AUTH_API_KEY=${QA_AUTH_API_KEY}' >> $BASH_ENV
+            echo 'export AUTH_JWT_CLAIMS_NAMESPACE=orchestrate.namespace' >> $BASH_ENV 
+            echo 'export AUTH_JWT_CERTIFICATE=${QA_AUTH_JWT_CERTIFICATE}' >> $BASH_ENV
+            echo 'export AUTH_JWT_PRIVATE_KEY=${QA_AUTH_JWT_PRIVATE_KEY}' >> $BASH_ENV
+            echo 'export TEST_GLOBAL_DATA=${QA_TEST_GLOBAL_DATA}' >> $BASH_ENV
+
   docker_build_e2e_dev:
     description: "Build Orchestrate E2E"
     steps:
@@ -163,6 +188,62 @@ jobs:
             TEST_REPOSITORY=${DOCKER_REGISTRY_DEV_REPO}/orchestrate-e2e
             make e2e-remote
 
+  run-e2e:
+    docker:
+      - image: cimg/go:1.15.8-node
+    resource_class: large
+    steps:
+      - prepare_golang
+      - prepare_e2e
+      - run:
+          name: Running e2e
+          environment:
+            CUCUMBER_OUTPUTPATH: "./scripts/report/report.json"
+            CUCUMBER_OUTPUT: "./report.html"
+            CUCUMBER_INPUT: "./report.json"
+            CUCUMBER_PATHS: "./tests/features"
+            ARTIFACTS_PATH: "./tests/artifacts"
+            CUCUMBER_FORMAT: "cucumber"
+            CUCUMBER_STEPS_TIMEOUT: "1m"
+            CUCUMBER_CONCURRENCY: "5"
+            KAFKA_CONSUMER_GROUP_NAME: "e2e"
+            LOG_LEVEL: "INFO"
+          command: |
+            set +e
+            METADATA_TAG=${CIRCLE_TAG}
+            METADATA_BRANCH=${CIRCLE_BRANCH}
+            METADATA_COMMIT=${CIRCLE_SHA1}
+            METADATA_OS=${CIRCLE_BUILD_IMAGE}
+            METADATA_RUNNER=${CIRCLE_BUILD_URL}
+            METADATA_RUNNER_ID=${CIRCLE_BUILD_NUM}
+            METADATA_RUNNER_VERSION=${CI_RUNNER_REVISION}
+            ./build/bin/test e2e
+            exitCode=$(echo $?)
+            cd ./scripts/report
+            npm install
+            npm start
+            exit $exitCode
+      - store_artifacts:
+          path: ./scripts/report/report.html
+          destination: report.html
+
+  run-stress:
+    docker:
+      - image: cimg/go:1.15.8
+    resource_class: large
+    steps:
+      - prepare_golang
+      - prepare_e2e
+      - run:
+          name: Running stress
+          environment:
+            ARTIFACTS_PATH: "./tests/artifacts"
+            STRESS_CONCURRENCY: "10"
+            STRESS_ITERATIONS: "500"
+            STRESS_TIMEOUT: "10m"
+            KAFKA_CONSUMER_GROUP_NAME: "stress"
+          command: ./build/bin/test stress
+
   release-latest:
     docker:
       - image: cimg/base:2020.01
@@ -211,7 +292,6 @@ jobs:
             ORCHESTRATE_REPOSITORY=${DOCKER_REGISTRY_REPO}/orchestrate
             TEST_REPOSITORY=${DOCKER_REGISTRY_REPO}/orchestrate-e2e
             ENVIRONMENT_VALUES=staging
-            make e2e-remote
 
 workflows:
   version: 2
@@ -255,7 +335,7 @@ workflows:
           requires:
             - push-orchestrate-image
             - push-orchestrate-e2e-image
-      - release-latest:
+      - run-e2e:
           filters:
             branches:
               only: master
@@ -263,6 +343,23 @@ workflows:
               ignore: /.*/
           requires:
             - deploy-qa
+#      - run-stress:
+#          filters:
+#            branches:
+#              only: master
+#            tags:
+#              ignore: /.*/
+#          requires:
+#            - run-e2e
+      - release-latest:
+          filters:
+            branches:
+              only: master
+            tags:
+              ignore: /.*/
+          requires:
+            - run-e2e
+#            - run-stress
       - wait-for-approval:
           type: approval
           requires:

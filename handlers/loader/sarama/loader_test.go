@@ -8,7 +8,7 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
-	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"github.com/stretchr/testify/assert"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/engine"
@@ -57,7 +57,7 @@ func TestLoader(t *testing.T) {
 			t.Parallel()
 
 			txctx := engine.NewTxContext()
-			txctx.Logger = log.NewEntry(log.New())
+			txctx.Logger = log.NewLogger()
 
 			Loader(test.input(txctx))
 

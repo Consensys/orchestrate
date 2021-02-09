@@ -5,8 +5,8 @@ import (
 	"os"
 
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 
-	traefiklog "github.com/containous/traefik/v2/pkg/log"
 	"github.com/spf13/cobra"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/e2e"
@@ -33,7 +33,9 @@ func NewRunE2ECommand() *cobra.Command {
 }
 
 func runE2E(cmd *cobra.Command, _ []string) error {
+	logger := log.NewLogger().SetComponent("e2e.cucumber")
 	ctx, cancel := context.WithCancel(cmd.Context())
+	ctx = log.With(ctx, logger)
 
 	// Process signals
 	sig := utils.NewSignalListener(func(signal os.Signal) {
@@ -42,14 +44,14 @@ func runE2E(cmd *cobra.Command, _ []string) error {
 	defer sig.Close()
 
 	if err := e2e.Start(ctx); err != nil {
-		traefiklog.WithoutContext().WithError(err).Errorf("Cucumber did not complete successfully")
+		logger.WithError(err).Error("did not complete successfully")
 		return err
 	}
 
 	if err := e2e.Stop(ctx); err != nil {
-		traefiklog.WithoutContext().WithError(err).Errorf("Cucumber did not shutdown properly")
+		logger.WithError(err).Error("did not shutdown properly")
 	} else {
-		traefiklog.WithoutContext().Info("Cucumber gracefully closed")
+		logger.Info("gracefully closed")
 	}
 
 	return nil

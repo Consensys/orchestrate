@@ -1,0 +1,89 @@
+version: "3.7"
+
+x-default-variables: &default-variables
+  API_URL: ${API_URL-http://api:8081}
+  API_METRICS_URL: ${API_METRICS_URL-http://api:8082}
+  LOG_LEVEL: ${LOG_LEVEL-info}
+  LOG_FORMAT: ${LOG_FORMAT-}
+  MULTI_TENANCY_ENABLED: ${MULTI_TENANCY_ENABLED-}
+  AUTH_JWT_CLAIMS_NAMESPACE: ${AUTH_JWT_CLAIMS_NAMESPACE-}
+  AUTH_JWT_CERTIFICATE: ${AUTH_JWT_CERTIFICATE-}
+  AUTH_API_KEY: ${AUTH_API_KEY-}
+  KAFKA_URL: ${KAFKA_URL-kafka:29092}
+  KAFKA_SASL_ENABLED: ${KAFKA_SASL_ENABLED-false}
+  KAFKA_SASL_MECHANISM: ${KAFKA_SASL_MECHANISM-PLAIN}
+  KAFKA_SASL_USER: ${KAFKA_SASL_USER-}
+  KAFKA_SASL_PASSWORD: ${KAFKA_SASL_PASSWORD-}
+  KAFKA_TLS_ENABLED: ${KAFKA_TLS_ENABLED-false}
+  KAFKA_TLS_INSECURE_SKIP_VERIFY: ${KAFKA_TLS_INSECURE_SKIP_VERIFY-false}
+  TOPIC_TX_SENDER: ${TOPIC_TX_SENDER-}
+  TOPIC_TX_RECOVER: ${TOPIC_TX_RECOVER-}
+  TOPIC_TX_DECODED: ${TOPIC_TX_DECODED-}
+    
+x-container-common: &container-common
+  image: golang:1.15-buster
+  restart: ${CONTAINER_RESTART-on-failure}
+  entrypoint: /bin/main
+  networks:
+    - orchestrate
+  tty: true
+
+services:
+  e2e:
+    <<: *container-common
+    environment:
+      <<: *default-variables
+      CUCUMBER_OUTPUTPATH: "/report/output/report.json"
+      CUCUMBER_PATHS: "/features"
+      ARTIFACTS_PATH: "/artifacts"
+      CUCUMBER_FORMAT: "cucumber"
+      CUCUMBER_CONCURRENCY: ${CUCUMBER_CONCURRENCY-}
+      CUCUMBER_TAGS: ${CUCUMBER_TAGS-}
+      TEST_GLOBAL_DATA: ${TEST_GLOBAL_DATA-}
+      AUTH_JWT_PRIVATE_KEY: ${AUTH_JWT_PRIVATE_KEY-}
+      CUCUMBER_STEPS_TIMEOUT: ${CUCUMBER_STEPS_TIMEOUT-20s}
+      KAFKA_CONSUMER_GROUP_NAME: ${KAFKA_CONSUMER_GROUP_NAME-e2e}
+    restart: "no"
+    command: e2e
+    volumes:
+      - ./build/bin/test:/bin/main
+      - ./build/report:/report/output
+      - ./tests/features:/features
+      - ./tests/artifacts:/artifacts
+
+  report:
+    build: ./scripts/report
+    environment:
+      METADATA_TAG: ${CI_COMMIT_TAG-}
+      METADATA_BRANCH: ${CI_COMMIT_BRANCH-}
+      METADATA_COMMIT: ${CI_COMMIT_SHORT_SHA-}
+      METADATA_OS: ${CI_RUNNER_EXECUTABLE_ARCH-}
+      METADATA_RUNNER: ${CI_RUNNER_DESCRIPTION-}
+      METADATA_RUNNER_ID: ${CI_RUNNER_ID-}
+      METADATA_RUNNER_VERSION: ${CI_RUNNER_REVISION-}
+      CUCUMBER_INPUT: in/report.json
+      CUCUMBER_OUTPUT: out/report.html
+    volumes:
+      - ./build/report:/usr/src/app/in
+      - ./build/report:/usr/src/app/out
+
+  stress:
+    <<: *container-common
+    environment:
+      <<: *default-variables
+      ARTIFACTS_PATH: "/artifacts"
+      STRESS_CONCURRENCY: "15"
+      STRESS_ITERATIONS: "300"
+      STRESS_TIMEOUT: "10m"
+      TEST_GLOBAL_DATA: ${TEST_GLOBAL_DATA-}
+      KAFKA_CONSUMER_GROUP_NAME: ${KAFKA_CONSUMER_GROUP_NAME-stress}
+    restart: "no"
+    command: stress
+    volumes:
+      - ./build/bin/test:/bin/main
+      - ./tests/artifacts:/artifacts
+
+networks:
+  orchestrate:
+    external:
+      name: deps_orchestrate

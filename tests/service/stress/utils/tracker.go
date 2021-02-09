@@ -4,19 +4,21 @@ import (
 	"fmt"
 	"time"
 
-	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/utils/chanregistry"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/utils/tracker"
 )
 
-var Topics = [...]string{
-	"tx.decoded",
-	"tx.recover",
+var Topics = map[string]string{
+	utils.TxDecodedTopicKey: sarama.TxDecodedViperKey,
+	utils.TxRecoverTopicKey: sarama.TxRecoverViperKey,
 }
 
 func NewEnvelopeTracker(chanReg *chanregistry.ChanRegistry, e *tx.Envelope, testID string) *tracker.Tracker {
+	logger := log.NewLogger().SetComponent("stress-test.tracker")
 	// Prepare envelope metadata
 	if testID != "" {
 		_ = e.SetContextLabelsValue("id", testID)
@@ -28,15 +30,12 @@ func NewEnvelopeTracker(chanReg *chanregistry.ChanRegistry, e *tx.Envelope, test
 	t.Current = e
 
 	// Initialize output channels on tracker and register channels on channel registry
-	for _, topic := range Topics {
+	for topic := range Topics {
 		ckey := utils.LongKeyOf(topic, testID)
 		var ch = make(chan *tx.Envelope, 10)
 		// Register channel on channel registry
-		log.WithFields(log.Fields{
-			"id":     ckey,
-			"testId": testID,
-			"topic":  topic,
-		}).Debugf("tracker: registered new envelope channel")
+		logger.WithField("id", ckey).WithField("testId", testID).
+			WithField("topic", topic).Debug("registered new envelope channel")
 		chanReg.Register(ckey, ch)
 
 		// Add channel as a tracker output

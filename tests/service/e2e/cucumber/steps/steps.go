@@ -8,17 +8,14 @@ import (
 	gherkin "github.com/cucumber/messages-go/v10"
 	"github.com/gofrs/uuid"
 	"github.com/mitchellh/copystructure"
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/auth/jwt/generator"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database/redis"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient"
 	rpcClient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/rpc"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/tx"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sender/store"
-	redis2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sender/store/redis"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/e2e/cucumber/alias"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/e2e/utils"
 	utils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/utils"
@@ -52,13 +49,11 @@ type ScenarioContext struct {
 	// Producer to producer envelopes in topics
 	producer sarama.SyncProducer
 
-	logger *log.Entry
+	logger *log.Logger
 
 	jwtGenerator *generator.JWTGenerator
 
 	ec ethclient.Client
-
-	nonceSender store.NonceSender
 
 	TearDownFunc []func()
 }
@@ -71,7 +66,6 @@ func NewScenarioContext(
 	aliasesReg *alias.Registry,
 	jwtGenerator *generator.JWTGenerator,
 	ec ethclient.Client,
-	nonceSender store.NonceSender,
 ) *ScenarioContext {
 	sc := &ScenarioContext{
 		chanReg:      chanReg,
@@ -79,10 +73,9 @@ func NewScenarioContext(
 		aliases:      aliasesReg,
 		client:       client,
 		producer:     producer,
-		logger:       log.NewEntry(log.StandardLogger()),
+		logger:       log.NewLogger().SetComponent("e2e.cucumber"),
 		jwtGenerator: jwtGenerator,
 		ec:           ec,
-		nonceSender:  nonceSender,
 	}
 
 	return sc
@@ -98,10 +91,7 @@ func (sc *ScenarioContext) init(s *gherkin.Pickle) {
 	sc.defaultTracker = sc.newTracker(nil)
 
 	// Enrich logger
-	sc.logger = sc.logger.WithFields(log.Fields{
-		"scenario.name": sc.Pickle.Name,
-		"scenario.id":   sc.Pickle.Id,
-	})
+	sc.logger = sc.logger.WithField("scenario.name", sc.Pickle.Name).WithField("scenario.id", sc.Pickle.Id)
 }
 
 func (sc *ScenarioContext) newTracker(e *tx.Envelope) *tracker.Tracker {
@@ -115,7 +105,7 @@ func (sc *ScenarioContext) newTracker(e *tx.Envelope) *tracker.Tracker {
 	t.Current = e
 
 	// Initialize output channels on tracker and register channels on channel registry
-	for _, topic := range utils.TOPICS {
+	for topic := range utils.TOPICS {
 		var ckey string
 		if e != nil {
 			ckey = utils2.LongKeyOf(topic, e.GetID())
@@ -127,11 +117,8 @@ func (sc *ScenarioContext) newTracker(e *tx.Envelope) *tracker.Tracker {
 		// TODO: make chan size configurable
 		var ch = make(chan *tx.Envelope, 30)
 		// Register channel on channel registry
-		log.WithFields(log.Fields{
-			"id":          ckey,
-			"scenario.id": sc.Pickle.Id,
-			"topic":       topic,
-		}).Debugf("tracker: registered new envelope channel")
+		sc.logger.WithField("msg_id", ckey).WithField("topic", topic).
+			Debug("registered new envelope channel")
 		sc.chanReg.Register(ckey, ch)
 
 		// Add channel as a tracker output
@@ -184,7 +171,6 @@ func (sc *ScenarioContext) preProcessTableStep(tableFunc stepTable) stepTable {
 }
 
 func InitializeScenario(s *godog.ScenarioContext) {
-	nm := redis2.NewNonceSender(redis.GlobalClient())
 	sc := NewScenarioContext(
 		chanregistry.GlobalChanRegistry(),
 		http.NewClient(http.NewDefaultConfig()),
@@ -193,26 +179,16 @@ func InitializeScenario(s *godog.ScenarioContext) {
 		alias.GlobalAliasRegistry(),
 		generator.GlobalJWTGenerator(),
 		rpcClient.GlobalClient(),
-		nm,
 	)
 
 	s.BeforeScenario(sc.init)
 	s.AfterScenario(sc.tearDown)
 
 	s.BeforeStep(func(s *gherkin.Pickle_PickleStep) {
-		log.WithFields(log.Fields{
-			"step.text":     s.Text,
-			"scenario.name": sc.Pickle.Name,
-			"scenario.id":   sc.Pickle.Id,
-		}).Debugf("scenario: step starts")
+		sc.logger.WithField("step", s.Text).Debug("step starts")
 	})
 	s.AfterStep(func(s *gherkin.Pickle_PickleStep, err error) {
-		log.WithError(err).
-			WithFields(log.Fields{
-				"step.text":     s.Text,
-				"scenario.name": sc.Pickle.Name,
-				"scenario.id":   sc.Pickle.Id,
-			}).Debugf("scenario: step completed")
+		sc.logger.WithField("step", s.Text).Debug("step completed")
 	})
 
 	initEnvelopeSteps(s, sc)

@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
-	log "github.com/sirupsen/logrus"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 )
 
 // HandlerFunc is base type for an handler function processing a Context
@@ -40,14 +40,14 @@ type Engine struct {
 }
 
 // NewEngine creates a new Engine
-func NewEngine(conf *Config) (e *Engine) {
+func NewEngine(logger *log.Logger, conf *Config) (e *Engine) {
 	e = &Engine{
 		handlers:  []HandlerFunc{},
 		running:   0,
 		cleanOnce: &sync.Once{},
 		ctxPool:   &sync.Pool{New: func() interface{} { return NewTxContext() }},
 		mux:       &sync.Mutex{},
-		logger:    log.StandardLogger(), // TODO: make possible to use non-standard logrus logger
+		logger:    logger,
 	}
 
 	if conf != nil {
@@ -60,11 +60,11 @@ func NewEngine(conf *Config) (e *Engine) {
 // SetConfig set Engine configuration
 func (e *Engine) SetConfig(conf *Config) {
 	if conf == nil {
-		log.Fatal("nil configuration passed to engine")
+		e.logger.Fatal("nil configuration passed to engine")
 	}
 
 	if err := conf.Validate(); err != nil {
-		log.WithError(err).Fatal("cannot validate engine configuration")
+		e.logger.WithError(err).Fatal("cannot validate engine configuration")
 	}
 
 	e.mux.Lock()
@@ -115,9 +115,7 @@ func (e *Engine) Run(ctx context.Context, input <-chan Msg) {
 
 	// Increment count of input channels being consumed
 	count := atomic.AddInt64(&e.running, 1)
-	e.logger.WithFields(log.Fields{
-		"loops.count": count,
-	}).Debugf("engine: start running loop")
+	e.logger.WithField("loops.count", count).Debug("engine: start running loop")
 
 	bckOff := backoff.NewExponentialBackOff()
 	bckOff.MaxInterval = time.Second * 15
@@ -169,9 +167,7 @@ runningLoop:
 
 	// Decrement count of input channels being consumed
 	count = atomic.AddInt64(&e.running, -1)
-	e.logger.WithFields(log.Fields{
-		"loops.count": count,
-	}).Debugf("engine: left running loop")
+	e.logger.WithField("loops.count", count).Debug("engine: left running loop")
 }
 
 // CleanUp clean Engine resources
@@ -202,7 +198,7 @@ func (e *Engine) handleMessage(ctx context.Context, msg Msg) error {
 	// Prepare context & calls Next to trigger execution
 	txctx.
 		Prepare(
-			log.NewEntry(e.logger),
+			log.FromContext(ctx),
 			msg,
 		).
 		WithContext(ctx).

@@ -12,7 +12,7 @@ func Marker(txctx *engine.TxContext) {
 
 	// In case of msg retrying, skip offset marker
 	if err := txctx.HasRetryMsgErr(); err != nil {
-		txctx.Logger.WithError(err).Warn("marker: skip offset marking, retrying message...")
+		txctx.Logger.WithError(err).Warn("marker - skip offset marking, retrying message...")
 		return
 	}
 
@@ -22,10 +22,10 @@ func Marker(txctx *engine.TxContext) {
 		// Cast message
 		msg, ok := txctx.In.(*broker.Msg)
 		if !ok {
-			txctx.Logger.Fatalf("marker: expected a sarama.ConsumerMessage")
+			txctx.Logger.Fatalf("marker - expected a sarama.ConsumerMessage")
 		}
 
-		txctx.Logger.Debug("marker: commit offset")
+		txctx.Logger.Debug("marker - commit offset")
 		s.MarkMessage(&msg.ConsumerMessage, "")
 		s.Commit()
 	}

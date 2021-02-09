@@ -93,15 +93,6 @@ Feature: Transaction Scheduler Jobs
     Then the response code should be 200
     When I send "PUT" request to "{{global.api}}/jobs/{{txOneJobUUID}}/start"
     Then the response code should be 202
-    When I send "GET" request to "{{global.api}}/jobs/{{txOneJobUUID}}"
-    Then the response code should be 200
-    And Response should have the following fields
-      | uuid             | transaction.from | transaction.to | status  |
-      | {{txOneJobUUID}} | {{account1}}     | {{to2}}        | STARTED |
-    Then Envelopes should be in topic "tx.sender"
-    And Envelopes should have the following fields
-      | Nonce | From         | To      |
-      | 1     | {{account1}} | {{to2}} |
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
       | Receipt.Status |

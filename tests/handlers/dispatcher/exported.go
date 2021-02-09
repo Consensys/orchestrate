@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"sync"
 
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/utils/chanregistry"
 )
@@ -33,7 +33,7 @@ func Init(ctx context.Context) {
 
 		handler = Dispatcher(chanregistry.GlobalChanRegistry(), keyOfFuncs...)
 
-		log.Infof("dispatcher: handler ready")
+		log.FromContext(ctx).Info("dispatcher handler ready")
 	})
 }
 

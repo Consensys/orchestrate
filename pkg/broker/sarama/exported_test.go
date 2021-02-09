@@ -14,6 +14,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	cgmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/engine"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 )
 
 type ExportedTestSuite struct {
@@ -118,7 +119,7 @@ func (s *ExportedTestSuite) TestSetConsumerGroup() {
 
 func TestConsume(t *testing.T) {
 	conf := engine.NewConfig()
-	e := engine.NewEngine(&conf)
+	e := engine.NewEngine(log.NewLogger(), &conf)
 
 	counter := CounterHandler{}
 	e.Register(counter.Handle)

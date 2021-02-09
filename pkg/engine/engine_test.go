@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 )
 
 type TestHandler struct {
@@ -47,7 +47,7 @@ func TestEngine(t *testing.T) {
 	}
 
 	// Create new Engine and register test handler
-	eng := NewEngine(&Config{Slots: 100})
+	eng := NewEngine(log.NewLogger(), &Config{Slots: 100})
 	eng.Register(h.Handler(t))
 
 	// Create input channels and prefills it
@@ -85,7 +85,7 @@ func TestEngineStopped(t *testing.T) {
 	}
 
 	// Create new Engine and register test handler
-	eng := NewEngine(&Config{Slots: 100})
+	eng := NewEngine(log.NewLogger(), &Config{Slots: 100})
 	eng.Register(h.Handler(t))
 
 	// Create input channels and prefills it
@@ -137,7 +137,7 @@ func testSleepingHandler(txctx *TxContext) {
 func makeTimeoutContext(i int) *TxContext {
 	txctx := NewTxContext()
 	txctx.Reset()
-	txctx.Prepare(log.NewEntry(log.StandardLogger()), nil)
+	txctx.Prepare(log.NewLogger(), nil)
 
 	switch i % 2 {
 	case 0:

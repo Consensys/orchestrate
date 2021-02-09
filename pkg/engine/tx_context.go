@@ -6,8 +6,8 @@ import (
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/tx"
 
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	ierror "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/error"
 )
 
@@ -24,7 +24,7 @@ type TxContext struct {
 	stack []*sequence
 
 	// Logger logrus log entry for this Envelope execution
-	Logger *log.Entry
+	Logger *log.Logger
 
 	// ctx is a go context that is attached to the Envelope
 	// It allows to carry deadlines, cancellation signals, etc. between handlers
@@ -88,7 +88,7 @@ func (txctx *TxContext) AbortWithError(err error) *ierror.Error {
 }
 
 // Prepare re-initializes Envelope, set handlers, set logger and set message
-func (txctx *TxContext) Prepare(logger *log.Entry, msg Msg) *TxContext {
+func (txctx *TxContext) Prepare(logger *log.Logger, msg Msg) *TxContext {
 	txctx.Reset()
 	txctx.In = msg
 	txctx.Logger = logger

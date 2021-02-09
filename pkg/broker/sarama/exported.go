@@ -94,7 +94,7 @@ func initClient(ctx context.Context) (err error) {
 		hostnames := viper.GetStringSlice(KafkaURLViperKey)
 		client, err = NewClient(hostnames, config)
 		if err != nil {
-			logger.WithField("hosts", hostnames).Fatalf("could not to start client")
+			logger.WithField("hosts", hostnames).Fatal("could not to start client")
 			return
 		}
 

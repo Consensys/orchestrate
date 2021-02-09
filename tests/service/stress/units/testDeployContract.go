@@ -11,11 +11,12 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	utils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/stress/utils"
+	utils3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/utils/chanregistry"
 )
 
 func BatchDeployContractTest(ctx context.Context, cfg *WorkloadConfig, client orchestrateclient.OrchestrateClient, chanReg *chanregistry.ChanRegistry) error {
-	logger := log.WithContext(ctx).SetComponent("deployContractTest")
+	logger := log.WithContext(ctx).SetComponent("stress-test.deploy-contract")
 	nAccount := utils.RandInt(len(cfg.accounts))
 	nArtifact := utils.RandInt(len(cfg.artifacts))
 	nChain := utils.RandInt(len(cfg.chains))
@@ -52,10 +53,10 @@ func BatchDeployContractTest(ctx context.Context, cfg *WorkloadConfig, client or
 		if !errors.IsConnectionError(err) {
 			logger = logger.WithField("req", string(sReq))
 		}
-		logger.WithError(err).Error("envelope was not found in tx-decoded")
+		logger.WithField("topic", utils3.TxDecodedTopicKey).WithError(err).Error("envelope was not found in topic")
 		return err
 	}
 
-	logger.Debug("envelope was found in tx-decoded")
+	logger.WithField("topic", utils3.TxDecodedTopicKey).Debug("envelope was found in topic")
 	return nil
 }

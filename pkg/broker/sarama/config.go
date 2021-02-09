@@ -13,8 +13,6 @@ func init() {
 	// Kafka general parameters
 	viper.SetDefault(KafkaURLViperKey, kafkaURLDefault)
 	_ = viper.BindEnv(KafkaURLViperKey, KafkaURLEnv)
-	viper.SetDefault(KafkaGroupViperKey, kafkaGroupDefault)
-	_ = viper.BindEnv(KafkaGroupViperKey, kafkaGroupEnv)
 
 	// Kafka topics for the tx workflow
 	viper.SetDefault(TxSenderViperKey, txSenderTopicDefault)
@@ -74,7 +72,6 @@ func init() {
 // InitKafkaFlags
 func InitKafkaFlags(f *pflag.FlagSet) {
 	KafkaURL(f)
-	KafkaGroup(f)
 	InitKafkaSASLFlags(f)
 	InitKafkaTLSFlags(f)
 	KafkaConsumerMaxWaitTime(f)
@@ -99,21 +96,6 @@ func KafkaURL(f *pflag.FlagSet) {
 Environment variable: %q`, KafkaURLEnv)
 	f.StringSlice(kafkaURLFlag, kafkaURLDefault, desc)
 	_ = viper.BindPFlag(KafkaURLViperKey, f.Lookup(kafkaURLFlag))
-}
-
-const (
-	kafkaGroupFlag     = "kafka-group"
-	KafkaGroupViperKey = "kafka.group"
-	kafkaGroupEnv      = "KAFKA_GROUP"
-	kafkaGroupDefault  = "group-e2e"
-)
-
-// KafkaGroup register flag for Kafka group
-func KafkaGroup(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Address of Kafka server to connect to.
-Environment variable: %q`, kafkaGroupEnv)
-	f.String(kafkaGroupFlag, kafkaGroupDefault, desc)
-	_ = viper.BindPFlag(KafkaGroupViperKey, f.Lookup(kafkaGroupFlag))
 }
 
 const (

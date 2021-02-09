@@ -2,23 +2,20 @@ package e2e
 
 import (
 	"context"
-	"fmt"
 	"sync"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 
-	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	loader "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/handlers/loader/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/handlers/offset"
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database/redis"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/engine"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	pkglog "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/handlers"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/handlers/consumer"
@@ -34,7 +31,7 @@ var (
 
 // Start starts application
 func Start(ctx context.Context) error {
-	log.FromContext(ctx).Info("Cucumber: starting execution...")
+	log.FromContext(ctx).Info("starting execution...")
 
 	var gerr error
 	// Create context for application
@@ -50,8 +47,8 @@ func Start(ctx context.Context) error {
 
 	// Start consuming on every topics of interest
 	var topics []string
-	for _, topic := range utils2.TOPICS {
-		topics = append(topics, viper.GetString(fmt.Sprintf("topic.%v", topic)))
+	for _, viprTopicKey := range utils2.TOPICS {
+		topics = append(topics, viper.GetString(viprTopicKey))
 	}
 
 	cg := consumer.NewEmbeddingConsumerGroupHandler(engine.GlobalEngine())
@@ -59,9 +56,7 @@ func Start(ctx context.Context) error {
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func() {
-		log.FromContext(ctx).WithFields(logrus.Fields{
-			"topics": topics,
-		}).Info("connecting")
+		log.FromContext(ctx).WithField("topics", topics).Info("connecting")
 
 		err := broker.Consume(ctx, topics, cg)
 		if err != nil {
@@ -116,8 +111,8 @@ func initComponents(ctx context.Context) {
 		func() {
 			// Prepare topics map for dispatcher
 			topics := make(map[string]string)
-			for _, topic := range utils2.TOPICS {
-				topics[viper.GetString(fmt.Sprintf("topic.%v", topic))] = topic
+			for topic, viprTopicKey := range utils2.TOPICS {
+				topics[viper.GetString(viprTopicKey)] = topic
 			}
 			dispatcher.SetKeyOfFuncs(
 				dispatcher.LongKeyOf(topics),
@@ -128,14 +123,10 @@ func initComponents(ctx context.Context) {
 		},
 		// Initialize logger
 		func() {
-			cfg := pkglog.NewConfig(viper.GetViper())
+			cfg := log.NewConfig(viper.GetViper())
 			// Create and configure logger
 			logger := logrus.StandardLogger()
-			_ = pkglog.ConfigureLogger(cfg, logger)
-		},
-		// Initialize Nonce Manager
-		func() {
-			redis.Init()
+			_ = log.ConfigureLogger(cfg, logger)
 		},
 		// Initialize cucumber handlers
 		func() {
