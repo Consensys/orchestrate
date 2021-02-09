@@ -186,7 +186,8 @@ jobs:
             TEST_TAG=${CIRCLE_SHA1:0:8}
             ORCHESTRATE_REPOSITORY=${DOCKER_REGISTRY_DEV_REPO}/orchestrate
             TEST_REPOSITORY=${DOCKER_REGISTRY_DEV_REPO}/orchestrate-e2e
-            make e2e-remote
+            ENVIRONMENT_VALUES=qa
+            make deploy-remote-env
 
   run-e2e:
     docker:
@@ -292,6 +293,7 @@ jobs:
             ORCHESTRATE_REPOSITORY=${DOCKER_REGISTRY_REPO}/orchestrate
             TEST_REPOSITORY=${DOCKER_REGISTRY_REPO}/orchestrate-e2e
             ENVIRONMENT_VALUES=staging
+            make deploy-remote-env
 
 workflows:
   version: 2

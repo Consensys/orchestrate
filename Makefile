@@ -53,8 +53,8 @@ e2e: run-e2e
 	@$(OPEN) build/report/report.html 2>/dev/null
 	@exit $(docker inspect orchestrategit_e2e_1 --format='{{.State.ExitCode}}')
 
-e2e-remote:
-	@bash ./scripts/circleci-e2e.sh
+deploy-remote-env:
+	@bash ./scripts/deploy-remote-env.sh
 
 stress: run-stress
 	@exit $(docker inspect orchestrategit_stress_1 --format='{{.State.ExitCode}}')
@@ -204,6 +204,8 @@ geth-dev: deps geth orchestrate ## Start Orchestrate and light deps
 besu-dev: deps besu orchestrate ## Start Orchestrate and light besu deps
 
 quorum-dev: deps quorum orchestrate ## Start Orchestrate and light quorum deps
+
+remote-dev: deps-persistent orchestrate
 
 down: down-orchestrate down-quorum down-geth down-besu down-deps  ## Down Orchestrate and deps
 
