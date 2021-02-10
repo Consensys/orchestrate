@@ -1,8 +1,11 @@
 package api
 
-import "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+import (
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
+)
 
-func validatePrivateTxParams(protocol, privacyGroupID string, privateFor []string) error {
+func validatePrivateTxParams(protocol entities.PrivateTxManagerType, privacyGroupID string, privateFor []string) error {
 	if protocol == "" {
 		return errors.InvalidParameterError("field 'protocol' cannot be empty")
 	}

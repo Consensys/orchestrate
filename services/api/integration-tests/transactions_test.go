@@ -6,6 +6,8 @@ import (
 	"context"
 	"github.com/stretchr/testify/require"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
+
 	"testing"
 	"time"
 
@@ -118,10 +120,10 @@ func (s *transactionsTestSuite) TestSuccess() {
 
 		assert.NotEmpty(t, txResponseGET.UUID)
 		assert.NotEmpty(t, job.UUID)
-		assert.Equal(t, utils.StatusStarted, job.Status)
+		assert.Equal(t, entities.StatusStarted, job.Status)
 		assert.Equal(t, txRequest.Params.From, job.Transaction.From)
 		assert.Equal(t, txRequest.Params.To, job.Transaction.To)
-		assert.Equal(t, utils.EthereumTransaction, job.Type)
+		assert.Equal(t, entities.EthereumTransaction, job.Type)
 
 		evlp, err := s.env.consumer.WaitForEnvelope(job.ScheduleUUID, s.env.kafkaTopicConfig.Sender, waitForEnvelopeTimeOut)
 		if err != nil {
@@ -131,7 +133,7 @@ func (s *transactionsTestSuite) TestSuccess() {
 		assert.Equal(t, job.ScheduleUUID, evlp.GetID())
 		assert.Equal(t, job.UUID, evlp.GetJobUUID())
 		assert.True(t, evlp.IsOneTimeKeySignature())
-		assert.Equal(t, tx.JobTypeMap[utils.EthereumTransaction].String(), evlp.GetJobTypeString())
+		assert.Equal(t, tx.JobTypeMap[entities.EthereumTransaction].String(), evlp.GetJobTypeString())
 		assert.Equal(t, evlp.PartitionKey(), "")
 	})
 
@@ -180,32 +182,32 @@ func (s *transactionsTestSuite) TestSuccess() {
 		faucetJob := txResponseGET.Jobs[1]
 		txJob := txResponseGET.Jobs[0]
 		assert.Equal(t, faucetJob.ChainUUID, faucet.ChainRule)
-		assert.Equal(t, utils.StatusStarted, faucetJob.Status)
-		assert.Equal(t, utils.EthereumTransaction, faucetJob.Type)
+		assert.Equal(t, entities.StatusStarted, faucetJob.Status)
+		assert.Equal(t, entities.EthereumTransaction, faucetJob.Type)
 		assert.Equal(t, faucetJob.Transaction.To, txJob.Transaction.From)
 		assert.Equal(t, faucetJob.Transaction.Value, faucet.Amount)
 
 		assert.NotEmpty(t, txResponseGET.UUID)
 		assert.NotEmpty(t, txJob.UUID)
 		assert.Equal(t, txJob.ChainUUID, faucet.ChainRule)
-		assert.Equal(t, utils.StatusStarted, txJob.Status)
+		assert.Equal(t, entities.StatusStarted, txJob.Status)
 		assert.Equal(t, txRequest.Params.From, txJob.Transaction.From)
 		assert.Equal(t, txRequest.Params.To, txJob.Transaction.To)
-		assert.Equal(t, utils.EthereumTransaction, txJob.Type)
+		assert.Equal(t, entities.EthereumTransaction, txJob.Type)
 
 		fctEvlp, err := s.env.consumer.WaitForEnvelope(faucetJob.ScheduleUUID, s.env.kafkaTopicConfig.Sender, waitForEnvelopeTimeOut)
 		require.NoError(t, err)
 		assert.Equal(t, faucetJob.ScheduleUUID, fctEvlp.GetID())
 		assert.Equal(t, faucetJob.UUID, fctEvlp.GetJobUUID())
-		assert.Equal(t, tx.JobTypeMap[utils.EthereumTransaction].String(), fctEvlp.GetJobTypeString())
+		assert.Equal(t, tx.JobTypeMap[entities.EthereumTransaction].String(), fctEvlp.GetJobTypeString())
 
 		jobEvlp, err := s.env.consumer.WaitForEnvelope(txJob.ScheduleUUID, s.env.kafkaTopicConfig.Sender, waitForEnvelopeTimeOut)
 		require.NoError(t, err)
 		assert.Equal(t, txJob.ScheduleUUID, jobEvlp.GetID())
 		assert.Equal(t, txJob.UUID, jobEvlp.GetJobUUID())
 
-		err = s.client.DeleteChain(ctx, chainWithFaucet.UUID)
-		assert.NoError(t, err)
+		// err = s.client.DeleteChain(ctx, chainWithFaucet.UUID)
+		// assert.NoError(t, err)
 		err = s.client.DeleteFaucet(ctx, faucet.UUID)
 		assert.NoError(t, err)
 	})
@@ -229,15 +231,15 @@ func (s *transactionsTestSuite) TestSuccess() {
 
 		privTxJob := txResponseGET.Jobs[0]
 		assert.NotEmpty(t, privTxJob.UUID)
-		assert.Equal(t, utils.StatusStarted, privTxJob.Status)
+		assert.Equal(t, entities.StatusStarted, privTxJob.Status)
 		assert.Equal(t, txRequest.Params.From, privTxJob.Transaction.From)
 		assert.Equal(t, txRequest.Params.To, privTxJob.Transaction.To)
-		assert.Equal(t, utils.TesseraPrivateTransaction, privTxJob.Type)
+		assert.Equal(t, entities.TesseraPrivateTransaction, privTxJob.Type)
 
 		markingTxJob := txResponseGET.Jobs[1]
 		assert.NotEmpty(t, markingTxJob.UUID)
-		assert.Equal(t, utils.StatusCreated, markingTxJob.Status)
-		assert.Equal(t, utils.TesseraMarkingTransaction, markingTxJob.Type)
+		assert.Equal(t, entities.StatusCreated, markingTxJob.Status)
+		assert.Equal(t, entities.TesseraMarkingTransaction, markingTxJob.Type)
 
 		privTxEvlp, err := s.env.consumer.WaitForEnvelope(privTxJob.ScheduleUUID, s.env.kafkaTopicConfig.Sender, waitForEnvelopeTimeOut)
 		if err != nil {
@@ -248,7 +250,7 @@ func (s *transactionsTestSuite) TestSuccess() {
 		assert.Equal(t, privTxJob.ScheduleUUID, privTxEvlp.GetID())
 		assert.Equal(t, privTxJob.UUID, privTxEvlp.GetJobUUID())
 		assert.False(t, privTxEvlp.IsOneTimeKeySignature())
-		assert.Equal(t, tx.JobTypeMap[utils.TesseraPrivateTransaction].String(), privTxEvlp.GetJobTypeString())
+		assert.Equal(t, tx.JobTypeMap[entities.TesseraPrivateTransaction].String(), privTxEvlp.GetJobTypeString())
 	})
 
 	s.T().Run("should send an orion transaction successfully", func(t *testing.T) {
@@ -272,15 +274,15 @@ func (s *transactionsTestSuite) TestSuccess() {
 
 		privTxJob := txResponseGET.Jobs[0]
 		assert.NotEmpty(t, privTxJob.UUID)
-		assert.Equal(t, utils.StatusStarted, privTxJob.Status)
+		assert.Equal(t, entities.StatusStarted, privTxJob.Status)
 		assert.Equal(t, txRequest.Params.From, privTxJob.Transaction.From)
 		assert.Equal(t, txRequest.Params.To, privTxJob.Transaction.To)
-		assert.Equal(t, utils.OrionEEATransaction, privTxJob.Type)
+		assert.Equal(t, entities.OrionEEATransaction, privTxJob.Type)
 
 		markingTxJob := txResponseGET.Jobs[1]
 		assert.NotEmpty(t, markingTxJob.UUID)
-		assert.Equal(t, utils.StatusCreated, markingTxJob.Status)
-		assert.Equal(t, utils.OrionMarkingTransaction, markingTxJob.Type)
+		assert.Equal(t, entities.StatusCreated, markingTxJob.Status)
+		assert.Equal(t, entities.OrionMarkingTransaction, markingTxJob.Type)
 
 		privTxEvlp, err := s.env.consumer.WaitForEnvelope(privTxJob.ScheduleUUID, s.env.kafkaTopicConfig.Sender, waitForEnvelopeTimeOut)
 		if err != nil {
@@ -290,7 +292,7 @@ func (s *transactionsTestSuite) TestSuccess() {
 
 		assert.Equal(t, privTxJob.ScheduleUUID, privTxEvlp.GetID())
 		assert.Equal(t, privTxJob.UUID, privTxEvlp.GetJobUUID())
-		assert.Equal(t, tx.JobTypeMap[utils.OrionEEATransaction].String(), privTxEvlp.GetJobTypeString())
+		assert.Equal(t, tx.JobTypeMap[entities.OrionEEATransaction].String(), privTxEvlp.GetJobTypeString())
 	})
 
 	s.T().Run("should send a deploy contract transaction successfully", func(t *testing.T) {
@@ -320,9 +322,9 @@ func (s *transactionsTestSuite) TestSuccess() {
 
 		assert.NotEmpty(t, txResponseGET.UUID)
 		assert.NotEmpty(t, job.UUID)
-		assert.Equal(t, utils.StatusStarted, job.Status)
+		assert.Equal(t, entities.StatusStarted, job.Status)
 		assert.Equal(t, txRequest.Params.From, job.Transaction.From)
-		assert.Equal(t, utils.EthereumTransaction, job.Type)
+		assert.Equal(t, entities.EthereumTransaction, job.Type)
 
 		evlp, err := s.env.consumer.WaitForEnvelope(job.ScheduleUUID, s.env.kafkaTopicConfig.Sender, waitForEnvelopeTimeOut)
 		if err != nil {
@@ -331,7 +333,7 @@ func (s *transactionsTestSuite) TestSuccess() {
 		}
 		assert.Equal(t, job.ScheduleUUID, evlp.GetID())
 		assert.Equal(t, job.UUID, evlp.GetJobUUID())
-		assert.Equal(t, tx.JobTypeMap[utils.EthereumTransaction].String(), evlp.GetJobTypeString())
+		assert.Equal(t, tx.JobTypeMap[entities.EthereumTransaction].String(), evlp.GetJobTypeString())
 	})
 
 	s.T().Run("should send a raw transaction successfully", func(t *testing.T) {
@@ -358,9 +360,9 @@ func (s *transactionsTestSuite) TestSuccess() {
 
 		assert.NotEmpty(t, txResponseGET.UUID)
 		assert.NotEmpty(t, job.UUID)
-		assert.Equal(t, utils.StatusStarted, job.Status)
+		assert.Equal(t, entities.StatusStarted, job.Status)
 		assert.Equal(t, txRequest.Params.Raw, job.Transaction.Raw)
-		assert.Equal(t, utils.EthereumRawTransaction, job.Type)
+		assert.Equal(t, entities.EthereumRawTransaction, job.Type)
 
 		evlp, err := s.env.consumer.WaitForEnvelope(job.ScheduleUUID, s.env.kafkaTopicConfig.Sender, waitForEnvelopeTimeOut)
 		if err != nil {
@@ -369,7 +371,7 @@ func (s *transactionsTestSuite) TestSuccess() {
 		}
 		assert.Equal(t, job.ScheduleUUID, evlp.GetID())
 		assert.Equal(t, job.UUID, evlp.GetJobUUID())
-		assert.Equal(t, tx.JobTypeMap[utils.EthereumRawTransaction].String(), evlp.GetJobTypeString())
+		assert.Equal(t, tx.JobTypeMap[entities.EthereumRawTransaction].String(), evlp.GetJobTypeString())
 	})
 
 	s.T().Run("should send a transfer transaction successfully", func(t *testing.T) {
@@ -393,11 +395,11 @@ func (s *transactionsTestSuite) TestSuccess() {
 
 		assert.NotEmpty(t, txResponseGET.UUID)
 		assert.NotEmpty(t, job.UUID)
-		assert.Equal(t, utils.StatusStarted, job.Status)
+		assert.Equal(t, entities.StatusStarted, job.Status)
 		assert.Equal(t, txRequest.Params.Value, job.Transaction.Value)
 		assert.Equal(t, txRequest.Params.To, job.Transaction.To)
 		assert.Equal(t, txRequest.Params.From, job.Transaction.From)
-		assert.Equal(t, utils.EthereumTransaction, job.Type)
+		assert.Equal(t, entities.EthereumTransaction, job.Type)
 
 		evlp, err := s.env.consumer.WaitForEnvelope(job.ScheduleUUID, s.env.kafkaTopicConfig.Sender, waitForEnvelopeTimeOut)
 		if err != nil {
@@ -407,7 +409,7 @@ func (s *transactionsTestSuite) TestSuccess() {
 
 		assert.Equal(t, job.ScheduleUUID, evlp.GetID())
 		assert.Equal(t, job.UUID, evlp.GetJobUUID())
-		assert.Equal(t, tx.JobTypeMap[utils.EthereumTransaction].String(), evlp.GetJobTypeString())
+		assert.Equal(t, tx.JobTypeMap[entities.EthereumTransaction].String(), evlp.GetJobTypeString())
 	})
 
 	s.T().Run("should succeed if payloads and idempotency key are the same and return same schedule", func(t *testing.T) {
@@ -440,6 +442,6 @@ func (s *transactionsTestSuite) TestSuccess() {
 		}
 		job := txResponse.Jobs[0]
 		assert.Equal(t, idempotencyKey, txResponse.IdempotencyKey)
-		assert.Equal(t, utils.StatusStarted, job.Status)
+		assert.Equal(t, entities.StatusStarted, job.Status)
 	})
 }

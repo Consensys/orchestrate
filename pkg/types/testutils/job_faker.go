@@ -16,12 +16,12 @@ func FakeJob() *entities.Job {
 		ScheduleUUID: uuid.Must(uuid.NewV4()).String(),
 		ChainUUID:    uuid.Must(uuid.NewV4()).String(),
 		TenantID:     utils.RandString(6),
-		Type:         utils.EthereumTransaction,
+		Type:         entities.EthereumTransaction,
 		InternalData: FakeInternalData(),
 		Labels:       make(map[string]string),
 		Logs:         []*entities.Log{FakeLog()},
 		CreatedAt:    time.Now(),
-		Status:       utils.StatusCreated,
+		Status:       entities.StatusCreated,
 		Transaction:  FakeETHTransaction(),
 	}
 }

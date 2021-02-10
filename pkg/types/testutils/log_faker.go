@@ -2,12 +2,11 @@ package testutils
 
 import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 )
 
 func FakeLog() *entities.Log {
 	return &entities.Log{
-		Status:  utils.StatusCreated,
+		Status:  entities.StatusCreated,
 		Message: "job message",
 	}
 }

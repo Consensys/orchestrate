@@ -10,7 +10,6 @@ import (
 	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 )
 
 //go:generate mockgen -source=retry_session_job.go -destination=mocks/retry_session_job.go -package=mocks
@@ -49,13 +48,13 @@ func (uc *retrySessionJobUseCase) Execute(ctx context.Context, jobUUID, childUUI
 	}
 
 	status := job.Status
-	if status != utils.StatusPending {
+	if status != entities.StatusPending {
 		logger.WithField("status", status).Info("job has been updated. stopping job session")
 		return "", nil
 	}
 
 	// In case gas increments on every retry we create a new job
-	if job.Type != utils.EthereumRawTransaction &&
+	if job.Type != entities.EthereumRawTransaction &&
 		(job.Annotations.GasPricePolicy.RetryPolicy.Increment > 0.0 &&
 			nChildren <= int(math.Ceil(job.Annotations.GasPricePolicy.RetryPolicy.Limit/job.Annotations.GasPricePolicy.RetryPolicy.Increment))) {
 
@@ -129,7 +128,7 @@ func newChildJobRequest(parentJob *types.JobResponse, gasPriceMultiplier float64
 	}
 
 	// raw transactions are resent as-is with no modifications
-	if parentJob.Type == utils.EthereumRawTransaction {
+	if parentJob.Type == entities.EthereumRawTransaction {
 		newJobRequest.Transaction = entities.ETHTransaction{
 			Raw: parentJob.Transaction.Raw,
 		}

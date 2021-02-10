@@ -84,7 +84,7 @@ func FormatJobFilterRequest(req *http.Request) (*entities.JobFilters, error) {
 
 	qStatus := req.URL.Query().Get("status")
 	if qStatus != "" {
-		filters.Status = qStatus
+		filters.Status = entities.JobStatus(qStatus)
 	}
 
 	qParentJobUUID := req.URL.Query().Get("parent_job_uuid")

@@ -8,7 +8,7 @@ import (
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	mock2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/metrics/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/parsers"
 	mocks2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/metrics/mock"
@@ -58,7 +58,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 	usecase := NewUpdateJobUseCase(mockDB, mockUpdateChilrenUC, mockStartNextJobUC, mockMetrics)
 
 	tenantID := "tenantID"
-	nextStatus := utils.StatusStarted
+	nextStatus := entities.StatusStarted
 	logMessage := "message"
 	ctx := context.Background()
 
@@ -135,10 +135,10 @@ func TestUpdateJob_Execute(t *testing.T) {
 	t.Run("should execute use case successfully if status is PENDING", func(t *testing.T) {
 		jobEntity := testutils3.FakeJob()
 		jobEntity.Transaction = nil
-		status := utils.StatusPending
+		status := entities.StatusPending
 		jobModel := testutils2.FakeJobModel(0)
 		jobModel.Schedule.TenantID = tenantID
-		jobModel.Logs[0].Status = utils.StatusStarted
+		jobModel.Logs[0].Status = entities.StatusStarted
 
 		mockJobDA.EXPECT().LockOneByUUID(gomock.Any(), jobEntity.UUID).Return(nil)
 		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), jobEntity.UUID, []string{tenantID}).Return(jobModel, nil).Times(2)
@@ -162,10 +162,10 @@ func TestUpdateJob_Execute(t *testing.T) {
 	t.Run("should execute use case successfully if status is MINED and update all the children jobs", func(t *testing.T) {
 		jobEntity := testutils3.FakeJob()
 		jobEntity.Transaction = nil
-		status := utils.StatusMined
+		status := entities.StatusMined
 		jobModel := testutils2.FakeJobModel(0)
 		jobModel.Schedule.TenantID = tenantID
-		jobModel.Logs[0].Status = utils.StatusPending
+		jobModel.Logs[0].Status = entities.StatusPending
 
 		mockJobDA.EXPECT().LockOneByUUID(gomock.Any(), jobEntity.UUID).Return(nil)
 		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), jobEntity.UUID, []string{tenantID}).Return(jobModel, nil).Times(2)
@@ -182,7 +182,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 			Message: logMessage,
 		}).Return(nil)
 		mockUpdateChilrenUC.EXPECT().
-			Execute(gomock.Any(), jobModel.UUID, jobModel.InternalData.ParentJobUUID, utils.StatusNeverMined, []string{tenantID}).
+			Execute(gomock.Any(), jobModel.UUID, jobModel.InternalData.ParentJobUUID, entities.StatusNeverMined, []string{tenantID}).
 			Return(nil)
 
 		_, err := usecase.Execute(ctx, jobEntity, status, logMessage, []string{tenantID})
@@ -192,7 +192,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 	t.Run("should fail with InvalidParameterError if status is MINED", func(t *testing.T) {
 		jobEntity := testutils3.FakeJob()
 		jobModel := testutils2.FakeJobModel(0)
-		jobModel.Logs[0].Status = utils.StatusMined
+		jobModel.Logs[0].Status = entities.StatusMined
 		jobModel.Schedule.TenantID = tenantID
 
 		mockJobDA.EXPECT().LockOneByUUID(gomock.Any(), jobEntity.UUID).Return(nil)
@@ -236,12 +236,12 @@ func TestUpdateJob_Execute(t *testing.T) {
 		jobEntity.Transaction = nil
 		jobModel := testutils2.FakeJobModel(0)
 		jobModel.Schedule.TenantID = tenantID
-		jobModel.Logs[0].Status = utils.StatusCreated
+		jobModel.Logs[0].Status = entities.StatusCreated
 
 		mockJobDA.EXPECT().LockOneByUUID(gomock.Any(), jobEntity.UUID).Return(nil)
 		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), gomock.Any(), gomock.Any()).Return(jobModel, nil)
 
-		_, err := usecase.Execute(ctx, jobEntity, utils.StatusPending, logMessage, []string{tenantID})
+		_, err := usecase.Execute(ctx, jobEntity, entities.StatusPending, logMessage, []string{tenantID})
 		assert.True(t, errors.IsInvalidStateError(err))
 	})
 
@@ -250,12 +250,12 @@ func TestUpdateJob_Execute(t *testing.T) {
 		jobEntity.Transaction = nil
 		jobModel := testutils2.FakeJobModel(0)
 		jobModel.Schedule.TenantID = tenantID
-		jobModel.Logs[0].Status = utils.StatusStarted
+		jobModel.Logs[0].Status = entities.StatusStarted
 
 		mockJobDA.EXPECT().LockOneByUUID(gomock.Any(), jobEntity.UUID).Return(nil)
 		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), gomock.Any(), gomock.Any()).Return(jobModel, nil)
 
-		_, err := usecase.Execute(ctx, jobEntity, utils.StatusMined, logMessage, []string{tenantID})
+		_, err := usecase.Execute(ctx, jobEntity, entities.StatusMined, logMessage, []string{tenantID})
 		assert.True(t, errors.IsInvalidStateError(err))
 	})
 
@@ -264,12 +264,12 @@ func TestUpdateJob_Execute(t *testing.T) {
 		jobEntity.Transaction = nil
 		jobModel := testutils2.FakeJobModel(0)
 		jobModel.Schedule.TenantID = tenantID
-		jobModel.Logs[0].Status = utils.StatusPending
+		jobModel.Logs[0].Status = entities.StatusPending
 
 		mockJobDA.EXPECT().LockOneByUUID(gomock.Any(), jobEntity.UUID).Return(nil)
 		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), gomock.Any(), gomock.Any()).Return(jobModel, nil)
 
-		_, err := usecase.Execute(ctx, jobEntity, utils.StatusStarted, logMessage, []string{tenantID})
+		_, err := usecase.Execute(ctx, jobEntity, entities.StatusStarted, logMessage, []string{tenantID})
 		assert.True(t, errors.IsInvalidStateError(err))
 	})
 
@@ -278,12 +278,12 @@ func TestUpdateJob_Execute(t *testing.T) {
 		jobEntity.Transaction = nil
 		jobModel := testutils2.FakeJobModel(0)
 		jobModel.Schedule.TenantID = tenantID
-		jobModel.Logs[0].Status = utils.StatusCreated
+		jobModel.Logs[0].Status = entities.StatusCreated
 
 		mockJobDA.EXPECT().LockOneByUUID(gomock.Any(), jobEntity.UUID).Return(nil)
 		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), gomock.Any(), gomock.Any()).Return(jobModel, nil)
 
-		_, err := usecase.Execute(ctx, jobEntity, utils.StatusFailed, logMessage, []string{tenantID})
+		_, err := usecase.Execute(ctx, jobEntity, entities.StatusFailed, logMessage, []string{tenantID})
 		assert.True(t, errors.IsInvalidStateError(err))
 	})
 
@@ -323,7 +323,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 	t.Run("should trigger next job start if nextStatus is STORED", func(t *testing.T) {
 		jobModel := testutils2.FakeJobModel(0)
 		nextJobModel := testutils2.FakeJobModel(0)
-		jobModel.Logs[0].Status = utils.StatusStarted
+		jobModel.Logs[0].Status = entities.StatusStarted
 		jobModel.Schedule.TenantID = tenantID
 		jobModel.NextJobUUID = nextJobModel.UUID
 
@@ -338,7 +338,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 		mockStartNextJobUC.EXPECT().Execute(gomock.Any(), jobModel.UUID, tenants).Return(nil)
 
 		jobEntity := parsers.NewJobEntityFromModels(jobModel)
-		_, err := usecase.Execute(ctx, jobEntity, utils.StatusStored, "", []string{tenantID})
+		_, err := usecase.Execute(ctx, jobEntity, entities.StatusStored, "", []string{tenantID})
 
 		assert.NoError(t, err)
 	})

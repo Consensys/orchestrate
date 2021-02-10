@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/parsers"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
 
@@ -39,7 +38,7 @@ func (uc updateChildrenUseCase) WithDBTransaction(dbtx store.Tx) usecases.Update
 }
 
 // Execute updates all children of a job to NEVER_MINED
-func (uc *updateChildrenUseCase) Execute(ctx context.Context, jobUUID, parentJobUUID, nextStatus string, tenants []string) error {
+func (uc *updateChildrenUseCase) Execute(ctx context.Context, jobUUID, parentJobUUID string, nextStatus entities.JobStatus, tenants []string) error {
 	ctx = log.WithFields(ctx, log.Field("job", jobUUID))
 	logger := uc.logger.WithContext(ctx)
 	logger.Debug("updating sibling and/or parent jobs")
@@ -60,7 +59,7 @@ func (uc *updateChildrenUseCase) Execute(ctx context.Context, jobUUID, parentJob
 
 	for _, jobModel := range jobsToUpdate {
 		status := parsers.NewJobEntityFromModels(jobModel).Status
-		if jobModel.UUID != jobUUID && status == utils.StatusPending {
+		if jobModel.UUID != jobUUID && status == entities.StatusPending {
 			jobLogModel := &models.Log{
 				JobID:   &jobModel.ID,
 				Status:  nextStatus,

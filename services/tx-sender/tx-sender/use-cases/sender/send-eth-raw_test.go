@@ -44,7 +44,7 @@ func TestSendETHRaw_Execute(t *testing.T) {
 		ec.EXPECT().SendRawTransaction(gomock.Any(), proxyURL, raw).Return(ethcommon.HexToHash(txHash), nil)
 
 		jobClient.EXPECT().UpdateJob(gomock.Any(), job.UUID, &txschedulertypes.UpdateJobRequest{
-			Status:      utils.StatusPending,
+			Status:      entities.StatusPending,
 			Transaction: decodeRaw(raw),
 		})
 
@@ -68,7 +68,7 @@ func TestSendETHRaw_Execute(t *testing.T) {
 
 		transaction := decodeRaw(raw)
 		jobClient.EXPECT().UpdateJob(gomock.Any(), job.UUID, &txschedulertypes.UpdateJobRequest{
-			Status:      utils.StatusPending,
+			Status:      entities.StatusPending,
 			Transaction: transaction,
 		})
 		jobClient.EXPECT().UpdateJob(gomock.Any(), job.UUID, gomock.Any())

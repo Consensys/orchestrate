@@ -13,7 +13,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/parsers"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
@@ -86,7 +85,7 @@ func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequ
 	// Step 4: Start first job of the schedule if status is CREATED
 	// Otherwise there was another request with same idempotency key and same reqHash
 	job := txRequest.Schedule.Jobs[0]
-	if job.Status == utils.StatusCreated {
+	if job.Status == entities.StatusCreated {
 		err = uc.startFaucetJob(ctx, txRequest.Params.From, job.ScheduleUUID, tenantID, chain)
 		if err != nil {
 			return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
@@ -216,7 +215,7 @@ func (uc *sendTxUsecase) startFaucetJob(ctx context.Context, account, scheduleUU
 	txJob := &entities.Job{
 		ScheduleUUID: scheduleUUID,
 		ChainUUID:    chain.UUID,
-		Type:         utils.EthereumTransaction,
+		Type:         entities.EthereumTransaction,
 		Labels: map[string]string{
 			"faucetUUID": faucet.UUID,
 		},

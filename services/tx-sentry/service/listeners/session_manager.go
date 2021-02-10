@@ -9,7 +9,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sentry/tx-sentry/use-cases"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
@@ -185,7 +184,7 @@ func (manager *sessionManager) retrieveJobSessionData(ctx context.Context, job *
 	// we count the number of resending of last job as retries
 	nRetries := nChildren
 	for _, lg := range lastJobRetry.Logs {
-		if lg.Status == utils.StatusResending {
+		if lg.Status == entities.StatusResending {
 			nRetries++
 		}
 	}

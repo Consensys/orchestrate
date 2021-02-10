@@ -26,6 +26,7 @@ x-container-common: &container-common
   entrypoint: /bin/main
   networks:
     - orchestrate
+    - quorum
   tty: true
 
 services:
@@ -73,7 +74,7 @@ services:
       <<: *default-variables
       ARTIFACTS_PATH: "/artifacts"
       STRESS_CONCURRENCY: "15"
-      STRESS_ITERATIONS: "300"
+      STRESS_ITERATIONS: "100"
       STRESS_TIMEOUT: "10m"
       TEST_GLOBAL_DATA: ${TEST_GLOBAL_DATA-}
       KAFKA_CONSUMER_GROUP_NAME: ${KAFKA_CONSUMER_GROUP_NAME-stress}
@@ -87,3 +88,7 @@ networks:
   orchestrate:
     external:
       name: deps_orchestrate
+
+  quorum:
+    external:
+      name: deps_quorum

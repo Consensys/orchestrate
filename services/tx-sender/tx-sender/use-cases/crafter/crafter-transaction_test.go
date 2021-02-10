@@ -9,6 +9,7 @@ import (
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	mock2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/mock"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
@@ -88,7 +89,7 @@ func TestCrafterTransaction_Execute(t *testing.T) {
 	
 	t.Run("should execute use case for EEA marking transaction successfully", func(t *testing.T) {
 		job := testutils.FakeJob()
-		job.Type = tx.JobType_ETH_ORION_MARKING_TX.String()
+		job.Type = entities.JobType(tx.JobType_ETH_ORION_MARKING_TX.String())
 		job.Transaction.Nonce = ""
 		job.Transaction.GasPrice = ""
 		job.Transaction.Gas = ""
@@ -111,7 +112,7 @@ func TestCrafterTransaction_Execute(t *testing.T) {
 	
 	t.Run("should execute use case for EEA private transaction successfully", func(t *testing.T) {
 		job := testutils.FakeJob()
-		job.Type = tx.JobType_ETH_ORION_EEA_TX.String()
+		job.Type = entities.JobType(tx.JobType_ETH_ORION_EEA_TX.String())
 		job.Transaction.Nonce = ""
 		job.Transaction.GasPrice = ""
 		job.Transaction.Gas = ""

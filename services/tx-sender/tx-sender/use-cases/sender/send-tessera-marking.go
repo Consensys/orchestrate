@@ -58,7 +58,7 @@ func (uc *sendTesseraMarkingTxUseCase) Execute(ctx context.Context, job *entitie
 
 	// In case of job resending we don't need to sign again
 	if job.InternalData.ParentJobUUID == job.UUID {
-		err = utils2.UpdateJobStatus(ctx, uc.jobClient, job.UUID, utils.StatusResending, "", job.Transaction)
+		err = utils2.UpdateJobStatus(ctx, uc.jobClient, job.UUID, entities.StatusResending, "", job.Transaction)
 		if err != nil {
 			return errors.FromError(err).ExtendComponent(sendETHTxComponent)
 		}
@@ -68,7 +68,7 @@ func (uc *sendTesseraMarkingTxUseCase) Execute(ctx context.Context, job *entitie
 			return errors.FromError(err).ExtendComponent(sendTesseraMarkingTxComponent)
 		}
 
-		err = utils2.UpdateJobStatus(ctx, uc.jobClient, job.UUID, utils.StatusPending, "", job.Transaction)
+		err = utils2.UpdateJobStatus(ctx, uc.jobClient, job.UUID, entities.StatusPending, "", job.Transaction)
 		if err != nil {
 			return errors.FromError(err).ExtendComponent(sendTesseraMarkingTxComponent)
 		}
@@ -90,7 +90,7 @@ func (uc *sendTesseraMarkingTxUseCase) Execute(ctx context.Context, job *entitie
 	if txHash != job.Transaction.Hash {
 		warnMessage := fmt.Sprintf("expected transaction hash %s, but got %s. Overriding", job.Transaction.Hash, txHash)
 		job.Transaction.Hash = txHash
-		err = utils2.UpdateJobStatus(ctx, uc.jobClient, job.UUID, utils.StatusWarning, warnMessage, job.Transaction)
+		err = utils2.UpdateJobStatus(ctx, uc.jobClient, job.UUID, entities.StatusWarning, warnMessage, job.Transaction)
 		if err != nil {
 			return errors.FromError(err).ExtendComponent(sendTesseraMarkingTxComponent)
 		}

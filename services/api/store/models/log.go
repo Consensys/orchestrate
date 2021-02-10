@@ -2,6 +2,8 @@ package models
 
 import (
 	"time"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 )
 
 type Log struct {
@@ -11,7 +13,7 @@ type Log struct {
 	UUID      string
 	JobID     *int `pg:"alias:job_id,notnull"`
 	Job       *Job
-	Status    string
+	Status    entities.JobStatus
 	Message   string
 	CreatedAt time.Time `pg:"default:now()"`
 }

@@ -153,7 +153,7 @@ runningLoop:
 			)
 
 			if err != nil {
-				e.logger.WithError(err).Errorf("engine: left running loop")
+				e.logger.WithError(err).Error("engine: left running loop")
 				break runningLoop
 			}
 

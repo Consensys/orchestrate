@@ -9,6 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/go-playground/validator/v10"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 )
 
 var (
@@ -107,7 +108,7 @@ func convDuration(fl validator.FieldLevel) (time.Duration, error) {
 func isPrivateTxManagerType(fl validator.FieldLevel) bool {
 	if fl.Field().String() != "" {
 		switch fl.Field().String() {
-		case TesseraChainType, OrionChainType:
+		case string(entities.TesseraChainType), string(entities.OrionChainType):
 			return true
 		default:
 			return false
@@ -132,14 +133,14 @@ func isPriority(fl validator.FieldLevel) bool {
 
 func isJobType(fl validator.FieldLevel) bool {
 	if fl.Field().String() != "" {
-		switch fl.Field().String() {
+		switch entities.JobType(fl.Field().String()) {
 		case
-			EthereumTransaction,
-			EthereumRawTransaction,
-			OrionEEATransaction,
-			OrionMarkingTransaction,
-			TesseraPrivateTransaction,
-			TesseraMarkingTransaction:
+			entities.EthereumTransaction,
+			entities.EthereumRawTransaction,
+			entities.OrionEEATransaction,
+			entities.OrionMarkingTransaction,
+			entities.TesseraPrivateTransaction,
+			entities.TesseraMarkingTransaction:
 			return true
 		default:
 			return false
@@ -151,8 +152,17 @@ func isJobType(fl validator.FieldLevel) bool {
 
 func isJobStatus(fl validator.FieldLevel) bool {
 	if fl.Field().String() != "" {
-		switch fl.Field().String() {
-		case StatusCreated, StatusStarted, StatusPending, StatusRecovering, StatusWarning, StatusMined, StatusFailed, StatusStored, StatusResending:
+		switch entities.JobStatus(fl.Field().String()) {
+		case
+			entities.StatusCreated,
+			entities.StatusStarted,
+			entities.StatusPending,
+			entities.StatusRecovering,
+			entities.StatusWarning,
+			entities.StatusMined,
+			entities.StatusFailed,
+			entities.StatusStored,
+			entities.StatusResending:
 			return true
 		default:
 			return false

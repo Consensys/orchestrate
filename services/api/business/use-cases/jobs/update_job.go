@@ -8,7 +8,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/parsers"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/metrics"
@@ -28,7 +27,8 @@ type updateJobUseCase struct {
 }
 
 // NewUpdateJobUseCase creates a new UpdateJobUseCase
-func NewUpdateJobUseCase(db store.DB, updateChildrenUseCase usecases.UpdateChildrenUseCase, startJobUC usecases.StartNextJobUseCase, m metrics.TransactionSchedulerMetrics) usecases.UpdateJobUseCase {
+func NewUpdateJobUseCase(db store.DB, updateChildrenUseCase usecases.UpdateChildrenUseCase,
+	startJobUC usecases.StartNextJobUseCase, m metrics.TransactionSchedulerMetrics) usecases.UpdateJobUseCase {
 	return &updateJobUseCase{
 		db:                    db,
 		updateChildrenUseCase: updateChildrenUseCase,
@@ -39,7 +39,8 @@ func NewUpdateJobUseCase(db store.DB, updateChildrenUseCase usecases.UpdateChild
 }
 
 // Execute validates and creates a new transaction job
-func (uc *updateJobUseCase) Execute(ctx context.Context, job *entities.Job, nextStatus, logMessage string, tenants []string) (*entities.Job, error) {
+func (uc *updateJobUseCase) Execute(ctx context.Context, job *entities.Job, nextStatus entities.JobStatus,
+	logMessage string, tenants []string) (*entities.Job, error) {
 	ctx = log.WithFields(ctx, log.Field("job", job.UUID))
 	logger := uc.logger.WithContext(ctx)
 	logger.Debug("updating job")
@@ -97,10 +98,10 @@ func (uc *updateJobUseCase) Execute(ctx context.Context, job *entities.Job, next
 			}
 
 			// if we updated to MINED, we need to update the children and sibling jobs to NEVER_MINED
-			if nextStatus == utils.StatusMined {
+			if nextStatus == entities.StatusMined {
 				der := uc.updateChildrenUseCase.
 					WithDBTransaction(tx.(store.Tx)).
-					Execute(ctx, jobModel.UUID, jobModel.InternalData.ParentJobUUID, utils.StatusNeverMined, tenants)
+					Execute(ctx, jobModel.UUID, jobModel.InternalData.ParentJobUUID, entities.StatusNeverMined, tenants)
 				if der != nil {
 					return der
 				}
@@ -117,7 +118,7 @@ func (uc *updateJobUseCase) Execute(ctx context.Context, job *entities.Job, next
 		return nil, errors.FromError(err).ExtendComponent(updateJobComponent)
 	}
 
-	if (nextStatus == utils.StatusMined || nextStatus == utils.StatusStored) && retrievedJob.NextJobUUID != "" {
+	if (nextStatus == entities.StatusMined || nextStatus == entities.StatusStored) && retrievedJob.NextJobUUID != "" {
 		err = uc.startNextJobUseCase.Execute(ctx, retrievedJob.UUID, tenants)
 		if err != nil {
 			return nil, errors.FromError(err).ExtendComponent(updateJobComponent)
@@ -133,8 +134,11 @@ func (uc *updateJobUseCase) Execute(ctx context.Context, job *entities.Job, next
 	return parsers.NewJobEntityFromModels(jobModel), nil
 }
 
-func isFinalStatus(status string) bool {
-	return status == utils.StatusMined || status == utils.StatusFailed || status == utils.StatusStored || status == utils.StatusNeverMined
+func isFinalStatus(status entities.JobStatus) bool {
+	return status == entities.StatusMined ||
+		status == entities.StatusFailed ||
+		status == entities.StatusStored ||
+		status == entities.StatusNeverMined
 }
 
 func updateJobModel(jobModel *models.Job, job *entities.Job) {
@@ -146,24 +150,24 @@ func updateJobModel(jobModel *models.Job, job *entities.Job) {
 	}
 }
 
-func canUpdateStatus(nextStatus, status string) bool {
+func canUpdateStatus(nextStatus, status entities.JobStatus) bool {
 	switch nextStatus {
-	case utils.StatusCreated:
+	case entities.StatusCreated:
 		return false
-	case utils.StatusStarted:
-		return status == utils.StatusCreated
-	case utils.StatusPending:
-		return status == utils.StatusStarted || status == utils.StatusRecovering
-	case utils.StatusResending:
-		return status == utils.StatusPending
-	case utils.StatusRecovering:
-		return status == utils.StatusStarted || status == utils.StatusRecovering || status == utils.StatusPending
-	case utils.StatusMined, utils.StatusNeverMined:
-		return status == utils.StatusPending
-	case utils.StatusStored:
-		return status == utils.StatusStarted || status == utils.StatusRecovering
-	case utils.StatusFailed:
-		return status == utils.StatusStarted || status == utils.StatusRecovering || status == utils.StatusPending
+	case entities.StatusStarted:
+		return status == entities.StatusCreated
+	case entities.StatusPending:
+		return status == entities.StatusStarted || status == entities.StatusRecovering
+	case entities.StatusResending:
+		return status == entities.StatusPending
+	case entities.StatusRecovering:
+		return status == entities.StatusStarted || status == entities.StatusRecovering || status == entities.StatusPending
+	case entities.StatusMined, entities.StatusNeverMined:
+		return status == entities.StatusPending
+	case entities.StatusStored:
+		return status == entities.StatusStarted || status == entities.StatusRecovering
+	case entities.StatusFailed:
+		return status == entities.StatusStarted || status == entities.StatusRecovering || status == entities.StatusPending
 	default: // For warning, they can be added at any time
 		return true
 	}
@@ -176,15 +180,15 @@ func (uc *updateJobUseCase) addMetrics(current, previous *models.Log, chainUUID 
 
 	d := float64(current.CreatedAt.Sub(previous.CreatedAt).Nanoseconds()) / float64(time.Second)
 	switch current.Status {
-	case utils.StatusMined:
+	case entities.StatusMined:
 		uc.metrics.MinedLatencyHistogram().With(append(baseLabels,
-			"prev_status", previous.Status,
-			"status", current.Status,
+			"prev_status", string(previous.Status),
+			"status", string(current.Status),
 		)...).Observe(d)
 	default:
 		uc.metrics.JobsLatencyHistogram().With(append(baseLabels,
-			"prev_status", previous.Status,
-			"status", current.Status,
+			"prev_status", string(previous.Status),
+			"status", string(current.Status),
 		)...).Observe(d)
 	}
 

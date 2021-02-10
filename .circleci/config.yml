@@ -117,10 +117,9 @@ jobs:
           command: make run-coverage
 
   race:
-    executor:
-      name: go/default
-      tag: '1.15.7'
-    resource_class: large
+    docker:
+      - image: cimg/go:1.15.7
+    resource_class: xlarge
     steps:
       - prepare_golang
       - run:
@@ -129,7 +128,7 @@ jobs:
 
   integration:
     machine: true
-    resource_class: large
+    resource_class: xlarge
     steps:
       - run:
           name: Uninstall Go

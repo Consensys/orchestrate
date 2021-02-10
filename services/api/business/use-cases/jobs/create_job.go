@@ -6,8 +6,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
-
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
@@ -68,7 +66,7 @@ func (uc *createJobUseCase) Execute(ctx context.Context, job *entities.Job, tena
 
 	jobModel := parsers.NewJobModelFromEntities(job, &schedule.ID)
 	jobModel.Logs = append(jobModel.Logs, &models.Log{
-		Status: utils.StatusCreated,
+		Status: entities.StatusCreated,
 	})
 	jobModel.Schedule = schedule
 
@@ -85,7 +83,7 @@ func (uc *createJobUseCase) Execute(ctx context.Context, job *entities.Job, tena
 			}
 
 			parentStatus := parsers.NewJobEntityFromModels(parentJobModel).Status
-			if parentStatus != utils.StatusPending {
+			if parentStatus != entities.StatusPending {
 				errMessage := "cannot create a child job in a finalized schedule"
 				logger.WithField("parent_job", jobModel.InternalData.ParentJobUUID).
 					WithField("parent_status", parentStatus).Error(errMessage)

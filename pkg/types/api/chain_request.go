@@ -1,5 +1,9 @@
 package api
 
+import (
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
+)
+
 type RegisterChainRequest struct {
 	Name             string                   `json:"name" validate:"required" example:"mainnet"`
 	URLs             []string                 `json:"urls" pg:"urls,array" validate:"required,min=1,unique,dive,url" example:"https://mainnet.infura.io/v3/a73136601e6f4924a0baa4ed880b535e"`
@@ -28,6 +32,6 @@ type UpdateListenerRequest struct {
 }
 
 type PrivateTxManagerRequest struct {
-	URL  string `json:"url" validate:"required,url" example:"http://tessera:3000"`
-	Type string `json:"type" validate:"required,isPrivateTxManagerType" example:"Tessera"`
+	URL  string                        `json:"url" validate:"required,url" example:"http://tessera:3000"`
+	Type entities.PrivateTxManagerType `json:"type" validate:"required,isPrivateTxManagerType" example:"Tessera"`
 }

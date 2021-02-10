@@ -3,7 +3,7 @@ package jobs
 import (
 	"context"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils/envelope"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
 
@@ -46,7 +46,7 @@ func (uc *resendJobTxUseCase) Execute(ctx context.Context, jobUUID string, tenan
 
 	jobModel.InternalData.ParentJobUUID = jobUUID
 	jobEntity := parsers.NewJobEntityFromModels(jobModel)
-	if jobEntity.Status != utils.StatusPending {
+	if jobEntity.Status != entities.StatusPending {
 		errMessage := "cannot resend job transaction at the current status"
 		logger.WithField("status", jobEntity.Status).Error(errMessage)
 		return errors.InvalidStateError(errMessage)

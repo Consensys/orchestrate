@@ -139,7 +139,7 @@ func TestNewChainsProxyConfig(t *testing.T) {
 					},
 					PrivateTxManager: &entities.PrivateTxManager{
 						URL:  "http://testURL10.com/tessera",
-						Type: utils.TesseraChainType,
+						Type: entities.TesseraChainType,
 					},
 				},
 			},

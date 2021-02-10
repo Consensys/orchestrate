@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils/envelope"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/metrics"
@@ -56,15 +56,15 @@ func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID string, tenants 
 	}
 
 	jobEntity := parsers.NewJobEntityFromModels(jobModel)
-	if !canUpdateStatus(utils.StatusStarted, jobEntity.Status) {
+	if !canUpdateStatus(entities.StatusStarted, jobEntity.Status) {
 		errMessage := "cannot start job at the current status"
-		logger.WithField("status", jobEntity.Status).WithField("next_status", utils.StatusStarted).Error(errMessage)
+		logger.WithField("status", jobEntity.Status).WithField("next_status", entities.StatusStarted).Error(errMessage)
 		return errors.InvalidStateError(errMessage)
 	}
 
 	jobLog := &models.Log{
 		JobID:  &jobModel.ID,
-		Status: utils.StatusStarted,
+		Status: entities.StatusStarted,
 	}
 
 	dbtx, err := uc.db.Begin()
@@ -99,7 +99,7 @@ func (uc *startJobUseCase) addMetrics(current, previous *models.Log, chainUUID s
 
 	d := float64(current.CreatedAt.Sub(previous.CreatedAt).Nanoseconds()) / float64(time.Second)
 	uc.metrics.JobsLatencyHistogram().With(append(baseLabels,
-		"prev_status", previous.Status,
-		"status", current.Status,
+		"prev_status", string(previous.Status),
+		"status", string(current.Status),
 	)...).Observe(d)
 }

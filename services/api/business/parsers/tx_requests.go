@@ -2,7 +2,6 @@ package parsers
 
 import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models"
 )
 
@@ -20,21 +19,23 @@ func NewTxRequestModelFromEntities(txRequest *entities.TxRequest, requestHash st
 func NewJobEntitiesFromTxRequest(txRequest *entities.TxRequest, chainUUID, txData string) []*entities.Job {
 	var jobs []*entities.Job
 	switch {
-	case txRequest.Params.Protocol == utils.OrionChainType:
-		privTxJob := newJobEntityFromTxRequest(txRequest, newEthTransactionFromParams(txRequest.Params, txData), utils.OrionEEATransaction, chainUUID)
-		markingTxJob := newJobEntityFromTxRequest(txRequest, &entities.ETHTransaction{}, utils.OrionMarkingTransaction, chainUUID)
+	case txRequest.Params.Protocol == entities.OrionChainType:
+		privTxJob := newJobEntityFromTxRequest(txRequest, newEthTransactionFromParams(txRequest.Params, txData), entities.OrionEEATransaction, chainUUID)
+		markingTxJob := newJobEntityFromTxRequest(txRequest, &entities.ETHTransaction{}, entities.OrionMarkingTransaction, chainUUID)
 		markingTxJob.InternalData.OneTimeKey = true
 		jobs = append(jobs, privTxJob, markingTxJob)
-	case txRequest.Params.Protocol == utils.TesseraChainType:
-		privTxJob := newJobEntityFromTxRequest(txRequest, newEthTransactionFromParams(txRequest.Params, txData), utils.TesseraPrivateTransaction, chainUUID)
-		markingTxJob := newJobEntityFromTxRequest(txRequest, &entities.ETHTransaction{From: txRequest.Params.From, PrivateFor: txRequest.Params.PrivateFor}, utils.TesseraMarkingTransaction, chainUUID)
+	case txRequest.Params.Protocol == entities.TesseraChainType:
+		privTxJob := newJobEntityFromTxRequest(txRequest, newEthTransactionFromParams(txRequest.Params, txData),
+			entities.TesseraPrivateTransaction, chainUUID)
+		markingTxJob := newJobEntityFromTxRequest(txRequest, &entities.ETHTransaction{From: txRequest.Params.From,
+			PrivateFor: txRequest.Params.PrivateFor}, entities.TesseraMarkingTransaction, chainUUID)
 		jobs = append(jobs, privTxJob, markingTxJob)
 	case txRequest.Params.Raw != "":
 		jobs = append(jobs, newJobEntityFromTxRequest(txRequest, newEthTransactionFromParams(txRequest.Params, txData),
-			utils.EthereumRawTransaction, chainUUID))
+			entities.EthereumRawTransaction, chainUUID))
 	default:
 		jobs = append(jobs, newJobEntityFromTxRequest(txRequest, newEthTransactionFromParams(txRequest.Params, txData),
-			utils.EthereumTransaction, chainUUID))
+			entities.EthereumTransaction, chainUUID))
 	}
 
 	return jobs
@@ -56,7 +57,7 @@ func newEthTransactionFromParams(params *entities.ETHTransactionParams, txData s
 	}
 }
 
-func newJobEntityFromTxRequest(txRequest *entities.TxRequest, ethTx *entities.ETHTransaction, jobType, chainUUID string) *entities.Job {
+func newJobEntityFromTxRequest(txRequest *entities.TxRequest, ethTx *entities.ETHTransaction, jobType entities.JobType, chainUUID string) *entities.Job {
 	internalData := *txRequest.InternalData
 	return &entities.Job{
 		ScheduleUUID: txRequest.Schedule.UUID,

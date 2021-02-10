@@ -4,7 +4,7 @@ import (
 	"context"
 	"strconv"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/parsers"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models"
@@ -51,9 +51,9 @@ func (uc *startNextJobUseCase) Execute(ctx context.Context, jobUUID string, tena
 	}
 
 	switch nextJobModel.Type {
-	case utils.OrionMarkingTransaction:
+	case entities.OrionMarkingTransaction:
 		err = uc.handleOrionMarkingTx(ctx, jobModel, nextJobModel)
-	case utils.TesseraMarkingTransaction:
+	case entities.TesseraMarkingTransaction:
 		err = uc.handleTesseraMarkingTx(ctx, jobModel, nextJobModel)
 	}
 
@@ -66,12 +66,12 @@ func (uc *startNextJobUseCase) Execute(ctx context.Context, jobUUID string, tena
 }
 
 func (uc *startNextJobUseCase) handleOrionMarkingTx(ctx context.Context, prevJobModel, jobModel *models.Job) error {
-	if prevJobModel.Type != utils.OrionEEATransaction {
-		return errors.DataError("expected previous job as type: %s", utils.OrionEEATransaction)
+	if prevJobModel.Type != entities.OrionEEATransaction {
+		return errors.DataError("expected previous job as type: %s", entities.OrionEEATransaction)
 	}
 
 	prevJobEntity := parsers.NewJobEntityFromModels(prevJobModel)
-	if prevJobEntity.Status != utils.StatusStored {
+	if prevJobEntity.Status != entities.StatusStored {
 		return errors.DataError("expected previous job status as: STORED")
 	}
 
@@ -80,19 +80,19 @@ func (uc *startNextJobUseCase) handleOrionMarkingTx(ctx context.Context, prevJob
 }
 
 func (uc *startNextJobUseCase) handleTesseraMarkingTx(ctx context.Context, prevJobModel, jobModel *models.Job) error {
-	if prevJobModel.Type != utils.TesseraPrivateTransaction {
-		return errors.DataError("expected previous job as type: %s", utils.TesseraPrivateTransaction)
+	if prevJobModel.Type != entities.TesseraPrivateTransaction {
+		return errors.DataError("expected previous job as type: %s", entities.TesseraPrivateTransaction)
 	}
 
 	prevJobEntity := parsers.NewJobEntityFromModels(prevJobModel)
-	if prevJobEntity.Status != utils.StatusStored {
+	if prevJobEntity.Status != entities.StatusStored {
 		return errors.DataError("expected previous job status as: STORED")
 	}
 
 	jobModel.Transaction.Data = prevJobModel.Transaction.EnclaveKey
 	gas, err := strconv.ParseInt(prevJobModel.Transaction.Gas, 10, 64)
-	if err == nil && gas < utils.TesseraGasLimit {
-		jobModel.Transaction.Gas = strconv.Itoa(utils.TesseraGasLimit)
+	if err == nil && gas < entities.TesseraGasLimit {
+		jobModel.Transaction.Gas = strconv.Itoa(entities.TesseraGasLimit)
 	} else {
 		jobModel.Transaction.Gas = prevJobModel.Transaction.Gas
 	}

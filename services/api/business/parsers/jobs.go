@@ -2,7 +2,6 @@ package parsers
 
 import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models"
 )
 
@@ -65,11 +64,11 @@ func NewJobEntityFromModels(jobModel *models.Job) *entities.Job {
 	for idx, logModel := range jobModel.Logs {
 		job.Logs = append(job.Logs, NewLogEntityFromModels(logModel))
 		// Ignore resending and warning statuses
-		if logModel.Status == utils.StatusResending || logModel.Status == utils.StatusWarning {
+		if logModel.Status == entities.StatusResending || logModel.Status == entities.StatusWarning {
 			continue
 		}
 		// Ignore fail statuses if they come after a resending
-		if logModel.Status == utils.StatusFailed && idx > 1 && jobModel.Logs[idx-1].Status == utils.StatusResending {
+		if logModel.Status == entities.StatusFailed && idx > 1 && jobModel.Logs[idx-1].Status == entities.StatusResending {
 			continue
 		}
 

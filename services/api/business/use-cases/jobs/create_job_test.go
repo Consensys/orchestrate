@@ -5,10 +5,10 @@ package jobs
 import (
 	"context"
 	"fmt"
-	mocks2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases/mocks"
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
+	mocks2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases/mocks"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -75,7 +75,7 @@ func TestCreateJob_Execute(t *testing.T) {
 		fakeSchedule.UUID = jobEntity.ScheduleUUID
 		jobModel := parsers.NewJobModelFromEntities(jobEntity, &fakeSchedule.ID)
 		parentJobModel := testutils2.FakeJobModel(fakeSchedule.ID)
-		parentJobModel.Logs[0].Status = utils.StatusPending
+		parentJobModel.Logs[0].Status = entities.StatusPending
 
 		mockGetChainUC.EXPECT().Execute(gomock.Any(), jobEntity.ChainUUID, tenants).Return(fakeChain, nil)
 		mockAccountDA.EXPECT().FindOneByAddress(gomock.Any(), jobEntity.Transaction.From, tenants).Return(nil, nil)
@@ -176,7 +176,7 @@ func TestCreateJob_Execute(t *testing.T) {
 		fakeSchedule.ID = 1
 		fakeSchedule.UUID = jobEntity.ScheduleUUID
 		parentJobModel := testutils2.FakeJobModel(fakeSchedule.ID)
-		parentJobModel.Logs[0].Status = utils.StatusMined
+		parentJobModel.Logs[0].Status = entities.StatusMined
 
 		mockGetChainUC.EXPECT().Execute(gomock.Any(), jobEntity.ChainUUID, tenants).Return(fakeChain, nil)
 		mockAccountDA.EXPECT().FindOneByAddress(gomock.Any(), jobEntity.Transaction.From, tenants).Return(nil, nil)

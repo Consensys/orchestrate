@@ -43,11 +43,11 @@ type StartNextJobUseCase interface {
 }
 
 type UpdateJobUseCase interface {
-	Execute(ctx context.Context, jobEntity *entities.Job, nextStatus, logMessage string, tenants []string) (*entities.Job, error)
+	Execute(ctx context.Context, jobEntity *entities.Job, nextStatus entities.JobStatus, logMessage string, tenants []string) (*entities.Job, error)
 }
 
 type UpdateChildrenUseCase interface {
-	Execute(ctx context.Context, jobUUID, parentJobUUID, nextStatus string, tenants []string) error
+	Execute(ctx context.Context, jobUUID, parentJobUUID string, nextStatus entities.JobStatus, tenants []string) error
 	WithDBTransaction(dbtx store.Tx) UpdateChildrenUseCase
 }
 

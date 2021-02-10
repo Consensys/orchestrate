@@ -15,7 +15,7 @@ type Job struct {
 	NextJobUUID   string `pg:"alias:next_job_uuid"`
 	ScheduleID    *int   `pg:"alias:schedule_id,notnull"`
 	Schedule      *Schedule
-	Type          string
+	Type          entities.JobType
 	TransactionID *int `pg:"alias:transaction_id,notnull"`
 	Transaction   *Transaction
 	Logs          []*Log

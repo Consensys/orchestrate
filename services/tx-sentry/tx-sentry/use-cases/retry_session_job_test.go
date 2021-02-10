@@ -9,9 +9,9 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/testutils"
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/testutils"
 )
 
 func TestCreateChildJob_Execute(t *testing.T) {
@@ -39,7 +39,7 @@ func TestCreateChildJob_Execute(t *testing.T) {
 		parentJob := testutils.FakeJob()
 		childJobResponse := testutils.FakeJobResponse()
 		parentJobResponse := testutils.FakeJobResponse()
-		parentJobResponse.Status = utils.StatusPending
+		parentJobResponse.Status = entities.StatusPending
 		parentJobResponse.Transaction.GasPrice = initialGasPrice
 		parentJobResponse.Annotations.GasPricePolicy.RetryPolicy.Increment = 0.1
 		parentJobResponse.Annotations.GasPricePolicy.RetryPolicy.Limit = 0.2
@@ -56,7 +56,7 @@ func TestCreateChildJob_Execute(t *testing.T) {
 	t.Run("should resend job transaction if the parent job status is PENDING with not gas increment", func(t *testing.T) {
 		parentJob := testutils.FakeJob()
 		parentJobResponse := testutils.FakeJobResponse()
-		parentJobResponse.Status = utils.StatusPending
+		parentJobResponse.Status = entities.StatusPending
 		parentJobResponse.Transaction.GasPrice = initialGasPrice
 
 		mockClient.EXPECT().GetJob(gomock.Any(), parentJob.UUID).Return(parentJobResponse, nil)
@@ -71,7 +71,7 @@ func TestCreateChildJob_Execute(t *testing.T) {
 		parentJob := testutils.FakeJob()
 		childJob := testutils.FakeJob()
 		parentJobResponse := testutils.FakeJobResponse()
-		parentJobResponse.Status = utils.StatusPending
+		parentJobResponse.Status = entities.StatusPending
 		parentJobResponse.Annotations.GasPricePolicy.RetryPolicy.Increment = 0.1
 		parentJobResponse.Annotations.GasPricePolicy.RetryPolicy.Limit = 0.2
 		parentJobResponse.Transaction.GasPrice = initialGasPrice
@@ -88,8 +88,8 @@ func TestCreateChildJob_Execute(t *testing.T) {
 		parentJob := testutils.FakeJob()
 		parentJobResponse := testutils.FakeJobResponse()
 		parentJobResponse.Transaction.Raw = "0xraw"
-		parentJobResponse.Type = utils.EthereumRawTransaction
-		parentJobResponse.Status = utils.StatusPending
+		parentJobResponse.Type = entities.EthereumRawTransaction
+		parentJobResponse.Status = entities.StatusPending
 		parentJobResponse.Annotations.GasPricePolicy.RetryPolicy.Increment = 0.1
 		parentJobResponse.Annotations.GasPricePolicy.RetryPolicy.Limit = 0.2
 
@@ -107,7 +107,7 @@ func TestCreateChildJob_Execute(t *testing.T) {
 		childJobResponse := testutils.FakeJobResponse()
 
 		parentJobResponse := testutils.FakeJobResponse()
-		parentJobResponse.Status = utils.StatusPending
+		parentJobResponse.Status = entities.StatusPending
 		parentJobResponse.Transaction.GasPrice = initialGasPrice
 		parentJobResponse.Transaction.Nonce = "1"
 		parentJobResponse.Annotations.GasPricePolicy.RetryPolicy.Increment = 0.06
@@ -133,7 +133,7 @@ func TestCreateChildJob_Execute(t *testing.T) {
 		childJobResponse := testutils.FakeJobResponse()
 
 		parentJobResponse := testutils.FakeJobResponse()
-		parentJobResponse.Status = utils.StatusPending
+		parentJobResponse.Status = entities.StatusPending
 		parentJobResponse.Transaction.GasPrice = initialGasPrice
 		parentJobResponse.Transaction.Nonce = "1"
 		parentJobResponse.Annotations.GasPricePolicy.RetryPolicy.Increment = 0.06

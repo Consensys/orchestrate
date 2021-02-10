@@ -15,8 +15,8 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
 	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/proto"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/tx"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models/testutils"
@@ -43,7 +43,7 @@ func TestResendJobTx_Execute(t *testing.T) {
 		job.Schedule = testutils.FakeSchedule("")
 		job.Logs = append(job.Logs, &models.Log{
 			ID:        1,
-			Status:    utils.StatusPending,
+			Status:    entities.StatusPending,
 			CreatedAt: time.Now().Add(time.Second),
 		})
 
@@ -86,7 +86,7 @@ func TestResendJobTx_Execute(t *testing.T) {
 		job.Schedule = testutils.FakeSchedule("")
 		job.Logs = append(job.Logs, &models.Log{
 			ID:        1,
-			Status:    utils.StatusPending,
+			Status:    entities.StatusPending,
 			CreatedAt: time.Now().Add(time.Second),
 		})
 

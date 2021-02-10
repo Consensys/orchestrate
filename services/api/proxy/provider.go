@@ -135,7 +135,7 @@ func appendChainServices(cfg *dynamic.Configuration, chain *entities.Chain, midd
 
 func appendTesseraPrivateTxServices(cfg *dynamic.Configuration, chain *entities.Chain, middlewares []string) {
 	servers := make([]*dynamic.Server, 0)
-	if chain.PrivateTxManager.Type == utils.TesseraChainType {
+	if chain.PrivateTxManager.Type == entities.TesseraChainType {
 		servers = append(servers, &dynamic.Server{
 			URL: chain.PrivateTxManager.URL,
 		})

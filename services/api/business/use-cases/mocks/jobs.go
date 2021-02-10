@@ -346,7 +346,7 @@ func (m *MockUpdateJobUseCase) EXPECT() *MockUpdateJobUseCaseMockRecorder {
 }
 
 // Execute mocks base method
-func (m *MockUpdateJobUseCase) Execute(ctx context.Context, jobEntity *entities.Job, nextStatus, logMessage string, tenants []string) (*entities.Job, error) {
+func (m *MockUpdateJobUseCase) Execute(ctx context.Context, jobEntity *entities.Job, nextStatus entities.JobStatus, logMessage string, tenants []string) (*entities.Job, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Execute", ctx, jobEntity, nextStatus, logMessage, tenants)
 	ret0, _ := ret[0].(*entities.Job)
@@ -384,7 +384,7 @@ func (m *MockUpdateChildrenUseCase) EXPECT() *MockUpdateChildrenUseCaseMockRecor
 }
 
 // Execute mocks base method
-func (m *MockUpdateChildrenUseCase) Execute(ctx context.Context, jobUUID, parentJobUUID, nextStatus string, tenants []string) error {
+func (m *MockUpdateChildrenUseCase) Execute(ctx context.Context, jobUUID, parentJobUUID string, nextStatus entities.JobStatus, tenants []string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Execute", ctx, jobUUID, parentJobUUID, nextStatus, tenants)
 	ret0, _ := ret[0].(error)

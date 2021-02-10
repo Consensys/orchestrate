@@ -5,12 +5,12 @@ package jobs
 import (
 	"context"
 	"fmt"
+	"testing"
+
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models/testutils"
-	"testing"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -23,7 +23,7 @@ func TestUpdateChildren_Execute(t *testing.T) {
 
 	tenants := []string{"tenantID"}
 	ctx := context.Background()
-	status := utils.StatusNeverMined
+	status := entities.StatusNeverMined
 
 	mockDB := mocks.NewMockDB(ctrl)
 	mockJobDA := mocks.NewMockJobAgent(ctrl)
@@ -38,8 +38,8 @@ func TestUpdateChildren_Execute(t *testing.T) {
 		jobUUID := "jobUUID"
 
 		jobsToUpdate := []*models.Job{testutils.FakeJobModel(1), testutils.FakeJobModel(1)}
-		jobsToUpdate[0].Logs[0].Status = utils.StatusPending
-		jobsToUpdate[1].Logs[0].Status = utils.StatusPending
+		jobsToUpdate[0].Logs[0].Status = entities.StatusPending
+		jobsToUpdate[1].Logs[0].Status = entities.StatusPending
 
 		mockJobDA.EXPECT().LockOneByUUID(gomock.Any(), parentJobUUID).Return(nil)
 		mockJobDA.EXPECT().Search(gomock.Any(), &entities.JobFilters{ParentJobUUID: parentJobUUID}, tenants).Return(jobsToUpdate, nil)
@@ -66,8 +66,8 @@ func TestUpdateChildren_Execute(t *testing.T) {
 		jobUUID := "jobUUID"
 
 		jobsToUpdate := []*models.Job{testutils.FakeJobModel(1), testutils.FakeJobModel(1)}
-		jobsToUpdate[0].Logs[0].Status = utils.StatusPending
-		jobsToUpdate[1].Logs[0].Status = utils.StatusPending
+		jobsToUpdate[0].Logs[0].Status = entities.StatusPending
+		jobsToUpdate[1].Logs[0].Status = entities.StatusPending
 
 		mockJobDA.EXPECT().LockOneByUUID(gomock.Any(), jobUUID).Return(nil)
 		mockJobDA.EXPECT().Search(gomock.Any(), &entities.JobFilters{ParentJobUUID: jobUUID}, tenants).Return(jobsToUpdate, nil)
@@ -95,8 +95,8 @@ func TestUpdateChildren_Execute(t *testing.T) {
 
 		jobsToUpdate := []*models.Job{testutils.FakeJobModel(1), testutils.FakeJobModel(1)}
 		jobsToUpdate[0].UUID = jobUUID
-		jobsToUpdate[0].Logs[0].Status = utils.StatusPending
-		jobsToUpdate[1].Logs[0].Status = utils.StatusPending
+		jobsToUpdate[0].Logs[0].Status = entities.StatusPending
+		jobsToUpdate[1].Logs[0].Status = entities.StatusPending
 
 		mockJobDA.EXPECT().LockOneByUUID(gomock.Any(), parentJobUUID).Return(nil)
 		mockJobDA.EXPECT().Search(gomock.Any(), &entities.JobFilters{ParentJobUUID: parentJobUUID}, tenants).Return(jobsToUpdate, nil)
@@ -135,7 +135,7 @@ func TestUpdateChildren_Execute(t *testing.T) {
 
 	t.Run("should fail with same error if Insert fails", func(t *testing.T) {
 		jobsToUpdate := []*models.Job{testutils.FakeJobModel(1)}
-		jobsToUpdate[0].Logs[0].Status = utils.StatusPending
+		jobsToUpdate[0].Logs[0].Status = entities.StatusPending
 
 		expectedErr := fmt.Errorf("error")
 

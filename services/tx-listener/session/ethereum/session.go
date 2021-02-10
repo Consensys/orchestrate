@@ -12,8 +12,6 @@ import (
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/session"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
-
 	"github.com/cenkalti/backoff/v4"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
@@ -357,7 +355,7 @@ func (s *Session) fetchJobs(ctx context.Context, transactions ethtypes.Transacti
 		jobResponses, err := s.client.SearchJob(ctx, &entities.JobFilters{
 			TxHashes:  txHashes,
 			ChainUUID: s.Chain.UUID,
-			Status:    utils.StatusPending,
+			Status:    entities.StatusPending,
 		})
 		if err != nil {
 			s.logger.WithError(err).Error("failed to search jobs")

@@ -13,7 +13,6 @@ import (
 	"github.com/gofrs/uuid"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models"
 
 	"github.com/stretchr/testify/assert"
@@ -126,8 +125,9 @@ func (s *jobTestSuite) TestPGJob_FindOneByUUID() {
 	ctx := context.Background()
 	job := testutils.FakeJobModel(0)
 	job.NextJobUUID = uuid.Must(uuid.NewV4()).String()
-	job.Logs = append(job.Logs, &models.Log{UUID: uuid.Must(uuid.NewV4()).String(), Status: utils.StatusStarted, Message: "created message"})
+	job.Logs = append(job.Logs, &models.Log{UUID: uuid.Must(uuid.NewV4()).String(), Status: entities.StatusStarted, Message: "created message"})
 	job.Schedule.TenantID = s.tenantID
+
 	err := insertJob(ctx, s.agents, job)
 	assert.NoError(s.T(), err)
 
@@ -164,7 +164,7 @@ func (s *jobTestSuite) TestPGJob_FindOneByUUID() {
 func (s *jobTestSuite) TestPGJob_LockOneByUUID() {
 	ctx := context.Background()
 	job := testutils.FakeJobModel(0)
-	job.Logs = append(job.Logs, &models.Log{UUID: uuid.Must(uuid.NewV4()).String(), Status: utils.StatusStarted, Message: "created message"})
+	job.Logs = append(job.Logs, &models.Log{UUID: uuid.Must(uuid.NewV4()).String(), Status: entities.StatusStarted, Message: "created message"})
 	job.Schedule.TenantID = s.tenantID
 	err := insertJob(ctx, s.agents, job)
 	assert.NoError(s.T(), err)
@@ -211,7 +211,7 @@ func (s *jobTestSuite) TestPGJob_Search() {
 
 	// job0 is the parent of a random job "parentJobUUID"
 	job0 := testutils.FakeJobModel(0)
-	job0.Logs = append(job0.Logs, &models.Log{UUID: uuid.Must(uuid.NewV4()).String(), Status: utils.StatusStarted, Message: "created message"})
+	job0.Logs = append(job0.Logs, &models.Log{UUID: uuid.Must(uuid.NewV4()).String(), Status: entities.StatusStarted, Message: "created message"})
 	txHashOne := common.HexToHash("0x1")
 	job0.Transaction.Hash = txHashOne.String()
 	job0.Schedule.TenantID = s.tenantID
@@ -225,7 +225,7 @@ func (s *jobTestSuite) TestPGJob_Search() {
 	job1.Transaction.Hash = txHashTwo.String()
 	job1.Schedule.TenantID = s.tenantID
 	job1.InternalData.ParentJobUUID = job0.UUID
-	job1.Logs[0].Status = utils.StatusPending
+	job1.Logs[0].Status = entities.StatusPending
 	err = insertJob(ctx, s.agents, job1)
 	assert.NoError(s.T(), err)
 
@@ -337,6 +337,14 @@ func (s *jobTestSuite) TestPGJob_ConnectionErr() {
 Persist Job entity and its related entities
 */
 func insertJob(ctx context.Context, agents *PGAgents, job *models.Job) error {
+	if _, err := agents.Chain().FindOneByUUID(ctx, job.ChainUUID, []string{}); errors.IsNotFoundError(err) {
+		chain := testutils.FakeChainModel()
+		chain.UUID = job.ChainUUID
+		if err := agents.Chain().Insert(ctx, chain); err != nil {
+			return err
+		}
+	}
+
 	if job.Schedule != nil {
 		if err := agents.Schedule().Insert(ctx, job.Schedule); err != nil {
 			return err

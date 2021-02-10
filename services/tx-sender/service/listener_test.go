@@ -15,6 +15,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	mock3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sender/tx-sender/use-cases"
@@ -224,7 +225,7 @@ func (s *messageListenerCtrlTestSuite) TestMessageListener_PublicEthereum_Errors
 		err := errors.InternalError("error")
 		s.sendETHUC.EXPECT().Execute(gomock.Any(), gomock.Any()).Return(err)
 		s.apiClient.EXPECT().UpdateJob(gomock.Any(), evlp.GetJobUUID(), &api.UpdateJobRequest{
-			Status:      utils.StatusFailed,
+			Status:      entities.StatusFailed,
 			Message:     err.Error(),
 			Transaction: nil,
 		}).Return(&api.JobResponse{}, nil)
@@ -258,7 +259,7 @@ func (s *messageListenerCtrlTestSuite) TestMessageListener_PublicEthereum_Errors
 		)
 
 		s.apiClient.EXPECT().UpdateJob(gomock.Any(), evlp.GetJobUUID(), &api.UpdateJobRequest{
-			Status:      utils.StatusRecovering,
+			Status:      entities.StatusRecovering,
 			Message:     err.Error(),
 			Transaction: nil,
 		}).Return(&api.JobResponse{}, nil)

@@ -8,7 +8,7 @@ import (
 	"time"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	mocks2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases/mocks"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models"
 
@@ -44,11 +44,11 @@ func TestStartNextJob_Execute(t *testing.T) {
 		jobModel.Transaction.Hash = txHash.String()
 		jobModel.Logs = append(jobModel.Logs, &models.Log{
 			ID:        1,
-			Status:    utils.StatusStored,
+			Status:    entities.StatusStored,
 			CreatedAt: time.Now(),
 		})
-		jobModel.Type = utils.OrionEEATransaction
-		nextJobModel.Type = utils.OrionMarkingTransaction
+		jobModel.Type = entities.OrionEEATransaction
+		nextJobModel.Type = entities.OrionMarkingTransaction
 
 		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), jobModel.UUID, tenants).
 			Return(jobModel, nil)
@@ -73,11 +73,11 @@ func TestStartNextJob_Execute(t *testing.T) {
 		jobModel.Transaction.Gas = "0x1"
 		jobModel.Logs = append(jobModel.Logs, &models.Log{
 			ID:        1,
-			Status:    utils.StatusStored,
+			Status:    entities.StatusStored,
 			CreatedAt: time.Now(),
 		})
-		jobModel.Type = utils.TesseraPrivateTransaction
-		nextJobModel.Type = utils.TesseraMarkingTransaction
+		jobModel.Type = entities.TesseraPrivateTransaction
+		nextJobModel.Type = entities.TesseraMarkingTransaction
 
 		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), jobModel.UUID, tenants).
 			Return(jobModel, nil)

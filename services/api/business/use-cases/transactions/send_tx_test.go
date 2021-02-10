@@ -5,8 +5,9 @@ package transactions
 import (
 	"context"
 	"fmt"
-	testutils3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/testutils"
 	"testing"
+
+	testutils3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/testutils"
 
 	"github.com/gofrs/uuid"
 	"github.com/golang/mock/gomock"
@@ -15,7 +16,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases/mocks"
 	mocks2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/mocks"
@@ -92,7 +92,7 @@ func (s *sendTxSuite) TestSendTx_Success() {
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 
-		response, err := successfulTestExecution(s, txRequest, false, utils.EthereumTransaction)
+		response, err := successfulTestExecution(s, txRequest, false, entities.EthereumTransaction)
 		assert.NoError(t, err)
 		assert.Equal(t, txRequest.Schedule.UUID, response.Schedule.UUID)
 		assert.Equal(t, txRequest.IdempotencyKey, response.IdempotencyKey)
@@ -104,7 +104,7 @@ func (s *sendTxSuite) TestSendTx_Success() {
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 
-		response, err := successfulTestExecution(s, txRequest, true, utils.EthereumTransaction)
+		response, err := successfulTestExecution(s, txRequest, true, entities.EthereumTransaction)
 		assert.NoError(t, err)
 		assert.Equal(t, txRequest.Schedule.UUID, response.Schedule.UUID)
 		assert.Equal(t, txRequest.IdempotencyKey, response.IdempotencyKey)
@@ -115,9 +115,10 @@ func (s *sendTxSuite) TestSendTx_Success() {
 		txRequest := testutils3.FakeOrionTxRequest()
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
-		txRequest.Params.Protocol = utils.OrionChainType
+		txRequest.Params.Protocol = entities.OrionChainType
 
-		response, err := successfulTestExecution(s, txRequest, false, utils.OrionEEATransaction, utils.OrionMarkingTransaction)
+		response, err := successfulTestExecution(s, txRequest, false, entities.OrionEEATransaction, 
+			entities.OrionMarkingTransaction)
 		assert.NoError(t, err)
 		assert.Equal(t, txRequest.IdempotencyKey, response.IdempotencyKey)
 		assert.Equal(t, txRequest.Schedule.UUID, response.Schedule.UUID)
@@ -127,9 +128,10 @@ func (s *sendTxSuite) TestSendTx_Success() {
 		txRequest := testutils3.FakeTesseraTxRequest()
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
-		txRequest.Params.Protocol = utils.TesseraChainType
+		txRequest.Params.Protocol = entities.TesseraChainType
 
-		response, err := successfulTestExecution(s, txRequest, false, utils.TesseraPrivateTransaction, utils.TesseraMarkingTransaction)
+		response, err := successfulTestExecution(s, txRequest, false, entities.TesseraPrivateTransaction, 
+			entities.TesseraMarkingTransaction)
 		assert.NoError(t, err)
 		assert.Equal(t, txRequest.IdempotencyKey, response.IdempotencyKey)
 		assert.Equal(t, txRequest.Schedule.UUID, response.Schedule.UUID)
@@ -140,7 +142,7 @@ func (s *sendTxSuite) TestSendTx_Success() {
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 
-		response, err := successfulTestExecution(s, txRequest, false, utils.EthereumRawTransaction)
+		response, err := successfulTestExecution(s, txRequest, false, entities.EthereumRawTransaction)
 		assert.NoError(t, err)
 		assert.Equal(t, txRequest.IdempotencyKey, response.IdempotencyKey)
 		assert.Equal(t, txRequest.Schedule.UUID, response.Schedule.UUID)
@@ -161,10 +163,13 @@ func (s *sendTxSuite) TestSendTx_Success() {
 		txRequestModel := testutils2.FakeTxRequest(0)
 		txRequestModel.RequestHash = "8ba6ffc20366e5326fc7d4a3f4833306"
 
-		s.SearchChainsUC.EXPECT().Execute(gomock.Any(), &entities.ChainFilters{Names: []string{txRequest.ChainName}}, []string{tenantID, multitenancy.DefaultTenant}).Return(chains, nil)
-		s.TxRequestDA.EXPECT().FindOneByIdempotencyKey(gomock.Any(), txRequest.IdempotencyKey, tenantID).Return(txRequestModel, nil)
+		s.SearchChainsUC.EXPECT().Execute(gomock.Any(), &entities.ChainFilters{Names: []string{txRequest.ChainName}}, 
+		[]string{tenantID, multitenancy.DefaultTenant}).Return(chains, nil)
+		s.TxRequestDA.EXPECT().FindOneByIdempotencyKey(gomock.Any(), txRequest.IdempotencyKey, tenantID).
+			Return(txRequestModel, nil)
 		s.GetTxUC.EXPECT().Execute(gomock.Any(), txRequestModel.Schedule.UUID, tenants).Return(txRequest, nil)
-		s.GetFaucetCandidate.EXPECT().Execute(gomock.Any(), gomock.Any(), chains[0], allowedTenants).Return(nil, faucetNotFoundErr)
+		s.GetFaucetCandidate.EXPECT().Execute(gomock.Any(), gomock.Any(), chains[0], allowedTenants).
+			Return(nil, faucetNotFoundErr)
 		s.StartJobUC.EXPECT().Execute(gomock.Any(), jobUUID, tenants).Return(nil)
 		s.GetTxUC.EXPECT().Execute(gomock.Any(), txRequest.Schedule.UUID, tenants).Return(txRequest, nil)
 
@@ -180,7 +185,7 @@ func (s *sendTxSuite) TestSendTx_Success() {
 		txRequest := testutils3.FakeTxRequest()
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
-		txRequest.Schedule.Jobs[0].Status = utils.StatusStarted
+		txRequest.Schedule.Jobs[0].Status = entities.StatusStarted
 
 		ctx := context.Background()
 		tenantID := "tenantID"
@@ -191,7 +196,8 @@ func (s *sendTxSuite) TestSendTx_Success() {
 		chains := []*entities.Chain{testutils3.FakeChain()}
 		chains[0].UUID = "myChainUUID"
 
-		s.SearchChainsUC.EXPECT().Execute(gomock.Any(), &entities.ChainFilters{Names: []string{txRequest.ChainName}}, []string{tenantID, multitenancy.DefaultTenant}).Return(chains, nil)
+		s.SearchChainsUC.EXPECT().Execute(gomock.Any(), &entities.ChainFilters{Names: []string{txRequest.ChainName}}, 
+		[]string{tenantID, multitenancy.DefaultTenant}).Return(chains, nil)
 		s.TxRequestDA.EXPECT().FindOneByIdempotencyKey(gomock.Any(), txRequest.IdempotencyKey, tenantID).Return(txRequestModel, nil)
 		s.GetTxUC.EXPECT().Execute(gomock.Any(), txRequestModel.Schedule.UUID, tenants).Return(txRequest, nil)
 		s.GetTxUC.EXPECT().Execute(gomock.Any(), txRequest.Schedule.UUID, tenants).Return(txRequest, nil)
@@ -210,7 +216,7 @@ func (s *sendTxSuite) TestSendTx_Success() {
 		txRequest.Params.From = ""
 		txRequest.InternalData.OneTimeKey = true
 
-		response, err := successfulTestExecution(s, txRequest, false, utils.EthereumTransaction)
+		response, err := successfulTestExecution(s, txRequest, false, entities.EthereumTransaction)
 		assert.NoError(t, err)
 		assert.Equal(t, txRequest.Schedule.UUID, response.Schedule.UUID)
 		assert.Equal(t, txRequest.IdempotencyKey, response.IdempotencyKey)
@@ -428,7 +434,7 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 	})
 }
 
-func successfulTestExecution(s *sendTxSuite, txRequest *entities.TxRequest, withFaucet bool, jobTypes ...string) (*entities.TxRequest, error) {
+func successfulTestExecution(s *sendTxSuite, txRequest *entities.TxRequest, withFaucet bool, jobTypes ...entities.JobType) (*entities.TxRequest, error) {
 	ctx := context.Background()
 	tenantID := "tenantID"
 	tenants := []string{"tenantID"}
@@ -465,7 +471,7 @@ func successfulTestExecution(s *sendTxSuite, txRequest *entities.TxRequest, with
 		expectedFaucetJob := &entities.Job{
 			ScheduleUUID: txRequest.Schedule.UUID,
 			ChainUUID:    chains[0].UUID,
-			Type:         utils.EthereumTransaction,
+			Type:         entities.EthereumTransaction,
 			Labels: map[string]string{
 				"faucetUUID": faucet.UUID,
 			},

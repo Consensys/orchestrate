@@ -51,7 +51,7 @@ func FakePrivateETHTransactionParams() *entities.PrivateETHTransactionParams {
 	return &entities.PrivateETHTransactionParams{
 		PrivateFrom:   "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=",
 		PrivateFor:    []string{"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="},
-		PrivateTxType: utils.PrivateTxTypeRestricted,
+		PrivateTxType: entities.PrivateTxTypeRestricted,
 	}
 }
 
@@ -77,7 +77,7 @@ func FakeTesseraTransactionParams() *entities.ETHTransactionParams {
 	tx := FakeETHTransactionParams()
 	tx.PrivateFrom = "ROAZBWtSacxXQrOe3FGAqJDyJjFePR5ce4TSIzmJ0Bc="
 	tx.PrivateFor = []string{"ROAZBWtSacxXQrOe3FGAqJDyJjFePR5ce4TSIzmJ0Bd="}
-	tx.Protocol = utils.TesseraPrivateTransaction
+	tx.Protocol = entities.TesseraChainType
 
 	return tx
 }
@@ -86,7 +86,7 @@ func FakeOrionTransactionParams() *entities.ETHTransactionParams {
 	tx := FakeETHTransactionParams()
 	tx.PrivateFrom = "ROAZBWtSacxXQrOe3FGAqJDyJjFePR5ce4TSIzmJ0Be="
 	tx.PrivacyGroupID = "ROAZBWtSacxXQrOe3FGAqJDyJjFePR5ce4TSIzmJ0Bf="
-	tx.Protocol = utils.OrionEEATransaction
+	tx.Protocol = entities.OrionChainType
 
 	return tx
 }

@@ -8,6 +8,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/tx"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/stress/assets"
@@ -36,7 +37,7 @@ func BatchPrivateTxsTest(ctx context.Context, cfg *WorkloadConfig, client orches
 			ContractName: contractName,
 			Args:         constructorArgs(contractName),
 			PrivateFrom:  privateFrom,
-			Protocol:     utils.OrionChainType,
+			Protocol:     entities.OrionChainType,
 		},
 		Labels: map[string]string{
 			"id": idempotency,

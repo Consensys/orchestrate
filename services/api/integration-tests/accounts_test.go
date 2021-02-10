@@ -111,8 +111,8 @@ func (s *accountsTestSuite) TestCreateAccounts() {
 		assert.Equal(t, resp.Alias, accountRequest.Alias)
 		assert.Equal(t, resp.TenantID, "_")
 
-		err = s.client.DeleteChain(ctx, chainWithFaucet.UUID)
-		assert.NoError(t, err)
+		// err = s.client.DeleteChain(ctx, chainWithFaucet.UUID)
+		// assert.NoError(t, err)
 		err = s.client.DeleteFaucet(ctx, faucet.UUID)
 		assert.NoError(t, err)
 	})

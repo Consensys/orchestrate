@@ -175,7 +175,6 @@ func (c *OrchestrateVaultClient) manageToken() error {
 		return errors.HashicorpVaultConnectionError(errMessage)
 	}
 
-	c.logger.Errorf("SECRET: %q", secret)
 	tokenTTL64, err := secret.Data["creation_ttl"].(json.Number).Int64()
 	if err != nil {
 		errMessage := "failed to get 'creation_ttl' field"

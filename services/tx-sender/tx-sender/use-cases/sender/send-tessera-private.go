@@ -56,7 +56,7 @@ func (uc *sendTesseraPrivateTxUseCase) Execute(ctx context.Context, job *entitie
 		return errors.FromError(err).ExtendComponent(sendTesseraPrivateTxComponent)
 	}
 
-	err = utils2.UpdateJobStatus(ctx, uc.jobClient, job.UUID, utils.StatusStored, "", job.Transaction)
+	err = utils2.UpdateJobStatus(ctx, uc.jobClient, job.UUID, entities.StatusStored, "", job.Transaction)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(sendTesseraPrivateTxComponent)
 	}

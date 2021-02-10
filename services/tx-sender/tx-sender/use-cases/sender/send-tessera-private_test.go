@@ -13,6 +13,7 @@ import (
 	mock2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sender/tx-sender/use-cases/mocks"
@@ -43,7 +44,7 @@ func TestSendTesseraPrivate_Execute(t *testing.T) {
 		ec.EXPECT().StoreRaw(gomock.Any(), proxyURL, data, job.Transaction.PrivateFrom).Return(enclaveKey, nil)
 
 		jobClient.EXPECT().UpdateJob(gomock.Any(), job.UUID, &api.UpdateJobRequest{
-			Status: utils.StatusStored,
+			Status: entities.StatusStored,
 			Transaction: job.Transaction,
 		})
 

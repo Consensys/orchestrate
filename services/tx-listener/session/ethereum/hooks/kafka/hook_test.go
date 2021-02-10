@@ -5,8 +5,9 @@ package kafka
 import (
 	"context"
 	"fmt"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"testing"
+
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 
 	"github.com/Shopify/sarama/mocks"
 	ethcommon "github.com/ethereum/go-ethereum/common"
@@ -16,10 +17,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/mock"
 	mock2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client/mock"
+	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/ethereum"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/testutils"
-	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/dynamic"
 )
 
@@ -79,7 +79,7 @@ func Test_AfterNewBlock(t *testing.T) {
 			Event: "{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"tokens\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"}",
 		}, nil)
 		client.EXPECT().UpdateJob(gomock.Any(), gomock.Any(), &txschedulertypes.UpdateJobRequest{
-			Status:  utils.StatusMined,
+			Status:  entities.StatusMined,
 			Message: fmt.Sprintf("transaction mined in block %v", block.NumberU64()),
 		}).Return(&txschedulertypes.JobResponse{}, nil)
 		producer.ExpectSendMessageAndSucceed()
@@ -109,7 +109,7 @@ func Test_AfterNewBlock(t *testing.T) {
 			Event: "{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"tokens\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"}",
 		}, nil)
 		client.EXPECT().UpdateJob(gomock.Any(), gomock.Any(), &txschedulertypes.UpdateJobRequest{
-			Status:  utils.StatusMined,
+			Status:  entities.StatusMined,
 			Message: fmt.Sprintf("transaction mined in block %v", block.NumberU64()),
 		}).Return(&txschedulertypes.JobResponse{}, nil)
 		producer.ExpectSendMessageAndSucceed()
@@ -127,7 +127,7 @@ func Test_AfterNewBlock(t *testing.T) {
 			Event: "{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"tokens\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"}",
 		}, nil)
 		client.EXPECT().UpdateJob(gomock.Any(), gomock.Any(), &txschedulertypes.UpdateJobRequest{
-			Status:  utils.StatusMined,
+			Status:  entities.StatusMined,
 			Message: fmt.Sprintf("transaction mined in block %v", block.NumberU64()),
 		}).Return(&txschedulertypes.JobResponse{}, nil)
 		producer.ExpectSendMessageAndSucceed()
@@ -143,7 +143,7 @@ func Test_AfterNewBlock(t *testing.T) {
 		client.EXPECT().SetContractAddressCodeHash(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 		client.EXPECT().GetContractEvents(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error GetEventsBySigHash"))
 		client.EXPECT().UpdateJob(gomock.Any(), gomock.Any(), &txschedulertypes.UpdateJobRequest{
-			Status:  utils.StatusMined,
+			Status:  entities.StatusMined,
 			Message: fmt.Sprintf("transaction mined in block %v", block.NumberU64()),
 		}).Return(&txschedulertypes.JobResponse{}, nil)
 		producer.ExpectSendMessageAndSucceed()
@@ -161,7 +161,7 @@ func Test_AfterNewBlock(t *testing.T) {
 			Event: "{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"tokens\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"}",
 		}, nil)
 		client.EXPECT().UpdateJob(gomock.Any(), gomock.Any(), &txschedulertypes.UpdateJobRequest{
-			Status:  utils.StatusMined,
+			Status:  entities.StatusMined,
 			Message: fmt.Sprintf("transaction mined in block %v", block.NumberU64()),
 		}).Return(nil, fmt.Errorf("error"))
 		producer.ExpectSendMessageAndSucceed()
@@ -181,7 +181,7 @@ func Test_AfterNewBlock(t *testing.T) {
 			Event: "{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"tokens\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"}",
 		}, nil)
 		client.EXPECT().UpdateJob(gomock.Any(), gomock.Any(), &txschedulertypes.UpdateJobRequest{
-			Status:  utils.StatusMined,
+			Status:  entities.StatusMined,
 			Message: fmt.Sprintf("transaction mined in block %v", block.NumberU64()),
 		}).Return(&txschedulertypes.JobResponse{}, nil)
 		producer.ExpectSendMessageAndFail(expectedErr)

@@ -53,6 +53,12 @@ func (s *logTestSuite) TestPGLog_Insert() {
 	assert.NoError(s.T(), err)
 	err = s.agents.Transaction().Insert(ctx, job.Transaction)
 	assert.NoError(s.T(), err)
+
+	chain := testutils.FakeChainModel()
+	chain.UUID = job.ChainUUID
+	err = s.agents.Chain().Insert(ctx, chain)
+	assert.NoError(s.T(), err)
+
 	err = s.agents.Job().Insert(ctx, job)
 	assert.NoError(s.T(), err)
 

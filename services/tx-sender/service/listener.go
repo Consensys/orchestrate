@@ -130,12 +130,12 @@ func (listener *MessageListener) consumeClaimLoop(ctx context.Context, session s
 					// Never retry on children jobs
 					case job.InternalData.ParentJobUUID == job.UUID:
 						serr = utils2.UpdateJobStatus(ctx, listener.jobClient, evlp.GetJobUUID(),
-							utils.StatusFailed, err.Error(), nil)
+							entities.StatusFailed, err.Error(), nil)
 					// Retry over same message
 					case errors.IsInvalidNonceWarning(err):
 						resetEnvelopeTx(evlp)
 						serr = utils2.UpdateJobStatus(ctx, listener.jobClient, evlp.GetJobUUID(),
-							utils.StatusRecovering, err.Error(), nil)
+							entities.StatusRecovering, err.Error(), nil)
 						if serr == nil {
 							return err
 						}
@@ -145,7 +145,7 @@ func (listener *MessageListener) consumeClaimLoop(ctx context.Context, session s
 						serr = listener.sendEnvelope(ctx, evlp.ID, txResponse, listener.recoverTopic, evlp.PartitionKey())
 						if serr == nil {
 							serr = utils2.UpdateJobStatus(ctx, listener.jobClient, evlp.GetJobUUID(),
-								utils.StatusFailed, err.Error(), nil)
+								entities.StatusFailed, err.Error(), nil)
 						}
 					}
 
@@ -185,7 +185,7 @@ func (listener *MessageListener) consumeClaimLoop(ctx context.Context, session s
 }
 
 func (listener *MessageListener) processJob(ctx context.Context, job *entities.Job) error {
-	switch job.Type {
+	switch string(job.Type) {
 	case tx.JobType_ETH_TESSERA_PRIVATE_TX.String():
 		return listener.useCases.SendTesseraPrivateTx().Execute(ctx, job)
 	case tx.JobType_ETH_TESSERA_MARKING_TX.String():

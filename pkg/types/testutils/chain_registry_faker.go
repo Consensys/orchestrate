@@ -6,7 +6,7 @@ import (
 	"github.com/gofrs/uuid"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 )
 
 func FakeRegisterChainRequest() *api.RegisterChainRequest {
@@ -19,7 +19,7 @@ func FakeRegisterChainRequest() *api.RegisterChainRequest {
 		},
 		PrivateTxManager: &api.PrivateTxManagerRequest{
 			URL:  "http://orion:8545",
-			Type: utils.OrionChainType,
+			Type: entities.OrionChainType,
 		},
 	}
 }

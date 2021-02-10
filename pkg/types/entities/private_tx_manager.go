@@ -2,10 +2,23 @@ package entities
 
 import "time"
 
+type PrivateTxType string
+type PrivateTxManagerType string
+
+const (
+	PrivateTxTypeRestricted PrivateTxType = "restricted"
+
+	TesseraChainType PrivateTxManagerType = "Tessera"
+	OrionChainType   PrivateTxManagerType = "Orion"
+
+	// Minimum gas is calculated by the size of the enclaveKey
+	TesseraGasLimit = 60000
+)
+
 type PrivateTxManager struct {
 	UUID      string
 	ChainUUID string
 	URL       string
-	Type      string
+	Type      PrivateTxManagerType
 	CreatedAt time.Time
 }

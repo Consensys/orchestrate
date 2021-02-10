@@ -10,10 +10,9 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client/mock"
+	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/testutils"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sentry/tx-sentry/use-cases/mocks"
 )
 
@@ -88,7 +87,7 @@ func TestSessionManager(t *testing.T) {
 		parentJobResponse.UUID = job.UUID
 		for idx := 0; idx < 10; idx++ {
 			parentJobResponse.Logs = append(parentJobResponse.Logs, &entities.Log{
-				Status: utils.StatusResending,
+				Status: entities.StatusResending,
 			})
 		}
 

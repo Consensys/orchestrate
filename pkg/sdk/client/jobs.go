@@ -66,7 +66,7 @@ func (c *HTTPClient) SearchJob(ctx context.Context, filters *entities.JobFilters
 	}
 
 	if filters.Status != "" {
-		qParams = append(qParams, "status="+filters.Status)
+		qParams = append(qParams, "status="+string(filters.Status))
 	}
 
 	if !filters.UpdatedAfter.IsZero() {

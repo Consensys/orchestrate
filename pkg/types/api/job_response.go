@@ -17,8 +17,8 @@ type JobResponse struct {
 	Logs          []*entities.Log         `json:"logs"`
 	Labels        map[string]string       `json:"labels,omitempty"`
 	Annotations   Annotations             `json:"annotations,omitempty"`
-	Status        string                  `json:"status" example:"MINED"`
-	Type          string                  `json:"type" example:"eth://ethereum/transaction"`
+	Status        entities.JobStatus      `json:"status" example:"MINED"`
+	Type          entities.JobType        `json:"type" example:"eth://ethereum/transaction"`
 	CreatedAt     time.Time               `json:"createdAt" example:"2020-07-09T12:35:42.115395Z"`
 	UpdatedAt     time.Time               `json:"updatedAt" example:"2020-07-09T12:35:42.115395Z"`
 }

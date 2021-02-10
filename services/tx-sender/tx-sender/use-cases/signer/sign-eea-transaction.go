@@ -49,7 +49,7 @@ func (uc *signEEATransactionUseCase) Execute(ctx context.Context, job *entities.
 		PrivateFrom:    job.Transaction.PrivateFrom,
 		PrivateFor:     job.Transaction.PrivateFor,
 		PrivacyGroupID: job.Transaction.PrivacyGroupID,
-		PrivateTxType:  utils.PrivateTxTypeRestricted,
+		PrivateTxType:  entities.PrivateTxTypeRestricted,
 	}
 
 	var decodedSignature []byte

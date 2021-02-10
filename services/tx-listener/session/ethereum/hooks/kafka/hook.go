@@ -104,7 +104,7 @@ func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *etht
 			ctx,
 			txResponse.GetJobUUID(),
 			&api.UpdateJobRequest{
-				Status:  utils.StatusMined,
+				Status:  entities.StatusMined,
 				Message: fmt.Sprintf("transaction mined in block %v", block.NumberU64()),
 			})
 

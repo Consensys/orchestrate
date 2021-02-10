@@ -3,6 +3,9 @@
 package integrationtests
 
 import (
+	"testing"
+	"time"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -12,9 +15,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/testutils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
-	"testing"
-	"time"
 )
 
 type chainsTestSuite struct {
@@ -281,7 +281,7 @@ func (s *chainsTestSuite) TestUpdate() {
 		req := testutils.FakeUpdateChainRequest()
 		req.PrivateTxManager = &api.PrivateTxManagerRequest{
 			URL:  "http://myURLUpdated:8545",
-			Type: utils.TesseraChainType,
+			Type: entities.TesseraChainType,
 		}
 
 		resp, err := s.client.UpdateChain(ctx, chain.UUID, req)

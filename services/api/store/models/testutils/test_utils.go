@@ -26,9 +26,9 @@ func FakeSchedule(tenantID string) *models.Schedule {
 		Jobs: []*models.Job{{
 			UUID:        uuid.Must(uuid.NewV4()).String(),
 			ChainUUID:   uuid.Must(uuid.NewV4()).String(),
-			Type:        utils.EthereumTransaction,
+			Type:        entities.EthereumTransaction,
 			Transaction: FakeTransaction(),
-			Logs:        []*models.Log{{Status: utils.StatusCreated, Message: "created message"}},
+			Logs:        []*models.Log{{Status: entities.StatusCreated, Message: "created message"}},
 		}},
 	}
 }
@@ -63,7 +63,7 @@ func FakeJobModel(scheduleID int) *models.Job {
 	job := &models.Job{
 		UUID:      uuid.Must(uuid.NewV4()).String(),
 		ChainUUID: uuid.Must(uuid.NewV4()).String(),
-		Type:      utils.EthereumTransaction,
+		Type:      entities.EthereumTransaction,
 		Schedule: &models.Schedule{
 			ID:       scheduleID,
 			TenantID: "_",
@@ -71,7 +71,7 @@ func FakeJobModel(scheduleID int) *models.Job {
 		},
 		Transaction: FakeTransaction(),
 		Logs: []*models.Log{
-			{UUID: uuid.Must(uuid.NewV4()).String(), Status: utils.StatusCreated, Message: "created message", CreatedAt: time.Now()},
+			{UUID: uuid.Must(uuid.NewV4()).String(), Status: entities.StatusCreated, Message: "created message", CreatedAt: time.Now()},
 		},
 		InternalData: &entities.InternalData{
 			ChainID: "888",
@@ -90,7 +90,7 @@ func FakeJobModel(scheduleID int) *models.Job {
 func FakeLog() *models.Log {
 	return &models.Log{
 		UUID:      uuid.Must(uuid.NewV4()).String(),
-		Status:    utils.StatusCreated,
+		Status:    entities.StatusCreated,
 		Job:       FakeJobModel(0),
 		CreatedAt: time.Now(),
 	}
@@ -126,7 +126,7 @@ func FakeFaucetModel() *models.Faucet {
 func FakeChainModel() *models.Chain {
 	return &models.Chain{
 		UUID:                      uuid.Must(uuid.NewV4()).String(),
-		Name:                      "mainnet",
+		Name:                      "chain" + utils.RandString(5),
 		TenantID:                  "tenantID",
 		URLs:                      []string{"http://ganache:8545"},
 		ChainID:                   "888",

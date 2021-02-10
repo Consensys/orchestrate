@@ -6,6 +6,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
+
 	"testing"
 	"time"
 
@@ -14,7 +16,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/testutils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 )
 
 // jobsTestSuite is a test suite for Jobs controller
@@ -43,7 +44,7 @@ func (s *jobsTestSuite) TestCreate() {
 		assert.Equal(t, req.ScheduleUUID, job.ScheduleUUID)
 		assert.Equal(t, multitenancy.DefaultTenant, job.TenantID)
 		assert.Equal(t, s.chainUUID, job.ChainUUID)
-		assert.Equal(t, utils.StatusCreated, job.Status)
+		assert.Equal(t, entities.StatusCreated, job.Status)
 		assert.Empty(t, job.ParentJobUUID)
 		assert.Empty(t, job.NextJobUUID)
 		assert.NotEmpty(t, job.CreatedAt)
@@ -108,7 +109,7 @@ func (s *jobsTestSuite) TestStart() {
 		jobRetrieved, err := s.client.GetJob(ctx, job.UUID)
 		require.NoError(t, err)
 
-		assert.Equal(t, utils.StatusStarted, jobRetrieved.Status)
+		assert.Equal(t, entities.StatusStarted, jobRetrieved.Status)
 	})
 
 	s.T().Run("should fail with 409 to start if job has already started", func(t *testing.T) {

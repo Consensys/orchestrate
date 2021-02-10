@@ -6,6 +6,8 @@ package dataagents
 
 import (
 	"context"
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	pgTestUtils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database/postgres/testutils"
@@ -13,7 +15,6 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/postgres/migrations"
-	"testing"
 )
 
 type scheduleTestSuite struct {
@@ -169,6 +170,14 @@ func insertSchedule(ctx context.Context, agents *PGAgents, schedule *models.Sche
 	}
 
 	for _, job := range schedule.Jobs {
+		if _, err := agents.Chain().FindOneByUUID(ctx, job.ChainUUID, []string{}); errors.IsNotFoundError(err) {
+			chain := testutils.FakeChainModel()
+			chain.UUID = job.ChainUUID
+			if err := agents.Chain().Insert(ctx, chain); err != nil {
+				return err
+			}
+		}
+
 		job.Schedule = schedule
 		if err := agents.Transaction().Insert(ctx, job.Transaction); err != nil {
 			return err

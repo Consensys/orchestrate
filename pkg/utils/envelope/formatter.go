@@ -65,7 +65,7 @@ func NewJobFromEnvelope(envelope *tx.Envelope, tenantID string) *entities.Job {
 		NextJobUUID:  envelope.GetNextJobUUID(),
 		ChainUUID:    envelope.GetChainUUID(),
 		ScheduleUUID: envelope.GetScheduleUUID(),
-		Type:         envelope.GetJobTypeString(),
+		Type:         entities.JobType(envelope.GetJobTypeString()),
 		InternalData: &entities.InternalData{
 			OneTimeKey:    envelope.IsOneTimeKeySignature(),
 			ChainID:       envelope.GetChainIDString(),

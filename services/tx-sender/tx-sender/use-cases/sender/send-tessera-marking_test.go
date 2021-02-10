@@ -12,6 +12,7 @@ import (
 	mock2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client/mock"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/testutils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	mocks2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sender/tx-sender/nonce/mocks"
@@ -50,7 +51,7 @@ func TestSendTesseraMarking_Execute(t *testing.T) {
 			Return(ethcommon.HexToHash(txHash), nil)
 		nonceChecker.EXPECT().IncrementNonce(gomock.Any(), job).Return(nil)
 		jobClient.EXPECT().UpdateJob(gomock.Any(), job.UUID, &api.UpdateJobRequest{
-			Status:      utils.StatusPending,
+			Status:      entities.StatusPending,
 			Transaction: job.Transaction,
 		})
 
@@ -75,7 +76,7 @@ func TestSendTesseraMarking_Execute(t *testing.T) {
 			Return(ethcommon.HexToHash(txHash2), nil)
 		nonceChecker.EXPECT().IncrementNonce(gomock.Any(), job).Return(nil)
 		jobClient.EXPECT().UpdateJob(gomock.Any(), job.UUID, &api.UpdateJobRequest{
-			Status:      utils.StatusPending,
+			Status:      entities.StatusPending,
 			Transaction: job.Transaction,
 		})
 
@@ -122,7 +123,7 @@ func TestSendTesseraMarking_Execute(t *testing.T) {
 
 		expectedErr := errors.InternalError("internal error")
 		jobClient.EXPECT().UpdateJob(gomock.Any(), job.UUID, &api.UpdateJobRequest{
-			Status:      utils.StatusPending,
+			Status:      entities.StatusPending,
 			Transaction: job.Transaction,
 		}).Return(nil, expectedErr)
 
@@ -143,7 +144,7 @@ func TestSendTesseraMarking_Execute(t *testing.T) {
 		expectedErr := errors.InternalError("internal error")
 		proxyURL := utils.GetProxyURL(chainRegistryURL, job.ChainUUID)
 		jobClient.EXPECT().UpdateJob(gomock.Any(), job.UUID, &api.UpdateJobRequest{
-			Status:      utils.StatusPending,
+			Status:      entities.StatusPending,
 			Transaction: job.Transaction,
 		})
 		ec.EXPECT().SendQuorumRawPrivateTransaction(gomock.Any(), proxyURL, job.Transaction.Raw, job.Transaction.PrivateFor).
