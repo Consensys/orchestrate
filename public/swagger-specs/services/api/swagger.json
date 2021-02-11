@@ -383,6 +383,13 @@
                         "schema": {
                             "$ref": "#/definitions/api.UpdateAccountRequest"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "selected account address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -517,6 +524,13 @@
                                 }
                             ]
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "selected account address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -3654,8 +3668,7 @@
                     "example": "Log message"
                 },
                 "status": {
-                    "type": "string",
-                    "example": "MINED"
+                    "type": "JobStatus"
                 }
             }
         },
@@ -3669,7 +3682,7 @@
                     "type": "string"
                 },
                 "type": {
-                    "type": "string"
+                    "type": "PrivateTxManagerType"
                 },
                 "url": {
                     "type": "string"
