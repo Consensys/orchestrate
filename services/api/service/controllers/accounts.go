@@ -186,6 +186,7 @@ func (c *AccountsController) importKey(rw http.ResponseWriter, request *http.Req
 // @Security ApiKeyAuth
 // @Security JWTAuth
 // @Param request body api.UpdateAccountRequest true "Account update request"
+// @Param address path string true "selected account address"
 // @Success 200 {object} api.AccountResponse "Account found"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 401 {object} httputil.ErrorResponse "Unauthorized"
@@ -265,6 +266,7 @@ func (c *AccountsController) signPayload(rw http.ResponseWriter, request *http.R
 // @Accept json
 // @Produce text/plain
 // @Param request body api.SignTypedDataRequest{domainSeparator=ethereum.DomainSeparator,types=map[string]ethereum.Type} true "Typed data to sign"
+// @Param address path string true "selected account address"
 // @Success 200 {string} string "Signed payload"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 401 {object} httputil.ErrorResponse "Unauthorized"

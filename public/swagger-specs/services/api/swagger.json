@@ -200,6 +200,112 @@
                 }
             }
         },
+        "/accounts/verify-signature": {
+            "post": {
+                "description": "Verifies if a message has been signed by the Ethereum account passed as argument",
+                "consumes": [
+                    "application/json"
+                ],
+                "summary": "Verifies the signature of a message",
+                "parameters": [
+                    {
+                        "description": "signature and message to verify",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ethereum.VerifyPayloadRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {},
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Invalid parameters",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/accounts/verify-typed-data-signature": {
+            "post": {
+                "description": "Verifies if a typed data message has been signed by the Ethereum account passed as argument following the EIP-712 standard",
+                "consumes": [
+                    "application/json"
+                ],
+                "summary": "Verifies the signature of a typed data message following the EIP-712 standard",
+                "parameters": [
+                    {
+                        "description": "Typed data to sign",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/ethereum.VerifyTypedDataRequest"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "domainSeparator": {
+                                            "$ref": "#/definitions/ethereum.DomainSeparator"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {},
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Invalid parameters",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/accounts/{address}": {
             "get": {
                 "security": [
@@ -361,6 +467,85 @@
                     },
                     "404": {
                         "description": "Account not found",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/accounts/{address}/sign-typed-data": {
+            "post": {
+                "description": "Signs typed data using ECDSA and the private key of an existing account following the EIP-712 standard",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/plain"
+                ],
+                "summary": "Signs typed data using an existing account following the EIP-712 standard",
+                "parameters": [
+                    {
+                        "description": "Typed data to sign",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/api.SignTypedDataRequest"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "domainSeparator": {
+                                            "$ref": "#/definitions/ethereum.DomainSeparator"
+                                        },
+                                        "types": {
+                                            "type": "object",
+                                            "additionalProperties": {
+                                                "$ref": "#/definitions/ethereum.Type"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Signed payload",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Account not found",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Invalid parameters",
                         "schema": {
                             "$ref": "#/definitions/httputil.ErrorResponse"
                         }
@@ -1046,191 +1231,6 @@
                     },
                     "404": {
                         "description": "Contract not found",
-                        "schema": {
-                            "$ref": "#/definitions/httputil.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/httputil.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/ethereum/accounts/verify-signature": {
-            "post": {
-                "description": "Verifies if a message has been signed by the Ethereum account passed as argument",
-                "consumes": [
-                    "application/json"
-                ],
-                "summary": "Verifies the signature of a message",
-                "parameters": [
-                    {
-                        "description": "signature and message to verify",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/ethereum.VerifyPayloadRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "204": {},
-                    "400": {
-                        "description": "Invalid request",
-                        "schema": {
-                            "$ref": "#/definitions/httputil.ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/httputil.ErrorResponse"
-                        }
-                    },
-                    "422": {
-                        "description": "Invalid parameters",
-                        "schema": {
-                            "$ref": "#/definitions/httputil.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/httputil.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/ethereum/accounts/verify-typed-data-signature": {
-            "post": {
-                "description": "Verifies if a typed data message has been signed by the Ethereum account passed as argument following the EIP-712 standard",
-                "consumes": [
-                    "application/json"
-                ],
-                "summary": "Verifies the signature of a typed data message following the EIP-712 standard",
-                "parameters": [
-                    {
-                        "description": "Typed data to sign",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/ethereum.VerifyTypedDataRequest"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "domainSeparator": {
-                                            "$ref": "#/definitions/ethereum.DomainSeparator"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                ],
-                "responses": {
-                    "204": {},
-                    "400": {
-                        "description": "Invalid request",
-                        "schema": {
-                            "$ref": "#/definitions/httputil.ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/httputil.ErrorResponse"
-                        }
-                    },
-                    "422": {
-                        "description": "Invalid parameters",
-                        "schema": {
-                            "$ref": "#/definitions/httputil.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/httputil.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/ethereum/accounts/{address}/sign-typed-data": {
-            "post": {
-                "description": "Signs typed data using ECDSA and the private key of an existing account following the EIP-712 standard",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "text/plain"
-                ],
-                "summary": "Signs typed data using an existing account following the EIP-712 standard",
-                "parameters": [
-                    {
-                        "description": "Typed data to sign",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/api.SignTypedDataRequest"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "domainSeparator": {
-                                            "$ref": "#/definitions/ethereum.DomainSeparator"
-                                        },
-                                        "types": {
-                                            "type": "object",
-                                            "additionalProperties": {
-                                                "$ref": "#/definitions/ethereum.Type"
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Signed payload",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request",
-                        "schema": {
-                            "$ref": "#/definitions/httputil.ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/httputil.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Account not found",
-                        "schema": {
-                            "$ref": "#/definitions/httputil.ErrorResponse"
-                        }
-                    },
-                    "422": {
-                        "description": "Invalid parameters",
                         "schema": {
                             "$ref": "#/definitions/httputil.ErrorResponse"
                         }

@@ -116,6 +116,7 @@ func (c *EthereumController) listNamespaces(rw http.ResponseWriter, _ *http.Requ
 // @Summary Fetch Ethereum Account
 // @Description Get selected stored ethereum account in the Vault
 // @Produce json
+// @Param address path string true "selected account address"
 // @Success 200 {object} ethereum.ETHAccountResponse "Ethereum account"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /ethereum/accounts/{address} [get]
@@ -176,6 +177,7 @@ func (c *EthereumController) importAccount(rw http.ResponseWriter, request *http
 // @Accept json
 // @Produce text/plain
 // @Param request body keymanager.SignPayloadRequest true "Payload to sign"
+// @Param address path string true "selected account address"
 // @Success 200 {string} string "Signed payload"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 404 {object} httputil.ErrorResponse "Account not found"
@@ -209,6 +211,7 @@ func (c *EthereumController) signPayload(rw http.ResponseWriter, request *http.R
 // @Accept json
 // @Produce text/plain
 // @Param request body ethereum.SignETHTransactionRequest true "Ethereum transaction to sign"
+// @Param address path string true "selected account address"
 // @Success 200 {string} string "Signed payload"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 404 {object} httputil.ErrorResponse "Account not found"
@@ -242,6 +245,7 @@ func (c *EthereumController) signTransaction(rw http.ResponseWriter, request *ht
 // @Accept json
 // @Produce text/plain
 // @Param request body ethereum.SignQuorumPrivateTransactionRequest true "Quorum private transaction to sign"
+// @Param address path string true "selected account address"
 // @Success 200 {string} string "Signed payload"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 404 {object} httputil.ErrorResponse "Account not found"
@@ -275,6 +279,7 @@ func (c *EthereumController) signQuorumPrivate(rw http.ResponseWriter, request *
 // @Accept json
 // @Produce text/plain
 // @Param request body ethereum.SignQuorumPrivateTransactionRequest true "EEA private transaction to sign"
+// @Param address path string true "selected account address"
 // @Success 200 {string} string "Signed payload"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 404 {object} httputil.ErrorResponse "Account not found"
@@ -314,6 +319,7 @@ func (c *EthereumController) signEEA(rw http.ResponseWriter, request *http.Reque
 // @Accept json
 // @Produce text/plain
 // @Param request body ethereum.SignTypedDataRequest{domainSeparator=ethereum.DomainSeparator} true "Typed data to sign"
+// @Param address path string true "selected account address"
 // @Success 200 {string} string "Signed payload"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 404 {object} httputil.ErrorResponse "Account not found"
