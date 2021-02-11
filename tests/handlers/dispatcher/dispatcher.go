@@ -34,6 +34,7 @@ func Dispatcher(reg *chanregistry.ChanRegistry, keyOfs ...KeyOfFunc) engine.Hand
 			if err == nil {
 				txctx.Logger.WithFields(log.Fields{"key": key}).Debug("dispatcher - external tx envelope dispatched")
 			}
+
 			return
 		}
 
@@ -53,6 +54,6 @@ func Dispatcher(reg *chanregistry.ChanRegistry, keyOfs ...KeyOfFunc) engine.Hand
 			return
 		}
 
-		txctx.Logger.Warnf("dispatcher - untracked envelope not dispatched")
+		txctx.Logger.Warn("dispatcher - untracked envelope not dispatched")
 	}
 }

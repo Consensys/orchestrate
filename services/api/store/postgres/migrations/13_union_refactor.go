@@ -52,8 +52,18 @@ ALTER TABLE transaction_requests
 CREATE TYPE job_type AS ENUM ('eth://ethereum/transaction', 'eth://ethereum/rawTransaction', 'eth://orion/markingTransaction', 'eth://orion/eeaTransaction', 'eth://tessera/markingTransaction', 'eth://tessera/privateTransaction');
 
 ALTER TABLE jobs
+	ALTER COLUMN chain_uuid DROP NOT NULL;
+
+UPDATE jobs
+	SET chain_uuid = NULL
+	WHERE chain_uuid NOT IN (SELECT uuid FROM chains);
+
+ALTER TABLE jobs
 	ALTER COLUMN type TYPE job_type using type::job_type,
-	ADD CONSTRAINT jobs_chain_uuid_fkey FOREIGN KEY (chain_uuid) REFERENCES chains (uuid) ON DELETE RESTRICT;
+	ADD CONSTRAINT jobs_chain_uuid_fkey FOREIGN KEY (chain_uuid) REFERENCES chains (uuid) ON DELETE SET NULL;
+
+DELETE FROM jobs
+	where schedule_id NOT IN (select id from schedules);
 
 ALTER TABLE jobs
 	DROP CONSTRAINT jobs_schedule_id_fkey,
@@ -160,6 +170,13 @@ ALTER TABLE transaction_requests
 ALTER TABLE jobs
 	ALTER COLUMN type TYPE TEXT,
 	DROP CONSTRAINT jobs_chain_uuid_fkey;
+
+UPDATE jobs
+	SET chain_uuid = '00000000-0000-0000-0000-000000000000'
+	WHERE chain_uuid IS NULL;
+
+ALTER TABLE jobs
+	ALTER COLUMN chain_uuid SET NOT NULL;
 
 ALTER TABLE jobs
 	DROP CONSTRAINT jobs_schedule_id_fkey,

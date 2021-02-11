@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/spf13/viper"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient"
 
 	"github.com/Shopify/sarama"
@@ -100,7 +101,8 @@ func (c *WorkLoadService) Run(ctx context.Context) error {
 
 	log.FromContext(ctx).Info("waiting for jobs to complete...")
 	wg.Wait()
-	return gerr
+
+	return c.postRun(cctx)
 }
 
 func (c *WorkLoadService) Stop() {
@@ -152,6 +154,22 @@ func (c *WorkLoadService) preRun(ctx context.Context) (context.Context, error) {
 	}
 
 	return ctx, nil
+}
+
+func (c *WorkLoadService) postRun(ctx context.Context) error {
+	logger := log.FromContext(ctx)
+	chains := assets.ContextChains(ctx)
+
+	var gerr error
+	for _, chain := range chains {
+		err := assets.DeregisterChain(ctx, c.client, &chain)
+		if err != nil {
+			gerr = errors.CombineErrors(gerr, err)
+			logger.WithError(err).Error("failed to remove chain")
+		}
+	}
+
+	return gerr
 }
 
 func (c *WorkLoadService) run(ctx context.Context, test *workLoadItem, cfg *units.WorkloadConfig) error {

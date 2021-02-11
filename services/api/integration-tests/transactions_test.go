@@ -206,8 +206,8 @@ func (s *transactionsTestSuite) TestSuccess() {
 		assert.Equal(t, txJob.ScheduleUUID, jobEvlp.GetID())
 		assert.Equal(t, txJob.UUID, jobEvlp.GetJobUUID())
 
-		// err = s.client.DeleteChain(ctx, chainWithFaucet.UUID)
-		// assert.NoError(t, err)
+		err = s.client.DeleteChain(ctx, chainWithFaucet.UUID)
+		assert.NoError(t, err)
 		err = s.client.DeleteFaucet(ctx, faucet.UUID)
 		assert.NoError(t, err)
 	})

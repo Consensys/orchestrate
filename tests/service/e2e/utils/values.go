@@ -10,6 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/mitchellh/mapstructure"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/tx"
 )
 
@@ -25,7 +26,7 @@ func toValue(structType reflect.Type, strValue string) (reflect.Value, error) {
 	var v reflect.Value
 	var err error
 	switch structType {
-	case reflect.TypeOf("string"):
+	case reflect.TypeOf("string"), reflect.TypeOf(entities.PrivateTxManagerType("")):
 		v = reflect.ValueOf(strValue)
 	case reflect.TypeOf(common.Address{}):
 		v = reflect.ValueOf(common.HexToAddress(strValue))

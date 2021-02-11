@@ -17,6 +17,7 @@ import (
 var chainsCtxKey ctxKey = "chains"
 
 type Chain struct {
+	UUID            string
 	Name            string
 	ProxyURL        string
 	PrivNodeAddress []string
@@ -55,8 +56,28 @@ func RegisterNewChain(ctx context.Context, client orchestrateclient.OrchestrateC
 
 	logger.WithField("chain", c.UUID).Info("new chain has been registered")
 	return contextWithChains(ctx, append(ContextChains(ctx),
-		Chain{ProxyURL: chainProxyURL, Name: chainName, PrivNodeAddress: chainData.PrivateAddress}),
+		Chain{
+			UUID:            c.UUID,
+			ProxyURL:        chainProxyURL,
+			Name:            chainName,
+			PrivNodeAddress: chainData.PrivateAddress,
+		}),
 	), nil
+}
+
+func DeregisterChain(ctx context.Context, client orchestrateclient.OrchestrateClient, chain *Chain) error {
+	logger := log.FromContext(ctx).WithField("uuid", chain.UUID).WithField("name", chain.Name)
+	logger.WithContext(ctx).Debug("deleting chain")
+
+	err := client.DeleteChain(ctx, chain.UUID)
+	if err != nil {
+		errMsg := "failed to delete chain"
+		logger.WithError(err).Error(errMsg)
+		return fmt.Errorf(errMsg)
+	}
+
+	logger.Info("chain has been deleted successfully")
+	return nil
 }
 
 func contextWithChains(ctx context.Context, chains []Chain) context.Context {
