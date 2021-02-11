@@ -318,7 +318,7 @@ func (c *EthereumController) signEEA(rw http.ResponseWriter, request *http.Reque
 // @Description Signs typed data using ECDSA and the private key of an existing account following the EIP-712 standard
 // @Accept json
 // @Produce text/plain
-// @Param request body ethereum.SignTypedDataRequest{domainSeparator=ethereum.DomainSeparator} true "Typed data to sign"
+// @Param request body ethereum.SignTypedDataRequest{domainSeparator=ethereum.DomainSeparator,types=map[string][]ethereum.Type} true "Typed data to sign"
 // @Param address path string true "selected account address"
 // @Success 200 {string} string "Signed payload"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
