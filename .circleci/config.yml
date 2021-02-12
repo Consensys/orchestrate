@@ -55,11 +55,11 @@ commands:
             --label org.label-schema.version="branch"
             --label org.label-schema.url="https://docs.orchestrate.pegasys.tech"
             --label org.label-schema.vcs-url="${CIRCLE_REPOSITORY_URL}"
-            --label org.label-schema.vcs-ref="${CIRCLE_SHA1:0:8}"
+            --label org.label-schema.vcs-ref="${CIRCLE_SHA1:0:7}"
             --label org.label-schema.vendor="PegaSys"
             -f ./Dockerfile.e2e
             -q
-            -t ${DOCKER_REGISTRY_DEV_REPO}/orchestrate-e2e:${CIRCLE_SHA1:0:8} .
+            -t ${DOCKER_REGISTRY_DEV_REPO}/orchestrate-e2e:${CIRCLE_SHA1:0:7} .
 
   docker_build_dev:
     description: "Build Orchestrate"
@@ -74,10 +74,10 @@ commands:
             --label org.label-schema.version="branch"
             --label org.label-schema.url="https://docs.orchestrate.pegasys.tech"
             --label org.label-schema.vcs-url="${CIRCLE_REPOSITORY_URL}"
-            --label org.label-schema.vcs-ref="${CIRCLE_SHA1:0:8}"
+            --label org.label-schema.vcs-ref="${CIRCLE_SHA1:0:7}"
             --label org.label-schema.vendor="PegaSys"
             -q
-            -t ${DOCKER_REGISTRY_DEV_REPO}/orchestrate:${CIRCLE_SHA1:0:8} .
+            -t ${DOCKER_REGISTRY_DEV_REPO}/orchestrate:${CIRCLE_SHA1:0:7} .
 
 jobs:
   lint:
@@ -181,8 +181,8 @@ jobs:
           name: Deploy QA environment
           command: >-
             ORCHESTRATE_NAMESPACE=qa
-            ORCHESTRATE_TAG=${CIRCLE_SHA1:0:8}
-            TEST_TAG=${CIRCLE_SHA1:0:8}
+            ORCHESTRATE_TAG=${CIRCLE_SHA1:0:7}
+            TEST_TAG=${CIRCLE_SHA1:0:7}
             ORCHESTRATE_REPOSITORY=${DOCKER_REGISTRY_DEV_REPO}/orchestrate
             TEST_REPOSITORY=${DOCKER_REGISTRY_DEV_REPO}/orchestrate-e2e
             ENVIRONMENT_VALUES=qa
