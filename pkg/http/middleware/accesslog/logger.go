@@ -82,6 +82,7 @@ func NewHandler(config *types.AccessLog) (*Handler, error) {
 	}
 	logHandlerChan := make(chan handlerParams, config.BufferingSize)
 
+	// @TODO Don't use Timestamp as part of message (Formatter ???)
 	logger := &logrus.Logger{
 		Out:       file,
 		Formatter: logrus.StandardLogger().Formatter,

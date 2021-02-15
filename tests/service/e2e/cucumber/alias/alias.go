@@ -46,7 +46,7 @@ func (r *Registry) Set(value interface{}, aka ...string) bool {
 
 	ok := setMap(strings.Join(aka, "."), value, r.registry)
 	if ok {
-		r.logger.WithField("aka", aka).WithField("value", value).Debugf("Registry value set")
+		r.logger.WithField("aka", aka).WithField("value", value).Debugf("registry value set")
 	}
 
 	return ok

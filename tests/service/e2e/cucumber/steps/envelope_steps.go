@@ -424,7 +424,7 @@ func (sc *ScenarioContext) replace(s string) (string, error) {
 			continue
 		}
 
-		if !strings.HasPrefix(matchedAlias[1], "global.") {
+		if !strings.HasPrefix(matchedAlias[1], "global.") && !strings.HasPrefix(matchedAlias[1], "chain.") {
 			aka = append([]string{sc.Pickle.Id}, aka...)
 		}
 		v, ok := sc.aliases.Get(aka...)

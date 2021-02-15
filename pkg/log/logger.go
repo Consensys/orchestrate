@@ -13,21 +13,6 @@ type Logger struct {
 	ctx       context.Context
 }
 
-// var (
-// 	initOnce = &sync.Once{}
-// 	logger   *Logger
-// )
-//
-// func initEntry() {
-// 	initOnce.Do(func() {
-// 		if logger != nil {
-// 			return
-// 		}
-//
-// 		entry = logrus.NewEntry(logrus.New())
-// 	})
-// }
-
 func NewLogger() *Logger {
 	return &Logger{logrus.NewEntry(logrus.StandardLogger()), "", nil}
 }

@@ -14,6 +14,7 @@ func NewJobModelFromEntities(job *entities.Job, scheduleID *int) *models.Job {
 		Labels:       job.Labels,
 		InternalData: job.InternalData,
 		ScheduleID:   scheduleID,
+		Status:       job.Status,
 		Schedule: &models.Schedule{
 			UUID:     job.ScheduleUUID,
 			TenantID: job.TenantID,
@@ -21,6 +22,14 @@ func NewJobModelFromEntities(job *entities.Job, scheduleID *int) *models.Job {
 		Logs:      []*models.Log{},
 		CreatedAt: job.CreatedAt,
 		UpdatedAt: job.UpdatedAt,
+	}
+
+	if job.InternalData != nil {
+		jobModel.IsParent = job.InternalData.ParentJobUUID == ""
+	}
+
+	if job.Status == "" {
+		job.Status = entities.StatusCreated
 	}
 
 	if scheduleID != nil {
@@ -49,6 +58,7 @@ func NewJobEntityFromModels(jobModel *models.Job) *entities.Job {
 		Logs:         []*entities.Log{},
 		CreatedAt:    jobModel.CreatedAt,
 		UpdatedAt:    jobModel.UpdatedAt,
+		Status:       jobModel.Status,
 	}
 
 	if jobModel.Schedule != nil {
@@ -60,22 +70,8 @@ func NewJobEntityFromModels(jobModel *models.Job) *entities.Job {
 		job.Transaction = NewTransactionEntityFromModels(jobModel.Transaction)
 	}
 
-	lastLogID := -1
-	for idx, logModel := range jobModel.Logs {
+	for _, logModel := range jobModel.Logs {
 		job.Logs = append(job.Logs, NewLogEntityFromModels(logModel))
-		// Ignore resending and warning statuses
-		if logModel.Status == entities.StatusResending || logModel.Status == entities.StatusWarning {
-			continue
-		}
-		// Ignore fail statuses if they come after a resending
-		if logModel.Status == entities.StatusFailed && idx > 1 && jobModel.Logs[idx-1].Status == entities.StatusResending {
-			continue
-		}
-
-		if logModel.ID > lastLogID {
-			job.Status = logModel.Status
-			lastLogID = logModel.ID
-		}
 	}
 
 	return job

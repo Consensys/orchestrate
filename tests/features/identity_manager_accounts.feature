@@ -10,9 +10,6 @@ Feature: Account management
     Given I register the following contracts
       | name        | artifacts        | Headers.Authorization    |
       | SimpleToken | SimpleToken.json | Bearer {{tenant1.token}} |
-    And I register the following chains
-      | alias | Name                | URLs                         | Headers.Authorization    |
-      | besu  | besu-{{scenarioID}} | {{global.nodes.besu[0].URLs}} | Bearer {{tenant1.token}} |
 
   Scenario: Import account and update it and sign with it
     Given I register the following alias
@@ -61,7 +58,7 @@ Feature: Account management
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
   """
 {
-    "chain": "besu-{{scenarioID}}",
+    "chain": "{{chain.besu0.Name}}",
     "params": {
         "contractName": "SimpleToken",
         "from": "{{importAcc.address}}"
@@ -105,7 +102,7 @@ Feature: Account management
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
   """
 {
-    "chain": "besu-{{scenarioID}}",
+    "chain": "{{chain.besu0.Name}}",
     "params": {
         "contractName": "SimpleToken",
         "from": "{{generatedAccAddr}}"
@@ -133,7 +130,7 @@ Feature: Account management
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
   """
 {
-    "chain": "besu-{{scenarioID}}",
+    "chain": "{{chain.besu0.Name}}",
     "params": {
         "contractName": "SimpleToken",
         "from": "{{fromAcc}}"

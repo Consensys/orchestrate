@@ -21,6 +21,8 @@ type Job struct {
 	Logs          []*Log
 	Labels        map[string]string
 	InternalData  *entities.InternalData
+	IsParent      bool `pg:"alias:is_parent,default:false"`
+	Status        entities.JobStatus
 	CreatedAt     time.Time `pg:"default:now()"`
 	UpdatedAt     time.Time `pg:"default:now()"`
 }

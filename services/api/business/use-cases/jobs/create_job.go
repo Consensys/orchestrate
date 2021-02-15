@@ -65,6 +65,7 @@ func (uc *createJobUseCase) Execute(ctx context.Context, job *entities.Job, tena
 	}
 
 	jobModel := parsers.NewJobModelFromEntities(job, &schedule.ID)
+	jobModel.Status = entities.StatusCreated
 	jobModel.Logs = append(jobModel.Logs, &models.Log{
 		Status: entities.StatusCreated,
 	})

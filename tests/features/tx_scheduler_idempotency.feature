@@ -10,10 +10,6 @@ Feature: Transaction Scheduler Idempotency
     Then I register the following contracts
       | name        | artifacts        | Headers.Authorization    |
       | SimpleToken | SimpleToken.json | Bearer {{tenant1.token}} |
-    Then I register the following chains
-      | alias  | Name                  | URLs                         | Headers.Authorization    |
-      | besu_1 | besu_1-{{scenarioID}} | {{global.nodes.besu[0].URLs}} | Bearer {{tenant1.token}} |
-      | besu_2 | besu_2-{{scenarioID}} | {{global.nodes.besu[0].URLs}} | Bearer {{tenant1.token}} |
     And I have created the following accounts
       | alias    | ID              | Headers.Authorization    |
       | account1 | {{random.uuid}} | Bearer {{tenant1.token}} |
@@ -35,7 +31,7 @@ Feature: Transaction Scheduler Idempotency
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
-        "chain": "besu_1-{{scenarioID}}",
+        "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{account1}}",
           "contractName": "SimpleToken"
@@ -54,7 +50,7 @@ Feature: Transaction Scheduler Idempotency
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
-        "chain": "besu_1-{{scenarioID}}",
+        "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{account1}}",
           "contractName": "SimpleToken"
@@ -89,7 +85,7 @@ Feature: Transaction Scheduler Idempotency
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
-        "chain": "besu_1-{{scenarioID}}",
+        "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{account1}}",
           "contractName": "SimpleToken"
@@ -108,7 +104,7 @@ Feature: Transaction Scheduler Idempotency
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
-        "chain": "besu_1-{{scenarioID}}",
+        "chain": "{{chain.besu0.Name}}",
         "params": {
           "oneTimeKey": true,
           "contractName": "SimpleToken"

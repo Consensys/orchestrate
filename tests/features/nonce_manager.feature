@@ -10,9 +10,6 @@ Feature: Nonce manager
     And I register the following contracts
       | name        | artifacts        | Headers.Authorization    |
       | SimpleToken | SimpleToken.json | Bearer {{tenant1.token}} |
-    And I register the following chains
-      | alias | Name                | URLs                         | Headers.Authorization    |
-      | besu  | besu-{{scenarioID}} | {{global.nodes.besu[0].URLs}} | Bearer {{tenant1.token}} |
     And I have created the following accounts
       | alias    | ID              | Headers.Authorization    |
       | account1 | {{random.uuid}} | Bearer {{tenant1.token}} |
@@ -29,7 +26,7 @@ Feature: Nonce manager
     When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
   """
 {
-    "chain": "besu-{{scenarioID}}",
+    "chain": "{{chain.besu0.Name}}",
     "params": {
       "from": "{{global.nodes.besu[0].fundedPublicKeys[0]}}",
       "to": "{{account1}}",
@@ -45,7 +42,7 @@ Feature: Nonce manager
     When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
   """
 {
-    "chain": "besu-{{scenarioID}}",
+    "chain": "{{chain.besu0.Name}}",
     "params": {
       "from": "{{global.nodes.besu[0].fundedPublicKeys[0]}}",
       "to": "{{account2}}",
@@ -61,7 +58,7 @@ Feature: Nonce manager
     When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
   """
 {
-    "chain": "besu-{{scenarioID}}",
+    "chain": "{{chain.besu0.Name}}",
     "params": {
       "from": "{{global.nodes.besu[0].fundedPublicKeys[0]}}",
       "to": "{{account3}}",
@@ -113,7 +110,7 @@ Feature: Nonce manager
   """
 {
     "scheduleUUID": "{{scheduleOneUUID}}",
-	"chainUUID": "{{besu.UUID}}",
+	"chainUUID": "{{chain.besu0.UUID}}",
     "type": "eth://ethereum/transaction",
     "transaction": {
         "from": "{{account1}}",
@@ -134,7 +131,7 @@ Feature: Nonce manager
   """
 {
     "scheduleUUID": "{{scheduleTwoUUID}}",
-	"chainUUID": "{{besu.UUID}}",
+	"chainUUID": "{{chain.besu0.UUID}}",
     "type": "eth://ethereum/transaction",
     "transaction": {
         "from": "{{account1}}",
@@ -156,7 +153,7 @@ Feature: Nonce manager
   """
 {
     "scheduleUUID": "{{scheduleThreeUUID}}",
-	"chainUUID": "{{besu.UUID}}",
+	"chainUUID": "{{chain.besu0.UUID}}",
     "type": "eth://ethereum/transaction",
     "transaction": {
         "from": "{{account1}}",
@@ -228,7 +225,7 @@ Feature: Nonce manager
   """
 {
     "scheduleUUID": "{{scheduleOneUUID}}",
-	"chainUUID": "{{besu.UUID}}",
+	"chainUUID": "{{chain.besu0.UUID}}",
     "type": "eth://ethereum/transaction",
     "transaction": {
         "from": "{{account3}}",
@@ -250,7 +247,7 @@ Feature: Nonce manager
   """
 {
     "scheduleUUID": "{{scheduleTwoUUID}}",
-	"chainUUID": "{{besu.UUID}}",
+	"chainUUID": "{{chain.besu0.UUID}}",
     "type": "eth://ethereum/transaction",
     "transaction": {
         "from": "{{account3}}",
@@ -273,7 +270,7 @@ Feature: Nonce manager
   """
 {
     "scheduleUUID": "{{scheduleThreeUUID}}",
-	"chainUUID": "{{besu.UUID}}",
+	"chainUUID": "{{chain.besu0.UUID}}",
     "type": "eth://ethereum/transaction",
     "transaction": {
         "from": "{{account3}}",
@@ -352,7 +349,7 @@ Feature: Nonce manager
   """
 {
     "scheduleUUID": "{{scheduleOneUUID}}",
-	"chainUUID": "{{besu.UUID}}",
+	"chainUUID": "{{chain.besu0.UUID}}",
     "type": "eth://orion/eeaTransaction",
     "transaction": {
         "from": "{{account1}}",
@@ -374,7 +371,7 @@ Feature: Nonce manager
   """
 {
     "scheduleUUID": "{{scheduleTwoUUID}}",
-	"chainUUID": "{{besu.UUID}}",
+	"chainUUID": "{{chain.besu0.UUID}}",
     "type": "eth://orion/eeaTransaction",
     "transaction": {
         "from": "{{account1}}",
@@ -395,7 +392,7 @@ Feature: Nonce manager
   """
 {
     "scheduleUUID": "{{scheduleThreeUUID}}",
-	"chainUUID": "{{besu.UUID}}",
+	"chainUUID": "{{chain.besu0.UUID}}",
     "type": "eth://orion/eeaTransaction",
     "transaction": {
         "from": "{{account1}}",

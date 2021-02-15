@@ -42,6 +42,7 @@ func TestStartNextJob_Execute(t *testing.T) {
 
 		jobModel.NextJobUUID = nextJobModel.UUID
 		jobModel.Transaction.Hash = txHash.String()
+		jobModel.Status = entities.StatusStored
 		jobModel.Logs = append(jobModel.Logs, &models.Log{
 			ID:        1,
 			Status:    entities.StatusStored,
@@ -71,6 +72,7 @@ func TestStartNextJob_Execute(t *testing.T) {
 		jobModel.NextJobUUID = nextJobModel.UUID
 		jobModel.Transaction.EnclaveKey = enclaveKey
 		jobModel.Transaction.Gas = "0x1"
+		jobModel.Status = entities.StatusStored
 		jobModel.Logs = append(jobModel.Logs, &models.Log{
 			ID:        1,
 			Status:    entities.StatusStored,

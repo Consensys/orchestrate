@@ -47,3 +47,14 @@ type Job struct {
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 }
+
+func IsFinalJobStatus(status JobStatus) bool {
+	return status == StatusMined ||
+		status == StatusFailed ||
+		status == StatusStored ||
+		status == StatusNeverMined
+}
+
+func IsOnlyJobLogStatus(status JobStatus) bool {
+	return status == StatusWarning || status == StatusResending
+}

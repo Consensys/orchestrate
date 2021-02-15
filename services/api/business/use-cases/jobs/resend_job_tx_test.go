@@ -41,6 +41,7 @@ func TestResendJobTx_Execute(t *testing.T) {
 		job.UUID = "6380e2b6-b828-43ee-abdc-de0f8d57dc5f"
 		job.Transaction.Sender = "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"
 		job.Schedule = testutils.FakeSchedule("")
+		job.Status = entities.StatusPending
 		job.Logs = append(job.Logs, &models.Log{
 			ID:        1,
 			Status:    entities.StatusPending,
@@ -84,6 +85,7 @@ func TestResendJobTx_Execute(t *testing.T) {
 		job.UUID = "6380e2b6-b828-43ee-abdc-de0f8d57dc5f"
 		job.Transaction.Sender = "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"
 		job.Schedule = testutils.FakeSchedule("")
+		job.Status = entities.StatusPending
 		job.Logs = append(job.Logs, &models.Log{
 			ID:        1,
 			Status:    entities.StatusPending,

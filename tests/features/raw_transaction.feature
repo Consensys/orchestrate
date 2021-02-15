@@ -8,9 +8,6 @@ Feature: Send raw transfer transaction
     Given I have the following tenants
       | alias   | tenantID        |
       | tenant1 | {{random.uuid}} |
-    And I register the following chains
-      | alias | Name                | URLs                         | Headers.Authorization    |
-      | besu  | besu-{{scenarioID}} | {{global.nodes.besu[0].URLs}} | Bearer {{tenant1.token}} |
 
   Scenario: Send raw transaction
     Given I register the following alias
@@ -18,8 +15,8 @@ Feature: Send raw transfer transaction
       | random_account | {{random.account}} |
       | idempotencykey | {{random.uuid}}    |
     Given I sign the following transactions
-      | alias | ID              | Data | Gas   | To                 | Nonce | privateKey             | ChainUUID     | Headers.Authorization    |
-      | rawTx | {{random.uuid}} | 0x   | 21000 | {{random_account}} | 0     | {{random.private_key}} | {{besu.UUID}} | Bearer {{tenant1.token}} |
+      | alias | ID              | Data | Gas   | To                 | Nonce | privateKey             | ChainUUID            | Headers.Authorization    |
+      | rawTx | {{random.uuid}} | 0x   | 21000 | {{random_account}} | 0     | {{random.private_key}} | {{chain.besu0.UUID}} | Bearer {{tenant1.token}} |
     Then I track the following envelopes
       | ID           |
       | {{rawTx.ID}} |
@@ -30,7 +27,7 @@ Feature: Send raw transfer transaction
     When I send "POST" request to "{{global.api}}/transactions/send-raw" with json:
   """
 {
-    "chain": "besu-{{scenarioID}}",
+    "chain": "{{chain.besu0.Name}}",
     "params": {
       "raw": "{{rawTx.Raw}}"
     },
@@ -59,8 +56,8 @@ Feature: Send raw transfer transaction
       | alias          | value              |
       | random_account | {{random.account}} |
     Given I sign the following transactions
-      | alias | ID              | Data | Gas   | To                 | Nonce | privateKey             | ChainUUID     | Headers.Authorization    |
-      | rawTx | {{random.uuid}} | 0x   | 21000 | {{random_account}} | 0     | {{random.private_key}} | {{besu.UUID}} | Bearer {{tenant1.token}} |
+      | alias | ID              | Data | Gas   | To                 | Nonce | privateKey             | ChainUUID            | Headers.Authorization    |
+      | rawTx | {{random.uuid}} | 0x   | 21000 | {{random_account}} | 0     | {{random.private_key}} | {{chain.besu0.UUID}} | Bearer {{tenant1.token}} |
     Then I track the following envelopes
       | ID           |
       | {{rawTx.ID}} |
@@ -70,7 +67,7 @@ Feature: Send raw transfer transaction
     When I send "POST" request to "{{global.api}}/transactions/send-raw" with json:
   """
 {
-    "chain": "besu-{{scenarioID}}",
+    "chain": "{{chain.besu0.Name}}",
     "params": {
       "raw": "{{rawTx.Raw}}"
     },
@@ -93,7 +90,7 @@ Feature: Send raw transfer transaction
     When I send "POST" request to "{{global.api}}/transactions/send-raw" with json:
   """
 {
-    "chain": "besu-{{scenarioID}}",
+    "chain": "{{chain.besu0.Name}}",
     "params": {
       "raw": "{{rawTx.Raw}}"
     },

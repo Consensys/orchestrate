@@ -3,6 +3,7 @@
 package log
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
@@ -12,7 +13,7 @@ import (
 )
 
 func TestLevel(t *testing.T) {
-	name := "log.level"
+	name := LevelViperKey
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	Level(flgs)
 
@@ -21,15 +22,15 @@ func TestLevel(t *testing.T) {
 		t.Errorf("Level #1: expected %q but got %q", expected, viper.GetString(name))
 	}
 
-	_ = os.Setenv("LOG_LEVEL", "fatal")
+	_ = os.Setenv(levelEnv, "fatal")
 	expected = "fatal"
 	if viper.GetString(name) != expected {
 		t.Errorf("Level #2: expected %q but got %q", expected, viper.GetString(name))
 	}
-	_ = os.Unsetenv("LOG_LEVEL")
+	_ = os.Unsetenv(levelEnv)
 
 	args := []string{
-		"--log-level=debug",
+		fmt.Sprintf("--%s=%s", levelFlag, "debug"),
 	}
 	err := flgs.Parse(args)
 	assert.NoError(t, err, "No error expected")
@@ -38,30 +39,57 @@ func TestLevel(t *testing.T) {
 	if viper.GetString(name) != expected {
 		t.Errorf("Level #3: expected %q but got %q", expected, viper.GetString(name))
 	}
+}
 
-	name = "log.format"
+func TestFormat(t *testing.T) {
+	name := FormatViperKey
 	f := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	Format(f)
-	expected = "text"
+	expected := "text"
 	if viper.GetString(name) != expected {
 		t.Errorf("Format #1: expected %q but got %q", expected, viper.GetString(name))
 	}
 
-	_ = os.Setenv("LOG_FORMAT", "json")
+	_ = os.Setenv(formatEnv, "json")
 	expected = "json"
 	if viper.GetString(name) != expected {
 		t.Errorf("Format #2: expected %q but got %q", expected, viper.GetString(name))
 	}
-	_ = os.Unsetenv("LOG_FORMAT")
+	_ = os.Unsetenv(formatEnv)
 
-	args = []string{
-		"--log-format=xml",
+	args := []string{
+		fmt.Sprintf("--%s=%s", formatFlag, "xml"),
 	}
-	err = f.Parse(args)
+	err := f.Parse(args)
 	assert.NoError(t, err, "No error expected")
 
 	expected = "xml"
 	if viper.GetString(name) != expected {
 		t.Errorf("Format #3: expected %q but got %q", expected, viper.GetString(name))
+	}
+}
+
+func TestTimestamp(t *testing.T) {
+	name := TimestampViperKey
+	f := pflag.NewFlagSet("test", pflag.ContinueOnError)
+	Timestamp(f)
+	if viper.GetBool(name) == true {
+		t.Errorf("Timestamp #1: expected %v but got %v", false, viper.GetBool(name))
+	}
+
+	_ = os.Setenv(timestampEnv, "true")
+	if viper.GetBool(name) != true {
+		t.Errorf("Timestamp #2: expected %v but got %v", true, viper.GetBool(name))
+	}
+	_ = os.Unsetenv(timestampEnv)
+	
+	args := []string{
+		fmt.Sprintf("--%s=%s", timestampFlag, "true"),
+	}
+	err := f.Parse(args)
+	assert.NoError(t, err, "No error expected")
+	
+	if viper.GetBool(name) != true {
+		t.Errorf("Timestamp #3: expected %v but got %v", true, viper.GetBool(name))
 	}
 }

@@ -16,13 +16,6 @@ Feature: Private transactions
     And I register the following contracts
       | name        | artifacts        | Headers.Authorization    |
       | SimpleToken | SimpleToken.json | Bearer {{tenant1.token}} |
-    And I register the following chains
-      | alias  | Name                  | URLs                            | PrivateTxManager.URL                            | PrivateTxManager.Type                            | Headers.Authorization    |
-      | quorum | quorum-{{scenarioID}} | {{global.nodes.quorum[0].URLs}} | {{global.nodes.quorum[0].privateTxManager.url}} | {{global.nodes.quorum[0].privateTxManager.type}} | Bearer {{tenant1.token}} |
-    And I register the following chains
-      | alias  | Name                  | URLs                          | Headers.Authorization    |
-      | besu   | besu-{{scenarioID}}   | {{global.nodes.besu[0].URLs}} | Bearer {{tenant1.token}} |
-      | besu_2 | besu_2-{{scenarioID}} | {{global.nodes.besu[1].URLs}} | Bearer {{tenant1.token}} |
 
   @quorum
   Scenario: Deploy private ERC20 contract with Quorum and Tessera
@@ -39,7 +32,7 @@ Feature: Private transactions
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
-        "chain": "quorum-{{scenarioID}}",
+        "chain": "{{chain.quorum0.Name}}",
         "params": {
           "from": "{{account1}}",
           "protocol": "Tessera",
@@ -88,7 +81,7 @@ Feature: Private transactions
     When I send "POST" request to "{{global.api}}/transactions/send" with json:
       """
       {
-        "chain": "quorum-{{scenarioID}}",
+        "chain": "{{chain.quorum0.Name}}",
         "params": {
           "from": "{{account1}}",
           "to": "{{counterContractAddr}}",
@@ -155,7 +148,7 @@ Feature: Private transactions
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
-        "chain": "quorum-{{scenarioID}}",
+        "chain": "{{chain.quorum0.Name}}",
         "params": {
           "from": "{{account1}}",
           "contractName": "SimpleToken"
@@ -174,7 +167,7 @@ Feature: Private transactions
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
-        "chain": "quorum-{{scenarioID}}",
+        "chain": "{{chain.quorum0.Name}}",
         "params": {
           "from": "{{account1}}",
           "protocol": "Tessera",
@@ -205,7 +198,7 @@ Feature: Private transactions
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
-        "chain": "quorum-{{scenarioID}}",
+        "chain": "{{chain.quorum0.Name}}",
         "params": {
           "from": "{{account1}}",
           "protocol": "Tessera",
@@ -265,7 +258,7 @@ Feature: Private transactions
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
-        "chain": "besu-{{scenarioID}}",
+        "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{account2}}",
           "protocol": "Orion",
@@ -312,7 +305,7 @@ Feature: Private transactions
     When I send "POST" request to "{{global.api}}/transactions/send" with json:
       """
       {
-        "chain": "besu-{{scenarioID}}",
+        "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{account2}}",
           "to": "{{counterContractAddr}}",
@@ -359,7 +352,7 @@ Feature: Private transactions
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
-        "chain": "besu-{{scenarioID}}",
+        "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{account1}}",
           "protocol": "Orion",
@@ -379,7 +372,7 @@ Feature: Private transactions
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
-        "chain": "besu-{{scenarioID}}",
+        "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{account2}}",
           "protocol": "Orion",
@@ -399,7 +392,7 @@ Feature: Private transactions
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
-        "chain": "besu-{{scenarioID}}",
+        "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{account3}}",
           "protocol": "Orion",
@@ -419,7 +412,7 @@ Feature: Private transactions
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
-        "chain": "besu-{{scenarioID}}",
+        "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{account4}}",
           "protocol": "Orion",
@@ -464,7 +457,7 @@ Feature: Private transactions
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
-        "chain": "besu-{{scenarioID}}",
+        "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{account1}}",
           "protocol": "Orion",
@@ -484,7 +477,7 @@ Feature: Private transactions
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
-        "chain": "besu_2-{{scenarioID}}",
+        "chain": "{{chain.besu1.Name}}",
         "params": {
           "from": "{{account2}}",
           "protocol": "Orion",
@@ -504,7 +497,7 @@ Feature: Private transactions
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
-        "chain": "besu-{{scenarioID}}",
+        "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{account3}}",
           "protocol": "Orion",
@@ -524,7 +517,7 @@ Feature: Private transactions
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
-        "chain": "besu_2-{{scenarioID}}",
+        "chain": "{{chain.besu1.Name}}",
         "params": {
           "from": "{{account4}}",
           "protocol": "Orion",
@@ -555,7 +548,7 @@ Feature: Private transactions
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
     Given I sleep "2s"
-    When I send "POST" request to "{{global.api}}/proxy/chains/{{besu.UUID}}" with json:
+    When I send "POST" request to "{{global.api}}/proxy/chains/{{chain.besu0.UUID}}" with json:
       """
       {
         "jsonrpc": "2.0",
@@ -587,7 +580,7 @@ Feature: Private transactions
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
-        "chain": "besu-{{scenarioID}}",
+        "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{account1}}",
           "protocol": "Orion",
@@ -617,7 +610,7 @@ Feature: Private transactions
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
     Then I sleep "2s"
-    When I send "POST" request to "{{global.api}}/proxy/chains/{{besu.UUID}}" with json:
+    When I send "POST" request to "{{global.api}}/proxy/chains/{{chain.besu0.UUID}}" with json:
       """
       {
         "jsonrpc": "2.0",
@@ -649,7 +642,7 @@ Feature: Private transactions
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
-        "chain": "besu-{{scenarioID}}",
+        "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{account1}}",
           "protocol": "Orion",
@@ -678,7 +671,7 @@ Feature: Private transactions
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
     Then I sleep "2s"
-    When I send "POST" request to "{{global.api}}/proxy/chains/{{besu.UUID}}" with json:
+    When I send "POST" request to "{{global.api}}/proxy/chains/{{chain.besu0.UUID}}" with json:
       """
       {
         "jsonrpc": "2.0",
@@ -710,7 +703,7 @@ Feature: Private transactions
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
-        "chain": "besu-{{scenarioID}}",
+        "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{account1}}",
           "protocol": "Orion",
@@ -747,7 +740,7 @@ Feature: Private transactions
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
-        "chain": "besu-{{scenarioID}}",
+        "chain": "{{chain.besu0.Name}}",
         "params": {
           "oneTimeKey": true,
           "protocol": "Orion",
@@ -784,7 +777,7 @@ Feature: Private transactions
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
-        "chain": "besu-{{scenarioID}}",
+        "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{account1}}",
           "contractName": "SimpleToken"
@@ -806,7 +799,7 @@ Feature: Private transactions
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
-        "chain": "besu-{{scenarioID}}",
+        "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{account1}}",
           "protocol": "Orion",
@@ -849,7 +842,7 @@ Feature: Private transactions
       """
       {
         "scheduleUUID": "{{scheduleUUID}}",
-        "chainUUID": "{{besu.UUID}}",
+        "chainUUID": "{{chain.besu0.UUID}}",
         "type": "eth://orion/markingTransaction",
         "transaction": {
           "from": "{{account1}}"
@@ -867,7 +860,7 @@ Feature: Private transactions
       """
       {
         "scheduleUUID": "{{scheduleUUID}}",
-        "chainUUID": "{{besu.UUID}}",
+        "chainUUID": "{{chain.besu0.UUID}}",
         "nextJobUUID": "{{txMarkingTxJobUUID}}",
         "type": "eth://orion/eeaTransaction",
         "transaction": {

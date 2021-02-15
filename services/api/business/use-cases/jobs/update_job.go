@@ -39,57 +39,50 @@ func NewUpdateJobUseCase(db store.DB, updateChildrenUseCase usecases.UpdateChild
 }
 
 // Execute validates and creates a new transaction job
-func (uc *updateJobUseCase) Execute(ctx context.Context, job *entities.Job, nextStatus entities.JobStatus,
+func (uc *updateJobUseCase) Execute(ctx context.Context, nextJob *entities.Job, nextStatus entities.JobStatus,
 	logMessage string, tenants []string) (*entities.Job, error) {
-	ctx = log.WithFields(ctx, log.Field("job", job.UUID))
+	ctx = log.WithFields(ctx, log.Field("job", nextJob.UUID))
 	logger := uc.logger.WithContext(ctx)
 	logger.Debug("updating job")
 
 	var retrievedJob *entities.Job
 	err := database.ExecuteInDBTx(uc.db, func(tx database.Tx) error {
-		der := tx.(store.Tx).Job().LockOneByUUID(ctx, job.UUID)
+		der := tx.(store.Tx).Job().LockOneByUUID(ctx, nextJob.UUID)
 		if der != nil {
 			return der
 		}
 
-		jobModel, der := tx.(store.Tx).Job().FindOneByUUID(ctx, job.UUID, tenants)
+		curJobModel, der := tx.(store.Tx).Job().FindOneByUUID(ctx, nextJob.UUID, tenants)
 		if der != nil {
 			return der
 		}
 
-		retrievedJob = parsers.NewJobEntityFromModels(jobModel)
-		status := retrievedJob.Status
-
-		if isFinalStatus(status) {
+		retrievedJob = parsers.NewJobEntityFromModels(curJobModel)
+		if entities.IsFinalJobStatus(curJobModel.Status) {
 			errMessage := "job status is final, cannot be updated"
-			logger.WithField("status", status).Error(errMessage)
+			logger.WithField("status", curJobModel.Status).Error(errMessage)
 			return errors.InvalidParameterError(errMessage).ExtendComponent(updateJobComponent)
 		}
 
 		// We are not forced to update the status
-		if nextStatus != "" && !canUpdateStatus(nextStatus, status) {
+		if nextStatus != "" && !canUpdateStatus(nextStatus, curJobModel.Status) {
 			errMessage := "invalid status update for the current job state"
-			logger.WithField("status", status).WithField("next_status", nextStatus).Error(errMessage)
+			logger.WithField("status", curJobModel.Status).WithField("next_status", nextStatus).Error(errMessage)
 			return errors.InvalidStateError(errMessage).ExtendComponent(updateJobComponent)
 		}
 
 		// We are not forced to update the transaction
-		if job.Transaction != nil {
-			parsers.UpdateTransactionModelFromEntities(jobModel.Transaction, job.Transaction)
-			if der := tx.(store.Tx).Transaction().Update(ctx, jobModel.Transaction); der != nil {
+		if nextJob.Transaction != nil {
+			parsers.UpdateTransactionModelFromEntities(curJobModel.Transaction, nextJob.Transaction)
+			if der := tx.(store.Tx).Transaction().Update(ctx, curJobModel.Transaction); der != nil {
 				return der
 			}
-		}
-
-		updateJobModel(jobModel, job)
-		if der := tx.(store.Tx).Job().Update(ctx, jobModel); der != nil {
-			return der
 		}
 
 		// We are not forced to update the status
 		if nextStatus != "" {
 			jobLogModel := &models.Log{
-				JobID:   &jobModel.ID,
+				JobID:   &curJobModel.ID,
 				Status:  nextStatus,
 				Message: logMessage,
 			}
@@ -97,18 +90,25 @@ func (uc *updateJobUseCase) Execute(ctx context.Context, job *entities.Job, next
 				return der
 			}
 
+			curJobModel.Logs = append(curJobModel.Logs, jobLogModel)
+
 			// if we updated to MINED, we need to update the children and sibling jobs to NEVER_MINED
 			if nextStatus == entities.StatusMined {
 				der := uc.updateChildrenUseCase.
 					WithDBTransaction(tx.(store.Tx)).
-					Execute(ctx, jobModel.UUID, jobModel.InternalData.ParentJobUUID, entities.StatusNeverMined, tenants)
+					Execute(ctx, curJobModel.UUID, curJobModel.InternalData.ParentJobUUID, entities.StatusNeverMined, tenants)
 				if der != nil {
 					return der
 				}
 			}
 
 			// Metrics observe request latency
-			uc.addMetrics(jobLogModel, jobModel.Logs[len(jobModel.Logs)-1], jobModel.ChainUUID)
+			uc.addMetrics(jobLogModel, curJobModel.Logs[len(curJobModel.Logs)-1], curJobModel.ChainUUID)
+		}
+
+		updateJobModel(curJobModel, nextJob)
+		if der := tx.(store.Tx).Job().Update(ctx, curJobModel); der != nil {
+			return der
 		}
 
 		return nil
@@ -125,7 +125,7 @@ func (uc *updateJobUseCase) Execute(ctx context.Context, job *entities.Job, next
 		}
 	}
 
-	jobModel, err := uc.db.Job().FindOneByUUID(ctx, job.UUID, tenants)
+	jobModel, err := uc.db.Job().FindOneByUUID(ctx, nextJob.UUID, tenants)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(updateJobComponent)
 	}
@@ -134,19 +134,29 @@ func (uc *updateJobUseCase) Execute(ctx context.Context, job *entities.Job, next
 	return parsers.NewJobEntityFromModels(jobModel), nil
 }
 
-func isFinalStatus(status entities.JobStatus) bool {
-	return status == entities.StatusMined ||
-		status == entities.StatusFailed ||
-		status == entities.StatusStored ||
-		status == entities.StatusNeverMined
-}
-
-func updateJobModel(jobModel *models.Job, job *entities.Job) {
-	if len(job.Labels) > 0 {
-		jobModel.Labels = job.Labels
+func updateJobModel(jobModel *models.Job, nextJob *entities.Job) {
+	if len(nextJob.Labels) > 0 {
+		jobModel.Labels = nextJob.Labels
 	}
-	if job.InternalData != nil {
-		jobModel.InternalData = job.InternalData
+	if nextJob.InternalData != nil {
+		jobModel.InternalData = nextJob.InternalData
+	}
+
+	lastLogID := -1
+	for idx, logModel := range jobModel.Logs {
+		// Ignore resending and warning statuses
+		if logModel.Status == entities.StatusResending || logModel.Status == entities.StatusWarning {
+			continue
+		}
+		// Ignore fail statuses if they come after a resending
+		if logModel.Status == entities.StatusFailed && idx > 1 && jobModel.Logs[idx-1].Status == entities.StatusResending {
+			continue
+		}
+
+		if logModel.ID > lastLogID {
+			jobModel.Status = logModel.Status
+			lastLogID = logModel.ID
+		}
 	}
 }
 

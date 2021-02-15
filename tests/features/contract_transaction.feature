@@ -11,10 +11,6 @@ Feature: Send contract transactions
       | name        | artifacts        | Headers.Authorization    |
       | SimpleToken | SimpleToken.json | Bearer {{tenant1.token}} |
       | Counter     | Counter.json     | Bearer {{tenant1.token}} |
-    And I register the following chains
-      | alias | Name                | URLs                         | Headers.Authorization    |
-      | besu  | besu-{{scenarioID}} | {{global.nodes.besu[0].URLs}} | Bearer {{tenant1.token}} |
-      | geth  | geth-{{scenarioID}} | {{global.nodes.geth[0].URLs}}   | Bearer {{tenant1.token}} |
     And I have created the following accounts
       | alias    | ID              | Headers.Authorization    |
       | account1 | {{random.uuid}} | Bearer {{tenant1.token}} |
@@ -29,7 +25,7 @@ Feature: Send contract transactions
     When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
       """
       {
-        "chain": "besu-{{scenarioID}}",
+        "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{global.nodes.besu[0].fundedPublicKeys[0]}}",
           "to": "{{account1}}",
@@ -45,7 +41,7 @@ Feature: Send contract transactions
     When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
       """
       {
-        "chain": "geth-{{scenarioID}}",
+        "chain": "{{chain.geth0.Name}}",
         "params": {
           "from": "{{global.nodes.geth[0].fundedPublicKeys[0]}}",
           "to": "{{account2}}",
@@ -74,7 +70,7 @@ Feature: Send contract transactions
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
-        "chain": "besu-{{scenarioID}}",
+        "chain": "{{chain.besu0.Name}}",
         "params": {
           "contractName": "SimpleToken",
           "from": "{{account1}}"
@@ -89,7 +85,7 @@ Feature: Send contract transactions
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
-        "chain": "geth-{{scenarioID}}",
+        "chain": "{{chain.geth0.Name}}",
         "params": {
           "contractName": "SimpleToken",
           "from": "{{account2}}"
@@ -131,7 +127,7 @@ Feature: Send contract transactions
     When I send "POST" request to "{{global.api}}/transactions/send" with json:
       """
       {
-        "chain": "besu-{{scenarioID}}",
+        "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{account1}}",
           "to": "{{besuContractAddr}}",
@@ -151,7 +147,7 @@ Feature: Send contract transactions
     When I send "POST" request to "{{global.api}}/transactions/send" with json:
       """
       {
-        "chain": "besu-{{scenarioID}}",
+        "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{account1}}",
           "to": "{{besuContractAddr}}",
@@ -171,7 +167,7 @@ Feature: Send contract transactions
     When I send "POST" request to "{{global.api}}/transactions/send" with json:
       """
       {
-        "chain": "besu-{{scenarioID}}",
+        "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{account1}}",
           "to": "{{besuContractAddr}}",
@@ -192,7 +188,7 @@ Feature: Send contract transactions
     When I send "POST" request to "{{global.api}}/transactions/send" with json:
       """
       {
-        "chain": "geth-{{scenarioID}}",
+        "chain": "{{chain.geth0.Name}}",
         "params": {
           "from": "{{account2}}",
           "to": "{{gethContractAddr}}",
@@ -212,7 +208,7 @@ Feature: Send contract transactions
     When I send "POST" request to "{{global.api}}/transactions/send" with json:
       """
       {
-        "chain": "geth-{{scenarioID}}",
+        "chain": "{{chain.geth0.Name}}",
         "params": {
           "from": "{{account2}}",
           "to": "{{gethContractAddr}}",
@@ -232,7 +228,7 @@ Feature: Send contract transactions
     When I send "POST" request to "{{global.api}}/transactions/send" with json:
       """
       {
-        "chain": "geth-{{scenarioID}}",
+        "chain": "{{chain.geth0.Name}}",
         "params": {
           "from": "{{account2}}",
           "to": "{{gethContractAddr}}",
@@ -274,7 +270,7 @@ Feature: Send contract transactions
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
-        "chain": "besu-{{scenarioID}}",
+        "chain": "{{chain.besu0.Name}}",
         "params": {
           "oneTimeKey": true,
           "contractName": "Counter"
@@ -299,7 +295,7 @@ Feature: Send contract transactions
     When I send "POST" request to "{{global.api}}/transactions/send" with json:
       """
       {
-        "chain": "besu-{{scenarioID}}",
+        "chain": "{{chain.besu0.Name}}",
         "params": {
           "oneTimeKey": true,
           "to": "{{counterContractAddr}}",
@@ -342,7 +338,7 @@ Feature: Send contract transactions
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
-        "chain": "besu-{{scenarioID}}",
+        "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{account1}}",
           "contractName": "Counter"
@@ -367,7 +363,7 @@ Feature: Send contract transactions
     When I send "POST" request to "{{global.api}}/transactions/send" with json:
       """
       {
-        "chain": "besu-{{scenarioID}}",
+        "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{account1}}",
           "to": "{{counterContractAddr}}",
@@ -400,7 +396,7 @@ Feature: Send contract transactions
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
-        "chain": "besu-{{scenarioID}}",
+        "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{account1}}",
           "contractName": "Counter"
@@ -425,7 +421,7 @@ Feature: Send contract transactions
     When I send "POST" request to "{{global.api}}/transactions/send" with json:
       """
       {
-        "chain": "besu-{{scenarioID}}",
+        "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{account1}}",
           "to": "{{counterContractAddr}}",

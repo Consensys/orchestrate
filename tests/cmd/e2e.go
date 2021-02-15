@@ -5,13 +5,13 @@ import (
 	"os"
 
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 
 	"github.com/spf13/cobra"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/e2e"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/e2e/cucumber"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/e2e/cucumber/alias"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/e2e/cucumber/steps"
 )
 
@@ -26,7 +26,7 @@ func NewRunE2ECommand() *cobra.Command {
 	// Register Cucumber flag
 	cucumber.InitFlags(runCmd.Flags())
 	steps.InitFlags(runCmd.Flags())
-	alias.InitFlags(runCmd.Flags())
+	e2e.InitFlags(runCmd.Flags())
 	broker.ConsumerGroupName(runCmd.Flags())
 
 	return runCmd
@@ -43,16 +43,16 @@ func runE2E(cmd *cobra.Command, _ []string) error {
 	})
 	defer sig.Close()
 
+	var gerr error
 	if err := e2e.Start(ctx); err != nil {
 		logger.WithError(err).Error("did not complete successfully")
-		return err
+		gerr = errors.CombineErrors(gerr, err)
 	}
 
 	if err := e2e.Stop(ctx); err != nil {
 		logger.WithError(err).Error("did not shutdown properly")
-	} else {
-		logger.Info("gracefully closed")
+		gerr = errors.CombineErrors(gerr, err)
 	}
 
-	return nil
+	return gerr
 }

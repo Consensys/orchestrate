@@ -7,10 +7,6 @@ Feature: Send transactions using tx-sentry
     Given I have the following tenants
       | alias   | tenantID        |
       | tenant1 | {{random.uuid}} |
-    And I register the following chains
-      | alias | Name                | URLs                         | Headers.Authorization    |
-      | besu  | besu-{{scenarioID}} | {{global.nodes.besu[0].URLs}} | Bearer {{tenant1.token}} |
-      | geth  | geth-{{scenarioID}} | {{global.nodes.geth[0].URLs}}   | Bearer {{tenant1.token}} |
     And I have created the following accounts
       | alias    | ID              | Headers.Authorization    |
       | account1 | {{random.uuid}} | Bearer {{tenant1.token}} |
@@ -27,7 +23,7 @@ Feature: Send transactions using tx-sentry
     When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
       """
       {
-        "chain": "geth-{{scenarioID}}",
+        "chain": "{{chain.geth0.Name}}",
         "params": {
           "from": "{{global.nodes.geth[0].fundedPublicKeys[0]}}",
           "to": "{{account1}}",
@@ -65,7 +61,7 @@ Feature: Send transactions using tx-sentry
       """
       {
         "scheduleUUID": "{{scheduleUUID}}",
-        "chainUUID": "{{besu.UUID}}",
+        "chainUUID": "{{chain.besu0.UUID}}",
         "type": "eth://ethereum/transaction",
         "transaction": {
           "from": "{{account1}}",
@@ -98,7 +94,7 @@ Feature: Send transactions using tx-sentry
       """
       {
         "scheduleUUID": "{{scheduleUUID}}",
-        "chainUUID": "{{besu.UUID}}",
+        "chainUUID": "{{chain.besu0.UUID}}",
         "type": "eth://ethereum/transaction",
         "transaction": {
           "from": "{{account1}}",
@@ -150,7 +146,7 @@ Feature: Send transactions using tx-sentry
       """
       {
         "scheduleUUID": "{{scheduleUUID}}",
-        "chainUUID": "{{geth.UUID}}",
+        "chainUUID": "{{chain.geth0.UUID}}",
         "type": "eth://ethereum/transaction",
         "transaction": {
           "from": "{{account1}}",
@@ -190,7 +186,7 @@ Feature: Send transactions using tx-sentry
       """
       {
         "scheduleUUID": "{{scheduleUUID}}",
-        "chainUUID": "{{geth.UUID}}",
+        "chainUUID": "{{chain.geth0.UUID}}",
         "type": "eth://ethereum/transaction",
         "transaction": {
           "from": "{{account1}}",
@@ -241,7 +237,7 @@ Feature: Send transactions using tx-sentry
       """
       {
         "scheduleUUID": "{{scheduleUUID}}",
-        "chainUUID": "{{besu.UUID}}",
+        "chainUUID": "{{chain.besu0.UUID}}",
         "type": "eth://ethereum/transaction",
         "transaction": {
           "from": "{{account2}}",

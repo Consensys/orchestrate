@@ -134,11 +134,13 @@ func TestUpdateJob_Execute(t *testing.T) {
 
 	t.Run("should execute use case successfully if status is PENDING", func(t *testing.T) {
 		jobEntity := testutils3.FakeJob()
+		jobEntity.Status = entities.StatusStarted
 		jobEntity.Transaction = nil
 		status := entities.StatusPending
 		jobModel := testutils2.FakeJobModel(0)
 		jobModel.Schedule.TenantID = tenantID
-		jobModel.Logs[0].Status = entities.StatusStarted
+		jobModel.Logs = append(jobModel.Logs, &models.Log{Status: entities.StatusStarted})
+		jobModel.Status = entities.StatusStarted
 
 		mockJobDA.EXPECT().LockOneByUUID(gomock.Any(), jobEntity.UUID).Return(nil)
 		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), jobEntity.UUID, []string{tenantID}).Return(jobModel, nil).Times(2)
@@ -162,10 +164,13 @@ func TestUpdateJob_Execute(t *testing.T) {
 	t.Run("should execute use case successfully if status is MINED and update all the children jobs", func(t *testing.T) {
 		jobEntity := testutils3.FakeJob()
 		jobEntity.Transaction = nil
+		jobEntity.Status = entities.StatusPending
 		status := entities.StatusMined
 		jobModel := testutils2.FakeJobModel(0)
 		jobModel.Schedule.TenantID = tenantID
-		jobModel.Logs[0].Status = entities.StatusPending
+		jobModel.Status = entities.StatusPending
+		jobModel.Logs = append(jobModel.Logs, &models.Log{Status: entities.StatusStarted})
+		jobModel.Logs = append(jobModel.Logs, &models.Log{Status: entities.StatusPending})
 
 		mockJobDA.EXPECT().LockOneByUUID(gomock.Any(), jobEntity.UUID).Return(nil)
 		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), jobEntity.UUID, []string{tenantID}).Return(jobModel, nil).Times(2)
@@ -192,6 +197,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 	t.Run("should fail with InvalidParameterError if status is MINED", func(t *testing.T) {
 		jobEntity := testutils3.FakeJob()
 		jobModel := testutils2.FakeJobModel(0)
+		jobModel.Status = entities.StatusMined
 		jobModel.Logs[0].Status = entities.StatusMined
 		jobModel.Schedule.TenantID = tenantID
 
@@ -224,6 +230,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 
 		mockJobDA.EXPECT().LockOneByUUID(gomock.Any(), jobEntity.UUID).Return(nil)
 		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), gomock.Any(), gomock.Any()).Return(jobModel, nil)
+		mockLogDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(nil)
 		mockTransactionDA.EXPECT().Update(gomock.Any(), gomock.Any()).Return(nil)
 		mockJobDA.EXPECT().Update(gomock.Any(), gomock.Any()).Return(expectedErr)
 
@@ -264,6 +271,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 		jobEntity.Transaction = nil
 		jobModel := testutils2.FakeJobModel(0)
 		jobModel.Schedule.TenantID = tenantID
+		jobModel.Status = entities.StatusPending
 		jobModel.Logs[0].Status = entities.StatusPending
 
 		mockJobDA.EXPECT().LockOneByUUID(gomock.Any(), jobEntity.UUID).Return(nil)
@@ -278,11 +286,11 @@ func TestUpdateJob_Execute(t *testing.T) {
 		jobEntity.Transaction = nil
 		jobModel := testutils2.FakeJobModel(0)
 		jobModel.Schedule.TenantID = tenantID
+		jobModel.Status = entities.StatusCreated
 		jobModel.Logs[0].Status = entities.StatusCreated
 
 		mockJobDA.EXPECT().LockOneByUUID(gomock.Any(), jobEntity.UUID).Return(nil)
 		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), gomock.Any(), gomock.Any()).Return(jobModel, nil)
-
 		_, err := usecase.Execute(ctx, jobEntity, entities.StatusFailed, logMessage, []string{tenantID})
 		assert.True(t, errors.IsInvalidStateError(err))
 	})
@@ -296,7 +304,6 @@ func TestUpdateJob_Execute(t *testing.T) {
 
 		mockJobDA.EXPECT().LockOneByUUID(gomock.Any(), jobEntity.UUID).Return(nil)
 		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), gomock.Any(), gomock.Any()).Return(jobModel, nil)
-		mockJobDA.EXPECT().Update(gomock.Any(), gomock.Any()).Return(nil)
 		mockLogDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(expectedErr)
 
 		_, err := usecase.Execute(ctx, jobEntity, nextStatus, logMessage, []string{tenantID})
@@ -323,6 +330,7 @@ func TestUpdateJob_Execute(t *testing.T) {
 	t.Run("should trigger next job start if nextStatus is STORED", func(t *testing.T) {
 		jobModel := testutils2.FakeJobModel(0)
 		nextJobModel := testutils2.FakeJobModel(0)
+		jobModel.Status = entities.StatusStarted
 		jobModel.Logs[0].Status = entities.StatusStarted
 		jobModel.Schedule.TenantID = tenantID
 		jobModel.NextJobUUID = nextJobModel.UUID

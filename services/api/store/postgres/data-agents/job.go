@@ -135,6 +135,13 @@ func (agent *PGJob) Search(ctx context.Context, filters *entities.JobFilters, te
 
 	if filters.ChainUUID != "" {
 		query = query.Where("job.chain_uuid = ?", filters.ChainUUID)
+	} else {
+		// Jobs without chain are consider as soft deleted
+		query = query.Where("job.chain_uuid IS NOT NULL", filters.ChainUUID)
+	}
+
+	if filters.Status != "" {
+		query = query.Where("job.status = ?", filters.Status)
 	}
 
 	if filters.ParentJobUUID != "" {
@@ -144,7 +151,7 @@ func (agent *PGJob) Search(ctx context.Context, filters *entities.JobFilters, te
 	}
 
 	if filters.OnlyParents {
-		query = query.Where("job.internal_data->'parentJobUUID' is null")
+		query = query.Where("job.is_parent is true")
 	}
 
 	if filters.UpdatedAfter.Second() > 0 {

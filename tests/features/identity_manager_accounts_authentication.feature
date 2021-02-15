@@ -13,9 +13,6 @@ Feature: Account management
     Given I register the following contracts
       | name        | artifacts        | Headers.Authorization     |
       | SimpleToken | SimpleToken.json | Bearer {{wildcard.token}} |
-    And I register the following chains
-      | alias | Name                | URLs                         | Headers.Authorization     |
-      | besu  | besu-{{scenarioID}} | {{global.nodes.besu[0].URLs}} | Bearer {{wildcard.token}} |
 
   Scenario: Accounts own by default tenant can be used by other authorized tenants
     Given I register the following alias
@@ -64,7 +61,7 @@ Feature: Account management
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
   """
 {
-    "chain": "besu-{{scenarioID}}",
+    "chain": "{{chain.besu0.Name}}",
     "params": {
         "contractName": "SimpleToken",
         "from": "{{generatedAccAddr}}"
@@ -86,7 +83,7 @@ Feature: Account management
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
   """
 {
-    "chain": "besu-{{scenarioID}}",
+    "chain": "{{chain.besu0.Name}}",
     "params": {
         "contractName": "SimpleToken",
         "from": "{{generatedAccAddr}}"
@@ -108,7 +105,7 @@ Feature: Account management
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
   """
 {
-    "chain": "besu-{{scenarioID}}",
+    "chain": "{{chain.besu0.Name}}",
     "params": {
         "contractName": "SimpleToken",
         "from": "{{generatedAccAddr}}"
@@ -158,7 +155,7 @@ Feature: Account management
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
   """
 {
-    "chain": "besu-{{scenarioID}}",
+    "chain": "{{chain.besu0.Name}}",
     "params": {
         "contractName": "SimpleToken",
         "from": "{{generatedAccAddr}}"
@@ -187,7 +184,7 @@ Feature: Account management
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
   """
 {
-    "chain": "besu-{{scenarioID}}",
+    "chain": "{{chain.besu0.Name}}",
     "params": {
         "contractName": "SimpleToken",
         "from": "{{generatedAccAddr}}"
@@ -209,7 +206,7 @@ Feature: Account management
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
   """
 {
-    "chain": "besu-{{scenarioID}}",
+    "chain": "{{chain.besu0.Name}}",
     "params": {
         "contractName": "SimpleToken",
         "from": "{{generatedAccAddr}}"

@@ -103,7 +103,7 @@ func (e *EntryPoint) Serve(ctx context.Context, l net.Listener) error {
 		logger.WithFields(logrus.Fields{
 			"destination.address": conn.RemoteAddr(),
 			"destination.source":  conn.LocalAddr(),
-		}).Debugf("accepted tcp connection %v", conn)
+		}).Debug("accepted tcp connection")
 
 		writeCloser, err := writeCloser(conn)
 		if err != nil {
@@ -117,14 +117,14 @@ func (e *EntryPoint) Serve(ctx context.Context, l net.Listener) error {
 			if e.timeouts.ReadTimeout > 0 {
 				err = writeCloser.SetReadDeadline(time.Now().Add(time.Duration(e.timeouts.ReadTimeout)))
 				if err != nil {
-					logger.WithError(err).Errorf("could not set read deadline")
+					logger.WithError(err).Error("could not set read deadline")
 				}
 			}
 
 			if e.timeouts.WriteTimeout > 0 {
 				err = writeCloser.SetWriteDeadline(time.Now().Add(time.Duration(e.timeouts.WriteTimeout)))
 				if err != nil {
-					logger.WithError(err).Errorf("could not set write deadline")
+					logger.WithError(err).Error("could not set write deadline")
 				}
 			}
 

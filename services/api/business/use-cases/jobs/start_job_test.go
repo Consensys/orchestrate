@@ -46,6 +46,7 @@ func TestStartJob_Execute(t *testing.T) {
 	mockDB.EXPECT().Job().Return(mockJobDA).AnyTimes()
 	mockDB.EXPECT().Job().Return(mockJobDA).AnyTimes()
 	mockDBTX.EXPECT().Log().Return(mockLogDA).AnyTimes()
+	mockDBTX.EXPECT().Job().Return(mockJobDA).AnyTimes()
 
 	usecase := NewStartJobUseCase(mockDB, mockKafkaProducer, sarama.NewKafkaTopicConfig(viper.GetViper()), mockMetrics)
 
@@ -72,6 +73,8 @@ func TestStartJob_Execute(t *testing.T) {
 			assert.False(t, envelope.IsOneTimeKeySignature())
 			return nil
 		})
+
+		mockJobDA.EXPECT().Update(gomock.Any(), gomock.Any()).Return(nil)
 		mockLogDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(nil)
 		mockDBTX.EXPECT().Commit().Return(nil)
 		err := usecase.Execute(ctx, job.UUID, tenants)
@@ -105,6 +108,8 @@ func TestStartJob_Execute(t *testing.T) {
 			assert.True(t, envelope.IsOneTimeKeySignature())
 			return nil
 		})
+
+		mockJobDA.EXPECT().Update(gomock.Any(), gomock.Any()).Return(nil)
 		mockLogDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(nil)
 		mockDBTX.EXPECT().Commit().Return(nil)
 		err := usecase.Execute(ctx, job.UUID, tenants)
@@ -134,6 +139,7 @@ func TestStartJob_Execute(t *testing.T) {
 		expectedErr := errors.PostgresConnectionError("error")
 
 		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), job.UUID, tenants).Return(job, nil)
+		mockJobDA.EXPECT().Update(gomock.Any(), gomock.Any()).Return(nil)
 		mockLogDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(expectedErr)
 
 		err := usecase.Execute(ctx, job.UUID, tenants)
@@ -147,6 +153,7 @@ func TestStartJob_Execute(t *testing.T) {
 		job.Schedule = testutils.FakeSchedule("")
 
 		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), job.UUID, tenants).Return(job, nil)
+		mockJobDA.EXPECT().Update(gomock.Any(), gomock.Any()).Return(nil)
 		mockLogDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(nil)
 		mockKafkaProducer.ExpectSendMessageAndFail(fmt.Errorf("error"))
 		mockDBTX.EXPECT().Rollback().Return(nil)

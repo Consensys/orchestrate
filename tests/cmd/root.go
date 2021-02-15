@@ -18,8 +18,7 @@ func main() {
 	}
 
 	// Set pkglog flags
-	log.Level(command.Flags())
-	log.Format(command.Flags())
+	log.InitFlags(command.Flags())
 
 	// Register Kafka flags
 	broker.InitKafkaFlags(command.Flags())

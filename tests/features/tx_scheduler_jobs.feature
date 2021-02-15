@@ -7,9 +7,6 @@ Feature: Transaction Scheduler Jobs
     Given I have the following tenants
       | alias   | tenantID        |
       | tenant1 | {{random.uuid}} |
-    Then I register the following chains
-      | alias | Name                | URLs                         | Headers.Authorization    |
-      | besu  | besu-{{scenarioID}} | {{global.nodes.besu[0].URLs}} | Bearer {{tenant1.token}} |
 
   @besu
   Scenario: Execute transfer transaction using jobs, step by step
@@ -25,7 +22,7 @@ Feature: Transaction Scheduler Jobs
     When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
       """
       {
-        "chain": "besu-{{scenarioID}}",
+        "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{global.nodes.besu[0].fundedPublicKeys[0]}}",
           "to": "{{account1}}",
@@ -58,7 +55,7 @@ Feature: Transaction Scheduler Jobs
       """
       {
         "scheduleUUID": "{{scheduleOneUUID}}",
-        "chainUUID": "{{besu.UUID}}",
+        "chainUUID": "{{chain.besu0.UUID}}",
         "type": "eth://ethereum/transaction",
         "transaction": {
           "from": "{{account1}}",
@@ -69,8 +66,8 @@ Feature: Transaction Scheduler Jobs
       """
     Then the response code should be 200
     And Response should have the following fields
-      | uuid | chainUUID     | transaction.from | transaction.to |
-      | ~    | {{besu.UUID}} | {{account1}}     | {{to1}}        |
+      | uuid | chainUUID            | transaction.from | transaction.to |
+      | ~    | {{chain.besu0.UUID}} | {{account1}}     | {{to1}}        |
     Then I register the following response fields
       | alias        | path |
       | txOneJobUUID | uuid |
@@ -110,7 +107,7 @@ Feature: Transaction Scheduler Jobs
       | random_account | {{random.account}} |
     Given I sign the following transactions
       | alias | ID              | Data | Gas   | To                 | Nonce | privateKey             | ChainUUID     | Headers.Authorization    |
-      | rawTx | {{random.uuid}} | 0x   | 21000 | {{random_account}} | 0     | {{random.private_key}} | {{besu.UUID}} | Bearer {{tenant1.token}} |
+      | rawTx | {{random.uuid}} | 0x   | 21000 | {{random_account}} | 0     | {{random.private_key}} | {{chain.besu0.UUID}} | Bearer {{tenant1.token}} |
     Then  I set the headers
       | Key           | Value                    |
       | Authorization | Bearer {{tenant1.token}} |
@@ -126,7 +123,7 @@ Feature: Transaction Scheduler Jobs
       """
       {
         "scheduleUUID": "{{scheduleTwoUUID}}",
-        "chainUUID": "{{besu.UUID}}",
+        "chainUUID": "{{chain.besu0.UUID}}",
         "type": "eth://ethereum/rawTransaction",
         "transaction": {
           "raw": "{{rawTx.Raw}}"
@@ -136,7 +133,7 @@ Feature: Transaction Scheduler Jobs
     Then the response code should be 200
     And Response should have the following fields
       | uuid | chainUUID     |
-      | ~    | {{besu.UUID}} |
+      | ~    | {{chain.besu0.UUID}} |
     Then I register the following response fields
       | alias        | path |
       | txTwoJobUUID | uuid |

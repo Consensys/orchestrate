@@ -62,6 +62,7 @@ func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID string, tenants 
 		return errors.InvalidStateError(errMessage)
 	}
 
+	jobModel.Status = entities.StatusStarted
 	jobLog := &models.Log{
 		JobID:  &jobModel.ID,
 		Status: entities.StatusStarted,
@@ -69,6 +70,10 @@ func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID string, tenants 
 
 	dbtx, err := uc.db.Begin()
 	if err != nil {
+		return errors.FromError(err).ExtendComponent(startJobComponent)
+	}
+
+	if err = dbtx.(store.Tx).Job().Update(ctx, jobModel); err != nil {
 		return errors.FromError(err).ExtendComponent(startJobComponent)
 	}
 

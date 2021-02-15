@@ -23,7 +23,7 @@ var (
 )
 
 // Init initialize Cucumber service
-func Init(ctx context.Context) {
+func Init(ctx context.Context, rawTestData string) {
 	initOnce.Do(func() {
 		if options != nil {
 			return
@@ -34,7 +34,7 @@ func Init(ctx context.Context) {
 		// Initialize Steps
 		broker.InitSyncProducer(ctx)
 		generator.Init(ctx)
-		alias.Init(ctx)
+		alias.Init(rawTestData)
 		client.Init()
 		ethclient.Init(ctx)
 

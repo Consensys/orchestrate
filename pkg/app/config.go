@@ -13,7 +13,7 @@ import (
 type Config struct {
 	HTTP    *HTTP
 	Watcher *configwatcher.Config
-	Log     *traefiktypes.TraefikLog
+	Log     *log.Config
 	Metrics *metricsregister.Config
 }
 

@@ -41,14 +41,16 @@ func TestUpdateChildren_Execute(t *testing.T) {
 		jobsToUpdate[0].Logs[0].Status = entities.StatusPending
 		jobsToUpdate[1].Logs[0].Status = entities.StatusPending
 
-		mockJobDA.EXPECT().LockOneByUUID(gomock.Any(), parentJobUUID).Return(nil)
-		mockJobDA.EXPECT().Search(gomock.Any(), &entities.JobFilters{ParentJobUUID: parentJobUUID}, tenants).Return(jobsToUpdate, nil)
+		mockJobDA.EXPECT().Search(gomock.Any(),
+			&entities.JobFilters{ParentJobUUID: parentJobUUID, Status: entities.StatusPending}, tenants).
+			Return(jobsToUpdate, nil)
+		mockJobDA.EXPECT().Update(gomock.Any(), jobsToUpdate[0]).Return(nil)
+		mockJobDA.EXPECT().Update(gomock.Any(), jobsToUpdate[1]).Return(nil)
 		mockLogDA.EXPECT().Insert(gomock.Any(), &models.Log{
 			JobID:   &jobsToUpdate[0].ID,
 			Status:  status,
 			Message: fmt.Sprintf("sibling (or parent) job %s was mined instead", jobUUID),
-		}).
-			Return(nil)
+		}).Return(nil)
 		mockLogDA.EXPECT().Insert(gomock.Any(), &models.Log{
 			JobID:   &jobsToUpdate[1].ID,
 			Status:  status,
@@ -69,14 +71,16 @@ func TestUpdateChildren_Execute(t *testing.T) {
 		jobsToUpdate[0].Logs[0].Status = entities.StatusPending
 		jobsToUpdate[1].Logs[0].Status = entities.StatusPending
 
-		mockJobDA.EXPECT().LockOneByUUID(gomock.Any(), jobUUID).Return(nil)
-		mockJobDA.EXPECT().Search(gomock.Any(), &entities.JobFilters{ParentJobUUID: jobUUID}, tenants).Return(jobsToUpdate, nil)
+		mockJobDA.EXPECT().Search(gomock.Any(), 
+			&entities.JobFilters{ParentJobUUID: jobUUID, Status: entities.StatusPending}, tenants).
+			Return(jobsToUpdate, nil)
+		mockJobDA.EXPECT().Update(gomock.Any(), jobsToUpdate[0]).Return(nil)
+		mockJobDA.EXPECT().Update(gomock.Any(), jobsToUpdate[1]).Return(nil)
 		mockLogDA.EXPECT().Insert(gomock.Any(), &models.Log{
 			JobID:   &jobsToUpdate[0].ID,
 			Status:  status,
 			Message: fmt.Sprintf("sibling (or parent) job %s was mined instead", jobUUID),
-		}).
-			Return(nil)
+		}).Return(nil)
 		mockLogDA.EXPECT().Insert(gomock.Any(), &models.Log{
 			JobID:   &jobsToUpdate[1].ID,
 			Status:  status,
@@ -98,8 +102,10 @@ func TestUpdateChildren_Execute(t *testing.T) {
 		jobsToUpdate[0].Logs[0].Status = entities.StatusPending
 		jobsToUpdate[1].Logs[0].Status = entities.StatusPending
 
-		mockJobDA.EXPECT().LockOneByUUID(gomock.Any(), parentJobUUID).Return(nil)
-		mockJobDA.EXPECT().Search(gomock.Any(), &entities.JobFilters{ParentJobUUID: parentJobUUID}, tenants).Return(jobsToUpdate, nil)
+		mockJobDA.EXPECT().Search(gomock.Any(), 
+			&entities.JobFilters{ParentJobUUID: parentJobUUID, Status: entities.StatusPending}, tenants).
+			Return(jobsToUpdate, nil)
+		mockJobDA.EXPECT().Update(gomock.Any(), gomock.Any()).Return(nil)
 		mockLogDA.EXPECT().Insert(gomock.Any(), &models.Log{
 			JobID:   &jobsToUpdate[1].ID,
 			Status:  status,
@@ -112,20 +118,9 @@ func TestUpdateChildren_Execute(t *testing.T) {
 		assert.NoError(t, err)
 	})
 
-	t.Run("should fail with same error if LockOneByUUID fails", func(t *testing.T) {
-		expectedErr := fmt.Errorf("error")
-
-		mockJobDA.EXPECT().LockOneByUUID(gomock.Any(), gomock.Any()).Return(expectedErr)
-
-		err := usecase.Execute(ctx, "jobUUID", "parentJobUUID", status, tenants)
-
-		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(updateChildrenComponent), err)
-	})
-
 	t.Run("should fail with same error if Search fails", func(t *testing.T) {
 		expectedErr := fmt.Errorf("error")
 
-		mockJobDA.EXPECT().LockOneByUUID(gomock.Any(), gomock.Any()).Return(nil)
 		mockJobDA.EXPECT().Search(gomock.Any(), gomock.Any(), tenants).Return(nil, expectedErr)
 
 		err := usecase.Execute(ctx, "jobUUID", "parentJobUUID", status, tenants)
@@ -139,8 +134,8 @@ func TestUpdateChildren_Execute(t *testing.T) {
 
 		expectedErr := fmt.Errorf("error")
 
-		mockJobDA.EXPECT().LockOneByUUID(gomock.Any(), gomock.Any()).Return(nil)
 		mockJobDA.EXPECT().Search(gomock.Any(), gomock.Any(), tenants).Return(jobsToUpdate, nil)
+		mockJobDA.EXPECT().Update(gomock.Any(), gomock.Any()).Return(nil)
 		mockLogDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(expectedErr)
 
 		err := usecase.Execute(ctx, "jobUUID", "parentJobUUID", status, tenants)

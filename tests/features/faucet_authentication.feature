@@ -6,27 +6,23 @@ Feature: Faucet funding
 
   Background:
     Given I have the following tenants
-      | alias         | tenantID |
-      | tenantFoo     | foo      |
-      | tenantBar     | bar      |
-      | tenantDefault | _        |
-    And I register the following chains
-      | alias | Name                | URLs                         | Headers.Authorization          |
-      | besu  | besu-{{scenarioID}} | {{global.nodes.besu[0].URLs}} | Bearer {{tenantDefault.token}} |
+      | alias     | tenantID |
+      | tenantFoo | foo      |
+      | tenantBar | bar      |
 
   Scenario: Generate account with faucet and different tenant
     And I register the following faucets
-      | Name                | ChainRule     | CreditorAccount                             | MaxBalance       | Amount           | Cooldown | Headers.Authorization      |
-      | besu-{{scenarioID}} | {{besu.UUID}} | {{global.nodes.besu[0].fundedPublicKeys[0]}} | 1000000000000000 | 1000000000000000 | 1m       | Bearer {{tenantFoo.token}} |
+      | Name                  | ChainRule            | CreditorAccount                              | MaxBalance       | Amount           | Cooldown | Headers.Authorization      |
+      | faucet-{{scenarioID}} | {{chain.besu0.UUID}} | {{global.nodes.besu[0].fundedPublicKeys[0]}} | 1000000000000000 | 1000000000000000 | 1m       | Bearer {{tenantFoo.token}} |
     And I have created the following accounts
-      | alias    | ID              | ChainName           | Headers.Authorization      |
-      | account1 | {{random.uuid}} | besu-{{scenarioID}} | Bearer {{tenantBar.token}} |
+      | alias    | ID              | ChainName            | Headers.Authorization      |
+      | account1 | {{random.uuid}} | {{chain.besu0.Name}} | Bearer {{tenantBar.token}} |
     Given I sleep "5s"
     Given I set the headers
       | Key             | Value                      |
       | Authorization   | Bearer {{tenantBar.token}} |
       | X-Cache-Control | no-cache                   |
-    When I send "POST" request to "{{global.api}}/proxy/chains/{{besu.UUID}}" with json:
+    When I send "POST" request to "{{global.api}}/proxy/chains/{{chain.besu0.UUID}}" with json:
       """
       {
         "jsonrpc": "2.0",
@@ -49,11 +45,11 @@ Feature: Faucet funding
       | toAddr        | {{random.account}} |
       | transferOneID | {{random.uuid}}    |
     And I have created the following accounts
-      | alias    | ID              | ChainName           | Headers.Authorization      |
-      | account1 | {{random.uuid}} | besu-{{scenarioID}} | Bearer {{tenantBar.token}} |
+      | alias    | ID              | ChainName            | Headers.Authorization      |
+      | account1 | {{random.uuid}} | {{chain.besu0.Name}} | Bearer {{tenantBar.token}} |
     And I register the following faucets
-      | Name                | ChainRule     | CreditorAccount                             | MaxBalance       | Amount           | Cooldown | Headers.Authorization      |
-      | besu-{{scenarioID}} | {{besu.UUID}} | {{global.nodes.besu[0].fundedPublicKeys[0]}} | 1000000000000000 | 1000000000000000 | 1m       | Bearer {{tenantFoo.token}} |
+      | Name                  | ChainRule            | CreditorAccount                              | MaxBalance       | Amount           | Cooldown | Headers.Authorization      |
+      | faucet-{{scenarioID}} | {{chain.besu0.UUID}} | {{global.nodes.besu[0].fundedPublicKeys[0]}} | 1000000000000000 | 1000000000000000 | 1m       | Bearer {{tenantFoo.token}} |
     Then I track the following envelopes
       | ID                |
       | {{transferOneID}} |
@@ -63,7 +59,7 @@ Feature: Faucet funding
     When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
       """
       {
-        "chain": "besu-{{scenarioID}}",
+        "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{account1}}",
           "to": "{{toAddr}}",
@@ -92,7 +88,7 @@ Feature: Faucet funding
       | Key             | Value                      |
       | Authorization   | Bearer {{tenantBar.token}} |
       | X-Cache-Control | no-cache                   |
-    When I send "POST" request to "{{global.api}}/proxy/chains/{{besu.UUID}}" with json:
+    When I send "POST" request to "{{global.api}}/proxy/chains/{{chain.besu0.UUID}}" with json:
       """
       {
         "jsonrpc": "2.0",

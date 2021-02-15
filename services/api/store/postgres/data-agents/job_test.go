@@ -215,6 +215,7 @@ func (s *jobTestSuite) TestPGJob_Search() {
 	txHashOne := common.HexToHash("0x1")
 	job0.Transaction.Hash = txHashOne.String()
 	job0.Schedule.TenantID = s.tenantID
+	job0.IsParent = true
 	err := insertJob(ctx, s.agents, job0)
 	assert.NoError(s.T(), err)
 

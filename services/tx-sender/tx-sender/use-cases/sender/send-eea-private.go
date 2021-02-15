@@ -88,7 +88,7 @@ func (uc *sendEEAPrivateTxUseCase) sendTx(ctx context.Context, job *entities.Job
 	txHash, err := uc.ec.PrivDistributeRawTransaction(ctx, proxyURL, job.Transaction.Raw)
 	if err != nil {
 		errMsg := "cannot send EEA private transaction"
-		uc.logger.WithContext(ctx).WithError(err).Errorf(errMsg)
+		uc.logger.WithContext(ctx).WithError(err).Error(errMsg)
 		return "", err
 	}
 

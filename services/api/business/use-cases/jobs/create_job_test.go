@@ -75,6 +75,7 @@ func TestCreateJob_Execute(t *testing.T) {
 		fakeSchedule.UUID = jobEntity.ScheduleUUID
 		jobModel := parsers.NewJobModelFromEntities(jobEntity, &fakeSchedule.ID)
 		parentJobModel := testutils2.FakeJobModel(fakeSchedule.ID)
+		parentJobModel.Status = entities.StatusPending
 		parentJobModel.Logs[0].Status = entities.StatusPending
 
 		mockGetChainUC.EXPECT().Execute(gomock.Any(), jobEntity.ChainUUID, tenants).Return(fakeChain, nil)

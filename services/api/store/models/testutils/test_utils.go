@@ -64,6 +64,7 @@ func FakeJobModel(scheduleID int) *models.Job {
 		UUID:      uuid.Must(uuid.NewV4()).String(),
 		ChainUUID: uuid.Must(uuid.NewV4()).String(),
 		Type:      entities.EthereumTransaction,
+		Status:    entities.StatusCreated,
 		Schedule: &models.Schedule{
 			ID:       scheduleID,
 			TenantID: "_",

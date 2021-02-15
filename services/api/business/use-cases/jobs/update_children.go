@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/parsers"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
@@ -37,38 +36,49 @@ func (uc updateChildrenUseCase) WithDBTransaction(dbtx store.Tx) usecases.Update
 	return &uc
 }
 
-// Execute updates all children of a job to NEVER_MINED
 func (uc *updateChildrenUseCase) Execute(ctx context.Context, jobUUID, parentJobUUID string, nextStatus entities.JobStatus, tenants []string) error {
-	ctx = log.WithFields(ctx, log.Field("job", jobUUID))
+	ctx = log.WithFields(ctx, log.Field("job", jobUUID), log.Field("next_status", nextStatus))
 	logger := uc.logger.WithContext(ctx)
 	logger.Debug("updating sibling and/or parent jobs")
+
+	if !entities.IsFinalJobStatus(nextStatus) {
+		errMsg := "expected final job status"
+		err := errors.InvalidParameterError(errMsg)
+		logger.WithError(err).Error("failed to update children jobs")
+		return err
+	}
 
 	if parentJobUUID == "" {
 		parentJobUUID = jobUUID
 	}
 
-	err := uc.db.Job().LockOneByUUID(ctx, parentJobUUID)
-	if err != nil {
-		return errors.FromError(err).ExtendComponent(updateChildrenComponent)
-	}
+	jobsToUpdate, err := uc.db.Job().Search(ctx, &entities.JobFilters{
+		ParentJobUUID: parentJobUUID,
+		Status:        entities.StatusPending,
+	}, tenants)
 
-	jobsToUpdate, err := uc.db.Job().Search(ctx, &entities.JobFilters{ParentJobUUID: parentJobUUID}, tenants)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(updateChildrenComponent)
 	}
 
 	for _, jobModel := range jobsToUpdate {
-		status := parsers.NewJobEntityFromModels(jobModel).Status
-		if jobModel.UUID != jobUUID && status == entities.StatusPending {
-			jobLogModel := &models.Log{
-				JobID:   &jobModel.ID,
-				Status:  nextStatus,
-				Message: fmt.Sprintf("sibling (or parent) job %s was mined instead", jobUUID),
-			}
-			err := uc.db.Log().Insert(ctx, jobLogModel)
-			if err != nil {
-				return errors.FromError(err).ExtendComponent(updateChildrenComponent)
-			}
+		if jobModel.UUID == jobUUID {
+			continue
+		}
+
+		jobModel.Status = nextStatus
+		if err := uc.db.Job().Update(ctx, jobModel); err != nil {
+			return errors.FromError(err).ExtendComponent(updateChildrenComponent)
+		}
+
+		jobLogModel := &models.Log{
+			JobID:   &jobModel.ID,
+			Status:  nextStatus,
+			Message: fmt.Sprintf("sibling (or parent) job %s was mined instead", jobUUID),
+		}
+
+		if err := uc.db.Log().Insert(ctx, jobLogModel); err != nil {
+			return errors.FromError(err).ExtendComponent(updateChildrenComponent)
 		}
 	}
 

@@ -7,10 +7,6 @@ Feature: Send transfer transaction
     Given I have the following tenants
       | alias   | tenantID        |
       | tenant1 | {{random.uuid}} |
-    And I register the following chains
-      | alias | Name                | URLs                         | Headers.Authorization    |
-      | besu  | besu-{{scenarioID}} | {{global.nodes.besu[0].URLs}} | Bearer {{tenant1.token}} |
-      | geth  | geth-{{scenarioID}} | {{global.nodes.geth[0].URLs}}   | Bearer {{tenant1.token}} |
     And I have created the following accounts
       | alias    | ID              | Headers.Authorization    |
       | account1 | {{random.uuid}} | Bearer {{tenant1.token}} |
@@ -25,7 +21,7 @@ Feature: Send transfer transaction
     When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
       """
       {
-        "chain": "besu-{{scenarioID}}",
+        "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{global.nodes.besu[0].fundedPublicKeys[0]}}",
           "to": "{{account1}}",
@@ -41,7 +37,7 @@ Feature: Send transfer transaction
     When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
       """
       {
-        "chain": "geth-{{scenarioID}}",
+        "chain": "{{chain.geth0.Name}}",
         "params": {
           "from": "{{global.nodes.geth[0].fundedPublicKeys[0]}}",
           "to": "{{account2}}",
@@ -75,7 +71,7 @@ Feature: Send transfer transaction
     When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
       """
       {
-        "chain": "besu-{{scenarioID}}",
+        "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{account1}}",
           "to": "{{to1}}",
@@ -94,7 +90,7 @@ Feature: Send transfer transaction
     When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
       """
       {
-        "chain": "geth-{{scenarioID}}",
+        "chain": "{{chain.geth0.Name}}",
         "params": {
           "from": "{{account2}}",
           "to": "{{to2}}",
@@ -130,7 +126,7 @@ Feature: Send transfer transaction
     And Response should have the following fields
       | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status |
       | MINED  | CREATED        | STARTED        | PENDING        | MINED          |
-    When I send "POST" request to "{{global.api}}/proxy/chains/{{besu.UUID}}" with json:
+    When I send "POST" request to "{{global.api}}/proxy/chains/{{chain.besu0.UUID}}" with json:
       """
       {
         "jsonrpc": "2.0",
@@ -146,7 +142,7 @@ Feature: Send transfer transaction
     And Response should have the following fields
       | result     |
       | 0x1dcd6500 |
-    When I send "POST" request to "{{global.api}}/proxy/chains/{{geth.UUID}}" with json:
+    When I send "POST" request to "{{global.api}}/proxy/chains/{{chain.geth0.UUID}}" with json:
       """
       {
         "jsonrpc": "2.0",
@@ -173,7 +169,7 @@ Feature: Send transfer transaction
     When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
       """
       {
-        "chain": "besu-{{scenarioID}}",
+        "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{account1}}",
           "to": "{{to1}}"
@@ -198,7 +194,7 @@ Feature: Send transfer transaction
     When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
       """
       {
-        "chain": "besu-{{scenarioID}}",
+        "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{account1}}",
           "value": "400000000"
@@ -228,7 +224,7 @@ Feature: Send transfer transaction
     When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
       """
       {
-        "chain": "besu-{{scenarioID}}",
+        "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{account3}}",
           "to": "{{to1}}",
