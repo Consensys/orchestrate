@@ -86,7 +86,7 @@ func decodeRaw(raw string) *entities.ETHTransaction {
 	msg, _ := tx.AsMessage(types.NewEIP155Signer(tx.ChainId()))
 	return &entities.ETHTransaction{
 		From:     msg.From().String(),
-		Data:     string(tx.Data()),
+		Data:     "0x" + ethcommon.Bytes2Hex(tx.Data()),
 		Gas:      fmt.Sprintf("%d", tx.Gas()),
 		GasPrice: fmt.Sprintf("%d", tx.GasPrice()),
 		Value:    tx.Value().String(),

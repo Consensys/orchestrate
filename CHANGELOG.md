@@ -6,6 +6,7 @@
 * Hanging issue during synchronization from block 0 
 * Tx-listener crashes on heavy load over API
 * Import identities from connected KeyManager Vault
+* Fail to send raw transaction with not empty data field
 
 ## v21.1.0 (2021-01-25)
 

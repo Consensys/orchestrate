@@ -86,7 +86,7 @@ func (uc *sendETHRawTxUseCase) sendTx(ctx context.Context, job *entities.Job) (s
 	txHash, err := uc.ec.SendRawTransaction(ctx, proxyURL, job.Transaction.Raw)
 	if err != nil {
 		errMsg := "cannot send ethereum raw transaction"
-		uc.logger.WithContext(ctx).WithError(err).Errorf(errMsg)
+		uc.logger.WithContext(ctx).WithError(err).Error(errMsg)
 		return "", err
 	}
 
@@ -113,7 +113,7 @@ func (uc *sendETHRawTxUseCase) rawTxDecoder(raw string) (*entities.ETHTransactio
 
 	jobTx := &entities.ETHTransaction{
 		From:     msg.From().String(),
-		Data:     string(tx.Data()),
+		Data:     hexutil.Encode(tx.Data()),
 		Gas:      fmt.Sprintf("%d", tx.Gas()),
 		GasPrice: fmt.Sprintf("%d", tx.GasPrice()),
 		Value:    tx.Value().String(),
