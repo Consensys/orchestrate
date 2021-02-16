@@ -120,6 +120,7 @@ services:
     build: ./hashicorp
     environment:
       VAULT_ADDR: ${VAULT_ADDR-http://vault:8200}
+      TOKEN_PATH: ${TOKEN_PATH-/vault/token}
     restart: "no"
     depends_on:
       - vault

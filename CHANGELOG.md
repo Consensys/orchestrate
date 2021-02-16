@@ -5,6 +5,7 @@
 ### 🛠 Bug fixes
 * Hanging issue during synchronization from block 0 
 * Tx-listener crashes on heavy load over API
+* Import identities from connected KeyManager Vault
 
 ## v21.1.0 (2021-01-25)
 

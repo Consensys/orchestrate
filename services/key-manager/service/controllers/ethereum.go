@@ -124,7 +124,7 @@ func (c *EthereumController) getAccount(rw http.ResponseWriter, req *http.Reques
 	rw.Header().Set("Content-Type", "application/json")
 
 	namespace := req.URL.Query().Get("namespace")
-	address, err := utils.ParseHexToMixedCaseEthAddress(mux.Vars(req)["publicKey"])
+	address, err := utils.ParseHexToMixedCaseEthAddress(mux.Vars(req)["address"])
 	if err != nil {
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
 		return

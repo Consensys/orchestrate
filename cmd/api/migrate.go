@@ -10,6 +10,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/cmd/api/scripts"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database/postgres"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/postgres/migrations"
+	keymanagerclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client"
 )
 
 // newMigrateCmd create migrate command
@@ -63,6 +64,7 @@ func newMigrateCmd() *cobra.Command {
 		Short: "Upgrade database",
 		Long:  "Runs all available migrations or up to [target] if argument is provided",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			keymanagerclient.Init()
 			return migrate(db, append([]string{"up"}, args...)...)
 		},
 	}

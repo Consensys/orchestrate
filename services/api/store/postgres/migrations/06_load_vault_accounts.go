@@ -38,7 +38,7 @@ func loadVaultAccounts(db migrations.DB) error {
 			acc, err2 := client.ETHGetAccount(ctx, addr, namespace)
 			if err2 != nil {
 				log.WithField("namespace", namespace).WithField("address", addr).
-					WithError(err2).Errorf("Could not get account")
+					WithError(err2).Error("Could not get account")
 				return err2
 			}
 
@@ -60,8 +60,7 @@ func loadVaultAccounts(db migrations.DB) error {
 		}
 	}
 
-	log.Infof("%d accounts imported successfully", len(queryInsertItems))
-
+	log.WithField("accounts", len(queryInsertItems)).Infof("Accounts imported successfully")
 	return nil
 }
 

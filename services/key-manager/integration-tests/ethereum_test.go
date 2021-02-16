@@ -41,6 +41,21 @@ func (s *keyManagerEthereumTestSuite) TestKeyManager_Ethereum_Create() {
 	})
 }
 
+func (s *keyManagerEthereumTestSuite) TestKeyManager_Ethereum_GetAccount() {
+	ctx := s.env.ctx
+
+	s.T().Run("should create a new account successfully", func(t *testing.T) {
+		accountRequest := testutils.FakeCreateETHAccountRequest()
+
+		account, err := s.client.ETHCreateAccount(ctx, accountRequest)
+		assert.NoError(t, err)
+		
+		account2, err := s.client.ETHGetAccount(ctx, account.Address, accountRequest.Namespace)
+		assert.NoError(t, err)
+		assert.Equal(t, account, account2)
+	})
+}
+
 func (s *keyManagerEthereumTestSuite) TestKeyManager_Ethereum_Import() {
 	ctx := s.env.ctx
 

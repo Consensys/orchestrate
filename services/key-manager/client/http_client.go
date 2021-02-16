@@ -33,7 +33,7 @@ func (c *HTTPClient) Checker() healthz.Check {
 }
 
 func (c *HTTPClient) listNamespaces(ctx context.Context, accountType string) ([]string, error) {
-	reqURL := fmt.Sprintf("%v/%s/namespaces", accountType, c.config.URL)
+	reqURL := fmt.Sprintf("%v/%s/namespaces", c.config.URL, accountType)
 
 	response, err := clientutils.GetRequest(ctx, c.client, reqURL)
 	if err != nil {
