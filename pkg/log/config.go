@@ -65,7 +65,6 @@ const (
 	timestampEnv      = "LOG_TIMESTAMP"
 )
 
-// Format register flag for Log Format
 func Timestamp(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Enable logging with timestamp (only TEXT format).
 Environment variable: %q`, timestampEnv)

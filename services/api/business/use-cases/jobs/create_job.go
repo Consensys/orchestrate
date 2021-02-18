@@ -74,20 +74,21 @@ func (uc *createJobUseCase) Execute(ctx context.Context, job *entities.Job, tena
 	err = database.ExecuteInDBTx(uc.db, func(tx database.Tx) error {
 		// If it's a child job, only create it if parent status is PENDING
 		if jobModel.InternalData.ParentJobUUID != "" {
+			parentJobUUID := jobModel.InternalData.ParentJobUUID
+			logger.WithField("parent_job", parentJobUUID).Debug("lock parent job row for update")
 			if der := tx.(store.Tx).Job().LockOneByUUID(ctx, jobModel.InternalData.ParentJobUUID); der != nil {
 				return der
 			}
 
-			parentJobModel, der := tx.(store.Tx).Job().FindOneByUUID(ctx, jobModel.InternalData.ParentJobUUID, tenants)
+			parentJobModel, der := tx.(store.Tx).Job().FindOneByUUID(ctx, parentJobUUID, tenants)
 			if der != nil {
 				return der
 			}
 
-			parentStatus := parsers.NewJobEntityFromModels(parentJobModel).Status
-			if parentStatus != entities.StatusPending {
+			if parentJobModel.Status != entities.StatusPending {
 				errMessage := "cannot create a child job in a finalized schedule"
-				logger.WithField("parent_job", jobModel.InternalData.ParentJobUUID).
-					WithField("parent_status", parentStatus).Error(errMessage)
+				logger.WithField("parent_job", parentJobUUID).
+					WithField("parent_status", parentJobModel.Status).Error(errMessage)
 				return errors.InvalidStateError(errMessage)
 			}
 		}
@@ -107,6 +108,7 @@ func (uc *createJobUseCase) Execute(ctx context.Context, job *entities.Job, tena
 
 		return nil
 	})
+
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(createJobComponent)
 	}

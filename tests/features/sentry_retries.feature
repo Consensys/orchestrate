@@ -214,7 +214,6 @@ Feature: Send transactions using tx-sentry
       | jobs[0].status | jobs[1].status | jobs[2].status | jobs[3].status |
       | NEVER_MINED    | NEVER_MINED    | NEVER_MINED    | MINED          |
 
-
   Scenario: Send transaction using retry policy with zero gas increment to retry limit
     Given I register the following alias
       | alias   | value           |

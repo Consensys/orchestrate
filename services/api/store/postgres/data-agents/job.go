@@ -71,9 +71,8 @@ func (agent *PGJob) Update(ctx context.Context, job *models.Job) error {
 
 	agent.db.ModelContext(ctx, job)
 	err := pg.Update(ctx, agent.db, job)
-
 	if err != nil {
-		agent.logger.WithContext(ctx).WithError(err).Error("failed to update job")
+		agent.logger.WithContext(ctx).WithError(err).Error()
 		return errors.FromError(err).ExtendComponent(jobDAComponent)
 	}
 
@@ -135,9 +134,6 @@ func (agent *PGJob) Search(ctx context.Context, filters *entities.JobFilters, te
 
 	if filters.ChainUUID != "" {
 		query = query.Where("job.chain_uuid = ?", filters.ChainUUID)
-	} else {
-		// Jobs without chain are consider as soft deleted
-		query = query.Where("job.chain_uuid IS NOT NULL", filters.ChainUUID)
 	}
 
 	if filters.Status != "" {
@@ -145,9 +141,10 @@ func (agent *PGJob) Search(ctx context.Context, filters *entities.JobFilters, te
 	}
 
 	if filters.ParentJobUUID != "" {
-		query = query.
-			Where("job.uuid = ?", filters.ParentJobUUID).
-			WhereOr(fmt.Sprintf("job.internal_data @> '{\"parentJobUUID\": \"%s\"}'", filters.ParentJobUUID))
+		query = query.Where(fmt.Sprintf("(%s) OR (%s)",
+			fmt.Sprintf("job.is_parent is false AND job.internal_data @> '{\"parentJobUUID\": \"%s\"}'", filters.ParentJobUUID),
+			fmt.Sprintf("job.is_parent is true AND job.uuid = '%s'", filters.ParentJobUUID),
+		))
 	}
 
 	if filters.OnlyParents {

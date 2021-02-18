@@ -154,7 +154,7 @@ func (e *EntryPoint) Shutdown(ctx context.Context) error {
 	})
 
 	logger := e.logger.WithContext(ctx)
-	logger.Infof("shutting down...")
+	logger.Info("shutting down...")
 
 	reqAcceptGraceTimeOut := time.Duration(e.lifecycle.RequestAcceptGraceTimeout)
 	if reqAcceptGraceTimeOut > 0 {

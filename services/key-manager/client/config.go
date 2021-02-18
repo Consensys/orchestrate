@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/cenkalti/backoff/v4"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/backoff"
 )
 
 func init() {
@@ -29,7 +29,7 @@ const (
 	metricsURLEnv      = "KEY_MANAGER_METRICS_URL"
 )
 
-var defaultClientBackOff = backoff.WithMaxRetries(backoff.NewConstantBackOff(time.Second), 0)
+var defaultClientBackOff = backoff.ConstantBackOffWithMaxRetries(time.Second, 0)
 
 func URL(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`URL of the Key Manager HTTP endpoint. 

@@ -9,18 +9,25 @@ import (
 )
 
 func handleError(err error) error {
+	if pg.ErrNoRows == err {
+		return errors.NotFoundError("data cannot be found")
+	}
+	if pg.ErrMultiRows == err {
+		return errors.DataCorruptedError("multiple rows found, only expected one")
+	}
+
 	pgErr, ok := err.(pg.Error)
 	if ok {
 		switch {
 		case pgErr.IntegrityViolation():
-			return errors.AlreadyExistsError("integrity violation: item already exist - %v", pgErr)
+			return errors.ConstraintViolatedError("integrity violation error")
 		// List of codes could be found in https://www.postgresql.org/docs/10/errcodes-appendix.html
 		case pgErr.Field('C')[0:2] == "08":
-			return errors.PostgresConnectionError("database connection error - %v", pgErr)
+			return errors.PostgresConnectionError("database connection error").AppendReason(pgErr.Error())
 		}
 	}
 
-	return errors.FromError(err)
+	return errors.PostgresConnectionError("internal database error").AppendReason(err.Error())
 }
 
 type hook struct{}

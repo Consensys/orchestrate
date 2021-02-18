@@ -54,7 +54,7 @@ func Start(ctx context.Context) error {
 
 	httpClient := http.NewClient(http.NewConfig(viper.GetViper()))
 	backoffConf := orchestrateclient.NewConfigFromViper(viper.GetViper(),
-		backoff.IncrementalBackOff(time.Second*5, time.Minute))
+		backoff.IncrementalBackOff(time.Second, time.Second*5, time.Minute))
 	client := orchestrateclient.NewHTTPClient(httpClient, backoffConf)
 
 	workload = NewService(cfg,

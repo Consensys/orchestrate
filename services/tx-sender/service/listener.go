@@ -81,13 +81,14 @@ func (listener *MessageListener) ConsumeClaim(session sarama.ConsumerGroupSessio
 }
 
 func (listener *MessageListener) consumeClaimLoop(ctx context.Context, session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
-	glogger := listener.logger.WithContext(ctx)
-	ctx = log.With(ctx, glogger)
-	glogger.Info("started consuming claims loop")
+	logger := listener.logger.WithContext(ctx)
+	ctx = log.With(ctx, logger)
+	logger.Info("started consuming claims loop")
+
 	for {
 		select {
 		case <-ctx.Done():
-			glogger.WithField("reason", ctx.Err().Error()).Info("gracefully stopping message listener...")
+			logger.WithField("reason", ctx.Err().Error()).Info("gracefully stopping message listener...")
 			return nil
 		case msg, ok := <-claim.Messages():
 			// Input channel has been close so we leave the loop
@@ -95,96 +96,103 @@ func (listener *MessageListener) consumeClaimLoop(ctx context.Context, session s
 				return nil
 			}
 
-			evlp, err := decodeMessage(glogger, msg)
+			evlp, err := decodeMessage(logger, msg)
 			if err != nil {
-				glogger.WithError(err).Error("error decoding message", msg)
+				logger.WithError(err).Error("error decoding message", msg)
 				session.MarkMessage(msg, "")
 				continue
 			}
 
-			glogger.WithField("envelope_id", evlp.ID).
+			logger.WithField("envelope_id", evlp.ID).
 				WithField("timestamp", msg.Timestamp).
 				Debug("message consumed")
 
-			tenantID := evlp.GetHeadersValue(utils.TenantIDMetadata)
-			job := envelope.NewJobFromEnvelope(evlp, tenantID)
-
-			logger := glogger.WithField("schedule", job.ScheduleUUID).WithField("job", job.UUID)
-			err = backoff.RetryNotify(
-				func() error {
-					err = listener.processJob(ctx, job)
-					switch {
-					// Exits if not errors
-					case err == nil:
-						return nil
-					case errors.IsConnectionError(err):
-						return err
-					case err == context.DeadlineExceeded || err == context.Canceled:
-						return backoff.Permanent(err)
-					case ctx.Err() != nil:
-						return backoff.Permanent(ctx.Err())
-					}
-
-					var serr error
-					switch {
-					// Never retry on children jobs
-					case job.InternalData.ParentJobUUID == job.UUID:
-						serr = utils2.UpdateJobStatus(ctx, listener.jobClient, evlp.GetJobUUID(),
-							entities.StatusFailed, err.Error(), nil)
-					// Retry over same message
-					case errors.IsInvalidNonceWarning(err):
-						resetEnvelopeTx(evlp)
-						serr = utils2.UpdateJobStatus(ctx, listener.jobClient, evlp.GetJobUUID(),
-							entities.StatusRecovering, err.Error(), nil)
-						if serr == nil {
-							return err
-						}
-					// In case of other kind of errors...
-					default:
-						txResponse := evlp.AppendError(errors.FromError(err)).TxResponse()
-						serr = listener.sendEnvelope(ctx, evlp.ID, txResponse, listener.recoverTopic, evlp.PartitionKey())
-						if serr == nil {
-							serr = utils2.UpdateJobStatus(ctx, listener.jobClient, evlp.GetJobUUID(),
-								entities.StatusFailed, err.Error(), nil)
-						}
-					}
-
-					if serr != nil {
-						// IMPORTANT: Jobs can be updated in parallel to NEVER_MINED or MINED, so that we should
-						// ignore it in this case
-						if strings.Contains(err.Error(), "42400@") {
-							logger.WithError(err).Warn("ignored error")
-							return nil
-						}
-
-						// Retry on IsConnectionError
-						if errors.IsConnectionError(serr) {
-							return serr
-						}
-
-						return backoff.Permanent(serr)
-					}
-
-					return nil
-				},
-				listener.retryBackOff,
-				func(err error, duration time.Duration) {
-					logger.WithError(err).Warnf("error processing job, retrying in %v...", duration)
-				},
-			)
-
+			jlogger := logger.WithField("job", evlp.GetJobUUID()).WithField("schedule", evlp.GetScheduleUUID())
+			err = listener.processEnvelope(log.With(ctx, jlogger), evlp)
 			if err != nil {
-				logger.WithError(err).Errorf("error processing message")
+				jlogger.WithError(err).Error("error processing message")
 				return err
 			}
 
-			logger.Debug("job processed successfully")
+			jlogger.Debug("job processed successfully")
 			session.MarkMessage(msg, "")
 		}
 	}
 }
 
-func (listener *MessageListener) processJob(ctx context.Context, job *entities.Job) error {
+func (listener *MessageListener) processEnvelope(ctx context.Context, evlp *tx.Envelope) error {
+	logger := log.FromContext(ctx)
+	tenantID := evlp.GetHeadersValue(utils.TenantIDMetadata)
+	job := envelope.NewJobFromEnvelope(evlp, tenantID)
+	return backoff.RetryNotify(
+		func() error {
+			err := listener.executeSendJob(ctx, job)
+			switch {
+			// Exits if not errors
+			case err == nil:
+				return nil
+			case err == context.DeadlineExceeded || err == context.Canceled:
+				return backoff.Permanent(err)
+			case ctx.Err() != nil:
+				return backoff.Permanent(ctx.Err())
+			case errors.IsConnectionError(err):
+				return err
+			}
+
+			var serr error
+			switch {
+			// Never retry on children jobs
+			case job.InternalData.ParentJobUUID == job.UUID:
+				serr = utils2.UpdateJobStatus(ctx, listener.jobClient, evlp.GetJobUUID(),
+					entities.StatusFailed, err.Error(), nil)
+			// Retry over same message
+			case errors.IsInvalidNonceWarning(err):
+				resetEnvelopeTx(evlp)
+				serr = utils2.UpdateJobStatus(ctx, listener.jobClient, evlp.GetJobUUID(),
+					entities.StatusRecovering, err.Error(), nil)
+				if serr == nil {
+					return err
+				}
+			// In case of other kind of errors...
+			default:
+				txResponse := evlp.AppendError(errors.FromError(err)).TxResponse()
+				serr = listener.sendEnvelope(ctx, evlp.ID, txResponse, listener.recoverTopic, evlp.PartitionKey())
+				if serr == nil {
+					serr = utils2.UpdateJobStatus(ctx, listener.jobClient, evlp.GetJobUUID(),
+						entities.StatusFailed, err.Error(), nil)
+				}
+			}
+
+			if serr != nil {
+				// IMPORTANT: Jobs can be updated in parallel to NEVER_MINED or MINED, so that we should
+				// ignore it in this case
+				if strings.Contains(err.Error(), "42400@") {
+					logger.WithError(err).Warn("ignored error")
+					return nil
+				}
+
+				if ctx.Err() != nil {
+					return backoff.Permanent(ctx.Err())
+				}
+
+				// Retry on IsConnectionError and not context canceled
+				if errors.IsConnectionError(serr) {
+					return serr
+				}
+
+				return backoff.Permanent(serr)
+			}
+
+			return nil
+		},
+		listener.retryBackOff,
+		func(err error, duration time.Duration) {
+			logger.WithError(err).Warnf("error processing job, retrying in %v...", duration)
+		},
+	)
+}
+
+func (listener *MessageListener) executeSendJob(ctx context.Context, job *entities.Job) error {
 	switch string(job.Type) {
 	case tx.JobType_ETH_TESSERA_PRIVATE_TX.String():
 		return listener.useCases.SendTesseraPrivateTx().Execute(ctx, job)

@@ -44,10 +44,10 @@ Feature: Faucet funding
       | transferOneID | {{random.uuid}}    |
     And I have created the following accounts
       | alias    | ID              | ChainName            | Headers.Authorization    |
-      | account1 | {{random.uuid}} | {{chain.besu0.Name}} | Bearer {{tenant1.token}} |
+      | account1 | {{random.uuid}} | {{chain.besu1.Name}} | Bearer {{tenant1.token}} |
     And I register the following faucets
       | Name                  | ChainRule            | CreditorAccount                              | MaxBalance       | Amount           | Cooldown | Headers.Authorization    |
-      | faucet-{{scenarioID}} | {{chain.besu0.UUID}} | {{global.nodes.besu[0].fundedPublicKeys[0]}} | 1000000000000000 | 1000000000000000 | 1m       | Bearer {{tenant1.token}} |
+      | faucet-{{scenarioID}} | {{chain.besu1.UUID}} | {{global.nodes.besu[0].fundedPublicKeys[0]}} | 1000000000000000 | 1000000000000000 | 1m       | Bearer {{tenant1.token}} |
     Then I track the following envelopes
       | ID                |
       | {{transferOneID}} |
@@ -57,7 +57,7 @@ Feature: Faucet funding
     When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
       """
       {
-        "chain": "{{chain.besu0.Name}}",
+        "chain": "{{chain.besu1.Name}}",
         "params": {
           "from": "{{account1}}",
           "to": "{{toAddr}}",
@@ -91,7 +91,7 @@ Feature: Faucet funding
       | Key             | Value                    |
       | Authorization   | Bearer {{tenant1.token}} |
       | X-Cache-Control | no-cache                 |
-    When I send "POST" request to "{{global.api}}/proxy/chains/{{chain.besu0.UUID}}" with json:
+    When I send "POST" request to "{{global.api}}/proxy/chains/{{chain.besu1.UUID}}" with json:
       """
       {
         "jsonrpc": "2.0",

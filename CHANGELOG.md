@@ -1,5 +1,12 @@
 # Orchestrate Release Notes
 
+## v21.x.0 (Unreleased)
+### 🆕 Features
+* New environment variable, `KAFKA_NUM_CONSUMERS`, to launch multiple kafka consumer in `tx-sender`
+
+### 🛠 Bug fixes
+* Remove unnecessary HTTP retries on internal API calls
+
 ## v21.1.1 (Unreleased)
 
 ### 🛠 Bug fixes

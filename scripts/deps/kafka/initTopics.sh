@@ -4,19 +4,20 @@
 set -Eeu
 
 TX_SENDER=tx-sender
-TX_DECODED=tx-decoded
-TX_RECOVER=tx-recover
+#TX_DECODED=tx-decoded
+#TX_RECOVER=tx-recover
 
 echo "Creating topics if not exist..."
 RETRY=10
-PARTITIONS=2
-TOPICS=($TX_SENDER $TX_DECODED $TX_RECOVER)
+PARTITIONS=5
+#TOPICS=($TX_SENDER $TX_DECODED $TX_RECOVER)
+TOPICS=($TX_SENDER)
 
 for NAME in ${TOPICS[@]}
 do
     for i in $(seq 1 1 $RETRY)
     do
-	    docker-compose -f scripts/deps/docker-compose.yml exec kafka kafka-topics --create --partitions $PARTITIONS --replication-factor 1 --if-not-exists --zookeeper zookeeper:32181 --topic topic-$NAME && break
+	    docker-compose -f scripts/deps/docker-compose.yml exec kafka kafka-topics --create --bootstrap-server kafka:9092 --partitions $PARTITIONS --replication-factor 1 --topic topic-$NAME && break
         echo "
 =======================================================================
 Attempt $i/$RETRY (retry in 2 seconds) - could not create topic-$NAME

@@ -27,6 +27,10 @@ type MockIntervalBackoff struct {
 
 func (b *MockIntervalBackoff) Reset() {}
 
+func (b *MockIntervalBackoff) NewBackOff() backoff.BackOff {
+	return b
+}
+
 func (b *MockIntervalBackoff) NextBackOff() time.Duration {
 	b.hasRetried = true
 	return backoff.DefaultInitialInterval

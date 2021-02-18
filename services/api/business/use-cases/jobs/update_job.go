@@ -39,76 +39,94 @@ func NewUpdateJobUseCase(db store.DB, updateChildrenUseCase usecases.UpdateChild
 }
 
 // Execute validates and creates a new transaction job
-func (uc *updateJobUseCase) Execute(ctx context.Context, nextJob *entities.Job, nextStatus entities.JobStatus,
+func (uc *updateJobUseCase) Execute(ctx context.Context, job *entities.Job, nextStatus entities.JobStatus,
 	logMessage string, tenants []string) (*entities.Job, error) {
-	ctx = log.WithFields(ctx, log.Field("job", nextJob.UUID))
+	ctx = log.WithFields(ctx, log.Field("job", job.UUID), log.Field("next_status", nextStatus))
 	logger := uc.logger.WithContext(ctx)
 	logger.Debug("updating job")
 
-	var retrievedJob *entities.Job
-	err := database.ExecuteInDBTx(uc.db, func(tx database.Tx) error {
-		der := tx.(store.Tx).Job().LockOneByUUID(ctx, nextJob.UUID)
-		if der != nil {
-			return der
+	jobModel, err := uc.db.Job().FindOneByUUID(ctx, job.UUID, tenants)
+	if err != nil {
+		return nil, err
+	}
+
+	// Does current job belong to a parent/children chains?
+	var parentJobUUID string
+	if jobModel.InternalData.ParentJobUUID != "" {
+		parentJobUUID = jobModel.InternalData.ParentJobUUID
+	} else if jobModel.InternalData.RetryInterval != 0 {
+		parentJobUUID = job.UUID
+	}
+
+	err = database.ExecuteInDBTx(uc.db, func(tx database.Tx) error {
+		// We should lock ONLY when there is children jobs
+		if parentJobUUID != "" {
+			logger.WithField("parent_job", parentJobUUID).Debug("lock parent job row for update")
+			der := tx.(store.Tx).Job().LockOneByUUID(ctx, parentJobUUID)
+			if der != nil {
+				return der
+			}
+
+			// Refresh jobModel after lock to ensure nothing was updated
+			jobModel, err = uc.db.Job().FindOneByUUID(ctx, job.UUID, tenants)
+			if err != nil {
+				return err
+			}
 		}
 
-		curJobModel, der := tx.(store.Tx).Job().FindOneByUUID(ctx, nextJob.UUID, tenants)
-		if der != nil {
-			return der
-		}
-
-		retrievedJob = parsers.NewJobEntityFromModels(curJobModel)
-		if entities.IsFinalJobStatus(curJobModel.Status) {
+		if entities.IsFinalJobStatus(jobModel.Status) {
 			errMessage := "job status is final, cannot be updated"
-			logger.WithField("status", curJobModel.Status).Error(errMessage)
+			logger.WithField("status", jobModel.Status).Error(errMessage)
 			return errors.InvalidParameterError(errMessage).ExtendComponent(updateJobComponent)
 		}
 
 		// We are not forced to update the status
-		if nextStatus != "" && !canUpdateStatus(nextStatus, curJobModel.Status) {
+		if nextStatus != "" && !canUpdateStatus(nextStatus, jobModel.Status) {
 			errMessage := "invalid status update for the current job state"
-			logger.WithField("status", curJobModel.Status).WithField("next_status", nextStatus).Error(errMessage)
+			logger.WithField("status", jobModel.Status).WithField("next_status", nextStatus).Error(errMessage)
 			return errors.InvalidStateError(errMessage).ExtendComponent(updateJobComponent)
 		}
 
 		// We are not forced to update the transaction
-		if nextJob.Transaction != nil {
-			parsers.UpdateTransactionModelFromEntities(curJobModel.Transaction, nextJob.Transaction)
-			if der := tx.(store.Tx).Transaction().Update(ctx, curJobModel.Transaction); der != nil {
+		if job.Transaction != nil {
+			parsers.UpdateTransactionModelFromEntities(jobModel.Transaction, job.Transaction)
+			if der := tx.(store.Tx).Transaction().Update(ctx, jobModel.Transaction); der != nil {
 				return der
 			}
 		}
 
-		// We are not forced to update the status
 		if nextStatus != "" {
 			jobLogModel := &models.Log{
-				JobID:   &curJobModel.ID,
+				JobID:   &jobModel.ID,
 				Status:  nextStatus,
 				Message: logMessage,
 			}
+
 			if der := tx.(store.Tx).Log().Insert(ctx, jobLogModel); der != nil {
 				return der
 			}
 
-			curJobModel.Logs = append(curJobModel.Logs, jobLogModel)
-
-			// if we updated to MINED, we need to update the children and sibling jobs to NEVER_MINED
-			if nextStatus == entities.StatusMined {
-				der := uc.updateChildrenUseCase.
-					WithDBTransaction(tx.(store.Tx)).
-					Execute(ctx, curJobModel.UUID, curJobModel.InternalData.ParentJobUUID, entities.StatusNeverMined, tenants)
-				if der != nil {
-					return der
-				}
-			}
-
-			// Metrics observe request latency
-			uc.addMetrics(jobLogModel, curJobModel.Logs[len(curJobModel.Logs)-1], curJobModel.ChainUUID)
+			jobModel.Logs = append(jobModel.Logs, jobLogModel)
 		}
 
-		updateJobModel(curJobModel, nextJob)
-		if der := tx.(store.Tx).Job().Update(ctx, curJobModel); der != nil {
+		updateJobModel(jobModel, job)
+		if der := tx.(store.Tx).Job().Update(ctx, jobModel); der != nil {
 			return der
+		}
+
+		// if we updated to MINED, we need to update the children and sibling jobs to NEVER_MINED
+		if parentJobUUID != "" && nextStatus == entities.StatusMined {
+			der := uc.updateChildrenUseCase.
+				WithDBTransaction(tx.(store.Tx)).
+				Execute(ctx, jobModel.UUID, parentJobUUID, entities.StatusNeverMined, tenants)
+			if der != nil {
+				return der
+			}
+		}
+
+		// Metrics observe request latency over job status changes
+		if nextStatus != "" && len(jobModel.Logs) > 2 {
+			uc.addMetrics(jobModel.Logs[len(jobModel.Logs)-2], jobModel.Logs[len(jobModel.Logs)-1], jobModel.ChainUUID)
 		}
 
 		return nil
@@ -118,14 +136,15 @@ func (uc *updateJobUseCase) Execute(ctx context.Context, nextJob *entities.Job, 
 		return nil, errors.FromError(err).ExtendComponent(updateJobComponent)
 	}
 
-	if (nextStatus == entities.StatusMined || nextStatus == entities.StatusStored) && retrievedJob.NextJobUUID != "" {
-		err = uc.startNextJobUseCase.Execute(ctx, retrievedJob.UUID, tenants)
+	if (nextStatus == entities.StatusMined || nextStatus == entities.StatusStored) && jobModel.NextJobUUID != "" {
+		err = uc.startNextJobUseCase.Execute(ctx, jobModel.UUID, tenants)
 		if err != nil {
 			return nil, errors.FromError(err).ExtendComponent(updateJobComponent)
 		}
 	}
 
-	jobModel, err := uc.db.Job().FindOneByUUID(ctx, nextJob.UUID, tenants)
+	// Refresh job from DB state
+	jobModel, err = uc.db.Job().FindOneByUUID(ctx, job.UUID, tenants)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(updateJobComponent)
 	}

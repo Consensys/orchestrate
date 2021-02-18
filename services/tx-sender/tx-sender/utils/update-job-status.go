@@ -21,7 +21,7 @@ func UpdateJobStatus(ctx context.Context, apiClient client.JobClient, jobUUID st
 
 	_, err := apiClient.UpdateJob(ctx, jobUUID, txUpdateReq)
 	if err != nil {
-		logger.WithError(err).Errorf("failed to update job status")
+		logger.WithError(err).Error("failed to update job status")
 		return err
 	}
 

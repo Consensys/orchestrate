@@ -37,7 +37,8 @@ func (uc updateChildrenUseCase) WithDBTransaction(dbtx store.Tx) usecases.Update
 }
 
 func (uc *updateChildrenUseCase) Execute(ctx context.Context, jobUUID, parentJobUUID string, nextStatus entities.JobStatus, tenants []string) error {
-	ctx = log.WithFields(ctx, log.Field("job", jobUUID), log.Field("next_status", nextStatus))
+	ctx = log.WithFields(ctx, log.Field("job", jobUUID), log.Field("parent_job", parentJobUUID),
+		log.Field("next_status", nextStatus))
 	logger := uc.logger.WithContext(ctx)
 	logger.Debug("updating sibling and/or parent jobs")
 
@@ -46,10 +47,6 @@ func (uc *updateChildrenUseCase) Execute(ctx context.Context, jobUUID, parentJob
 		err := errors.InvalidParameterError(errMsg)
 		logger.WithError(err).Error("failed to update children jobs")
 		return err
-	}
-
-	if parentJobUUID == "" {
-		parentJobUUID = jobUUID
 	}
 
 	jobsToUpdate, err := uc.db.Job().Search(ctx, &entities.JobFilters{
@@ -62,6 +59,7 @@ func (uc *updateChildrenUseCase) Execute(ctx context.Context, jobUUID, parentJob
 	}
 
 	for _, jobModel := range jobsToUpdate {
+		// Skip mined job which trigger the update of sibling/children
 		if jobModel.UUID == jobUUID {
 			continue
 		}
@@ -80,6 +78,9 @@ func (uc *updateChildrenUseCase) Execute(ctx context.Context, jobUUID, parentJob
 		if err := uc.db.Log().Insert(ctx, jobLogModel); err != nil {
 			return errors.FromError(err).ExtendComponent(updateChildrenComponent)
 		}
+
+		logger.WithField("job", jobModel.UUID).
+			WithField("status", nextStatus).Debug("updated children/sibling job successfully")
 	}
 
 	logger.WithField("status", nextStatus).Info("children (and/or parent) jobs updated successfully")

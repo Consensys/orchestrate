@@ -151,13 +151,15 @@ func (uc *sendTxUsecase) insertNewTxRequest(
 	txData, requestHash, chainUUID, tenantID string,
 ) (*entities.TxRequest, error) {
 	err := database.ExecuteInDBTx(uc.db, func(dbtx database.Tx) error {
-		schedule, der := uc.createScheduleUC.WithDBTransaction(dbtx.(store.Tx)).Execute(ctx, &entities.Schedule{TenantID: tenantID})
+		schedule, der := uc.createScheduleUC.WithDBTransaction(dbtx.(store.Tx)).
+			Execute(ctx, &entities.Schedule{TenantID: tenantID})
 		if der != nil {
 			return der
 		}
 		txRequest.Schedule = schedule
 
-		scheduleModel, der := dbtx.(store.Tx).Schedule().FindOneByUUID(ctx, txRequest.Schedule.UUID, []string{tenantID})
+		scheduleModel, der := dbtx.(store.Tx).Schedule().
+			FindOneByUUID(ctx, txRequest.Schedule.UUID, []string{tenantID})
 		if der != nil {
 			return der
 		}
@@ -181,7 +183,8 @@ func (uc *sendTxUsecase) insertNewTxRequest(
 				txJob.NextJobUUID = nextJobUUID
 			}
 
-			job, der := uc.createJobUC.WithDBTransaction(dbtx.(store.Tx)).Execute(ctx, txJob, []string{tenantID, multitenancy.DefaultTenant})
+			job, der := uc.createJobUC.WithDBTransaction(dbtx.(store.Tx)).
+				Execute(ctx, txJob, []string{tenantID, multitenancy.DefaultTenant})
 			if der != nil {
 				return der
 			}

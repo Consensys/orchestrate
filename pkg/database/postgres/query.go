@@ -7,143 +7,86 @@ import (
 	"github.com/go-pg/pg/v9"
 	"github.com/go-pg/pg/v9/orm"
 	healthz "github.com/heptiolabs/healthcheck"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
-	ierror "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/error"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 )
 
-var alreadyExistErr = "entity already exists in DB"
-var integrityErr = "insert integrity violation"
-
-func Insert(ctx context.Context, db DB, models ...interface{}) *ierror.Error {
+func Insert(ctx context.Context, db DB, models ...interface{}) error {
 	_, err := db.ModelContext(ctx, models...).Insert()
 	if err != nil {
-		pgErr, ok := err.(pg.Error)
-		if ok && errors.IsAlreadyExistsError(err) {
-			return errors.AlreadyExistsError(alreadyExistErr)
-		} else if ok && pgErr.IntegrityViolation() {
-			return errors.ConstraintViolatedError(integrityErr)
-		}
-
-		return errors.PostgresConnectionError("error executing insert by model")
+		return handleError(err)
 	}
 
 	return nil
 }
 
-func InsertQuery(_ context.Context, q *orm.Query) *ierror.Error {
+func InsertQuery(_ context.Context, q *orm.Query) error {
 	_, err := q.Insert()
 	if err != nil {
-		pgErr, ok := err.(pg.Error)
-		if ok && errors.IsAlreadyExistsError(err) {
-			return errors.AlreadyExistsError(alreadyExistErr)
-		} else if ok && pgErr.IntegrityViolation() {
-			return errors.ConstraintViolatedError(integrityErr)
-		}
-
-		errMsg := "error executing insert by query"
-		return errors.PostgresConnectionError(errMsg)
+		return handleError(err)
 	}
 
 	return nil
 }
 
-func Update(ctx context.Context, db DB, models ...interface{}) *ierror.Error {
+func Update(ctx context.Context, db DB, models ...interface{}) error {
 	_, err := db.ModelContext(ctx, models...).WherePK().Update()
 	if err != nil {
-		pgErr, ok := err.(pg.Error)
-		if ok && errors.IsAlreadyExistsError(err) {
-			return errors.AlreadyExistsError("entity cannot be updated in DB")
-		} else if ok && pgErr.IntegrityViolation() {
-			return errors.PostgresConnectionError("update integrity violation")
-		}
-
-		return errors.PostgresConnectionError("error executing update")
+		return handleError(err)
 	}
 	return nil
 }
 
-func UpdateNotZero(ctx context.Context, q *orm.Query) *ierror.Error {
+func UpdateNotZero(ctx context.Context, q *orm.Query) error {
 	_, err := q.Context(ctx).UpdateNotZero()
 	if err != nil {
-		pgErr, ok := err.(pg.Error)
-		if ok && errors.IsAlreadyExistsError(err) {
-			return errors.AlreadyExistsError("entity cannot be non zero updated in DB")
-		} else if ok && pgErr.IntegrityViolation() {
-			return errors.PostgresConnectionError("non zero update integrity violation")
-		}
-
-		return errors.PostgresConnectionError("error executing non zero update")
+		return handleError(err)
 	}
 	return nil
 }
 
-func Delete(ctx context.Context, q *orm.Query) *ierror.Error {
+func Delete(ctx context.Context, q *orm.Query) error {
 	_, err := q.Context(ctx).Delete()
 	if err != nil {
-		pgErr, ok := err.(pg.Error)
-		if ok && pgErr.IntegrityViolation() {
-			return errors.PostgresConnectionError("delete integrity violation")
-		}
-
-		return errors.PostgresConnectionError("error executing delete")
+		return handleError(err)
 	}
 
 	return nil
 }
 
-func Select(ctx context.Context, q *orm.Query) *ierror.Error {
+func Select(ctx context.Context, q *orm.Query) error {
 	err := q.Context(ctx).Select()
-	if err != nil && err == pg.ErrNoRows {
-		return errors.NotFoundError("entities cannot be found")
-	} else if err != nil {
-		return errors.PostgresConnectionError("could not load entities")
+	if err != nil {
+		return handleError(err)
 	}
 
 	return nil
 }
 
-func SelectColumn(ctx context.Context, q *orm.Query, result interface{}) *ierror.Error {
+func SelectColumn(ctx context.Context, q *orm.Query, result interface{}) error {
 	err := q.Context(ctx).Select(result)
-	if err != nil && err == pg.ErrNoRows {
-		return errors.NotFoundError("entities cannot be found")
-	} else if err != nil {
-		return errors.PostgresConnectionError("could not load columns")
+	if err != nil {
+		return handleError(err)
 	}
 
 	return nil
 }
 
-func SelectOrInsert(ctx context.Context, q *orm.Query) *ierror.Error {
+func SelectOrInsert(ctx context.Context, q *orm.Query) error {
 	_, err := q.Context(ctx).SelectOrInsert()
 	if err != nil {
-		pgErr, ok := err.(pg.Error)
-		if ok && pgErr.IntegrityViolation() {
-			return errors.ConstraintViolatedError(integrityErr)
-		}
-
-		return errors.PostgresConnectionError("error executing select or insert")
+		return handleError(err)
 	}
 
 	return nil
 }
 
-func SelectOne(ctx context.Context, q *orm.Query) *ierror.Error {
+func SelectOne(ctx context.Context, q *orm.Query) error {
 	err := q.Context(ctx).First()
-	if err != nil && err == pg.ErrNoRows {
-		return errors.NotFoundError("entity does not exist")
-	} else if err != nil {
-		return errors.PostgresConnectionError("could not load entity")
+	if err != nil {
+		return handleError(err)
 	}
 	return nil
-}
-
-func WhereFilters(query *orm.Query, filters map[string]string) *orm.Query {
-	for k, v := range filters {
-		query.Where(fmt.Sprintf("%s = ?", k), v)
-	}
-	return query
 }
 
 func WhereAllowedTenantsDefault(query *orm.Query, tenants []string) *orm.Query {

@@ -39,9 +39,10 @@ func NewApp(ctx context.Context) (*app.App, error) {
 			ethclient.Init(ctx)
 		},
 	)
+
 	httpClient := http.NewClient(http.NewConfig(viper.GetViper()))
 	backoffConf := orchestrateclient.NewConfigFromViper(viper.GetViper(),
-		backoff.IncrementalBackOff(time.Second*5, time.Minute))
+		backoff.IncrementalBackOffWithMaxRetries(time.Millisecond*500, time.Second, 5))
 	client := orchestrateclient.NewHTTPClient(httpClient, backoffConf)
 
 	registryprovider.Init(client)

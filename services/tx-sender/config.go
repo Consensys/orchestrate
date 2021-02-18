@@ -31,6 +31,9 @@ func init() {
 
 	viper.SetDefault(NonceManagerExpirationViperKey, nonceManagerExpirationDefault)
 	_ = viper.BindEnv(NonceManagerExpirationViperKey, nonceManagerExpirationEnv)
+
+	viper.SetDefault(KafkaConsumerViperKey, kafkaConsumerDefault)
+	_ = viper.BindEnv(KafkaConsumerViperKey, KafkaConsumerEnv)
 }
 
 const (
@@ -63,6 +66,13 @@ const (
 	nonceManagerExpirationEnv      = "NONCE_MANAGER_EXPIRATION"
 )
 
+var (
+	kafkaConsumersFlag    = "kafka-consumers"
+	KafkaConsumerViperKey = "kafka.consumers"
+	kafkaConsumerDefault  = uint8(1)
+	KafkaConsumerEnv      = "KAFKA_NUM_CONSUMERS"
+)
+
 // Flags register flags for tx sentry
 func Flags(f *pflag.FlagSet) {
 	broker.InitKafkaFlags(f)
@@ -73,7 +83,8 @@ func Flags(f *pflag.FlagSet) {
 	broker.ConsumerGroupName(f)
 	MaxRecovery(f)
 	NonceManagerType(f)
-	NonceManagerExpirationFlag(f)
+	NonceManagerExpiration(f)
+	KafkaConsumers(f)
 	redis.Flags(f)
 	metricregistry.Flags(f, httpmetrics.ModuleName, tcpmetrics.ModuleName)
 	httputils.MetricFlags(f)
@@ -96,16 +107,24 @@ Environment variable: %q`, []string{NonceManagerTypeInMemory, NonceManagerTypeRe
 }
 
 // ExpirationFlag register a flag for Redis expiration
-func NonceManagerExpirationFlag(f *pflag.FlagSet) {
+func NonceManagerExpiration(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`NonceManager values expiration time.
 Environment variable: %q`, nonceManagerExpirationEnv)
 	f.Duration(nonceManagerExpirationFlag, nonceManagerExpirationDefault, desc)
 	_ = viper.BindPFlag(NonceManagerExpirationViperKey, f.Lookup(nonceManagerExpirationFlag))
 }
 
+func KafkaConsumers(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Number of parallel kafka consumers to initialize.
+Environment variable: %q`, KafkaConsumerEnv)
+	f.Uint8(kafkaConsumersFlag, kafkaConsumerDefault, desc)
+	_ = viper.BindPFlag(KafkaConsumerViperKey, f.Lookup(kafkaConsumersFlag))
+}
+
 type Config struct {
 	App                    *app.Config
 	GroupName              string
+	NConsumer              int
 	RecoverTopic           string
 	SenderTopic            string
 	ProxyURL               string
@@ -128,9 +147,10 @@ func NewConfig(vipr *viper.Viper) *Config {
 		ProxyURL:               vipr.GetString(client.URLViperKey),
 		NonceMaxRecovery:       vipr.GetUint64(NonceMaxRecoveryViperKey),
 		BckOff:                 retryMessageBackOff(),
-		NonceManagerType:       viper.GetString(nonceManagerTypeViperKey),
+		NonceManagerType:       vipr.GetString(nonceManagerTypeViperKey),
 		NonceManagerExpiration: vipr.GetDuration(NonceManagerExpirationViperKey),
 		RedisCfg:               redisCfg,
+		NConsumer:              int(vipr.GetUint64(KafkaConsumerViperKey)),
 	}
 }
 

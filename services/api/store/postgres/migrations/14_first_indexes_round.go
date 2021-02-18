@@ -19,13 +19,11 @@ CREATE INDEX schedules_tenant_id_uuid_idx on schedules (tenant_id, uuid);
 CREATE INDEX logs_job_id_status_idx on logs (job_id, status);
 
 ALTER TABLE jobs 
-	ADD COLUMN is_parent BOOLEAN DEFAULT FALSE,
+	ADD COLUMN is_parent BOOLEAN NOT NULL DEFAULT FALSE,
 	ADD COLUMN status job_status;
 
 UPDATE jobs j1
-	SET is_parent=j2.internal_data->'parentJobUUID' is null
-	FROM jobs j2
-	WHERE j1.id=j2.id;
+	SET is_parent=j1.internal_data->'parentJobUUID' is null;
 
 UPDATE jobs j1
 	SET status=l1.status
@@ -33,8 +31,6 @@ UPDATE jobs j1
 	WHERE l1.id=(select MAX(id) from logs l2 where l2.job_id = j1.id and l2.status NOT IN ('WARNING', 'RECOVERING', 'RESENDING'));
 
 CREATE INDEX jobs_parent_updated_at_idx on jobs (is_parent, updated_at);
-
-CREATE INDEX jobs_tx_parent_uuid_idx on jobs ((internal_data->>'jobUUID'));
 
 CREATE INDEX jobs_chain_uuid_status_idx on jobs (chain_uuid, status);
 `)
@@ -63,8 +59,6 @@ DROP INDEX jobs_chain_uuid_status_idx;
 
 ALTER TABLE jobs 
 	DROP COLUMN is_parent, DROP COLUMN status;
-
-DROP INDEX jobs_tx_parent_uuid_idx;
 
 DROP INDEX logs_job_id_status_idx;
 `)

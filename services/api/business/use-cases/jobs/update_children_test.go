@@ -33,7 +33,7 @@ func TestUpdateChildren_Execute(t *testing.T) {
 
 	usecase := NewUpdateChildrenUseCase(mockDB)
 
-	t.Run("should execute use case successfully if parentJobUUID is set", func(t *testing.T) {
+	t.Run("should execute use case successfully", func(t *testing.T) {
 		parentJobUUID := "parentJobUUID"
 		jobUUID := "jobUUID"
 
@@ -43,36 +43,6 @@ func TestUpdateChildren_Execute(t *testing.T) {
 
 		mockJobDA.EXPECT().Search(gomock.Any(),
 			&entities.JobFilters{ParentJobUUID: parentJobUUID, Status: entities.StatusPending}, tenants).
-			Return(jobsToUpdate, nil)
-		mockJobDA.EXPECT().Update(gomock.Any(), jobsToUpdate[0]).Return(nil)
-		mockJobDA.EXPECT().Update(gomock.Any(), jobsToUpdate[1]).Return(nil)
-		mockLogDA.EXPECT().Insert(gomock.Any(), &models.Log{
-			JobID:   &jobsToUpdate[0].ID,
-			Status:  status,
-			Message: fmt.Sprintf("sibling (or parent) job %s was mined instead", jobUUID),
-		}).Return(nil)
-		mockLogDA.EXPECT().Insert(gomock.Any(), &models.Log{
-			JobID:   &jobsToUpdate[1].ID,
-			Status:  status,
-			Message: fmt.Sprintf("sibling (or parent) job %s was mined instead", jobUUID),
-		}).
-			Return(nil)
-
-		err := usecase.Execute(ctx, jobUUID, parentJobUUID, status, tenants)
-
-		assert.NoError(t, err)
-	})
-
-	t.Run("should execute use case successfully if parentJobUUID is not set", func(t *testing.T) {
-		parentJobUUID := ""
-		jobUUID := "jobUUID"
-
-		jobsToUpdate := []*models.Job{testutils.FakeJobModel(1), testutils.FakeJobModel(1)}
-		jobsToUpdate[0].Logs[0].Status = entities.StatusPending
-		jobsToUpdate[1].Logs[0].Status = entities.StatusPending
-
-		mockJobDA.EXPECT().Search(gomock.Any(), 
-			&entities.JobFilters{ParentJobUUID: jobUUID, Status: entities.StatusPending}, tenants).
 			Return(jobsToUpdate, nil)
 		mockJobDA.EXPECT().Update(gomock.Any(), jobsToUpdate[0]).Return(nil)
 		mockJobDA.EXPECT().Update(gomock.Any(), jobsToUpdate[1]).Return(nil)

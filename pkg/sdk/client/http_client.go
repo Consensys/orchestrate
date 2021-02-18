@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
+	backoff2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/backoff"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 )
@@ -22,13 +23,21 @@ func NewHTTPClient(h *http.Client, c *Config) OrchestrateClient {
 	}
 }
 
-func callWithBackOff(ctx context.Context, backOff backoff.BackOff, requestCall func() error) error {
+func callWithBackOff(ctx context.Context, backOff backoff2.BackOff, requestCall func() error) error {
 	return backoff.RetryNotify(
 		func() error {
 			err := requestCall()
 			// If not errors, it does not retry
 			if err == nil {
 				return nil
+			}
+
+			if err == context.Canceled || err == context.DeadlineExceeded {
+				return backoff.Permanent(err)
+			}
+
+			if ctx.Err() != nil {
+				return backoff.Permanent(ctx.Err())
 			}
 
 			// Retry on following errors
@@ -38,7 +47,7 @@ func callWithBackOff(ctx context.Context, backOff backoff.BackOff, requestCall f
 
 			// Otherwise, stop retrying
 			return backoff.Permanent(err)
-		}, backoff.WithContext(backOff, ctx),
+		}, backoff.WithContext(backOff.NewBackOff(), ctx),
 		func(e error, duration time.Duration) {
 			log.FromContext(ctx).
 				WithError(e).

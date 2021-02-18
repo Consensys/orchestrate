@@ -74,7 +74,7 @@ func SetGlobalConfig(cfg *sarama.Config) {
 
 // initialize Sarama Client
 // It bases on viper configuration to get Kafka address
-func initClient(ctx context.Context) (err error) {
+func InitClient(ctx context.Context) (err error) {
 	initClientOnce.Do(func() {
 		if client != nil {
 			return
@@ -144,7 +144,7 @@ func InitSyncProducer(ctx context.Context) {
 		}
 
 		// Initialize client
-		err := initClient(ctx)
+		err := InitClient(ctx)
 		if err != nil {
 			return
 		}
@@ -183,7 +183,7 @@ func InitConsumerGroup(ctx context.Context, kafkaGroup string) {
 			return
 		}
 
-		err := initClient(ctx)
+		err := InitClient(ctx)
 		if err != nil {
 			return
 		}

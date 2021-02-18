@@ -7,9 +7,11 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/cenkalti/backoff/v4"
+	"github.com/hashicorp/go-multierror"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/app"
 	pkgsarama "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
 	dbredis "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database/redis"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	api "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
@@ -28,15 +30,16 @@ type txSenderDaemon struct {
 	jobClient        api.JobClient
 	ec               ethclient.MultiClient
 	nonceManager     nonce.Manager
-	consumerGroup    sarama.ConsumerGroup
+	consumerGroup    []sarama.ConsumerGroup
 	producer         sarama.SyncProducer
 	config           *Config
 	logger           *log.Logger
+	cancel           context.CancelFunc
 }
 
 func NewTxSender(
 	config *Config,
-	consumerGroup sarama.ConsumerGroup,
+	consumerGroup []sarama.ConsumerGroup,
 	producer sarama.SyncProducer,
 	keyManagerClient keymanager.KeyManagerClient,
 	apiClient api.OrchestrateClient,
@@ -74,8 +77,7 @@ func NewTxSender(
 }
 
 func (d *txSenderDaemon) Run(ctx context.Context) error {
-	logger := d.logger.WithContext(ctx)
-	logger.Debug("starting transaction sender")
+	d.logger.Debug("starting transaction sender")
 
 	// Create business layer use cases
 	useCases := builder.NewUseCases(d.jobClient, d.keyManagerClient, d.ec, d.nonceManager,
@@ -85,27 +87,46 @@ func (d *txSenderDaemon) Run(ctx context.Context) error {
 	listener := service.NewMessageListener(useCases, d.jobClient, d.producer, d.config.RecoverTopic, d.config.SenderTopic,
 		d.config.BckOff)
 
-	// We retry once after consume exits to prevent entire stack to exit after kafka rebalance is triggered
-	return backoff.RetryNotify(
-		func() error {
-			err := d.consumerGroup.Consume(ctx, []string{d.config.SenderTopic}, listener)
+	ctx, d.cancel = context.WithCancel(ctx)
+	gr := &multierror.Group{}
+	for idx, consumerGroup := range d.consumerGroup {
+		cGroup := consumerGroup
+		cGroupID := fmt.Sprintf("c-%d", idx)
+		logger := d.logger.WithField("consumer", cGroupID)
+		cctx := log.With(log.WithField(ctx, "consumer", cGroupID), logger)
+		gr.Go(func() error {
+			// We retry once after consume exits to prevent entire stack to exit after kafka rebalance is triggered
+			err := backoff.RetryNotify(
+				func() error {
+					err := cGroup.Consume(cctx, []string{d.config.SenderTopic}, listener)
 
-			// In this case, kafka rebalance was triggered and we want to retry
-			if err == nil && ctx.Err() == nil {
-				return fmt.Errorf("kafka rebalance was triggered")
-			}
+					// In this case, kafka rebalance was triggered and we want to retry
+					if err == nil && cctx.Err() == nil {
+						return fmt.Errorf("kafka rebalance was triggered")
+					}
 
-			return backoff.Permanent(err)
-		},
-		backoff.NewConstantBackOff(time.Millisecond*500),
-		func(err error, duration time.Duration) {
-			logger.WithError(err).Warnf("consuming session exited, retrying in %s", duration.String())
-		},
-	)
+					return backoff.Permanent(err)
+				},
+				backoff.NewConstantBackOff(time.Millisecond*500),
+				func(err error, duration time.Duration) {
+					logger.WithError(err).Warnf("consuming session exited, retrying in %s", duration.String())
+				},
+			)
+			d.cancel()
+			return err
+		})
+	}
+
+	return gr.Wait().ErrorOrNil()
 }
 
 func (d *txSenderDaemon) Close() error {
-	return d.consumerGroup.Close()
+	var gerr error
+	for _, consumerGroup := range d.consumerGroup {
+		gerr = errors.CombineErrors(gerr, consumerGroup.Close())
+	}
+
+	return gerr
 }
 
 func readinessOpt(apiClient api.MetricClient, redisCli *dbredis.Client) app.Option {

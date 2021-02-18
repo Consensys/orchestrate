@@ -90,7 +90,7 @@ func (manager *sessionManager) Start(ctx context.Context, job *entities.Job) {
 				err := manager.runSession(ctx, ses)
 				return err
 			},
-			pkgbackoff.IncrementalBackOff(5*time.Second, time.Minute),
+			pkgbackoff.IncrementalBackOff(time.Second, 5*time.Second, time.Minute),
 			func(err error, d time.Duration) {
 				logger.WithError(err).Warnf("error in job retry session, restarting in %v...", d)
 			},
