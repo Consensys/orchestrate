@@ -86,6 +86,7 @@ services:
     restart: "no"
     depends_on:
       - api-migration-init
+      - key-manager
     command: api migrate up
 
   api-copy-db:
