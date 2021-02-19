@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	Subsystem           = "transaction_scheduler"
+	Subsystem           = "api"
 	JobLatencySeconds   = "job_latency_seconds"
 	MinedLatencySeconds = "mined_latency_seconds"
 )
