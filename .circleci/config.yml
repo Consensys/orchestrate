@@ -295,11 +295,36 @@ workflows:
   version: 2
   default:
     jobs:
-      - lint
-      - gobuild
-      - test
-      - race
-      - integration
+      - lint:
+        filters:
+          tags:
+            only: /^v.*/
+          branches:
+            only: /.*/
+      - gobuild:
+        filters:
+          tags:
+            only: /^v.*/
+          branches:
+            only: /.*/
+      - test:
+        filters:
+          tags:
+            only: /^v.*/
+          branches:
+            only: /.*/
+      - race:
+        filters:
+          tags:
+            only: /^v.*/
+          branches:
+            only: /.*/
+      - integration:
+        filters:
+          tags:
+            only: /^v.*/
+          branches:
+            only: /.*/
       - push-orchestrate-image:
           filters:
             branches:
