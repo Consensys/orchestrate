@@ -296,35 +296,35 @@ workflows:
   default:
     jobs:
       - lint:
-        filters:
-          tags:
-            only: /^v.*/
-          branches:
-            only: /.*/
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              only: /.*/
       - gobuild:
-        filters:
-          tags:
-            only: /^v.*/
-          branches:
-            only: /.*/
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              only: /.*/
       - test:
-        filters:
-          tags:
-            only: /^v.*/
-          branches:
-            only: /.*/
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              only: /.*/
       - race:
-        filters:
-          tags:
-            only: /^v.*/
-          branches:
-            only: /.*/
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              only: /.*/
       - integration:
-        filters:
-          tags:
-            only: /^v.*/
-          branches:
-            only: /.*/
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              only: /.*/
       - push-orchestrate-image:
           filters:
             branches:
@@ -353,26 +353,21 @@ workflows:
           filters:
             branches:
               only: master
-            tags:
-              only: /^v.*/
           requires:
             - push-orchestrate-image
       - run-e2e:
           filters:
             branches:
               only: master
-            tags:
-              only: /^v.*/
           requires:
             - deploy-qa
       - run-stress:
           filters:
             branches:
-              ignore: /.*/
-            tags:
-              only: /^v.*/
+              only: master
           requires:
             - run-e2e
+            - deploy-qa
       - release-latest:
           filters:
             branches:
@@ -381,11 +376,12 @@ workflows:
               ignore: /.*/
           requires:
             - run-e2e
+            - run-stress
       - wait-for-approval:
           type: approval
           requires:
-            - run-e2e
-            - run-stress
+            - push-orchestrate-e2e-image
+            - push-orchestrate-image
           filters:
             tags:
               only: /^v.*/
