@@ -20,14 +20,14 @@ const (
 	apiKeyEnv      = "AUTH_API_KEY"
 )
 
-// APIKey register flag for Authentication with API Key
-func APIKey(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Key used for authentication (it should be used only for Orchestrate internal authenetication)
+func Flags(f *pflag.FlagSet) {
+	apiKey(f)
+}
+
+// apiKey register flag for Authentication with API Key
+func apiKey(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Key used for authentication (it should be used only for Orchestrate internal authenetication).
 Environment variable: %q`, apiKeyEnv)
 	f.String(apiKeyFlag, apiKeyDefault, desc)
 	_ = viper.BindPFlag(APIKeyViperKey, f.Lookup(apiKeyFlag))
-}
-
-func Flags(f *pflag.FlagSet) {
-	APIKey(f)
 }

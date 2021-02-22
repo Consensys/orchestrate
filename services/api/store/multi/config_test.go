@@ -13,7 +13,7 @@ import (
 
 func TestStoreType(t *testing.T) {
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	Type(flgs)
+	Flags(flgs)
 
 	expected := "postgres"
 	assert.Equal(t, expected, viper.GetString(TypeViperKey), "Default")

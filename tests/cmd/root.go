@@ -18,10 +18,10 @@ func main() {
 	}
 
 	// Set pkglog flags
-	log.InitFlags(command.Flags())
+	log.Flags(command.Flags())
 
 	// Register Kafka flags
-	broker.InitKafkaFlags(command.Flags())
+	broker.KafkaConsumerFlags(command.Flags())
 	broker.KafkaTopicTxSender(command.Flags())
 	broker.KafkaTopicTxDecoded(command.Flags())
 
@@ -29,7 +29,7 @@ func main() {
 	command.AddCommand(NewRunStressTestCommand())
 
 	// Register Multi-Tenancy flags
-	multitenancy.Enabled(command.Flags())
+	multitenancy.Flags(command.Flags())
 	auth.Flags(command.Flags())
 	generator.PrivateKey(command.Flags())
 

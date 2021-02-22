@@ -13,7 +13,7 @@ import (
 func TestMultiTenancyEnable(t *testing.T) {
 	name := "multi.tenancy.enabled"
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	Enabled(flgs)
+	Flags(flgs)
 
 	expected := false
 	assert.Equal(t, expected, viper.GetBool(name), "TenancyEnable #1")

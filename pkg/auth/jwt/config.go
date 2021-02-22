@@ -15,8 +15,8 @@ func init() {
 }
 
 func Flags(f *pflag.FlagSet) {
-	Certificate(f)
-	ClaimsNamespace(f)
+	certificateFlags(f)
+	claimsNamespace(f)
 }
 
 // Provision trusted certificate of the authentication service (base64 encoded)
@@ -27,9 +27,9 @@ const (
 	certificateEnv      = "AUTH_JWT_CERTIFICATE"
 )
 
-// Certificate register flag for Authentication service certificate
-func Certificate(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`certificate of the authentication service encoded in base64
+// certificateFlag register flag for Authentication service certificate
+func certificateFlags(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`certificate of the authentication service encoded in base64.
 Environment variable: %q`, certificateEnv)
 	f.String(certificateFlag, certificateDefault, desc)
 	_ = viper.BindPFlag(CertificateViperKey, f.Lookup(certificateFlag))
@@ -44,8 +44,8 @@ const (
 )
 
 // ClaimsNamespace register flag for tenant namespace
-func ClaimsNamespace(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Tenant Namespace to retrieve the tenant id in the OpenId or Access Token (JWT)
+func claimsNamespace(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Tenant Namespace to retrieve the tenant id in the Access Token (JWT).
 Environment variable: %q`, claimsNamespaceEnv)
 	f.String(claimsNamespaceFlag, claimsNamespaceDefault, desc)
 	_ = viper.BindPFlag(ClaimsNamespaceViperKey, f.Lookup(claimsNamespaceFlag))

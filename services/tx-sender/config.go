@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"time"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
+	authkey "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/auth/key"
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
+
+	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 
 	"github.com/cenkalti/backoff/v4"
 	"github.com/spf13/pflag"
@@ -13,7 +16,6 @@ import (
 	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database/redis"
 	httputils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http"
-	httpmetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/metrics"
 	metricregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/metrics/registry"
 	tcpmetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tcp/metrics"
 	keymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client"
@@ -66,7 +68,7 @@ const (
 	nonceManagerExpirationEnv      = "NONCE_MANAGER_EXPIRATION"
 )
 
-var (
+const (
 	kafkaConsumersFlag    = "kafka-consumers"
 	KafkaConsumerViperKey = "kafka.consumers"
 	kafkaConsumerDefault  = uint8(1)
@@ -75,46 +77,45 @@ var (
 
 // Flags register flags for tx sentry
 func Flags(f *pflag.FlagSet) {
-	broker.InitKafkaFlags(f)
-	keymanager.Flags(f)
-	client.Flags(f)
+	log.Flags(f)
+	authkey.Flags(f)
+	broker.KafkaConsumerFlags(f)
 	broker.KafkaTopicTxSender(f)
 	broker.KafkaTopicTxRecover(f)
-	broker.ConsumerGroupName(f)
-	MaxRecovery(f)
-	NonceManagerType(f)
-	NonceManagerExpiration(f)
-	KafkaConsumers(f)
-	redis.Flags(f)
-	metricregistry.Flags(f, httpmetrics.ModuleName, tcpmetrics.ModuleName)
+	keymanager.Flags(f)
+	orchestrateclient.Flags(f)
 	httputils.MetricFlags(f)
+	metricregistry.Flags(f, tcpmetrics.ModuleName)
+	redis.Flags(f)
+
+	maxRecovery(f)
+	nonceManagerType(f)
+	nonceManagerExpiration(f)
+	kafkaConsumers(f)
 }
 
-// MaxRecovery register a flag for Redis server MaxRecovery
-func MaxRecovery(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Maximum number of times tx-sender tries to recover an envelope with invalid nonce before outputing an error
+func maxRecovery(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Maximum number of times to try to recover a transaction with invalid nonce before returning an error.
 Environment variable: %q`, nonceMaxRecoveryEnv)
 	f.Int(nonceMaxRecoveryFlag, nonceMaxRecoveryDefault, desc)
 	_ = viper.BindPFlag(NonceMaxRecoveryViperKey, f.Lookup(nonceMaxRecoveryFlag))
 }
 
-// Type register flag for Nonce Cooldown
-func NonceManagerType(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Type of Nonce (one of %q)
+func nonceManagerType(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Type of Nonce manager cache (one of %q)
 Environment variable: %q`, []string{NonceManagerTypeInMemory, NonceManagerTypeRedis}, nonceManagerTypeEnv)
 	f.String(nonceManagerTypeFlag, nonceManagerTypeDefault, desc)
 	_ = viper.BindPFlag(nonceManagerTypeViperKey, f.Lookup(nonceManagerTypeFlag))
 }
 
-// ExpirationFlag register a flag for Redis expiration
-func NonceManagerExpiration(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`NonceManager values expiration time.
+func nonceManagerExpiration(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Nonce manager cache expiration time (TTL).
 Environment variable: %q`, nonceManagerExpirationEnv)
 	f.Duration(nonceManagerExpirationFlag, nonceManagerExpirationDefault, desc)
 	_ = viper.BindPFlag(NonceManagerExpirationViperKey, f.Lookup(nonceManagerExpirationFlag))
 }
 
-func KafkaConsumers(f *pflag.FlagSet) {
+func kafkaConsumers(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Number of parallel kafka consumers to initialize.
 Environment variable: %q`, KafkaConsumerEnv)
 	f.Uint8(kafkaConsumersFlag, kafkaConsumerDefault, desc)
@@ -144,7 +145,7 @@ func NewConfig(vipr *viper.Viper) *Config {
 		GroupName:              vipr.GetString(broker.ConsumerGroupNameViperKey),
 		RecoverTopic:           vipr.GetString(broker.TxRecoverViperKey),
 		SenderTopic:            vipr.GetString(broker.TxSenderViperKey),
-		ProxyURL:               vipr.GetString(client.URLViperKey),
+		ProxyURL:               vipr.GetString(orchestrateclient.URLViperKey),
 		NonceMaxRecovery:       vipr.GetUint64(NonceMaxRecoveryViperKey),
 		BckOff:                 retryMessageBackOff(),
 		NonceManagerType:       vipr.GetString(nonceManagerTypeViperKey),

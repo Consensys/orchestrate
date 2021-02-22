@@ -29,7 +29,7 @@ func init() {
 
 // Flags register flags for tx sentry
 func Flags(f *pflag.FlagSet, modules ...string) {
-	metricsModuleDesc := fmt.Sprintf(`List of metrics modules to exposed by prometheus endpoint. Available metric modules are %q, to enable all use %s or to disable all %s. 
+	metricsModuleDesc := fmt.Sprintf(`List of metrics modules exposed. Available metric modules are %q, to enable all use %s or to disable all %s. 
 Environment variable: %q`,
 		append(modules, GoMetricsModule, ProcessMetricsModule, HealthzMetricsModule), MetricsModuleEnableAll, MetricsModuleDisabledAll, metricsModulesEnv)
 	f.StringSlice(metricsModulesFlag, MetricsModulesDefault, metricsModuleDesc)

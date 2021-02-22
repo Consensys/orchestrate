@@ -72,8 +72,8 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 	flgs := pflag.NewFlagSet("key-manager-integration-test", pflag.ContinueOnError)
 	httputils.MetricFlags(flgs)
 	httputils.Flags(flgs)
-	hashicorp.InitFlags(flgs)
-	log.Level(flgs)
+	hashicorp.Flags(flgs)
+	log.Flags(flgs)
 	args := []string{
 		"--metrics-port=" + envMetricsPort,
 		"--rest-port=" + envHTTPPort,

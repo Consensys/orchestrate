@@ -7,8 +7,6 @@ import (
 	"strconv"
 	"time"
 
-	logpkg "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
-
 	sarama2 "github.com/Shopify/sarama"
 	"github.com/alicebob/miniredis"
 	"github.com/cenkalti/backoff/v4"
@@ -76,7 +74,6 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 	// Initialize environment flags
 	flgs := pflag.NewFlagSet("tx-sender-integration-test", pflag.ContinueOnError)
 	txsender.Flags(flgs)
-	logpkg.Level(flgs)
 	args := []string{
 		"--metrics-port=" + envMetricsPort,
 		"--kafka-url=" + kafkaExternalHostname,

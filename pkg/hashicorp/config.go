@@ -134,8 +134,8 @@ const (
 	vaultTLSServerNameDefault = ""
 )
 
-// InitFlags register flags for HashiCorp Vault
-func InitFlags(f *pflag.FlagSet) {
+// Flags register flags for HashiCorp Vault
+func Flags(f *pflag.FlagSet) {
 	vaultAddr(f)
 	vaultBurstLimit(f)
 	vaultCACert(f)

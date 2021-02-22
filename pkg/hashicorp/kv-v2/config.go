@@ -42,7 +42,7 @@ const (
 )
 
 func InitFlags(f *pflag.FlagSet) {
-	hashicorp.InitFlags(f)
+	hashicorp.Flags(f)
 	vaultMountPoint(f)
 	vaultTokenFilePath(f)
 	vaultSecretPath(f)

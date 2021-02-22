@@ -20,10 +20,10 @@ const (
 	enabledEnv      = "MULTI_TENANCY_ENABLED"
 )
 
-// TenancyEnable register flag for Enable Multi-Tenancy
-func Enabled(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Whether or not to use Multi Tenancy (one of %q).
-Environment variable: %q`, []string{"false", "true"}, enabledEnv)
+// Flags register flag for Enable Multi-Tenancy
+func Flags(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Whether or not to use Multi Tenancy.
+Environment variable: %q`, enabledEnv)
 	f.Bool(enabledFlag, enabledDefault, desc)
 	_ = viper.BindPFlag(EnabledViperKey, f.Lookup(enabledFlag))
 }

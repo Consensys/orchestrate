@@ -14,7 +14,7 @@ import (
 func TestKafkaUrl(t *testing.T) {
 	name := "kafka.url"
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	KafkaURL(flgs)
+	KafkaProducerFlags(flgs)
 
 	expected := []string{
 		"localhost:9092",
@@ -45,7 +45,7 @@ func TestKafkaUrl(t *testing.T) {
 func TestKafkaConsumerMaxWaitTime(t *testing.T) {
 
 	f := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	KafkaConsumerMaxWaitTime(f)
+	kafkaConsumerMaxWaitTime(f)
 
 	assert.Equal(t, kafkaConsumerMaxWaitTimeDefault, viper.GetDuration(kafkaConsumerMaxWaitTimeViperKey), "Default")
 }
@@ -90,7 +90,7 @@ func TestTopics(t *testing.T) {
 func TestConsumerGroupName(t *testing.T) {
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
 
-	ConsumerGroupName(flgs)
+	KafkaConsumerFlags(flgs)
 	assert.Equal(t, "group-sender", viper.GetString("kafka.consumer.group.name"), "From default")
 }
 
@@ -98,7 +98,7 @@ func TestInitKafkaSASLFlags(t *testing.T) {
 
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
 
-	InitKafkaSASLFlags(flgs)
+	KafkaProducerFlags(flgs)
 	assert.Equal(t, false, viper.GetBool("kafka.sasl.enable"), "From default")
 	assert.Equal(t, "", viper.GetString("kafka.sasl.mechanism"), "From default")
 	assert.Equal(t, true, viper.GetBool("kafka.sasl.handshake"), "From default")
@@ -111,7 +111,7 @@ func TestInitKafkaTLSFlags(t *testing.T) {
 
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
 
-	InitKafkaTLSFlags(flgs)
+	KafkaConsumerFlags(flgs)
 	assert.Equal(t, false, viper.GetBool("kafka.tls.enabled"), "From default")
 	assert.Equal(t, false, viper.GetBool("kafka.tls.insecure.skip.verify"), "From default")
 	assert.Equal(t, "", viper.GetString("kafka.tls.client.cert.file"), "From default")
@@ -119,11 +119,11 @@ func TestInitKafkaTLSFlags(t *testing.T) {
 	assert.Equal(t, "", viper.GetString("kafka.tls.ca.cert.file"), "From default")
 }
 
-func TestInitKafkaFlags(t *testing.T) {
+func TestKafkaConsumerFlags(t *testing.T) {
 
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
 
-	InitKafkaFlags(flgs)
+	KafkaConsumerFlags(flgs)
 
 	TestKafkaUrl(t)
 	TestInitKafkaSASLFlags(t)

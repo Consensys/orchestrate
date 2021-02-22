@@ -28,8 +28,13 @@ const (
 	typeEnv      = "API_STORE_TYPE"
 )
 
-// Type register flag for the Transaction scheduler to select
-func Type(f *pflag.FlagSet) {
+func Flags(f *pflag.FlagSet) {
+	storeType(f)
+	pgstore.Flags(f)
+}
+
+// typeFlag register flag for the Transaction scheduler to select
+func storeType(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Type of API Store (one of %q) Environment variable: %q`, availableTypes, typeEnv)
 	f.String(typeFlag, typeDefault, desc)
 	_ = viper.BindPFlag(TypeViperKey, f.Lookup(typeFlag))
@@ -45,8 +50,4 @@ func NewConfig(vipr *viper.Viper) *Config {
 		Type:     vipr.GetString(TypeViperKey),
 		Postgres: pgstore.NewConfig(vipr),
 	}
-}
-
-func Flags(f *pflag.FlagSet) {
-	pgstore.Flags(f)
 }

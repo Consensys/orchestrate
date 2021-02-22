@@ -27,7 +27,7 @@ func NewRunE2ECommand() *cobra.Command {
 	cucumber.InitFlags(runCmd.Flags())
 	steps.InitFlags(runCmd.Flags())
 	e2e.InitFlags(runCmd.Flags())
-	broker.ConsumerGroupName(runCmd.Flags())
+	broker.KafkaConsumerFlags(runCmd.Flags())
 
 	return runCmd
 }

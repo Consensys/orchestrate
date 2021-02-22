@@ -69,17 +69,25 @@ func init() {
 	_ = viper.BindEnv(kafkaConsumerGroupRebalanceTimeoutViperKey, kafkaConsumerGroupRebalanceTimeoutEnv)
 }
 
-// InitKafkaFlags
-func InitKafkaFlags(f *pflag.FlagSet) {
-	KafkaURL(f)
-	InitKafkaSASLFlags(f)
-	InitKafkaTLSFlags(f)
-	KafkaConsumerMaxWaitTime(f)
+func KafkaProducerFlags(f *pflag.FlagSet) {
+	kafkaURL(f)
+	kafkaSASLFlags(f)
+	kafkaTLSFlags(f)
+	kafkaVersion(f)
+}
+
+// KafkaConsumerFlags
+func KafkaConsumerFlags(f *pflag.FlagSet) {
+	kafkaURL(f)
+	kafkaSASLFlags(f)
+	kafkaTLSFlags(f)
+	kafkaVersion(f)
+	consumerGroupName(f)
+	kafkaConsumerMaxWaitTime(f)
 	kafkaConsumerMaxProcessingTime(f)
 	kafkaConsumerGroupSessionTimeout(f)
 	kafkaConsumerGroupHeartbeatInterval(f)
 	kafkaConsumerGroupRebalanceTimeout(f)
-	kafkaVersion(f)
 	kafkaConsumerGroupRebalanceStrategy(f)
 }
 
@@ -91,7 +99,7 @@ var (
 )
 
 // KafkaURL register flag for Kafka server
-func KafkaURL(f *pflag.FlagSet) {
+func kafkaURL(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`URL (addresses) of Kafka server(s) to connect to.
 Environment variable: %q`, KafkaURLEnv)
 	f.StringSlice(kafkaURLFlag, kafkaURLDefault, desc)
@@ -133,7 +141,7 @@ func NewKafkaTopicConfig(vipr *viper.Viper) *KafkaTopicConfig {
 
 // KafkaTopicTxSender register flag for Kafka topic
 func KafkaTopicTxSender(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Kafka topic for envelopes waiting for their transaction sent
+	desc := fmt.Sprintf(`Topic for messages between the API and the Tx-Sender.
 Environment variable: %q`, txSenderTopicEnv)
 	f.String(txSenderFlag, txSenderTopicDefault, desc)
 	_ = viper.BindPFlag(TxSenderViperKey, f.Lookup(txSenderFlag))
@@ -141,7 +149,7 @@ Environment variable: %q`, txSenderTopicEnv)
 
 // KafkaTopicTxRecover register flag for Kafka topic
 func KafkaTopicTxRecover(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Kafka topic for envelopes waiting for their transaction recovered
+	desc := fmt.Sprintf(`Topic for failed transaction messages.
 Environment variable: %q`, txRecoverTopicEnv)
 	f.String(txRecoverFlag, txRecoverTopicDefault, desc)
 	_ = viper.BindPFlag(TxRecoverViperKey, f.Lookup(txRecoverFlag))
@@ -149,7 +157,7 @@ Environment variable: %q`, txRecoverTopicEnv)
 
 // KafkaTopicTxDecoded register flag for Kafka topic
 func KafkaTopicTxDecoded(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Kafka topic for messages which receipt has been decoded
+	desc := fmt.Sprintf(`Topic for successful transaction messages (receipts).
 Environment variable: %q`, txDecodedTopicEnv)
 	f.String(txDecodedFlag, txDecodedTopicDefault, desc)
 	_ = viper.BindPFlag(TxDecodedViperKey, f.Lookup(txDecodedFlag))
@@ -163,22 +171,22 @@ const (
 	consumerGroupNameDefault  = "group-sender"
 )
 
-// SenderGroup register flag for a kafka consumer group
-func ConsumerGroupName(f *pflag.FlagSet) {
+// consumerGroupName register flag for a kafka consumer group name
+func consumerGroupName(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Kafka consumer group name
 Environment variable: %q`, consumerGroupNameEnv)
 	f.String(consumerGroupNameFlag, consumerGroupNameDefault, desc)
 	_ = viper.BindPFlag(ConsumerGroupNameViperKey, f.Lookup(consumerGroupNameFlag))
 }
 
-// InitKafkaSASLFlags register flags for SASL authentication
-func InitKafkaSASLFlags(f *pflag.FlagSet) {
-	KafkaSASLEnable(f)
-	KafkaSASLMechanism(f)
-	KafkaSASLHandshake(f)
-	KafkaSASLUser(f)
-	KafkaSASLPassword(f)
-	KafkaSASLSCRAMAuthzID(f)
+// kafkaSASLFlags register flags for SASL authentication
+func kafkaSASLFlags(f *pflag.FlagSet) {
+	kafkaSASLEnable(f)
+	kafkaSASLMechanism(f)
+	kafkaSASLHandshake(f)
+	kafkaSASLUser(f)
+	kafkaSASLPassword(f)
+	kafkaSASLSCRAMAuthzID(f)
 }
 
 // Kafka SASL Enable environment variables
@@ -189,8 +197,8 @@ const (
 	kafkaSASLEnabledDefault  = false
 )
 
-// KafkaSASLEnable register flag
-func KafkaSASLEnable(f *pflag.FlagSet) {
+// kafkaSASLEnable register flag
+func kafkaSASLEnable(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Whether or not to use SASL authentication when connecting to the broker
 Environment variable: %q`, kafkaSASLEnabledEnv)
 	f.Bool(kafkaSASLEnabledFlag, kafkaSASLEnabledDefault, desc)
@@ -205,8 +213,8 @@ const (
 	kafkaSASLMechanismDefault  = ""
 )
 
-// KafkaSASLMechanism register flag
-func KafkaSASLMechanism(f *pflag.FlagSet) {
+// kafkaSASLMechanism register flag
+func kafkaSASLMechanism(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`SASLMechanism is the name of the enabled SASL mechanism. Possible values: OAUTHBEARER, PLAIN (defaults to PLAIN).
 Environment variable: %q`, kafkaSASLMechanismEnv)
 	f.String(kafkaSASLMechanismFlag, kafkaSASLMechanismDefault, desc)
@@ -221,8 +229,8 @@ const (
 	kafkaSASLHandshakeDefault  = true
 )
 
-// KafkaSASLHandshake register flag
-func KafkaSASLHandshake(f *pflag.FlagSet) {
+// kafkaSASLHandshake register flag
+func kafkaSASLHandshake(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Whether or not to send the Kafka SASL handshake first if enabled (defaults to true). You should only set this to false if you're using a non-Kafka SASL proxy.
 Environment variable: %q`, kafkaSASLHandshakeEnv)
 	f.Bool(kafkaSASLHandshakeFlag, kafkaSASLHandshakeDefault, desc)
@@ -237,8 +245,8 @@ const (
 	kafkaSASLUserDefault  = ""
 )
 
-// KafkaSASLUser register flag
-func KafkaSASLUser(f *pflag.FlagSet) {
+// kafkaSASLUser register flag
+func kafkaSASLUser(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Username for SASL/PLAIN or SASL/SCRAM auth.
 Environment variable: %q`, kafkaSASLUserEnv)
 	f.String(kafkaSASLUserFlag, kafkaSASLUserDefault, desc)
@@ -253,8 +261,8 @@ const (
 	kafkaSASLPasswordDefault  = ""
 )
 
-// KafkaSASLPassword register flag
-func KafkaSASLPassword(f *pflag.FlagSet) {
+// kafkaSASLPassword register flag
+func kafkaSASLPassword(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Password for SASL/PLAIN or SASL/SCRAM auth.
 Environment variable: %q`, kafkaSASLPasswordEnv)
 	f.String(kafkaSASLPasswordFlag, kafkaSASLPasswordDefault, desc)
@@ -269,21 +277,21 @@ const (
 	kafkaSASLSCRAMAuthzIDDefault  = ""
 )
 
-// KafkaSASLSCRAMAuthzID register flag
-func KafkaSASLSCRAMAuthzID(f *pflag.FlagSet) {
+// kafkaSASLSCRAMAuthzID register flag
+func kafkaSASLSCRAMAuthzID(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Authz id used for SASL/SCRAM authentication
 Environment variable: %q`, kafkaSASLSCRAMAuthzIDEnv)
 	f.String(kafkaSASLSCRAMAuthzIDFlag, kafkaSASLSCRAMAuthzIDDefault, desc)
 	_ = viper.BindPFlag(kafkaSASLSCRAMAuthzIDViperKey, f.Lookup(kafkaSASLSCRAMAuthzIDFlag))
 }
 
-// InitKafkaTLSFlags register flags for SASL and SSL
-func InitKafkaTLSFlags(f *pflag.FlagSet) {
-	KafkaTLSEnable(f)
-	KafkaTLSInsecureSkipVerify(f)
-	KafkaTLSClientCertFilePath(f)
-	KafkaTLSClientKeyFilePath(f)
-	KafkaTLSCaCertFilePath(f)
+// kafkaTLSFlags register flags for SASL and SSL
+func kafkaTLSFlags(f *pflag.FlagSet) {
+	kafkaTLSEnable(f)
+	kafkaTLSInsecureSkipVerify(f)
+	kafkaTLSClientCertFilePath(f)
+	kafkaTLSClientKeyFilePath(f)
+	kafkaTLSCaCertFilePath(f)
 }
 
 // Kafka TLS Enable environment variables
@@ -294,8 +302,8 @@ const (
 	kafkaTLSEnableDefault  = false
 )
 
-// KafkaTLSEnable register flag
-func KafkaTLSEnable(f *pflag.FlagSet) {
+// kafkaTLSEnable register flag
+func kafkaTLSEnable(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Whether or not to use TLS when connecting to the broker (defaults to false).
 Environment variable: %q`, kafkaTLSEnableEnv)
 	f.Bool(kafkaTLSEnableFlag, kafkaTLSEnableDefault, desc)
@@ -310,8 +318,8 @@ const (
 	kafkaTLSInsecureSkipVerifyDefault  = false
 )
 
-// KafkaTLSInsecureSkipVerify register flag
-func KafkaTLSInsecureSkipVerify(f *pflag.FlagSet) {
+// kafkaTLSInsecureSkipVerify register flag
+func kafkaTLSInsecureSkipVerify(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Controls whether a client verifies the server's certificate chain and host name. If InsecureSkipVerify is true, TLS accepts any certificate presented by the server and any host name in that certificate. In this mode, TLS is susceptible to man-in-the-middle attacks. This should be used only for testing.
 Environment variable: %q`, kafkaTLSInsecureSkipVerifyEnv)
 	f.Bool(kafkaTLSInsecureSkipVerifyFlag, kafkaTLSInsecureSkipVerifyDefault, desc)
@@ -326,8 +334,8 @@ const (
 	kafkaTLSClientCertFilePathDefault  = ""
 )
 
-// KafkaTLSClientCertFilePath register flag
-func KafkaTLSClientCertFilePath(f *pflag.FlagSet) {
+// kafkaTLSClientCertFilePath register flag
+func kafkaTLSClientCertFilePath(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Client Cert File Path.
 Environment variable: %q`, kafkaTLSClientCertFilePathEnv)
 	f.String(kafkaTLSClientCertFilePathFlag, kafkaTLSClientCertFilePathDefault, desc)
@@ -342,8 +350,8 @@ const (
 	kafkaTLSClientKeyFilePathDefault  = ""
 )
 
-// KafkaTLSClientKeyFilePath register flag
-func KafkaTLSClientKeyFilePath(f *pflag.FlagSet) {
+// kafkaTLSClientKeyFilePath register flag
+func kafkaTLSClientKeyFilePath(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Client key file Path.
 Environment variable: %q`, kafkaTLSClientKeyFilePathEnv)
 	f.String(kafkaTLSClientKeyFilePathFlag, kafkaTLSClientKeyFilePathDefault, desc)
@@ -358,8 +366,8 @@ const (
 	kafkaTLSCACertFilePathDefault  = ""
 )
 
-// KafkaTLSCaCertFilePath register flag
-func KafkaTLSCaCertFilePath(f *pflag.FlagSet) {
+// kafkaTLSCaCertFilePath register flag
+func kafkaTLSCaCertFilePath(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`CA cert file Path.
 Environment variable: %q`, kafkaTLSCACertFilePathEnv)
 	f.String(kafkaTLSCACertFilePathFlag, kafkaTLSCACertFilePathDefault, desc)
@@ -374,8 +382,8 @@ const (
 	kafkaConsumerMaxWaitTimeDefault   = time.Millisecond * 250
 )
 
-// KafkaConsumerMaxWaitTime configuration
-func KafkaConsumerMaxWaitTime(f *pflag.FlagSet) {
+// kafkaConsumerMaxWaitTime configuration
+func kafkaConsumerMaxWaitTime(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`The maximum amount of time the broker will wait for Consumer.Fetch.Min bytes to become available before it returns fewer than that anyways.
 Environment variable: %q in ms`, kafkaConsumerMaxWaitTimeEnv)
 	f.Duration(kafkaConsumerMaxWaitTimeViperFlag, kafkaConsumerMaxWaitTimeDefault, desc)

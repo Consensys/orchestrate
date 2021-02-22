@@ -3,18 +3,11 @@ package txlistener
 import (
 	"os"
 
-	metrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/metrics/registry"
-	tcpmetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tcp/metrics"
-	txsentry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sentry"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	txschedulerclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 	txlistener "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener"
-	provider "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/providers/chain-registry"
 )
 
 var cmdErr error
@@ -34,14 +27,7 @@ func newRunCommand() *cobra.Command {
 		},
 	}
 
-	// Register Kafka flags
-	broker.InitKafkaFlags(runCmd.Flags())
-
-	// Listener flags
-	provider.Flags(runCmd.Flags())
-	txschedulerclient.Flags(runCmd.Flags())
-	txsentry.Flags(runCmd.Flags())
-	metrics.Flags(runCmd.Flags(), tcpmetrics.ModuleName)
+	txlistener.Flags(runCmd.Flags())
 
 	return runCmd
 }

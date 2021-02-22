@@ -24,6 +24,7 @@ const (
 )
 
 const (
+	metricsURLFlag     = "key-manager-metrics-url"
 	MetricsURLViperKey = "key.manager.metrics.url"
 	metricsURLDefault  = "http://localhost:8082"
 	metricsURLEnv      = "KEY_MANAGER_METRICS_URL"
@@ -31,15 +32,23 @@ const (
 
 var defaultClientBackOff = backoff.ConstantBackOffWithMaxRetries(time.Second, 0)
 
-func URL(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`URL of the Key Manager HTTP endpoint. 
+func url(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`URL of the Key Manager HTTP endpoint.
 Environment variable: %q`, urlEnv)
 	f.String(urlFlag, urlDefault, desc)
 	_ = viper.BindPFlag(URLViperKey, f.Lookup(urlFlag))
 }
 
+func metricsURL(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`URL of the Key Manager HTTP metrics endpoint.
+Environment variable: %q`, metricsURLEnv)
+	f.String(metricsURLFlag, metricsURLDefault, desc)
+	_ = viper.BindPFlag(MetricsURLViperKey, f.Lookup(metricsURLDefault))
+}
+
 func Flags(f *pflag.FlagSet) {
-	URL(f)
+	url(f)
+	metricsURL(f)
 }
 
 type Config struct {

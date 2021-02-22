@@ -27,36 +27,12 @@ const (
 	levelEnv      = "LOG_LEVEL"
 )
 
-var ECSJsonFormatter = &logrus.JSONFormatter{
-	FieldMap: logrus.FieldMap{
-		logrus.FieldKeyTime:  "@timestamp",
-		logrus.FieldKeyLevel: "log.level",
-		logrus.FieldKeyMsg:   "message",
-	},
-}
-
-// Level register flag for Level
-func Level(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Log level (one of %q).
-Environment variable: %q`, []string{"panic", "fatal", "error", "warn", "info", "debug", "trace"}, levelEnv)
-	f.String(levelFlag, levelDefault, desc)
-	_ = viper.BindPFlag(LevelViperKey, f.Lookup(levelFlag))
-}
-
 const (
 	formatFlag     = "log-format"
 	FormatViperKey = "log.format"
 	formatDefault  = "text"
 	formatEnv      = "LOG_FORMAT"
 )
-
-// Format register flag for Log Format
-func Format(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Log formatter (one of %q).
-Environment variable: %q`, []string{"text", "json"}, formatEnv)
-	f.String(formatFlag, formatDefault, desc)
-	_ = viper.BindPFlag(FormatViperKey, f.Lookup(formatFlag))
-}
 
 const (
 	timestampFlag     = "log-timestamp"
@@ -65,17 +41,41 @@ const (
 	timestampEnv      = "LOG_TIMESTAMP"
 )
 
-func Timestamp(f *pflag.FlagSet) {
+var ECSJsonFormatter = &logrus.JSONFormatter{
+	FieldMap: logrus.FieldMap{
+		logrus.FieldKeyTime:  "@timestamp",
+		logrus.FieldKeyLevel: "log.level",
+		logrus.FieldKeyMsg:   "message",
+	},
+}
+
+func Flags(f *pflag.FlagSet) {
+	level(f)
+	format(f)
+	timestamp(f)
+}
+
+// Level register flag for Level
+func level(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Log level (one of %q).
+Environment variable: %q`, []string{"panic", "fatal", "error", "warn", "info", "debug", "trace"}, levelEnv)
+	f.String(levelFlag, levelDefault, desc)
+	_ = viper.BindPFlag(LevelViperKey, f.Lookup(levelFlag))
+}
+
+// Format register flag for Log Format
+func format(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Log formatter (one of %q).
+Environment variable: %q`, []string{"text", "json"}, formatEnv)
+	f.String(formatFlag, formatDefault, desc)
+	_ = viper.BindPFlag(FormatViperKey, f.Lookup(formatFlag))
+}
+
+func timestamp(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Enable logging with timestamp (only TEXT format).
 Environment variable: %q`, timestampEnv)
 	f.Bool(timestampFlag, timestampDefault, desc)
 	_ = viper.BindPFlag(TimestampViperKey, f.Lookup(timestampFlag))
-}
-
-func InitFlags(f *pflag.FlagSet) {
-	Level(f)
-	Format(f)
-	Timestamp(f)
 }
 
 func NewConfig(vipr *viper.Viper) *Config {

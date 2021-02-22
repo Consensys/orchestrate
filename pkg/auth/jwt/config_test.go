@@ -18,7 +18,7 @@ const (
 func TestAuthServiceCertificate(t *testing.T) {
 	name := "auth.jwt.certificate"
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	Certificate(flgs)
+	Flags(flgs)
 
 	_ = os.Setenv("AUTH_JWT_CERTIFICATE", authServiceCertificateExpected)
 	expected := authServiceCertificateExpected
@@ -28,7 +28,7 @@ func TestAuthServiceCertificate(t *testing.T) {
 func TestTenantNamespace(t *testing.T) {
 	name := "auth.jawt.claims.namespace"
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	ClaimsNamespace(flgs)
+	Flags(flgs)
 
 	expected := false
 	assert.Equal(t, expected, viper.GetBool(name), "TenantNamespace #1")

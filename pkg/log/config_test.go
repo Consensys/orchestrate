@@ -15,7 +15,7 @@ import (
 func TestLevel(t *testing.T) {
 	name := LevelViperKey
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	Level(flgs)
+	Flags(flgs)
 
 	expected := "info"
 	if viper.GetString(name) != expected {
@@ -44,7 +44,7 @@ func TestLevel(t *testing.T) {
 func TestFormat(t *testing.T) {
 	name := FormatViperKey
 	f := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	Format(f)
+	Flags(f)
 	expected := "text"
 	if viper.GetString(name) != expected {
 		t.Errorf("Format #1: expected %q but got %q", expected, viper.GetString(name))
@@ -72,7 +72,7 @@ func TestFormat(t *testing.T) {
 func TestTimestamp(t *testing.T) {
 	name := TimestampViperKey
 	f := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	Timestamp(f)
+	Flags(f)
 	if viper.GetBool(name) == true {
 		t.Errorf("Timestamp #1: expected %v but got %v", false, viper.GetBool(name))
 	}

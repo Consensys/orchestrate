@@ -10,8 +10,6 @@ import (
 	ganacheDocker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/docker/container/ganache"
 
 	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/rpc"
-	logpkg "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
-
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api"
 	keymanagerclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client"
 
@@ -85,12 +83,7 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 
 	// Initialize environment flags
 	flgs := pflag.NewFlagSet("api-integration-test", pflag.ContinueOnError)
-	postgres.DBPort(flgs)
-	sarama.KafkaURL(flgs)
-	httputils.MetricFlags(flgs)
-	httputils.Flags(flgs)
-	keymanagerclient.Flags(flgs)
-	logpkg.Level(flgs)
+	api.Flags(flgs)
 	args := []string{
 		"--metrics-port=" + envMetricsPort,
 		"--rest-port=" + envHTTPPort,
