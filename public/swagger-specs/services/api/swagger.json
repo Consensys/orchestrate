@@ -1,12 +1,12 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "PegaSys Orchestrate API. Enables dynamic management of transactions, identities, chains, faucets and contracts.\nTransaction Requests are an abstraction over schedules and jobs representing one or more transactions executed on the Blockchain network\nSchedules are ordered lists of jobs executed in a predefined sequence\nJobs represent single transaction flows executed on the Blockchain network\nChains represent list of endpoints pointing to a Blockchain network\nFaucets represent funded accounts (holding ETH) linked to specific chains, allowed to fund newly created accounts automatically for them to be able to send transactions.\nAccounts represent Ethereum accounts (private keys). By usage of the generated cryptographic key pair, accounts can be used to sign/verify and to encrypt/decrypt messages.\nContracts represent Solidity contracts management.",
+        "description": "ConsenSys Codefi Orchestrate API. Enables dynamic management of transactions, identities, chains, faucets and contracts.\nTransaction Requests are an abstraction over schedules and jobs representing one or more transactions executed on the Blockchain network\nSchedules are ordered lists of jobs executed in a predefined sequence\nJobs represent single transaction flows executed on the Blockchain network\nChains represent list of endpoints pointing to a Blockchain network\nFaucets represent funded accounts (holding ETH) linked to specific chains, allowed to fund newly created accounts automatically for them to be able to send transactions.\nAccounts represent Ethereum accounts (private keys). By usage of the generated cryptographic key pair, accounts can be used to sign/verify and to encrypt/decrypt messages.\nContracts represent Solidity contracts management.",
         "title": "Orchestrate API",
         "contact": {
-            "name": "Contact PegaSys Orchestrate",
-            "url": "https://pegasys.tech/contact/",
-            "email": "support@pegasys.tech"
+            "name": "Contact ConsenSys Codefi Orchestrate",
+            "url": "https://consensys.net/codefi/orchestrate/contact",
+            "email": "orchestrate@consensys.net"
         },
         "license": {
             "name": "Apache 2.0",

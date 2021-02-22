@@ -17,7 +17,7 @@ import (
 
 // @title Orchestrate API
 // @version 2.0
-// @description PegaSys Orchestrate API. Enables dynamic management of transactions, identities, chains, faucets and contracts.
+// @description ConsenSys Codefi Orchestrate API. Enables dynamic management of transactions, identities, chains, faucets and contracts.
 // @description Transaction Requests are an abstraction over schedules and jobs representing one or more transactions executed on the Blockchain network
 // @description Schedules are ordered lists of jobs executed in a predefined sequence
 // @description Jobs represent single transaction flows executed on the Blockchain network
@@ -26,9 +26,9 @@ import (
 // @description Accounts represent Ethereum accounts (private keys). By usage of the generated cryptographic key pair, accounts can be used to sign/verify and to encrypt/decrypt messages.
 // @description Contracts represent Solidity contracts management.
 
-// @contact.name Contact PegaSys Orchestrate
-// @contact.url https://pegasys.tech/contact/
-// @contact.email support@pegasys.tech
+// @contact.name Contact ConsenSys Codefi Orchestrate
+// @contact.url https://consensys.net/codefi/orchestrate/contact
+// @contact.email orchestrate@consensys.net
 
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html

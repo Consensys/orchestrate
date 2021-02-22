@@ -53,11 +53,7 @@ tests/report/output/report.json
 services/key-manager/integration-tests/plugins
 
 # API Doc
-combined-schema.json
-swagger-combine.yml
-redoc-static.html
 node_modules
-package-lock.json
 
 # Script logs
 scripts/besu/logs/**

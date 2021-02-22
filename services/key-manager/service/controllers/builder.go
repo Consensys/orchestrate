@@ -18,11 +18,11 @@ import (
 
 // @title Key Management API
 // @version 2.0
-// @description PegaSys Orchestrate Key Management. Enables fine-grained management of cryptographic keys.
+// @description ConsenSys Codefi Orchestrate Key Management. Enables fine-grained management of cryptographic keys.
 
-// @contact.name Contact PegaSys Orchestrate
-// @contact.url https://pegasys.tech/contact/
-// @contact.email support@pegasys.tech
+// @contact.name Contact ConsenSys Codefi Orchestrate
+// @contact.url https://consensys.net/codefi/orchestrate/contact
+// @contact.email orchestrate@consensys.net
 
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html

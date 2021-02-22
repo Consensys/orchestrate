@@ -1,12 +1,12 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "PegaSys Orchestrate Key Management. Enables fine-grained management of cryptographic keys.",
+        "description": "ConsenSys Codefi Orchestrate Key Management. Enables fine-grained management of cryptographic keys.",
         "title": "Key Management API",
         "contact": {
-            "name": "Contact PegaSys Orchestrate",
-            "url": "https://pegasys.tech/contact/",
-            "email": "support@pegasys.tech"
+            "name": "Contact ConsenSys Codefi Orchestrate",
+            "url": "https://consensys.net/codefi/orchestrate/contact",
+            "email": "orchestrate@consensys.net"
         },
         "license": {
             "name": "Apache 2.0",

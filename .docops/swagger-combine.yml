@@ -1,14 +1,14 @@
 # See https://github.com/maxdome/swagger-combine for this config file usage
 swagger: '2.0'
 info:
-  title: Pegasys Orchestrate REST API
-  version: {{API_VERSION}}
+  title: ConsenSys Codefi Orchestrate REST API
+  version: latest
   contact:
-    name: "✉ PegaSys Orchestrate"
-    email: "support@pegasys.tech"
+    name: "ConsenSys Codefi Orchestrate"
+    email: "orchestrate@consensys.net"
 externalDocs:
-  description: "📒 Documentation of PegaSys Orchestrate"
-  url: "https://docs.orchestrate.pegasys.tech/en/latest/"
+  description: "Documentation of ConsenSys Codefi Orchestrate"
+  url: "https://docs.orchestrate.consensys.net/"
 apis:
   - url: 'public/swagger-specs/services/api/swagger.json'
     tags:

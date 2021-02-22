@@ -76,6 +76,18 @@ Error codes are `uint64` that maps to five hex character code
 | FFXXX |   FF1XX  |    FF100   | data_corrupted                | Data is corrupted                          |
 | BEXXX |   BEXXX  |    BE1000  | ethereum_nonce_too_low        | Nonce is too low                           |
 
+## Documentation
+
+### Product
+
+This project documentation is available at https://docs.orchestrate.consensys.net/
+
+The documentation source repos is https://github.com/ConsenSys/doc.orchestrate
+
+### API
+
+Generated API documentation (using a Github Action Workflow in this repos) is available at https://consensys.github.io/orchestrate/
+
 ## Local Development Interfaces
 
 ### APIs
