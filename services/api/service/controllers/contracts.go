@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
+
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
 	jsonutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/json"
@@ -13,6 +15,9 @@ import (
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/service/formatters"
 )
+
+var _ entities.Method
+var _ entities.Event
 
 type ContractsController struct {
 	ucs usecases.ContractUseCases
@@ -40,7 +45,7 @@ func (c *ContractsController) Append(router *mux.Router) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Success 200 {array} []string "Registered contract List"
+// @Success 200 {array} string "Registered contract List"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /contracts [get]
 func (c *ContractsController) getCatalog(rw http.ResponseWriter, request *http.Request) {
@@ -67,7 +72,7 @@ func (c *ContractsController) getCatalog(rw http.ResponseWriter, request *http.R
 // @Security ApiKeyAuth
 // @Security JWTAuth
 // @Param request body api.RegisterContractRequest true "Contract register request"
-// @Success 200 {object} api.ContractResponse "Contract object"
+// @Success 200 {object} api.ContractResponse{constructor=entities.Method,methods=[]entities.Method,events=[]entities.Event} "Contract object"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 401 {object} httputil.ErrorResponse "Unauthorized"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
@@ -101,7 +106,7 @@ func (c *ContractsController) register(rw http.ResponseWriter, request *http.Req
 		return
 	}
 
-	_ = json.NewEncoder(rw).Encode(api.ContractResponse{Contract: contract})
+	_ = json.NewEncoder(rw).Encode(formatters.FormatContractResponse(contract))
 }
 
 // @Summary Set the codeHash of the given contract address
@@ -111,7 +116,7 @@ func (c *ContractsController) register(rw http.ResponseWriter, request *http.Req
 // @Security JWTAuth
 // @Param address path string true "contract deployed address"
 // @Param chain_id path string true "network chain id"
-// @Success 200 {array} []string "List of events"
+// @Success 200 {array} string "List of events"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /contracts/accounts/{chain_id}/{address} [post]
@@ -189,7 +194,7 @@ func (c *ContractsController) getEvents(rw http.ResponseWriter, request *http.Re
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Success 200 {array} []string "List of tags"
+// @Success 200 {array} string "List of tags"
 // @Failure 404 {object} httputil.ErrorResponse "contract not found"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /contracts/{name} [get]
@@ -217,7 +222,7 @@ func (c *ContractsController) getTags(rw http.ResponseWriter, request *http.Requ
 // @Security JWTAuth
 // @Param name path string true "solidity contract registered name"
 // @Param tag path string true "solidity contract registered tag"
-// @Success 200 {object} api.ContractResponse "Contract found"
+// @Success 200 {object} api.ContractResponse{constructor=entities.Method,methods=[]entities.Method,events=[]entities.Event} "Contract found"
 // @Failure 404 {object} httputil.ErrorResponse "Contract not found"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /contracts/{name}/{tag} [get]
@@ -231,7 +236,7 @@ func (c *ContractsController) getContract(rw http.ResponseWriter, request *http.
 		return
 	}
 
-	_ = json.NewEncoder(rw).Encode(api.ContractResponse{Contract: contract})
+	_ = json.NewEncoder(rw).Encode(formatters.FormatContractResponse(contract))
 }
 
 // @Summary Get method signatures of registered contract

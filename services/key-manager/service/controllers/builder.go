@@ -13,7 +13,7 @@ import (
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/dynamic"
 )
 
-//go:generate swag init --dir . --generalInfo builder.go --output ../../../../public/swagger-specs/services/key-manager
+//go:generate swag init --generalInfo builder.go --output ../../../../public/swagger-specs/services/key-manager --parseDependency --parseDepth 2
 //go:generate rm ../../../../public/swagger-specs/services/key-manager/docs.go ../../../../public/swagger-specs/services/key-manager/swagger.yaml
 
 // @title Key Management API

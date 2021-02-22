@@ -58,8 +58,8 @@ func (c *ZKSController) listNamespaces(rw http.ResponseWriter, _ *http.Request) 
 // @Description Creates a new private key, stores it in the Vault and generates a public key given a chosen elliptic curve
 // @Accept json
 // @Produce json
-// @Param request body zk-snarks.CreateZKSAccountRequest true "zk-snarks account creation request"
-// @Success 200 {object} zk-snarks.ZKSAccountResponse "Created zk-snarks account"
+// @Param request body types.CreateZKSAccountRequest true "zk-snarks account creation request"
+// @Success 200 {object} types.ZKSAccountResponse "Created zk-snarks account"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /zk-snarks/accounts [post]
@@ -107,7 +107,7 @@ func (c *ZKSController) listAccounts(rw http.ResponseWriter, req *http.Request) 
 // @Description Get selected stored zk-snarks account in the Vault
 // @Produce json
 // @Param namespace query string false "namespace where key is stored"
-// @Success 200 {object} zk-snarks.ZKSAccountResponse "zk-snarks account"
+// @Success 200 {object} types.ZKSAccountResponse "zk-snarks account"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /zk-snarks/accounts/{publicKey} [get]
 func (c *ZKSController) getAccount(rw http.ResponseWriter, req *http.Request) {
@@ -160,7 +160,7 @@ func (c *ZKSController) signPayload(rw http.ResponseWriter, req *http.Request) {
 // @Summary Verifies the signature of a message
 // @Description Verifies if a message has been signed by the zk-snarks account passed as argument
 // @Accept json
-// @Param request body zk-snarks.VerifyPayloadRequest true "signature and message to verify"
+// @Param request body types.VerifyPayloadRequest true "signature and message to verify"
 // @Success 204
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 422 {object} httputil.ErrorResponse "Failed to verify"

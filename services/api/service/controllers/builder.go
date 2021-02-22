@@ -12,7 +12,7 @@ import (
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
 )
 
-//go:generate swag init --dir . --generalInfo builder.go --output ../../../../public/swagger-specs/services/api
+//go:generate swag init --generalInfo builder.go --parseDepth 100 --output ../../../../public/swagger-specs/services/api --parseDependency --parseDepth 3
 //go:generate rm ../../../../public/swagger-specs/services/api/docs.go ../../../../public/swagger-specs/services/api/swagger.yaml
 
 // @title Orchestrate API

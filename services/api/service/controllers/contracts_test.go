@@ -102,7 +102,7 @@ func (s *contractsCtrlTestSuite) TestContractsController_Register() {
 		s.getContract.EXPECT().Execute(gomock.Any(), req.Name, req.Tag).Return(contract, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
-		expectedBody, _ := json.Marshal(api.ContractResponse{Contract: contract})
+		expectedBody, _ := json.Marshal(formatters.FormatContractResponse(contract))
 		assert.Equal(t, string(expectedBody)+"\n", rw.Body.String())
 	})
 
@@ -216,7 +216,7 @@ func (s *contractsCtrlTestSuite) TestContractsController_GetContract() {
 		s.getContract.EXPECT().Execute(gomock.Any(), contract.Name, contract.Tag).Return(contract, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
-		expectedBody, _ := json.Marshal(contract)
+		expectedBody, _ := json.Marshal(formatters.FormatContractResponse(contract))
 		assert.Equal(t, string(expectedBody)+"\n", rw.Body.String())
 	})
 

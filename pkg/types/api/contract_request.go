@@ -1,8 +1,6 @@
 package api
 
-import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-)
+import "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 
 type RegisterContractRequest struct {
 	ABI              interface{} `json:"abi,omitempty" validate:"required"`
@@ -13,7 +11,15 @@ type RegisterContractRequest struct {
 }
 
 type ContractResponse struct {
-	*entities.Contract
+	Name             string            `json:"name" example:"ERC20"`
+	Tag              string            `json:"tag" example:"v1.0.0"`
+	Registry         string            `json:"registry" example:"registry.consensys.net/orchestrate"`
+	ABI              string            `json:"abi" example:"[{anonymous: false, inputs: [{indexed: false, name: account, type: address}, name: MinterAdded, type: event}]}]"`
+	Bytecode         string            `json:"bytecode,omitempty" example:"0x6080604052348015600f57600080f..."`
+	DeployedBytecode string            `json:"deployedBytecode,omitempty" example:"0x6080604052348015600f57600080f..."`
+	Constructor      entities.Method   `json:"constructor"`
+	Methods          []entities.Method `json:"methods"`
+	Events           []entities.Event  `json:"events"`
 }
 
 type GetContractEventsRequest struct {

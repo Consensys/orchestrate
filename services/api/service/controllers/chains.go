@@ -128,7 +128,7 @@ func (c *ChainsController) update(rw http.ResponseWriter, request *http.Request)
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Param request body api.ChainResponse{listener=api.RegisterListenerRequest,privateTxManager=api.PrivateTxManagerRequest} true "Chain registration request"
+// @Param request body api.RegisterChainRequest{listener=api.RegisterListenerRequest,privateTxManager=api.PrivateTxManagerRequest} true "Chain registration request"
 // @Success 200 {object} api.ChainResponse{privateTxManager=entities.PrivateTxManager}
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
@@ -166,7 +166,7 @@ func (c *ChainsController) register(rw http.ResponseWriter, request *http.Reques
 // @Security ApiKeyAuth
 // @Security JWTAuth
 // @Param uuid path string true "ID of the chain"
-// @Success 204 "Chain deleted successfully"
+// @Success 204
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 404 {object} httputil.ErrorResponse "Chain not found"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"

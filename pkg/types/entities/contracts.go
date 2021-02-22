@@ -13,15 +13,15 @@ import (
 const DefaultTagValue = "latest"
 
 type Contract struct {
-	Name             string   `json:"name" example:"ERC20"`
-	Tag              string   `json:"tag" example:"v1.0.0"`
-	Registry         string   `json:"registry" example:"registry.consensys.net/orchestrate"`
-	ABI              string   `json:"abi" example:"[{anonymous: false, inputs: [{indexed: false, name: account, type: address}, name: MinterAdded, type: event}]}]"`
-	Bytecode         string   `json:"bytecode,omitempty" example:"0x6080604052348015600f57600080f..."`
-	DeployedBytecode string   `json:"deployedBytecode,omitempty" example:"0x6080604052348015600f57600080f..."`
-	Constructor      Method   `json:"constructor"`
-	Methods          []Method `json:"methods"`
-	Events           []Event  `json:"events"`
+	Name             string
+	Tag              string
+	Registry         string
+	ABI              string
+	Bytecode         string
+	DeployedBytecode string
+	Constructor      Method
+	Methods          []Method
+	Events           []Event
 }
 
 type Method struct {

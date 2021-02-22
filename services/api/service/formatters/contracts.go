@@ -55,3 +55,17 @@ func FormatGetContractEventsRequest(req *http.Request) (*types.GetContractEvents
 		IndexedInputCount: uint32(qIndexedInputCountInt),
 	}, nil
 }
+
+func FormatContractResponse(contract *entities.Contract) *types.ContractResponse {
+	return &types.ContractResponse{
+		Name:             contract.Name,
+		Tag:              contract.Tag,
+		Registry:         contract.Registry,
+		ABI:              contract.ABI,
+		Bytecode:         contract.Bytecode,
+		DeployedBytecode: contract.DeployedBytecode,
+		Constructor:      contract.Constructor,
+		Methods:          contract.Methods,
+		Events:           contract.Events,
+	}
+}

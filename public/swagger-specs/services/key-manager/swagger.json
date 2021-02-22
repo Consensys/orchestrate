@@ -158,7 +158,9 @@
                     }
                 ],
                 "responses": {
-                    "204": {},
+                    "204": {
+                        "description": ""
+                    },
                     "400": {
                         "description": "Invalid request",
                         "schema": {
@@ -211,7 +213,9 @@
                     }
                 ],
                 "responses": {
-                    "204": {},
+                    "204": {
+                        "description": ""
+                    },
                     "400": {
                         "description": "Invalid request",
                         "schema": {
@@ -653,7 +657,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/zk-snarks.CreateZKSAccountRequest"
+                            "$ref": "#/definitions/zksnarks.CreateZKSAccountRequest"
                         }
                     }
                 ],
@@ -661,7 +665,7 @@
                     "200": {
                         "description": "Created zk-snarks account",
                         "schema": {
-                            "$ref": "#/definitions/zk-snarks.ZKSAccountResponse"
+                            "$ref": "#/definitions/zksnarks.ZKSAccountResponse"
                         }
                     },
                     "400": {
@@ -693,12 +697,14 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/zk-snarks.VerifyPayloadRequest"
+                            "$ref": "#/definitions/zksnarks.VerifyPayloadRequest"
                         }
                     }
                 ],
                 "responses": {
-                    "204": {},
+                    "204": {
+                        "description": ""
+                    },
                     "400": {
                         "description": "Invalid request",
                         "schema": {
@@ -739,7 +745,7 @@
                     "200": {
                         "description": "zk-snarks account",
                         "schema": {
-                            "$ref": "#/definitions/zk-snarks.ZKSAccountResponse"
+                            "$ref": "#/definitions/zksnarks.ZKSAccountResponse"
                         }
                     },
                     "500": {
@@ -993,7 +999,6 @@
             ],
             "properties": {
                 "domainSeparator": {
-                    "type": "object",
                     "$ref": "#/definitions/ethereum.DomainSeparator"
                 },
                 "message": {
@@ -1087,7 +1092,7 @@
                 }
             }
         },
-        "zk-snarks.CreateZKSAccountRequest": {
+        "zksnarks.CreateZKSAccountRequest": {
             "type": "object",
             "properties": {
                 "namespace": {
@@ -1096,7 +1101,7 @@
                 }
             }
         },
-        "zk-snarks.VerifyPayloadRequest": {
+        "zksnarks.VerifyPayloadRequest": {
             "type": "object",
             "required": [
                 "data",
@@ -1118,7 +1123,7 @@
                 }
             }
         },
-        "zk-snarks.ZKSAccountResponse": {
+        "zksnarks.ZKSAccountResponse": {
             "type": "object",
             "properties": {
                 "curve": {

@@ -227,8 +227,9 @@ func (c *AccountsController) update(rw http.ResponseWriter, request *http.Reques
 // @Produce text/plain
 // @Security ApiKeyAuth
 // @Security JWTAuth
+// @Param request body api.SignPayloadRequest true "Payload to sign"
 // @Param address path string true "selected account address"
-// @Success 200 {object} api.SignPayloadRequest "Data signature"
+// @Success 200 {string} string "Signed payload"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 401 {object} httputil.ErrorResponse "Unauthorized"
 // @Failure 404 {object} httputil.ErrorResponse "Account not found"

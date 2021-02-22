@@ -155,7 +155,7 @@ func (c *FaucetsController) update(rw http.ResponseWriter, request *http.Request
 // @Security ApiKeyAuth
 // @Security JWTAuth
 // @Param uuid path string true "ID of the faucet"
-// @Success 204 "Faucet deleted successfully"
+// @Success 204
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 404 {object} httputil.ErrorResponse "Faucet not found"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"

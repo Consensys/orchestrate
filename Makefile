@@ -82,7 +82,7 @@ lint-tools: ## Install linting tools
 
 tools: lint-tools ## Install test tools
 	@GO111MODULE=on go get github.com/golang/mock/mockgen@v1.4.3
-	@GO111MODULE=on go get github.com/swaggo/swag/cmd/swag@v1.6.7
+	@GO111MODULE=on go get github.com/swaggo/swag/cmd/swag@v1.7.0
 	@GO111MODULE=on go get github.com/tsenart/vegeta
 
 # Help

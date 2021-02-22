@@ -50,8 +50,8 @@ func (c *EthereumController) Append(router *mux.Router) {
 // @Description Creates a new private key, stores it in the Vault and generates a public key given a chosen elliptic curve
 // @Accept json
 // @Produce json
-// @Param request body ethereum.CreateETHAccountRequest true "Ethereum account creation request"
-// @Success 200 {object} ethereum.ETHAccountResponse "Created Ethereum account"
+// @Param request body types.CreateETHAccountRequest true "Ethereum account creation request"
+// @Success 200 {object} types.ETHAccountResponse "Created Ethereum account"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /ethereum/accounts [post]
@@ -117,7 +117,7 @@ func (c *EthereumController) listNamespaces(rw http.ResponseWriter, _ *http.Requ
 // @Description Get selected stored ethereum account in the Vault
 // @Produce json
 // @Param address path string true "selected account address"
-// @Success 200 {object} ethereum.ETHAccountResponse "Ethereum account"
+// @Success 200 {object} types.ETHAccountResponse "Ethereum account"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /ethereum/accounts/{address} [get]
 func (c *EthereumController) getAccount(rw http.ResponseWriter, req *http.Request) {
@@ -147,8 +147,8 @@ func (c *EthereumController) getAccount(rw http.ResponseWriter, req *http.Reques
 // @Description Imports a private key, stores it in the Vault and generates a public key given a chosen elliptic curve
 // @Accept json
 // @Produce json
-// @Param request body ethereum.ImportETHAccountRequest true "Ethereum account import request"
-// @Success 200 {object} ethereum.ETHAccountResponse "Imported Ethereum account"
+// @Param request body types.ImportETHAccountRequest true "Ethereum account import request"
+// @Success 200 {object} types.ETHAccountResponse "Imported Ethereum account"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 422 {object} httputil.ErrorResponse "Invalid private key"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
@@ -210,7 +210,7 @@ func (c *EthereumController) signPayload(rw http.ResponseWriter, request *http.R
 // @Description Signs an Ethereum transaction using ECDSA and the private key of an existing account
 // @Accept json
 // @Produce text/plain
-// @Param request body ethereum.SignETHTransactionRequest true "Ethereum transaction to sign"
+// @Param request body types.SignETHTransactionRequest true "Ethereum transaction to sign"
 // @Param address path string true "selected account address"
 // @Success 200 {string} string "Signed payload"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
@@ -244,7 +244,7 @@ func (c *EthereumController) signTransaction(rw http.ResponseWriter, request *ht
 // @Description Signs a Quorum private transaction using ECDSA and the private key of an existing account
 // @Accept json
 // @Produce text/plain
-// @Param request body ethereum.SignQuorumPrivateTransactionRequest true "Quorum private transaction to sign"
+// @Param request body types.SignQuorumPrivateTransactionRequest true "Quorum private transaction to sign"
 // @Param address path string true "selected account address"
 // @Success 200 {string} string "Signed payload"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
@@ -278,7 +278,7 @@ func (c *EthereumController) signQuorumPrivate(rw http.ResponseWriter, request *
 // @Description Signs an EEA private transaction using ECDSA and the private key of an existing account
 // @Accept json
 // @Produce text/plain
-// @Param request body ethereum.SignQuorumPrivateTransactionRequest true "EEA private transaction to sign"
+// @Param request body types.SignQuorumPrivateTransactionRequest true "EEA private transaction to sign"
 // @Param address path string true "selected account address"
 // @Success 200 {string} string "Signed payload"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
@@ -318,7 +318,7 @@ func (c *EthereumController) signEEA(rw http.ResponseWriter, request *http.Reque
 // @Description Signs typed data using ECDSA and the private key of an existing account following the EIP-712 standard
 // @Accept json
 // @Produce text/plain
-// @Param request body ethereum.SignTypedDataRequest{domainSeparator=ethereum.DomainSeparator,types=map[string][]ethereum.Type} true "Typed data to sign"
+// @Param request body types.SignTypedDataRequest{domainSeparator=types.DomainSeparator,types=map[string][]types.Type} true "Typed data to sign"
 // @Param address path string true "selected account address"
 // @Success 200 {string} string "Signed payload"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
@@ -353,7 +353,7 @@ func (c *EthereumController) signTypedData(rw http.ResponseWriter, request *http
 // @Summary Verifies the signature of a typed data message following the EIP-712 standard
 // @Description Verifies if a typed data message has been signed by the Ethereum account passed as argument following the EIP-712 standard
 // @Accept json
-// @Param request body ethereum.SignTypedDataRequest{domainSeparator=ethereum.DomainSeparator} true "Typed data to sign"
+// @Param request body types.SignTypedDataRequest{domainSeparator=types.DomainSeparator} true "Typed data to sign"
 // @Success 204
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 404 {object} httputil.ErrorResponse "Account not found"
@@ -387,7 +387,7 @@ func (c *EthereumController) verifyTypedDataSignature(rw http.ResponseWriter, re
 // @Summary Verifies the signature of a message
 // @Description Verifies if a message has been signed by the Ethereum account passed as argument
 // @Accept json
-// @Param request body ethereum.VerifyPayloadRequest true "signature and message to verify"
+// @Param request body types.VerifyPayloadRequest true "signature and message to verify"
 // @Success 204
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 422 {object} httputil.ErrorResponse "Failed to verify"
