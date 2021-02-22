@@ -1,5 +1,18 @@
 {
-    "latest":{"spec":"latest","source":"master"},
-    "stable":{"spec":"21.1.0","source":"21.1.0"},
-    "21.1.0":{"spec":"21.1.0","source":"21.1.0"}
+ "latest": {
+  "spec": "latest",
+  "source": "master"
+ },
+ "stable": {
+  "spec": "21.2.223",
+  "source": "21.2.223"
+ },
+ "21.1.0": {
+  "spec": "21.1.0",
+  "source": "21.1.0"
+ },
+ "21.2.223": {
+  "spec": "21.2.223",
+  "source": "21.2.223"
+ }
 }
