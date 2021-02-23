@@ -37,7 +37,7 @@ func (uc *searchSchedulesUseCase) Execute(ctx context.Context, tenants []string)
 
 	for idx, scheduleModel := range scheduleModels {
 		for jdx, job := range scheduleModel.Jobs {
-			scheduleModels[idx].Jobs[jdx], err = uc.db.Job().FindOneByUUID(ctx, job.UUID, tenants)
+			scheduleModels[idx].Jobs[jdx], err = uc.db.Job().FindOneByUUID(ctx, job.UUID, tenants, false)
 			if err != nil {
 				return nil, errors.FromError(err).ExtendComponent(searchSchedulesComponent)
 			}

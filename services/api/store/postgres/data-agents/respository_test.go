@@ -93,7 +93,7 @@ func (s *repositoryTestSuite) TestPGRepository_Insert() {
 		}
 		err := s.agents.Repository().Insert(ctx, repo)
 
-		assert.True(t, errors.IsPostgresConnectionError(err))
+		assert.True(t, errors.IsInternalError(err))
 
 		// We bring it back up
 		s.pg.InitTestDB(t)
@@ -122,7 +122,7 @@ func (s *repositoryTestSuite) TestPGRepository_FindOneByName() {
 		s.pg.DropTestDB(t)
 		_, err := s.agents.Repository().FindOne(ctx,  "respository")
 
-		assert.True(t, errors.IsPostgresConnectionError(err))
+		assert.True(t, errors.IsInternalError(err))
 
 		s.pg.InitTestDB(t)
 	})
@@ -145,7 +145,7 @@ func (s *repositoryTestSuite) TestPGRepository_FindAll() {
 		s.pg.DropTestDB(t)
 		_, err := s.agents.Repository().FindAll(ctx)
 
-		assert.True(t, errors.IsPostgresConnectionError(err))
+		assert.True(t, errors.IsInternalError(err))
 
 		s.pg.InitTestDB(t)
 	})

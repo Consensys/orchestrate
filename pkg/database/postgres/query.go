@@ -23,7 +23,7 @@ func Insert(ctx context.Context, db DB, models ...interface{}) error {
 func InsertQuery(_ context.Context, q *orm.Query) error {
 	_, err := q.Insert()
 	if err != nil {
-		return handleError(err)
+		return err
 	}
 
 	return nil

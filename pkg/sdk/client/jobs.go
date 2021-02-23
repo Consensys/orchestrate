@@ -81,6 +81,10 @@ func (c *HTTPClient) SearchJob(ctx context.Context, filters *entities.JobFilters
 		qParams = append(qParams, "parent_job_uuid="+filters.ParentJobUUID)
 	}
 
+	if filters.WithLogs {
+		qParams = append(qParams, "with_logs=true")
+	}
+
 	if len(qParams) > 0 {
 		reqURL = reqURL + "?" + strings.Join(qParams, "&")
 	}

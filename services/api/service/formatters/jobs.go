@@ -109,6 +109,11 @@ func FormatJobFilterRequest(req *http.Request) (*entities.JobFilters, error) {
 		filters.OnlyParents = true
 	}
 
+	qWithLogs := req.URL.Query().Get("with_logs")
+	if qWithLogs == "true" {
+		filters.WithLogs = true
+	}
+
 	if err := utils.GetValidator().Struct(filters); err != nil {
 		return nil, err
 	}

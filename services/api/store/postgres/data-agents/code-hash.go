@@ -34,7 +34,7 @@ func (agent *PGCodeHash) Insert(ctx context.Context, codehash *models.CodehashMo
 	if err != nil {
 		errMessage := "could not insert codehash"
 		agent.logger.WithContext(ctx).WithError(err).Error(errMessage)
-		return errors.PostgresConnectionError(errMessage).ExtendComponent(codeHashDAComponent)
+		return errors.FromError(err).ExtendComponent(codeHashDAComponent)
 	}
 
 	return nil

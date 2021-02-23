@@ -41,7 +41,7 @@ func TestSearchSchedules_Execute(t *testing.T) {
 			Return([]*models.Schedule{scheduleModel}, nil)
 
 		mockJobDA.EXPECT().
-			FindOneByUUID(gomock.Any(), scheduleModel.Jobs[0].UUID, []string{tenantID}).
+			FindOneByUUID(gomock.Any(), scheduleModel.Jobs[0].UUID, []string{tenantID}, false).
 			Return(scheduleModel.Jobs[0], nil)
 
 		schedulesResponse, err := usecase.Execute(ctx, []string{tenantID})
@@ -78,7 +78,7 @@ func TestSearchSchedules_Execute(t *testing.T) {
 			Return([]*models.Schedule{scheduleModel}, nil)
 
 		mockJobDA.EXPECT().
-			FindOneByUUID(gomock.Any(), scheduleModel.Jobs[0].UUID, []string{tenantID}).
+			FindOneByUUID(gomock.Any(), scheduleModel.Jobs[0].UUID, []string{tenantID}, false).
 			Return(scheduleModel.Jobs[0], expectedErr)
 
 		scheduleResponse, err := usecase.Execute(ctx, []string{tenantID})

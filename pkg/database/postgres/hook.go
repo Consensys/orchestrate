@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/go-pg/pg/v9"
 	log "github.com/sirupsen/logrus"
@@ -20,14 +21,16 @@ func handleError(err error) error {
 	if ok {
 		switch {
 		case pgErr.IntegrityViolation():
-			return errors.ConstraintViolatedError("integrity violation error")
+			return errors.ConstraintViolatedError("database integrity violation")
+		case pgErr.Field('C')[0:2] == "22":
+			return errors.InvalidParameterError("database input data").AppendReason(pgErr.Error())
 		// List of codes could be found in https://www.postgresql.org/docs/10/errcodes-appendix.html
 		case pgErr.Field('C')[0:2] == "08":
 			return errors.PostgresConnectionError("database connection error").AppendReason(pgErr.Error())
 		}
 	}
 
-	return errors.PostgresConnectionError("internal database error").AppendReason(err.Error())
+	return fmt.Errorf("database internal error - %s", err.Error())
 }
 
 type hook struct{}

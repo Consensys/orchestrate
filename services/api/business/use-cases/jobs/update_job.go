@@ -45,93 +45,48 @@ func (uc *updateJobUseCase) Execute(ctx context.Context, job *entities.Job, next
 	logger := uc.logger.WithContext(ctx)
 	logger.Debug("updating job")
 
-	jobModel, err := uc.db.Job().FindOneByUUID(ctx, job.UUID, tenants)
+	jobModel, err := uc.db.Job().FindOneByUUID(ctx, job.UUID, tenants, true)
 	if err != nil {
 		return nil, err
 	}
 
-	// Does current job belong to a parent/children chains?
-	var parentJobUUID string
-	if jobModel.InternalData.ParentJobUUID != "" {
-		parentJobUUID = jobModel.InternalData.ParentJobUUID
-	} else if jobModel.InternalData.RetryInterval != 0 {
-		parentJobUUID = job.UUID
+	if entities.IsFinalJobStatus(jobModel.Status) {
+		errMessage := "job status is final, cannot be updated"
+		logger.WithField("status", jobModel.Status).Error(errMessage)
+		return nil, errors.InvalidParameterError(errMessage).ExtendComponent(updateJobComponent)
 	}
 
-	err = database.ExecuteInDBTx(uc.db, func(tx database.Tx) error {
-		// We should lock ONLY when there is children jobs
-		if parentJobUUID != "" {
-			logger.WithField("parent_job", parentJobUUID).Debug("lock parent job row for update")
-			der := tx.(store.Tx).Job().LockOneByUUID(ctx, parentJobUUID)
-			if der != nil {
-				return der
-			}
-
-			// Refresh jobModel after lock to ensure nothing was updated
-			jobModel, err = uc.db.Job().FindOneByUUID(ctx, job.UUID, tenants)
-			if err != nil {
-				return err
-			}
+	// We are not forced to update the transaction
+	if job.Transaction != nil {
+		parsers.UpdateTransactionModelFromEntities(jobModel.Transaction, job.Transaction)
+		if err = uc.db.Transaction().Update(ctx, jobModel.Transaction); err != nil {
+			return nil, errors.FromError(err).ExtendComponent(updateJobComponent)
 		}
+	}
 
-		if entities.IsFinalJobStatus(jobModel.Status) {
-			errMessage := "job status is final, cannot be updated"
-			logger.WithField("status", jobModel.Status).Error(errMessage)
-			return errors.InvalidParameterError(errMessage).ExtendComponent(updateJobComponent)
+	if len(job.Labels) > 0 {
+		jobModel.Labels = job.Labels
+	}
+	if job.InternalData != nil {
+		jobModel.InternalData = job.InternalData
+	}
+
+	var jobLogModel *models.Log
+	// We are not forced to update the status
+	if nextStatus != "" && !canUpdateStatus(nextStatus, jobModel.Status) {
+		errMessage := "invalid status update for the current job state"
+		logger.WithField("status", jobModel.Status).WithField("next_status", nextStatus).Error(errMessage)
+		return nil, errors.InvalidStateError(errMessage).ExtendComponent(updateJobComponent)
+	} else if nextStatus != "" {
+		jobLogModel = &models.Log{
+			JobID:   &jobModel.ID,
+			Status:  nextStatus,
+			Message: logMessage,
 		}
+	}
 
-		// We are not forced to update the status
-		if nextStatus != "" && !canUpdateStatus(nextStatus, jobModel.Status) {
-			errMessage := "invalid status update for the current job state"
-			logger.WithField("status", jobModel.Status).WithField("next_status", nextStatus).Error(errMessage)
-			return errors.InvalidStateError(errMessage).ExtendComponent(updateJobComponent)
-		}
-
-		// We are not forced to update the transaction
-		if job.Transaction != nil {
-			parsers.UpdateTransactionModelFromEntities(jobModel.Transaction, job.Transaction)
-			if der := tx.(store.Tx).Transaction().Update(ctx, jobModel.Transaction); der != nil {
-				return der
-			}
-		}
-
-		if nextStatus != "" {
-			jobLogModel := &models.Log{
-				JobID:   &jobModel.ID,
-				Status:  nextStatus,
-				Message: logMessage,
-			}
-
-			if der := tx.(store.Tx).Log().Insert(ctx, jobLogModel); der != nil {
-				return der
-			}
-
-			jobModel.Logs = append(jobModel.Logs, jobLogModel)
-		}
-
-		updateJobModel(jobModel, job)
-		if der := tx.(store.Tx).Job().Update(ctx, jobModel); der != nil {
-			return der
-		}
-
-		// if we updated to MINED, we need to update the children and sibling jobs to NEVER_MINED
-		if parentJobUUID != "" && nextStatus == entities.StatusMined {
-			der := uc.updateChildrenUseCase.
-				WithDBTransaction(tx.(store.Tx)).
-				Execute(ctx, jobModel.UUID, parentJobUUID, entities.StatusNeverMined, tenants)
-			if der != nil {
-				return der
-			}
-		}
-
-		// Metrics observe request latency over job status changes
-		if nextStatus != "" && len(jobModel.Logs) > 2 {
-			uc.addMetrics(jobModel.Logs[len(jobModel.Logs)-2], jobModel.Logs[len(jobModel.Logs)-1], jobModel.ChainUUID)
-		}
-
-		return nil
-	})
-
+	// In case of status update
+	err = uc.updateJob(ctx, jobModel, jobLogModel)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(updateJobComponent)
 	}
@@ -143,40 +98,95 @@ func (uc *updateJobUseCase) Execute(ctx context.Context, job *entities.Job, next
 		}
 	}
 
-	// Refresh job from DB state
-	jobModel, err = uc.db.Job().FindOneByUUID(ctx, job.UUID, tenants)
-	if err != nil {
-		return nil, errors.FromError(err).ExtendComponent(updateJobComponent)
-	}
-
-	logger.WithField("status", nextStatus).Info("job updated successfully")
+	logger.Info("job updated successfully")
 	return parsers.NewJobEntityFromModels(jobModel), nil
 }
 
-func updateJobModel(jobModel *models.Job, nextJob *entities.Job) {
-	if len(nextJob.Labels) > 0 {
-		jobModel.Labels = nextJob.Labels
-	}
-	if nextJob.InternalData != nil {
-		jobModel.InternalData = nextJob.InternalData
+func (uc *updateJobUseCase) updateJob(ctx context.Context, jobModel *models.Job, jobLogModel *models.Log) error {
+	logger := uc.logger.WithContext(ctx)
+
+	// Does current job belong to a parent/children chains?
+	var parentJobUUID string
+	if jobModel.InternalData.ParentJobUUID != "" {
+		parentJobUUID = jobModel.InternalData.ParentJobUUID
+	} else if jobModel.InternalData.RetryInterval != 0 {
+		parentJobUUID = jobModel.UUID
 	}
 
-	lastLogID := -1
-	for idx, logModel := range jobModel.Logs {
-		// Ignore resending and warning statuses
-		if logModel.Status == entities.StatusResending || logModel.Status == entities.StatusWarning {
-			continue
-		}
-		// Ignore fail statuses if they come after a resending
-		if logModel.Status == entities.StatusFailed && idx > 1 && jobModel.Logs[idx-1].Status == entities.StatusResending {
-			continue
+	prevLogModel := jobModel.Logs[len(jobModel.Logs)-1]
+	err := database.ExecuteInDBTx(uc.db, func(tx database.Tx) error {
+		// We should lock ONLY when there is children jobs
+		if parentJobUUID != "" {
+			logger.WithField("parent_job", parentJobUUID).Debug("lock parent job row for update")
+			if err := tx.(store.Tx).Job().LockOneByUUID(ctx, parentJobUUID); err != nil {
+				return err
+			}
+
+			// Refresh jobModel after lock to ensure nothing was updated
+			refreshedJobModel, err := uc.db.Job().FindOneByUUID(ctx, jobModel.UUID, []string{}, false)
+			if err != nil {
+				return err
+			}
+
+			if refreshedJobModel.UpdatedAt != jobModel.UpdatedAt {
+				errMessage := "job status was updated since user request was sent"
+				logger.WithField("status", jobModel.Status).Error(errMessage)
+				return errors.InvalidStateError(errMessage).ExtendComponent(updateJobComponent)
+			}
 		}
 
-		if logModel.ID > lastLogID {
-			jobModel.Status = logModel.Status
-			lastLogID = logModel.ID
+		if jobLogModel != nil {
+			if err := tx.(store.Tx).Log().Insert(ctx, jobLogModel); err != nil {
+				return err
+			}
+
+			jobModel.Logs = append(jobModel.Logs, jobLogModel)
+			if updateNextJobStatus(prevLogModel.Status, jobLogModel.Status) {
+				jobModel.Status = jobLogModel.Status
+			}
 		}
+
+		if err := tx.(store.Tx).Job().Update(ctx, jobModel); err != nil {
+			return err
+		}
+
+		// if we updated to MINED, we need to update the children and sibling jobs to NEVER_MINED
+		if parentJobUUID != "" && jobLogModel != nil && jobLogModel.Status == entities.StatusMined {
+			der := uc.updateChildrenUseCase.
+				WithDBTransaction(tx.(store.Tx)).
+				Execute(ctx, jobModel.UUID, parentJobUUID, entities.StatusNeverMined, []string{})
+			if der != nil {
+				return der
+			}
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return err
 	}
+
+	// Metrics observe request latency over job status changes
+	if jobLogModel != nil {
+		uc.addMetrics(jobModel.UpdatedAt.Sub(prevLogModel.CreatedAt), prevLogModel.Status, jobLogModel.Status, jobModel.ChainUUID)
+	}
+
+	return nil
+}
+
+func updateNextJobStatus(prevStatus, nextStatus entities.JobStatus) bool {
+	if nextStatus == entities.StatusResending {
+		return false
+	}
+	if nextStatus == entities.StatusWarning {
+		return false
+	}
+	if nextStatus == entities.StatusFailed && prevStatus == entities.StatusResending {
+		return false
+	}
+
+	return true
 }
 
 func canUpdateStatus(nextStatus, status entities.JobStatus) bool {
@@ -202,23 +212,26 @@ func canUpdateStatus(nextStatus, status entities.JobStatus) bool {
 	}
 }
 
-func (uc *updateJobUseCase) addMetrics(current, previous *models.Log, chainUUID string) {
+func (uc *updateJobUseCase) addMetrics(elapseTime time.Duration, previousStatus, nextStatus entities.JobStatus, chainUUID string) {
+	if previousStatus == nextStatus {
+		return
+	}
+
 	baseLabels := []string{
 		"chain_uuid", chainUUID,
 	}
 
-	d := float64(current.CreatedAt.Sub(previous.CreatedAt).Nanoseconds()) / float64(time.Second)
-	switch current.Status {
+	switch nextStatus {
 	case entities.StatusMined:
 		uc.metrics.MinedLatencyHistogram().With(append(baseLabels,
-			"prev_status", string(previous.Status),
-			"status", string(current.Status),
-		)...).Observe(d)
+			"prev_status", string(previousStatus),
+			"status", string(nextStatus),
+		)...).Observe(elapseTime.Seconds())
 	default:
 		uc.metrics.JobsLatencyHistogram().With(append(baseLabels,
-			"prev_status", string(previous.Status),
-			"status", string(current.Status),
-		)...).Observe(d)
+			"prev_status", string(previousStatus),
+			"status", string(nextStatus),
+		)...).Observe(elapseTime.Seconds())
 	}
 
 }

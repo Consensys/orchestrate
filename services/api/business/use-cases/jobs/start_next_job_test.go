@@ -51,9 +51,9 @@ func TestStartNextJob_Execute(t *testing.T) {
 		jobModel.Type = entities.OrionEEATransaction
 		nextJobModel.Type = entities.OrionMarkingTransaction
 
-		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), jobModel.UUID, tenants).
+		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), jobModel.UUID, tenants, false).
 			Return(jobModel, nil)
-		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), nextJobModel.UUID, tenants).
+		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), nextJobModel.UUID, tenants, false).
 			Return(nextJobModel, nil)
 		nextJobModel.Transaction.Data = txHash.String()
 		mockTxDA.EXPECT().Update(gomock.Any(), nextJobModel.Transaction).Return(nil)
@@ -81,9 +81,9 @@ func TestStartNextJob_Execute(t *testing.T) {
 		jobModel.Type = entities.TesseraPrivateTransaction
 		nextJobModel.Type = entities.TesseraMarkingTransaction
 
-		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), jobModel.UUID, tenants).
+		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), jobModel.UUID, tenants, false).
 			Return(jobModel, nil)
-		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), nextJobModel.UUID, tenants).
+		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), nextJobModel.UUID, tenants, false).
 			Return(nextJobModel, nil)
 		nextJobModel.Transaction.Data = enclaveKey
 		nextJobModel.Transaction.Gas = "0x1"

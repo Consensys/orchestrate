@@ -90,7 +90,7 @@ func (s *logTestSuite) TestPGLog_ConnectionErr() {
 	job := testutils.FakeLog()
 	s.T().Run("should return PostgresConnectionError if insert fails", func(t *testing.T) {
 		err := s.agents.Log().Insert(ctx, job)
-		assert.True(t, errors.IsPostgresConnectionError(err))
+		assert.True(t, errors.IsInternalError(err))
 	})
 
 	// We bring it back up

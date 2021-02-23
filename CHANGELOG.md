@@ -3,6 +3,7 @@
 ## v21.x.0 (Unreleased)
 ### 🆕 Features
 * New environment variable, `KAFKA_NUM_CONSUMERS`, to launch multiple kafka consumer in `tx-sender`
+* Support for new Postgres setting `DB_POOL_TIMEOUT`
 
 ### 🛠 Bug fixes
 * Remove unnecessary HTTP retries on internal API calls

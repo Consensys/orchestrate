@@ -28,8 +28,7 @@ func FakeJob() *entities.Job {
 
 func FakeInternalData() *entities.InternalData {
 	return &entities.InternalData{
-		ChainID:       "888",
-		Priority:      utils.PriorityMedium,
-		RetryInterval: 5 * time.Second,
+		ChainID:  "888",
+		Priority: utils.PriorityMedium,
 	}
 }

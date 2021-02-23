@@ -24,6 +24,8 @@ func init() {
 	_ = viper.BindEnv(DBPortViperKey, dbPortEnv)
 	viper.SetDefault(DBPoolSizeViperKey, dbPoolSizeDefault)
 	_ = viper.BindEnv(DBPoolSizeViperKey, dbPoolSizeEnv)
+	viper.SetDefault(DBPoolTimeoutViperKey, dbPoolTimeoutDefault)
+	_ = viper.BindEnv(DBPoolTimeoutViperKey, dbPoolTimeoutEnv)
 	viper.SetDefault(DBTLSCertViperKey, dbTLSCertDefault)
 	_ = viper.BindEnv(DBTLSCertViperKey, dbTLSCertEnv)
 	viper.SetDefault(DBTLSKeyViperKey, dbTLSKeyDefault)
@@ -44,6 +46,7 @@ func PGFlags(f *pflag.FlagSet) {
 	DBHost(f)
 	DBPort(f)
 	DBPoolSize(f)
+	DBPoolTimeout(f)
 	DBKeepAliveInterval(f)
 	DBTLSSSLMode(f)
 	DBTLSCert(f)
@@ -142,6 +145,20 @@ Environment variable: %q`, dbPoolSizeEnv)
 }
 
 const (
+	dbPoolTimeoutFlag     = "db-pool-timeout"
+	DBPoolTimeoutViperKey = "db.pool-timeout"
+	dbPoolTimeoutDefault  = time.Second * 30
+	dbPoolTimeoutEnv      = "DB_POOL_TIMEOUT"
+)
+
+func DBPoolTimeout(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Time for which client waits for free connection if all connections are busy
+Environment variable: %q`, dbPoolTimeoutEnv)
+	f.Duration(dbPoolTimeoutFlag, dbPoolTimeoutDefault, desc)
+	_ = viper.BindPFlag(DBPoolTimeoutViperKey, f.Lookup(dbPoolTimeoutFlag))
+}
+
+const (
 	dbKeepAliveFlag    = "db-keepalive"
 	DBKeepAliveKey     = "db.keepalive"
 	dbKeepAliveDefault = time.Minute
@@ -237,6 +254,7 @@ type Config struct {
 	Password          string
 	Database          string
 	PoolSize          int
+	PoolTimeout       time.Duration
 	DialTimeout       time.Duration
 	KeepAliveInterval time.Duration
 	TLS               *tls.Option
@@ -252,6 +270,7 @@ func (cfg *Config) PGOptions() (*pg.Options, error) {
 		Database:        cfg.Database,
 		PoolSize:        cfg.PoolSize,
 		ApplicationName: cfg.ApplicationName,
+		PoolTimeout:     cfg.PoolTimeout,
 	}
 
 	dialer, err := NewTLSDialer(cfg)
@@ -276,6 +295,7 @@ func NewConfig(vipr *viper.Viper) *Config {
 		Password:          vipr.GetString(DBPasswordViperKey),
 		Database:          vipr.GetString(DBDatabaseViperKey),
 		PoolSize:          vipr.GetInt(DBPoolSizeViperKey),
+		PoolTimeout:       vipr.GetDuration(DBPoolTimeoutViperKey),
 		SSLMode:           vipr.GetString(DBTLSSSLModeViperKey),
 		KeepAliveInterval: vipr.GetDuration(DBKeepAliveKey),
 		DialTimeout:       time.Second * 10, // Using double of default PG value

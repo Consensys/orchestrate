@@ -419,7 +419,7 @@ func (s *transactionsTestSuite) TestSuccess() {
 			controllers.IdempotencyKeyHeader: idempotencyKey,
 		})
 
-		// Kill Kafka on first call so data is added in DB and status is CREATED but does not get updated to STARTED
+		// Kill Kafka on first call so data is added in DB and status is CREATED but does not get update it and fetch previous one
 		err := s.env.client.Stop(rctx, kafkaContainerID)
 		if err != nil {
 			assert.Fail(t, err.Error())
@@ -442,6 +442,6 @@ func (s *transactionsTestSuite) TestSuccess() {
 		}
 		job := txResponse.Jobs[0]
 		assert.Equal(t, idempotencyKey, txResponse.IdempotencyKey)
-		assert.Equal(t, entities.StatusStarted, job.Status)
+		assert.Equal(t, entities.StatusFailed, job.Status)
 	})
 }

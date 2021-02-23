@@ -32,7 +32,7 @@ func TestGetJob_Execute(t *testing.T) {
 		job := testutils.FakeJobModel(0)
 		expectedResponse := parsers.NewJobEntityFromModels(job)
 
-		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), job.UUID, []string{tenantID}).Return(job, nil)
+		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), job.UUID, []string{tenantID}, true).Return(job, nil)
 		jobResponse, err := usecase.Execute(ctx, job.UUID, []string{tenantID})
 
 		assert.NoError(t, err)
@@ -43,7 +43,7 @@ func TestGetJob_Execute(t *testing.T) {
 		uuid := "uuid"
 		expectedErr := errors.NotFoundError("error")
 
-		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), uuid, []string{tenantID}).Return(nil, expectedErr)
+		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), uuid, []string{tenantID}, true).Return(nil, expectedErr)
 
 		response, err := usecase.Execute(ctx, uuid, []string{tenantID})
 

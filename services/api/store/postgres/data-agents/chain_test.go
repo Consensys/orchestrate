@@ -184,17 +184,17 @@ func (s *chainTestSuite) TestConnectionErr() {
 	chain := testutils.FakeChainModel()
 	s.T().Run("should return PostgresConnectionError if insert fails", func(t *testing.T) {
 		err := s.agents.Chain().Insert(ctx, chain)
-		assert.True(t, errors.IsPostgresConnectionError(err))
+		assert.True(t, errors.IsInternalError(err))
 	})
 
 	s.T().Run("should return PostgresConnectionError if update fails", func(t *testing.T) {
 		err := s.agents.Chain().Update(ctx, chain, []string{chain.TenantID})
-		assert.True(t, errors.IsPostgresConnectionError(err))
+		assert.True(t, errors.IsInternalError(err))
 	})
 
 	s.T().Run("should return PostgresConnectionError if findOne fails", func(t *testing.T) {
 		_, err := s.agents.Chain().FindOneByUUID(ctx, chain.UUID, []string{chain.TenantID})
-		assert.True(t, errors.IsPostgresConnectionError(err))
+		assert.True(t, errors.IsInternalError(err))
 	})
 
 	// We bring it back up

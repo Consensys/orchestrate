@@ -83,16 +83,6 @@ CREATE TRIGGER accounts_updated_trigger
 	FOR EACH ROW 
 	EXECUTE PROCEDURE updated();
 
-CREATE TRIGGER chains_updated_trigger
-	BEFORE UPDATE ON chains
-	FOR EACH ROW 
-	EXECUTE PROCEDURE updated();
-
-CREATE TRIGGER faucets_updated_trigger
-	BEFORE UPDATE ON faucets
-	FOR EACH ROW 
-	EXECUTE PROCEDURE updated();
-
 CREATE TRIGGER transactions_updated_trigger
 	BEFORE UPDATE ON transactions
 	FOR EACH ROW 
@@ -194,8 +184,6 @@ ALTER TABLE logs
 DROP TYPE job_status;
 
 DROP TRIGGER accounts_updated_trigger ON accounts;
-DROP TRIGGER chains_updated_trigger ON chains;
-DROP TRIGGER faucets_updated_trigger ON faucets;
 DROP TRIGGER transactions_updated_trigger ON transactions;
 DROP TRIGGER update_parent_job on logs;
 

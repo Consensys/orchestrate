@@ -44,7 +44,6 @@ func TestRegisterContract_Execute(t *testing.T) {
 		methodAgent.EXPECT().InsertMultiple(gomock.Any(), gomock.AssignableToTypeOf([]*models.MethodModel{}))
 		eventAgent.EXPECT().InsertMultiple(gomock.Any(), gomock.AssignableToTypeOf([]*models.EventModel{}))
 		mockDBTX.EXPECT().Commit().Return(nil)
-		mockDBTX.EXPECT().Close().Return(nil)
 		err := usecase.Execute(ctx, contract)
 
 		assert.NoError(t, err)

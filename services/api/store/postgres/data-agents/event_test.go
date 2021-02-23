@@ -110,7 +110,7 @@ func (s *eventTestSuite) TestPGEvent_InsertMultipleTx() {
 		}
 		err := s.agents.Event().InsertMultiple(ctx, events)
 
-		assert.True(t, errors.IsPostgresConnectionError(err))
+		assert.True(t, errors.IsInternalError(err))
 
 		// We bring it back up
 		s.pg.InitTestDB(t)
@@ -139,7 +139,7 @@ func (s *eventTestSuite) TestPGEvent_FindOneByAccountAndSigHash() {
 		s.pg.DropTestDB(t)
 
 		_, err := s.agents.Event().FindOneByAccountAndSigHash(ctx, chainID, address, sigHash, 0)
-		assert.True(t, errors.IsPostgresConnectionError(err))
+		assert.True(t, errors.IsInternalError(err))
 
 		// We bring it back up
 		s.pg.InitTestDB(t)
@@ -168,7 +168,7 @@ func (s *eventTestSuite) TestPGEvent_FindDefaultBySigHash() {
 	
 		_, err := s.agents.Event().FindDefaultBySigHash(ctx, sigHash, 0)
 		assert.Error(t, err)
-		assert.True(t, errors.IsPostgresConnectionError(err))
+		assert.True(t, errors.IsInternalError(err))
 	
 		s.pg.InitTestDB(t)
 	})

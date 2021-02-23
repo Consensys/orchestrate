@@ -42,7 +42,7 @@ func TestUpdateChildren_Execute(t *testing.T) {
 		jobsToUpdate[1].Logs[0].Status = entities.StatusPending
 
 		mockJobDA.EXPECT().Search(gomock.Any(),
-			&entities.JobFilters{ParentJobUUID: parentJobUUID, Status: entities.StatusPending}, tenants).
+			&entities.JobFilters{ParentJobUUID: parentJobUUID, Status: entities.StatusPending, WithLogs: true}, tenants).
 			Return(jobsToUpdate, nil)
 		mockJobDA.EXPECT().Update(gomock.Any(), jobsToUpdate[0]).Return(nil)
 		mockJobDA.EXPECT().Update(gomock.Any(), jobsToUpdate[1]).Return(nil)
@@ -72,8 +72,8 @@ func TestUpdateChildren_Execute(t *testing.T) {
 		jobsToUpdate[0].Logs[0].Status = entities.StatusPending
 		jobsToUpdate[1].Logs[0].Status = entities.StatusPending
 
-		mockJobDA.EXPECT().Search(gomock.Any(), 
-			&entities.JobFilters{ParentJobUUID: parentJobUUID, Status: entities.StatusPending}, tenants).
+		mockJobDA.EXPECT().Search(gomock.Any(),
+			&entities.JobFilters{ParentJobUUID: parentJobUUID, Status: entities.StatusPending, WithLogs: true}, tenants).
 			Return(jobsToUpdate, nil)
 		mockJobDA.EXPECT().Update(gomock.Any(), gomock.Any()).Return(nil)
 		mockLogDA.EXPECT().Insert(gomock.Any(), &models.Log{

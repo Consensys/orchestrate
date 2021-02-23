@@ -48,7 +48,7 @@ func TestResendJobTx_Execute(t *testing.T) {
 			CreatedAt: time.Now().Add(time.Second),
 		})
 
-		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), job.UUID, tenants).Return(job, nil)
+		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), job.UUID, tenants, false).Return(job, nil)
 		mockKafkaProducer.ExpectSendMessageWithCheckerFunctionAndSucceed(func(val []byte) error {
 			txEnvelope := &tx.TxEnvelope{}
 			err := encoding.Unmarshal(val, txEnvelope)
@@ -74,7 +74,7 @@ func TestResendJobTx_Execute(t *testing.T) {
 		job.UUID = "6380e2b6-b828-43ee-abdc-de0f8d57dc5f"
 		expectedErr := errors.NotFoundError("error")
 
-		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), job.UUID, tenants).Return(nil, expectedErr)
+		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), job.UUID, tenants, false).Return(nil, expectedErr)
 
 		err := usecase.Execute(ctx, job.UUID, tenants)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(resendJobTxComponent), err)
@@ -92,7 +92,7 @@ func TestResendJobTx_Execute(t *testing.T) {
 			CreatedAt: time.Now().Add(time.Second),
 		})
 
-		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), job.UUID, tenants).Return(job, nil)
+		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), job.UUID, tenants, false).Return(job, nil)
 		mockKafkaProducer.ExpectSendMessageAndFail(fmt.Errorf("error"))
 		err := usecase.Execute(ctx, job.UUID, tenants)
 		assert.True(t, errors.IsKafkaConnectionError(err))

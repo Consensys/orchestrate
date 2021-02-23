@@ -124,13 +124,13 @@ func (s *txTestSuite) TestPGTransaction_ConnectionErr() {
 
 	s.T().Run("should return PostgresConnectionError if insert fails", func(t *testing.T) {
 		err := s.agents.Transaction().Insert(ctx, tx)
-		assert.True(t, errors.IsPostgresConnectionError(err))
+		assert.True(t, errors.IsInternalError(err))
 	})
 	//
 	s.T().Run("should return PostgresConnectionError if update fails", func(t *testing.T) {
 		tx.ID = 1
 		err := s.agents.Transaction().Update(ctx, tx)
-		assert.True(t, errors.IsPostgresConnectionError(err))
+		assert.True(t, errors.IsInternalError(err))
 	})
 
 	// We bring it back up

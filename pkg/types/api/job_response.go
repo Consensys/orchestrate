@@ -14,7 +14,7 @@ type JobResponse struct {
 	ParentJobUUID string                  `json:"parentJobUUID,omitempty" example:"b4374e6f-b28a-4bad-b4fe-bda36eaf849c"`
 	TenantID      string                  `json:"tenantID,omitempty" example:"foo"`
 	Transaction   entities.ETHTransaction `json:"transaction"`
-	Logs          []*entities.Log         `json:"logs"`
+	Logs          []*entities.Log         `json:"logs,omitempty"`
 	Labels        map[string]string       `json:"labels,omitempty"`
 	Annotations   Annotations             `json:"annotations,omitempty"`
 	Status        entities.JobStatus      `json:"status" example:"MINED"`

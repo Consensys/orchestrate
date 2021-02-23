@@ -2,6 +2,7 @@ package dataagents
 
 import (
 	"context"
+	"time"
 
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
@@ -48,6 +49,7 @@ func (agent *PGTransaction) Update(ctx context.Context, txModel *models.Transact
 		return err
 	}
 
+	txModel.UpdatedAt = time.Now().UTC()
 	err := pg.Update(ctx, agent.db, txModel)
 	if err != nil {
 		agent.logger.WithContext(ctx).WithError(err).Error("failed to update transaction")

@@ -197,17 +197,17 @@ func (s *faucetTestSuite) TestPGFaucet_ConnectionErr() {
 	faucet := testutils.FakeFaucetModel()
 	s.T().Run("should return PostgresConnectionError if insert fails", func(t *testing.T) {
 		err := s.agents.Faucet().Insert(ctx, faucet)
-		assert.True(t, errors.IsPostgresConnectionError(err))
+		assert.True(t, errors.IsInternalError(err))
 	})
 
 	s.T().Run("should return PostgresConnectionError if update fails", func(t *testing.T) {
 		err := s.agents.Faucet().Update(ctx, faucet, []string{faucet.TenantID})
-		assert.True(t, errors.IsPostgresConnectionError(err))
+		assert.True(t, errors.IsInternalError(err))
 	})
 
 	s.T().Run("should return PostgresConnectionError if findOne fails", func(t *testing.T) {
 		_, err := s.agents.Faucet().FindOneByUUID(ctx, faucet.UUID, []string{faucet.TenantID})
-		assert.True(t, errors.IsPostgresConnectionError(err))
+		assert.True(t, errors.IsInternalError(err))
 	})
 
 	// We bring it back up

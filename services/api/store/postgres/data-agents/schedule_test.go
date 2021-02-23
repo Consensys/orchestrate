@@ -132,17 +132,17 @@ func (s *scheduleTestSuite) TestPGSchedule_ConnectionErr() {
 
 	s.T().Run("should return PostgresConnectionError if Insert fails", func(t *testing.T) {
 		err := s.agents.Schedule().Insert(ctx, schedule)
-		assert.True(t, errors.IsPostgresConnectionError(err))
+		assert.True(t, errors.IsInternalError(err))
 	})
 
 	s.T().Run("should return PostgresConnectionError if FindOneByUUID fails", func(t *testing.T) {
 		_, err := s.agents.Schedule().FindOneByUUID(ctx, schedule.UUID, []string{"_"})
-		assert.True(t, errors.IsPostgresConnectionError(err))
+		assert.True(t, errors.IsInternalError(err))
 	})
 
 	s.T().Run("should return PostgresConnectionError if FindAll fails", func(t *testing.T) {
 		_, err := s.agents.Schedule().FindAll(ctx, []string{"_"})
-		assert.True(t, errors.IsPostgresConnectionError(err))
+		assert.True(t, errors.IsInternalError(err))
 	})
 
 	// We bring it back up

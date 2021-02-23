@@ -43,6 +43,7 @@ x-default-variables: &default-variables
   DB_PORT: ${DB_PORT-}
   DB_DATABASE: ${DB_DATABASE-}
   DB_POOLSIZE: ${DB_POOLSIZE-}
+  DB_POOL_TIMEOUT: ${DB_POOL_TIMEOUT-}
   METRICS_MODULES: ${METRICS_MODULES-}
 
 x-container-common: &container-common

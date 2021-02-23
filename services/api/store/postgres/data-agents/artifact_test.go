@@ -109,7 +109,7 @@ func (s *artifactTestSuite) TestPGArtifact_Insert() {
 		}
 		err := s.agents.Artifact().Insert(ctx, artifact)
 
-		assert.True(t, errors.IsPostgresConnectionError(err))
+		assert.True(t, errors.IsInternalError(err))
 
 		// We bring it back up
 		s.pg.InitTestDB(t)
@@ -138,7 +138,7 @@ func (s *artifactTestSuite) TestPGArtifact_FindOneByABIAndCodeHash() {
 		s.pg.DropTestDB(t)
 		_, err := s.agents.Artifact().FindOneByABIAndCodeHash(ctx, abi, codeHash)
 
-		assert.True(t, errors.IsPostgresConnectionError(err))
+		assert.True(t, errors.IsInternalError(err))
 
 		s.pg.InitTestDB(t)
 	})
@@ -166,7 +166,7 @@ func (s *artifactTestSuite) TestPGArtifact_FindOneByNameAndTag() {
 		s.pg.DropTestDB(t)
 		_, err := s.agents.Artifact().FindOneByNameAndTag(ctx, "name", "tag")
 
-		assert.True(t, errors.IsPostgresConnectionError(err))
+		assert.True(t, errors.IsInternalError(err))
 
 		s.pg.InitTestDB(t)
 	})

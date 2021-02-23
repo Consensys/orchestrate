@@ -31,7 +31,7 @@ func NewGetJobUseCase(db store.DB) usecases.GetJobUseCase {
 // Execute gets a job
 func (uc *getJobUseCase) Execute(ctx context.Context, jobUUID string, tenants []string) (*entities.Job, error) {
 	ctx = log.WithFields(ctx, log.Field("job", jobUUID))
-	jobModel, err := uc.db.Job().FindOneByUUID(ctx, jobUUID, tenants)
+	jobModel, err := uc.db.Job().FindOneByUUID(ctx, jobUUID, tenants, true)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(getJobComponent)
 	}

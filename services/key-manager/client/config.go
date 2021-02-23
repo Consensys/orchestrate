@@ -43,7 +43,7 @@ func metricsURL(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`URL of the Key Manager HTTP metrics endpoint.
 Environment variable: %q`, metricsURLEnv)
 	f.String(metricsURLFlag, metricsURLDefault, desc)
-	_ = viper.BindPFlag(MetricsURLViperKey, f.Lookup(metricsURLDefault))
+	_ = viper.BindPFlag(MetricsURLViperKey, f.Lookup(metricsURLFlag))
 }
 
 func Flags(f *pflag.FlagSet) {

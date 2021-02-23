@@ -59,8 +59,7 @@ func (uc *createJobUseCase) Execute(ctx context.Context, job *entities.Job, tena
 	schedule, err := uc.db.Schedule().FindOneByUUID(ctx, job.ScheduleUUID, tenants)
 	if errors.IsNotFoundError(err) {
 		return nil, errors.InvalidParameterError("schedule does not exist").ExtendComponent(createJobComponent)
-	}
-	if err != nil {
+	} else if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(createJobComponent)
 	}
 
@@ -71,6 +70,10 @@ func (uc *createJobUseCase) Execute(ctx context.Context, job *entities.Job, tena
 	})
 	jobModel.Schedule = schedule
 
+	if err = uc.db.Transaction().Insert(ctx, jobModel.Transaction); err != nil {
+		return nil, errors.FromError(err).ExtendComponent(createJobComponent)
+	}
+
 	err = database.ExecuteInDBTx(uc.db, func(tx database.Tx) error {
 		// If it's a child job, only create it if parent status is PENDING
 		if jobModel.InternalData.ParentJobUUID != "" {
@@ -80,7 +83,7 @@ func (uc *createJobUseCase) Execute(ctx context.Context, job *entities.Job, tena
 				return der
 			}
 
-			parentJobModel, der := tx.(store.Tx).Job().FindOneByUUID(ctx, parentJobUUID, tenants)
+			parentJobModel, der := tx.(store.Tx).Job().FindOneByUUID(ctx, parentJobUUID, tenants, false)
 			if der != nil {
 				return der
 			}
@@ -91,10 +94,6 @@ func (uc *createJobUseCase) Execute(ctx context.Context, job *entities.Job, tena
 					WithField("parent_status", parentJobModel.Status).Error(errMessage)
 				return errors.InvalidStateError(errMessage)
 			}
-		}
-
-		if der := tx.(store.Tx).Transaction().Insert(ctx, jobModel.Transaction); der != nil {
-			return der
 		}
 
 		if der := tx.(store.Tx).Job().Insert(ctx, jobModel); der != nil {
@@ -110,6 +109,7 @@ func (uc *createJobUseCase) Execute(ctx context.Context, job *entities.Job, tena
 	})
 
 	if err != nil {
+		logger.WithError(err).Info("failed to create job")
 		return nil, errors.FromError(err).ExtendComponent(createJobComponent)
 	}
 

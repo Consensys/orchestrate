@@ -110,6 +110,7 @@ func (manager *sessionManager) Start(ctx context.Context, job *entities.Job) {
 			logger.WithError(err).Error("failed to update job labels")
 		}
 
+		logger.Debug("job session was completed")
 		manager.removeSession(job.UUID)
 	}()
 }
@@ -172,6 +173,7 @@ func (manager *sessionManager) retrieveJobSessionData(ctx context.Context, job *
 	jobs, err := manager.client.SearchJob(ctx, &entities.JobFilters{
 		ChainUUID:     job.ChainUUID,
 		ParentJobUUID: job.UUID,
+		WithLogs:      true,
 	})
 
 	if err != nil {

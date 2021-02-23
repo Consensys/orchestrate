@@ -71,7 +71,7 @@ func (s *codeHashTestSuite) TestPGCodeHash_Insert() {
 		}
 		err := s.agents.CodeHash().Insert(ctx, codehash)
 
-		assert.True(t, errors.IsPostgresConnectionError(err))
+		assert.True(t, errors.IsInternalError(err))
 
 		// We bring it back up
 		s.pg.InitTestDB(t)

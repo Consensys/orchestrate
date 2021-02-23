@@ -77,7 +77,7 @@ func (s *tagTestSuite) TestPGTag_Insert() {
 		}
 		err := s.agents.Tag().Insert(ctx, tag)
 
-		assert.True(t, errors.IsPostgresConnectionError(err))
+		assert.True(t, errors.IsInternalError(err))
 
 		// We bring it back up
 		s.pg.InitTestDB(t)
@@ -109,7 +109,7 @@ func (s *tagTestSuite) TestPGTag_FindAllByName() {
 		s.pg.DropTestDB(t)
 		_, err := s.agents.Tag().FindAllByName(ctx, contractName)
 
-		assert.True(t, errors.IsPostgresConnectionError(err))
+		assert.True(t, errors.IsInternalError(err))
 
 		s.pg.InitTestDB(t)
 	})

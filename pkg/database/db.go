@@ -1,9 +1,5 @@
 package database
 
-import (
-	"reflect"
-)
-
 type DB interface {
 	Begin() (Tx, error)
 }
@@ -15,30 +11,24 @@ type Tx interface {
 	Close() error
 }
 
-func ExecuteInDBTx(db DB, persist func(tx Tx) error) (der error) {
-	dbtx, err := db.Begin()
-	if err != nil {
-		return err
+func ExecuteInDBTx(db DB, persist func(tx Tx) error) (err error) {
+	dbtx, isTx := db.(Tx)
+	if !isTx {
+		if dbtx, err = db.Begin(); err != nil {
+			return err
+		}
 	}
 
 	defer func() {
 		// In case it is a nested transaction IGNORE
-		if reflect.DeepEqual(db, dbtx) {
+		if isTx {
 			return
 		}
 
-		if der == nil {
-			der = dbtx.Commit()
-		}
-
-		if der != nil {
-			if err := dbtx.Rollback(); err != nil {
-				der = err
-			}
-		}
-
-		if err := dbtx.Close(); err != nil {
-			der = err
+		if err != nil {
+			_ = dbtx.Rollback()
+		} else {
+			err = dbtx.Commit()
 		}
 	}()
 

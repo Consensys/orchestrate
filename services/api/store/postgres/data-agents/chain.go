@@ -2,6 +2,7 @@ package dataagents
 
 import (
 	"context"
+	"time"
 
 	gopg "github.com/go-pg/pg/v9"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
@@ -101,6 +102,7 @@ func (agent *PGChain) Search(ctx context.Context, filters *entities.ChainFilters
 }
 
 func (agent *PGChain) Update(ctx context.Context, chain *models.Chain, tenants []string) error {
+	chain.UpdatedAt = time.Now().UTC()
 	query := agent.db.ModelContext(ctx, chain).Where("uuid = ?", chain.UUID)
 	query = pg.WhereAllowedTenantsDefault(query, tenants)
 

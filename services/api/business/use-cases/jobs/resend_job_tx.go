@@ -39,7 +39,7 @@ func (uc *resendJobTxUseCase) Execute(ctx context.Context, jobUUID string, tenan
 	logger := uc.logger.WithContext(ctx)
 	logger.Debug("resending job transaction")
 
-	jobModel, err := uc.db.Job().FindOneByUUID(ctx, jobUUID, tenants)
+	jobModel, err := uc.db.Job().FindOneByUUID(ctx, jobUUID, tenants, false)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(resendJobTxComponent)
 	}

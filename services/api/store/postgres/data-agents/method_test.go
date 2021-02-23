@@ -109,7 +109,7 @@ func (s *methodTestSuite) TestPGMethod_InsertMultipleTx() {
 		}
 		err := s.agents.Method().InsertMultiple(ctx, methods)
 
-		assert.True(t, errors.IsPostgresConnectionError(err))
+		assert.True(t, errors.IsInternalError(err))
 
 		// We bring it back up
 		s.pg.InitTestDB(t)
@@ -145,7 +145,7 @@ func (s *methodTestSuite) TestPGMethod_FindOneByAccountAndSelector() {
 
 		selector := crypto.Keccak256([]byte(methodSig0))[:4]
 		_, err := s.agents.Method().FindOneByAccountAndSelector(ctx, chainID, address, selector)
-		assert.True(t, errors.IsPostgresConnectionError(err))
+		assert.True(t, errors.IsInternalError(err))
 
 		// We bring it back up
 		s.pg.InitTestDB(t)
@@ -177,7 +177,7 @@ func (s *methodTestSuite) TestPGMethod_FindDefaultBySelector() {
 
 		selector := crypto.Keccak256([]byte(methodSig0))[:4]
 		_, err := s.agents.Method().FindDefaultBySelector(ctx, selector)
-		assert.True(t, errors.IsPostgresConnectionError(err))
+		assert.True(t, errors.IsInternalError(err))
 
 		// We bring it back up
 		s.pg.InitTestDB(t)

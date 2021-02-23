@@ -49,7 +49,7 @@ func fetchScheduleByUUID(ctx context.Context, db store.DB, scheduleUUID string, 
 	}
 
 	for idx, job := range schedule.Jobs {
-		schedule.Jobs[idx], err = db.Job().FindOneByUUID(ctx, job.UUID, tenants)
+		schedule.Jobs[idx], err = db.Job().FindOneByUUID(ctx, job.UUID, tenants, false)
 		if err != nil {
 			return nil, err
 		}

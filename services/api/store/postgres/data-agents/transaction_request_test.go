@@ -197,22 +197,22 @@ func (s *txRequestTestSuite) TestPGTransactionRequest_ConnectionErr() {
 
 	s.T().Run("should return PostgresConnectionError if insert fails", func(t *testing.T) {
 		err := insertTxRequest(ctx, s.agents, txRequest)
-		assert.True(t, errors.IsPostgresConnectionError(err))
+		assert.True(t, errors.IsInternalError(err))
 	})
 
 	s.T().Run("should return PostgresConnectionError if find fails", func(t *testing.T) {
 		_, err := s.agents.TransactionRequest().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey, txRequest.Schedule.TenantID)
-		assert.True(t, errors.IsPostgresConnectionError(err))
+		assert.True(t, errors.IsInternalError(err))
 	})
 
 	s.T().Run("should return PostgresConnectionError if find fails", func(t *testing.T) {
 		_, err := s.agents.TransactionRequest().FindOneByUUID(ctx, txRequest.Schedule.UUID, []string{multitenancy.Wildcard})
-		assert.True(t, errors.IsPostgresConnectionError(err))
+		assert.True(t, errors.IsInternalError(err))
 	})
 
 	s.T().Run("should return PostgresConnectionError if find fails", func(t *testing.T) {
 		_, err := s.agents.TransactionRequest().Search(ctx, &entities.TransactionRequestFilters{}, []string{"tenant"})
-		assert.True(t, errors.IsPostgresConnectionError(err))
+		assert.True(t, errors.IsInternalError(err))
 	})
 
 	// We bring it back up

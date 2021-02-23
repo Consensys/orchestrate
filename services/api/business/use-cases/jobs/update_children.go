@@ -52,6 +52,7 @@ func (uc *updateChildrenUseCase) Execute(ctx context.Context, jobUUID, parentJob
 	jobsToUpdate, err := uc.db.Job().Search(ctx, &entities.JobFilters{
 		ParentJobUUID: parentJobUUID,
 		Status:        entities.StatusPending,
+		WithLogs:      true,
 	}, tenants)
 
 	if err != nil {

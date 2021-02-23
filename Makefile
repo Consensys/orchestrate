@@ -272,7 +272,7 @@ down-nginx:
 
 vegeta:
 	@mkdir -p build/vegeta
-	@cat scripts/vegeta/test | vegeta attack -format=http -duration=10s -rate=50/s | tee build/vegeta/results.bin | vegeta report
+	@cat scripts/vegeta/test | vegeta attack -format=http -duration=30s -rate=200/s | tee build/vegeta/results.bin | vegeta report
 	@vegeta report -type=json build/vegeta/results.bin > build/vegeta/metrics.json
 	@cat build/vegeta/results.bin | vegeta plot > build/vegeta/plot.html
 	@cat build/vegeta/results.bin | vegeta report -type="hist[0,100ms,200ms,300ms,500ms]"

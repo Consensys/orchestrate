@@ -2,6 +2,7 @@ package dataagents
 
 import (
 	"context"
+	"time"
 
 	pg "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database/postgres"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
@@ -51,6 +52,7 @@ func (agent *PGAccount) Update(ctx context.Context, account *models.Account) err
 		return errors.InvalidArgError(errMsg).ExtendComponent(accountDAComponent)
 	}
 
+	account.UpdatedAt = time.Now().UTC()
 	agent.db.ModelContext(ctx, account)
 	err := pg.Update(ctx, agent.db, account)
 	if err != nil {

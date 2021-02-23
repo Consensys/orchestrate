@@ -60,7 +60,7 @@ type ScheduleAgent interface {
 type JobAgent interface {
 	Insert(ctx context.Context, job *models.Job) error
 	Update(ctx context.Context, job *models.Job) error
-	FindOneByUUID(ctx context.Context, uuid string, tenants []string) (*models.Job, error)
+	FindOneByUUID(ctx context.Context, uuid string, tenants []string, withLogs bool) (*models.Job, error)
 	LockOneByUUID(ctx context.Context, uuid string) error
 	Search(ctx context.Context, filters *entities.JobFilters, tenants []string) ([]*models.Job, error)
 }

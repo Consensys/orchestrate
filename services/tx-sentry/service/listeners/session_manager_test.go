@@ -40,6 +40,7 @@ func TestSessionManager(t *testing.T) {
 		client.EXPECT().SearchJob(gomock.Any(), &entities.JobFilters{
 			ChainUUID:     job.ChainUUID,
 			ParentJobUUID: job.UUID,
+			WithLogs:      true,
 		}).Return([]*types.JobResponse{parentJobResponse}, nil)
 		retrySessionJobUC.EXPECT().Execute(gomock.Any(), parentJobResponse.UUID, parentJobResponse.UUID, 0).Return(childJobUUIDOne, nil)
 		retrySessionJobUC.EXPECT().Execute(gomock.Any(), parentJobResponse.UUID, childJobUUIDOne, 1).Return(childJobUUIDTwo, nil)
@@ -65,6 +66,7 @@ func TestSessionManager(t *testing.T) {
 		client.EXPECT().SearchJob(gomock.Any(), &entities.JobFilters{
 			ChainUUID:     job.ChainUUID,
 			ParentJobUUID: job.UUID,
+			WithLogs:      true,
 		}).Return([]*types.JobResponse{parentJobResponse}, nil)
 		retrySessionJobUC.EXPECT().Execute(gomock.Any(), parentJobResponse.UUID, parentJobResponse.UUID, 0).Return(childJobUUIDOne, nil)
 		retrySessionJobUC.EXPECT().Execute(gomock.Any(), parentJobResponse.UUID, childJobUUIDOne, 1).Return(childJobUUIDTwo, nil)
@@ -94,6 +96,7 @@ func TestSessionManager(t *testing.T) {
 		client.EXPECT().SearchJob(gomock.Any(), &entities.JobFilters{
 			ChainUUID:     job.ChainUUID,
 			ParentJobUUID: job.UUID,
+			WithLogs:      true,
 		}).Return([]*types.JobResponse{parentJobResponse}, nil)
 
 		sessionManager.Start(ctx, job)
@@ -112,6 +115,7 @@ func TestSessionManager(t *testing.T) {
 		client.EXPECT().SearchJob(gomock.Any(), &entities.JobFilters{
 			ChainUUID:     job.ChainUUID,
 			ParentJobUUID: job.UUID,
+			WithLogs:      true,
 		}).Return([]*types.JobResponse{parentJobResponse}, nil)
 		retrySessionJobUC.EXPECT().Execute(gomock.Any(), parentJobResponse.UUID, parentJobResponse.UUID, 0).Return("", nil)
 
@@ -126,20 +130,21 @@ func TestSessionManager(t *testing.T) {
 		ctx, _ := context.WithTimeout(context.Background(), timeout)
 		job := testutils.FakeJob()
 		job.InternalData.RetryInterval = retryInterval
-	
+
 		parentJobResponse := testutils.FakeJobResponse()
 		parentJobResponse.UUID = job.UUID
 		client.EXPECT().SearchJob(gomock.Any(), &entities.JobFilters{
 			ChainUUID:     job.ChainUUID,
 			ParentJobUUID: job.UUID,
+			WithLogs:      true,
 		}).Return([]*types.JobResponse{parentJobResponse}, nil)
-	
+
 		retrySessionJobUC.EXPECT().Execute(gomock.Any(), parentJobResponse.UUID, parentJobResponse.UUID, gomock.Any()).
 			Return(parentJobResponse.UUID, nil).Times(types.SentryMaxRetries)
-	
+
 		client.EXPECT().UpdateJob(gomock.Any(), job.UUID, gomock.Any()).Return(nil, nil)
 		sessionManager.Start(ctx, job)
-	
+
 		<-ctx.Done()
 	})
 
@@ -148,19 +153,20 @@ func TestSessionManager(t *testing.T) {
 		ctx, _ := context.WithTimeout(context.Background(), timeout)
 		job := testutils.FakeJob()
 		job.InternalData.RetryInterval = retryInterval
-	
+
 		parentJobResponse := testutils.FakeJobResponse()
 		parentJobResponse.UUID = job.UUID
 		client.EXPECT().SearchJob(gomock.Any(), &entities.JobFilters{
 			ChainUUID:     job.ChainUUID,
 			ParentJobUUID: job.UUID,
+			WithLogs:      true,
 		}).Return([]*types.JobResponse{parentJobResponse}, nil)
-	
+
 		retrySessionJobUC.EXPECT().Execute(gomock.Any(), parentJobResponse.UUID, parentJobResponse.UUID, 0).Return("", fmt.Errorf("error"))
 		retrySessionJobUC.EXPECT().Execute(gomock.Any(), parentJobResponse.UUID, parentJobResponse.UUID, gomock.Any()).Return(parentJobResponse.UUID, nil).AnyTimes()
 		client.EXPECT().UpdateJob(gomock.Any(), job.UUID, gomock.Any()).Return(nil, nil)
 		sessionManager.Start(ctx, job)
-	
+
 		<-ctx.Done()
 	})
 
@@ -169,26 +175,27 @@ func TestSessionManager(t *testing.T) {
 		ctx, _ := context.WithTimeout(context.Background(), timeout)
 		job := testutils.FakeJob()
 		job.InternalData.RetryInterval = retryInterval
-	
+
 		parentJobResponse := testutils.FakeJobResponse()
 		parentJobResponse.UUID = job.UUID
 		client.EXPECT().SearchJob(gomock.Any(), &entities.JobFilters{
 			ChainUUID:     job.ChainUUID,
 			ParentJobUUID: job.UUID,
+			WithLogs:      true,
 		}).Return([]*types.JobResponse{parentJobResponse}, nil)
-	
+
 		// First session is added and startSessionUC is called
 		retrySessionJobUC.EXPECT().Execute(gomock.Any(), parentJobResponse.UUID, parentJobResponse.UUID, gomock.Any()).
 			Return(parentJobResponse.UUID, nil)
 		retrySessionJobUC.EXPECT().Execute(gomock.Any(), parentJobResponse.UUID, parentJobResponse.UUID, gomock.Any()).
 			Return("", nil)
 		sessionManager.Start(ctx, job)
-	
+
 		// Second call does not call startSessionUC
 		ctx2, _ := context.WithTimeout(context.Background(), timeout)
 		sessionManager.Start(ctx, job)
 		client.EXPECT().UpdateJob(gomock.Any(), job.UUID, gomock.Any()).Return(nil, nil)
-	
+
 		<-ctx.Done()
 		<-ctx2.Done()
 	})

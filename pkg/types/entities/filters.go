@@ -9,6 +9,7 @@ type JobFilters struct {
 	UpdatedAfter  time.Time `validate:"omitempty"`
 	ParentJobUUID string    `validate:"omitempty"`
 	OnlyParents   bool      `validate:"omitempty"`
+	WithLogs      bool      `validate:"omitempty"`
 }
 
 type TransactionRequestFilters struct {

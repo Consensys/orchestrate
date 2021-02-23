@@ -3,12 +3,12 @@ package dataagents
 import (
 	"context"
 	"fmt"
+	"time"
 
+	"github.com/go-pg/pg/v9/orm"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
-
-	"github.com/go-pg/pg/v9/orm"
 
 	gopg "github.com/go-pg/pg/v9"
 	pg "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database/postgres"
@@ -69,10 +69,12 @@ func (agent *PGJob) Update(ctx context.Context, job *models.Job) error {
 		job.ScheduleID = &job.Transaction.ID
 	}
 
+	job.UpdatedAt = time.Now().UTC()
 	agent.db.ModelContext(ctx, job)
 	err := pg.Update(ctx, agent.db, job)
+
 	if err != nil {
-		agent.logger.WithContext(ctx).WithError(err).Error()
+		agent.logger.WithContext(ctx).WithError(err).Error("failed to update job")
 		return errors.FromError(err).ExtendComponent(jobDAComponent)
 	}
 
@@ -80,16 +82,19 @@ func (agent *PGJob) Update(ctx context.Context, job *models.Job) error {
 }
 
 // FindOneByUUID gets a job by UUID
-func (agent *PGJob) FindOneByUUID(ctx context.Context, jobUUID string, tenants []string) (*models.Job, error) {
+func (agent *PGJob) FindOneByUUID(ctx context.Context, jobUUID string, tenants []string, withLogs bool) (*models.Job, error) {
 	job := &models.Job{}
 
 	query := agent.db.ModelContext(ctx, job).
 		Where("job.uuid = ?", jobUUID).
 		Relation("Transaction").
-		Relation("Schedule").
-		Relation("Logs", func(q *orm.Query) (*orm.Query, error) {
+		Relation("Schedule")
+
+	if withLogs {
+		query = query.Relation("Logs", func(q *orm.Query) (*orm.Query, error) {
 			return q.Order("id ASC"), nil
 		})
+	}
 
 	query = pg.WhereAllowedTenants(query, "schedule.tenant_id", tenants).Order("id ASC")
 
@@ -123,10 +128,13 @@ func (agent *PGJob) Search(ctx context.Context, filters *entities.JobFilters, te
 
 	query := agent.db.ModelContext(ctx, &jobs).
 		Relation("Transaction").
-		Relation("Schedule").
-		Relation("Logs", func(q *orm.Query) (*orm.Query, error) {
+		Relation("Schedule")
+
+	if filters.WithLogs {
+		query = query.Relation("Logs", func(q *orm.Query) (*orm.Query, error) {
 			return q.Order("id ASC"), nil
 		})
+	}
 
 	if len(filters.TxHashes) > 0 {
 		query = query.Where("transaction.hash in (?)", gopg.In(filters.TxHashes))

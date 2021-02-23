@@ -74,7 +74,7 @@ func (uc *retrySessionJobUseCase) Execute(ctx context.Context, jobUUID, childUUI
 		return "", errors.FromError(err).ExtendComponent(retrySessionJobComponent)
 	}
 
-	logger.Info("job has been resent")
+	logger.Info("job has been resent successfully")
 	return job.UUID, nil
 }
 

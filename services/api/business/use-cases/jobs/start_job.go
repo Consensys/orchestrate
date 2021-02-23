@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils/envelope"
 	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
@@ -50,7 +51,7 @@ func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID string, tenants 
 	logger := uc.logger.WithContext(ctx).WithField("job", jobUUID)
 	logger.Debug("starting job")
 
-	jobModel, err := uc.db.Job().FindOneByUUID(ctx, jobUUID, tenants)
+	jobModel, err := uc.db.Job().FindOneByUUID(ctx, jobUUID, tenants, false)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(startJobComponent)
 	}
@@ -62,49 +63,61 @@ func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID string, tenants 
 		return errors.InvalidStateError(errMessage)
 	}
 
-	jobModel.Status = entities.StatusStarted
-	jobLog := &models.Log{
-		JobID:  &jobModel.ID,
-		Status: entities.StatusStarted,
-	}
-
-	dbtx, err := uc.db.Begin()
+	err = uc.updateStatus(ctx, jobModel, entities.StatusStarted, "")
 	if err != nil {
-		return errors.FromError(err).ExtendComponent(startJobComponent)
-	}
-
-	if err = dbtx.(store.Tx).Job().Update(ctx, jobModel); err != nil {
-		return errors.FromError(err).ExtendComponent(startJobComponent)
-	}
-
-	if err = dbtx.(store.Tx).Log().Insert(ctx, jobLog); err != nil {
 		return errors.FromError(err).ExtendComponent(startJobComponent)
 	}
 
 	partition, offset, err := envelope.SendJobMessage(jobEntity, uc.kafkaProducer, uc.topicsCfg.Sender)
 	if err != nil {
-		logger.WithError(err).Error("failed to send job message")
-		_ = dbtx.Rollback()
+		errMsg := "failed to send job message"
+		_ = uc.updateStatus(ctx, jobModel, entities.StatusFailed, errMsg)
+		logger.WithError(err).Error(errMsg)
 		return errors.FromError(err).ExtendComponent(startJobComponent)
 	}
 
-	if err := dbtx.Commit(); err != nil {
-		return errors.FromError(err).ExtendComponent(startJobComponent)
-	}
-
-	uc.addMetrics(jobLog, jobModel.Logs[len(jobModel.Logs)-1], jobModel.ChainUUID)
 	logger.WithField("partition", partition).WithField("offset", offset).Info("job started successfully")
+
 	return nil
 }
 
-func (uc *startJobUseCase) addMetrics(current, previous *models.Log, chainUUID string) {
+func (uc *startJobUseCase) updateStatus(ctx context.Context, job *models.Job, status entities.JobStatus, msg string) error {
+	job.Status = status
+	jobLog := &models.Log{
+		JobID:   &job.ID,
+		Status:  status,
+		Message: msg,
+	}
+
+	prevUpdatedAt := job.UpdatedAt
+	prevStatus := job.Status
+	err := database.ExecuteInDBTx(uc.db, func(tx database.Tx) error {
+		if err := tx.(store.Tx).Job().Update(ctx, job); err != nil {
+			return err
+		}
+
+		if err := tx.(store.Tx).Log().Insert(ctx, jobLog); err != nil {
+			return errors.FromError(err).ExtendComponent(startJobComponent)
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return err
+	}
+
+	uc.addMetrics(job.UpdatedAt.Sub(prevUpdatedAt), prevStatus, status, job.ChainUUID)
+	return nil
+}
+
+func (uc *startJobUseCase) addMetrics(elapseTime time.Duration, previousStatus, nextStatus entities.JobStatus, chainUUID string) {
 	baseLabels := []string{
 		"chain_uuid", chainUUID,
 	}
 
-	d := float64(current.CreatedAt.Sub(previous.CreatedAt).Nanoseconds()) / float64(time.Second)
 	uc.metrics.JobsLatencyHistogram().With(append(baseLabels,
-		"prev_status", string(previous.Status),
-		"status", string(current.Status),
-	)...).Observe(d)
+		"prev_status", string(previousStatus),
+		"status", string(nextStatus),
+	)...).Observe(elapseTime.Seconds())
 }
