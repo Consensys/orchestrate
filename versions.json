@@ -1,5 +1,5 @@
 {
-    "latest":{"spec":"latest","source":"master"},
+    "latest":{"spec":"latest","source":"master", "display":false},
     "stable":{"spec":"21.1.0","source":"21.1.0"},
     "21.1.0":{"spec":"21.1.0","source":"21.1.0"},
     "2.5.0":{"spec":"2.5.0","source":"2.5.0"},

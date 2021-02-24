@@ -73,13 +73,13 @@
     <script>
 
       // default version list in case of JSON loading issue
-      var versions = {'latest':{'spec':'latest','source':'master'}};
+      let versions = {'latest': {'spec': 'latest', 'source': 'master'}};
       const DEFAULT_VERSION = Object.keys(versions)[0];
 
-      // return the yaml OPENAPI spec path to load for a version
+      // return the JSON OPENAPI spec path to load for a version
       // or a default version (first one in list) if no matching version.
       function getSpecPath(version){
-        var spec = (version in versions) ? versions[version].spec : versions[Object.keys(versions)[0]].spec;
+        let spec = (version in versions) ? versions[version].spec : versions[Object.keys(versions)[0]].spec;
         return `orchestrate.${spec}.json`;
       }
 
@@ -102,25 +102,39 @@
       function updateVersionsDropDown(){
         $("#versionsList").empty();
         $.each( versions, function( version, infos ) {
-          var sourceText = (version === infos.source) ? '' : ` (${infos.source})`;
+          if(infos.display === undefined || infos.display) { //latest display can be disabled in versions file
+            let sourceText = (version === infos.source) ? '' : ` (${infos.source})`;
 
-          var item = $( `<a class="version-number-item dropdown-item" href="#${version}">${version}${sourceText}</a>" `);
+            let item = $(
+                `<a class="version-number-item dropdown-item" href="#${version}">${version}${sourceText}</a>" `);
 
-          if(isDisplayedVersion(version)){
-            item.addClass("active");
-            $('#dropdownMenuButton').text(`${version}${sourceText}`);
-            document.title = `ConsenSys Codefi Orchestrate API Documentation - ${version}`;
+            if (isDisplayedVersion(version)) {
+              item.addClass("active");
+              $('#dropdownMenuButton').text(`${version}${sourceText}`);
+              document.title = `ConsenSys Codefi Orchestrate API Documentation - ${version}`;
+            }
+
+            item.appendTo("#versionsList");
           }
-
-          item.appendTo("#versionsList");
         });
       }
 
       // get the version in the URL from the hash part
       // removes the and # at the begining of the hask part
-      // returns empty string if no hash present
+      // returns empty string if no hash present and latest enabled
+      // otherwise return the stable version
       function getVersionFromURL(){
-        return $(location).attr('hash').replace(/^[#]/,'');
+        let hash = $(location).attr('hash').replace(/^[#]/,'');
+
+        // display stable if latest is disabled
+        if(versions['latest'] !== undefined
+            && versions['latest'].display !== undefined
+            && !versions['latest'].display
+            && hash === ''){
+          hash = 'stable';
+          location.hash = 'stable'
+        }
+        return hash;
       }
 
       // set the global versions value from the Json file,
