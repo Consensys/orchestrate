@@ -121,20 +121,6 @@ services:
     labels:
       filebeat: "false"
 
-  #  TODO: Remove after version 2.7.0
-  keymanager-migration-import-secrets:
-    <<: *container-common
-    environment:
-      <<: *default-variables
-      <<: *key-manager-common
-    restart: "no"
-    depends_on:
-      - key-vault-init
-    command: key-manager migrate import-secrets
-    volumes:
-      - vault-token:/vault/token:ro
-      - ./build/bin/orchestrate:/bin/main
-
   key-vault-init:
     build: ./scripts/deps/hashicorp
     environment:

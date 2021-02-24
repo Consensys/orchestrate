@@ -78,8 +78,8 @@ services:
     <<: *container-common
     <<: *postgres-common
     image: postgres:13.1-alpine
-#    command: ["postgres", "-c", "max_connections=100"]
-#    command: ["postgres", "-c", "log_statement=all"]
+    #    command: ["postgres", "-c", "max_connections=100"]
+    #    command: ["postgres", "-c", "log_statement=all"]
     volumes:
       - db-data-api:/var/lib/postgresql/data
     ports:
@@ -116,21 +116,6 @@ services:
       - ./hashicorp/plugin.sh:/plugin.sh
     command: >
       sh -c "./plugin.sh && ./init.sh"
-
-  vault-import-secrets:
-    <<: *container-common
-    build: ./hashicorp
-    environment:
-      VAULT_ADDR: ${VAULT_ADDR-http://vault:8200}
-      TOKEN_PATH: ${TOKEN_PATH-/vault/token}
-    restart: "no"
-    depends_on:
-      - vault
-      - vault-init
-    volumes:
-      - vault-token:/vault/token:ro
-      - ./hashicorp/kv-v2/secrets_to_engine.sh:/import.sh
-    command: bash -c "/import.sh"
 
 volumes:
   db-data-postgres-unit:

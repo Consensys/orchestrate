@@ -27,7 +27,6 @@ func newRunCommand() *cobra.Command {
 		},
 	}
 
-	// Transaction signer flags
 	keymanager.Flags(runCmd.Flags())
 
 	return runCmd
