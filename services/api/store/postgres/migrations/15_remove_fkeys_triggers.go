@@ -8,26 +8,24 @@ import (
 func upgradeRemoveFkeysTrigger(db migrations.DB) error {
 	log.Debug("Applying removing fkeys and triggers...")
 	_, err := db.Exec(`
-DROP FUNCTION updated CASCADE;
-
-DROP FUNCTION job_log_updated CASCADE;
-
 ALTER TABLE jobs
 	DROP CONSTRAINT jobs_schedule_id_fkey;
 
 ALTER TABLE jobs
 	DROP CONSTRAINT jobs_transaction_id_fkey;
 
-ALTER TABLE jobs
-	DROP CONSTRAINT jobs_chain_uuid_fkey;
+ALTER TABLE logs
+	DROP CONSTRAINT logs_job_id_fkey;
 
 ALTER TABLE transaction_requests
 	DROP CONSTRAINT transaction_requests_schedule_id_fkey;
 
-ALTER TABLE logs
-	DROP CONSTRAINT logs_job_id_fkey;
+DROP TRIGGER faucet_trigger ON faucets;
+DROP TRIGGER chain_trigger ON chains;
+DROP TRIGGER job_trigger ON jobs;
+DROP TRIGGER accounts_trigger ON accounts;
 
-CREATE INDEX jobs_schedule_id_idx on jobs (schedule_id);
+DROP FUNCTION updated;
 `)
 	if err != nil {
 		return err
@@ -48,26 +46,8 @@ CREATE OR REPLACE FUNCTION updated() RETURNS TRIGGER AS
 	END;
 	$$ LANGUAGE plpgsql;
 
-CREATE or REPLACE FUNCTION job_log_updated() RETURNS trigger AS
-	$$
-	BEGIN
-	  UPDATE jobs SET updated_at = (now() at time zone 'utc') WHERE id = NEW.job_id;
-	  RETURN NEW;
-	END;
-	$$ LANGUAGE plpgsql;
-
 CREATE TRIGGER job_trigger
 	BEFORE UPDATE ON jobs
-	FOR EACH ROW 
-	EXECUTE PROCEDURE updated();
-
-CREATE TRIGGER update_parent_job
-	AFTER INSERT OR UPDATE ON logs
-	FOR EACH ROW
-	EXECUTE PROCEDURE job_log_updated();
-
-CREATE TRIGGER accounts_updated_trigger
-	BEFORE UPDATE ON accounts
 	FOR EACH ROW 
 	EXECUTE PROCEDURE updated();
 
@@ -81,32 +61,22 @@ CREATE TRIGGER faucet_trigger
 	FOR EACH ROW 
 	EXECUTE PROCEDURE updated();
 
-CREATE TRIGGER transactions_updated_trigger
-	BEFORE UPDATE ON transactions
-	FOR EACH ROW 
-	EXECUTE PROCEDURE updated();
-
 CREATE TRIGGER accounts_trigger
 	BEFORE UPDATE ON accounts
 	FOR EACH ROW 
 	EXECUTE PROCEDURE updated();
 
 ALTER TABLE jobs
-	ADD CONSTRAINT jobs_schedule_id_fkey FOREIGN KEY (schedule_id) REFERENCES schedules (id) ON DELETE CASCADE;
+	ADD CONSTRAINT jobs_schedule_id_fkey FOREIGN KEY (schedule_id) REFERENCES schedules (id);
 
 ALTER TABLE jobs
-	ADD CONSTRAINT jobs_transaction_id_fkey FOREIGN KEY (transaction_id) REFERENCES transactions (id) ON DELETE RESTRICT;
-
-ALTER TABLE jobs
-	ADD CONSTRAINT jobs_chain_uuid_fkey FOREIGN KEY (chain_uuid) REFERENCES chains (uuid) ON DELETE SET NULL;
-
-ALTER TABLE transaction_requests
-	ADD CONSTRAINT transaction_requests_schedule_id_fkey FOREIGN KEY (schedule_id) REFERENCES schedules (id) ON DELETE SET NULL;
+	ADD CONSTRAINT jobs_transaction_id_fkey FOREIGN KEY (transaction_id) REFERENCES transactions (id);
 
 ALTER TABLE logs
-	ADD CONSTRAINT logs_job_id_fkey FOREIGN KEY (job_id) REFERENCES jobs (id) ON DELETE CASCADE;
+	ADD CONSTRAINT logs_job_id_fkey FOREIGN KEY (job_id) REFERENCES jobs (id);
 
-DROP INDEX jobs_schedule_id_idx;
+ALTER TABLE transaction_requests
+	ADD CONSTRAINT transaction_requests_schedule_id_fkey FOREIGN KEY (schedule_id) REFERENCES schedules (id);
 `)
 	if err != nil {
 		return err

@@ -5,8 +5,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func upgradeFistIndexesRound(db migrations.DB) error {
-	log.Debug("Applying first indexes round...")
+func upgradeIndexesRound(db migrations.DB) error {
+	log.Debug("Applying indexes round...")
 	_, err := db.Exec(`
 CREATE UNIQUE INDEX chain_uuid_idx ON chains (uuid);
 
@@ -33,6 +33,8 @@ UPDATE jobs j1
 CREATE INDEX jobs_parent_updated_at_idx on jobs (is_parent, updated_at);
 
 CREATE INDEX jobs_chain_uuid_status_idx on jobs (chain_uuid, status);
+
+CREATE INDEX jobs_schedule_id_idx on jobs (schedule_id);
 `)
 	if err != nil {
 		return err
@@ -42,8 +44,8 @@ CREATE INDEX jobs_chain_uuid_status_idx on jobs (chain_uuid, status);
 	return nil
 }
 
-func downgradeFistIndexesRound(db migrations.DB) error {
-	log.Debug("Undoing first indexes round...")
+func downgradeIndexesRound(db migrations.DB) error {
+	log.Debug("Undoing indexes round...")
 	_, err := db.Exec(`
 DROP INDEX chain_uuid_idx;
 
@@ -61,6 +63,8 @@ ALTER TABLE jobs
 	DROP COLUMN is_parent, DROP COLUMN status;
 
 DROP INDEX logs_job_id_status_idx;
+
+DROP INDEX jobs_schedule_id_idx;
 `)
 	if err != nil {
 		return err
@@ -71,5 +75,5 @@ DROP INDEX logs_job_id_status_idx;
 }
 
 func init() {
-	Collection.MustRegisterTx(upgradeFistIndexesRound, downgradeFistIndexesRound)
+	Collection.MustRegisterTx(upgradeIndexesRound, downgradeIndexesRound)
 }

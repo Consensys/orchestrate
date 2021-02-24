@@ -52,7 +52,6 @@ func (uc *updateChildrenUseCase) Execute(ctx context.Context, jobUUID, parentJob
 	jobsToUpdate, err := uc.db.Job().Search(ctx, &entities.JobFilters{
 		ParentJobUUID: parentJobUUID,
 		Status:        entities.StatusPending,
-		WithLogs:      true,
 	}, tenants)
 
 	if err != nil {
@@ -65,15 +64,15 @@ func (uc *updateChildrenUseCase) Execute(ctx context.Context, jobUUID, parentJob
 			continue
 		}
 
-		jobModel.Status = nextStatus
-		if err := uc.db.Job().Update(ctx, jobModel); err != nil {
-			return errors.FromError(err).ExtendComponent(updateChildrenComponent)
-		}
-
 		jobLogModel := &models.Log{
 			JobID:   &jobModel.ID,
 			Status:  nextStatus,
 			Message: fmt.Sprintf("sibling (or parent) job %s was mined instead", jobUUID),
+		}
+
+		jobModel.Status = nextStatus
+		if err := uc.db.Job().Update(ctx, jobModel); err != nil {
+			return errors.FromError(err).ExtendComponent(updateChildrenComponent)
 		}
 
 		if err := uc.db.Log().Insert(ctx, jobLogModel); err != nil {

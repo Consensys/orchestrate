@@ -1,14 +1,15 @@
 # Orchestrate Release Notes
 
-## v21.x.0 (Unreleased)
+## v21.1.2 (Unreleased)
 ### 🆕 Features
 * New environment variable, `KAFKA_NUM_CONSUMERS`, to launch multiple kafka consumer in `tx-sender`
 * Support for new Postgres setting `DB_POOL_TIMEOUT`
+* Major API and DB performance improvements
 
 ### 🛠 Bug fixes
-* Remove unnecessary HTTP retries on internal API calls
+* Prevent unnecessary HTTP retries on internal API calls
 
-## v21.1.1 (Unreleased)
+## v21.1.1 (2021-02-19)
 
 ### 🛠 Bug fixes
 * Hanging issue during synchronization from block 0 
