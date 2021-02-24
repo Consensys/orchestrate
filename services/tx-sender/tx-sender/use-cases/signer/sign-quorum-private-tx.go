@@ -4,21 +4,21 @@ import (
 	"context"
 	"fmt"
 
+	pkgcryto "github.com/ConsenSys/orchestrate/pkg/crypto/ethereum"
+	"github.com/ConsenSys/orchestrate/pkg/encoding/rlp"
+	"github.com/ConsenSys/orchestrate/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	"github.com/ConsenSys/orchestrate/pkg/utils"
+	"github.com/ConsenSys/orchestrate/services/tx-sender/tx-sender/parsers"
 	quorumtypes "github.com/consensys/quorum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
-	pkgcryto "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/crypto/ethereum"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/rlp"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sender/tx-sender/parsers"
 
-	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sender/tx-sender/use-cases"
+	usecases "github.com/ConsenSys/orchestrate/services/tx-sender/tx-sender/use-cases"
 
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/types/keymanager/ethereum"
+	"github.com/ConsenSys/orchestrate/services/key-manager/client"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/ethereum"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client"
 )
 
 const signQuorumPrivateTransactionComponent = "use-cases.sign-quorum-private-transaction"

@@ -3,9 +3,9 @@ package utils
 import (
 	"fmt"
 
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/services/key-manager/service/formatters"
 	signer "github.com/ethereum/go-ethereum/signer/core"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/service/formatters"
 )
 
 func GetEIP712EncodedData(typedData *signer.TypedData) (string, error) {

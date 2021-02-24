@@ -1,9 +1,9 @@
 package testutils
 
 import (
+	types "github.com/ConsenSys/orchestrate/pkg/types/api"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 	"github.com/gofrs/uuid"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 )
 
 const FromAddress = "0x5Cc634233E4a454d47aACd9fC68801482Fb02610"

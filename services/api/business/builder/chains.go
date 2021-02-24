@@ -1,10 +1,10 @@
 package builder
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient"
-	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases/chains"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
+	"github.com/ConsenSys/orchestrate/pkg/ethclient"
+	usecases "github.com/ConsenSys/orchestrate/services/api/business/use-cases"
+	"github.com/ConsenSys/orchestrate/services/api/business/use-cases/chains"
+	"github.com/ConsenSys/orchestrate/services/api/store"
 )
 
 type chainUseCases struct {

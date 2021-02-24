@@ -4,16 +4,16 @@ package accounts
 
 import (
 	"context"
-	parsers2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/parsers"
-	models2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models"
+	parsers2 "github.com/ConsenSys/orchestrate/services/api/business/parsers"
+	models2 "github.com/ConsenSys/orchestrate/services/api/store/models"
 	"testing"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/mocks"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models/testutils"
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	"github.com/ConsenSys/orchestrate/services/api/store/mocks"
+	"github.com/ConsenSys/orchestrate/services/api/store/models/testutils"
 )
 
 func TestSearchAccounts_Execute(t *testing.T) {

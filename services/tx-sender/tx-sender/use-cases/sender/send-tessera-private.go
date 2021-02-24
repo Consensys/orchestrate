@@ -3,15 +3,15 @@ package sender
 import (
 	"context"
 
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/ethclient"
+	"github.com/ConsenSys/orchestrate/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/sdk/client"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	"github.com/ConsenSys/orchestrate/pkg/utils"
+	usecases "github.com/ConsenSys/orchestrate/services/tx-sender/tx-sender/use-cases"
+	utils2 "github.com/ConsenSys/orchestrate/services/tx-sender/tx-sender/utils"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
-	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sender/tx-sender/use-cases"
-	utils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sender/tx-sender/utils"
 )
 
 const sendTesseraPrivateTxComponent = "use-cases.send-tessera-private-tx"

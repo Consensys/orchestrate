@@ -8,14 +8,14 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/ethclient"
+	"github.com/ConsenSys/orchestrate/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	"github.com/ConsenSys/orchestrate/pkg/types/tx"
+	"github.com/ConsenSys/orchestrate/pkg/utils"
+	"github.com/ConsenSys/orchestrate/services/tx-sender/store"
 	ethcommon "github.com/ethereum/go-ethereum/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/tx"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sender/store"
 )
 
 const component = "nonce-manager"

@@ -17,12 +17,12 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/stretchr/testify/assert"
-	backoffmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/backoff/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/testutils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethereum/types"
-	pkgUtils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
+	backoffmock "github.com/ConsenSys/orchestrate/pkg/backoff/mock"
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/ethclient/testutils"
+	"github.com/ConsenSys/orchestrate/pkg/ethclient/utils"
+	"github.com/ConsenSys/orchestrate/pkg/ethereum/types"
+	pkgUtils "github.com/ConsenSys/orchestrate/pkg/utils"
 )
 
 func newEthereumClient() *Client {

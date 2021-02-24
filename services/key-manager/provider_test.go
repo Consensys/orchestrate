@@ -9,8 +9,8 @@ import (
 
 	traefikdynamic "github.com/containous/traefik/v2/pkg/config/dynamic"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/dynamic"
+	"github.com/ConsenSys/orchestrate/pkg/http"
+	"github.com/ConsenSys/orchestrate/pkg/http/config/dynamic"
 )
 
 func TestNewInternalConfig(t *testing.T) {

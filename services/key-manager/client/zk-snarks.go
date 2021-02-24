@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	clientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/client-utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/httputil"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/zk-snarks"
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	clientutils "github.com/ConsenSys/orchestrate/pkg/http/client-utils"
+	"github.com/ConsenSys/orchestrate/pkg/http/httputil"
+	"github.com/ConsenSys/orchestrate/pkg/types/keymanager"
+	types "github.com/ConsenSys/orchestrate/pkg/types/keymanager/zk-snarks"
 )
 
 const (

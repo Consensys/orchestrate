@@ -4,13 +4,13 @@ import (
 	"context"
 	"reflect"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/key-manager/builder"
+	"github.com/ConsenSys/orchestrate/services/key-manager/key-manager/builder"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/store"
+	"github.com/ConsenSys/orchestrate/services/key-manager/store"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/app"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/dynamic"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/service/controllers"
+	"github.com/ConsenSys/orchestrate/pkg/app"
+	"github.com/ConsenSys/orchestrate/pkg/http/config/dynamic"
+	"github.com/ConsenSys/orchestrate/services/key-manager/service/controllers"
 )
 
 func NewKeyManager(ctx context.Context, cfg *Config) (*app.App, error) {

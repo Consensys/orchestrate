@@ -3,8 +3,8 @@ package sarama
 import (
 	"context"
 
+	"github.com/ConsenSys/orchestrate/pkg/errors"
 	"github.com/Shopify/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 )
 
 //go:generate mockgen -source=consumer_group.go -destination=mock/mock.go -package=mock

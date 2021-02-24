@@ -1,12 +1,12 @@
 package config
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/docker/container/ganache"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/docker/container/hashicorp"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/docker/container/kafka"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/docker/container/postgres"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/docker/container/zookeeper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
+	"github.com/ConsenSys/orchestrate/pkg/docker/container/ganache"
+	"github.com/ConsenSys/orchestrate/pkg/docker/container/hashicorp"
+	"github.com/ConsenSys/orchestrate/pkg/docker/container/kafka"
+	"github.com/ConsenSys/orchestrate/pkg/docker/container/postgres"
+	"github.com/ConsenSys/orchestrate/pkg/docker/container/zookeeper"
+	"github.com/ConsenSys/orchestrate/pkg/utils"
 )
 
 type Composition struct {

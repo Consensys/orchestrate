@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"math/big"
 
+	"github.com/ConsenSys/orchestrate/pkg/ethereum/types"
+	proto "github.com/ConsenSys/orchestrate/pkg/types/ethereum"
 	eth "github.com/ethereum/go-ethereum"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethereum/types"
-	proto "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/ethereum"
 )
 
 //go:generate mockgen -source=ethclient.go -destination=mock/mock.go -package=mock

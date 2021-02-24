@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/json"
-	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/utils"
+	"github.com/ConsenSys/orchestrate/pkg/encoding/json"
+	ethclient "github.com/ConsenSys/orchestrate/pkg/ethclient/utils"
 )
 
 func TestHTTPCacheRequest_Valid(t *testing.T) {

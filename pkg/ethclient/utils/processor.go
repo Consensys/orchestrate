@@ -3,8 +3,8 @@ package utils
 import (
 	"encoding/json"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	proto "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/ethereum"
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	proto "github.com/ConsenSys/orchestrate/pkg/types/ethereum"
 )
 
 type ProcessResultFunc func(result json.RawMessage) error

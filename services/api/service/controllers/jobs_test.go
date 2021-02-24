@@ -11,21 +11,21 @@ import (
 	"strings"
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/testutils"
-	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases/mocks"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
+	txschedulertypes "github.com/ConsenSys/orchestrate/pkg/types/api"
+	"github.com/ConsenSys/orchestrate/services/api/business/use-cases"
+	"github.com/ConsenSys/orchestrate/services/api/business/use-cases/mocks"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/json"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/service/formatters"
+	"github.com/ConsenSys/orchestrate/pkg/encoding/json"
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
+	"github.com/ConsenSys/orchestrate/services/api/service/formatters"
 )
 
 type jobsCtrlTestSuite struct {

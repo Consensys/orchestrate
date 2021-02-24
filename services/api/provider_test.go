@@ -3,9 +3,9 @@
 package api
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/proxy"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	"github.com/ConsenSys/orchestrate/pkg/utils"
+	"github.com/ConsenSys/orchestrate/services/api/proxy"
 	"math"
 	"reflect"
 	"testing"
@@ -13,8 +13,8 @@ import (
 
 	traefikdynamic "github.com/containous/traefik/v2/pkg/config/dynamic"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/dynamic"
+	"github.com/ConsenSys/orchestrate/pkg/http"
+	"github.com/ConsenSys/orchestrate/pkg/http/config/dynamic"
 )
 
 func TestNewInternalConfig(t *testing.T) {

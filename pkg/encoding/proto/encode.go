@@ -1,8 +1,8 @@
 package proto
 
 import (
+	"github.com/ConsenSys/orchestrate/pkg/errors"
 	"github.com/golang/protobuf/proto"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 )
 
 // Marshal a proto into a message assumed to be an Envelope

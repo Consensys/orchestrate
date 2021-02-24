@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/ConsenSys/orchestrate/pkg/auth/key"
+	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
 	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/auth/key"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
 )
 
 func init() {

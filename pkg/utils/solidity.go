@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strings"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/errors"
 )
 
 const nameRegex = "[a-zA-Z_][a-zA-Z0-9_]*"

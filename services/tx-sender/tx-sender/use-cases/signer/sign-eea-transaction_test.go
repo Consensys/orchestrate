@@ -4,11 +4,11 @@ package signer
 
 import (
 	"context"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/ethereum"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/testutils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client/mock"
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
+	"github.com/ConsenSys/orchestrate/pkg/types/keymanager/ethereum"
+	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
+	"github.com/ConsenSys/orchestrate/services/key-manager/client/mock"
 	"strconv"
 	"testing"
 

@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/ConsenSys/orchestrate/pkg/encoding/json"
+	"github.com/ConsenSys/orchestrate/tests/utils"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/json"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/utils"
 )
 
 func init() {

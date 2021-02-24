@@ -5,8 +5,8 @@ import (
 	"math/big"
 	"regexp"
 
+	"github.com/ConsenSys/orchestrate/pkg/errors"
 	ethcommon "github.com/ethereum/go-ethereum/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 )
 
 // KafkaChainTopic computes Kafka topic identified by chain

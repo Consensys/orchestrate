@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
+	"github.com/ConsenSys/orchestrate/pkg/ethclient"
+	"github.com/ConsenSys/orchestrate/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/utils"
 )
 
 var privacyGroupsCtxKey ctxKey = "besuPrivacyGroups"

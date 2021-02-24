@@ -3,11 +3,11 @@ package testutils
 import (
 	"time"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
+	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
 
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	"github.com/ConsenSys/orchestrate/pkg/utils"
 	ethcommon "github.com/ethereum/go-ethereum/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 )
 
 func FakeAccount() *entities.Account {

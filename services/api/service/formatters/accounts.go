@@ -4,10 +4,10 @@ import (
 	"net/http"
 	"strings"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
+	"github.com/ConsenSys/orchestrate/pkg/types/api"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	"github.com/ConsenSys/orchestrate/pkg/utils"
 )
 
 func FormatCreateAccountRequest(req *api.CreateAccountRequest) *entities.Account {

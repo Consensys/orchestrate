@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/ConsenSys/orchestrate/pkg/utils"
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 )
 
 type TestSuiteEnv interface {

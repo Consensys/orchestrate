@@ -8,13 +8,13 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/log"
 	"github.com/Shopify/sarama"
 	"github.com/hashicorp/go-multierror"
 	healthz "github.com/heptiolabs/healthcheck"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 )
 
 const component = "broker.sarama"

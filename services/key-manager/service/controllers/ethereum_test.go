@@ -9,20 +9,20 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager"
-	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/key-manager/use-cases"
-	mocks2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/key-manager/use-cases/mocks"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/store/mocks"
+	"github.com/ConsenSys/orchestrate/pkg/types/keymanager"
+	usecases "github.com/ConsenSys/orchestrate/services/key-manager/key-manager/use-cases"
+	mocks2 "github.com/ConsenSys/orchestrate/services/key-manager/key-manager/use-cases/mocks"
+	"github.com/ConsenSys/orchestrate/services/key-manager/store/mocks"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/errors"
 
 	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/json"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/testutils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/service/formatters"
+	"github.com/ConsenSys/orchestrate/pkg/encoding/json"
+	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
+	"github.com/ConsenSys/orchestrate/services/key-manager/service/formatters"
 )
 
 type ethereumCtrlTestSuite struct {

@@ -4,19 +4,19 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager"
-	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/key-manager/use-cases"
+	"github.com/ConsenSys/orchestrate/pkg/types/keymanager"
+	usecases "github.com/ConsenSys/orchestrate/services/key-manager/key-manager/use-cases"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/store"
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/services/key-manager/store"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
+	"github.com/ConsenSys/orchestrate/pkg/utils"
 
+	jsonutils "github.com/ConsenSys/orchestrate/pkg/encoding/json"
+	"github.com/ConsenSys/orchestrate/pkg/http/httputil"
+	types "github.com/ConsenSys/orchestrate/pkg/types/keymanager/ethereum"
+	"github.com/ConsenSys/orchestrate/services/key-manager/service/formatters"
 	"github.com/gorilla/mux"
-	jsonutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/json"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/httputil"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/ethereum"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/service/formatters"
 )
 
 const ethAccountPath = "/ethereum/accounts"

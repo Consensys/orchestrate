@@ -9,10 +9,10 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/ConsenSys/orchestrate/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/tcp/metrics"
 	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
 	"github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tcp/metrics"
 )
 
 const component = "tcp"

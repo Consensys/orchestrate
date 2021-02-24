@@ -3,10 +3,10 @@ package hook
 import (
 	"context"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 
+	"github.com/ConsenSys/orchestrate/services/tx-listener/dynamic"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/dynamic"
 )
 
 //go:generate mockgen -source=hook.go -destination=mock/mock.go -package=mock

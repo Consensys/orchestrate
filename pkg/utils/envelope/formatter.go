@@ -3,8 +3,8 @@ package envelope
 import (
 	"math/big"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/tx"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	"github.com/ConsenSys/orchestrate/pkg/types/tx"
 )
 
 func NewEnvelopeFromJob(job *entities.Job, headers map[string]string) *tx.TxEnvelope {

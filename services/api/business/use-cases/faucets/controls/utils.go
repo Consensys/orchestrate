@@ -4,10 +4,10 @@ import (
 	"context"
 	"math/big"
 
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/ethclient"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient"
 )
 
 func getAddressBalance(ctx context.Context, chainStateReader ethclient.ChainStateReader, uris []string, address string) (*big.Int, error) {

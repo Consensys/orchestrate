@@ -12,9 +12,9 @@ import (
 
 	"github.com/cenkalti/backoff/v4"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/testutils"
-	pkgUtils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/ethclient/testutils"
+	pkgUtils "github.com/ConsenSys/orchestrate/pkg/utils"
 )
 
 func newQuorumClient() *Client {

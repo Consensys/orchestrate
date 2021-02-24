@@ -7,16 +7,16 @@ import (
 	"fmt"
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	mocks2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases/mocks"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	mocks2 "github.com/ConsenSys/orchestrate/services/api/business/use-cases/mocks"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	testutils3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/testutils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/parsers"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/mocks"
-	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models/testutils"
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	testutils3 "github.com/ConsenSys/orchestrate/pkg/types/testutils"
+	"github.com/ConsenSys/orchestrate/services/api/business/parsers"
+	"github.com/ConsenSys/orchestrate/services/api/store/mocks"
+	testutils2 "github.com/ConsenSys/orchestrate/services/api/store/models/testutils"
 )
 
 func TestCreateJob_Execute(t *testing.T) {

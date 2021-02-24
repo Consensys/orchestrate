@@ -3,14 +3,14 @@ package chains
 import (
 	"context"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database"
+	"github.com/ConsenSys/orchestrate/pkg/database"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/parsers"
-	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	"github.com/ConsenSys/orchestrate/services/api/business/parsers"
+	usecases "github.com/ConsenSys/orchestrate/services/api/business/use-cases"
+	"github.com/ConsenSys/orchestrate/services/api/store"
 )
 
 const updateChainComponent = "use-cases.update-chain"

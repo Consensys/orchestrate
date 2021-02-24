@@ -4,9 +4,9 @@ import (
 	"math/big"
 	"regexp"
 
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 	ethcommon "github.com/ethereum/go-ethereum/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 )
 
 var JobTypeMap = map[entities.JobType]JobType{

@@ -1,8 +1,8 @@
 package testutils
 
 import (
+	"github.com/ConsenSys/orchestrate/pkg/types/api"
 	"github.com/gofrs/uuid"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 )
 
 func FakeRegisterFaucetRequest() *api.RegisterFaucetRequest {

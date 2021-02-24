@@ -3,16 +3,16 @@ package txsender
 import (
 	"context"
 
+	"github.com/ConsenSys/orchestrate/pkg/app"
+	dbredis "github.com/ConsenSys/orchestrate/pkg/database/redis"
+	ethclient "github.com/ConsenSys/orchestrate/pkg/ethclient/rpc"
+	"github.com/ConsenSys/orchestrate/pkg/log"
+	orchestrateClient "github.com/ConsenSys/orchestrate/pkg/sdk/client"
 	sarama2 "github.com/Shopify/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/app"
-	dbredis "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database/redis"
-	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/rpc"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
-	orchestrateClient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
 
+	"github.com/ConsenSys/orchestrate/pkg/broker/sarama"
+	keymanager "github.com/ConsenSys/orchestrate/services/key-manager/client"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
-	keymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client"
 )
 
 // New Utility function used to initialize a new service

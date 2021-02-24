@@ -9,14 +9,14 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	mock2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/testutils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sender/tx-sender/use-cases/mocks"
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	mock2 "github.com/ConsenSys/orchestrate/pkg/ethclient/mock"
+	"github.com/ConsenSys/orchestrate/pkg/sdk/client/mock"
+	"github.com/ConsenSys/orchestrate/pkg/types/api"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
+	"github.com/ConsenSys/orchestrate/pkg/utils"
+	"github.com/ConsenSys/orchestrate/services/tx-sender/tx-sender/use-cases/mocks"
 )
 
 func TestSendTesseraPrivate_Execute(t *testing.T) {

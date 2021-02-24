@@ -1,13 +1,13 @@
 package app
 
 import (
+	"github.com/ConsenSys/orchestrate/pkg/configwatcher"
+	"github.com/ConsenSys/orchestrate/pkg/http"
+	"github.com/ConsenSys/orchestrate/pkg/log"
+	metricsregister "github.com/ConsenSys/orchestrate/pkg/metrics/registry"
 	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
 	traefiktypes "github.com/containous/traefik/v2/pkg/types"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/configwatcher"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
-	metricsregister "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/metrics/registry"
 )
 
 type Config struct {

@@ -7,12 +7,12 @@ import (
 
 	"k8s.io/apimachinery/pkg/util/rand"
 
+	"github.com/ConsenSys/orchestrate/pkg/database/postgres"
 	"github.com/go-pg/migrations/v7"
 	"github.com/go-pg/pg/v9"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database/postgres"
 )
 
 func init() {

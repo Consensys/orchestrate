@@ -1,8 +1,8 @@
 package parsers
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	"github.com/ConsenSys/orchestrate/services/api/store/models"
 )
 
 func NewTransactionModelFromEntities(tx *entities.ETHTransaction) *models.Transaction {

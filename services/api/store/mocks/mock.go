@@ -7,10 +7,10 @@ package mocks
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
-	database "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database"
-	entities "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	store "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
-	models "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models"
+	database "github.com/ConsenSys/orchestrate/pkg/database"
+	entities "github.com/ConsenSys/orchestrate/pkg/types/entities"
+	store "github.com/ConsenSys/orchestrate/services/api/store"
+	models "github.com/ConsenSys/orchestrate/services/api/store/models"
 	reflect "reflect"
 )
 

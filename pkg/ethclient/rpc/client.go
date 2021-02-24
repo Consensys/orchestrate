@@ -12,13 +12,13 @@ import (
 	"sync/atomic"
 	"time"
 
+	encoding "github.com/ConsenSys/orchestrate/pkg/encoding/json"
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/ethclient/utils"
+	"github.com/ConsenSys/orchestrate/pkg/log"
 	"github.com/cenkalti/backoff/v4"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/json"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 )
 
 type ProcessResultFunc func(result json.RawMessage) error

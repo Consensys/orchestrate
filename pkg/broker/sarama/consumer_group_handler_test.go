@@ -9,10 +9,10 @@ import (
 	"time"
 
 	"github.com/Shopify/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/log"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/engine"
+	"github.com/ConsenSys/orchestrate/pkg/broker/sarama/mock"
+	"github.com/ConsenSys/orchestrate/pkg/engine"
 )
 
 func TestContext(t *testing.T) {

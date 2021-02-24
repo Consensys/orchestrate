@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/ConsenSys/orchestrate/pkg/backoff"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/backoff"
 )
 
 func init() {

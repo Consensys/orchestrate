@@ -1,8 +1,8 @@
 package kafka
 
 import (
+	broker "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
 	"github.com/spf13/viper"
-	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
 )
 
 type Config struct {

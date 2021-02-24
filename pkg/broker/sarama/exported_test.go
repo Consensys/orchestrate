@@ -12,9 +12,9 @@ import (
 	"github.com/Shopify/sarama/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	cgmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
+	cgmock "github.com/ConsenSys/orchestrate/pkg/broker/sarama/mock"
+	"github.com/ConsenSys/orchestrate/pkg/engine"
+	"github.com/ConsenSys/orchestrate/pkg/log"
 )
 
 type ExportedTestSuite struct {

@@ -3,9 +3,9 @@ package multi
 import (
 	"fmt"
 
+	pgstore "github.com/ConsenSys/orchestrate/services/api/store/postgres"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
-	pgstore "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/postgres"
 )
 
 func init() {

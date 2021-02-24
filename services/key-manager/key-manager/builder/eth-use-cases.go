@@ -1,9 +1,9 @@
 package builder
 
 import (
-	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/key-manager/use-cases"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/key-manager/use-cases/ethereum"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/store"
+	usecases "github.com/ConsenSys/orchestrate/services/key-manager/key-manager/use-cases"
+	"github.com/ConsenSys/orchestrate/services/key-manager/key-manager/use-cases/ethereum"
+	"github.com/ConsenSys/orchestrate/services/key-manager/store"
 )
 
 type ethUseCases struct {

@@ -6,10 +6,10 @@ import (
 	"io"
 	"io/ioutil"
 
+	"github.com/ConsenSys/orchestrate/pkg/ethclient/utils"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/utils"
 )
 
 func MakeRespBody(result interface{}, errMsg string) io.ReadCloser {

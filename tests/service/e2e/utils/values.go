@@ -6,12 +6,12 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	"github.com/ConsenSys/orchestrate/pkg/types/tx"
 	gherkin "github.com/cucumber/messages-go/v10"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/mitchellh/mapstructure"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/tx"
 )
 
 func underlyingType(structType reflect.Type) reflect.Type {

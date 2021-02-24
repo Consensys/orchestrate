@@ -1,12 +1,12 @@
 package cmd
 
 import (
+	"github.com/ConsenSys/orchestrate/cmd/api"
+	keymanager "github.com/ConsenSys/orchestrate/cmd/key-manager"
+	txlistener "github.com/ConsenSys/orchestrate/cmd/tx-listener"
+	txsender "github.com/ConsenSys/orchestrate/cmd/tx-sender"
+	"github.com/ConsenSys/orchestrate/cmd/utils"
 	"github.com/spf13/cobra"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/cmd/api"
-	keymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/cmd/key-manager"
-	txlistener "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/cmd/tx-listener"
-	txsender "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/cmd/tx-sender"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/cmd/utils"
 )
 
 // NewCommand create root command

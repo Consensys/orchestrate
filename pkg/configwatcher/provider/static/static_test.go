@@ -7,9 +7,9 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/configwatcher/provider"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/configwatcher/provider/static"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/configwatcher/testutils"
+	"github.com/ConsenSys/orchestrate/pkg/configwatcher/provider"
+	"github.com/ConsenSys/orchestrate/pkg/configwatcher/provider/static"
+	"github.com/ConsenSys/orchestrate/pkg/configwatcher/testutils"
 )
 
 func TestProvider(t *testing.T) {

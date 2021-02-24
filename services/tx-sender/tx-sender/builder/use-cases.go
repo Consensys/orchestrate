@@ -1,14 +1,14 @@
 package builder
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
-	keymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sender/tx-sender/nonce"
-	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sender/tx-sender/use-cases"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sender/tx-sender/use-cases/crafter"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sender/tx-sender/use-cases/sender"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sender/tx-sender/use-cases/signer"
+	"github.com/ConsenSys/orchestrate/pkg/ethclient"
+	"github.com/ConsenSys/orchestrate/pkg/sdk/client"
+	keymanager "github.com/ConsenSys/orchestrate/services/key-manager/client"
+	"github.com/ConsenSys/orchestrate/services/tx-sender/tx-sender/nonce"
+	usecases "github.com/ConsenSys/orchestrate/services/tx-sender/tx-sender/use-cases"
+	"github.com/ConsenSys/orchestrate/services/tx-sender/tx-sender/use-cases/crafter"
+	"github.com/ConsenSys/orchestrate/services/tx-sender/tx-sender/use-cases/sender"
+	"github.com/ConsenSys/orchestrate/services/tx-sender/tx-sender/use-cases/signer"
 )
 
 type useCases struct {

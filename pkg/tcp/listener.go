@@ -4,8 +4,8 @@ import (
 	"net"
 	"time"
 
+	"github.com/ConsenSys/orchestrate/pkg/tcp/metrics"
 	kitmetrics "github.com/go-kit/kit/metrics"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tcp/metrics"
 )
 
 func Listen(network, addr string, opts ...ListenerOpt) (net.Listener, error) {

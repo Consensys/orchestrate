@@ -4,12 +4,12 @@ import (
 	"encoding/base64"
 	"math/big"
 
+	"github.com/ConsenSys/orchestrate/pkg/errors"
 	quorumtypes "github.com/consensys/quorum/core/types"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 )
 
 func GetSignatureSender(signature, payload string) (*ethcommon.Address, error) {

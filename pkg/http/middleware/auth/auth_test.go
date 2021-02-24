@@ -5,11 +5,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	authjwt "github.com/ConsenSys/orchestrate/pkg/auth/jwt"
+	authkey "github.com/ConsenSys/orchestrate/pkg/auth/key"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	authjwt "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/auth/jwt"
-	authkey "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/auth/key"
 )
 
 type MockHandler struct {

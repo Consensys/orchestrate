@@ -6,13 +6,13 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	backoffmock "github.com/ConsenSys/orchestrate/pkg/backoff/mock"
+	"github.com/ConsenSys/orchestrate/pkg/encoding/json"
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/http/httputil"
+	types "github.com/ConsenSys/orchestrate/pkg/types/api"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	backoffmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/backoff/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/json"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/httputil"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
 )
 
 var jobUUID = "jobUUID"

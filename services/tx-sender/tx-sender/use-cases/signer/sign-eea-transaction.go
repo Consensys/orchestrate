@@ -4,24 +4,24 @@ import (
 	"context"
 	"fmt"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/rlp"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/encoding/rlp"
+	"github.com/ConsenSys/orchestrate/pkg/log"
 
-	pkgcryto "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/crypto/ethereum"
+	pkgcryto "github.com/ConsenSys/orchestrate/pkg/crypto/ethereum"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
+	"github.com/ConsenSys/orchestrate/pkg/utils"
 
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	"github.com/ConsenSys/orchestrate/services/tx-sender/tx-sender/parsers"
 	"github.com/ethereum/go-ethereum/crypto"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sender/tx-sender/parsers"
 
-	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sender/tx-sender/use-cases"
+	usecases "github.com/ConsenSys/orchestrate/services/tx-sender/tx-sender/use-cases"
 
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/types/keymanager/ethereum"
+	"github.com/ConsenSys/orchestrate/services/key-manager/client"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/ethereum"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client"
 )
 
 const signEEATransactionComponent = "use-cases.sign-eea-transaction"

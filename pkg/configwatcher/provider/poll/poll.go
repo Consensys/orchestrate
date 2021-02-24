@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/ConsenSys/orchestrate/pkg/configwatcher/provider"
+	"github.com/ConsenSys/orchestrate/pkg/log"
 	"github.com/cenkalti/backoff/v4"
 	"github.com/containous/traefik/v2/pkg/job"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/configwatcher/provider"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 )
 
 type Provider struct {

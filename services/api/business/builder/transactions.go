@@ -1,9 +1,9 @@
 package builder
 
 import (
-	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases/transactions"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
+	usecases "github.com/ConsenSys/orchestrate/services/api/business/use-cases"
+	"github.com/ConsenSys/orchestrate/services/api/business/use-cases/transactions"
+	"github.com/ConsenSys/orchestrate/services/api/store"
 )
 
 type transactionUseCases struct {

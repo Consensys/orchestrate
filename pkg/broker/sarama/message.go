@@ -3,8 +3,8 @@ package sarama
 import (
 	"bytes"
 
+	"github.com/ConsenSys/orchestrate/pkg/engine"
 	"github.com/Shopify/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/engine"
 )
 
 // Msg is a wrapper struct for sarama.ConsumerMessage that implements engine.Msg

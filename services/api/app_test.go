@@ -3,19 +3,19 @@
 package api
 
 import (
-	ethclientmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/mock"
+	ethclientmock "github.com/ConsenSys/orchestrate/pkg/ethclient/mock"
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
+	"github.com/ConsenSys/orchestrate/pkg/broker/sarama"
 
 	"github.com/Shopify/sarama/mocks"
 
 	"github.com/golang/mock/gomock"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
-	mockauth "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/auth/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database/postgres"
-	keymanagerclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client/mock"
+	mockauth "github.com/ConsenSys/orchestrate/pkg/auth/mock"
+	"github.com/ConsenSys/orchestrate/pkg/database/postgres"
+	keymanagerclient "github.com/ConsenSys/orchestrate/services/key-manager/client/mock"
 )
 
 func TestApp(t *testing.T) {

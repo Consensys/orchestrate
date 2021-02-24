@@ -11,8 +11,8 @@ import (
 
 	"github.com/containous/traefik/v2/pkg/testhelpers"
 	"github.com/oxtoacart/bpool"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/dynamic"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
+	"github.com/ConsenSys/orchestrate/pkg/http/config/dynamic"
+	"github.com/ConsenSys/orchestrate/pkg/utils"
 )
 
 type staticTransport struct {

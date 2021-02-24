@@ -1,8 +1,8 @@
 package proto
 
 import (
+	"github.com/ConsenSys/orchestrate/pkg/errors"
 	"github.com/golang/protobuf/proto"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 )
 
 // Unmarshal parses the protocol buffer representation in `buf`

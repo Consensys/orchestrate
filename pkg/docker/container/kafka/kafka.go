@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"time"
 
+	pkgsarama "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
+	"github.com/ConsenSys/orchestrate/pkg/docker/container/zookeeper"
 	dockercontainer "github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/go-connections/nat"
 	log "github.com/sirupsen/logrus"
-	pkgsarama "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/docker/container/zookeeper"
 )
 
 const DefaultKafkaImage = "confluentinc/cp-kafka:5.4.3"

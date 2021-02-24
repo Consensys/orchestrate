@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/testutils"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
 )
 
 func TestParsersTxRequest_NewTxRequestModelFromEntities(t *testing.T) {

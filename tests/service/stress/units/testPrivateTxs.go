@@ -3,18 +3,18 @@ package units
 import (
 	"context"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/json"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
-	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/tx"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/stress/assets"
-	utils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/stress/utils"
-	utils3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/utils/chanregistry"
+	"github.com/ConsenSys/orchestrate/pkg/encoding/json"
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/log"
+	orchestrateclient "github.com/ConsenSys/orchestrate/pkg/sdk/client"
+	"github.com/ConsenSys/orchestrate/pkg/types/api"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	"github.com/ConsenSys/orchestrate/pkg/types/tx"
+	"github.com/ConsenSys/orchestrate/pkg/utils"
+	"github.com/ConsenSys/orchestrate/tests/service/stress/assets"
+	utils2 "github.com/ConsenSys/orchestrate/tests/service/stress/utils"
+	utils3 "github.com/ConsenSys/orchestrate/tests/utils"
+	"github.com/ConsenSys/orchestrate/tests/utils/chanregistry"
 )
 
 func BatchPrivateTxsTest(ctx context.Context, cfg *WorkloadConfig, client orchestrateclient.OrchestrateClient, chanReg *chanregistry.ChanRegistry) error {

@@ -9,9 +9,9 @@ import (
 	gomock "github.com/golang/mock/gomock"
 	healthcheck "github.com/heptiolabs/healthcheck"
 	io_prometheus_client "github.com/prometheus/client_model/go"
-	api "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
-	entities "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	ethereum "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/ethereum"
+	api "github.com/ConsenSys/orchestrate/pkg/types/api"
+	entities "github.com/ConsenSys/orchestrate/pkg/types/entities"
+	ethereum "github.com/ConsenSys/orchestrate/pkg/types/keymanager/ethereum"
 	reflect "reflect"
 )
 

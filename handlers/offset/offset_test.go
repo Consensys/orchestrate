@@ -8,12 +8,12 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/golang/mock/gomock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/log"
 	"github.com/stretchr/testify/suite"
-	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/engine/testutils"
+	broker "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
+	"github.com/ConsenSys/orchestrate/pkg/broker/sarama/mock"
+	"github.com/ConsenSys/orchestrate/pkg/engine"
+	"github.com/ConsenSys/orchestrate/pkg/engine/testutils"
 )
 
 func makeMarkerContext(session sarama.ConsumerGroupSession, c sarama.ConsumerGroupClaim, i int) *engine.TxContext {

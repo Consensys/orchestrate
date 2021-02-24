@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/handler/mock"
+	"github.com/ConsenSys/orchestrate/pkg/http/handler/mock"
 )
 
 func TestSwitcher(t *testing.T) {

@@ -3,13 +3,13 @@ package steps
 import (
 	"context"
 
+	authutils "github.com/ConsenSys/orchestrate/pkg/auth/utils"
+	"github.com/ConsenSys/orchestrate/pkg/encoding/json"
+	"github.com/ConsenSys/orchestrate/pkg/types/api"
+	"github.com/ConsenSys/orchestrate/tests/service/e2e/utils"
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/cucumber/godog"
 	gherkin "github.com/cucumber/messages-go/v10"
-	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/auth/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/json"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/e2e/utils"
 )
 
 func (sc *ScenarioContext) iRegisterTheFollowingContract(table *gherkin.PickleStepArgument_PickleTable) error {

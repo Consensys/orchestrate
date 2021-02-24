@@ -9,16 +9,16 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ConsenSys/orchestrate/pkg/errors"
 	"github.com/docker/docker/api/types/network"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 
+	"github.com/ConsenSys/orchestrate/pkg/docker/config"
+	"github.com/ConsenSys/orchestrate/pkg/docker/container"
+	"github.com/ConsenSys/orchestrate/pkg/docker/container/compose"
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/docker/docker/api/types"
 	dockercontainer "github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/docker/config"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/docker/container"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/docker/container/compose"
 )
 
 type Client struct {

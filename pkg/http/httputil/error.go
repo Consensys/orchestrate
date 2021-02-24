@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/errors"
 )
 
 var internalErrMsg = "Internal server error. Please ask an admin for help or try again later"

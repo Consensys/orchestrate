@@ -7,10 +7,10 @@ import (
 	"os"
 	"path"
 
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 	gherkin "github.com/cucumber/messages-go/v10"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 )
 
 type Artifact struct {

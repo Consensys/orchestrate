@@ -3,9 +3,9 @@ package sarama
 import (
 	"fmt"
 
+	"github.com/ConsenSys/orchestrate/pkg/log"
 	"github.com/Shopify/sarama"
 	"github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 )
 
 type logger struct {

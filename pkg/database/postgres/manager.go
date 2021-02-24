@@ -4,10 +4,10 @@ import (
 	"context"
 	"sync"
 
+	"github.com/ConsenSys/orchestrate/pkg/log"
 	tlog "github.com/containous/traefik/v2/pkg/log"
 	"github.com/go-pg/pg/v9"
 	"github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 )
 
 //go:generate mockgen -source=manager.go -destination=mocks/manager.go -package=mocks

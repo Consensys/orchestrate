@@ -7,12 +7,12 @@ import (
 	"sync"
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/tx"
+	"github.com/ConsenSys/orchestrate/pkg/types/tx"
 
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
-	err "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/error"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/ethereum"
+	err "github.com/ConsenSys/orchestrate/pkg/types/error"
+	"github.com/ConsenSys/orchestrate/pkg/types/ethereum"
 )
 
 var PostState = "0xabcdef"

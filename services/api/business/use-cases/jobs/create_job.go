@@ -3,15 +3,15 @@ package jobs
 import (
 	"context"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	usecases "github.com/ConsenSys/orchestrate/services/api/business/use-cases"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/parsers"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models"
+	"github.com/ConsenSys/orchestrate/pkg/database"
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/log"
+	"github.com/ConsenSys/orchestrate/services/api/business/parsers"
+	"github.com/ConsenSys/orchestrate/services/api/store"
+	"github.com/ConsenSys/orchestrate/services/api/store/models"
 )
 
 const createJobComponent = "use-cases.create-job"

@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/log"
 )
 
 type TestHandler struct {

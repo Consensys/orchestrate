@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/dynamic"
+	"github.com/ConsenSys/orchestrate/services/tx-listener/dynamic"
 )
 
 const (

@@ -3,9 +3,9 @@ package multi
 import (
 	"sync"
 
+	"github.com/ConsenSys/orchestrate/pkg/http/config/dynamic"
+	promcol "github.com/ConsenSys/orchestrate/pkg/metrics/collector"
 	"github.com/prometheus/client_golang/prometheus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/dynamic"
-	promcol "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/metrics/collector"
 )
 
 type DynamicMulti struct {

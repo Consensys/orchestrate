@@ -14,9 +14,9 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/dynamic"
-	metrics1 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/metrics"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/metrics/testutils"
+	"github.com/ConsenSys/orchestrate/pkg/http/config/dynamic"
+	metrics1 "github.com/ConsenSys/orchestrate/pkg/metrics"
+	"github.com/ConsenSys/orchestrate/pkg/metrics/testutils"
 )
 
 func TestHTTPMetrics(t *testing.T) {

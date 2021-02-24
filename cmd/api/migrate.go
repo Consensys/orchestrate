@@ -3,14 +3,14 @@ package api
 import (
 	"os"
 
+	"github.com/ConsenSys/orchestrate/cmd/api/scripts"
+	"github.com/ConsenSys/orchestrate/pkg/database/postgres"
+	"github.com/ConsenSys/orchestrate/services/api/store/postgres/migrations"
+	keymanagerclient "github.com/ConsenSys/orchestrate/services/key-manager/client"
 	"github.com/go-pg/pg/v9"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/cmd/api/scripts"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database/postgres"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/postgres/migrations"
-	keymanagerclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client"
 )
 
 // newMigrateCmd create migrate command

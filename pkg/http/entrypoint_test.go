@@ -15,12 +15,12 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/handler/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/router"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/router/static"
-	mock3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/metrics/mock"
-	mock2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tcp/metrics/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tls/generate"
+	"github.com/ConsenSys/orchestrate/pkg/http/handler/mock"
+	"github.com/ConsenSys/orchestrate/pkg/http/router"
+	"github.com/ConsenSys/orchestrate/pkg/http/router/static"
+	mock3 "github.com/ConsenSys/orchestrate/pkg/metrics/mock"
+	mock2 "github.com/ConsenSys/orchestrate/pkg/tcp/metrics/mock"
+	"github.com/ConsenSys/orchestrate/pkg/tls/generate"
 )
 
 type okHandler struct {

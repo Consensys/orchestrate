@@ -6,8 +6,8 @@ package tx
 import (
 	fmt "fmt"
 	proto "github.com/golang/protobuf/proto"
-	error1 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/error"
-	ethereum "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/ethereum"
+	error1 "github.com/ConsenSys/orchestrate/pkg/types/error"
+	ethereum "github.com/ConsenSys/orchestrate/pkg/types/ethereum"
 	math "math"
 )
 

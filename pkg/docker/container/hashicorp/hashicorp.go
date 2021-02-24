@@ -10,8 +10,8 @@ import (
 
 	"github.com/docker/docker/api/types/mount"
 
+	httputils "github.com/ConsenSys/orchestrate/pkg/http"
 	log "github.com/sirupsen/logrus"
-	httputils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http"
 
 	dockercontainer "github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"

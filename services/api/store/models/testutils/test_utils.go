@@ -5,15 +5,15 @@ import (
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/testutils"
+	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
+	"github.com/ConsenSys/orchestrate/pkg/utils"
 
+	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
+	"github.com/ConsenSys/orchestrate/services/api/store/models"
 	"github.com/gofrs/uuid"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models"
 )
 
 func FakeSchedule(tenantID string) *models.Schedule {

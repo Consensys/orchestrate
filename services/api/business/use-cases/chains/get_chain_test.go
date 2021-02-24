@@ -4,14 +4,14 @@ import (
 	"context"
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
+	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
 
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/services/api/business/parsers"
+	"github.com/ConsenSys/orchestrate/services/api/store/mocks"
+	"github.com/ConsenSys/orchestrate/services/api/store/models/testutils"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/parsers"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/mocks"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models/testutils"
 )
 
 func TestGetChain_Execute(t *testing.T) {

@@ -1,7 +1,7 @@
 package multi
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/dynamic"
+	"github.com/ConsenSys/orchestrate/pkg/http/config/dynamic"
 )
 
 // dynamicConfig holds the current set of routers, and services

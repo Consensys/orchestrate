@@ -6,9 +6,9 @@ import (
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
 
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
+	types "github.com/ConsenSys/orchestrate/pkg/types/api"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	"github.com/ConsenSys/orchestrate/pkg/utils"
 )
 
 func FormatRegisterFaucetRequest(request *types.RegisterFaucetRequest, tenantID string) *entities.Faucet {

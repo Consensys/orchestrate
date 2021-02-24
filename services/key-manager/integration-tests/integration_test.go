@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/suite"
-	integrationtest "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/integration-test"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
+	integrationtest "github.com/ConsenSys/orchestrate/pkg/integration-test"
+	"github.com/ConsenSys/orchestrate/pkg/utils"
 )
 
 type keyManagerTestSuite struct {

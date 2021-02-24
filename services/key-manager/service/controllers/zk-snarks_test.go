@@ -13,14 +13,14 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/json"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/testutils"
-	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/key-manager/use-cases"
-	mocks2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/key-manager/use-cases/mocks"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/service/formatters"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/store/mocks"
+	"github.com/ConsenSys/orchestrate/pkg/encoding/json"
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/types/keymanager"
+	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
+	usecases "github.com/ConsenSys/orchestrate/services/key-manager/key-manager/use-cases"
+	mocks2 "github.com/ConsenSys/orchestrate/services/key-manager/key-manager/use-cases/mocks"
+	"github.com/ConsenSys/orchestrate/services/key-manager/service/formatters"
+	"github.com/ConsenSys/orchestrate/services/key-manager/store/mocks"
 )
 
 type zksCtrlTestSuite struct {

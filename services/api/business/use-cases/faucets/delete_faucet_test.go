@@ -4,12 +4,12 @@ import (
 	"context"
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models/testutils"
+	"github.com/ConsenSys/orchestrate/services/api/store/models/testutils"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
+	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/mocks"
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/services/api/store/mocks"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"

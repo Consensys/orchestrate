@@ -9,8 +9,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	metrics1 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/metrics"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/metrics/testutils"
+	metrics1 "github.com/ConsenSys/orchestrate/pkg/metrics"
+	"github.com/ConsenSys/orchestrate/pkg/metrics/testutils"
 )
 
 func TestListenerMetrics(t *testing.T) {

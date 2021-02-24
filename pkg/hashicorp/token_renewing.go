@@ -4,10 +4,10 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ConsenSys/orchestrate/pkg/log"
 	"github.com/hashicorp/vault/api"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/errors"
 )
 
 // renewTokenLoop handle the token renewal of the application

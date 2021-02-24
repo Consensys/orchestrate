@@ -6,14 +6,14 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ConsenSys/orchestrate/pkg/auth/jwt"
+	jwtgenerator "github.com/ConsenSys/orchestrate/pkg/auth/jwt/generator"
+	authutils "github.com/ConsenSys/orchestrate/pkg/auth/utils"
+	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
+	"github.com/ConsenSys/orchestrate/pkg/tls/certificate"
+	tlstestutils "github.com/ConsenSys/orchestrate/pkg/tls/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/auth/jwt"
-	jwtgenerator "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/auth/jwt/generator"
-	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/auth/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tls/certificate"
-	tlstestutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tls/testutils"
 )
 
 func TestJWT(t *testing.T) {

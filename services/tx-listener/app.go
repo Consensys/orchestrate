@@ -1,16 +1,16 @@
 package txlistener
 
 import (
+	"github.com/ConsenSys/orchestrate/pkg/app"
+	pkgsarama "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
+	orchestrateclient "github.com/ConsenSys/orchestrate/pkg/sdk/client"
+	listenermetrics "github.com/ConsenSys/orchestrate/services/tx-listener/metrics"
+	provider "github.com/ConsenSys/orchestrate/services/tx-listener/providers"
+	"github.com/ConsenSys/orchestrate/services/tx-listener/session/ethereum"
+	hook "github.com/ConsenSys/orchestrate/services/tx-listener/session/ethereum/hooks"
+	"github.com/ConsenSys/orchestrate/services/tx-listener/session/ethereum/offset"
+	txsentry "github.com/ConsenSys/orchestrate/services/tx-sentry"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/app"
-	pkgsarama "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
-	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
-	listenermetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/metrics"
-	provider "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/providers"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/session/ethereum"
-	hook "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/session/ethereum/hooks"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/session/ethereum/offset"
-	txsentry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sentry"
 )
 
 func New(

@@ -6,17 +6,17 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/ethclient"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient"
 
+	"github.com/ConsenSys/orchestrate/pkg/log"
+	orchestrateclient "github.com/ConsenSys/orchestrate/pkg/sdk/client"
+	utils2 "github.com/ConsenSys/orchestrate/pkg/utils"
+	"github.com/ConsenSys/orchestrate/tests/service/stress/assets"
+	"github.com/ConsenSys/orchestrate/tests/service/stress/units"
+	"github.com/ConsenSys/orchestrate/tests/utils/chanregistry"
 	"github.com/Shopify/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
-	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
-	utils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/stress/assets"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/stress/units"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/utils/chanregistry"
 )
 
 type WorkLoadTest func(context.Context, *units.WorkloadConfig, orchestrateclient.OrchestrateClient, *chanregistry.ChanRegistry) error

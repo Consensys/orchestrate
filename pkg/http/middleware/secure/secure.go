@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/ConsenSys/orchestrate/pkg/http/config/dynamic"
 	"github.com/unrolled/secure"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/dynamic"
 )
 
 type Builder struct{}

@@ -3,9 +3,9 @@ package certificate_test
 import (
 	"testing"
 
+	"github.com/ConsenSys/orchestrate/pkg/tls/certificate"
+	"github.com/ConsenSys/orchestrate/pkg/tls/testutils"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tls/certificate"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tls/testutils"
 )
 
 func TestX509KeyPair(t *testing.T) {

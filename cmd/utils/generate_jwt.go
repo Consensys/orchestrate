@@ -5,10 +5,10 @@ import (
 	"os"
 	"time"
 
+	"github.com/ConsenSys/orchestrate/pkg/auth/jwt/generator"
+	"github.com/ConsenSys/orchestrate/pkg/utils"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/auth/jwt/generator"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 )
 
 var (

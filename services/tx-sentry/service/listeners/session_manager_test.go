@@ -9,11 +9,11 @@ import (
 	"time"
 
 	"github.com/golang/mock/gomock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client/mock"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/testutils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sentry/tx-sentry/use-cases/mocks"
+	"github.com/ConsenSys/orchestrate/pkg/sdk/client/mock"
+	types "github.com/ConsenSys/orchestrate/pkg/types/api"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
+	"github.com/ConsenSys/orchestrate/services/tx-sentry/tx-sentry/use-cases/mocks"
 )
 
 func TestSessionManager(t *testing.T) {

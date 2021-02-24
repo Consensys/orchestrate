@@ -3,10 +3,10 @@ package generator
 import (
 	"fmt"
 
+	"github.com/ConsenSys/orchestrate/pkg/auth/jwt"
+	"github.com/ConsenSys/orchestrate/pkg/tls/certificate"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/auth/jwt"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tls/certificate"
 )
 
 func init() {

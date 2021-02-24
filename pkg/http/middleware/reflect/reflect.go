@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"reflect"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/middleware"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/http/middleware"
+	"github.com/ConsenSys/orchestrate/pkg/log"
 )
 
 const component = "http.middleware"

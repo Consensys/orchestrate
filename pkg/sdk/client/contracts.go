@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	clientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/client-utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/httputil"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	clientutils "github.com/ConsenSys/orchestrate/pkg/http/client-utils"
+	"github.com/ConsenSys/orchestrate/pkg/http/httputil"
+	types "github.com/ConsenSys/orchestrate/pkg/types/api"
 )
 
 func (c *HTTPClient) RegisterContract(ctx context.Context, request *types.RegisterContractRequest) (*types.ContractResponse, error) {

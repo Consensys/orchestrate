@@ -8,12 +8,12 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/log"
 	"github.com/stretchr/testify/assert"
-	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/tx"
+	broker "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
+	"github.com/ConsenSys/orchestrate/pkg/engine"
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/types/tx"
 )
 
 func TestLoader(t *testing.T) {

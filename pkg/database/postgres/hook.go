@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/ConsenSys/orchestrate/pkg/errors"
 	"github.com/go-pg/pg/v9"
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 )
 
 func handleError(err error) error {

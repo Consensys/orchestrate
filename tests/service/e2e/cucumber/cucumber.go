@@ -1,10 +1,10 @@
 package cucumber
 
 import (
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/tests/service/e2e/cucumber/steps"
 	"github.com/cucumber/godog"
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/e2e/cucumber/steps"
 )
 
 func Run(opt *godog.Options) error {

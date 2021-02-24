@@ -4,11 +4,11 @@ import (
 	"context"
 	"sync"
 
-	txscheduler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
+	txscheduler "github.com/ConsenSys/orchestrate/pkg/sdk/client"
 
-	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
-	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/rpc"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
+	broker "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
+	ethclient "github.com/ConsenSys/orchestrate/pkg/ethclient/rpc"
+	"github.com/ConsenSys/orchestrate/pkg/utils"
 )
 
 var (

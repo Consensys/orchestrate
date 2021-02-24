@@ -11,9 +11,9 @@ import (
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/testutils"
-	proto "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/ethereum"
-	pkgUtils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
+	"github.com/ConsenSys/orchestrate/pkg/ethclient/testutils"
+	proto "github.com/ConsenSys/orchestrate/pkg/types/ethereum"
+	pkgUtils "github.com/ConsenSys/orchestrate/pkg/utils"
 )
 
 func newEEAClient() *Client {

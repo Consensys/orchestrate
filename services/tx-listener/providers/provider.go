@@ -3,7 +3,7 @@ package provider
 import (
 	"context"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/dynamic"
+	"github.com/ConsenSys/orchestrate/services/tx-listener/dynamic"
 )
 
 //go:generate mockgen -source=provider.go -destination=mock/provider.go -package=mock

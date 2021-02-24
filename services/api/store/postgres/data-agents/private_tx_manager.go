@@ -3,13 +3,13 @@ package dataagents
 import (
 	"context"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models"
+	"github.com/ConsenSys/orchestrate/pkg/log"
+	"github.com/ConsenSys/orchestrate/services/api/store"
+	"github.com/ConsenSys/orchestrate/services/api/store/models"
 
+	pg "github.com/ConsenSys/orchestrate/pkg/database/postgres"
+	"github.com/ConsenSys/orchestrate/pkg/errors"
 	"github.com/gofrs/uuid"
-	pg "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database/postgres"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 )
 
 const privateTxManagerDAComponent = "data-agents.private-tx-manager"

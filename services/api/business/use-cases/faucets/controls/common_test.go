@@ -3,7 +3,7 @@
 package controls
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 	"sort"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"

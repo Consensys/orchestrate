@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/errors"
 )
 
 type unmarshalTest struct {

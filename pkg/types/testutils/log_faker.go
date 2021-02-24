@@ -1,7 +1,7 @@
 package testutils
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 )
 
 func FakeLog() *entities.Log {

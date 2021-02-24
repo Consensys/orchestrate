@@ -9,9 +9,9 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/ConsenSys/orchestrate/pkg/errors"
 	gherkin "github.com/cucumber/messages-go/v10"
 	"github.com/ethereum/go-ethereum/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 )
 
 // TODO: improve Regex to capture sub values instead of doing 2

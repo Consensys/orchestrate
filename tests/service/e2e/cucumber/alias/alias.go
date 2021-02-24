@@ -5,8 +5,8 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/ConsenSys/orchestrate/tests/service/e2e/utils"
 	"github.com/containous/traefik/v2/pkg/log"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/e2e/utils"
 )
 
 // Registry allows to store aliases

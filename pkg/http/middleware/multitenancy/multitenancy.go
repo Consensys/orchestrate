@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/ConsenSys/orchestrate/pkg/http/config/dynamic"
+	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
 	"github.com/containous/traefik/v2/pkg/log"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/dynamic"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
 )
 
 type Builder struct{}

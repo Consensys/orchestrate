@@ -7,8 +7,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/ConsenSys/orchestrate/pkg/log"
 	"github.com/cenkalti/backoff/v4"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 )
 
 // HandlerFunc is base type for an handler function processing a Context

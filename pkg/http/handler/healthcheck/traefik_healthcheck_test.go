@@ -11,7 +11,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/dynamic"
+	"github.com/ConsenSys/orchestrate/pkg/http/config/dynamic"
 )
 
 func TestTraefikHealthCheck(t *testing.T) {

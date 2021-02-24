@@ -1,8 +1,8 @@
 package accesslog
 
 import (
+	"github.com/ConsenSys/orchestrate/pkg/http/config/dynamic"
 	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/dynamic"
 )
 
 func AddDynamicConfig(cfg *dynamic.Configuration, midName string, staticCfg *traefikstatic.Configuration) {

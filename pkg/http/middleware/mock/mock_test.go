@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	mockhandler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/handler/mock"
+	mockhandler "github.com/ConsenSys/orchestrate/pkg/http/handler/mock"
 )
 
 func TestNewMockMiddleware(t *testing.T) {

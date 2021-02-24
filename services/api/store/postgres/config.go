@@ -1,9 +1,9 @@
 package postgres
 
 import (
+	"github.com/ConsenSys/orchestrate/pkg/database/postgres"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database/postgres"
 )
 
 type Config struct {

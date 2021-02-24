@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/ConsenSys/orchestrate/pkg/http/config/runtime"
+	"github.com/ConsenSys/orchestrate/pkg/http/handler/dashboard/genstatic"
 	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
 	assetfs "github.com/elazarl/go-bindata-assetfs"
 	"github.com/gorilla/mux"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/runtime"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/handler/dashboard/genstatic"
 )
 
 type Builder struct {

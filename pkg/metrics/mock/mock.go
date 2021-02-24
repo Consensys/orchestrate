@@ -7,8 +7,8 @@ package mock
 import (
 	gomock "github.com/golang/mock/gomock"
 	prometheus "github.com/prometheus/client_golang/prometheus"
-	dynamic "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/dynamic"
-	metrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/metrics"
+	dynamic "github.com/ConsenSys/orchestrate/pkg/http/config/dynamic"
+	metrics "github.com/ConsenSys/orchestrate/pkg/metrics"
 	reflect "reflect"
 )
 

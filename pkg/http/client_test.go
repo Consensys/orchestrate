@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/auth/utils"
+	"github.com/ConsenSys/orchestrate/pkg/auth/utils"
 )
 
 func TestDefaultClient(t *testing.T) {

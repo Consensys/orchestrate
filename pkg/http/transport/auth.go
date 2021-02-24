@@ -3,7 +3,7 @@ package transport
 import (
 	"net/http"
 
-	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/auth/utils"
+	authutils "github.com/ConsenSys/orchestrate/pkg/auth/utils"
 )
 
 type AuthHeadersTransport struct {

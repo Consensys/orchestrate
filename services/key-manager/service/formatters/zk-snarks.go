@@ -1,8 +1,8 @@
 package formatters
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/zk-snarks"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	types "github.com/ConsenSys/orchestrate/pkg/types/keymanager/zk-snarks"
 )
 
 func FormatZKSAccountResponse(account *entities.ZKSAccount) *types.ZKSAccountResponse {

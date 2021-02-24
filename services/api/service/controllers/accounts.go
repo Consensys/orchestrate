@@ -4,20 +4,20 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager"
+	"github.com/ConsenSys/orchestrate/pkg/types/api"
+	"github.com/ConsenSys/orchestrate/pkg/types/keymanager"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/service/formatters"
+	"github.com/ConsenSys/orchestrate/services/api/service/formatters"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/ethereum"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client"
+	"github.com/ConsenSys/orchestrate/pkg/types/keymanager/ethereum"
+	"github.com/ConsenSys/orchestrate/services/key-manager/client"
 
+	jsonutils "github.com/ConsenSys/orchestrate/pkg/encoding/json"
+	"github.com/ConsenSys/orchestrate/pkg/http/httputil"
+	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
+	"github.com/ConsenSys/orchestrate/pkg/utils"
+	usecases "github.com/ConsenSys/orchestrate/services/api/business/use-cases"
 	"github.com/gorilla/mux"
-	jsonutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/json"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/httputil"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
-	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
 )
 
 type AccountsController struct {

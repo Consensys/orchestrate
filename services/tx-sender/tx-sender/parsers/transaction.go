@@ -6,10 +6,10 @@ import (
 
 	quorumtypes "github.com/consensys/quorum/core/types"
 
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 	"github.com/consensys/quorum/common/hexutil"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 )
 
 func ETHTransactionToTransaction(tx *entities.ETHTransaction) *types.Transaction {

@@ -1,22 +1,22 @@
 package api
 
 import (
+	"github.com/ConsenSys/orchestrate/pkg/app"
+	authjwt "github.com/ConsenSys/orchestrate/pkg/auth/jwt"
+	authkey "github.com/ConsenSys/orchestrate/pkg/auth/key"
+	broker "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
+	"github.com/ConsenSys/orchestrate/pkg/http"
+	httpmetrics "github.com/ConsenSys/orchestrate/pkg/http/metrics"
+	"github.com/ConsenSys/orchestrate/pkg/log"
+	metricregistry "github.com/ConsenSys/orchestrate/pkg/metrics/registry"
+	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
+	tcpmetrics "github.com/ConsenSys/orchestrate/pkg/tcp/metrics"
+	"github.com/ConsenSys/orchestrate/services/api/metrics"
+	"github.com/ConsenSys/orchestrate/services/api/proxy"
+	store "github.com/ConsenSys/orchestrate/services/api/store/multi"
+	keymanagerclient "github.com/ConsenSys/orchestrate/services/key-manager/client"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/app"
-	authjwt "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/auth/jwt"
-	authkey "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/auth/key"
-	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http"
-	httpmetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/metrics"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
-	metricregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/metrics/registry"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
-	tcpmetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tcp/metrics"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/metrics"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/proxy"
-	store "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/multi"
-	keymanagerclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client"
 )
 
 // Flags register flags for API

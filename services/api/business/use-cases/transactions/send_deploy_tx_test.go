@@ -7,11 +7,11 @@ import (
 	"fmt"
 	"testing"
 
-	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/testutils"
+	testutils2 "github.com/ConsenSys/orchestrate/pkg/types/testutils"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	mocks2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases/mocks"
+	mocks2 "github.com/ConsenSys/orchestrate/services/api/business/use-cases/mocks"
 )
 
 func TestSendDeployTx_Execute(t *testing.T) {

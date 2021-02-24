@@ -5,16 +5,16 @@ import (
 	"sync"
 	"time"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
-	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
-	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sentry/tx-sentry/use-cases"
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/log"
+	orchestrateclient "github.com/ConsenSys/orchestrate/pkg/sdk/client"
+	types "github.com/ConsenSys/orchestrate/pkg/types/api"
+	usecases "github.com/ConsenSys/orchestrate/services/tx-sentry/tx-sentry/use-cases"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 
+	pkgbackoff "github.com/ConsenSys/orchestrate/pkg/backoff"
 	"github.com/cenkalti/backoff/v4"
-	pkgbackoff "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/backoff"
 )
 
 //go:generate mockgen -source=session_manager.go -destination=mocks/session_manager.go -package=mocks

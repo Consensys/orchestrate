@@ -12,11 +12,11 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
-	mockhandler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/handler/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/httputil"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/metrics/mock"
-	mockmetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/metrics/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
+	mockhandler "github.com/ConsenSys/orchestrate/pkg/http/handler/mock"
+	"github.com/ConsenSys/orchestrate/pkg/http/httputil"
+	"github.com/ConsenSys/orchestrate/pkg/http/metrics/mock"
+	mockmetrics "github.com/ConsenSys/orchestrate/pkg/metrics/mock"
+	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
 )
 
 func TestMetrics(t *testing.T) {

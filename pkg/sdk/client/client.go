@@ -3,12 +3,12 @@ package client
 import (
 	"context"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/ethereum"
+	"github.com/ConsenSys/orchestrate/pkg/types/keymanager/ethereum"
 
+	types "github.com/ConsenSys/orchestrate/pkg/types/api"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 	healthz "github.com/heptiolabs/healthcheck"
 	dto "github.com/prometheus/client_model/go"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 )
 
 //go:generate mockgen -source=client.go -destination=mock/mock.go -package=mock

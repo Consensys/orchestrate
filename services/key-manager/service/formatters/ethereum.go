@@ -1,10 +1,10 @@
 package formatters
 
 import (
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	types "github.com/ConsenSys/orchestrate/pkg/types/keymanager/ethereum"
 	"github.com/ethereum/go-ethereum/common/math"
 	signer "github.com/ethereum/go-ethereum/signer/core"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/ethereum"
 )
 
 const DomainLabel = "EIP712Domain"

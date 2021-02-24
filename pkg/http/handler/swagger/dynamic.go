@@ -3,9 +3,9 @@ package swagger
 import (
 	"math"
 
+	"github.com/ConsenSys/orchestrate/pkg/http"
+	"github.com/ConsenSys/orchestrate/pkg/http/config/dynamic"
 	traefikdynamic "github.com/containous/traefik/v2/pkg/config/dynamic"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/dynamic"
 )
 
 func AddDynamicConfig(cfg *dynamic.Configuration, middlewares []string, specsFile string) {

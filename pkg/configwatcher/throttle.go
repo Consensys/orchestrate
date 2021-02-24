@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/ConsenSys/orchestrate/pkg/utils"
 	"github.com/eapache/channels"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 )
 
 func Throttle(ctx context.Context, throttleDuration time.Duration, in <-chan interface{}, out chan<- interface{}) {

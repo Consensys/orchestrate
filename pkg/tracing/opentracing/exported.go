@@ -5,9 +5,9 @@ import (
 	"reflect"
 	"sync"
 
+	"github.com/ConsenSys/orchestrate/pkg/tracing/opentracing/jaeger"
 	extOpentracing "github.com/opentracing/opentracing-go"
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tracing/opentracing/jaeger"
 )
 
 var (

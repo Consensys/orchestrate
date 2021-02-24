@@ -1,6 +1,6 @@
 package api
 
-import "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/ethereum"
+import "github.com/ConsenSys/orchestrate/pkg/types/keymanager/ethereum"
 
 type CreateAccountRequest struct {
 	Alias      string            `json:"alias" validate:"omitempty" example:"personal-account"`

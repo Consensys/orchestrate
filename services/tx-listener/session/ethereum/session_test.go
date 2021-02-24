@@ -10,24 +10,24 @@ import (
 	"testing"
 	"time"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
-	backoffmock "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/backoff/mock"
-	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/ethereum"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/testutils"
-	mock3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/session/ethereum/mocks"
+	backoffmock "github.com/ConsenSys/orchestrate/pkg/backoff/mock"
+	txschedulertypes "github.com/ConsenSys/orchestrate/pkg/types/api"
+	"github.com/ConsenSys/orchestrate/pkg/types/ethereum"
+	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
+	mock3 "github.com/ConsenSys/orchestrate/services/tx-listener/session/ethereum/mocks"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	mock6 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/metrics/mock"
-	mock4 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/dynamic"
-	mock5 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/metrics/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/session/ethereum/hooks/mock"
-	mock2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/session/ethereum/offset/mock"
+	mock6 "github.com/ConsenSys/orchestrate/pkg/metrics/mock"
+	mock4 "github.com/ConsenSys/orchestrate/pkg/sdk/client/mock"
+	"github.com/ConsenSys/orchestrate/services/tx-listener/dynamic"
+	mock5 "github.com/ConsenSys/orchestrate/services/tx-listener/metrics/mock"
+	"github.com/ConsenSys/orchestrate/services/tx-listener/session/ethereum/hooks/mock"
+	mock2 "github.com/ConsenSys/orchestrate/services/tx-listener/session/ethereum/offset/mock"
 )
 
 func TestSession_Run(t *testing.T) {

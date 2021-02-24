@@ -2,7 +2,7 @@ package mock
 
 import (
 	"github.com/opentracing/opentracing-go/mocktracer"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tracing/opentracing"
+	"github.com/ConsenSys/orchestrate/pkg/tracing/opentracing"
 )
 
 // NewTracer returns a mocked tracer instance

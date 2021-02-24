@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"strings"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/ethereum"
+	"github.com/ConsenSys/orchestrate/pkg/types/api"
+	types "github.com/ConsenSys/orchestrate/pkg/types/keymanager/ethereum"
 
-	clientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/client-utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/httputil"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
+	clientutils "github.com/ConsenSys/orchestrate/pkg/http/client-utils"
+	"github.com/ConsenSys/orchestrate/pkg/http/httputil"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 )
 
 func (c *HTTPClient) GetAccount(ctx context.Context, address string) (*api.AccountResponse, error) {

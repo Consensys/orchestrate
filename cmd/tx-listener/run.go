@@ -3,11 +3,11 @@ package txlistener
 import (
 	"os"
 
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/utils"
+	txlistener "github.com/ConsenSys/orchestrate/services/tx-listener"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
-	txlistener "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener"
 )
 
 var cmdErr error

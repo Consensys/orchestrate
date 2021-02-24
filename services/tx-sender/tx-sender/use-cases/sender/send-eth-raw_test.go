@@ -13,12 +13,12 @@ import (
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	mock2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/mock"
-	mock3 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client/mock"
-	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/testutils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
+	mock2 "github.com/ConsenSys/orchestrate/pkg/ethclient/mock"
+	mock3 "github.com/ConsenSys/orchestrate/pkg/sdk/client/mock"
+	txschedulertypes "github.com/ConsenSys/orchestrate/pkg/types/api"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
+	"github.com/ConsenSys/orchestrate/pkg/utils"
 )
 
 func TestSendETHRaw_Execute(t *testing.T) {

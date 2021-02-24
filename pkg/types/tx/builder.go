@@ -8,15 +8,15 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	error1 "github.com/ConsenSys/orchestrate/pkg/types/error"
+	"github.com/ConsenSys/orchestrate/pkg/types/ethereum"
+	"github.com/ConsenSys/orchestrate/pkg/utils"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/go-playground/validator/v10"
 	"github.com/opentracing/opentracing-go"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	error1 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/error"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/ethereum"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 )
 
 type Envelope struct {

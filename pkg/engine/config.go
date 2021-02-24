@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/errors"
 )
 
 func init() {

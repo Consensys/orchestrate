@@ -6,18 +6,18 @@ import (
 	goreflect "reflect"
 	"time"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/docker/container/ganache"
+	"github.com/ConsenSys/orchestrate/pkg/docker/container/ganache"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/docker/container/hashicorp"
+	"github.com/ConsenSys/orchestrate/pkg/docker/container/hashicorp"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/docker/container/kafka"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/docker/container/zookeeper"
+	"github.com/ConsenSys/orchestrate/pkg/docker/container/kafka"
+	"github.com/ConsenSys/orchestrate/pkg/docker/container/zookeeper"
 
+	"github.com/ConsenSys/orchestrate/pkg/docker/config"
+	"github.com/ConsenSys/orchestrate/pkg/docker/container/postgres"
+	"github.com/ConsenSys/orchestrate/pkg/docker/container/reflect"
 	dockercontainer "github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/docker/config"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/docker/container/postgres"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/docker/container/reflect"
 )
 
 type Compose struct {

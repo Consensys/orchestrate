@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/log"
 	"github.com/stretchr/testify/assert"
-	ierror "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/error"
+	ierror "github.com/ConsenSys/orchestrate/pkg/types/error"
 )
 
 var testKey = "test"

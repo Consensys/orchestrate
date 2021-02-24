@@ -3,10 +3,10 @@ package tls_test
 import (
 	"testing"
 
+	"github.com/ConsenSys/orchestrate/pkg/tls"
+	"github.com/ConsenSys/orchestrate/pkg/tls/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tls"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tls/testutils"
 )
 
 func TestNewConfig(t *testing.T) {

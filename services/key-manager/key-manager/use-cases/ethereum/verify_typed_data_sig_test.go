@@ -6,9 +6,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/testutils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/key-manager/use-cases/mocks"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/service/formatters"
+	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
+	"github.com/ConsenSys/orchestrate/services/key-manager/key-manager/use-cases/mocks"
+	"github.com/ConsenSys/orchestrate/services/key-manager/service/formatters"
 	"testing"
 
 	"github.com/golang/mock/gomock"

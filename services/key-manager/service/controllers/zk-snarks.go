@@ -4,15 +4,15 @@ import (
 	"encoding/json"
 	"net/http"
 
+	jsonutils "github.com/ConsenSys/orchestrate/pkg/encoding/json"
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/http/httputil"
+	"github.com/ConsenSys/orchestrate/pkg/types/keymanager"
+	types "github.com/ConsenSys/orchestrate/pkg/types/keymanager/zk-snarks"
+	usecases "github.com/ConsenSys/orchestrate/services/key-manager/key-manager/use-cases"
+	"github.com/ConsenSys/orchestrate/services/key-manager/service/formatters"
+	"github.com/ConsenSys/orchestrate/services/key-manager/store"
 	"github.com/gorilla/mux"
-	jsonutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/json"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/httputil"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/zk-snarks"
-	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/key-manager/use-cases"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/service/formatters"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/store"
 )
 
 const zksAccountPath = "/zk-snarks/accounts"

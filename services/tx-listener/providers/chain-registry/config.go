@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
+	orchestrateclient "github.com/ConsenSys/orchestrate/pkg/sdk/client"
 
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"

@@ -3,11 +3,11 @@ package zksnarks
 import (
 	"context"
 
-	zksnarks "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/crypto/zk-snarks"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
-	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/key-manager/use-cases"
+	zksnarks "github.com/ConsenSys/orchestrate/pkg/crypto/zk-snarks"
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/utils"
+	usecases "github.com/ConsenSys/orchestrate/services/key-manager/key-manager/use-cases"
 )
 
 const verifySignatureComponent = "use-cases.zks.verify-signature"

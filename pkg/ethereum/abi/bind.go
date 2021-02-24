@@ -7,10 +7,10 @@ import (
 	"reflect"
 	"strconv"
 
+	"github.com/ConsenSys/orchestrate/pkg/errors"
 	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 )
 
 const trueStr = "true"

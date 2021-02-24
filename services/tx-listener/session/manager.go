@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"sync"
 
-	ethclientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/dynamic"
-	provider "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/providers"
+	ethclientutils "github.com/ConsenSys/orchestrate/pkg/ethclient/utils"
+	"github.com/ConsenSys/orchestrate/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/utils"
+	"github.com/ConsenSys/orchestrate/services/tx-listener/dynamic"
+	provider "github.com/ConsenSys/orchestrate/services/tx-listener/providers"
 )
 
 const component = "tx-listener.session-manager"

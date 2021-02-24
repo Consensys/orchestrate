@@ -6,8 +6,8 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/ConsenSys/orchestrate/pkg/errors"
 	"github.com/containous/traefik/v2/pkg/log"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 )
 
 const (

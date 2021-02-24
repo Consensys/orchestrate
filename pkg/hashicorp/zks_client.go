@@ -3,7 +3,7 @@ package hashicorp
 import (
 	"path"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 )
 
 func (c *OrchestrateVaultClient) ZKSListNamespaces() ([]string, error) {

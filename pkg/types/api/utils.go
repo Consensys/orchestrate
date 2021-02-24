@@ -1,8 +1,8 @@
 package api
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 )
 
 func validatePrivateTxParams(protocol entities.PrivateTxManagerType, privacyGroupID string, privateFor []string) error {

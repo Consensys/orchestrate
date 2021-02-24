@@ -3,10 +3,10 @@ package redis
 import (
 	"time"
 
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/tls"
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/gomodule/redigo/redis"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tls"
 )
 
 // Conn is a wrapper around a redis.Conn that handles internal errors

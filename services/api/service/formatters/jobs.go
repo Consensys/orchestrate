@@ -5,14 +5,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ConsenSys/orchestrate/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
+	types "github.com/ConsenSys/orchestrate/pkg/types/api"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
+	"github.com/ConsenSys/orchestrate/pkg/utils"
 )
 
 func FormatJobResponse(job *entities.Job) *types.JobResponse {

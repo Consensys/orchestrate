@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
+	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
 )
 
 const (

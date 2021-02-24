@@ -1,7 +1,7 @@
 package client
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
+	"github.com/ConsenSys/orchestrate/pkg/utils"
 )
 
 func (c *HTTPClient) ChainProxyURL(uuid string) string {

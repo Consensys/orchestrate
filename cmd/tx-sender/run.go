@@ -3,11 +3,11 @@ package txsender
 import (
 	"os"
 
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/utils"
+	txsender "github.com/ConsenSys/orchestrate/services/tx-sender"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
-	txsender "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sender"
 )
 
 var cmdErr error

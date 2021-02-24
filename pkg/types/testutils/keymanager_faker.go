@@ -1,10 +1,10 @@
 package testutils
 
 import (
+	ethTypes "github.com/ConsenSys/orchestrate/pkg/types/keymanager/ethereum"
+	zksTypes "github.com/ConsenSys/orchestrate/pkg/types/keymanager/zk-snarks"
+	"github.com/ConsenSys/orchestrate/pkg/utils"
 	ethcommon "github.com/ethereum/go-ethereum/common"
-	ethTypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/ethereum"
-	zksTypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/zk-snarks"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 )
 
 func FakeCreateETHAccountRequest() *ethTypes.CreateETHAccountRequest {

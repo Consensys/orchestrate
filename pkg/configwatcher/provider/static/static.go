@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/configwatcher/provider"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/configwatcher/provider"
+	"github.com/ConsenSys/orchestrate/pkg/log"
 )
 
 type Provider struct {

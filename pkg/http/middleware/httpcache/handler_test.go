@@ -9,12 +9,12 @@ import (
 	"testing"
 	"time"
 
+	mockhandler "github.com/ConsenSys/orchestrate/pkg/http/handler/mock"
+	"github.com/ConsenSys/orchestrate/pkg/http/middleware/httpcache/mocks"
+	"github.com/ConsenSys/orchestrate/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/utils"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	mockhandler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/handler/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/middleware/httpcache/mocks"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 )
 
 var generatedKey = "generatedKey"

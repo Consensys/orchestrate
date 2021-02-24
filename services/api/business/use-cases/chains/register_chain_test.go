@@ -5,16 +5,16 @@ import (
 	"math/big"
 	"testing"
 
+	"github.com/ConsenSys/orchestrate/pkg/ethclient/mock"
 	"github.com/ethereum/go-ethereum/core/types"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/mock"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	mocks2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases/mocks"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	mocks2 "github.com/ConsenSys/orchestrate/services/api/business/use-cases/mocks"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/testutils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/parsers"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/mocks"
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
+	"github.com/ConsenSys/orchestrate/services/api/business/parsers"
+	"github.com/ConsenSys/orchestrate/services/api/store/mocks"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"

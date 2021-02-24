@@ -1,9 +1,9 @@
 package sarama
 
 import (
+	"github.com/ConsenSys/orchestrate/pkg/errors"
 	"github.com/Shopify/sarama"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 )
 
 // NewClient creates a new sarama client and connects to one of the given broker addresses

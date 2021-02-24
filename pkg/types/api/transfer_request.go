@@ -1,6 +1,6 @@
 package api
 
-import "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
+import "github.com/ConsenSys/orchestrate/pkg/utils"
 
 type TransferRequest struct {
 	ChainName string            `json:"chain" validate:"required" example:"myChain"`

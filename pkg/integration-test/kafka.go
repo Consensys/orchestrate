@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"time"
 
+	loader "github.com/ConsenSys/orchestrate/handlers/loader/sarama"
+	"github.com/ConsenSys/orchestrate/handlers/offset"
+	sarama2 "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
+	"github.com/ConsenSys/orchestrate/pkg/engine"
+	"github.com/ConsenSys/orchestrate/pkg/types/tx"
+	"github.com/ConsenSys/orchestrate/tests/utils/chanregistry"
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
-	loader "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/handlers/loader/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/handlers/offset"
-	sarama2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/tx"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/utils/chanregistry"
 )
 
 type KafkaConsumer struct {

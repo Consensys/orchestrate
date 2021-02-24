@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"sync/atomic"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/handler/dummy"
+	"github.com/ConsenSys/orchestrate/pkg/http/handler/dummy"
 )
 
 // Switcher allows hot switching of http.ServeMux

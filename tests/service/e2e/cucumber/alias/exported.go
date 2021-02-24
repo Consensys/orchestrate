@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"sync"
 
+	"github.com/ConsenSys/orchestrate/pkg/auth/key"
+	"github.com/ConsenSys/orchestrate/pkg/sdk/client"
+	keymanager "github.com/ConsenSys/orchestrate/services/key-manager/client"
+	txlistener "github.com/ConsenSys/orchestrate/services/tx-listener"
+	txsender "github.com/ConsenSys/orchestrate/services/tx-sender"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/auth/key"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
-	keymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client"
-	txlistener "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener"
-	txsender "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sender"
 )
 
 const GlobalAka = "global"

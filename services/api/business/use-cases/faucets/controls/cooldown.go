@@ -6,12 +6,12 @@ import (
 	"sync"
 	"time"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/log"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 
+	"github.com/ConsenSys/orchestrate/pkg/errors"
 	stripedmutex "github.com/nmvalera/striped-mutex"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 )
 
 const cooldownComponent = "faucet.control.cooldown"

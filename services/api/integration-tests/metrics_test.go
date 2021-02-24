@@ -4,21 +4,21 @@ package integrationtests
 
 import (
 	"fmt"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/json"
+	"github.com/ConsenSys/orchestrate/pkg/encoding/json"
 	http2 "net/http"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http"
-	httpmetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/metrics"
-	metrics1 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/metrics"
-	testutils2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/metrics/testutils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
-	tpcmetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tcp/metrics"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/testutils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/metrics"
+	"github.com/ConsenSys/orchestrate/pkg/http"
+	httpmetrics "github.com/ConsenSys/orchestrate/pkg/http/metrics"
+	metrics1 "github.com/ConsenSys/orchestrate/pkg/metrics"
+	testutils2 "github.com/ConsenSys/orchestrate/pkg/metrics/testutils"
+	"github.com/ConsenSys/orchestrate/pkg/sdk/client"
+	tpcmetrics "github.com/ConsenSys/orchestrate/pkg/tcp/metrics"
+	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
+	"github.com/ConsenSys/orchestrate/services/api/metrics"
 )
 
 type metricsTestSuite struct {

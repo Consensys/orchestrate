@@ -5,29 +5,29 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/ConsenSys/orchestrate/pkg/http/middleware/httpcache"
+	"github.com/ConsenSys/orchestrate/pkg/http/middleware/ratelimit"
+	"github.com/ConsenSys/orchestrate/services/api/proxy"
 	"github.com/dgraph-io/ristretto"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/middleware/httpcache"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/middleware/ratelimit"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/proxy"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient"
+	"github.com/ConsenSys/orchestrate/pkg/ethclient"
 
-	keymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client"
+	keymanager "github.com/ConsenSys/orchestrate/services/key-manager/client"
 
+	pkgsarama "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
+	"github.com/ConsenSys/orchestrate/pkg/database"
+	pkgproxy "github.com/ConsenSys/orchestrate/pkg/http/handler/proxy"
+	"github.com/ConsenSys/orchestrate/services/api/business/builder"
+	"github.com/ConsenSys/orchestrate/services/api/metrics"
 	"github.com/Shopify/sarama"
 	"github.com/go-pg/pg/v9/orm"
-	pkgsarama "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database"
-	pkgproxy "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/handler/proxy"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/builder"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/metrics"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/app"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/auth"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database/postgres"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/dynamic"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/service/controllers"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/multi"
+	"github.com/ConsenSys/orchestrate/pkg/app"
+	"github.com/ConsenSys/orchestrate/pkg/auth"
+	"github.com/ConsenSys/orchestrate/pkg/database/postgres"
+	"github.com/ConsenSys/orchestrate/pkg/http/config/dynamic"
+	"github.com/ConsenSys/orchestrate/services/api/service/controllers"
+	"github.com/ConsenSys/orchestrate/services/api/store/multi"
 )
 
 func NewAPI(

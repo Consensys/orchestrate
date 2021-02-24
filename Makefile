@@ -69,8 +69,8 @@ gen-mocks:
 	@go generate -run mockgen ./...
 
 gen-swagger:
-	@go generate gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/service/controllers
-	@go generate gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/service/controllers
+	@go generate github.com/ConsenSys/orchestrate/services/api/service/controllers
+	@go generate github.com/ConsenSys/orchestrate/services/key-manager/service/controllers
 
 gen-deepcopy:
 	@bash scripts/deepcopy/generate.sh

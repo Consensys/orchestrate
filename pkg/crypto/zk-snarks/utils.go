@@ -3,9 +3,9 @@ package zksnarks
 import (
 	"crypto/sha256"
 
+	"github.com/ConsenSys/orchestrate/pkg/errors"
 	eddsa "github.com/consensys/gnark/crypto/signature/eddsa/bn256"
 	"github.com/consensys/quorum/common/hexutil"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 )
 
 func VerifyZKSMessage(publicKey, signature string, message []byte) (bool, error) {

@@ -1,9 +1,9 @@
 package redis
 
 import (
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	ierror "github.com/ConsenSys/orchestrate/pkg/types/error"
 	"github.com/gomodule/redigo/redis"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	ierror "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/error"
 )
 
 func parseRedisError(err error, msg string) *ierror.Error {

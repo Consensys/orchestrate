@@ -1,10 +1,10 @@
 package builder
 
 import (
-	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases/accounts"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store"
-	keymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client"
+	usecases "github.com/ConsenSys/orchestrate/services/api/business/use-cases"
+	"github.com/ConsenSys/orchestrate/services/api/business/use-cases/accounts"
+	"github.com/ConsenSys/orchestrate/services/api/store"
+	keymanager "github.com/ConsenSys/orchestrate/services/key-manager/client"
 )
 
 type accountUseCases struct {

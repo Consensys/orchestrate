@@ -8,9 +8,9 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/ConsenSys/orchestrate/pkg/http/config/dynamic"
 	"github.com/sirupsen/logrus"
 	"github.com/vulcand/oxy/roundrobin"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/dynamic"
 )
 
 const cookieNameLength = 6

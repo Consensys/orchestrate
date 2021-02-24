@@ -6,9 +6,9 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/ConsenSys/orchestrate/pkg/docker/container"
 	dockercontainer "github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/docker/container"
 )
 
 type Reflect struct {

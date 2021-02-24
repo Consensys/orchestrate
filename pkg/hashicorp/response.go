@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/ConsenSys/orchestrate/pkg/errors"
 	"github.com/hashicorp/vault/api"
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 )
 
 func parseResponse(data map[string]interface{}, resp interface{}) error {

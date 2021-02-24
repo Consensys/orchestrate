@@ -7,8 +7,8 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/ConsenSys/orchestrate/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 )
 
 type key string

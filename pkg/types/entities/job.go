@@ -3,7 +3,7 @@ package entities
 import (
 	"time"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/ethereum"
+	"github.com/ConsenSys/orchestrate/pkg/types/ethereum"
 )
 
 type JobType string

@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"strings"
 
-	clientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/client-utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/httputil"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
+	clientutils "github.com/ConsenSys/orchestrate/pkg/http/client-utils"
+	"github.com/ConsenSys/orchestrate/pkg/http/httputil"
+	types "github.com/ConsenSys/orchestrate/pkg/types/api"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 )
 
 func (c *HTTPClient) GetChain(ctx context.Context, uuid string) (*types.ChainResponse, error) {

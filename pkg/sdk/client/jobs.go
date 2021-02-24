@@ -6,14 +6,14 @@ import (
 	"strings"
 	"time"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/httputil"
+	"github.com/ConsenSys/orchestrate/pkg/http/httputil"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
+	types "github.com/ConsenSys/orchestrate/pkg/types/api"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	clientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/client-utils"
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	clientutils "github.com/ConsenSys/orchestrate/pkg/http/client-utils"
 )
 
 func (c *HTTPClient) GetJob(ctx context.Context, jobUUID string) (*types.JobResponse, error) {

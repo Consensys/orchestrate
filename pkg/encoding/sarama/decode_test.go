@@ -6,13 +6,13 @@ import (
 	"sync"
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/tx"
+	"github.com/ConsenSys/orchestrate/pkg/types/tx"
 
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
 	"github.com/stretchr/testify/assert"
-	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
+	broker "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
+	"github.com/ConsenSys/orchestrate/pkg/errors"
 )
 
 func newConsumerMessage() *broker.Msg {

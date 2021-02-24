@@ -6,11 +6,11 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	clientutils "github.com/ConsenSys/orchestrate/pkg/http/client-utils"
+	"github.com/ConsenSys/orchestrate/pkg/http/httputil"
 	"github.com/containous/traefik/v2/pkg/log"
 	healthz "github.com/heptiolabs/healthcheck"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	clientutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/client-utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/httputil"
 )
 
 const zksAccountType = "zk-snarks"

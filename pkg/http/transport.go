@@ -3,7 +3,7 @@ package http
 import (
 	"net/http"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/transport"
+	"github.com/ConsenSys/orchestrate/pkg/http/transport"
 )
 
 func NewTransport(t http.RoundTripper, middleware ...transport.Middleware) http.RoundTripper {

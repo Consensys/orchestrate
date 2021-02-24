@@ -1,9 +1,9 @@
 package builder
 
 import (
-	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/key-manager/use-cases"
-	zksnarks "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/key-manager/use-cases/zk-snarks"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/store"
+	usecases "github.com/ConsenSys/orchestrate/services/key-manager/key-manager/use-cases"
+	zksnarks "github.com/ConsenSys/orchestrate/services/key-manager/key-manager/use-cases/zk-snarks"
+	"github.com/ConsenSys/orchestrate/services/key-manager/store"
 )
 
 type zskUseCases struct {

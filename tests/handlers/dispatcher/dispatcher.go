@@ -1,11 +1,11 @@
 package dispatcher
 
 import (
+	"github.com/ConsenSys/orchestrate/pkg/engine"
+	"github.com/ConsenSys/orchestrate/tests/service/e2e/cucumber/alias"
+	"github.com/ConsenSys/orchestrate/tests/utils"
+	"github.com/ConsenSys/orchestrate/tests/utils/chanregistry"
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/service/e2e/cucumber/alias"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/tests/utils/chanregistry"
 )
 
 // KeyOfFunc should return channel key to dispatch envelope to

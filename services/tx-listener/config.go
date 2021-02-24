@@ -1,17 +1,17 @@
 package txlistener
 
 import (
+	authkey "github.com/ConsenSys/orchestrate/pkg/auth/key"
+	broker "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
+	"github.com/ConsenSys/orchestrate/pkg/http"
+	"github.com/ConsenSys/orchestrate/pkg/log"
+	metricregistry "github.com/ConsenSys/orchestrate/pkg/metrics/registry"
+	orchestrateclient "github.com/ConsenSys/orchestrate/pkg/sdk/client"
+	tcpmetrics "github.com/ConsenSys/orchestrate/pkg/tcp/metrics"
+	provider "github.com/ConsenSys/orchestrate/services/tx-listener/providers/chain-registry"
+	txsentry "github.com/ConsenSys/orchestrate/services/tx-sentry"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
-	authkey "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/auth/key"
-	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
-	metricregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/metrics/registry"
-	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
-	tcpmetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tcp/metrics"
-	provider "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/providers/chain-registry"
-	txsentry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sentry"
 )
 
 const (

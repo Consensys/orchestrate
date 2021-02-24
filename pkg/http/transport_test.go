@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/auth/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/transport"
+	authutils "github.com/ConsenSys/orchestrate/pkg/auth/utils"
+	"github.com/ConsenSys/orchestrate/pkg/http/transport"
 )
 
 type MockTransport struct {

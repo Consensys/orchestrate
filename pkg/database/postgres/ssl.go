@@ -8,8 +8,8 @@ import (
 	"io"
 	"net"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tcp"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tls"
+	"github.com/ConsenSys/orchestrate/pkg/tcp"
+	"github.com/ConsenSys/orchestrate/pkg/tls"
 )
 
 type SSLDialer struct {

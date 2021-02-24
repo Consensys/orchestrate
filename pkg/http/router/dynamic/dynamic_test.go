@@ -6,13 +6,13 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	testutilsdynamic "github.com/ConsenSys/orchestrate/pkg/http/config/dynamic/testutils"
+	mhandler "github.com/ConsenSys/orchestrate/pkg/http/handler/mock"
+	mmiddleware "github.com/ConsenSys/orchestrate/pkg/http/middleware/mock"
 	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
 	traefiktypes "github.com/containous/traefik/v2/pkg/types"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
-	testutilsdynamic "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/dynamic/testutils"
-	mhandler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/handler/mock"
-	mmiddleware "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/middleware/mock"
 )
 
 func TestBuilder(t *testing.T) {

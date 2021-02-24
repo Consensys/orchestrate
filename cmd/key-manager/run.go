@@ -3,11 +3,11 @@ package keymanager
 import (
 	"os"
 
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/utils"
+	keymanager "github.com/ConsenSys/orchestrate/services/key-manager"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
-	keymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager"
 )
 
 var cmdErr error

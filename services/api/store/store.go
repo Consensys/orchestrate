@@ -3,10 +3,10 @@ package store
 import (
 	"context"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models"
+	"github.com/ConsenSys/orchestrate/pkg/database"
+	"github.com/ConsenSys/orchestrate/services/api/store/models"
 )
 
 //go:generate mockgen -source=store.go -destination=mocks/mock.go -package=mocks

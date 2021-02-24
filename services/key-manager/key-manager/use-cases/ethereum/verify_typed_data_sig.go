@@ -3,12 +3,12 @@ package ethereum
 import (
 	"context"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/key-manager/use-cases/ethereum/utils"
+	"github.com/ConsenSys/orchestrate/pkg/log"
+	"github.com/ConsenSys/orchestrate/services/key-manager/key-manager/use-cases/ethereum/utils"
 
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	usecases "github.com/ConsenSys/orchestrate/services/key-manager/key-manager/use-cases"
 	signer "github.com/ethereum/go-ethereum/signer/core"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/key-manager/use-cases"
 )
 
 const verifyTypedDataSignatureComponent = "use-cases.eth.verify-typed-data-signature"

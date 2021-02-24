@@ -1,6 +1,6 @@
 package api
 
-import "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
+import "github.com/ConsenSys/orchestrate/pkg/types/entities"
 
 type CreateJobRequest struct {
 	ScheduleUUID  string                  `json:"scheduleUUID" validate:"required,uuid4" example:"b4374e6f-b28a-4bad-b4fe-bda36eaf849c"`

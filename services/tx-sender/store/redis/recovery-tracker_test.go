@@ -3,9 +3,9 @@ package redis
 import (
 	"testing"
 
+	"github.com/ConsenSys/orchestrate/pkg/database/redis"
 	"github.com/alicebob/miniredis"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database/redis"
 )
 
 func TestRecoveryTrackerRedis(t *testing.T) {

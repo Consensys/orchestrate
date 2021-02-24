@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/ConsenSys/orchestrate/pkg/errors"
 	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 )
 
 const DefaultTagValue = "latest"

@@ -3,10 +3,10 @@ package client
 import (
 	"context"
 
+	"github.com/ConsenSys/orchestrate/pkg/types/keymanager"
+	ethTypes "github.com/ConsenSys/orchestrate/pkg/types/keymanager/ethereum"
+	zksTypes "github.com/ConsenSys/orchestrate/pkg/types/keymanager/zk-snarks"
 	healthz "github.com/heptiolabs/healthcheck"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager"
-	ethTypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/ethereum"
-	zksTypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/zk-snarks"
 )
 
 //go:generate mockgen -source=client.go -destination=mock/mock.go -package=mock

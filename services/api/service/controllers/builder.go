@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"net/http"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client"
+	"github.com/ConsenSys/orchestrate/services/key-manager/client"
 
+	"github.com/ConsenSys/orchestrate/pkg/http/config/dynamic"
+	usecases "github.com/ConsenSys/orchestrate/services/api/business/use-cases"
 	"github.com/gorilla/mux"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/dynamic"
-	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/business/use-cases"
 )
 
 //go:generate swag init --generalInfo builder.go --parseDepth 100 --output ../../../../public/swagger-specs/services/api --parseDependency --parseDepth 3

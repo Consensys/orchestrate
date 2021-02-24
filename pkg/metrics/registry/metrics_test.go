@@ -8,8 +8,8 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/dynamic"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/metrics/mock"
+	"github.com/ConsenSys/orchestrate/pkg/http/config/dynamic"
+	"github.com/ConsenSys/orchestrate/pkg/metrics/mock"
 )
 
 func TestRegistryMetrics(t *testing.T) {

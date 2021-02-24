@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/ConsenSys/orchestrate/pkg/http/config/dynamic"
+	swaggerui "github.com/ConsenSys/orchestrate/pkg/http/handler/swagger/genstatic"
 	assetfs "github.com/elazarl/go-bindata-assetfs"
 	"github.com/gorilla/mux"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/dynamic"
-	swaggerui "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/handler/swagger/genstatic"
 )
 
 type Builder struct{}

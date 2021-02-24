@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/ConsenSys/orchestrate/pkg/errors"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 
 	"github.com/golang/mock/gomock"
 )

@@ -1,8 +1,8 @@
 package store
 
 import (
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/ethereum"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	types "github.com/ConsenSys/orchestrate/pkg/types/keymanager/ethereum"
 )
 
 //go:generate mockgen -source=store.go -destination=mocks/mock.go -package=mocks

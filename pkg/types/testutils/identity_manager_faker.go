@@ -3,9 +3,9 @@ package testutils
 import (
 	"fmt"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
+	"github.com/ConsenSys/orchestrate/pkg/types/api"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
+	"github.com/ConsenSys/orchestrate/pkg/utils"
 )
 
 func FakeCreateAccountRequest() *api.CreateAccountRequest {

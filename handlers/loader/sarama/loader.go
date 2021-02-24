@@ -1,12 +1,12 @@
 package sarama
 
 import (
+	broker "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
+	encoding "github.com/ConsenSys/orchestrate/pkg/encoding/sarama"
+	"github.com/ConsenSys/orchestrate/pkg/engine"
+	"github.com/ConsenSys/orchestrate/pkg/types/tx"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
-	encoding "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/encoding/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/engine"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/tx"
 )
 
 // Loader is an handler that Load sarama.ConsumerGroup messages

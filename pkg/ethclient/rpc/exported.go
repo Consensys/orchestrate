@@ -4,12 +4,12 @@ import (
 	"context"
 	"sync"
 
+	"github.com/ConsenSys/orchestrate/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/utils"
 	"github.com/cenkalti/backoff/v4"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http"
+	"github.com/ConsenSys/orchestrate/pkg/http"
 )
 
 const component = "ethclient.rpc"

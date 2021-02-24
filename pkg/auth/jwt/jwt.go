@@ -7,11 +7,11 @@ import (
 	"crypto/x509"
 	"fmt"
 
+	authutils "github.com/ConsenSys/orchestrate/pkg/auth/utils"
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
+	"github.com/ConsenSys/orchestrate/pkg/tls/certificate"
 	"github.com/dgrijalva/jwt-go"
-	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/auth/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tls/certificate"
 )
 
 // Structure to define the parser of the Token and what have to be verify in the Token

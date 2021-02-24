@@ -1,10 +1,10 @@
 package metrics
 
 import (
+	pkgmetrics "github.com/ConsenSys/orchestrate/pkg/metrics/multi"
 	"github.com/go-kit/kit/metrics/discard"
 	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
 	"github.com/prometheus/client_golang/prometheus"
-	pkgmetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/metrics/multi"
 )
 
 const (

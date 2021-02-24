@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
+	keymanagerclient "github.com/ConsenSys/orchestrate/services/key-manager/client"
 	"github.com/go-pg/migrations/v7"
 	log "github.com/sirupsen/logrus"
-	keymanagerclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client"
 )
 
 func loadVaultAccounts(db migrations.DB) error {

@@ -4,7 +4,7 @@ import (
 	"net"
 	"net/http"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/transport"
+	"github.com/ConsenSys/orchestrate/pkg/http/transport"
 )
 
 // NewClient creates an HTTP client

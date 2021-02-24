@@ -4,9 +4,9 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/services/tx-sender/store"
 	"github.com/dgraph-io/ristretto"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sender/store"
 )
 
 // NonceManager is a NonceManager that works with in memory cache

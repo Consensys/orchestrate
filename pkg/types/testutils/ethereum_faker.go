@@ -3,10 +3,10 @@ package testutils
 import (
 	"time"
 
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 	ethcommon "github.com/ethereum/go-ethereum/common"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
+	"github.com/ConsenSys/orchestrate/pkg/utils"
 )
 
 func ParseIArray(args ...interface{}) (ret []interface{}) {

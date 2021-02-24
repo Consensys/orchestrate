@@ -1,4 +1,4 @@
-module gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2
+module github.com/ConsenSys/orchestrate
 
 go 1.15
 

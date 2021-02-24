@@ -3,7 +3,7 @@ package memory
 import (
 	"sync"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-sender/store"
+	"github.com/ConsenSys/orchestrate/services/tx-sender/store"
 )
 
 type nonceRecoveryTracker struct {

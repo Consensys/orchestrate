@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
+	"github.com/ConsenSys/orchestrate/pkg/utils"
 	"github.com/go-pg/pg/v9"
 	"github.com/go-pg/pg/v9/orm"
 	healthz "github.com/heptiolabs/healthcheck"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/utils"
 )
 
 func Insert(ctx context.Context, db DB, models ...interface{}) error {

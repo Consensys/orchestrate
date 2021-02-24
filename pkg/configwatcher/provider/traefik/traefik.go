@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/ConsenSys/orchestrate/pkg/configwatcher/provider"
+	"github.com/ConsenSys/orchestrate/pkg/http/config/dynamic"
+	"github.com/ConsenSys/orchestrate/pkg/log"
 	traefikdynamic "github.com/containous/traefik/v2/pkg/config/dynamic"
 	traefikprovider "github.com/containous/traefik/v2/pkg/provider"
 	"github.com/containous/traefik/v2/pkg/safe"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/configwatcher/provider"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/dynamic"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
 )
 
 type Provider struct {

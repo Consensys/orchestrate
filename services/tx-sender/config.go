@@ -4,21 +4,21 @@ import (
 	"fmt"
 	"time"
 
-	authkey "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/auth/key"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
+	authkey "github.com/ConsenSys/orchestrate/pkg/auth/key"
+	"github.com/ConsenSys/orchestrate/pkg/log"
 
-	orchestrateclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client"
+	orchestrateclient "github.com/ConsenSys/orchestrate/pkg/sdk/client"
 
+	"github.com/ConsenSys/orchestrate/pkg/app"
+	broker "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
+	"github.com/ConsenSys/orchestrate/pkg/database/redis"
+	httputils "github.com/ConsenSys/orchestrate/pkg/http"
+	metricregistry "github.com/ConsenSys/orchestrate/pkg/metrics/registry"
+	tcpmetrics "github.com/ConsenSys/orchestrate/pkg/tcp/metrics"
+	keymanager "github.com/ConsenSys/orchestrate/services/key-manager/client"
 	"github.com/cenkalti/backoff/v4"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/app"
-	broker "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database/redis"
-	httputils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http"
-	metricregistry "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/metrics/registry"
-	tcpmetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tcp/metrics"
-	keymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client"
 )
 
 func init() {

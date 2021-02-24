@@ -5,18 +5,18 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ConsenSys/orchestrate/pkg/configwatcher"
+	mockwatcher "github.com/ConsenSys/orchestrate/pkg/configwatcher/mock"
+	mockhttp "github.com/ConsenSys/orchestrate/pkg/http/router/mock"
+	"github.com/ConsenSys/orchestrate/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/metrics/mock"
+	"github.com/ConsenSys/orchestrate/pkg/metrics/registry"
+	tcpmetrics "github.com/ConsenSys/orchestrate/pkg/tcp/metrics"
 	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
 	"github.com/golang/mock/gomock"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/configwatcher"
-	mockwatcher "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/configwatcher/mock"
-	mockhttp "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/router/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/log"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/metrics/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/metrics/registry"
-	tcpmetrics "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tcp/metrics"
 )
 
 func newTestConfig() *Config {

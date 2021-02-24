@@ -6,7 +6,7 @@ package mock
 
 import (
 	gomock "github.com/golang/mock/gomock"
-	tcp "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tcp"
+	tcp "github.com/ConsenSys/orchestrate/pkg/tcp"
 	reflect "reflect"
 )
 

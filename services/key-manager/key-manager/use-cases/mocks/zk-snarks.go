@@ -7,7 +7,7 @@ package mocks
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
-	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/key-manager/use-cases"
+	usecases "github.com/ConsenSys/orchestrate/services/key-manager/key-manager/use-cases"
 	reflect "reflect"
 )
 

@@ -1,8 +1,8 @@
 package main
 
 import (
+	"github.com/ConsenSys/orchestrate/cmd"
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/cmd"
 )
 
 func main() {

@@ -8,9 +8,9 @@ import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
 	healthcheck "github.com/heptiolabs/healthcheck"
-	keymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager"
-	ethereum "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/ethereum"
-	zksnarks "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/keymanager/zk-snarks"
+	keymanager "github.com/ConsenSys/orchestrate/pkg/types/keymanager"
+	ethereum "github.com/ConsenSys/orchestrate/pkg/types/keymanager/ethereum"
+	zksnarks "github.com/ConsenSys/orchestrate/pkg/types/keymanager/zk-snarks"
 	reflect "reflect"
 )
 

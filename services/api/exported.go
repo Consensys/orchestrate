@@ -3,16 +3,16 @@ package api
 import (
 	"context"
 
-	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/rpc"
+	ethclient "github.com/ConsenSys/orchestrate/pkg/ethclient/rpc"
 
-	keymanager "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/client"
+	keymanager "github.com/ConsenSys/orchestrate/services/key-manager/client"
 
+	"github.com/ConsenSys/orchestrate/pkg/app"
+	authjwt "github.com/ConsenSys/orchestrate/pkg/auth/jwt"
+	authkey "github.com/ConsenSys/orchestrate/pkg/auth/key"
+	"github.com/ConsenSys/orchestrate/pkg/broker/sarama"
+	"github.com/ConsenSys/orchestrate/pkg/database/postgres"
 	"github.com/spf13/viper"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/app"
-	authjwt "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/auth/jwt"
-	authkey "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/auth/key"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/broker/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/database/postgres"
 )
 
 // New Utility function used to initialize a new service

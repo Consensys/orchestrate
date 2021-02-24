@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"net/http"
 
-	usecases "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/key-manager/use-cases"
+	usecases "github.com/ConsenSys/orchestrate/services/key-manager/key-manager/use-cases"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/key-manager/store"
+	"github.com/ConsenSys/orchestrate/services/key-manager/store"
 
+	"github.com/ConsenSys/orchestrate/pkg/http/config/dynamic"
 	"github.com/gorilla/mux"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/dynamic"
 )
 
 //go:generate swag init --generalInfo builder.go --output ../../../../public/swagger-specs/services/key-manager --parseDependency --parseDepth 2

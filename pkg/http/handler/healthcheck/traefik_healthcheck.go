@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"sync/atomic"
 
+	"github.com/ConsenSys/orchestrate/pkg/http/config/dynamic"
 	"github.com/gorilla/mux"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/dynamic"
 )
 
 type TraefikBuilder struct{}

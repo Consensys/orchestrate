@@ -3,11 +3,11 @@ package migrations
 import (
 	"context"
 
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	ethclient "github.com/ConsenSys/orchestrate/pkg/ethclient/rpc"
+	"github.com/ConsenSys/orchestrate/services/api/store/models"
 	"github.com/go-pg/migrations/v7"
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
-	ethclient "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/rpc"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/api/store/models"
 )
 
 func addChainIDColumn(db migrations.DB) error {

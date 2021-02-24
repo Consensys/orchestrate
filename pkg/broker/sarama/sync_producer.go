@@ -1,8 +1,8 @@
 package sarama
 
 import (
+	"github.com/ConsenSys/orchestrate/pkg/errors"
 	"github.com/Shopify/sarama"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/errors"
 )
 
 type syncProducer struct {

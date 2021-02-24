@@ -3,7 +3,7 @@ package usecases
 import (
 	"context"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 )
 
 //go:generate mockgen -source=chains.go -destination=mocks/chains.go -package=mocks

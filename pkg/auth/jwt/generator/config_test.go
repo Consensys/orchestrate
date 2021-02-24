@@ -4,10 +4,10 @@ import (
 	"os"
 	"testing"
 
+	tlstestutils "github.com/ConsenSys/orchestrate/pkg/tls/testutils"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
-	tlstestutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/tls/testutils"
 )
 
 func TestAuthServicePrivateKey(t *testing.T) {

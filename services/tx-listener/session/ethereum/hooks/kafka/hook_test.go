@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"testing"
 
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/entities"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 
 	"github.com/Shopify/sarama/mocks"
 	ethcommon "github.com/ethereum/go-ethereum/common"
@@ -15,12 +15,12 @@ import (
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/ethclient/mock"
-	mock2 "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/sdk/client/mock"
-	txschedulertypes "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/api"
-	types "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/ethereum"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/types/testutils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/services/tx-listener/dynamic"
+	"github.com/ConsenSys/orchestrate/pkg/ethclient/mock"
+	mock2 "github.com/ConsenSys/orchestrate/pkg/sdk/client/mock"
+	txschedulertypes "github.com/ConsenSys/orchestrate/pkg/types/api"
+	types "github.com/ConsenSys/orchestrate/pkg/types/ethereum"
+	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
+	"github.com/ConsenSys/orchestrate/services/tx-listener/dynamic"
 )
 
 var c = &dynamic.Chain{

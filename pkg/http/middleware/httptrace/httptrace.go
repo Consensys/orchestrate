@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"net/http/httptrace"
 
+	"github.com/ConsenSys/orchestrate/pkg/http/config/dynamic"
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/sirupsen/logrus"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/dynamic"
 )
 
 type Builder struct{}

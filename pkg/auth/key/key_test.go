@@ -7,8 +7,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	authutils "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/auth/utils"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/multitenancy"
+	authutils "github.com/ConsenSys/orchestrate/pkg/auth/utils"
+	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
 )
 
 func TestKey(t *testing.T) {

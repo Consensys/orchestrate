@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	mockmid "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/middleware/mock"
-	reflectmid "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/middleware/reflect"
+	mockmid "github.com/ConsenSys/orchestrate/pkg/http/middleware/mock"
+	reflectmid "github.com/ConsenSys/orchestrate/pkg/http/middleware/reflect"
 )
 
 func TestBuilder(t *testing.T) {

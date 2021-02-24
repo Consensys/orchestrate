@@ -6,15 +6,15 @@ import (
 	"testing"
 	"time"
 
+	mockauth "github.com/ConsenSys/orchestrate/pkg/auth/mock"
+	mockprovider "github.com/ConsenSys/orchestrate/pkg/configwatcher/provider/mock"
+	"github.com/ConsenSys/orchestrate/pkg/http/config/dynamic"
+	mockhandler "github.com/ConsenSys/orchestrate/pkg/http/handler/mock"
+	mockmid "github.com/ConsenSys/orchestrate/pkg/http/middleware/mock"
+	dynrouter "github.com/ConsenSys/orchestrate/pkg/http/router/dynamic"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	mockauth "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/auth/mock"
-	mockprovider "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/configwatcher/provider/mock"
-	"gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/config/dynamic"
-	mockhandler "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/handler/mock"
-	mockmid "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/middleware/mock"
-	dynrouter "gitlab.com/ConsenSys/client/fr/core-stack/orchestrate.git/v2/pkg/http/router/dynamic"
 )
 
 func TestProviderOpt(t *testing.T) {
