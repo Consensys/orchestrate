@@ -1,6 +1,6 @@
 # Orchestrate Release Notes
 
-## v21.1.2 (Unreleased)
+## v21.1.2 (2021-02-25)
 ### 🆕 Features
 * New environment variable, `KAFKA_NUM_CONSUMERS`, to launch multiple kafka consumer in `tx-sender`
 * Support for new Postgres setting `DB_POOL_TIMEOUT`
@@ -63,7 +63,10 @@
 * Environment variable `CONTRACT_REGISTRY_URL` replaced by `API_URL`
 * Environment variable `CHAIN_REGISTRY_URL` replaced by `API_URL`
 
-### Migrate steps from v2.5.x to v21.1.0
+### Migrate steps from v2.5.x to v21.1.x
+
+> IMPORTANT ! In order to perform this migration, Orchestrate has to be running on the latest minor version of v2.5.x
+and been migrated to latest v21.1.x  
 
 #### HashiCorp keys
 In order to migrate your keys from `kv-v2` engine to `orchestrate` engine you need to follow the next steps:
@@ -83,7 +86,7 @@ $> orchestrate key-manager migrate import-secrets
 
 #### Orchestrate Service Data
 In previous versions of orchestrate each of the API service data was stored in a independent postgres DB. 
-Therefore to update to `v21.1.0` you need to import each of service's data by following the next steps for
+Therefore to update to `v21.1.x` you need to import each of service's data by following the next steps for
 each of the service DBs you intend to migrate:
 
 1. Initialize the following:
@@ -96,6 +99,14 @@ each of the service DBs you intend to migrate:
 ```
 $> orchestrate api migrate copy-db
 ```
+
+## v2.5.7 (2021-02-24)
+
+### 🆕 Features
+* Significant API and DB performance improvements
+
+### 🛠 Bug fixes
+* Hanging issue during synchronization from block 0
 
 ## v2.5.6 (2021-01-25)
 
