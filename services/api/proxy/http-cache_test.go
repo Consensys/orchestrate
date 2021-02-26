@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/ConsenSys/orchestrate/pkg/encoding/json"
-	ethclient "github.com/ConsenSys/orchestrate/pkg/ethclient/utils"
+	ethclient "github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/utils"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestHTTPCacheRequest_Valid(t *testing.T) {

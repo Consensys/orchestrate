@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/ConsenSys/orchestrate/pkg/log"
 	orchestrateclient "github.com/ConsenSys/orchestrate/pkg/sdk/client"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 	"github.com/ConsenSys/orchestrate/pkg/types/api"
 
 	"github.com/ConsenSys/orchestrate/pkg/errors"

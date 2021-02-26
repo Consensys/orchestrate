@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 	"github.com/Shopify/sarama"
 	"github.com/hashicorp/go-multierror"
 	healthz "github.com/heptiolabs/healthcheck"

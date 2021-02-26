@@ -7,18 +7,18 @@ import (
 	"fmt"
 	"testing"
 
+	mock3 "github.com/ConsenSys/orchestrate/pkg/sdk/client/mock"
+	mock2 "github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/mock"
+	txschedulertypes "github.com/ConsenSys/orchestrate/pkg/types/api"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
+	"github.com/ConsenSys/orchestrate/pkg/utils"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	mock2 "github.com/ConsenSys/orchestrate/pkg/ethclient/mock"
-	mock3 "github.com/ConsenSys/orchestrate/pkg/sdk/client/mock"
-	txschedulertypes "github.com/ConsenSys/orchestrate/pkg/types/api"
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
-	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
-	"github.com/ConsenSys/orchestrate/pkg/utils"
 )
 
 func TestSendETHRaw_Execute(t *testing.T) {

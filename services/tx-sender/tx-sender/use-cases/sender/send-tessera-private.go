@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/ethclient"
-	"github.com/ConsenSys/orchestrate/pkg/log"
 	"github.com/ConsenSys/orchestrate/pkg/sdk/client"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient"
 	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 	"github.com/ConsenSys/orchestrate/pkg/utils"
 	usecases "github.com/ConsenSys/orchestrate/services/tx-sender/tx-sender/use-cases"

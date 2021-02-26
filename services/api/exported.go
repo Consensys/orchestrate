@@ -3,15 +3,15 @@ package api
 import (
 	"context"
 
-	ethclient "github.com/ConsenSys/orchestrate/pkg/ethclient/rpc"
+	ethclient "github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/rpc"
 
 	keymanager "github.com/ConsenSys/orchestrate/services/key-manager/client"
 
-	"github.com/ConsenSys/orchestrate/pkg/app"
-	authjwt "github.com/ConsenSys/orchestrate/pkg/auth/jwt"
-	authkey "github.com/ConsenSys/orchestrate/pkg/auth/key"
 	"github.com/ConsenSys/orchestrate/pkg/broker/sarama"
-	"github.com/ConsenSys/orchestrate/pkg/database/postgres"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app"
+	authjwt "github.com/ConsenSys/orchestrate/pkg/toolkit/app/auth/jwt"
+	authkey "github.com/ConsenSys/orchestrate/pkg/toolkit/app/auth/key"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/database/postgres"
 	"github.com/spf13/viper"
 )
 

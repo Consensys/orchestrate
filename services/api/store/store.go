@@ -5,7 +5,7 @@ import (
 
 	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 
-	"github.com/ConsenSys/orchestrate/pkg/database"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/database"
 	"github.com/ConsenSys/orchestrate/services/api/store/models"
 )
 

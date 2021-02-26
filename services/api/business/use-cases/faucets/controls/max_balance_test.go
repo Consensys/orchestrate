@@ -4,16 +4,16 @@ package controls
 
 import (
 	"context"
-	"github.com/consensys/quorum/common"
 	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
+	"github.com/consensys/quorum/common"
 	"math/big"
 	"testing"
 
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/mock"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/ethclient/mock"
 )
 
 func TestMaxBalanceControl_Execute(t *testing.T) {

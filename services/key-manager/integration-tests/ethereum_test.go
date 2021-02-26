@@ -3,15 +3,15 @@
 package integrationtests
 
 import (
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/suite"
 	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/http"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http"
 	"github.com/ConsenSys/orchestrate/pkg/types/keymanager"
 	types "github.com/ConsenSys/orchestrate/pkg/types/keymanager/ethereum"
 	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
 	"github.com/ConsenSys/orchestrate/services/key-manager/client"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 	"testing"
 )
 

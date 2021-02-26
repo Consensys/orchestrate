@@ -7,7 +7,7 @@ import (
 
 	backoff2 "github.com/ConsenSys/orchestrate/pkg/backoff"
 	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 	"github.com/cenkalti/backoff/v4"
 )
 

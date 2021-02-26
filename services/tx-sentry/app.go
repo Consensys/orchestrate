@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/log"
 	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
 	orchestrateclient "github.com/ConsenSys/orchestrate/pkg/sdk/client"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 	"github.com/ConsenSys/orchestrate/services/tx-sentry/service/listeners"
 	"github.com/ConsenSys/orchestrate/services/tx-sentry/service/parsers"

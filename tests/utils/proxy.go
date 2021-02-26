@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/ethclient"
-	"github.com/ConsenSys/orchestrate/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient"
 	"github.com/ConsenSys/orchestrate/pkg/utils"
 
 	"github.com/cenkalti/backoff/v4"

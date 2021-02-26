@@ -1,8 +1,8 @@
 package builder
 
 import (
-	"github.com/ConsenSys/orchestrate/pkg/ethclient"
 	"github.com/ConsenSys/orchestrate/pkg/sdk/client"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient"
 	keymanager "github.com/ConsenSys/orchestrate/services/key-manager/client"
 	"github.com/ConsenSys/orchestrate/services/tx-sender/tx-sender/nonce"
 	usecases "github.com/ConsenSys/orchestrate/services/tx-sender/tx-sender/use-cases"

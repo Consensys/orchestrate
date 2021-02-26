@@ -3,11 +3,11 @@ package txsender
 import (
 	"context"
 
-	"github.com/ConsenSys/orchestrate/pkg/app"
-	dbredis "github.com/ConsenSys/orchestrate/pkg/database/redis"
-	ethclient "github.com/ConsenSys/orchestrate/pkg/ethclient/rpc"
-	"github.com/ConsenSys/orchestrate/pkg/log"
 	orchestrateClient "github.com/ConsenSys/orchestrate/pkg/sdk/client"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
+	dbredis "github.com/ConsenSys/orchestrate/pkg/toolkit/database/redis"
+	ethclient "github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/rpc"
 	sarama2 "github.com/Shopify/sarama"
 
 	"github.com/ConsenSys/orchestrate/pkg/broker/sarama"

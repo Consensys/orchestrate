@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"testing"
 
+	metrics1 "github.com/ConsenSys/orchestrate/pkg/toolkit/app/metrics"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/metrics/testutils"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	metrics1 "github.com/ConsenSys/orchestrate/pkg/metrics"
-	"github.com/ConsenSys/orchestrate/pkg/metrics/testutils"
 )
 
 func TestTransactionSchedulerMetrics(t *testing.T) {

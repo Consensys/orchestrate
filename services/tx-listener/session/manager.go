@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"sync"
 
-	ethclientutils "github.com/ConsenSys/orchestrate/pkg/ethclient/utils"
-	"github.com/ConsenSys/orchestrate/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
+	ethclientutils "github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/utils"
 	"github.com/ConsenSys/orchestrate/pkg/utils"
 	"github.com/ConsenSys/orchestrate/services/tx-listener/dynamic"
 	provider "github.com/ConsenSys/orchestrate/services/tx-listener/providers"

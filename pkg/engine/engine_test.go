@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 	"github.com/stretchr/testify/assert"
-	"github.com/ConsenSys/orchestrate/pkg/log"
 )
 
 type TestHandler struct {

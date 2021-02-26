@@ -6,17 +6,17 @@ import (
 	"context"
 	"testing"
 
-	ethcommon "github.com/ethereum/go-ethereum/common"
-	"github.com/stretchr/testify/assert"
 	"github.com/ConsenSys/orchestrate/pkg/errors"
-	mock2 "github.com/ConsenSys/orchestrate/pkg/ethclient/mock"
 	"github.com/ConsenSys/orchestrate/pkg/sdk/client/mock"
+	mock2 "github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/mock"
 	txschedulertypes "github.com/ConsenSys/orchestrate/pkg/types/api"
 	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
 	"github.com/ConsenSys/orchestrate/pkg/utils"
 	mocks2 "github.com/ConsenSys/orchestrate/services/tx-sender/tx-sender/nonce/mocks"
 	"github.com/ConsenSys/orchestrate/services/tx-sender/tx-sender/use-cases/mocks"
+	ethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/golang/mock/gomock"
 )

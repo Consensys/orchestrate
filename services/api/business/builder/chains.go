@@ -1,7 +1,7 @@
 package builder
 
 import (
-	"github.com/ConsenSys/orchestrate/pkg/ethclient"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient"
 	usecases "github.com/ConsenSys/orchestrate/services/api/business/use-cases"
 	"github.com/ConsenSys/orchestrate/services/api/business/use-cases/chains"
 	"github.com/ConsenSys/orchestrate/services/api/store"

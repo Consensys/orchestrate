@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	"github.com/ConsenSys/orchestrate/pkg/engine"
-	"github.com/ConsenSys/orchestrate/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 	"github.com/ConsenSys/orchestrate/tests/utils"
 	"github.com/ConsenSys/orchestrate/tests/utils/chanregistry"
 )

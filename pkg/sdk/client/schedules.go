@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ConsenSys/orchestrate/pkg/http/httputil"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/httputil"
 	types "github.com/ConsenSys/orchestrate/pkg/types/api"
 
-	clientutils "github.com/ConsenSys/orchestrate/pkg/http/client-utils"
+	clientutils "github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/client-utils"
 )
 
 func (c *HTTPClient) CreateSchedule(ctx context.Context, request *types.CreateScheduleRequest) (*types.ScheduleResponse, error) {

@@ -3,11 +3,11 @@ package keymanager
 import (
 	"math"
 
-	"github.com/ConsenSys/orchestrate/pkg/configwatcher/provider"
-	"github.com/ConsenSys/orchestrate/pkg/configwatcher/provider/aggregator"
-	"github.com/ConsenSys/orchestrate/pkg/configwatcher/provider/static"
-	"github.com/ConsenSys/orchestrate/pkg/http"
-	"github.com/ConsenSys/orchestrate/pkg/http/config/dynamic"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/config/dynamic"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/configwatcher/provider"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/configwatcher/provider/aggregator"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/configwatcher/provider/static"
 	traefikdynamic "github.com/containous/traefik/v2/pkg/config/dynamic"
 )
 

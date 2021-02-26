@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/ConsenSys/orchestrate/pkg/log"
-	"github.com/stretchr/testify/assert"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 	ierror "github.com/ConsenSys/orchestrate/pkg/types/error"
+	"github.com/stretchr/testify/assert"
 )
 
 var testKey = "test"

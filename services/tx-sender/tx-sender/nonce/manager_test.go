@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/ConsenSys/orchestrate/pkg/errors"
-	mock2 "github.com/ConsenSys/orchestrate/pkg/ethclient/mock"
+	mock2 "github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/mock"
 	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
 	"github.com/ConsenSys/orchestrate/pkg/utils"
 	"github.com/ConsenSys/orchestrate/services/tx-sender/store/mock"

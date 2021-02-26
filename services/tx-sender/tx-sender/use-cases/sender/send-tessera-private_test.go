@@ -6,17 +6,17 @@ import (
 	"context"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/assert"
 	"github.com/ConsenSys/orchestrate/pkg/errors"
-	mock2 "github.com/ConsenSys/orchestrate/pkg/ethclient/mock"
 	"github.com/ConsenSys/orchestrate/pkg/sdk/client/mock"
+	mock2 "github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/mock"
 	"github.com/ConsenSys/orchestrate/pkg/types/api"
 	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
 	"github.com/ConsenSys/orchestrate/pkg/utils"
 	"github.com/ConsenSys/orchestrate/services/tx-sender/tx-sender/use-cases/mocks"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSendTesseraPrivate_Execute(t *testing.T) {

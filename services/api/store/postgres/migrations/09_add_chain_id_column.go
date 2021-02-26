@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/ConsenSys/orchestrate/pkg/errors"
-	ethclient "github.com/ConsenSys/orchestrate/pkg/ethclient/rpc"
+	ethclient "github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/rpc"
 	"github.com/ConsenSys/orchestrate/services/api/store/models"
 	"github.com/go-pg/migrations/v7"
 	log "github.com/sirupsen/logrus"

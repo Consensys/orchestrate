@@ -3,7 +3,7 @@ package keymanager
 import (
 	"context"
 
-	"github.com/ConsenSys/orchestrate/pkg/app"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app"
 	"github.com/spf13/viper"
 )
 

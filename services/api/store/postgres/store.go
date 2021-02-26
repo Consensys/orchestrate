@@ -1,9 +1,9 @@
 package postgres
 
 import (
-	"github.com/ConsenSys/orchestrate/pkg/database"
-	pg "github.com/ConsenSys/orchestrate/pkg/database/postgres"
 	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/database"
+	pg "github.com/ConsenSys/orchestrate/pkg/toolkit/database/postgres"
 	dataagents "github.com/ConsenSys/orchestrate/services/api/store/postgres/data-agents"
 )
 

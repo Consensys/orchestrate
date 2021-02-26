@@ -6,14 +6,14 @@ import (
 	"context"
 	"testing"
 
-	"github.com/Shopify/sarama"
-	"github.com/golang/mock/gomock"
-	"github.com/ConsenSys/orchestrate/pkg/log"
-	"github.com/stretchr/testify/suite"
 	broker "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
 	"github.com/ConsenSys/orchestrate/pkg/broker/sarama/mock"
 	"github.com/ConsenSys/orchestrate/pkg/engine"
 	"github.com/ConsenSys/orchestrate/pkg/engine/testutils"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
+	"github.com/Shopify/sarama"
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/suite"
 )
 
 func makeMarkerContext(session sarama.ConsumerGroupSession, c sarama.ConsumerGroupClaim, i int) *engine.TxContext {

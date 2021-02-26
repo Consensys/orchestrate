@@ -6,14 +6,14 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Shopify/sarama"
-	"github.com/golang/protobuf/proto"
-	"github.com/ConsenSys/orchestrate/pkg/log"
-	"github.com/stretchr/testify/assert"
 	broker "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
 	"github.com/ConsenSys/orchestrate/pkg/engine"
 	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 	"github.com/ConsenSys/orchestrate/pkg/types/tx"
+	"github.com/Shopify/sarama"
+	"github.com/golang/protobuf/proto"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestLoader(t *testing.T) {

@@ -3,7 +3,7 @@ package accounts
 import (
 	"context"
 
-	"github.com/ConsenSys/orchestrate/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 	"github.com/ConsenSys/orchestrate/services/api/business/parsers"
 	usecases "github.com/ConsenSys/orchestrate/services/api/business/use-cases"
 

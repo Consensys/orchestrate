@@ -8,13 +8,13 @@ import (
 
 	"github.com/ConsenSys/orchestrate/tests/service/e2e/cucumber/alias"
 
-	"github.com/Shopify/sarama"
-	"github.com/ConsenSys/orchestrate/pkg/log"
-	"github.com/stretchr/testify/assert"
 	broker "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
 	"github.com/ConsenSys/orchestrate/pkg/engine"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 	"github.com/ConsenSys/orchestrate/pkg/types/tx"
 	"github.com/ConsenSys/orchestrate/tests/utils/chanregistry"
+	"github.com/Shopify/sarama"
+	"github.com/stretchr/testify/assert"
 )
 
 func testKeyOf1(txctx *engine.TxContext) (string, error) {

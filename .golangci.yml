@@ -64,5 +64,5 @@ run:
     - /vendor
   skip-files:
     - ".*\\.pb(\\.gw)?\\.go$"
-    - pkg/http/handler/dashboard/genstatic/gen.go
-    - pkg/http/handler/swagger/genstatic/gen.go
+    - pkg/toolkit/app/http/handler/dashboard/genstatic/gen.go
+    - pkg/toolkit/app/http/handler/swagger/genstatic/gen.go

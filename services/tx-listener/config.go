@@ -1,13 +1,13 @@
 package txlistener
 
 import (
-	authkey "github.com/ConsenSys/orchestrate/pkg/auth/key"
 	broker "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
-	"github.com/ConsenSys/orchestrate/pkg/http"
-	"github.com/ConsenSys/orchestrate/pkg/log"
-	metricregistry "github.com/ConsenSys/orchestrate/pkg/metrics/registry"
 	orchestrateclient "github.com/ConsenSys/orchestrate/pkg/sdk/client"
-	tcpmetrics "github.com/ConsenSys/orchestrate/pkg/tcp/metrics"
+	authkey "github.com/ConsenSys/orchestrate/pkg/toolkit/app/auth/key"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
+	metricregistry "github.com/ConsenSys/orchestrate/pkg/toolkit/app/metrics/registry"
+	tcpmetrics "github.com/ConsenSys/orchestrate/pkg/toolkit/tcp/metrics"
 	provider "github.com/ConsenSys/orchestrate/services/tx-listener/providers/chain-registry"
 	txsentry "github.com/ConsenSys/orchestrate/services/tx-sentry"
 	"github.com/spf13/pflag"

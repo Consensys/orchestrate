@@ -3,7 +3,7 @@ package metrics
 import (
 	"fmt"
 
-	pkgmetrics "github.com/ConsenSys/orchestrate/pkg/metrics"
+	pkgmetrics "github.com/ConsenSys/orchestrate/pkg/toolkit/app/metrics"
 	kitmetrics "github.com/go-kit/kit/metrics"
 )
 

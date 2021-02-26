@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"sync"
 
-	"github.com/ConsenSys/orchestrate/pkg/auth/key"
 	"github.com/ConsenSys/orchestrate/pkg/sdk/client"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/auth/key"
 	keymanager "github.com/ConsenSys/orchestrate/services/key-manager/client"
 	txlistener "github.com/ConsenSys/orchestrate/services/tx-listener"
 	txsender "github.com/ConsenSys/orchestrate/services/tx-sender"

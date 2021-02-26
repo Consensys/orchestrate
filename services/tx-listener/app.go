@@ -1,9 +1,9 @@
 package txlistener
 
 import (
-	"github.com/ConsenSys/orchestrate/pkg/app"
 	pkgsarama "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
 	orchestrateclient "github.com/ConsenSys/orchestrate/pkg/sdk/client"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app"
 	listenermetrics "github.com/ConsenSys/orchestrate/services/tx-listener/metrics"
 	provider "github.com/ConsenSys/orchestrate/services/tx-listener/providers"
 	"github.com/ConsenSys/orchestrate/services/tx-listener/session/ethereum"

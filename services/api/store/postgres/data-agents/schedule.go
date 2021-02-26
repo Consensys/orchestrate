@@ -3,9 +3,9 @@ package dataagents
 import (
 	"context"
 
-	pg "github.com/ConsenSys/orchestrate/pkg/database/postgres"
 	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
+	pg "github.com/ConsenSys/orchestrate/pkg/toolkit/database/postgres"
 	"github.com/ConsenSys/orchestrate/services/api/store"
 	"github.com/go-pg/pg/v9/orm"
 	"github.com/gofrs/uuid"

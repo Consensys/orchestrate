@@ -7,9 +7,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/stretchr/testify/suite"
-	integrationtest "github.com/ConsenSys/orchestrate/pkg/integration-test"
+	integrationtest "github.com/ConsenSys/orchestrate/pkg/toolkit/integration-test"
 	"github.com/ConsenSys/orchestrate/pkg/utils"
+	"github.com/stretchr/testify/suite"
 )
 
 type keyManagerTestSuite struct {

@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/log"
 	"github.com/ConsenSys/orchestrate/pkg/sdk/client"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 	"github.com/ConsenSys/orchestrate/pkg/utils"
 	"github.com/ConsenSys/orchestrate/pkg/utils/envelope"

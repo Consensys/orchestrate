@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/ConsenSys/orchestrate/pkg/ethclient"
-	"github.com/ConsenSys/orchestrate/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient"
 	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 	"github.com/ConsenSys/orchestrate/pkg/types/tx"
 	"github.com/ConsenSys/orchestrate/pkg/utils"

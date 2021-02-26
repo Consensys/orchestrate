@@ -7,8 +7,8 @@ import (
 	"github.com/ConsenSys/orchestrate/pkg/types/api"
 
 	jsonutils "github.com/ConsenSys/orchestrate/pkg/encoding/json"
-	"github.com/ConsenSys/orchestrate/pkg/http/httputil"
 	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/httputil"
 	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 	usecases "github.com/ConsenSys/orchestrate/services/api/business/use-cases"
 	"github.com/ConsenSys/orchestrate/services/api/service/formatters"

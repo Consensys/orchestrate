@@ -5,7 +5,7 @@ import (
 
 	"github.com/ConsenSys/orchestrate/pkg/errors"
 	"github.com/ConsenSys/orchestrate/pkg/hashicorp"
-	"github.com/ConsenSys/orchestrate/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 )
 
 func Build(ctx context.Context, cfg *Config) (Vault, error) {

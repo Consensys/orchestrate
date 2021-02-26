@@ -8,8 +8,8 @@ import (
 	"github.com/ConsenSys/orchestrate/pkg/types/api"
 	types "github.com/ConsenSys/orchestrate/pkg/types/keymanager/ethereum"
 
-	clientutils "github.com/ConsenSys/orchestrate/pkg/http/client-utils"
-	"github.com/ConsenSys/orchestrate/pkg/http/httputil"
+	clientutils "github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/client-utils"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/httputil"
 	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 )
 

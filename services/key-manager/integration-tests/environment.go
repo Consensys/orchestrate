@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 
 	"github.com/hashicorp/vault/api"
 
@@ -17,14 +17,14 @@ import (
 	keymanager "github.com/ConsenSys/orchestrate/services/key-manager"
 	"github.com/spf13/viper"
 
-	"github.com/ConsenSys/orchestrate/pkg/app"
-	httputils "github.com/ConsenSys/orchestrate/pkg/http"
-	integrationtest "github.com/ConsenSys/orchestrate/pkg/integration-test"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app"
+	httputils "github.com/ConsenSys/orchestrate/pkg/toolkit/app/http"
+	integrationtest "github.com/ConsenSys/orchestrate/pkg/toolkit/integration-test"
 	"k8s.io/apimachinery/pkg/util/rand"
 
-	"github.com/ConsenSys/orchestrate/pkg/docker"
-	"github.com/ConsenSys/orchestrate/pkg/docker/config"
-	hashicorpDocker "github.com/ConsenSys/orchestrate/pkg/docker/container/hashicorp"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/integration-test/docker"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/integration-test/docker/config"
+	hashicorpDocker "github.com/ConsenSys/orchestrate/pkg/toolkit/integration-test/docker/container/hashicorp"
 	"github.com/spf13/pflag"
 )
 
@@ -93,8 +93,7 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 		return nil, err
 	}
 
-	vaultContainer := hashicorpDocker.
-		NewDefault().
+	vaultContainer := hashicorpDocker.NewDefault().
 		SetHostPort(envVaultHostPort).
 		SetRootToken(rootToken).
 		SetHost(host).

@@ -5,7 +5,7 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/ConsenSys/orchestrate/pkg/ethclient/mock"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/mock"
 	"github.com/ethereum/go-ethereum/core/types"
 
 	"github.com/ConsenSys/orchestrate/pkg/types/entities"

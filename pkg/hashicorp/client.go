@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 	"github.com/hashicorp/vault/api"
 )
 

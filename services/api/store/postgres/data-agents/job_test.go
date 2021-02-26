@@ -9,18 +9,18 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/gofrs/uuid"
 	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
 	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 	"github.com/ConsenSys/orchestrate/services/api/store/models"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/gofrs/uuid"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/suite"
-	pgTestUtils "github.com/ConsenSys/orchestrate/pkg/database/postgres/testutils"
 	"github.com/ConsenSys/orchestrate/pkg/errors"
+	pgTestUtils "github.com/ConsenSys/orchestrate/pkg/toolkit/database/postgres/testutils"
 	"github.com/ConsenSys/orchestrate/services/api/store/models/testutils"
 	"github.com/ConsenSys/orchestrate/services/api/store/postgres/migrations"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 )
 
 type jobTestSuite struct {

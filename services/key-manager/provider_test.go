@@ -7,10 +7,10 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/config/dynamic"
 	traefikdynamic "github.com/containous/traefik/v2/pkg/config/dynamic"
 	"github.com/stretchr/testify/assert"
-	"github.com/ConsenSys/orchestrate/pkg/http"
-	"github.com/ConsenSys/orchestrate/pkg/http/config/dynamic"
 )
 
 func TestNewInternalConfig(t *testing.T) {

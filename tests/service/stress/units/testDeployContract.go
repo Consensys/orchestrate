@@ -5,8 +5,8 @@ import (
 
 	"github.com/ConsenSys/orchestrate/pkg/encoding/json"
 	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/log"
 	orchestrateclient "github.com/ConsenSys/orchestrate/pkg/sdk/client"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 	"github.com/ConsenSys/orchestrate/pkg/types/api"
 	"github.com/ConsenSys/orchestrate/pkg/types/tx"
 	"github.com/ConsenSys/orchestrate/pkg/utils"

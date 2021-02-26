@@ -7,7 +7,7 @@ import (
 	"github.com/ConsenSys/orchestrate/pkg/types/tx"
 
 	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 	ierror "github.com/ConsenSys/orchestrate/pkg/types/error"
 )
 

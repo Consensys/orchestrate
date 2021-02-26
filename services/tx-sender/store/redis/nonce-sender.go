@@ -1,7 +1,7 @@
 package redis
 
 import (
-	"github.com/ConsenSys/orchestrate/pkg/database/redis"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/database/redis"
 	"github.com/ConsenSys/orchestrate/services/tx-sender/store"
 )
 

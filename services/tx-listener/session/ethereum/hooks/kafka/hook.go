@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ConsenSys/orchestrate/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 	"github.com/ConsenSys/orchestrate/pkg/types/api"
 
 	"github.com/ConsenSys/orchestrate/pkg/types/entities"
@@ -14,9 +14,9 @@ import (
 
 	encoding "github.com/ConsenSys/orchestrate/pkg/encoding/sarama"
 	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/ethclient"
 	"github.com/ConsenSys/orchestrate/pkg/ethereum/abi"
 	sdk "github.com/ConsenSys/orchestrate/pkg/sdk/client"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient"
 	ierror "github.com/ConsenSys/orchestrate/pkg/types/error"
 	types "github.com/ConsenSys/orchestrate/pkg/types/ethereum"
 	"github.com/ConsenSys/orchestrate/pkg/types/tx"

@@ -4,22 +4,22 @@ package integrationtests
 
 import (
 	"context"
-	"github.com/stretchr/testify/require"
 	"github.com/ConsenSys/orchestrate/pkg/types/api"
 	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	"github.com/stretchr/testify/require"
 
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/suite"
 	"github.com/ConsenSys/orchestrate/pkg/errors"
-	clientutils "github.com/ConsenSys/orchestrate/pkg/http/client-utils"
 	"github.com/ConsenSys/orchestrate/pkg/sdk/client"
+	clientutils "github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/client-utils"
 	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
 	"github.com/ConsenSys/orchestrate/pkg/types/tx"
 	"github.com/ConsenSys/orchestrate/pkg/utils"
 	"github.com/ConsenSys/orchestrate/services/api/service/controllers"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 	"gopkg.in/h2non/gock.v1"
 )
 

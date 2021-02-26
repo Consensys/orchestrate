@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	"github.com/ConsenSys/orchestrate/pkg/encoding/json"
-	"github.com/ConsenSys/orchestrate/pkg/ethclient/rpc"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/rpc"
 	"github.com/ConsenSys/orchestrate/pkg/types/api"
 	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 	"github.com/ConsenSys/orchestrate/tests/service/e2e/cucumber/alias"
@@ -19,7 +19,7 @@ import (
 	broker "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
 	"github.com/ConsenSys/orchestrate/pkg/engine"
 	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 	"github.com/ConsenSys/orchestrate/pkg/utils"
 	"github.com/ConsenSys/orchestrate/tests/handlers"
 	"github.com/ConsenSys/orchestrate/tests/handlers/consumer"

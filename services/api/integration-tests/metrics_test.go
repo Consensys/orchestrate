@@ -9,16 +9,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/suite"
-	"github.com/ConsenSys/orchestrate/pkg/http"
-	httpmetrics "github.com/ConsenSys/orchestrate/pkg/http/metrics"
-	metrics1 "github.com/ConsenSys/orchestrate/pkg/metrics"
-	testutils2 "github.com/ConsenSys/orchestrate/pkg/metrics/testutils"
 	"github.com/ConsenSys/orchestrate/pkg/sdk/client"
-	tpcmetrics "github.com/ConsenSys/orchestrate/pkg/tcp/metrics"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http"
+	httpmetrics "github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/metrics"
+	metrics1 "github.com/ConsenSys/orchestrate/pkg/toolkit/app/metrics"
+	testutils2 "github.com/ConsenSys/orchestrate/pkg/toolkit/app/metrics/testutils"
+	tpcmetrics "github.com/ConsenSys/orchestrate/pkg/toolkit/tcp/metrics"
 	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
 	"github.com/ConsenSys/orchestrate/services/api/metrics"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 )
 
 type metricsTestSuite struct {

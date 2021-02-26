@@ -13,7 +13,7 @@ import (
 	"github.com/ConsenSys/orchestrate/pkg/utils"
 
 	jsonutils "github.com/ConsenSys/orchestrate/pkg/encoding/json"
-	"github.com/ConsenSys/orchestrate/pkg/http/httputil"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/httputil"
 	types "github.com/ConsenSys/orchestrate/pkg/types/keymanager/ethereum"
 	"github.com/ConsenSys/orchestrate/services/key-manager/service/formatters"
 	"github.com/gorilla/mux"

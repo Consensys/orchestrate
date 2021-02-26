@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/log"
 	orchestrateclient "github.com/ConsenSys/orchestrate/pkg/sdk/client"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 	types "github.com/ConsenSys/orchestrate/pkg/types/api"
 	usecases "github.com/ConsenSys/orchestrate/services/tx-sentry/tx-sentry/use-cases"
 

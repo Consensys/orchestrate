@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	clientutils "github.com/ConsenSys/orchestrate/pkg/http/client-utils"
-	"github.com/ConsenSys/orchestrate/pkg/http/httputil"
+	clientutils "github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/client-utils"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/httputil"
 	types "github.com/ConsenSys/orchestrate/pkg/types/api"
 	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 )

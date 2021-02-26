@@ -3,13 +3,13 @@ package steps
 import (
 	gohttp "net/http"
 
-	"github.com/ConsenSys/orchestrate/pkg/auth/jwt/generator"
 	broker "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
-	"github.com/ConsenSys/orchestrate/pkg/ethclient"
-	rpcClient "github.com/ConsenSys/orchestrate/pkg/ethclient/rpc"
-	"github.com/ConsenSys/orchestrate/pkg/http"
-	"github.com/ConsenSys/orchestrate/pkg/log"
 	orchestrateclient "github.com/ConsenSys/orchestrate/pkg/sdk/client"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/auth/jwt/generator"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient"
+	rpcClient "github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/rpc"
 	"github.com/ConsenSys/orchestrate/pkg/types/tx"
 	"github.com/ConsenSys/orchestrate/tests/service/e2e/cucumber/alias"
 	"github.com/ConsenSys/orchestrate/tests/service/e2e/utils"

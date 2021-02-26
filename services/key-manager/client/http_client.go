@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/ConsenSys/orchestrate/pkg/errors"
-	clientutils "github.com/ConsenSys/orchestrate/pkg/http/client-utils"
-	"github.com/ConsenSys/orchestrate/pkg/http/httputil"
+	clientutils "github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/client-utils"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/httputil"
 	"github.com/containous/traefik/v2/pkg/log"
 	healthz "github.com/heptiolabs/healthcheck"
 )

@@ -10,7 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 
 	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 )
 
 const sendContractTxComponent = "use-cases.send-contract-tx"

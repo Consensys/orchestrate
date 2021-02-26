@@ -7,7 +7,7 @@ import (
 	usecases "github.com/ConsenSys/orchestrate/services/api/business/use-cases"
 
 	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 	"github.com/ConsenSys/orchestrate/services/api/store"
 )

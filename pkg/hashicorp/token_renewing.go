@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 	"github.com/hashicorp/vault/api"
 
 	"github.com/ConsenSys/orchestrate/pkg/errors"

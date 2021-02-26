@@ -9,13 +9,13 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/suite"
-	"github.com/ConsenSys/orchestrate/pkg/database/postgres"
-	pgTestUtils "github.com/ConsenSys/orchestrate/pkg/database/postgres/testutils"
 	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/database/postgres"
+	pgTestUtils "github.com/ConsenSys/orchestrate/pkg/toolkit/database/postgres/testutils"
 	"github.com/ConsenSys/orchestrate/services/api/store/models"
 	"github.com/ConsenSys/orchestrate/services/api/store/postgres/migrations"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 )
 
 type repositoryTestSuite struct {

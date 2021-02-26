@@ -12,12 +12,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 
 	"github.com/ConsenSys/orchestrate/pkg/encoding/json"
 	"github.com/ConsenSys/orchestrate/pkg/errors"
-	ethclient "github.com/ConsenSys/orchestrate/pkg/ethclient/utils"
+	ethclient "github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/utils"
 	"github.com/ConsenSys/orchestrate/pkg/utils"
 )
 

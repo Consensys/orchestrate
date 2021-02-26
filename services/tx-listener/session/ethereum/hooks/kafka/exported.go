@@ -7,7 +7,7 @@ import (
 	txscheduler "github.com/ConsenSys/orchestrate/pkg/sdk/client"
 
 	broker "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
-	ethclient "github.com/ConsenSys/orchestrate/pkg/ethclient/rpc"
+	ethclient "github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/rpc"
 	"github.com/ConsenSys/orchestrate/pkg/utils"
 )
 

@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/ConsenSys/orchestrate/pkg/backoff"
-	"github.com/ConsenSys/orchestrate/pkg/http"
-	"github.com/ConsenSys/orchestrate/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 	"github.com/spf13/viper"
 )
 

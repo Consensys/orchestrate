@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/auth/jwt/generator"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/auth/jwt/generator"
 	"github.com/ConsenSys/orchestrate/pkg/utils"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"

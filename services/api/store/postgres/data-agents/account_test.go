@@ -8,15 +8,15 @@ import (
 	"context"
 	"testing"
 
-	ethcommon "github.com/ethereum/go-ethereum/common"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/suite"
-	pgTestUtils "github.com/ConsenSys/orchestrate/pkg/database/postgres/testutils"
 	"github.com/ConsenSys/orchestrate/pkg/errors"
+	pgTestUtils "github.com/ConsenSys/orchestrate/pkg/toolkit/database/postgres/testutils"
 	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 	"github.com/ConsenSys/orchestrate/pkg/utils"
 	testutils2 "github.com/ConsenSys/orchestrate/services/api/store/models/testutils"
 	"github.com/ConsenSys/orchestrate/services/api/store/postgres/migrations"
+	ethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 )
 
 type accountTestSuite struct {

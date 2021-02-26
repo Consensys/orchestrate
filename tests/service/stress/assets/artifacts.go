@@ -9,8 +9,8 @@ import (
 	"path"
 
 	"github.com/ConsenSys/orchestrate/pkg/encoding/json"
-	"github.com/ConsenSys/orchestrate/pkg/log"
 	"github.com/ConsenSys/orchestrate/pkg/sdk/client"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 	"github.com/ConsenSys/orchestrate/pkg/types/api"
 	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 )

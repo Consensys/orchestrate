@@ -9,10 +9,10 @@ import (
 	"math/big"
 	"testing"
 
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/mock"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/ethclient/mock"
 )
 
 func TestCreditorControl_SuccessfulCandidate(t *testing.T) {

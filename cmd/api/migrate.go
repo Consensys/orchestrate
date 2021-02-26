@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/ConsenSys/orchestrate/pkg/database/postgres"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/database/postgres"
 	"github.com/ConsenSys/orchestrate/services/api/store/postgres/migrations"
 	keymanagerclient "github.com/ConsenSys/orchestrate/services/key-manager/client"
 	"github.com/go-pg/pg/v9"

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ConsenSys/orchestrate/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 	"github.com/ConsenSys/orchestrate/pkg/types/api"
 
 	orchestrateclient "github.com/ConsenSys/orchestrate/pkg/sdk/client"

@@ -1,7 +1,7 @@
 package dataagents
 
 import (
-	pg "github.com/ConsenSys/orchestrate/pkg/database/postgres"
+	pg "github.com/ConsenSys/orchestrate/pkg/toolkit/database/postgres"
 	"github.com/ConsenSys/orchestrate/services/api/store"
 )
 

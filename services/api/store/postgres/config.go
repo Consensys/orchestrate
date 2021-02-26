@@ -1,7 +1,7 @@
 package postgres
 
 import (
-	"github.com/ConsenSys/orchestrate/pkg/database/postgres"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/database/postgres"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )

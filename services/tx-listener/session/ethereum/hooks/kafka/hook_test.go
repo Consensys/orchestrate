@@ -9,18 +9,18 @@ import (
 
 	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 
+	mock2 "github.com/ConsenSys/orchestrate/pkg/sdk/client/mock"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/mock"
+	txschedulertypes "github.com/ConsenSys/orchestrate/pkg/types/api"
+	types "github.com/ConsenSys/orchestrate/pkg/types/ethereum"
+	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
+	"github.com/ConsenSys/orchestrate/services/tx-listener/dynamic"
 	"github.com/Shopify/sarama/mocks"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	"github.com/ConsenSys/orchestrate/pkg/ethclient/mock"
-	mock2 "github.com/ConsenSys/orchestrate/pkg/sdk/client/mock"
-	txschedulertypes "github.com/ConsenSys/orchestrate/pkg/types/api"
-	types "github.com/ConsenSys/orchestrate/pkg/types/ethereum"
-	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
-	"github.com/ConsenSys/orchestrate/services/tx-listener/dynamic"
 )
 
 var c = &dynamic.Chain{

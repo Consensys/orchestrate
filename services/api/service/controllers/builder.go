@@ -7,7 +7,7 @@ import (
 
 	"github.com/ConsenSys/orchestrate/services/key-manager/client"
 
-	"github.com/ConsenSys/orchestrate/pkg/http/config/dynamic"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/config/dynamic"
 	usecases "github.com/ConsenSys/orchestrate/services/api/business/use-cases"
 	"github.com/gorilla/mux"
 )

@@ -7,20 +7,20 @@ import (
 	"fmt"
 	"testing"
 
-	mock2 "github.com/ConsenSys/orchestrate/pkg/metrics/mock"
+	mock2 "github.com/ConsenSys/orchestrate/pkg/toolkit/app/metrics/mock"
 	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 	"github.com/ConsenSys/orchestrate/services/api/metrics/mock"
 
-	mocks2 "github.com/Shopify/sarama/mocks"
-	"github.com/golang/mock/gomock"
-	"github.com/spf13/viper"
-	"github.com/stretchr/testify/assert"
 	"github.com/ConsenSys/orchestrate/pkg/broker/sarama"
 	encoding "github.com/ConsenSys/orchestrate/pkg/encoding/proto"
 	"github.com/ConsenSys/orchestrate/pkg/errors"
 	"github.com/ConsenSys/orchestrate/pkg/types/tx"
 	"github.com/ConsenSys/orchestrate/services/api/store/mocks"
 	"github.com/ConsenSys/orchestrate/services/api/store/models/testutils"
+	mocks2 "github.com/Shopify/sarama/mocks"
+	"github.com/golang/mock/gomock"
+	"github.com/spf13/viper"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestStartJob_Execute(t *testing.T) {

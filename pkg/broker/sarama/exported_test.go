@@ -8,13 +8,13 @@ import (
 	"testing"
 	"time"
 
+	cgmock "github.com/ConsenSys/orchestrate/pkg/broker/sarama/mock"
+	"github.com/ConsenSys/orchestrate/pkg/engine"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 	"github.com/Shopify/sarama"
 	"github.com/Shopify/sarama/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	cgmock "github.com/ConsenSys/orchestrate/pkg/broker/sarama/mock"
-	"github.com/ConsenSys/orchestrate/pkg/engine"
-	"github.com/ConsenSys/orchestrate/pkg/log"
 )
 
 type ExportedTestSuite struct {

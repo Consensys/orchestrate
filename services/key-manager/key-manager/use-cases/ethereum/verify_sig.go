@@ -5,7 +5,7 @@ import (
 
 	"github.com/ConsenSys/orchestrate/pkg/crypto/ethereum"
 	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 	"github.com/ConsenSys/orchestrate/pkg/utils"
 	usecases "github.com/ConsenSys/orchestrate/services/key-manager/key-manager/use-cases"
 )

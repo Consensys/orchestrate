@@ -7,10 +7,10 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/ConsenSys/orchestrate/pkg/database"
 	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/log"
 	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/database"
 	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 	"github.com/ConsenSys/orchestrate/services/api/business/parsers"
 	usecases "github.com/ConsenSys/orchestrate/services/api/business/use-cases"

@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github.com/ConsenSys/orchestrate/pkg/auth"
-	"github.com/ConsenSys/orchestrate/pkg/auth/jwt/generator"
 	broker "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
-	"github.com/ConsenSys/orchestrate/pkg/log"
 	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/auth"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/auth/jwt/generator"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )

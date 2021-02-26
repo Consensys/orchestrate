@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/ConsenSys/orchestrate/pkg/broker/sarama"
-	"github.com/ConsenSys/orchestrate/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 	"github.com/ConsenSys/orchestrate/pkg/types/tx"
 	"github.com/ConsenSys/orchestrate/tests/utils"
 	"github.com/ConsenSys/orchestrate/tests/utils/chanregistry"

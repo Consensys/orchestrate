@@ -12,13 +12,13 @@ import (
 
 	"github.com/gofrs/uuid"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/suite"
-	pgTestUtils "github.com/ConsenSys/orchestrate/pkg/database/postgres/testutils"
 	"github.com/ConsenSys/orchestrate/pkg/errors"
+	pgTestUtils "github.com/ConsenSys/orchestrate/pkg/toolkit/database/postgres/testutils"
 	"github.com/ConsenSys/orchestrate/services/api/store/models"
 	"github.com/ConsenSys/orchestrate/services/api/store/models/testutils"
 	"github.com/ConsenSys/orchestrate/services/api/store/postgres/migrations"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 )
 
 type txRequestTestSuite struct {

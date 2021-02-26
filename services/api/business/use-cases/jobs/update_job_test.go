@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/ConsenSys/orchestrate/pkg/errors"
-	mock2 "github.com/ConsenSys/orchestrate/pkg/metrics/mock"
+	mock2 "github.com/ConsenSys/orchestrate/pkg/toolkit/app/metrics/mock"
 	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 	"github.com/ConsenSys/orchestrate/services/api/business/parsers"
 	mocks2 "github.com/ConsenSys/orchestrate/services/api/business/use-cases/mocks"
@@ -16,10 +16,10 @@ import (
 
 	testutils3 "github.com/ConsenSys/orchestrate/pkg/types/testutils"
 
-	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/assert"
 	"github.com/ConsenSys/orchestrate/services/api/store/mocks"
 	testutils2 "github.com/ConsenSys/orchestrate/services/api/store/models/testutils"
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestUpdateJob_Execute(t *testing.T) {

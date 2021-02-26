@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ConsenSys/orchestrate/pkg/ethclient"
-	"github.com/ConsenSys/orchestrate/pkg/log"
 	orchestrateclient "github.com/ConsenSys/orchestrate/pkg/sdk/client"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient"
 	"github.com/ConsenSys/orchestrate/pkg/types/api"
 	"github.com/ConsenSys/orchestrate/pkg/utils"
 	utils2 "github.com/ConsenSys/orchestrate/tests/utils"

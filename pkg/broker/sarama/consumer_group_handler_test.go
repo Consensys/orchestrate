@@ -8,11 +8,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Shopify/sarama"
-	"github.com/ConsenSys/orchestrate/pkg/log"
-	"github.com/stretchr/testify/assert"
 	"github.com/ConsenSys/orchestrate/pkg/broker/sarama/mock"
 	"github.com/ConsenSys/orchestrate/pkg/engine"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
+	"github.com/Shopify/sarama"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestContext(t *testing.T) {

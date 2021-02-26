@@ -6,7 +6,7 @@ import (
 
 	jsonutils "github.com/ConsenSys/orchestrate/pkg/encoding/json"
 	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/http/httputil"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/httputil"
 	"github.com/ConsenSys/orchestrate/pkg/types/keymanager"
 	types "github.com/ConsenSys/orchestrate/pkg/types/keymanager/zk-snarks"
 	usecases "github.com/ConsenSys/orchestrate/services/key-manager/key-manager/use-cases"

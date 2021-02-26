@@ -3,7 +3,7 @@ package redis
 import (
 	"testing"
 
-	"github.com/ConsenSys/orchestrate/pkg/database/redis"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/database/redis"
 	"github.com/alicebob/miniredis"
 	"github.com/stretchr/testify/assert"
 )

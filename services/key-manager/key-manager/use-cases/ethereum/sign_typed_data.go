@@ -3,7 +3,7 @@ package ethereum
 import (
 	"context"
 
-	"github.com/ConsenSys/orchestrate/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 	"github.com/ConsenSys/orchestrate/services/key-manager/key-manager/use-cases/ethereum/utils"
 
 	"github.com/ConsenSys/orchestrate/pkg/errors"

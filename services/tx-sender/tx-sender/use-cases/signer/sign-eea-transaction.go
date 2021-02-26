@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/ConsenSys/orchestrate/pkg/encoding/rlp"
-	"github.com/ConsenSys/orchestrate/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 
 	pkgcryto "github.com/ConsenSys/orchestrate/pkg/crypto/ethereum"
 

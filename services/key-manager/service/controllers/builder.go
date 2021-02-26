@@ -9,7 +9,7 @@ import (
 
 	"github.com/ConsenSys/orchestrate/services/key-manager/store"
 
-	"github.com/ConsenSys/orchestrate/pkg/http/config/dynamic"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/config/dynamic"
 	"github.com/gorilla/mux"
 )
 

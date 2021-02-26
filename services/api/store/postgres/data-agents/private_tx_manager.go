@@ -3,12 +3,12 @@ package dataagents
 import (
 	"context"
 
-	"github.com/ConsenSys/orchestrate/pkg/log"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 	"github.com/ConsenSys/orchestrate/services/api/store"
 	"github.com/ConsenSys/orchestrate/services/api/store/models"
 
-	pg "github.com/ConsenSys/orchestrate/pkg/database/postgres"
 	"github.com/ConsenSys/orchestrate/pkg/errors"
+	pg "github.com/ConsenSys/orchestrate/pkg/toolkit/database/postgres"
 	"github.com/gofrs/uuid"
 )
 

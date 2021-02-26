@@ -6,16 +6,16 @@ package dataagents
 
 import (
 	"context"
-	"github.com/stretchr/testify/assert"
 	"github.com/ConsenSys/orchestrate/pkg/errors"
 	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
 	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 	"github.com/ConsenSys/orchestrate/services/api/store/models/testutils"
+	"github.com/stretchr/testify/assert"
 	"testing"
 
-	"github.com/stretchr/testify/suite"
-	pgTestUtils "github.com/ConsenSys/orchestrate/pkg/database/postgres/testutils"
+	pgTestUtils "github.com/ConsenSys/orchestrate/pkg/toolkit/database/postgres/testutils"
 	"github.com/ConsenSys/orchestrate/services/api/store/postgres/migrations"
+	"github.com/stretchr/testify/suite"
 )
 
 type chainTestSuite struct {

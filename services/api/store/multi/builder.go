@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ConsenSys/orchestrate/pkg/database/postgres"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/database/postgres"
 	"github.com/ConsenSys/orchestrate/services/api/store"
 	storePG "github.com/ConsenSys/orchestrate/services/api/store/postgres"
 )

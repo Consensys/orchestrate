@@ -12,22 +12,22 @@ import (
 
 	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
 	backoffmock "github.com/ConsenSys/orchestrate/pkg/backoff/mock"
 	txschedulertypes "github.com/ConsenSys/orchestrate/pkg/types/api"
 	"github.com/ConsenSys/orchestrate/pkg/types/ethereum"
 	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
 	mock3 "github.com/ConsenSys/orchestrate/services/tx-listener/session/ethereum/mocks"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 
-	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/assert"
-	mock6 "github.com/ConsenSys/orchestrate/pkg/metrics/mock"
 	mock4 "github.com/ConsenSys/orchestrate/pkg/sdk/client/mock"
+	mock6 "github.com/ConsenSys/orchestrate/pkg/toolkit/app/metrics/mock"
 	"github.com/ConsenSys/orchestrate/services/tx-listener/dynamic"
 	mock5 "github.com/ConsenSys/orchestrate/services/tx-listener/metrics/mock"
 	"github.com/ConsenSys/orchestrate/services/tx-listener/session/ethereum/hooks/mock"
 	mock2 "github.com/ConsenSys/orchestrate/services/tx-listener/session/ethereum/offset/mock"
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSession_Run(t *testing.T) {

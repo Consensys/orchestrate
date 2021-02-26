@@ -9,7 +9,7 @@ import (
 	backoffmock "github.com/ConsenSys/orchestrate/pkg/backoff/mock"
 	"github.com/ConsenSys/orchestrate/pkg/encoding/json"
 	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/http/httputil"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/httputil"
 	types "github.com/ConsenSys/orchestrate/pkg/types/api"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
