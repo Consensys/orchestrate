@@ -90,21 +90,6 @@ services:
       - key-manager
     command: api migrate up
 
-  api-copy-db:
-    <<: *container-common
-    environment:
-      <<: *default-variables
-      <<: *api-common
-      DB_MIGRATION_USERNAME: ${DB_MIGRATION_USERNAME-postgres}
-      DB_MIGRATION_PASSWORD: ${DB_MIGRATION_PASSWORD-postgres}
-      DB_MIGRATION_DATABASE: ${DB_MIGRATION_DATABASE-postgres}
-      DB_MIGRATION_ADDRESS: ${DB_MIGRATION_ADDRESS-postgres-transaction-scheduler:5432}
-      DB_MIGRATION_SERVICE: ${DB_MIGRATION_SERVICE-transaction-scheduler}
-    restart: "no"
-    depends_on:
-      - api-migration
-    command: api migrate copy-db
-
   api:
     <<: *container-common
     ports:

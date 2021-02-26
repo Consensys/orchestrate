@@ -1,9 +1,6 @@
 package api
 
 import (
-	"os"
-
-	"github.com/ConsenSys/orchestrate/cmd/api/scripts"
 	"github.com/ConsenSys/orchestrate/pkg/database/postgres"
 	"github.com/ConsenSys/orchestrate/services/api/store/postgres/migrations"
 	keymanagerclient "github.com/ConsenSys/orchestrate/services/key-manager/client"
@@ -121,29 +118,6 @@ func newMigrateCmd() *cobra.Command {
 		},
 	}
 	migrateCmd.AddCommand(setVersionCmd)
-
-	// Register Migrate API DB
-	migrateAPIDBCmd := &cobra.Command{
-		Use:   "copy-db",
-		Short: "Copy Database from version 2.5.x to version 21.1.x",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			// Set database connection
-			opts, err := postgres.NewConfig(viper.GetViper()).PGOptions()
-			if err != nil {
-				return err
-			}
-
-			opts.User = os.Getenv("DB_MIGRATION_USERNAME")
-			opts.Password = os.Getenv("DB_MIGRATION_PASSWORD")
-			opts.Database = os.Getenv("DB_MIGRATION_DATABASE")
-			opts.Addr = os.Getenv("DB_MIGRATION_ADDRESS")
-
-			oldDB := pg.Connect(opts)
-
-			return scripts.MigrateAPIDB(db, oldDB)
-		},
-	}
-	migrateCmd.AddCommand(migrateAPIDBCmd)
 
 	return migrateCmd
 }
