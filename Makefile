@@ -3,7 +3,7 @@ PACKAGES ?= $(shell go list ./... | grep -Fv -e e2e -e examples -e genstatic -e 
 INTEGRATION_TEST_PACKAGES ?= $(shell go list ./... | grep integration-tests )
 ORCH_SERVICES = tx-sender tx-listener api key-manager
 ORCH_MIGRATE = api key-manager
-DEPS_VAULT = vault-init vault vault-import-secrets
+DEPS_VAULT = vault-init vault
 DEPS_POSTGRES = postgres-api
 DEPS_KAFKA = zookeeper kafka
 
@@ -195,7 +195,7 @@ postgres:
 down-postgres:
 	@docker-compose -f scripts/deps/docker-compose.yml rm --force -s -v postgres-unit
 
-up: deps-persistent quorum geth besu deps-kafka hashicorp-vault-import-secrets bootstrap-deps orchestrate ## Start Orchestrate and deps
+up: deps-persistent quorum geth besu deps-kafka bootstrap-deps orchestrate ## Start Orchestrate and deps
 
 dev: deps orchestrate ## Start Orchestrate and light deps
 
@@ -221,9 +221,6 @@ hashicorp-token-lookup:
 
 hashicorp-vault:
 	@bash scripts/deps/hashicorp/vault.sh $(COMMAND)
-
-hashicorp-vault-import-secrets: gobuild
-	@docker-compose up -d keymanager-migration-import-secrets
 
 pgadmin:
 	@docker-compose -f scripts/deps/docker-compose-tools.yml up -d pgadmin
