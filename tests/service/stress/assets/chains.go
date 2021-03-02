@@ -23,7 +23,7 @@ type Chain struct {
 
 func RegisterNewChain(ctx context.Context, client orchestrateclient.OrchestrateClient, ec ethclient.ChainSyncReader,
 	proxyHost, chainName string, chainData *utils2.TestDataChain,
-) (context.Context, error) {
+) (context.Context, string, error) {
 	logger := log.FromContext(ctx).WithField("name", chainName).WithField("urls", chainData.URLs)
 	logger.WithContext(ctx).Debug("registering new chain")
 
@@ -33,13 +33,13 @@ func RegisterNewChain(ctx context.Context, client orchestrateclient.OrchestrateC
 	})
 	if err != nil {
 		logger.WithError(err).Error("failed to register chain")
-		return nil, err
+		return nil, "", err
 	}
 
 	err = utils2.WaitForProxy(ctx, proxyHost, c.UUID, ec)
 	if err != nil {
 		logger.WithError(err).Error("failed to wait for chain proxy")
-		return nil, err
+		return nil, "", err
 	}
 
 	logger.WithField("chain", c.UUID).Info("new chain has been registered")
@@ -50,7 +50,7 @@ func RegisterNewChain(ctx context.Context, client orchestrateclient.OrchestrateC
 			Name:            chainName,
 			PrivNodeAddress: chainData.PrivateAddress,
 		}),
-	), nil
+	), c.UUID, nil
 }
 
 func DeregisterChain(ctx context.Context, client orchestrateclient.OrchestrateClient, chain *Chain) error {

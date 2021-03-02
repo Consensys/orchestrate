@@ -131,7 +131,8 @@ func (c *WorkLoadService) preRun(ctx context.Context) (context.Context, error) {
 	for idx := 0; idx < nBesuNodes; idx++ {
 		besuNode := c.cfg.gData.Nodes.Besu[idx]
 		chainName := fmt.Sprintf("besu_%d-%s", idx, utils2.RandString(5))
-		ctx, err = assets.RegisterNewChain(ctx, c.client, c.ec, proxyHost, chainName, &besuNode)
+		var cUUID string
+		ctx, cUUID, err = assets.RegisterNewChain(ctx, c.client, c.ec, proxyHost, chainName, &besuNode)
 		if err != nil {
 			return ctx, err
 		}
@@ -145,7 +146,7 @@ func (c *WorkLoadService) preRun(ctx context.Context) (context.Context, error) {
 		}
 
 		for jdx := 0; jdx < nPrivGroupPerChain; jdx++ {
-			ctx, err = assets.CreatePrivateGroup(ctx, c.ec, besuNode.URLs[0], besuNode.PrivateAddress,
+			ctx, err = assets.CreatePrivateGroup(ctx, c.ec, utils2.GetProxyURL(proxyHost, cUUID), besuNode.PrivateAddress,
 				utils2.RandShuffle(privNodeAddress))
 			if err != nil {
 				return ctx, err
