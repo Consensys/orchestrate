@@ -75,22 +75,20 @@ func (c *WorkLoadService) Run(ctx context.Context) error {
 	logger.Info("stress test started")
 
 	ctx, c.cancel = context.WithTimeout(ctx, c.cfg.Timeout)
-
 	cctx, err := c.preRun(ctx)
 	if err != nil {
+		_ = c.postRun(cctx)
 		return err
 	}
 
-	var wg sync.WaitGroup
 	var gerr error
-
+	var wg sync.WaitGroup
 	unitCfg := units.NewWorkloadConfig(cctx, waitForEnvelopeTimeout)
 	for _, item := range c.items {
 		wg.Add(1)
 		go func(it *workLoadItem) {
 			defer wg.Done()
-			err := c.run(cctx, it, unitCfg)
-			if err != nil {
+			if err = c.run(cctx, it, unitCfg); err != nil {
 				if gerr == nil {
 					gerr = err
 				}
@@ -102,7 +100,12 @@ func (c *WorkLoadService) Run(ctx context.Context) error {
 	log.FromContext(ctx).Info("waiting for jobs to complete...")
 	wg.Wait()
 
-	return c.postRun(cctx)
+	err = c.postRun(cctx)
+	if gerr != nil && err != nil {
+		gerr = err
+	}
+
+	return gerr
 }
 
 func (c *WorkLoadService) Stop() {
@@ -163,7 +166,7 @@ func (c *WorkLoadService) postRun(ctx context.Context) error {
 
 	var gerr error
 	for _, chain := range chains {
-		err := assets.DeregisterChain(ctx, c.client, &chain)
+		err := assets.DeregisterChain(log.With(context.Background(), logger), c.client, &chain)
 		if err != nil {
 			gerr = errors.CombineErrors(gerr, err)
 			logger.WithError(err).Error("failed to remove chain")
