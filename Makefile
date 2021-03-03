@@ -3,7 +3,7 @@ PACKAGES ?= $(shell go list ./... | grep -Fv -e e2e -e examples -e genstatic -e 
 INTEGRATION_TEST_PACKAGES ?= $(shell go list ./... | grep integration-tests )
 ORCH_SERVICES = tx-sender tx-listener api key-manager
 ORCH_MIGRATE = api key-manager
-DEPS_VAULT = vault-init vault
+DEPS_VAULT = vault vault-init vault-agent
 DEPS_POSTGRES = postgres-api
 DEPS_KAFKA = zookeeper kafka
 

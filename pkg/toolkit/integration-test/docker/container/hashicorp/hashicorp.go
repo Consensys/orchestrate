@@ -18,7 +18,7 @@ import (
 	"github.com/docker/go-connections/nat"
 )
 
-const defaultHashicorpVaultImage = "library/vault:1.6.1"
+const defaultHashicorpVaultImage = "library/vault:1.6.2"
 const defaultHostPort = "8200"
 const defaultRootToken = "myRoot"
 const defaultHost = "localhost"

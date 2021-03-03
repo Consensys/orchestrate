@@ -1,12 +1,9 @@
 package hashicorp
 
 import (
-	"encoding/json"
+	"context"
 	"fmt"
-	"io/ioutil"
-	"os"
 	"path"
-	"strings"
 
 	"github.com/ConsenSys/orchestrate/pkg/errors"
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
@@ -37,7 +34,7 @@ type OrchestrateVaultClient struct {
 }
 
 // NewOrchestrateVaultClient construct a new OrchestrateVaultClient
-func NewOrchestrateVaultClient(config *Config) (*OrchestrateVaultClient, error) {
+func NewOrchestrateVaultClient(ctx context.Context, config *Config) (*OrchestrateVaultClient, error) {
 	logger := log.NewLogger().SetComponent(component)
 
 	client, err := api.NewClient(ToVaultConfig(config))
@@ -53,15 +50,18 @@ func NewOrchestrateVaultClient(config *Config) (*OrchestrateVaultClient, error) 
 		logger: logger,
 	}
 
-	err = orchestrateVaultClient.setTokenFromConfig(config)
+	tokenWatcher, err := newRenewTokenWatcher(client, config.TokenFilePath, logger)
 	if err != nil {
 		return nil, err
 	}
 
-	err = orchestrateVaultClient.manageToken()
-	if err != nil {
-		return nil, err
-	}
+	go func() {
+		err = tokenWatcher.Run(ctx)
+		if err != nil {
+			logger.WithError(err).Fatal("token watcher routine has exited with errors")
+		}
+		logger.Warn("token watcher routine has exited gracefully")
+	}()
 
 	logger.Info("client has been initialized successfully")
 	return orchestrateVaultClient, nil
@@ -162,69 +162,6 @@ func (c *OrchestrateVaultClient) createAccount(accountType, namespace string, ac
 	err = parseResponse(res.Data, account)
 	if err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func (c *OrchestrateVaultClient) manageToken() error {
-	secret, err := c.client.Auth().Token().LookupSelf()
-	if err != nil {
-		errMessage := "initial token lookup failed"
-		c.logger.WithError(err).Error(errMessage)
-		return errors.HashicorpVaultConnectionError(errMessage)
-	}
-
-	tokenTTL64, err := secret.Data["creation_ttl"].(json.Number).Int64()
-	if err != nil {
-		errMessage := "failed to get 'creation_ttl' field"
-		c.logger.WithError(err).Error(errMessage)
-		return errors.HashicorpVaultConnectionError(errMessage)
-	}
-
-	tokenRenewable := secret.Data["renewable"].(bool)
-	if int(tokenTTL64) == 0 || !tokenRenewable {
-		c.logger.Debug("token in use never expires or cannot be renewed")
-		return nil
-	}
-
-	tokenExpireIn64, err := secret.Data["ttl"].(json.Number).Int64()
-	if err != nil {
-		return errors.InternalError("could not read vault ttl").AppendReason(err.Error())
-	}
-	if int(tokenExpireIn64) == 0 {
-		return errors.InternalError("token is expired")
-	}
-
-	c.logger.WithField("expiration_duration", tokenExpireIn64).Debug("token expiration time")
-
-	rtl := newRenewTokenLoop(tokenExpireIn64, c.client, c.logger)
-
-	err = rtl.Refresh()
-	if err != nil {
-		return err
-	}
-
-	rtl.Run()
-	return nil
-}
-
-func (c *OrchestrateVaultClient) setTokenFromConfig(config *Config) error {
-	encoded, err := ioutil.ReadFile(config.TokenFilePath)
-	if err != nil {
-		errMessage := "token file path could not be found"
-		c.logger.WithError(err).Fatal(errMessage)
-		return errors.ConfigError(errMessage)
-	}
-
-	decoded := strings.TrimSuffix(string(encoded), "\n") // Remove the newline if it exists
-	decoded = strings.TrimSuffix(decoded, "\r")          // This one is for windows compatibility
-	c.client.SetToken(decoded)
-
-	// Immediately delete the file after it was read
-	err = os.Remove(config.TokenFilePath)
-	if err != nil {
-		c.logger.WithError(err).Warn("could not delete token file")
 	}
 
 	return nil

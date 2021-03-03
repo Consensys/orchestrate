@@ -106,17 +106,6 @@ services:
     labels:
       filebeat: "false"
 
-  key-vault-init:
-    build: ./scripts/deps/hashicorp
-    environment:
-      VAULT_ADDR: ${VAULT_ADDR-http://vault:8200}
-    networks:
-      - orchestrate
-    volumes:
-      - vault-token:/vault/token
-      - ./scripts/deps/hashicorp/renew.sh:/renew.sh
-    command: sh /renew.sh
-
   key-manager:
     <<: *container-common
     ports:
@@ -125,11 +114,9 @@ services:
     environment:
       <<: *default-variables
       <<: *key-manager-common
-    depends_on:
-      - key-vault-init
     command: key-manager run
     volumes:
-      - vault-token:/vault/token:ro
+      - vault-token:/vault/token
       - ./build/bin/orchestrate:/bin/main
 
   tx-sender:
@@ -140,10 +127,8 @@ services:
       <<: *default-variables
       SECRET_STORE: ${SECRET_STORE-hashicorp}
     volumes:
-      - vault-token:/vault/token:ro
       - ./build/bin/orchestrate:/bin/main
     depends_on:
-      - key-vault-init
       - api
     command: tx-sender run
 

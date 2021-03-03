@@ -1,5 +1,9 @@
 # Orchestrate Release Notes
 
+## v21.1.3 (Unreleased)
+### 🛠 Bug fixes
+* Renew token with the Vault Agent where the Key Manager is watching "VAULT_TOKEN_FILE". The Key Manager supports plaintext token and wrapped-token
+
 ## v21.1.2 (2021-02-25)
 ### 🆕 Features
 * New environment variable, `KAFKA_NUM_CONSUMERS`, to launch multiple kafka consumer in `tx-sender`

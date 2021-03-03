@@ -23,6 +23,7 @@ require (
 	github.com/eapache/channels v1.1.0
 	github.com/elazarl/go-bindata-assetfs v1.0.0
 	github.com/ethereum/go-ethereum v1.9.25
+	github.com/fsnotify/fsnotify v1.4.9
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32 // indirect
 	github.com/go-kit/kit v0.10.0
 	github.com/go-pg/migrations/v7 v7.1.9
