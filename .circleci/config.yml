@@ -17,24 +17,70 @@ commands:
           command: |
             echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin $DOCKER_REGISTRY
 
+  set_remote_environment_variables:
+    description: "Set remote environment values"
+    parameters:
+      environment_values:
+        type: string
+        default: ""
+      orchestrate_namespace:
+        type: string
+        default: ""
+    steps:
+      - when:
+          condition: <<parameters.environment_values>>
+          steps:
+            - run:
+                name: Set Environment Values
+                command: echo 'export ENVIRONMENT_VALUES=<<parameters.environment_values>>' >> $BASH_ENV
+      - unless:
+          condition: <<parameters.environment_values>>
+          steps:
+            - run:
+                name: Set Environment Values
+                command: if [ "${CIRCLE_TAG}" ]; then echo 'export ENVIRONMENT_VALUES=staging' >> $BASH_ENV ; else echo 'export ENVIRONMENT_VALUES=qa' >> $BASH_ENV; fi
+      - when:
+          condition: <<parameters.orchestrate_namespace>>
+          steps:
+            - run:
+                name: Set Orchestrate Namespace
+                command: echo 'export ORCHESTRATE_NAMESPACE=<<parameters.environment_values>>' >> $BASH_ENV
+
+      - unless:
+          condition: <<parameters.orchestrate_namespace>>
+          steps:
+            - run:
+                name: Set Orchestrate Namespace
+                command:  if [ ${CIRCLE_BRANCH} == "master" ]; then echo 'export ORCHESTRATE_NAMESPACE=${ENVIRONMENT_VALUES}' >> $BASH_ENV ; else echo 'export ORCHESTRATE_NAMESPACE=${ENVIRONMENT_VALUES}-${${CIRCLE_BRANCH#"maintenance/"}//./-} ' >> $BASH_ENV; fi
+
   prepare_e2e:
     description: "Orchestrate e2e environment"
+    parameters:
+      environment_values:
+        type: string
+        default: ""
+      orchestrate_namespace:
+        type: string
+        default: ""
     steps:
       - run:
           name: Build test binary
           command: make gobuild-e2e
+      - set_remote_environment_variables:
+          environment_values: <<parameters.environment_values>>
+          orchestrate_namespace: <<parameters.orchestrate_namespace>>
       - run:
-          name: Setup QA environment
+          name: Setup QA environment variables
           command: |
-            echo 'export API_URL=https://qa.orchestrate.ops.consensys.net' >> $BASH_ENV
-            echo 'export KAFKA_URL=kafka-qa-0.kafka.ops.consensys.net:9094' >> $BASH_ENV
+            echo 'export API_URL=https://${ORCHESTRATE_NAMESPACE}.orchestrate.${REMOTE_DOMAIN_NAME}' >> $BASH_ENV
+            echo 'export KAFKA_URL=kafka-${ENVIRONMENT_VALUES}-0.kafka.${REMOTE_DOMAIN_NAME}:9094' >> $BASH_ENV
             echo 'export KAFKA_SASL_ENABLED=true' >> $BASH_ENV
             echo 'export KAFKA_SASL_MECHANISM=PLAIN' >> $BASH_ENV
             echo 'export KAFKA_SASL_USER=${QA_KAFKA_SASL_USER}' >> $BASH_ENV
             echo 'export KAFKA_SASL_PASSWORD=${QA_KAFKA_SASL_PASSWORD}' >> $BASH_ENV
-            echo 'export TOPIC_TX_SENDER=qa-tx-sender' >> $BASH_ENV
-            echo 'export TOPIC_TX_RECOVER=qa-tx-recover' >> $BASH_ENV
-            echo 'export TOPIC_TX_DECODED=qa-tx-decoded' >> $BASH_ENV
+            echo 'export TOPIC_TX_SENDER=${ORCHESTRATE_NAMESPACE}-tx-sender' >> $BASH_ENV
+            echo 'export TOPIC_TX_RECOVER=${ORCHESTRATE_NAMESPACE}-tx-recover' >> $BASH_ENV
+            echo 'export TOPIC_TX_DECODED=${ORCHESTRATE_NAMESPACE}-tx-decoded' >> $BASH_ENV
             echo 'export MULTI_TENANCY_ENABLED=true' >> $BASH_ENV
             echo 'export AUTH_API_KEY=${QA_AUTH_API_KEY}' >> $BASH_ENV
             echo 'export AUTH_JWT_CLAIMS_NAMESPACE=orchestrate.namespace' >> $BASH_ENV 
@@ -177,13 +223,12 @@ jobs:
       - image: cimg/base:2020.01
     steps:
       - checkout
+      - set_remote_environment_variables
       - run:
           name: Deploy QA environment
           command: >-
-            ORCHESTRATE_NAMESPACE=qa
             ORCHESTRATE_TAG=${CIRCLE_SHA1:0:7}
             ORCHESTRATE_REPOSITORY=${DOCKER_REGISTRY_DEV_REPO}/orchestrate
-            ENVIRONMENT_VALUES=qa
             make deploy-remote-env
 
   run-e2e:
@@ -208,13 +253,12 @@ jobs:
             LOG_LEVEL: "INFO"
           command: |
             set +e
-            METADATA_TAG=${CIRCLE_TAG}
-            METADATA_BRANCH=${CIRCLE_BRANCH}
-            METADATA_COMMIT=${CIRCLE_SHA1}
-            METADATA_OS=${CIRCLE_BUILD_IMAGE}
-            METADATA_RUNNER=${CIRCLE_BUILD_URL}
-            METADATA_RUNNER_ID=${CIRCLE_BUILD_NUM}
-            METADATA_RUNNER_VERSION=${CI_RUNNER_REVISION}
+            CIRCLE_TAG=${CIRCLE_TAG}
+            CIRCLE_BRANCH=${CIRCLE_BRANCH}
+            CIRCLE_SHA1=${CIRCLE_SHA1}
+            CIRCLE_BUILD_IMAGE=${CIRCLE_BUILD_IMAGE}
+            CIRCLE_BUILD_URL=${CIRCLE_BUILD_URL}
+            CIRCLE_BUILD_NUM=${CIRCLE_BUILD_NUM}
             ./build/bin/test e2e
             exitCode=$(echo $?)
             cd ./scripts/report
@@ -229,16 +273,34 @@ jobs:
     docker:
       - image: cimg/go:1.15.8
     resource_class: large
+    parameters:
+      environment_values:
+        type: string
+        default: ""
+      orchestrate_namespace:
+        type: string
+        default: ""
+      stress_concurrency:
+        type: string
+        default: "5"
+      stress_iteration:
+        type: string
+        default: "100"
+      stress_timeout:
+        type: string
+        default: "10m"
     steps:
       - prepare_golang
-      - prepare_e2e
+      - prepare_e2e:
+          environment_values: <<parameters.environment_values>>
+          orchestrate_namespace: <<parameters.orchestrate_namespace>>
       - run:
           name: Running stress
           environment:
             ARTIFACTS_PATH: "./tests/artifacts"
-            STRESS_CONCURRENCY: "10"
-            STRESS_ITERATIONS: "500"
-            STRESS_TIMEOUT: "10m"
+            STRESS_CONCURRENCY: <<parameters.stress_concurrency>>
+            STRESS_ITERATIONS: <<parameters.stress_iteration>>
+            STRESS_TIMEOUT: <<parameters.stress_timeout>>
             KAFKA_CONSUMER_GROUP_NAME: "stress"
           command: ./build/bin/test stress
 
@@ -282,13 +344,12 @@ jobs:
       - image: cimg/base:2020.01
     steps:
       - checkout
+      - set_remote_environment_variables
       - run:
           name: Deploy staging environment
           command: >-
-            ORCHESTRATE_NAMESPACE=staging-${CIRCLE_TAG}
             ORCHESTRATE_TAG=${CIRCLE_TAG}
             ORCHESTRATE_REPOSITORY=${DOCKER_REGISTRY_REPO}/orchestrate
-            ENVIRONMENT_VALUES=staging
             make deploy-remote-env
 
 workflows:
@@ -403,3 +464,17 @@ workflows:
               ignore: /.*/
           requires:
             - release-tag
+  schedule-stress:
+    triggers:
+      - schedule:
+          cron: "3 * * * *"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - run-stress:
+          environment_values: "staging"
+          stress_concurrency: "3"
+          stress_iteration: "200"
+          stress_timeout: "30m"

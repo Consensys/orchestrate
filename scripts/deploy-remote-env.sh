@@ -5,9 +5,6 @@ set -Ee
 
 TOKEN_HEADER="Circle-Token: ${CIRCLECI_TOKEN}"
 
-ORCHESTRATE_NAMESPACE=$(echo "${ORCHESTRATE_NAMESPACE}" | tr -cd '[:alnum:]')
-echo "Orchestrate namespace: $ORCHESTRATE_NAMESPACE"
-
 #Pass parameters to the Circle CI pipeline
 PARAMETERS=""
 [ "$ORCHESTRATE_NAMESPACE" ] && export PARAMETERS=$PARAMETERS,\"orchestrate_namespace\":\"$ORCHESTRATE_NAMESPACE\"
