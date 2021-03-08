@@ -47,5 +47,5 @@ func run(_ *cobra.Command, _ []string) {
 	log.WithFields(log.Fields{
 		"jwt":      jwt,
 		"tenantID": tenant,
-	}).Infof("jwt-generator: token generated")
+	}).Info("jwt-generator: token generated")
 }

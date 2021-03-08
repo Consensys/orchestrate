@@ -82,6 +82,9 @@ func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID string, tenants 
 }
 
 func (uc *startJobUseCase) updateStatus(ctx context.Context, job *models.Job, status entities.JobStatus, msg string) error {
+	prevUpdatedAt := job.UpdatedAt
+	prevStatus := job.Status
+
 	job.Status = status
 	jobLog := &models.Log{
 		JobID:   &job.ID,
@@ -89,8 +92,6 @@ func (uc *startJobUseCase) updateStatus(ctx context.Context, job *models.Job, st
 		Message: msg,
 	}
 
-	prevUpdatedAt := job.UpdatedAt
-	prevStatus := job.Status
 	err := database.ExecuteInDBTx(uc.db, func(tx database.Tx) error {
 		if err := tx.(store.Tx).Job().Update(ctx, job); err != nil {
 			return err

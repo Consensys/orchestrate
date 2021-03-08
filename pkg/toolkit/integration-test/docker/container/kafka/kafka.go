@@ -126,7 +126,7 @@ waitForServiceLoop:
 					WithError(err).
 					Warnf("waiting for kafka service to start: %s", cfg.KafkaExternalHostname)
 			default:
-				log.WithContext(rctx).Infof("kafka container service is ready")
+				log.WithContext(rctx).Info("kafka container service is ready")
 				break waitForServiceLoop
 			}
 		}

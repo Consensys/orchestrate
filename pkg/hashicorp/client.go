@@ -41,7 +41,7 @@ func NewOrchestrateVaultClient(ctx context.Context, config *Config) (*Orchestrat
 	if err != nil {
 		errMessage := "failed to instantiate Hashicorp Vault client"
 		logger.WithError(err).Error(errMessage)
-		return nil, errors.HashicorpVaultConnectionError("errMessage")
+		return nil, errors.HashicorpVaultConnectionError(errMessage)
 	}
 
 	orchestrateVaultClient := &OrchestrateVaultClient{

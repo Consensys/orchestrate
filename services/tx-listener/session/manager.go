@@ -85,7 +85,7 @@ func (m *Manager) run(ctx context.Context) {
 		func() { m.listenCommands(ctx) },
 		func() {
 			<-ctx.Done()
-			m.logger.WithError(ctx.Err()).Infof("service finished gracefully")
+			m.logger.WithError(ctx.Err()).Info("service finished gracefully")
 		},
 	)
 }

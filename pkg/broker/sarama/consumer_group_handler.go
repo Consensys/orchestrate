@@ -52,7 +52,8 @@ func (h *EngineConsumerGroupHandler) Setup(s sarama.ConsumerGroupSession) error 
 	log.WithFields(log.Fields{
 		"kafka.generation_id": s.GenerationID(),
 		"kafka.member_id":     s.MemberID(),
-	}).Infof("sarama: ready to consume claims %v", s.Claims())
+		"kafka.claims":        s.Claims(),
+	}).Info("sarama: ready to consume claims")
 
 	return nil
 }

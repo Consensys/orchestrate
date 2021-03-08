@@ -90,10 +90,10 @@ func (c *Client) Up(ctx context.Context, name, networkName string) error {
 			return err
 		}
 
-		logger.WithField("network_id", networkID).Infof("container %v connected to network", name)
+		logger.WithField("network_id", networkID).Info("container connected to network")
 	} else if networkName != "" {
 		errMsg := fmt.Sprintf("container %v cannot connected to network", name)
-		logger.WithField("network_id", networkID).Errorf(errMsg)
+		logger.WithField("network_id", networkID).Error(errMsg)
 		return errors.InvalidArgError(errMsg)
 	}
 
@@ -120,7 +120,7 @@ func (c *Client) Start(ctx context.Context, name string) error {
 		return err
 	}
 
-	logger.WithField("id", containerBody.ID).Infof("started container")
+	logger.WithField("id", containerBody.ID).Info("started container")
 
 	return nil
 }
@@ -137,7 +137,7 @@ func (c *Client) Stop(ctx context.Context, name string) error {
 		return err
 	}
 
-	logger.WithField("id", containerBody.ID).Infof("stopped container")
+	logger.WithField("id", containerBody.ID).Info("stopped container")
 
 	return nil
 }
@@ -183,13 +183,13 @@ func (c *Client) Down(ctx context.Context, name string) error {
 		return err
 	}
 
-	logger.WithField("id", containerBody.ID).Infof("stopped container")
+	logger.WithField("id", containerBody.ID).Info("stopped container")
 
 	if err := c.cli.ContainerRemove(ctx, containerBody.ID, types.ContainerRemoveOptions{RemoveVolumes: true}); err != nil {
 		return err
 	}
 
-	logger.WithField("id", containerBody.ID).Infof("removed container")
+	logger.WithField("id", containerBody.ID).Info("removed container")
 
 	return nil
 }
@@ -202,7 +202,7 @@ func (c *Client) CreateNetwork(ctx context.Context, name string) error {
 		return err
 	}
 
-	logger.WithField("id", createResponse.ID).Infof("created network")
+	logger.WithField("id", createResponse.ID).Info("created network")
 	c.networks[name] = createResponse.ID
 	return nil
 }
@@ -216,14 +216,14 @@ func (c *Client) RemoveNetwork(ctx context.Context, name string) error {
 			return err
 		}
 
-		logger.WithField("network_id", networkID).Infof("removed network")
+		logger.WithField("network_id", networkID).Info("removed network")
 	} else {
 		err := c.cli.NetworkRemove(ctx, name)
 		if err != nil {
 			return err
 		}
 
-		logger.WithField("network_name", name).Infof("removed network")
+		logger.WithField("network_name", name).Info("removed network")
 	}
 
 	return nil

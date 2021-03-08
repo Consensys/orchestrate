@@ -96,7 +96,7 @@ waitForServiceLoop:
 			if err != nil {
 				log.WithContext(rctx).WithError(err).Warnf("waiting for PostgreSQL service to start")
 			} else {
-				log.WithContext(rctx).Infof("PostgreSQL container service is ready")
+				log.WithContext(rctx).Info("PostgreSQL container service is ready")
 				break waitForServiceLoop
 			}
 		}

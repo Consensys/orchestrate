@@ -143,7 +143,7 @@ waitForServiceLoop:
 			case resp.StatusCode != http.StatusOK:
 				log.WithContext(rctx).WithField("status_code", resp.StatusCode).Warnf("waiting for Hashicorp Vault service to be ready")
 			default:
-				log.WithContext(rctx).Infof("Hashicorp Vault container service is ready")
+				log.WithContext(rctx).Info("hashicorp Vault container service is ready")
 				break waitForServiceLoop
 			}
 		}

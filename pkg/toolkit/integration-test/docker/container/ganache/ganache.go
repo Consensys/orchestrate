@@ -94,7 +94,7 @@ waitForServiceLoop:
 			if err != nil {
 				log.WithContext(rctx).WithError(err).Warnf("waiting for Ganache service to start")
 			} else {
-				log.WithContext(rctx).Infof("Ganache container service is ready")
+				log.WithContext(rctx).Info("ganache container service is ready")
 				break waitForServiceLoop
 			}
 		}

@@ -60,7 +60,7 @@ func loadVaultAccounts(db migrations.DB) error {
 		}
 	}
 
-	log.WithField("accounts", len(queryInsertItems)).Infof("Accounts imported successfully")
+	log.WithField("accounts", len(queryInsertItems)).Info("accounts imported successfully")
 	return nil
 }
 
