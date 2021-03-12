@@ -97,6 +97,12 @@ services:
     entrypoint: vault server -config=/vault/config.hcl
     ports:
       - 8200:8200
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "--proxy", "off", "http://vault:8200/v1/sys/health?standbyok=true" ]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
 
   vault-init:
     <<: *container-common
@@ -116,7 +122,7 @@ services:
       - ./hashicorp/plugin.sh:/plugin.sh
     command: >
       sh -c "./plugin.sh && ./init.sh"
-      
+
   vault-agent:
     <<: *container-common
     image: library/vault:1.6.2
@@ -130,6 +136,12 @@ services:
       - vault-token:/vault/token
       - ./hashicorp/config/agent-config.hcl:/vault/config.hcl:ro
     entrypoint: vault agent -config=/vault/config.hcl
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "--proxy", "off", "http://vault:8200/v1/sys/health?standbyok=true" ]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
 
 volumes:
   db-data-postgres-unit:

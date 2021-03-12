@@ -92,8 +92,19 @@ func New(cfg *dynamic.ReverseProxy, transport http.RoundTripper, pool gohttputil
 	return &gohttputil.ReverseProxy{
 		Director: func(outReq *http.Request) {
 			u := outReq.URL
+
+			log.FromContext(outReq.Context()).
+				Debugf("proxy call - outReq.URL: %s - u.EscapedPath(): %s, outReq.RequestURI: %s", outReq.URL, u.EscapedPath(), outReq.RequestURI)
+
 			if outReq.RequestURI != "/" {
-				parsedURL, err := url.ParseRequestURI(outReq.RequestURI)
+				// Add requestURI in the path
+				// In case the downstream backend is domain/path (i.e. domain.com/tessera), and the request is done to proxy/proxyPath/(.+) (i.e. proxy.com/proxyPath/storeraw)
+				// Then backend call will be domain.com/tessera/storeraw
+				// if u.EscapedPath() != outReq.RequestURI {
+				// 	outReq.RequestURI = u.EscapedPath() + outReq.RequestURI
+				// }
+
+				parsedURL, err := url.ParseRequestURI(u.EscapedPath() + outReq.RequestURI)
 				if err == nil {
 					u = parsedURL
 				}

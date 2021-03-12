@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"context"
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
 
+	"github.com/ConsenSys/orchestrate/pkg/encoding/json"
 	"github.com/ConsenSys/orchestrate/pkg/errors"
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/utils"
 	"github.com/cenkalti/backoff/v4"
@@ -23,7 +23,7 @@ const successStatusClass = 200
 const serverErrorStatusClass = 500
 
 type StoreRawResponse struct {
-	Key string `json:"key"`
+	Key string `json:"key" validate:"required"`
 }
 
 func (ec *Client) SendQuorumRawPrivateTransaction(ctx context.Context, endpoint, signedTxHash string, privateFor []string) (ethcommon.Hash, error) {
@@ -45,8 +45,8 @@ func (ec *Client) StoreRaw(ctx context.Context, endpoint string, data []byte, pr
 		"from":    privateFrom,
 	}
 
-	storeRawResponse := StoreRawResponse{}
-	err := ec.postRequest(ctx, endpoint, "storeraw", request, &storeRawResponse)
+	storeRawResponse := &StoreRawResponse{}
+	err := ec.postRequest(ctx, endpoint, "storeraw", request, storeRawResponse)
 	if err != nil {
 		if errors.IsDataCorruptedError(err) {
 			return "", err
@@ -112,14 +112,8 @@ func readResponseString(requestURL string, resp *http.Response) (string, error) 
 func readResponse(requestURL string, resp *http.Response, result interface{}) error {
 	log.Debugf("request to '%s' resulted with %d status code", requestURL, resp.StatusCode)
 
-	reply, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return errors.DataCorruptedError("failed to read body for a request from '%s' endpoint: %s", requestURL, err)
-	}
+	err := json.UnmarshalBody(resp.Body, result)
 
-	log.Debugf("received the following reply from '%s' endpoint: %q", requestURL, string(reply))
-
-	err = json.Unmarshal(reply, &result)
 	if err != nil {
 		return errors.DataCorruptedError("failed to parse reply from '%s' request: %s", requestURL, err)
 	}
