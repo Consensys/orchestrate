@@ -464,17 +464,17 @@ workflows:
               ignore: /.*/
           requires:
             - release-tag
-  schedule-stress:
-    triggers:
-      - schedule:
-          cron: "3 * * * *"
-          filters:
-            branches:
-              only:
-                - master
-    jobs:
-      - run-stress:
-          environment_values: "staging"
-          stress_concurrency: "3"
-          stress_iteration: "200"
-          stress_timeout: "30m"
+  # schedule-stress:
+  #   triggers:
+  #     - schedule:
+  #         cron: "3 * * * *"
+  #         filters:
+  #           branches:
+  #             only:
+  #               - master
+  #   jobs:
+  #     - run-stress:
+  #         environment_values: "staging"
+  #         stress_concurrency: "3"
+  #         stress_iteration: "200"
+  #         stress_timeout: "30m"

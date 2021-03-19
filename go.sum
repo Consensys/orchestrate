@@ -372,6 +372,10 @@ github.com/fsnotify/fsnotify v1.4.9/go.mod h1:znqG4EE+3YCdAaPaxE2ZRY/06pZUdp0tY4
 github.com/fxamacker/cbor/v2 v2.2.0/go.mod h1:TA1xS00nchWmaBnEIxPSE5oHLuJBAVvqrtAnWBwBCVo=
 github.com/gambol99/go-marathon v0.0.0-20180614232016-99a156b96fb2 h1:df6OFl8WNXk82xxP3R9ZPZ5seOA8XZkwLdbEzZF1/xI=
 github.com/gambol99/go-marathon v0.0.0-20180614232016-99a156b96fb2/go.mod h1:GLyXJD41gBO/NPKVPGQbhyyC06eugGy15QEZyUkE2/s=
+github.com/gammazero/deque v0.0.0-20200721202602-07291166fe33 h1:UG4wNrJX9xSKnm/Gck5yTbxnOhpNleuE4MQRdmcGySo=
+github.com/gammazero/deque v0.0.0-20200721202602-07291166fe33/go.mod h1:D90+MBHVc9Sk1lJAbEVgws0eYEurY4mv2TDso3Nxh3w=
+github.com/gammazero/workerpool v1.1.1 h1:MN29GcZtZZAgzTU+Zk54Y+J9XkE54MoXON/NCZvNulo=
+github.com/gammazero/workerpool v1.1.1/go.mod h1:5BN0IJVRjSFAypo9QTJCaWdijjNz9Jjl6VFS1PRjCeg=
 github.com/gballet/go-libpcsclite v0.0.0-20190607065134-2772fd86a8ff h1:tY80oXqGNY4FhTFhk+o9oFHGINQ/+vhlm8HFzi6znCI=
 github.com/gballet/go-libpcsclite v0.0.0-20190607065134-2772fd86a8ff/go.mod h1:x7DCsMOv1taUwEWCzT4cmDeAkigA5/QCwUodaVOe8Ww=
 github.com/ghodss/yaml v0.0.0-20150909031657-73d445a93680/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeMEF04=

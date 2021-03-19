@@ -324,9 +324,18 @@ func (s *Session) fetchBlock(ctx context.Context, blockPosition uint64) *Future 
 			return nil, err
 		}
 
-		block.jobs, err = awaitReceipts(s.fetchReceipts(ctx, blck.Transactions(), jobMap))
-		if err != nil {
-			return nil, err
+		// TODO: pass batch variable by environment variable
+		batch := 20
+		for i := 0; i < blck.Transactions().Len(); i += batch {
+			j := i + batch
+			if j > blck.Transactions().Len() {
+				j = blck.Transactions().Len()
+			}
+			jobs, err := awaitReceipts(s.fetchReceipts(ctx, blck.Transactions()[i:j], jobMap))
+			if err != nil {
+				return nil, err
+			}
+			block.jobs = append(block.jobs, jobs...)
 		}
 
 		return block, nil

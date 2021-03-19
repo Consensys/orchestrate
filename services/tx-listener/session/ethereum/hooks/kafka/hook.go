@@ -8,6 +8,7 @@ import (
 
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 	"github.com/ConsenSys/orchestrate/pkg/types/api"
+	"github.com/gammazero/workerpool"
 
 	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 	"github.com/ConsenSys/orchestrate/pkg/utils"
@@ -95,23 +96,28 @@ func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *etht
 	}
 
 	// Update transactions to "MINED"
+	// TODO: pass batch variable by environment variable
+	wp := workerpool.New(20)
 	for _, txResponse := range txResponses {
 		if txResponse.GetJobUUID() == "" {
 			continue
 		}
-
-		_, err := hk.client.UpdateJob(
-			ctx,
-			txResponse.GetJobUUID(),
-			&api.UpdateJobRequest{
-				Status:  entities.StatusMined,
-				Message: fmt.Sprintf("transaction mined in block %v", block.NumberU64()),
-			})
-
-		if err != nil {
-			logger.WithError(err).Warnf("failed to update status of %s to MINED", txResponse.Id)
-		}
+		txResponse := txResponse
+		wp.Submit(func() {
+			_, err := hk.client.UpdateJob(
+				ctx,
+				txResponse.GetJobUUID(),
+				&api.UpdateJobRequest{
+					Status:  entities.StatusMined,
+					Message: fmt.Sprintf("transaction mined in block %v", block.NumberU64()),
+				},
+			)
+			if err != nil {
+				logger.WithError(err).Warnf("failed to update status of %s to MINED", txResponse.Id)
+			}
+		})
 	}
+	wp.StopWait()
 
 	// Prepare messages to be produced
 	msgs, err := hk.prepareEnvelopeMsgs(txResponses, hk.conf.OutTopic, c.UUID)
