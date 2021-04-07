@@ -1,9 +1,10 @@
 # Orchestrate Release Notes
 
-## v21.1.3 (Unreleased)
+## v21.1.3 (2021-04-07)
 ### 🛠 Bug fixes
 * Renew token with the Vault Agent where the Key Manager is watching "VAULT_TOKEN_FILE". The Key Manager supports plaintext token and wrapped-token
-* Metric value for job status update CREATED to STARTED 
+* Metric value for job status update CREATED to STARTED
+* Improve Tx Listener performance to update transaction status to MINED
 
 ## v21.1.2 (2021-02-25)
 ### 🆕 Features

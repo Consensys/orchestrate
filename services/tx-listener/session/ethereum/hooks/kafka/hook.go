@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/workerpool"
 	"github.com/ConsenSys/orchestrate/pkg/types/api"
-	"github.com/gammazero/workerpool"
 
 	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 	"github.com/ConsenSys/orchestrate/pkg/utils"
