@@ -9,7 +9,7 @@ require (
 	github.com/aws/aws-sdk-go v1.29.33 // indirect
 	github.com/c0va23/go-proxyprotocol v0.9.1
 	github.com/cenkalti/backoff/v4 v4.0.0
-	github.com/consensys/gnark v0.3.9-0.20210118153910-d64de428a945
+	github.com/consensys/gnark-crypto v0.4.0
 	github.com/consensys/quorum v2.7.0+incompatible
 	github.com/containous/alice v0.0.0-20181107144136-d83ebdd94cbd
 	github.com/containous/traefik/v2 v2.2.0
@@ -68,8 +68,8 @@ require (
 	github.com/unrolled/secure v1.0.7
 	github.com/vulcand/oxy v1.1.0
 	github.com/yuin/gopher-lua v0.0.0-20191220021717-ab39c6098bdb // indirect
-	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
-	golang.org/x/net v0.0.0-20201110031124-69a78807bb2b
+	golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2
+	golang.org/x/net v0.0.0-20210226172049-e18ecbb05110
 	golang.org/x/text v0.3.4 // indirect
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0
 	golang.org/x/tools v0.0.0-20201120155355-20be4ac4bd6e // indirect

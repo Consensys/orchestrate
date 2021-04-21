@@ -5,6 +5,7 @@ import (
 	zksTypes "github.com/ConsenSys/orchestrate/pkg/types/keymanager/zk-snarks"
 	"github.com/ConsenSys/orchestrate/pkg/utils"
 	ethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
 func FakeCreateETHAccountRequest() *ethTypes.CreateETHAccountRequest {
@@ -99,7 +100,7 @@ func FakeSignTypedDataRequest() *ethTypes.SignTypedDataRequest {
 
 func FakeVerifyPayloadRequest() *ethTypes.VerifyPayloadRequest {
 	return &ethTypes.VerifyPayloadRequest{
-		Data:      "my data to sign",
+		Data:      hexutil.Encode([]byte("my data to sign")),
 		Signature: "0x34334af7bacf5d82bb892c838beda65331232c29e122b3485f31e14eda731dbb0ebae9d1eed72c099ff4c3b462aebf449068f717f3638a6facd0b3dddf2529a500",
 		Address:   "0x5Cc634233E4a454d47aACd9fC68801482Fb02610",
 	}
@@ -107,7 +108,7 @@ func FakeVerifyPayloadRequest() *ethTypes.VerifyPayloadRequest {
 
 func FakeZKSVerifyPayloadRequest() *zksTypes.VerifyPayloadRequest {
 	return &zksTypes.VerifyPayloadRequest{
-		Data:      "my data to sign",
+		Data:      hexutil.Encode([]byte("my data to sign")),
 		Signature: "0x34334af7bacf5d82bb892c838beda65331232c29e122b3485f31e14eda731dbb0ebae9d1eed72c099ff4c3b462aebf449068f717f3638a6facd0b3dddf2529a500",
 		PublicKey: "16551006344732991963827342392501535507890487822471009342749102663105305595515",
 	}

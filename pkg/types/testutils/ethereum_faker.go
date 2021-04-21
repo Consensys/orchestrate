@@ -68,7 +68,7 @@ func FakeZKSAccount() *entities.ZKSAccount {
 	return &entities.ZKSAccount{
 		Namespace:        "_",
 		PublicKey:        ethcommon.HexToHash(utils.RandHexString(12)).String(),
-		Curve:            entities.ZKSCurveBN256,
+		Curve:            entities.ZKSCurveBN254,
 		SigningAlgorithm: entities.ZKSAlgorithmEDDSA,
 	}
 }

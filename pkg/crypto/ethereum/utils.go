@@ -18,8 +18,12 @@ func GetSignatureSender(signature, payload string) (*ethcommon.Address, error) {
 		return nil, errors.EncodingError("failed to decode signature").AppendReason(err.Error())
 	}
 
-	hash := crypto.Keccak256([]byte(payload))
-	pubKey, err := crypto.SigToPub(hash, signatureBytes)
+	payloadBytes, err := hexutil.Decode(payload)
+	if err != nil {
+		return nil, errors.EncodingError("failed to decode payload").AppendReason(err.Error())
+	}
+
+	pubKey, err := crypto.SigToPub(crypto.Keccak256(payloadBytes), signatureBytes)
 	if err != nil {
 		return nil, errors.CryptoOperationError("failed to recover public key").AppendReason(err.Error())
 	}

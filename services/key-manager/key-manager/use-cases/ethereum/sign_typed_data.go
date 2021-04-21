@@ -5,6 +5,7 @@ import (
 
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 	"github.com/ConsenSys/orchestrate/services/key-manager/key-manager/use-cases/ethereum/utils"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 
 	"github.com/ConsenSys/orchestrate/pkg/errors"
 	usecases "github.com/ConsenSys/orchestrate/services/key-manager/key-manager/use-cases"
@@ -36,7 +37,7 @@ func (uc *signTypedDataUseCase) Execute(ctx context.Context, address, namespace 
 		return "", errors.FromError(err).ExtendComponent(signTypedDataComponent)
 	}
 
-	signature, err := uc.vaultClient.ETHSign(address, namespace, encodedData)
+	signature, err := uc.vaultClient.ETHSign(address, namespace, hexutil.Encode([]byte(encodedData)))
 	if err != nil {
 		logger.WithError(err).Error("failed to sign typed data")
 		return "", errors.FromError(err).ExtendComponent(signTypedDataComponent)

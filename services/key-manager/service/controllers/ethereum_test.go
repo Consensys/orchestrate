@@ -5,6 +5,7 @@ package controllers
 import (
 	"bytes"
 	"fmt"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -16,13 +17,13 @@ import (
 
 	"github.com/ConsenSys/orchestrate/pkg/errors"
 
+	"github.com/ConsenSys/orchestrate/pkg/encoding/json"
+	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
+	"github.com/ConsenSys/orchestrate/services/key-manager/service/formatters"
 	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"github.com/ConsenSys/orchestrate/pkg/encoding/json"
-	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
-	"github.com/ConsenSys/orchestrate/services/key-manager/service/formatters"
 )
 
 type ethereumCtrlTestSuite struct {
@@ -113,7 +114,7 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_Import() {
 		requestBytes, _ := json.Marshal(importAccountRequest)
 
 		rw := httptest.NewRecorder()
-		httpRequest := httptest.NewRequest(http.MethodPost, ethAccountPath + "/import", bytes.NewReader(requestBytes))
+		httpRequest := httptest.NewRequest(http.MethodPost, ethAccountPath+"/import", bytes.NewReader(requestBytes))
 
 		fakeETHAccount := testutils.FakeETHAccount()
 
@@ -135,7 +136,7 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_Import() {
 		requestBytes, _ := json.Marshal(importAccountRequest)
 
 		rw := httptest.NewRecorder()
-		httpRequest := httptest.NewRequest(http.MethodPost, ethAccountPath + "/import", bytes.NewReader(requestBytes))
+		httpRequest := httptest.NewRequest(http.MethodPost, ethAccountPath+"/import", bytes.NewReader(requestBytes))
 
 		s.vault.EXPECT().
 			ETHImportAccount(importAccountRequest.Namespace, importAccountRequest.PrivateKey).
@@ -152,7 +153,7 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_Sign() {
 	s.T().Run("should execute request successfully", func(t *testing.T) {
 		signature := "0xsignature"
 		payloadRequest := &keymanager.SignPayloadRequest{
-			Data:      "my data to sign",
+			Data:      hexutil.Encode([]byte("my data to sign")),
 			Namespace: "namespace",
 		}
 		requestBytes, _ := json.Marshal(payloadRequest)
@@ -173,7 +174,7 @@ func (s *ethereumCtrlTestSuite) TestEthereumController_Sign() {
 	// Sufficient test to check that the mapping to HTTP errors is working. All other status code tests are done in integration tests
 	s.T().Run("should fail with correct error code if use case fails", func(t *testing.T) {
 		payloadRequest := &keymanager.SignPayloadRequest{
-			Data:      "my data to sign",
+			Data:      hexutil.Encode([]byte("my data to sign")),
 			Namespace: "namespace",
 		}
 		requestBytes, _ := json.Marshal(payloadRequest)

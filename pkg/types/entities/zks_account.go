@@ -1,6 +1,6 @@
 package entities
 
-const ZKSCurveBN256 = "bn256"
+const ZKSCurveBN254 = "bn254"
 const ZKSAlgorithmEDDSA = "eddsa"
 
 type ZKSAccount struct {

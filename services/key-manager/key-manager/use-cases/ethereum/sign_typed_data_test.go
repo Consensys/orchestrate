@@ -5,11 +5,12 @@ package ethereum
 import (
 	"context"
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"github.com/ConsenSys/orchestrate/pkg/errors"
 	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
 	"github.com/ConsenSys/orchestrate/services/key-manager/service/formatters"
 	"github.com/ConsenSys/orchestrate/services/key-manager/store/mocks"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/stretchr/testify/assert"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -33,7 +34,7 @@ func TestSignTypedData_Execute(t *testing.T) {
 		expectedHashMessage := "0x93d8044d5438b567977f89a53282195effc64659ef5a29e60960e5727dd8580c"
 		expectedEncodedData := fmt.Sprintf("\x19\x01%s%s", expectedHashDomainSeparator, expectedHashMessage)
 
-		mockVault.EXPECT().ETHSign(address, namespace, expectedEncodedData).Return(expectedSignature, nil)
+		mockVault.EXPECT().ETHSign(address, namespace, hexutil.Encode([]byte(expectedEncodedData))).Return(expectedSignature, nil)
 
 		typedData := formatters.FormatSignTypedDataRequest(testutils.FakeSignTypedDataRequest())
 		signature, err := usecase.Execute(ctx, address, namespace, typedData)

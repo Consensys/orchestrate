@@ -4,8 +4,8 @@ package ethereum
 
 import (
 	"context"
-	"github.com/stretchr/testify/assert"
 	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/stretchr/testify/assert"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -18,14 +18,19 @@ func TestVerifySignature_Execute(t *testing.T) {
 	defer ctrl.Finish()
 
 	address := "0x5Cc634233E4a454d47aACd9fC68801482Fb02610"
-	payload := "my data to sign"
+	payload := "0xda"
 
 	usecase := NewVerifySignatureUseCase()
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
-		signature := "0x34334af7bacf5d82bb892c838beda65331232c29e122b3485f31e14eda731dbb0ebae9d1eed72c099ff4c3b462aebf449068f717f3638a6facd0b3dddf2529a500"
+		signature := "0xa0a47f5c1d3a68435eb0de9f7c72c4a6534d62c54e1d044b47d4c530c161b4875b5e978ead1aa3144682938f97fb040fd2c5ee3e69ab22d8c95d38d91e9a13d200"
 		err := usecase.Execute(ctx, address, signature, payload)
 		assert.NoError(t, err)
+	})
+
+	t.Run("should fail with InvalidParameterError if data not a hex string", func(t *testing.T) {
+		err := usecase.Execute(ctx, address, "invalid signature", payload)
+		assert.True(t, errors.IsInvalidParameterError(err))
 	})
 
 	t.Run("should fail with InvalidParameterError if fails to decode signature", func(t *testing.T) {

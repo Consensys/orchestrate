@@ -4,21 +4,22 @@ package integrationtests
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/require"
 	"github.com/ConsenSys/orchestrate/pkg/sdk/client"
 	"github.com/ConsenSys/orchestrate/pkg/types/api"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/stretchr/testify/require"
 	"net/http"
 	"testing"
 	"time"
 
-	"github.com/containous/traefik/v2/pkg/log"
-	ethcommon "github.com/ethereum/go-ethereum/common"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/suite"
 	"github.com/ConsenSys/orchestrate/pkg/errors"
 	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
 	"github.com/ConsenSys/orchestrate/pkg/utils"
+	"github.com/containous/traefik/v2/pkg/log"
+	ethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 	"gopkg.in/h2non/gock.v1"
 )
 
@@ -278,7 +279,7 @@ func (s *accountsTestSuite) TestSignPayload() {
 	s.T().Run("should sign payload successfully", func(t *testing.T) {
 		defer gock.Off()
 		address := ethcommon.HexToAddress("0x123").String()
-		payload := "messageToSign"
+		payload := hexutil.Encode([]byte("my data to sign"))
 		signedPayload := ethcommon.HexToHash("0xABCDEF01234").String()
 		gock.New(keyManagerURL).Post(fmt.Sprintf("/ethereum/accounts/%s/sign", address)).
 			Reply(200).BodyString(signedPayload)

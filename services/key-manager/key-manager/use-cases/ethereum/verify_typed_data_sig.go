@@ -3,6 +3,8 @@ package ethereum
 import (
 	"context"
 
+	"github.com/ethereum/go-ethereum/common/hexutil"
+
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 	"github.com/ConsenSys/orchestrate/services/key-manager/key-manager/use-cases/ethereum/utils"
 
@@ -37,5 +39,5 @@ func (uc *verifyTypedDataSignatureUseCase) Execute(ctx context.Context, address,
 		return errors.FromError(err).ExtendComponent(verifyTypedDataSignatureComponent)
 	}
 
-	return uc.verifySignatureUC.Execute(ctx, address, signature, encodedData)
+	return uc.verifySignatureUC.Execute(ctx, address, signature, hexutil.Encode([]byte(encodedData)))
 }

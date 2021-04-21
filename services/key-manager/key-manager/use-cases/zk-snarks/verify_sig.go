@@ -28,7 +28,7 @@ func (uc *verifySignatureUseCase) Execute(ctx context.Context, publicKey, signat
 		WithField("public_key", publicKey).
 		WithField("signature", utils.ShortString(signature, 10))
 
-	verified, err := zksnarks.VerifyZKSMessage(publicKey, signature, []byte(payload))
+	verified, err := zksnarks.VerifyZKSMessage(publicKey, signature, payload)
 	if err != nil || !verified {
 		errMessage := "failed to verify signature"
 		logger.WithError(err).Error(errMessage)

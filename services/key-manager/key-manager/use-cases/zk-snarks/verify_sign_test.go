@@ -16,9 +16,9 @@ func TestVerifySignature_Execute(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	publicKey := "0xefaecb7b08beec692cc136ad5ad7c249c337ae0890e88c6afd2f67ad51d1ad15"
-	payload := "data to sign"
-	signature := "0x68eb9b75aa8a0ae94a130fa2da013f281ccbecfea2572fc597451fb80b8acc92008c0d011e3f7524e6f3d98b528ffe26d984f9d154ef14d71d2899cca2101705"
+	publicKey := "0x5fd633ff9f8ee36f9e3a874709406103854c0f6650cb908c010ea55eabc35191"
+	payload := "0xda"
+	signature := "0xbdb22e268e765473720646ade5df2b35df131e97f1ea85a98cb3c2b88858f79c02d3ca05397c2a65f38063e55aad69d9479838605559f67f9fb75860df766497"
 
 	usecase := NewVerifySignatureUseCase()
 
@@ -26,6 +26,11 @@ func TestVerifySignature_Execute(t *testing.T) {
 		err := usecase.Execute(ctx, publicKey, signature, payload)
 
 		assert.NoError(t, err)
+	})
+
+	t.Run("should fail with InvalidParameterError if data not a hex string", func(t *testing.T) {
+		err := usecase.Execute(ctx, publicKey, signature, "invalid data")
+		assert.True(t, errors.IsInvalidParameterError(err))
 	})
 
 	t.Run("should fail with InvalidParameterError if fails to decode signature", func(t *testing.T) {

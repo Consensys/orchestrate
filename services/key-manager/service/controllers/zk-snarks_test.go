@@ -5,14 +5,11 @@ package controllers
 import (
 	"bytes"
 	"fmt"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/golang/mock/gomock"
-	"github.com/gorilla/mux"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/suite"
 	"github.com/ConsenSys/orchestrate/pkg/encoding/json"
 	"github.com/ConsenSys/orchestrate/pkg/errors"
 	"github.com/ConsenSys/orchestrate/pkg/types/keymanager"
@@ -21,6 +18,10 @@ import (
 	mocks2 "github.com/ConsenSys/orchestrate/services/key-manager/key-manager/use-cases/mocks"
 	"github.com/ConsenSys/orchestrate/services/key-manager/service/formatters"
 	"github.com/ConsenSys/orchestrate/services/key-manager/store/mocks"
+	"github.com/golang/mock/gomock"
+	"github.com/gorilla/mux"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 )
 
 type zksCtrlTestSuite struct {
@@ -97,7 +98,7 @@ func (s *zksCtrlTestSuite) TestZKSController_Sign() {
 	s.T().Run("should execute request successfully", func(t *testing.T) {
 		signature := "signature"
 		payloadRequest := &keymanager.SignPayloadRequest{
-			Data:      "my data to sign",
+			Data:      hexutil.Encode([]byte("my data to sign")),
 			Namespace: "namespace",
 		}
 		requestBytes, _ := json.Marshal(payloadRequest)
@@ -117,7 +118,7 @@ func (s *zksCtrlTestSuite) TestZKSController_Sign() {
 
 	s.T().Run("should fail with correct error code if use case fails", func(t *testing.T) {
 		payloadRequest := &keymanager.SignPayloadRequest{
-			Data:      "my data to sign",
+			Data:      hexutil.Encode([]byte("my data to sign")),
 			Namespace: "namespace",
 		}
 		requestBytes, _ := json.Marshal(payloadRequest)
@@ -136,7 +137,7 @@ func (s *zksCtrlTestSuite) TestZKSController_Sign() {
 
 func (s *zksCtrlTestSuite) TestZKSController_VerifySignature() {
 	url := zksAccountPath + "/verify-signature"
-	
+
 	s.T().Run("should execute request successfully", func(t *testing.T) {
 		verifyRequest := testutils.FakeZKSVerifyPayloadRequest()
 		requestBytes, _ := json.Marshal(verifyRequest)
@@ -152,7 +153,7 @@ func (s *zksCtrlTestSuite) TestZKSController_VerifySignature() {
 
 		assert.Equal(t, http.StatusNoContent, rw.Code)
 	})
-	
+
 	s.T().Run("should fail with correct error code if use case fails", func(t *testing.T) {
 		verifyRequest := testutils.FakeZKSVerifyPayloadRequest()
 		requestBytes, _ := json.Marshal(verifyRequest)

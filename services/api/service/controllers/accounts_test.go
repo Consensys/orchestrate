@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -17,16 +18,16 @@ import (
 	"github.com/ConsenSys/orchestrate/services/api/service/formatters"
 	"github.com/ConsenSys/orchestrate/services/key-manager/client/mock"
 
-	ethcommon "github.com/ethereum/go-ethereum/common"
-	"github.com/golang/mock/gomock"
-	"github.com/gorilla/mux"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/suite"
 	"github.com/ConsenSys/orchestrate/pkg/encoding/json"
 	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
 	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
 	"github.com/ConsenSys/orchestrate/services/api/business/use-cases/mocks"
+	ethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/golang/mock/gomock"
+	"github.com/gorilla/mux"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 )
 
 type accountsCtrlTestSuite struct {
@@ -270,7 +271,7 @@ func (s *accountsCtrlTestSuite) TestAccountController_SignPayload() {
 		acc := testutils.FakeAccount()
 		acc.Address = inputTestAddress
 		rw := httptest.NewRecorder()
-		payload := "payloadMessage"
+		payload := hexutil.Encode([]byte("my data to sign"))
 		signature := "0xsignature"
 		requestBytes, _ := json.Marshal(&api.SignPayloadRequest{Data: payload})
 

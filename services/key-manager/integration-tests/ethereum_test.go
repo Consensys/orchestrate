@@ -10,6 +10,7 @@ import (
 	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
 	"github.com/ConsenSys/orchestrate/services/key-manager/client"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"testing"
@@ -49,7 +50,7 @@ func (s *keyManagerEthereumTestSuite) TestKeyManager_Ethereum_GetAccount() {
 
 		account, err := s.client.ETHCreateAccount(ctx, accountRequest)
 		assert.NoError(t, err)
-		
+
 		account2, err := s.client.ETHGetAccount(ctx, account.Address, accountRequest.Namespace)
 		assert.NoError(t, err)
 		assert.Equal(t, account, account2)
@@ -102,7 +103,7 @@ func (s *keyManagerEthereumTestSuite) TestKeyManager_Ethereum_Sign() {
 		assert.Equal(t, expectedAddress, account.Address)
 
 		signRequest := &keymanager.SignPayloadRequest{
-			Data:      "my data to sign",
+			Data:      hexutil.Encode([]byte("my data to sign")),
 			Namespace: "_",
 		}
 		signature, err := s.client.ETHSign(ctx, expectedAddress, signRequest)
@@ -350,9 +351,10 @@ func (s *keyManagerEthereumTestSuite) TestKeyManager_Ethereum_VerifySignature() 
 	account, _ := s.client.ETHImportAccount(ctx, accountRequest)
 
 	signRequest := &keymanager.SignPayloadRequest{
-		Data:      "my data to sign",
+		Data:      hexutil.Encode([]byte("my data to sign")),
 		Namespace: "_",
 	}
+
 	signature, _ := s.client.ETHSign(ctx, account.Address, signRequest)
 
 	s.T().Run("should fail with 400 if payload is invalid", func(t *testing.T) {

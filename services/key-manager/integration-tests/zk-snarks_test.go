@@ -3,6 +3,7 @@
 package integrationtests
 
 import (
+	"github.com/stretchr/testify/require"
 	"testing"
 
 	"github.com/ConsenSys/orchestrate/pkg/errors"
@@ -41,7 +42,7 @@ func (s *keyManagerZKSTestSuite) TestKeyManager_ZKS_CreateAndGet() {
 		assert.NoError(t, err)
 		assert.NotEmpty(t, account.PublicKey)
 		assert.Equal(t, entities.ZKSAlgorithmEDDSA, account.SigningAlgorithm)
-		assert.Equal(t, entities.ZKSCurveBN256, account.Curve)
+		assert.Equal(t, entities.ZKSCurveBN254, account.Curve)
 		assert.Equal(t, accountRequest.Namespace, account.Namespace)
 	})
 
@@ -61,7 +62,7 @@ func (s *keyManagerZKSTestSuite) TestKeyManager_ZKS_Sign() {
 
 	s.T().Run("should sign payload successfully", func(t *testing.T) {
 		signRequest := &keymanager.SignPayloadRequest{
-			Data:      "44717650746155748460101257525078853138837311576962212923649547644148297035978",
+			Data:      "0xda",
 			Namespace: account.Namespace,
 		}
 		signature, err := s.client.ZKSSign(ctx, account.PublicKey, signRequest)
@@ -85,15 +86,15 @@ func (s *keyManagerZKSTestSuite) TestKeyManager_ZKS_VerifySignature() {
 
 	accountRequest := testutils.FakeCreateZKSAccountRequest()
 	account, err := s.client.ZKSCreateAccount(ctx, accountRequest)
-	assert.NoError(s.T(), err)
+	require.NoError(s.T(), err)
 
 	signRequest := &keymanager.SignPayloadRequest{
-		Data:      "44717650746155748460101257525078853138837311576962212923649547644148297035978",
+		Data:      "0xda",
 		Namespace: account.Namespace,
 	}
 
 	signature, err := s.client.ZKSSign(ctx, account.PublicKey, signRequest)
-	assert.NoError(s.T(), err)
+	require.NoError(s.T(), err)
 
 	s.T().Run("should verify signature successfully", func(t *testing.T) {
 		err = s.client.ZKSVerifySignature(ctx, &types.VerifyPayloadRequest{
@@ -134,5 +135,4 @@ func (s *keyManagerZKSTestSuite) TestKeyManager_ZKS_VerifySignature() {
 
 		assert.True(t, errors.IsInvalidParameterError(err))
 	})
-
 }
