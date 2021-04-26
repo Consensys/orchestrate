@@ -1,5 +1,10 @@
 # Orchestrate Release Notes
 
+## v21.1.4 (2021-04-07)
+### 🛠 Bug fixes
+* Signing and verifying payload for zk-snarks accounts
+* Hexadecimal string validation for signing endpoints
+
 ## v21.1.3 (2021-04-07)
 ### 🛠 Bug fixes
 * Renew token with the Vault Agent where the Key Manager is watching "VAULT_TOKEN_FILE". The Key Manager supports plaintext token and wrapped-token
