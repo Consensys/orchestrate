@@ -33,7 +33,7 @@ const networkName = "key-manager"
 const vaultTokenFilePrefix = "orchestrate_vault_token_"
 const localhostPath = "http://localhost:"
 const pluginFilename = "orchestrate-hashicorp-vault-plugin"
-const pluginVersion = "v0.0.10-alpha.5"
+const pluginVersion = "v0.0.10"
 
 var envVaultHostPort string
 var envHTTPPort string

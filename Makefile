@@ -91,22 +91,20 @@ help: ## Display this help screen
 
 gen-help: gobuild ## Generate Command Help file
 	@mkdir -p build/cmd
-	@./build/bin/orchestrate help tx-sender | grep -A 9999 "Global Flags:" | head -n -2 > build/cmd/global.txt
 	@for cmd in $(ORCH_SERVICES); do \
-		./build/bin/orchestrate help $$cmd run | grep -B 9999 "Global Flags:" | tail -n +3 | head -n -2 > build/cmd/$$cmd-run.txt; \
+		./build/bin/orchestrate help $$cmd run | tail -n +3 | head -n -2 > build/cmd/$$cmd-run.txt; \
 	done
 	@for cmd in $(ORCH_MIGRATE); do \
-		./build/bin/orchestrate help $$cmd migrate | grep -B 9999 "Global Flags:" | tail -n +3 | head -n -2 > build/cmd/$$cmd-migrate.txt; \
+		./build/bin/orchestrate help $$cmd migrate | tail -n +3 | head -n -2 > build/cmd/$$cmd-migrate.txt; \
 	done
 
 gen-help-docker: docker-build ## Generate Command Help file using docker
 	@mkdir -p build/cmd
-	@docker run orchestrate help tx-crafter | grep -A 9999 "Global Flags:" | head -n -3 > build/cmd/global.txt
 	@for cmd in $(ORCH_SERVICES); do \
-		docker run orchestrate help $$cmd run | grep -B 9999 "Global Flags:" | tail -n +3 | head -n -3 > build/cmd/$$cmd-run.txt; \
+		docker run orchestrate help $$cmd run | tail -n +3 | head -n -3 > build/cmd/$$cmd-run.txt; \
 	done
 	@for cmd in $(ORCH_MIGRATE); do \
-		docker run orchestrate help $$cmd migrate | grep -B 9999 "Global Flags:" | tail -n +3 | head -n -3 > build/cmd/$$cmd-migrate.txt; \
+		docker run orchestrate help $$cmd migrate | tail -n +3 | head -n -3 > build/cmd/$$cmd-migrate.txt; \
 	done
 
 # Protobuf
