@@ -116,7 +116,7 @@ services:
       <<: *key-manager-common
     command: key-manager run
     volumes:
-      - vault-token:/vault/token
+      - vault-token:/vault/token:ro
       - ./build/bin/orchestrate:/bin/main
 
   tx-sender:

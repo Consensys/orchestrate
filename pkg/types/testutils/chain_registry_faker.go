@@ -21,6 +21,10 @@ func FakeRegisterChainRequest() *api.RegisterChainRequest {
 			URL:  "http://orion:8545",
 			Type: entities.OrionChainType,
 		},
+		Labels: map[string]string{
+			"label1": "val1",
+			"label2": "val2",
+		},
 	}
 }
 
@@ -29,6 +33,9 @@ func FakeUpdateChainRequest() *api.UpdateChainRequest {
 		Name: "mainnet",
 		Listener: &api.UpdateListenerRequest{
 			CurrentBlock: 55,
+		},
+		Labels: map[string]string{
+			"label3": "val3",
 		},
 	}
 }

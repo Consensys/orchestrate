@@ -14,6 +14,7 @@ type Chain struct {
 	ListenerBackOffDuration   string
 	ListenerExternalTxEnabled bool
 	PrivateTxManager          *PrivateTxManager
+	Labels                    map[string]string
 	CreatedAt                 time.Time
 	UpdatedAt                 time.Time
 }

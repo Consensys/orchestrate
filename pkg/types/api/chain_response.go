@@ -18,6 +18,7 @@ type ChainResponse struct {
 	ListenerBackOffDuration   string                     `json:"listenerBackOffDuration" example:"5s"`
 	ListenerExternalTxEnabled bool                       `json:"listenerExternalTxEnabled" example:"false"`
 	PrivateTxManager          *entities.PrivateTxManager `json:"privateTxManager,omitempty"`
+	Labels                    map[string]string          `json:"labels,omitempty"`
 	CreatedAt                 time.Time                  `json:"createdAt" example:"2020-07-09T12:35:42.115395Z"`
 	UpdatedAt                 time.Time                  `json:"updatedAt" example:"2020-07-09T12:35:42.115395Z"`
 }

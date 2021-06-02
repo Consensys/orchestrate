@@ -9,6 +9,7 @@ type RegisterChainRequest struct {
 	URLs             []string                 `json:"urls" pg:"urls,array" validate:"required,min=1,unique,dive,url" example:"https://mainnet.infura.io/v3/a73136601e6f4924a0baa4ed880b535e"`
 	Listener         RegisterListenerRequest  `json:"listener,omitempty"`
 	PrivateTxManager *PrivateTxManagerRequest `json:"privateTxManager,omitempty"`
+	Labels           map[string]string        `json:"labels,omitempty"`
 }
 
 type RegisterListenerRequest struct {
@@ -22,6 +23,7 @@ type UpdateChainRequest struct {
 	Name             string                   `json:"name,omitempty" example:"mainnet"`
 	Listener         *UpdateListenerRequest   `json:"listener,omitempty"`
 	PrivateTxManager *PrivateTxManagerRequest `json:"privateTxManager,omitempty"`
+	Labels           map[string]string        `json:"labels,omitempty"`
 }
 
 type UpdateListenerRequest struct {

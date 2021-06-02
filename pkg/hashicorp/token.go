@@ -60,7 +60,7 @@ func (rtl *renewTokenWatcher) reloadToken() error {
 		// Unwrap token
 		secret, err2 := rtl.client.Logical().Unwrap(wrappedToken.Token)
 		if err2 != nil {
-			return errors.InternalError("could not unwrap token")
+			return errors.InternalError("could not unwrap token").AppendReason(err2.Error())
 		}
 		token = fmt.Sprintf("%v", secret.Data["token"])
 	}

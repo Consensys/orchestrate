@@ -40,6 +40,7 @@ func (s *chainsTestSuite) TestRegister() {
 		assert.Equal(t, req.Listener.ExternalTxEnabled, resp.ListenerExternalTxEnabled)
 		assert.Equal(t, "5s", resp.ListenerBackOffDuration)
 		assert.Equal(t, req.Listener.Depth, resp.ListenerDepth)
+		assert.Equal(t, req.Labels, resp.Labels)
 		assert.NotEmpty(t, resp.UUID)
 		assert.Greater(t, resp.ListenerStartingBlock, uint64(0))
 		assert.NotEmpty(t, resp.CreatedAt)
@@ -257,6 +258,7 @@ func (s *chainsTestSuite) TestUpdate() {
 		require.NoError(t, err)
 
 		assert.Equal(t, req.Name, resp.Name)
+		assert.Equal(t, req.Labels, resp.Labels)
 		assert.NotEqual(t, resp.CreatedAt, resp.UpdatedAt)
 	})
 

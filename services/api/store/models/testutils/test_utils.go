@@ -137,6 +137,9 @@ func FakeChainModel() *models.Chain {
 		ListenerBackOffDuration:   "5s",
 		ListenerExternalTxEnabled: false,
 		PrivateTxManagers:         []*models.PrivateTxManager{},
+		Labels: map[string]string{
+			"label1": "value1",
+		},
 	}
 }
 

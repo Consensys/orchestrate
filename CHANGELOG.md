@@ -1,5 +1,9 @@
 # Orchestrate Release Notes
 
+## v21.1.5 (2021-06-02)
+### 🆕 Features
+* Included labels to registered chains
+
 ## v21.1.4 (2021-04-07)
 ### 🛠 Bug fixes
 * Signing and verifying payload for zk-snarks accounts

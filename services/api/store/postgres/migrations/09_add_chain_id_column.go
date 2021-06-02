@@ -5,10 +5,20 @@ import (
 
 	"github.com/ConsenSys/orchestrate/pkg/errors"
 	ethclient "github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/rpc"
-	"github.com/ConsenSys/orchestrate/services/api/store/models"
 	"github.com/go-pg/migrations/v7"
 	log "github.com/sirupsen/logrus"
 )
+
+// Minimum version of model to perform migration actions
+type chain struct {
+	tableName struct{} `pg:"chains"` // nolint
+
+	UUID     string `pg:",pk"`
+	Name     string
+	TenantID string
+	ChainID  string
+	URLs     []string `pg:"urls,array"`
+}
 
 func addChainIDColumn(db migrations.DB) error {
 	log.Debugf("Adding chainID column on table %q...", "chains")
@@ -77,27 +87,27 @@ func updateChainIDs(ctx context.Context, db migrations.DB) error {
 
 	log.Debugf("fetching chainIDs from rpc nodes")
 
-	var chains []*models.Chain
+	var chains []*chain
 	err := db.Model(&chains).Where(`chain_id = ?`, 0).Select()
 	if err != nil {
 		return err
 	}
 
-	for _, chain := range chains {
-		chainID, err := getChainID(ctx, ec, chain.URLs)
+	for _, c := range chains {
+		chainID, err := getChainID(ctx, ec, c.URLs)
 		if err != nil {
 			return err
 		}
 
-		_, err = db.Model(&models.Chain{ChainID: chainID}).
-			Where("uuid = ?", chain.UUID).UpdateNotZero()
+		_, err = db.Model(&chain{ChainID: chainID}).
+			Where("uuid = ?", c.UUID).UpdateNotZero()
 
 		if err != nil {
 			return err
 		}
 
-		log.WithField("chainName", chain.Name).
-			WithField("chainUUID", chain.UUID).
+		log.WithField("chainName", c.Name).
+			WithField("chainUUID", c.UUID).
 			WithField("chainID", chainID).
 			Infof("chain was updated correctly")
 	}
