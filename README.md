@@ -5,10 +5,17 @@ It provides production grade and agnostic mechanisms for transaction crafting, n
 
 Orchestrate is a **microservices architecture** composed of APIs & Workers. 
 Workers communicate following **publish-subscribe** pattern using *Apache Kafka* as message broker. 
-All messages are standardized using **protobuf** and **gRPC**.
 
 Orchestrate is Plug & Play, a user only needs to send a business protobuf message to Orchestrate input topic,
 Orchestrate then manages the full lifecycle of the transaction from crafting the transaction to decoding event logs data.
+
+## License
+
+Orchestrate is licensed under the BSL 1.1.
+
+Please refer to the [LICENSE file](LICENSE) for a detailed description of the license.
+
+Please contact [orchestrate@consensys.net](mailto:orchestrate@consensys.net) if you need to purchase a license for a production use-case.  
 
 ## Goal
 
