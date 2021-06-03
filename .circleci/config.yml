@@ -59,9 +59,9 @@ commands:
             - run:
                 name: Set Orchestrate Namespace
                 command: |
-                 if [ "${CIRCLE_TAG}" ]; then echo 'export ORCHESTRATE_NAMESPACE=${ENVIRONMENT_VALUES}-${${CIRCLE_TAG%.*}//./-}' >> $BASH_ENV; 
+                 if [ "${CIRCLE_TAG}" ]; then TAG=${CIRCLE_TAG%.*} echo 'export ORCHESTRATE_NAMESPACE=${ENVIRONMENT_VALUES}-${TAG//./-}' >> $BASH_ENV;
                  elif [ "${CIRCLE_BRANCH}" == "master" ]; then echo 'export ORCHESTRATE_NAMESPACE=${ENVIRONMENT_VALUES}' >> $BASH_ENV; 
-                 else echo 'export ORCHESTRATE_NAMESPACE=${ENVIRONMENT_VALUES}-${${CIRCLE_BRANCH#"maintenance/"}//./-}' >> $BASH_ENV;
+                 else TAG=${CIRCLE_BRANCH#"maintenance/"} echo 'export ORCHESTRATE_NAMESPACE=${ENVIRONMENT_VALUES}-${TAG//./-}' >> $BASH_ENV;
                  fi
 
   prepare_e2e:
