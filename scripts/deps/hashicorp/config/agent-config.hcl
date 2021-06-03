@@ -14,7 +14,7 @@ auto_auth {
   }
 
   sink "file" {
-    wrap_ttl = "30s"
+    wrap_ttl = "5m"
     config = {
       path = "/vault/token/.vault-token"
     }
