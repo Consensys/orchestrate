@@ -21,7 +21,7 @@ type UpdateAccountRequest struct {
 }
 
 type SignPayloadRequest struct {
-	Data string `json:"data" validate:"required,isHex" example:"data to sign"`
+	Data string `json:"data" validate:"required,isHex" example:"0x6d79206461746120746f207369676e"`
 }
 
 type SignTypedDataRequest struct {
