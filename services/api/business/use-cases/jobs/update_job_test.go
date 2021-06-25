@@ -325,6 +325,32 @@ func TestUpdateJob_Execute(t *testing.T) {
 		_, err := usecase.Execute(ctx, jobEntity, entities.StatusFailed, logMessage, []string{tenantID})
 		assert.True(t, errors.IsInvalidStateError(err))
 	})
+	
+	t.Run("should allow transition of job from RESENDING to RESENDING", func(t *testing.T) {
+		jobEntity := testutils3.FakeJob()
+		jobEntity.Transaction = nil
+		jobModel := testutils2.FakeJobModel(0)
+		jobModel.Schedule.TenantID = tenantID
+		jobModel.Status = entities.StatusResending
+		jobModel.Logs[0].Status = entities.StatusResending
+
+		status := entities.StatusResending
+		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), gomock.Any(), gomock.Any(), true).Return(jobModel, nil)
+		mockJobDA.EXPECT().Update(gomock.Any(), gomock.Any()).DoAndReturn(func(ctx context.Context, jobModelUpdate *models.Job) error {
+			assert.Equal(t, jobModelUpdate.InternalData, jobEntity.InternalData)
+			assert.Equal(t, jobModelUpdate.Labels, jobEntity.Labels)
+			jobModel.ID = 1
+			jobModel.Logs[0].Status = status
+			return nil
+		})
+		mockLogDA.EXPECT().Insert(gomock.Any(), &models.Log{
+			JobID:   &jobModel.ID,
+			Status:  status,
+			Message: logMessage,
+		}).Return(nil)
+		_, err := usecase.Execute(ctx, jobEntity, status, logMessage, []string{tenantID})
+		assert.NoError(t, err)
+	})
 
 	t.Run("should fail with the same error if insert log fails", func(t *testing.T) {
 		expectedErr := errors.NotFoundError("error")

@@ -74,7 +74,7 @@ func (uc *sendEEAPrivateTxUseCase) Execute(ctx context.Context, job *entities.Jo
 		return err
 	}
 
-	err = utils2.UpdateJobStatus(ctx, uc.jobClient, job.UUID, entities.StatusStored, "", job.Transaction)
+	err = utils2.UpdateJobStatus(ctx, uc.jobClient, job, entities.StatusStored, "", job.Transaction)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(sendEEAPrivateTxComponent)
 	}

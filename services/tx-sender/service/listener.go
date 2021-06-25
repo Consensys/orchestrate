@@ -143,12 +143,12 @@ func (listener *MessageListener) processEnvelope(ctx context.Context, evlp *tx.E
 			switch {
 			// Never retry on children jobs
 			case job.InternalData.ParentJobUUID == job.UUID:
-				serr = utils2.UpdateJobStatus(ctx, listener.jobClient, evlp.GetJobUUID(),
+				serr = utils2.UpdateJobStatus(ctx, listener.jobClient, job,
 					entities.StatusFailed, err.Error(), nil)
 			// Retry over same message
 			case errors.IsInvalidNonceWarning(err):
 				resetEnvelopeTx(evlp)
-				serr = utils2.UpdateJobStatus(ctx, listener.jobClient, evlp.GetJobUUID(),
+				serr = utils2.UpdateJobStatus(ctx, listener.jobClient, job,
 					entities.StatusRecovering, err.Error(), nil)
 				if serr == nil {
 					return err
@@ -158,7 +158,7 @@ func (listener *MessageListener) processEnvelope(ctx context.Context, evlp *tx.E
 				txResponse := evlp.AppendError(errors.FromError(err)).TxResponse()
 				serr = listener.sendEnvelope(ctx, evlp.ID, txResponse, listener.recoverTopic, evlp.PartitionKey())
 				if serr == nil {
-					serr = utils2.UpdateJobStatus(ctx, listener.jobClient, evlp.GetJobUUID(),
+					serr = utils2.UpdateJobStatus(ctx, listener.jobClient, job,
 						entities.StatusFailed, err.Error(), nil)
 				}
 			}

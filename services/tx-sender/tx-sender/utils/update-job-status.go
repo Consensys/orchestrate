@@ -9,7 +9,7 @@ import (
 	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 )
 
-func UpdateJobStatus(ctx context.Context, apiClient client.JobClient, jobUUID string, status entities.JobStatus,
+func UpdateJobStatus(ctx context.Context, apiClient client.JobClient, job *entities.Job, status entities.JobStatus,
 	msg string, transaction *entities.ETHTransaction) error {
 	logger := log.FromContext(ctx).WithField("status", status)
 
@@ -19,12 +19,13 @@ func UpdateJobStatus(ctx context.Context, apiClient client.JobClient, jobUUID st
 		Transaction: transaction,
 	}
 
-	_, err := apiClient.UpdateJob(ctx, jobUUID, txUpdateReq)
+	_, err := apiClient.UpdateJob(ctx, job.UUID, txUpdateReq)
 	if err != nil {
 		logger.WithError(err).Error("failed to update job status")
 		return err
 	}
 
+	job.Status = status
 	logger.Debug("job status was updated successfully")
 	return nil
 }

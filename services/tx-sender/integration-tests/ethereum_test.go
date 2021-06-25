@@ -124,6 +124,64 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Public() {
 		assert.NoError(t, err)
 	})
 
+	s.T().Run("should craft, sign, fail to send, and resend public ethereum transaction successfully", func(t *testing.T) {
+		defer gock.Off()
+		wg := &multierror.Group{}
+
+		envelope := fakeEnvelope()
+
+		gock.New(apiURL).
+			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
+			AddMatcher(ethCallMatcher(wg, "eth_gasPrice")).
+			Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"0x989680\"}")
+
+		gock.New(apiURL).
+			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
+			AddMatcher(ethCallMatcher(wg, "eth_estimateGas")).
+			Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"0x5208\"}")
+
+		gock.New(apiURL).
+			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
+			AddMatcher(ethCallMatcher(wg, "eth_getTransactionCount", envelope.From.String(), "pending")).
+			Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"0x0\"}")
+
+		gock.New(keyManagerURL).
+			Post(fmt.Sprintf("/ethereum/accounts/%s/sign-transaction", envelope.GetFromString())).
+			Reply(200).BodyString(signature)
+
+		gock.New(apiURL).
+			Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
+			AddMatcher(txStatusUpdateMatcher(wg, entities.StatusPending, "")).
+			Reply(200).JSON(&api.JobResponse{})
+
+		gock.New(apiURL).
+			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
+			AddMatcher(ethCallMatcher(wg, "eth_sendRawTransaction", raw)).
+			Reply(429).BodyString("")
+
+		gock.New(apiURL).
+			Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
+			AddMatcher(txStatusUpdateMatcher(wg, entities.StatusResending, "")).
+			Reply(200).JSON(&api.JobResponse{})
+
+		gock.New(apiURL).
+			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
+			AddMatcher(ethCallMatcher(wg, "eth_sendRawTransaction", raw)).
+			Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"" + txHash + "\"}")
+
+		envelope.GasPrice = nil
+		envelope.Gas = nil
+		envelope.Nonce = nil
+		err := s.sendEnvelope(envelope.TxEnvelopeAsRequest())
+		if err != nil {
+			assert.Fail(t, err.Error())
+			return
+		}
+
+		err = waitTimeout(wg, time.Second*2)
+		assert.NoError(t, err)
+	})
+
 	s.T().Run("should sign and send a public onetimekey ethereum transaction successfully", func(t *testing.T) {
 		defer gock.Off()
 		wg := &multierror.Group{}
@@ -305,6 +363,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Raw_Public() {
 		envelope := fakeEnvelope()
 		_ = envelope.SetJobType(tx.JobType_ETH_RAW_TX)
 		_ = envelope.SetRawString(raw)
+
 		gock.New(apiURL).
 			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
 			AddMatcher(ethCallMatcher(wg, "eth_sendRawTransaction", raw)).
@@ -314,6 +373,44 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Raw_Public() {
 			Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
 			AddMatcher(txStatusUpdateMatcher(wg, entities.StatusPending, "")).
 			Reply(200).JSON(&api.JobResponse{})
+
+		err := s.sendEnvelope(envelope.TxEnvelopeAsRequest().EnableTxFromOneTimeKey())
+		if err != nil {
+			assert.Fail(t, err.Error())
+			return
+		}
+
+		err = waitTimeout(wg, time.Second*2)
+		assert.NoError(t, err)
+	})
+
+	s.T().Run("should resend ethereum raw transaction successfully", func(t *testing.T) {
+		defer gock.Off()
+		wg := &multierror.Group{}
+
+		envelope := fakeEnvelope()
+		_ = envelope.SetJobType(tx.JobType_ETH_RAW_TX)
+		_ = envelope.SetRawString(raw)
+
+		gock.New(apiURL).
+			Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
+			AddMatcher(txStatusUpdateMatcher(wg, entities.StatusPending, "")).
+			Reply(200).JSON(&api.JobResponse{})
+
+		gock.New(apiURL).
+			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
+			AddMatcher(ethCallMatcher(wg, "eth_sendRawTransaction", raw)).
+			Reply(429).BodyString("")
+
+		gock.New(apiURL).
+			Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
+			AddMatcher(txStatusUpdateMatcher(wg, entities.StatusResending, "")).
+			Reply(200).JSON(&api.JobResponse{})
+
+		gock.New(apiURL).
+			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
+			AddMatcher(ethCallMatcher(wg, "eth_sendRawTransaction", raw)).
+			Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"" + txHash + "\"}")
 
 		err := s.sendEnvelope(envelope.TxEnvelopeAsRequest().EnableTxFromOneTimeKey())
 		if err != nil {
@@ -515,6 +612,57 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Tessera_Marking() {
 			Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
 			AddMatcher(txStatusUpdateMatcher(wg, entities.StatusPending, "")).
 			Reply(200).JSON(&api.JobResponse{})
+
+		err := s.sendEnvelope(envelope.TxEnvelopeAsRequest())
+		if err != nil {
+			assert.Fail(t, err.Error())
+			return
+		}
+
+		err = waitTimeout(wg, time.Second*2)
+		assert.NoError(t, err)
+	})
+	
+	s.T().Run("should sign, fail to send, and resend Tessera marking transaction successfully", func(t *testing.T) {
+		defer gock.Off()
+		wg := &multierror.Group{}
+
+		envelope := fakeEnvelope()
+		envelope.Nonce = nil
+		_ = envelope.SetJobType(tx.JobType_ETH_TESSERA_MARKING_TX)
+
+		gock.New(keyManagerURL).
+			Post(fmt.Sprintf("/ethereum/accounts/%s/sign-quorum-private-transaction", envelope.GetFromString())).
+			Reply(200).BodyString(signature)
+
+		gock.New(apiURL).
+			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
+			AddMatcher(ethCallMatcher(wg, "eth_getTransactionCount")).
+			Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"0x0\"}")
+
+		gock.New(apiURL).
+			Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
+			AddMatcher(txStatusUpdateMatcher(wg, entities.StatusPending, "")).
+			Reply(200).JSON(&api.JobResponse{})
+		
+		gock.New(apiURL).
+			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
+			AddMatcher(ethCallMatcher(wg, "eth_sendRawPrivateTransaction", raw, map[string]interface{}{
+				"privateFor": envelope.PrivateFor,
+			})).
+			Reply(429).BodyString("")
+
+		gock.New(apiURL).
+			Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
+			AddMatcher(txStatusUpdateMatcher(wg, entities.StatusResending, "")).
+			Reply(200).JSON(&api.JobResponse{})
+
+		gock.New(apiURL).
+			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
+			AddMatcher(ethCallMatcher(wg, "eth_sendRawPrivateTransaction", raw, map[string]interface{}{
+				"privateFor": envelope.PrivateFor,
+			})).
+			Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"" + txHash + "\"}")
 
 		err := s.sendEnvelope(envelope.TxEnvelopeAsRequest())
 		if err != nil {

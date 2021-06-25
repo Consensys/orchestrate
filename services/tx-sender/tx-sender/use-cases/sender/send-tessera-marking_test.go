@@ -59,6 +59,31 @@ func TestSendTesseraMarking_Execute(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, job.Transaction.Hash, txHash)
 	})
+	
+	t.Run("should execute use case, using resending, successfully", func(t *testing.T) {
+		job := testutils.FakeJob()
+		job.Status = entities.StatusPending
+		job.Transaction.PrivateFor = []string{"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="}
+		raw := "rawData"
+		txHash := "0x0000000000000000000000000000000000000000000000000000000000000abc"
+
+		crafter.EXPECT().Execute(gomock.Any(), job).Return(nil)
+		job.Transaction.Raw = raw
+		job.Transaction.Hash = txHash
+
+		proxyURL := utils.GetProxyURL(chainRegistryURL, job.ChainUUID)
+		ec.EXPECT().SendQuorumRawPrivateTransaction(gomock.Any(), proxyURL, job.Transaction.Raw, job.Transaction.PrivateFor).
+			Return(ethcommon.HexToHash(txHash), nil)
+		nonceChecker.EXPECT().IncrementNonce(gomock.Any(), job).Return(nil)
+		jobClient.EXPECT().UpdateJob(gomock.Any(), job.UUID, &api.UpdateJobRequest{
+			Status:      entities.StatusResending,
+			Transaction: job.Transaction,
+		})
+
+		err := usecase.Execute(ctx, job)
+		assert.NoError(t, err)
+		assert.Equal(t, job.Transaction.Hash, txHash)
+	})
 
 	t.Run("should execute use case, update warning, successfully", func(t *testing.T) {
 		job := testutils.FakeJob()

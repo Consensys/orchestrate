@@ -198,7 +198,7 @@ func canUpdateStatus(nextStatus, status entities.JobStatus) bool {
 	case entities.StatusPending:
 		return status == entities.StatusStarted || status == entities.StatusRecovering
 	case entities.StatusResending:
-		return status == entities.StatusPending
+		return status == entities.StatusPending || status == entities.StatusResending
 	case entities.StatusRecovering:
 		return status == entities.StatusStarted || status == entities.StatusRecovering || status == entities.StatusPending
 	case entities.StatusMined, entities.StatusNeverMined:

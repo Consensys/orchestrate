@@ -53,10 +53,10 @@ func (uc *sendETHRawTxUseCase) Execute(ctx context.Context, job *entities.Job) e
 		return errors.FromError(err).ExtendComponent(sendETHRawTxComponent)
 	}
 
-	if job.InternalData.ParentJobUUID == job.UUID {
-		err = utils2.UpdateJobStatus(ctx, uc.jobClient, job.UUID, entities.StatusResending, "", job.Transaction)
+	if job.InternalData.ParentJobUUID == job.UUID || job.Status == entities.StatusPending || job.Status == entities.StatusResending {
+		err = utils2.UpdateJobStatus(ctx, uc.jobClient, job, entities.StatusResending, "", job.Transaction)
 	} else {
-		err = utils2.UpdateJobStatus(ctx, uc.jobClient, job.UUID, entities.StatusPending, "", job.Transaction)
+		err = utils2.UpdateJobStatus(ctx, uc.jobClient, job, entities.StatusPending, "", job.Transaction)
 	}
 
 	if err != nil {
@@ -71,7 +71,7 @@ func (uc *sendETHRawTxUseCase) Execute(ctx context.Context, job *entities.Job) e
 	if txHash != job.Transaction.Hash {
 		warnMessage := fmt.Sprintf("expected transaction hash %s, but got %s. Overriding", job.Transaction.Hash, txHash)
 		job.Transaction.Hash = txHash
-		err = utils2.UpdateJobStatus(ctx, uc.jobClient, job.UUID, entities.StatusWarning, warnMessage, job.Transaction)
+		err = utils2.UpdateJobStatus(ctx, uc.jobClient, job, entities.StatusWarning, warnMessage, job.Transaction)
 		if err != nil {
 			return errors.FromError(err).ExtendComponent(sendETHRawTxComponent)
 		}

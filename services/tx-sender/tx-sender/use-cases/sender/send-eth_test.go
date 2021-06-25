@@ -58,7 +58,29 @@ func TestSendEth_Execute(t *testing.T) {
 		assert.Equal(t, job.Transaction.Hash, txHash)
 	})
 	
-	t.Run("should execute use case, using resending, successfully", func(t *testing.T) {
+	t.Run("should execute use case, using resending for retried jobs, successfully", func(t *testing.T) {
+		job := testutils.FakeJob()
+		raw := "rawData"
+		txHash := "0x0000000000000000000000000000000000000000000000000000000000000abc"
+		job.Status = entities.StatusPending
+		crafter.EXPECT().Execute(gomock.Any(), job).Return(nil)
+		job.Transaction.Raw = raw
+		job.Transaction.Hash = txHash
+		
+		proxyURL := utils.GetProxyURL(chainRegistryURL, job.ChainUUID)
+		ec.EXPECT().SendRawTransaction(gomock.Any(), proxyURL, job.Transaction.Raw).Return(ethcommon.HexToHash(txHash), nil)
+		nonceManager.EXPECT().IncrementNonce(gomock.Any(), job).Return(nil)
+		jobClient.EXPECT().UpdateJob(gomock.Any(), job.UUID, &txschedulertypes.UpdateJobRequest{
+			Status:      entities.StatusResending,
+			Transaction: job.Transaction,
+		})
+		
+		err := usecase.Execute(ctx, job)
+		assert.NoError(t, err)
+		assert.Equal(t, job.Transaction.Hash, txHash)
+	})
+	
+	t.Run("should execute use case, using resending for child job, successfully", func(t *testing.T) {
 		job := testutils.FakeJob()
 		job.InternalData.ParentJobUUID = job.UUID
 		raw := "rawData"
@@ -76,6 +98,30 @@ func TestSendEth_Execute(t *testing.T) {
 			Transaction: job.Transaction,
 		})
 		
+		err := usecase.Execute(ctx, job)
+		assert.NoError(t, err)
+		assert.Equal(t, job.Transaction.Hash, txHash)
+	})
+	
+	t.Run("should execute use case, using resending for retried job, successfully", func(t *testing.T) {
+		job := testutils.FakeJob()
+		job.InternalData.ParentJobUUID = job.UUID
+		raw := "rawData"
+		txHash := "0x0000000000000000000000000000000000000000000000000000000000000abc"
+		job.Status = entities.StatusResending
+
+		crafter.EXPECT().Execute(gomock.Any(), job).Return(nil)
+		job.Transaction.Raw = raw
+		job.Transaction.Hash = txHash
+		
+		proxyURL := utils.GetProxyURL(chainRegistryURL, job.ChainUUID)
+		ec.EXPECT().SendRawTransaction(gomock.Any(), proxyURL, job.Transaction.Raw).Return(ethcommon.HexToHash(txHash), nil)
+		nonceManager.EXPECT().IncrementNonce(gomock.Any(), job).Return(nil)
+		jobClient.EXPECT().UpdateJob(gomock.Any(), job.UUID, &txschedulertypes.UpdateJobRequest{
+			Status:      entities.StatusResending,
+			Transaction: job.Transaction,
+		})
+
 		err := usecase.Execute(ctx, job)
 		assert.NoError(t, err)
 		assert.Equal(t, job.Transaction.Hash, txHash)
