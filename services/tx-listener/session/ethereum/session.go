@@ -489,13 +489,11 @@ func (s *Session) fetchPrivateReceipt(ctx context.Context, job *entities.Job, tx
 
 		// We exit ONLY when we failed to fetch the marking tx receipt, otherwise
 		// error is being appended to the envelope
-		if err != nil {
+		if err != nil && receipt == nil {
 			logger.Error("failed to fetch private receipt")
 			return nil, err
-		}
-
-		if receipt == nil {
-			logger.Debug("fetched an empty private receipt")
+		} else if receipt == nil {
+			logger.Debug("fetched an empty receipt")
 			return nil, nil
 		}
 

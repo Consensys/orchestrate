@@ -3,6 +3,7 @@
 ## v21.1.6 (2021-06-25)
 ### 🛠 Bug fixes
 * Incorrect transition to FAILED status on rpc node connectivity issues
+* Tx-listener do not exit when it fails to fetch private receipt from Besu node
 
 ## v21.1.5 (2021-06-02)
 ### 🆕 Features

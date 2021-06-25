@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ConsenSys/orchestrate/pkg/errors"
 	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 
 	backoffmock "github.com/ConsenSys/orchestrate/pkg/backoff/mock"
@@ -293,6 +294,53 @@ func TestSession_Run(t *testing.T) {
 			}).
 			Return([]*txschedulertypes.JobResponse{}, nil)
 		mockEthClient.EXPECT().PrivateTransactionReceipt(gomock.Any(), chain.URL, common.HexToHash(txHashPrivate)).Return(receipt, nil)
+		mockHook.EXPECT().AfterNewBlock(gomock.Any(), chain, block, gomock.Any()).Return(nil)
+		mockOffsetManager.EXPECT().SetLastBlockNumber(gomock.Any(), chain, newBlockPosition.Uint64()).Return(nil)
+
+		// Start session
+		exitErr := make(chan error)
+		go func() {
+			exitErr <- session.Run(cancellableCtx)
+		}()
+
+		go func() {
+			<-time.After(200 * time.Microsecond)
+			cancel()
+		}()
+
+		select {
+		case <-exitErr:
+			assert.False(t, bckoff.HasRetried())
+		// Inject hook error
+		case <-time.After(1 * time.Second):
+			assert.Fail(t, "should have finished")
+		}
+	})
+	
+	t.Run("should fetch receipts successfully an ignore private receipt", func(t *testing.T) {
+		cancellableCtx, cancel := context.WithCancel(ctx)
+		block := newFakeBlock(newBlockPosition, eeaPrivPrecompiledContractAddr)
+		chain := newFakeChain()
+		chain.Listener.ExternalTxEnabled = true
+		session := NewSession(chain, mockEthClient, mockClient, mockHook, mockOffsetManager, mockMetrics)
+		bckoff := &backoffmock.MockIntervalBackoff{}
+		session.bckOff = bckoff
+		err := errors.InvalidParameterError("private receipt not found")
+
+		mockOffsetManager.EXPECT().GetLastBlockNumber(gomock.Any(), chain).Return(blockPosition.Uint64(), nil)
+		mockEthClient.EXPECT().EEAPrivPrecompiledContractAddr(gomock.Any(), chain.URL).Return(common.HexToAddress(eeaPrivPrecompiledContractAddr), nil)
+		mockEthClient.EXPECT().HeaderByNumber(gomock.Any(), chain.URL, nil).Return(&types.Header{
+			Number: newBlockPosition,
+		}, nil).AnyTimes()
+		mockEthClient.EXPECT().BlockByNumber(gomock.Any(), chain.URL, newBlockPosition).Return(block, nil)
+		mockClient.EXPECT().
+			SearchJob(gomock.Any(), &entities.JobFilters{
+				TxHashes:  []string{txHashPrivate},
+				ChainUUID: chain.UUID,
+				Status:    entities.StatusPending,
+			}).
+			Return([]*txschedulertypes.JobResponse{}, nil)
+		mockEthClient.EXPECT().PrivateTransactionReceipt(gomock.Any(), chain.URL, common.HexToHash(txHashPrivate)).Return(receipt, err)
 		mockHook.EXPECT().AfterNewBlock(gomock.Any(), chain, block, gomock.Any()).Return(nil)
 		mockOffsetManager.EXPECT().SetLastBlockNumber(gomock.Any(), chain, newBlockPosition.Uint64()).Return(nil)
 

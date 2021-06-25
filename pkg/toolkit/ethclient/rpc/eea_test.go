@@ -66,15 +66,42 @@ func TestPrivateTransactionReceipt(t *testing.T) {
 		PrivateFrom: "PrivateFrom",
 	}
 
-	ctx := testutils.NewContext(nil, 200, testutils.MakeRespBody(privReceipt, ""))
-	// First tx receipt to fetch is the Public receipt
-	ctx = context.WithValue(ctx, testutils.TestCtxKey("pre_call"),
-		testutils.NewContext(nil, 200, testutils.MakeRespBody(testutils.NewReceiptResp(ethReceipt), "")))
+	t.Run("should fetch receipts successfully including private receipt", func(t *testing.T) {
+		ctx := testutils.NewContext(nil, 200, testutils.MakeRespBody(privReceipt, ""))
+		// First tx receipt to fetch is the Public receipt
+		ctx = context.WithValue(ctx, testutils.TestCtxKey("pre_call"),
+			testutils.NewContext(nil, 200, testutils.MakeRespBody(testutils.NewReceiptResp(ethReceipt), "")))
 
-	receipt, err := ec.PrivateTransactionReceipt(ctx, "test-endpoint", ethcommon.HexToHash(""))
-	assert.NoError(t, err, "TransactionReceipt should not  error")
-	assert.Equal(t, ethReceipt.CumulativeGasUsed, receipt.CumulativeGasUsed, "TransactionReceipt receipt should have correct cumulative gas used")
-	assert.Equal(t, privReceipt.Output, receipt.Output, "TransactionReceipt receipt should have correct priv tx output")
-	assert.Equal(t, privReceipt.ContractAddress, receipt.ContractAddress, "TransactionReceipt receipt should have correct priv contract addr")
-	assert.Equal(t, uint64(0x1), receipt.Status, "TransactionReceipt receipt should have correct priv tx status")
+		receipt, err := ec.PrivateTransactionReceipt(ctx, "test-endpoint", ethcommon.HexToHash(""))
+		assert.NoError(t, err, "TransactionReceipt should not  error")
+		assert.Equal(t, ethReceipt.CumulativeGasUsed, receipt.CumulativeGasUsed, "TransactionReceipt receipt should have correct cumulative gas used")
+		assert.Equal(t, privReceipt.Output, receipt.Output, "TransactionReceipt receipt should have correct priv tx output")
+		assert.Equal(t, privReceipt.ContractAddress, receipt.ContractAddress, "TransactionReceipt receipt should have correct priv contract addr")
+		assert.Equal(t, uint64(0x1), receipt.Status, "TransactionReceipt receipt should have correct priv tx status")
+	})
+
+	//@TODO Following test only work running individually as there is context data leak on the way this test were implemented
+	// t.Run("should fetch receipts successfully ingoring private receipt", func(t *testing.T) {
+	// 	ctx := testutils.NewContext(nil, 200, testutils.MakeRespBody(nil, ""))
+	// 	// First tx receipt to fetch is the Public receipt
+	// 	ctx = context.WithValue(ctx, testutils.TestCtxKey("pre_call"),
+	// 		testutils.NewContext(nil, 200, testutils.MakeRespBody(testutils.NewReceiptResp(ethReceipt), "")))
+	// 
+	// 	receipt, err := ec.PrivateTransactionReceipt(ctx, "test-endpoint", ethcommon.HexToHash(""))
+	// 	assert.Error(t, err, "TransactionReceipt should error")
+	// 	assert.True(t, errors.IsInvalidParameterError(err), "error should come as InvalidParameter for not found private receipts")
+	// 	assert.NotNil(t, receipt, "Public receipt should be there")
+	// })
+	// 
+	// t.Run("should fail to fetch receipt", func(t *testing.T) {
+	// 	ctx := testutils.NewContext(fmt.Errorf("failed to fetch"), 500, nil)
+	// 	// First tx receipt to fetch is the Public receipt
+	// 	ctx = context.WithValue(ctx, testutils.TestCtxKey("pre_call"),
+	// 		testutils.NewContext(nil, 200, testutils.MakeRespBody(testutils.NewReceiptResp(ethReceipt), "")))
+	// 
+	// 	receipt, err := ec.PrivateTransactionReceipt(ctx, "test-endpoint", ethcommon.HexToHash(""))
+	// 	assert.Error(t, err, "TransactionReceipt should error")
+	// 	assert.False(t, errors.IsInvalidParameterError(err), "error should not come as InvalidParameter for not found private receipts")
+	// 	assert.NotNil(t, receipt, "Public receipt should be there")
+	// })
 }
