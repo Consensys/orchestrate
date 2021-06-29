@@ -1,10 +1,10 @@
 package builder
 
 import (
+	qkmclient "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/client"
 	usecases "github.com/ConsenSys/orchestrate/services/api/business/use-cases"
 	"github.com/ConsenSys/orchestrate/services/api/business/use-cases/accounts"
 	"github.com/ConsenSys/orchestrate/services/api/store"
-	keymanager "github.com/ConsenSys/orchestrate/services/key-manager/client"
 )
 
 type accountUseCases struct {
@@ -16,7 +16,7 @@ type accountUseCases struct {
 
 func newAccountUseCases(
 	db store.DB,
-	keyManagerClient keymanager.KeyManagerClient,
+	keyManagerClient qkmclient.Eth1Client,
 	searchChainsUC usecases.SearchChainsUseCase,
 	sendTxUC usecases.SendTxUseCase,
 	getFaucetCandidateUC usecases.GetFaucetCandidateUseCase,

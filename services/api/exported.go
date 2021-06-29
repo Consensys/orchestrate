@@ -5,7 +5,7 @@ import (
 
 	ethclient "github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/rpc"
 
-	keymanager "github.com/ConsenSys/orchestrate/services/key-manager/client"
+	qkm "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager"
 
 	"github.com/ConsenSys/orchestrate/pkg/broker/sarama"
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/app"
@@ -21,8 +21,8 @@ func New(ctx context.Context) (*app.App, error) {
 	authjwt.Init(ctx)
 	authkey.Init(ctx)
 	sarama.InitSyncProducer(ctx)
-	keymanager.Init()
 	ethclient.Init(ctx)
+	qkm.Init()
 
 	config := NewConfig(viper.GetViper())
 	pgmngr := postgres.GetManager()
@@ -32,7 +32,7 @@ func New(ctx context.Context) (*app.App, error) {
 		pgmngr,
 		authjwt.GlobalChecker(),
 		authkey.GlobalChecker(),
-		keymanager.GlobalClient(),
+		qkm.GlobalClient(),
 		ethclient.GlobalClient(),
 		sarama.GlobalSyncProducer(),
 		sarama.NewKafkaTopicConfig(viper.GetViper()),

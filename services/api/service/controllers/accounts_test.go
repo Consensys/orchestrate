@@ -6,17 +6,19 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
+	qkm "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager"
+	qkmmock "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/client/mocks"
+	qkmtypes "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/types"
 	"github.com/ConsenSys/orchestrate/pkg/types/api"
-	"github.com/ConsenSys/orchestrate/pkg/types/keymanager"
+	"github.com/ConsenSys/orchestrate/pkg/utils"
 	"github.com/ConsenSys/orchestrate/services/api/business/use-cases"
 	"github.com/ConsenSys/orchestrate/services/api/service/formatters"
-	"github.com/ConsenSys/orchestrate/services/key-manager/client/mock"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 
 	"github.com/ConsenSys/orchestrate/pkg/encoding/json"
 	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
@@ -37,7 +39,7 @@ type accountsCtrlTestSuite struct {
 	searchAccountUC  *mocks.MockSearchAccountsUseCase
 	updateAccountUC  *mocks.MockUpdateAccountUseCase
 	fundAccountUC    *mocks.MockFundAccountUseCase
-	keyManagerClient *mock.MockKeyManagerClient
+	keyManagerClient *qkmmock.MockKeyManagerClient
 	ctx              context.Context
 	tenants          []string
 	router           *mux.Router
@@ -68,6 +70,7 @@ func (s *accountsCtrlTestSuite) FundAccount() usecases.FundAccountUseCase {
 const (
 	inputTestAddress     = "0x7e654d251da770a068413677967f6d3ea2feA9e4"
 	mixedCaseTestAddress = "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4"
+	globalStoreName      = "test-store-name"
 )
 
 func TestAccountController(t *testing.T) {
@@ -80,11 +83,12 @@ func (s *accountsCtrlTestSuite) SetupTest() {
 	defer ctrl.Finish()
 
 	s.tenants = []string{"tenantID"}
+	qkm.SetGlobalStoreName(globalStoreName)
 	s.createAccountUC = mocks.NewMockCreateAccountUseCase(ctrl)
 	s.getAccountUC = mocks.NewMockGetAccountUseCase(ctrl)
 	s.searchAccountUC = mocks.NewMockSearchAccountsUseCase(ctrl)
 	s.updateAccountUC = mocks.NewMockUpdateAccountUseCase(ctrl)
-	s.keyManagerClient = mock.NewMockKeyManagerClient(ctrl)
+	s.keyManagerClient = qkmmock.NewMockKeyManagerClient(ctrl)
 	s.ctx = context.Background()
 	s.ctx = context.WithValue(s.ctx, multitenancy.TenantIDKey, s.tenants[0])
 	s.ctx = context.WithValue(s.ctx, multitenancy.AllowedTenantsKey, s.tenants)
@@ -106,7 +110,7 @@ func (s *accountsCtrlTestSuite) TestAccountController_Create() {
 			NewRequest(http.MethodPost, "/accounts", bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 
-		s.createAccountUC.EXPECT().Execute(gomock.Any(), gomock.Any(), "", req.Chain, s.tenants[0]).Return(accResp, nil)
+		s.createAccountUC.EXPECT().Execute(gomock.Any(), gomock.Any(), nil, req.Chain, s.tenants[0]).Return(accResp, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -137,7 +141,7 @@ func (s *accountsCtrlTestSuite) TestAccountController_Create() {
 			NewRequest(http.MethodPost, "/accounts", bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 
-		s.createAccountUC.EXPECT().Execute(gomock.Any(), gomock.Any(), "", "", s.tenants[0]).
+		s.createAccountUC.EXPECT().Execute(gomock.Any(), gomock.Any(), nil, "", s.tenants[0]).
 			Return(nil, fmt.Errorf("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -157,7 +161,8 @@ func (s *accountsCtrlTestSuite) TestAccountController_Import() {
 			NewRequest(http.MethodPost, "/accounts/import", bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 
-		s.createAccountUC.EXPECT().Execute(gomock.Any(), gomock.Any(), req.PrivateKey, req.Chain, s.tenants[0]).Return(accResp, nil)
+		// s.createAccountUC.EXPECT().Execute(gomock.Any(), gomock.Any(), hexutil.MustDecode("0x"+req.PrivateKey), req.Chain, s.tenants[0]).Return(accResp, nil)
+		s.createAccountUC.EXPECT().Execute(gomock.Any(), gomock.Any(), gomock.Any(), req.Chain, s.tenants[0]).Return(accResp, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -271,7 +276,7 @@ func (s *accountsCtrlTestSuite) TestAccountController_SignPayload() {
 		acc := testutils.FakeAccount()
 		acc.Address = inputTestAddress
 		rw := httptest.NewRecorder()
-		payload := hexutil.Encode([]byte("my data to sign"))
+		payload := "0x1234"
 		signature := "0xsignature"
 		requestBytes, _ := json.Marshal(&api.SignPayloadRequest{Data: payload})
 
@@ -279,9 +284,10 @@ func (s *accountsCtrlTestSuite) TestAccountController_SignPayload() {
 			NewRequest(http.MethodPost, fmt.Sprintf("/accounts/%v/sign", acc.Address), bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 
-		s.keyManagerClient.EXPECT().ETHSign(gomock.Any(), mixedCaseTestAddress, &keymanager.SignPayloadRequest{
-			Data:      payload,
-			Namespace: s.tenants[0],
+		s.getAccountUC.EXPECT().Execute(gomock.Any(), mixedCaseTestAddress, 
+			 utils.AllowedTenants(s.tenants[0])).Return(acc, nil)
+		s.keyManagerClient.EXPECT().SignEth1(gomock.Any(), globalStoreName, mixedCaseTestAddress, &qkmtypes.SignHexPayloadRequest{
+			Data: hexutil.MustDecode(payload),
 		}).Return(signature, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -296,14 +302,14 @@ func (s *accountsCtrlTestSuite) TestAccountController_VerifySignature() {
 		acc := testutils.FakeAccount()
 		acc.Address = inputTestAddress
 		rw := httptest.NewRecorder()
-		request := testutils.FakeVerifyPayloadRequest()
+		request := qkm.FakeVerifyPayloadRequest()
 		requestBytes, _ := json.Marshal(request)
 
 		httpRequest := httptest.
 			NewRequest(http.MethodPost, "/accounts/verify-signature", bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 
-		s.keyManagerClient.EXPECT().ETHVerifySignature(gomock.Any(), request).Return(nil)
+		s.keyManagerClient.EXPECT().VerifyEth1Signature(gomock.Any(), globalStoreName, request).Return(nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -316,14 +322,14 @@ func (s *accountsCtrlTestSuite) TestAccountController_VerifyTypedDataSignature()
 		acc := testutils.FakeAccount()
 		acc.Address = inputTestAddress
 		rw := httptest.NewRecorder()
-		request := testutils.FakeVerifyTypedDataPayloadRequest()
+		request := qkm.FakeVerifyTypedDataPayloadRequest()
 		requestBytes, _ := json.Marshal(request)
 
 		httpRequest := httptest.
 			NewRequest(http.MethodPost, "/accounts/verify-typed-data-signature", bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 
-		s.keyManagerClient.EXPECT().ETHVerifyTypedDataSignature(gomock.Any(), request).Return(nil)
+		s.keyManagerClient.EXPECT().VerifyTypedDataSignature(gomock.Any(), globalStoreName, request).Return(nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 

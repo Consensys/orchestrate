@@ -17,6 +17,7 @@ auto_auth {
     wrap_ttl = "5m"
     config = {
       path = "/vault/token/.vault-token"
+      mode = 0666
     }
   }
 }

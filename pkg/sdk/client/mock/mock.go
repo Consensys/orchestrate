@@ -6,12 +6,12 @@ package mock
 
 import (
 	context "context"
+	types "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/types"
+	api "github.com/ConsenSys/orchestrate/pkg/types/api"
+	entities "github.com/ConsenSys/orchestrate/pkg/types/entities"
 	gomock "github.com/golang/mock/gomock"
 	healthcheck "github.com/heptiolabs/healthcheck"
 	io_prometheus_client "github.com/prometheus/client_model/go"
-	api "github.com/ConsenSys/orchestrate/pkg/types/api"
-	entities "github.com/ConsenSys/orchestrate/pkg/types/entities"
-	ethereum "github.com/ConsenSys/orchestrate/pkg/types/keymanager/ethereum"
 	reflect "reflect"
 )
 
@@ -396,7 +396,7 @@ func (mr *MockOrchestrateClientMockRecorder) SignTypedData(ctx, address, request
 }
 
 // VerifySignature mocks base method
-func (m *MockOrchestrateClient) VerifySignature(ctx context.Context, request *ethereum.VerifyPayloadRequest) error {
+func (m *MockOrchestrateClient) VerifySignature(ctx context.Context, request *types.VerifyEth1SignatureRequest) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "VerifySignature", ctx, request)
 	ret0, _ := ret[0].(error)
@@ -410,7 +410,7 @@ func (mr *MockOrchestrateClientMockRecorder) VerifySignature(ctx, request interf
 }
 
 // VerifyTypedDataSignature mocks base method
-func (m *MockOrchestrateClient) VerifyTypedDataSignature(ctx context.Context, request *ethereum.VerifyTypedDataRequest) error {
+func (m *MockOrchestrateClient) VerifyTypedDataSignature(ctx context.Context, request *types.VerifyTypedDataRequest) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "VerifyTypedDataSignature", ctx, request)
 	ret0, _ := ret[0].(error)
@@ -1162,7 +1162,7 @@ func (mr *MockAccountClientMockRecorder) SignTypedData(ctx, address, request int
 }
 
 // VerifySignature mocks base method
-func (m *MockAccountClient) VerifySignature(ctx context.Context, request *ethereum.VerifyPayloadRequest) error {
+func (m *MockAccountClient) VerifySignature(ctx context.Context, request *types.VerifyEth1SignatureRequest) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "VerifySignature", ctx, request)
 	ret0, _ := ret[0].(error)
@@ -1176,7 +1176,7 @@ func (mr *MockAccountClientMockRecorder) VerifySignature(ctx, request interface{
 }
 
 // VerifyTypedDataSignature mocks base method
-func (m *MockAccountClient) VerifyTypedDataSignature(ctx context.Context, request *ethereum.VerifyTypedDataRequest) error {
+func (m *MockAccountClient) VerifyTypedDataSignature(ctx context.Context, request *types.VerifyTypedDataRequest) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "VerifyTypedDataSignature", ctx, request)
 	ret0, _ := ret[0].(error)

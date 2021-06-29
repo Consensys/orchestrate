@@ -6,24 +6,26 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/ConsenSys/orchestrate/pkg/types/api"
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
-	"github.com/ConsenSys/orchestrate/services/api/business/use-cases"
-	"github.com/ConsenSys/orchestrate/services/api/service/formatters"
-	"github.com/ConsenSys/orchestrate/services/key-manager/client/mock"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
-	"github.com/golang/mock/gomock"
-	"github.com/gorilla/mux"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/suite"
+	qkm "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager"
+	mocks2 "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/client/mocks"
+	"github.com/ConsenSys/orchestrate/pkg/types/api"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	"github.com/ConsenSys/orchestrate/services/api/business/use-cases"
+	"github.com/ConsenSys/orchestrate/services/api/service/formatters"
+
 	"github.com/ConsenSys/orchestrate/pkg/encoding/json"
 	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
 	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
 	"github.com/ConsenSys/orchestrate/services/api/business/use-cases/mocks"
+	"github.com/golang/mock/gomock"
+	"github.com/gorilla/mux"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 )
 
 const endpoint = "/faucets"
@@ -35,7 +37,7 @@ type faucetsCtrlTestSuite struct {
 	searchFaucetUC   *mocks.MockSearchFaucetsUseCase
 	updateFaucetUC   *mocks.MockUpdateFaucetUseCase
 	deleteFaucetUC   *mocks.MockDeleteFaucetUseCase
-	keyManagerClient *mock.MockKeyManagerClient
+	keyManagerClient *mocks2.MockKeyManagerClient
 	ctx              context.Context
 	tenants          []string
 	router           *mux.Router
@@ -255,7 +257,7 @@ func (s *faucetsCtrlTestSuite) TestFaucetsController_Delete() {
 		acc := testutils.FakeAccount()
 		acc.Address = inputTestAddress
 		rw := httptest.NewRecorder()
-		request := testutils.FakeVerifyPayloadRequest()
+		request := qkm.FakeVerifyPayloadRequest()
 		requestBytes, _ := json.Marshal(request)
 
 		httpRequest := httptest.

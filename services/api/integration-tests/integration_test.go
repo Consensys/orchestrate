@@ -59,7 +59,6 @@ func (s *apiTestSuite) SetupSuite() {
 	// We use this account in the tests
 	account := testutils.FakeAccount()
 	account.Address = testutils.FromAddress
-	gock.New(keyManagerURL).Post("/ethereum/accounts/import").Reply(200).JSON(account)
 	_, s.err = s.client.ImportAccount(s.env.ctx, testutils.FakeImportAccountRequest())
 	if s.err != nil {
 		s.Fail(s.err.Error())

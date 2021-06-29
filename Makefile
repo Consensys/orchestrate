@@ -1,8 +1,8 @@
 GOFILES := $(shell find . -name '*.go' -not -path "./vendor/*" | grep -v pkg/toolkit/app/http/handler/dashboard/genstatic/gen.go | grep -v pkg/http/handler/swagger/genstatic/gen.go | egrep -v "^\./\.go" | grep -v _test.go)
 PACKAGES ?= $(shell go list ./... | grep -Fv -e e2e -e examples -e genstatic -e mock )
 INTEGRATION_TEST_PACKAGES ?= $(shell go list ./... | grep integration-tests )
-ORCH_SERVICES = tx-sender tx-listener api key-manager
-ORCH_MIGRATE = api key-manager
+ORCH_SERVICES = tx-sender tx-listener api
+ORCH_MIGRATE = api
 DEPS_VAULT = vault vault-init vault-agent
 DEPS_POSTGRES = postgres-api
 DEPS_KAFKA = zookeeper kafka
@@ -13,6 +13,11 @@ ifeq ($(UNAME_S),Linux)
 endif
 ifeq ($(UNAME_S),Darwin)
 	OPEN = open
+endif
+
+ifneq (,$(wildcard ./.env))
+    include .env
+    export
 endif
 
 .PHONY: all run-coverage coverage fmt fmt-check vet lint misspell-check misspell race tools help
@@ -70,7 +75,6 @@ gen-mocks:
 
 gen-swagger:
 	@go generate github.com/ConsenSys/orchestrate/services/api/service/controllers
-	@go generate github.com/ConsenSys/orchestrate/services/key-manager/service/controllers
 
 gen-deepcopy:
 	@bash scripts/deepcopy/generate.sh
@@ -153,9 +157,13 @@ deps-vault:
 deps-kafka:
 	@docker-compose -f scripts/deps/docker-compose.yml up --build -d $(DEPS_KAFKA)
 
+quorum-key-manager:
+	@bash scripts/deps/quorum-key-manager/wait_for_token.sh
+	@docker-compose -f scripts/deps/docker-compose.yml up --build -d quorum-key-manager
+
 deps-persistent: deps-vault deps-postgres deps-redis
 
-deps: deps-persistent deps-kafka
+deps: deps-persistent deps-kafka quorum-key-manager
 
 down-deps:
 	@docker-compose -f scripts/deps/docker-compose.yml down --volumes --timeout 0
@@ -193,7 +201,7 @@ postgres:
 down-postgres:
 	@docker-compose -f scripts/deps/docker-compose.yml rm --force -s -v postgres-unit
 
-up: deps-persistent quorum geth besu deps-kafka bootstrap-deps orchestrate ## Start Orchestrate and deps
+up: deps-persistent quorum geth besu deps-kafka quorum-key-manager bootstrap-deps orchestrate ## Start Orchestrate and deps
 
 dev: deps orchestrate ## Start Orchestrate and light deps
 

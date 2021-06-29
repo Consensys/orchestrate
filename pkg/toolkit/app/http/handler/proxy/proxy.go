@@ -93,9 +93,6 @@ func New(cfg *dynamic.ReverseProxy, transport http.RoundTripper, pool gohttputil
 		Director: func(outReq *http.Request) {
 			u := outReq.URL
 
-			log.FromContext(outReq.Context()).
-				Debugf("proxy call - outReq.URL: %s - u.EscapedPath(): %s, outReq.RequestURI: %s", outReq.URL, u.EscapedPath(), outReq.RequestURI)
-
 			if outReq.RequestURI != "/" {
 				// Add requestURI in the path
 				// In case the downstream backend is domain/path (i.e. domain.com/tessera), and the request is done to proxy/proxyPath/(.+) (i.e. proxy.com/proxyPath/storeraw)

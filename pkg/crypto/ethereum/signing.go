@@ -34,6 +34,20 @@ func SignQuorumPrivateTransaction(tx *quorumtypes.Transaction, privKey *ecdsa.Pr
 }
 
 func SignEEATransaction(tx *types.Transaction, privateArgs *entities.PrivateETHTransactionParams, chainID string, privKey *ecdsa.PrivateKey) ([]byte, error) {
+	hash, err := EEATransactionPayload(tx, privateArgs, chainID)
+	if err != nil {
+		return nil, err
+	}
+
+	signature, err := crypto.Sign(hash, privKey)
+	if err != nil {
+		return nil, errors.CryptoOperationError("failed to sign eea transaction").AppendReason(err.Error())
+	}
+
+	return signature, err
+}
+
+func EEATransactionPayload(tx *types.Transaction, privateArgs *entities.PrivateETHTransactionParams, chainID string) ([]byte, error) {
 	chainIDBigInt, ok := new(big.Int).SetString(chainID, 10)
 	if !ok {
 		return nil, errors.InvalidParameterError("invalid chainID")
@@ -67,10 +81,5 @@ func SignEEATransaction(tx *types.Transaction, privateArgs *entities.PrivateETHT
 		return nil, errors.CryptoOperationError("failed to hash eea transaction").AppendReason(err.Error())
 	}
 
-	signature, err := crypto.Sign(hash[:], privKey)
-	if err != nil {
-		return nil, errors.CryptoOperationError("failed to sign eea transaction").AppendReason(err.Error())
-	}
-
-	return signature, err
+	return hash.Bytes(), nil
 }

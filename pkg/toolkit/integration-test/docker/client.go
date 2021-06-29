@@ -2,6 +2,7 @@ package docker
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -38,7 +39,7 @@ type dockerAuthItem struct {
 	Auth string `json:"auth"`
 }
 
-var dockerRegistries = []string{"https://index.docker.io/v2/", "index.docker.io/v2/", "https://index.docker.io/v1/", "index.docker.io/v1/"}
+var dockerRegistries = []string{"docker.consensys.net", "https://index.docker.io/v2/", "index.docker.io/v2/", "https://index.docker.io/v1/", "index.docker.io/v1/"}
 
 func NewClient(composition *config.Composition) (*Client, error) {
 	cli, err := client.NewClientWithOpts(
@@ -69,6 +70,7 @@ func (c *Client) Up(ctx context.Context, name, networkName string) error {
 	// Pull image
 	err = c.pullImage(ctx, containerCfg.Image)
 	if err != nil {
+		logger.WithError(err).Errorf("failed to download image %s", containerCfg.Image)
 		return err
 	}
 
@@ -241,23 +243,44 @@ func (c *Client) getContainer(name string) (dockercontainer.ContainerCreateCreat
 func (c *Client) pullImage(ctx context.Context, imageName string) error {
 	logger := log.FromContext(ctx).WithField("image_name", imageName)
 
-	cfg := types.ImagePullOptions{}
 	dockerAthCfg := &dockerAuth{}
-	if err := json.Unmarshal([]byte(os.Getenv("DOCKER_AUTH_CONFIG")), dockerAthCfg); err == nil {
+	var events io.ReadCloser
+	var derr error
+
+	events, derr = c.cli.ImagePull(ctx, imageName, types.ImagePullOptions{})
+
+	// We use auth credentials only in case we fail to pull using default ones
+	if err := json.Unmarshal([]byte(os.Getenv("DOCKER_AUTH_CONFIG")), dockerAthCfg); derr != nil && err == nil {
 		for _, reg := range dockerRegistries {
-			if crdt, ok := dockerAthCfg.Auths[reg]; ok {
-				cfg.RegistryAuth = crdt.Auth
-				logger.WithField("auth", crdt.Auth).WithField("reg", reg).Info("docker registry credential")
+			crdt, ok := dockerAthCfg.Auths[reg]
+			if !ok {
+				continue
+			}
+
+			logger.WithField("auth", crdt.Auth).WithField("reg", reg).Info("docker registry credential")
+			bAuth, err := base64.StdEncoding.DecodeString(crdt.Auth)
+			if err != nil {
+				continue
+			}
+			userPwd := strings.Split(string(bAuth), ":")
+			encodedJSON, _ := json.Marshal(types.AuthConfig{
+				Username: userPwd[0],
+				Password: userPwd[1],
+			})
+			authStr := base64.URLEncoding.EncodeToString(encodedJSON)
+			events, derr = c.cli.ImagePull(ctx, imageName, types.ImagePullOptions{
+				RegistryAuth: authStr,
+			})
+
+			if derr == nil {
 				break
 			}
 		}
 	}
 
-	// Pull image
-	events, err := c.cli.ImagePull(ctx, imageName, cfg)
-
-	if err != nil {
-		return err
+	if derr != nil {
+		logger.WithError(derr).Error("failed to download image")
+		return derr
 	}
 
 	d := json.NewDecoder(events)

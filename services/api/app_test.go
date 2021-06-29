@@ -3,6 +3,7 @@
 package api
 
 import (
+	mocks2 "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/client/mocks"
 	ethclientmock "github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/mock"
 	"testing"
 
@@ -12,7 +13,6 @@ import (
 
 	mockauth "github.com/ConsenSys/orchestrate/pkg/toolkit/app/auth/mock"
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/database/postgres"
-	keymanagerclient "github.com/ConsenSys/orchestrate/services/key-manager/client/mock"
 	"github.com/golang/mock/gomock"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
@@ -30,7 +30,7 @@ func TestApp(t *testing.T) {
 		cfg,
 		postgres.GetManager(),
 		mockauth.NewMockChecker(ctrl), mockauth.NewMockChecker(ctrl),
-		keymanagerclient.NewMockKeyManagerClient(ctrl),
+		mocks2.NewMockKeyManagerClient(ctrl),
 		ethclientmock.NewMockClient(ctrl),
 		mocks.NewSyncProducer(t, nil),
 		kCfg,

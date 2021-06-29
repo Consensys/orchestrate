@@ -400,7 +400,8 @@ workflows:
             tags:
               only: /^v.*/
             branches:
-              only: /.*/
+#             only: /.*/
+              only: master
       - push-orchestrate-image:
           filters:
             branches:

@@ -3,8 +3,9 @@ version: "3.7"
 x-default-variables: &default-variables
   API_URL: ${API_URL-http://api:8081}
   API_METRICS_URL: ${API_METRICS_URL-http://api:8082}
-  KEY_MANAGER_URL: ${KEY_MANAGER_URL-http://key-manager:8081}
-  KEY_MANAGER_METRICS_URL: ${KEY_MANAGER_URL-http://key-manager:8082}
+  KEY_MANAGER_URL: ${KEY_MANAGER_URL-http://quorum-key-manager:8080}
+  KEY_MANAGER_METRICS_URL: ${KEY_MANAGER_URL-http://quorum-key-manager:8081}
+  KEY_MANAGER_STORE_NAME: ${KEY_MANAGER_STORE_NAME-orchestrate-eth1}
   TX_SENDER_METRICS_URL: ${TX_SENDER_METRICS_URL-http://tx-sender:8082}
   TX_LISTENER_METRICS_URL: ${TX_LISTENER_METRICS_URL-http://tx-listener:8082}
   ETH_CLIENT_RETRY_MAX_ELAPSED_TIME: 5s
@@ -67,9 +68,6 @@ x-api-common: &api-common
   API_STORE_TYPE: ${API_STORE_TYPE-}
   DB_HOST: postgres-api
 
-x-key-manager-common: &key-manager-common
-  KEY_MANAGER_TYPE: ${KEY_MANAGER_TYPE-}
-
 services:
   api-migration-init:
     <<: *container-common
@@ -87,7 +85,6 @@ services:
     restart: "no"
     depends_on:
       - api-migration-init
-      - key-manager
     command: api migrate up
 
   api:
@@ -101,23 +98,9 @@ services:
       <<: *proxy-common
     depends_on:
       - api-migration
-      - key-manager
     command: api run
     labels:
       filebeat: "false"
-
-  key-manager:
-    <<: *container-common
-    ports:
-      - 8091:8081
-      - 8092:8082
-    environment:
-      <<: *default-variables
-      <<: *key-manager-common
-    command: key-manager run
-    volumes:
-      - vault-token:/vault/token:ro
-      - ./build/bin/orchestrate:/bin/main
 
   tx-sender:
     <<: *container-common

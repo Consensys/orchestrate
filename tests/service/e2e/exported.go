@@ -6,13 +6,12 @@ import (
 	"sync"
 
 	"github.com/ConsenSys/orchestrate/pkg/encoding/json"
+	"github.com/ConsenSys/orchestrate/pkg/sdk/client"
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/rpc"
 	"github.com/ConsenSys/orchestrate/pkg/types/api"
 	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 	"github.com/ConsenSys/orchestrate/tests/service/e2e/cucumber/alias"
 	utils3 "github.com/ConsenSys/orchestrate/tests/utils"
-
-	"github.com/ConsenSys/orchestrate/pkg/sdk/client"
 
 	loader "github.com/ConsenSys/orchestrate/handlers/loader/sarama"
 	"github.com/ConsenSys/orchestrate/handlers/offset"

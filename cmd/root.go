@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"github.com/ConsenSys/orchestrate/cmd/api"
-	keymanager "github.com/ConsenSys/orchestrate/cmd/key-manager"
 	txlistener "github.com/ConsenSys/orchestrate/cmd/tx-listener"
 	txsender "github.com/ConsenSys/orchestrate/cmd/tx-sender"
 	"github.com/ConsenSys/orchestrate/cmd/utils"
@@ -21,7 +20,6 @@ func NewCommand() *cobra.Command {
 	rootCmd.AddCommand(txsender.NewRootCommand())
 	rootCmd.AddCommand(txlistener.NewRootCommand())
 	rootCmd.AddCommand(api.NewRootCommand())
-	rootCmd.AddCommand(keymanager.NewRootCommand())
 	rootCmd.AddCommand(utils.NewRootCommand())
 
 	return rootCmd

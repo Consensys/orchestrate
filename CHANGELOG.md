@@ -1,5 +1,9 @@
 # Orchestrate Release Notes
 
+## v21.7.0 (WIP)
+### ⚠ BREAKING CHANGES
+* Integration of Quorum Key Manager as replacement of Orchestrate Key Manager service
+
 ## v21.1.6 (2021-06-25)
 ### 🛠 Bug fixes
 * Incorrect transition to FAILED status on rpc node connectivity issues

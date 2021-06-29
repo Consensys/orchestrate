@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/ConsenSys/orchestrate/services/key-manager/client"
+	qkm "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/client"
 
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/config/dynamic"
 	usecases "github.com/ConsenSys/orchestrate/services/api/business/use-cases"
@@ -51,7 +51,7 @@ type Builder struct {
 	contractsCtrl *ContractsController
 }
 
-func NewBuilder(ucs usecases.UseCases, keyManagerClient client.KeyManagerClient) *Builder {
+func NewBuilder(ucs usecases.UseCases, keyManagerClient qkm.Eth1Client) *Builder {
 	return &Builder{
 		txCtrl:        NewTransactionsController(ucs),
 		schedulesCtrl: NewSchedulesController(ucs),

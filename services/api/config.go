@@ -3,6 +3,7 @@ package api
 import (
 	broker "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
 	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
+	qkm "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager"
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/app"
 	authjwt "github.com/ConsenSys/orchestrate/pkg/toolkit/app/auth/jwt"
 	authkey "github.com/ConsenSys/orchestrate/pkg/toolkit/app/auth/key"
@@ -14,7 +15,6 @@ import (
 	"github.com/ConsenSys/orchestrate/services/api/metrics"
 	"github.com/ConsenSys/orchestrate/services/api/proxy"
 	store "github.com/ConsenSys/orchestrate/services/api/store/multi"
-	keymanagerclient "github.com/ConsenSys/orchestrate/services/key-manager/client"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
@@ -27,7 +27,7 @@ func Flags(f *pflag.FlagSet) {
 	authkey.Flags(f)
 	broker.KafkaProducerFlags(f)
 	broker.KafkaTopicTxSender(f)
-	keymanagerclient.Flags(f)
+	qkm.Flags(f)
 	store.Flags(f)
 	http.Flags(f)
 	http.MetricFlags(f)

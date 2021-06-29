@@ -2,9 +2,10 @@ package signer
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/ConsenSys/orchestrate/pkg/encoding/rlp"
+	qkm "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager"
+	qkmtypes "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/types"
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 
 	pkgcryto "github.com/ConsenSys/orchestrate/pkg/crypto/ethereum"
@@ -18,8 +19,7 @@ import (
 	usecases "github.com/ConsenSys/orchestrate/services/tx-sender/tx-sender/use-cases"
 
 	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/types/keymanager/ethereum"
-	"github.com/ConsenSys/orchestrate/services/key-manager/client"
+	"github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/client"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
 )
@@ -30,6 +30,7 @@ const signEEATransactionComponent = "use-cases.sign-eea-transaction"
 type signEEATransactionUseCase struct {
 	keyManagerClient client.KeyManagerClient
 	logger           *log.Logger
+	storeName        string
 }
 
 // NewSignEEATransactionUseCase creates a new SignEEATransactionUseCase
@@ -37,6 +38,7 @@ func NewSignEEATransactionUseCase(keyManagerClient client.KeyManagerClient) usec
 	return &signEEATransactionUseCase{
 		keyManagerClient: keyManagerClient,
 		logger:           log.NewLogger().SetComponent(signEEATransactionComponent),
+		storeName:        qkm.GlobalStoreName(),
 	}
 }
 
@@ -56,7 +58,7 @@ func (uc *signEEATransactionUseCase) Execute(ctx context.Context, job *entities.
 	if job.InternalData.OneTimeKey {
 		decodedSignature, err = uc.signWithOneTimeKey(ctx, transaction, privateArgs, job.InternalData.ChainID)
 	} else {
-		decodedSignature, err = uc.signWithAccount(ctx, job, transaction)
+		decodedSignature, err = uc.signWithAccount(ctx, job, privateArgs, transaction)
 	}
 	if err != nil {
 		return "", "", errors.FromError(err).ExtendComponent(signEEATransactionComponent)
@@ -93,46 +95,47 @@ func (uc *signEEATransactionUseCase) signWithOneTimeKey(ctx context.Context, tra
 }
 
 func (uc *signEEATransactionUseCase) signWithAccount(ctx context.Context, job *entities.Job,
-	tx *types.Transaction) ([]byte, error) {
+	privateArgs *entities.PrivateETHTransactionParams, tx *types.Transaction) ([]byte, error) {
 	logger := uc.logger.WithContext(ctx)
-	request := &ethereum.SignEEATransactionRequest{
-		Namespace:      job.TenantID,
-		Nonce:          tx.Nonce(),
-		Data:           hexutil.Encode(tx.Data()),
-		ChainID:        job.InternalData.ChainID,
-		PrivateFrom:    job.Transaction.PrivateFrom,
-		PrivateFor:     job.Transaction.PrivateFor,
-		PrivacyGroupID: job.Transaction.PrivacyGroupID,
-	}
-	if tx.To() != nil {
-		request.To = tx.To().Hex()
-	}
 
 	tenants := utils.AllowedTenants(job.TenantID)
-	for _, tenant := range tenants {
-		request.Namespace = tenant
-		sig, err := uc.keyManagerClient.ETHSignEEATransaction(ctx, job.Transaction.From, request)
-		if err != nil && errors.IsNotFoundError(err) {
-			continue
-		}
-		if err != nil {
-			logger.Error("failed to sign eea transaction using key manager")
-			return nil, errors.FromError(err)
-		}
-
-		decodedSignature, err := hexutil.Decode(sig)
-		if err != nil {
-			errMessage := "failed to decode signature for eea transaction"
-			logger.WithError(err).Error(errMessage)
-			return nil, errors.EncodingError(errMessage)
-		}
-
-		return decodedSignature, nil
+	isAllowed, err := qkm.IsTenantAllowed(ctx, uc.keyManagerClient, tenants, uc.storeName, job.Transaction.From)
+	if err != nil {
+		errMsg := "failed to to sign eea transaction, cannot fetch account"
+		uc.logger.WithField("address", job.Transaction.From).WithError(err).Error(errMsg)
+		return nil, errors.DependencyFailureError(errMsg).AppendReason(err.Error())
 	}
 
-	errMessage := fmt.Sprintf("account %s was not found on key-manager", job.Transaction.From)
-	logger.WithField("from_account", job.Transaction.From).WithField("tenants", tenants).Error(errMessage)
-	return nil, errors.InvalidParameterError(errMessage)
+	if !isAllowed {
+		errMessage := "failed to to sign eea transaction, tenant is not allowed"
+		logger.WithField("address", job.Transaction.From).WithField("tenants", tenants).Error(errMessage)
+		return nil, errors.InvalidAuthenticationError(errMessage)
+	}
+
+	txData, err := pkgcryto.EEATransactionPayload(tx, privateArgs, job.InternalData.ChainID)
+	if err != nil {
+		errMsg := "failed to build eea transaction payload"
+		uc.logger.WithField("address", job.Transaction.From).WithError(err).Error(errMsg)
+		return nil, errors.FromError(err)
+	}
+
+	sig, err := uc.keyManagerClient.SignEth1Data(ctx, uc.storeName, job.Transaction.From, &qkmtypes.SignHexPayloadRequest{
+		Data: txData,
+	})
+	if err != nil {
+		errMsg := "failed to sign eea transaction using key manager"
+		logger.Error(errMsg)
+		return nil, errors.DependencyFailureError(errMsg).AppendReason(err.Error())
+	}
+
+	decodedSignature, err := hexutil.Decode(sig)
+	if err != nil {
+		errMessage := "failed to decode signature for eea transaction"
+		logger.WithError(err).Error(errMessage)
+		return nil, errors.EncodingError(errMessage)
+	}
+
+	return decodedSignature, nil
 }
 
 func (uc *signEEATransactionUseCase) getSignedRawEEATransaction(ctx context.Context, transaction *types.Transaction,

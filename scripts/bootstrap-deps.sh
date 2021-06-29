@@ -3,7 +3,7 @@
 # Exit on error
 set -Eeu
 
-CONTAINERS=(deps_kafka_1 deps_vault_1 deps_vault-agent_1)
+CONTAINERS=(deps_kafka_1 deps_vault_1)
 
 RETRY=20
 

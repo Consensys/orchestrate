@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
 //go:generate mockgen -source=accounts.go -destination=mocks/accounts.go -package=mocks
@@ -20,7 +21,7 @@ type GetAccountUseCase interface {
 }
 
 type CreateAccountUseCase interface {
-	Execute(ctx context.Context, identity *entities.Account, privateKey, chainName, tenantID string) (*entities.Account, error)
+	Execute(ctx context.Context, identity *entities.Account, privateKey hexutil.Bytes, chainName, tenantID string) (*entities.Account, error)
 }
 
 type SearchAccountsUseCase interface {

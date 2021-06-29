@@ -11,7 +11,7 @@ import (
 	sarama2 "github.com/Shopify/sarama"
 
 	"github.com/ConsenSys/orchestrate/pkg/broker/sarama"
-	keymanager "github.com/ConsenSys/orchestrate/services/key-manager/client"
+	qkm "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager"
 	"github.com/spf13/viper"
 )
 
@@ -21,7 +21,7 @@ func New(ctx context.Context) (*app.App, error) {
 	config := NewConfig(viper.GetViper())
 
 	sarama.InitSyncProducer(ctx)
-	keymanager.Init()
+	qkm.Init()
 	orchestrateClient.Init()
 	ethclient.Init(ctx)
 
@@ -45,7 +45,7 @@ func New(ctx context.Context) (*app.App, error) {
 		config,
 		consumerGroups,
 		sarama.GlobalSyncProducer(),
-		keymanager.GlobalClient(),
+		qkm.GlobalClient(),
 		orchestrateClient.GlobalClient(),
 		ethclient.GlobalClient(),
 		dbredis.GlobalClient(),

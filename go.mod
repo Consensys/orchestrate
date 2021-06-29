@@ -23,7 +23,7 @@ require (
 	github.com/eapache/channels v1.1.0
 	github.com/elazarl/go-bindata-assetfs v1.0.0
 	github.com/ethereum/go-ethereum v1.9.25
-	github.com/fsnotify/fsnotify v1.4.9
+	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32 // indirect
 	github.com/go-kit/kit v0.10.0
 	github.com/go-pg/migrations/v7 v7.1.9
@@ -39,9 +39,8 @@ require (
 	github.com/gorilla/websocket v1.4.2
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway v1.14.3 // indirect
-	github.com/hashicorp/go-cleanhttp v0.5.1
 	github.com/hashicorp/go-multierror v1.1.0
-	github.com/hashicorp/go-retryablehttp v0.6.4
+	github.com/hashicorp/go-retryablehttp v0.6.4 // indirect
 	github.com/hashicorp/serf v0.8.3 // indirect
 	github.com/hashicorp/vault/api v1.0.5-0.20200117231345-460d63e36490
 	github.com/hashicorp/vault/sdk v0.1.14-0.20200305172021-03a3749f220d // indirect
@@ -77,7 +76,7 @@ require (
 	google.golang.org/grpc v1.28.0 // indirect
 	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0 // indirect
 	gopkg.in/h2non/gock.v1 v1.0.15
-	gopkg.in/yaml.v2 v2.3.0 // indirect
+	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/apimachinery v0.17.3
 )
 

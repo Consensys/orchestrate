@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	keymanagerclient "github.com/ConsenSys/orchestrate/services/key-manager/client"
+	qkm "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager"
 	"github.com/go-pg/migrations/v7"
 	log "github.com/sirupsen/logrus"
 )
@@ -14,36 +14,31 @@ func loadVaultAccounts(db migrations.DB) error {
 	log.Debug("Loading accounts from Vault...")
 	ctx := context.Background()
 
-	client := keymanagerclient.GlobalClient()
+	storeName := qkm.GlobalStoreName()
+	client := qkm.GlobalClient()
 	if client == nil {
 		log.Warnf("loading vault accounts ignored. Missing key-manager client")
 		return nil
 	}
 
-	namespaces, err := client.ETHListNamespaces(ctx)
+	accounts, err := client.ListEth1Accounts(ctx, storeName)
 	if err != nil {
-		log.WithError(err).Errorf("could not get list of namespaces")
+		log.WithError(err).Errorf("could not get list of accounts")
 		return err
 	}
 
 	var queryInsertItems []string
-	for _, namespace := range namespaces {
-		accounts, err2 := client.ETHListAccounts(ctx, namespace)
+	for _, accountID := range accounts {
+		acc, err2 := client.GetEth1Account(ctx, storeName, accountID)
 		if err2 != nil {
-			log.WithField("namespace", namespace).WithError(err2).Errorf("Could not get list of accounts")
+			log.WithField("account_id", accountID).WithError(err2).Error("Could not get account")
 			return err2
 		}
 
-		for _, addr := range accounts {
-			acc, err2 := client.ETHGetAccount(ctx, addr, namespace)
-			if err2 != nil {
-				log.WithField("namespace", namespace).WithField("address", addr).
-					WithError(err2).Error("Could not get account")
-				return err2
-			}
-
+		tenantIDs := strings.Split(acc.Tags[qkm.TagIDAllowedTenants], qkm.TagSeparatorAllowedTenants)
+		for _, tenantID := range tenantIDs {
 			queryInsertItems = append(queryInsertItems, fmt.Sprintf("('%s', '%s', '%s', '%s', '{\"source\": \"kv-v2\"}')",
-				acc.Namespace,
+				tenantID,
 				acc.Address,
 				acc.PublicKey,
 				acc.CompressedPublicKey,

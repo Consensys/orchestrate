@@ -14,6 +14,7 @@ type Account struct {
 	CompressedPublicKey string
 	TenantID            string
 	Attributes          map[string]string
+	// TODO add internal labels to store accountID
 
 	CreatedAt time.Time `pg:"default:now()"`
 	UpdatedAt time.Time `pg:"default:now()"`

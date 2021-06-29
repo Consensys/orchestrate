@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/docker/docker/api/types/mount"
+	api2 "github.com/hashicorp/vault/api"
 
 	httputils "github.com/ConsenSys/orchestrate/pkg/toolkit/app/http"
 	log "github.com/sirupsen/logrus"
@@ -22,14 +23,18 @@ const defaultHashicorpVaultImage = "library/vault:1.6.2"
 const defaultHostPort = "8200"
 const defaultRootToken = "myRoot"
 const defaultHost = "localhost"
+const pluginFileName = "orchestrate-hashicorp-vault-plugin"
+const pluginVersion = "v0.0.11-alpha.4"
+const defaultMountPath = "orchestrate"
 
 type Vault struct{}
 
 type Config struct {
 	Image                 string
+	Host                  string
 	Port                  string
 	RootToken             string
-	Host                  string
+	MonthPath             string
 	PluginSourceDirectory string
 }
 
@@ -39,6 +44,7 @@ func NewDefault() *Config {
 		Port:      defaultHostPort,
 		RootToken: defaultRootToken,
 		Host:      defaultHost,
+		MonthPath: defaultMountPath,
 	}
 }
 
@@ -60,16 +66,19 @@ func (cfg *Config) SetHost(host string) *Config {
 	return cfg
 }
 
+func (cfg *Config) SetMountPath(mountPath string) *Config {
+	cfg.MonthPath = mountPath
+	return cfg
+}
+
 func (cfg *Config) SetPluginSourceDirectory(dir string) *Config {
 	cfg.PluginSourceDirectory = dir
 	return cfg
 }
 
-func (cfg *Config) DownloadPlugin(filename, version string) error {
-	// url := fmt.Sprintf("%s/releases/download/%s/orchestrate-hashicorp-vault-plugin",
-	// 	"https://github.com/ConsenSys/orchestrate-hashicorp-vault-plugin", version)
-	url := fmt.Sprintf("https://github.com/ConsenSys/orchestrate-hashicorp-vault-plugin/releases/download/%s/orchestrate-hashicorp-vault-plugin", version)
-	err := downloadPlugin(fmt.Sprintf("%s/%s", cfg.PluginSourceDirectory, filename), url)
+func (cfg *Config) DownloadPlugin() error {
+	url := fmt.Sprintf("https://github.com/ConsenSys/orchestrate-hashicorp-vault-plugin/releases/download/%s/%s", pluginVersion, pluginFileName)
+	err := downloadPlugin(fmt.Sprintf("%s/%s", cfg.PluginSourceDirectory, pluginFileName), url)
 	if err != nil {
 		return err
 	}
@@ -91,7 +100,7 @@ func (vault *Vault) GenerateContainerConfig(_ context.Context, configuration int
 			"8200/tcp": struct{}{},
 		},
 		Tty: true,
-		Cmd: []string{"server", "-dev", "-dev-plugin-dir=/vault/plugins", "-log-level=trace"},
+		Cmd: []string{"server", "-dev", "-dev-plugin-dir=/vault/plugins", "-log-level=debug"},
 	}
 
 	hostConfig := &dockercontainer.HostConfig{
@@ -113,6 +122,27 @@ func (vault *Vault) GenerateContainerConfig(_ context.Context, configuration int
 	return containerCfg, hostConfig, nil, nil
 }
 
+func (vault *Vault) enablePlugin(serverAddr, rootToken, mountPath string) error {
+	// Enable orchestrate secret engine
+	vaultClient, err := api2.NewClient(&api2.Config{
+		Address: serverAddr,
+	})
+	if err != nil {
+		return err
+	}
+
+	vaultClient.SetToken(rootToken)
+	return vaultClient.Sys().Mount(mountPath, &api2.MountInput{
+		Type:        "plugin",
+		Description: "Orchestrate Wallets",
+		Config: api2.MountConfigInput{
+			ForceNoCache:              true,
+			PassthroughRequestHeaders: []string{"X-Vault-Namespace"},
+		},
+		PluginName: pluginFileName,
+	})
+}
+
 func (vault *Vault) WaitForService(ctx context.Context, configuration interface{}, timeout time.Duration) error {
 	cfg, ok := configuration.(*Config)
 	if !ok {
@@ -126,6 +156,7 @@ func (vault *Vault) WaitForService(ctx context.Context, configuration interface{
 	defer retryT.Stop()
 
 	httpClient := httputils.NewClient(httputils.NewDefaultConfig())
+	serverAddr := "http://" + cfg.Host + ":" + cfg.Port
 
 	var cerr error
 waitForServiceLoop:
@@ -135,7 +166,7 @@ waitForServiceLoop:
 			cerr = rctx.Err()
 			break waitForServiceLoop
 		case <-retryT.C:
-			resp, err := httpClient.Get(fmt.Sprintf("http://%v:%v/v1/sys/health", cfg.Host, cfg.Port))
+			resp, err := httpClient.Get(fmt.Sprintf("%s/v1/sys/health", serverAddr))
 
 			switch {
 			case err != nil:
@@ -149,7 +180,15 @@ waitForServiceLoop:
 		}
 	}
 
-	return cerr
+	if cerr != nil {
+		return cerr
+	}
+
+	if err := vault.enablePlugin(serverAddr, cfg.RootToken, cfg.MonthPath); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func downloadPlugin(filepath, url string) error {

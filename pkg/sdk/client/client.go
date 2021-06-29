@@ -3,7 +3,7 @@ package client
 import (
 	"context"
 
-	"github.com/ConsenSys/orchestrate/pkg/types/keymanager/ethereum"
+	qkmtypes "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/types"
 
 	types "github.com/ConsenSys/orchestrate/pkg/types/api"
 	"github.com/ConsenSys/orchestrate/pkg/types/entities"
@@ -61,8 +61,8 @@ type AccountClient interface {
 	UpdateAccount(ctx context.Context, address string, request *types.UpdateAccountRequest) (*types.AccountResponse, error)
 	SignPayload(ctx context.Context, address string, request *types.SignPayloadRequest) (string, error)
 	SignTypedData(ctx context.Context, address string, request *types.SignTypedDataRequest) (string, error)
-	VerifySignature(ctx context.Context, request *ethereum.VerifyPayloadRequest) error
-	VerifyTypedDataSignature(ctx context.Context, request *ethereum.VerifyTypedDataRequest) error
+	VerifySignature(ctx context.Context, request *qkmtypes.VerifyEth1SignatureRequest) error
+	VerifyTypedDataSignature(ctx context.Context, request *qkmtypes.VerifyTypedDataRequest) error
 }
 
 type FaucetClient interface {

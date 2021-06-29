@@ -1,6 +1,8 @@
 package api
 
-import "github.com/ConsenSys/orchestrate/pkg/types/keymanager/ethereum"
+import (
+	qkmtypes "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/types"
+)
 
 type CreateAccountRequest struct {
 	Alias      string            `json:"alias" validate:"omitempty" example:"personal-account"`
@@ -25,8 +27,8 @@ type SignPayloadRequest struct {
 }
 
 type SignTypedDataRequest struct {
-	DomainSeparator ethereum.DomainSeparator   `json:"domainSeparator" validate:"required"`
-	Types           map[string][]ethereum.Type `json:"types" validate:"required"`
+	DomainSeparator qkmtypes.DomainSeparator   `json:"domainSeparator" validate:"required"`
+	Types           map[string][]qkmtypes.Type `json:"types" validate:"required"`
 	Message         map[string]interface{}     `json:"message" validate:"required"`
 	MessageType     string                     `json:"messageType" validate:"required" example:"Mail"`
 }

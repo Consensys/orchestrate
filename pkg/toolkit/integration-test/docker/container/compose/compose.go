@@ -6,16 +6,14 @@ import (
 	goreflect "reflect"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/integration-test/docker/container/ganache"
-
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/integration-test/docker/container/hashicorp"
-
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/integration-test/docker/container/kafka"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/integration-test/docker/container/zookeeper"
-
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/integration-test/docker/config"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/integration-test/docker/container/ganache"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/integration-test/docker/container/hashicorp"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/integration-test/docker/container/kafka"
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/integration-test/docker/container/postgres"
+	quorumkeymanager "github.com/ConsenSys/orchestrate/pkg/toolkit/integration-test/docker/container/quorum-key-manager"
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/integration-test/docker/container/reflect"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/integration-test/docker/container/zookeeper"
 	dockercontainer "github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
 )
@@ -34,6 +32,7 @@ func New() *Compose {
 	factory.reflect.AddGenerator(goreflect.TypeOf(&kafka.Config{}), &kafka.Kafka{})
 	factory.reflect.AddGenerator(goreflect.TypeOf(&hashicorp.Config{}), &hashicorp.Vault{})
 	factory.reflect.AddGenerator(goreflect.TypeOf(&ganache.Config{}), &ganache.Ganache{})
+	factory.reflect.AddGenerator(goreflect.TypeOf(&quorumkeymanager.Config{}), &quorumkeymanager.QuorumKeyManager{})
 
 	return factory
 }

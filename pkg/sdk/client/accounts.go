@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
+	qkmtypes "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/types"
 	"github.com/ConsenSys/orchestrate/pkg/types/api"
-	types "github.com/ConsenSys/orchestrate/pkg/types/keymanager/ethereum"
 
 	clientutils "github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/client-utils"
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/httputil"
@@ -131,7 +131,7 @@ func (c *HTTPClient) SignTypedData(ctx context.Context, address string, request 
 	return httputil.ParseStringResponse(ctx, response)
 }
 
-func (c *HTTPClient) VerifySignature(ctx context.Context, request *types.VerifyPayloadRequest) error {
+func (c *HTTPClient) VerifySignature(ctx context.Context, request *qkmtypes.VerifyEth1SignatureRequest) error {
 	reqURL := fmt.Sprintf("%v/accounts/verify-signature", c.config.URL)
 
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, request)
@@ -143,7 +143,7 @@ func (c *HTTPClient) VerifySignature(ctx context.Context, request *types.VerifyP
 	return httputil.ParseEmptyBodyResponse(ctx, response)
 }
 
-func (c *HTTPClient) VerifyTypedDataSignature(ctx context.Context, request *types.VerifyTypedDataRequest) error {
+func (c *HTTPClient) VerifyTypedDataSignature(ctx context.Context, request *qkmtypes.VerifyTypedDataRequest) error {
 	reqURL := fmt.Sprintf("%v/accounts/verify-typed-data-signature", c.config.URL)
 
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, request)

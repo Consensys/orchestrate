@@ -2,15 +2,15 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
+	qkm "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager"
+	"github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/client"
+	qkmtypes "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/types"
 	"github.com/ConsenSys/orchestrate/pkg/types/api"
-	"github.com/ConsenSys/orchestrate/pkg/types/keymanager"
-
 	"github.com/ConsenSys/orchestrate/services/api/service/formatters"
-
-	"github.com/ConsenSys/orchestrate/pkg/types/keymanager/ethereum"
-	"github.com/ConsenSys/orchestrate/services/key-manager/client"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 
 	jsonutils "github.com/ConsenSys/orchestrate/pkg/encoding/json"
 	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
@@ -22,13 +22,15 @@ import (
 
 type AccountsController struct {
 	ucs              usecases.AccountUseCases
-	keyManagerClient client.KeyManagerClient
+	keyManagerClient client.Eth1Client
+	storeName        string
 }
 
-func NewAccountsController(accountUCs usecases.AccountUseCases, keyManagerClient client.KeyManagerClient) *AccountsController {
+func NewAccountsController(accountUCs usecases.AccountUseCases, keyManagerClient client.Eth1Client) *AccountsController {
 	return &AccountsController{
 		accountUCs,
 		keyManagerClient,
+		qkm.GlobalStoreName(),
 	}
 }
 
@@ -69,7 +71,7 @@ func (c *AccountsController) create(rw http.ResponseWriter, request *http.Reques
 	}
 
 	acc := formatters.FormatCreateAccountRequest(req)
-	acc, err = c.ucs.CreateAccount().Execute(ctx, acc, "", req.Chain, multitenancy.TenantIDFromContext(ctx))
+	acc, err = c.ucs.CreateAccount().Execute(ctx, acc, nil, req.Chain, multitenancy.TenantIDFromContext(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -169,8 +171,18 @@ func (c *AccountsController) importKey(rw http.ResponseWriter, request *http.Req
 		return
 	}
 
+	var bPrivKey []byte
+	if req.PrivateKey != "" {
+		req.PrivateKey = "0x" + req.PrivateKey
+		bPrivKey, err = hexutil.Decode(req.PrivateKey)
+		if err != nil {
+			httputil.WriteError(rw, "invalid private key format", http.StatusBadRequest)
+			return
+		}
+	}
+
 	accResp := formatters.FormatImportAccountRequest(req)
-	accResp, err = c.ucs.CreateAccount().Execute(ctx, accResp, req.PrivateKey, req.Chain, multitenancy.TenantIDFromContext(ctx))
+	accResp, err = c.ucs.CreateAccount().Execute(ctx, accResp, bPrivKey, req.Chain, multitenancy.TenantIDFromContext(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -250,9 +262,15 @@ func (c *AccountsController) signPayload(rw http.ResponseWriter, request *http.R
 		return
 	}
 
-	signature, err := c.keyManagerClient.ETHSign(request.Context(), address, &keymanager.SignPayloadRequest{
-		Namespace: multitenancy.TenantIDFromContext(ctx),
-		Data:      payloadRequest.Data,
+	tenants := utils.AllowedTenants(multitenancy.TenantIDFromContext(ctx))
+	_, err = c.ucs.GetAccount().Execute(ctx, address, tenants)
+	if err != nil {
+		httputil.WriteError(rw, fmt.Sprintf("account %s was not found", address), http.StatusBadRequest)
+		return
+	}
+
+	signature, err := c.keyManagerClient.SignEth1(request.Context(), c.storeName, address, &qkmtypes.SignHexPayloadRequest{
+		Data: hexutil.MustDecode(payloadRequest.Data),
 	})
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
@@ -290,8 +308,13 @@ func (c *AccountsController) signTypedData(rw http.ResponseWriter, request *http
 		return
 	}
 
-	signature, err := c.keyManagerClient.ETHSignTypedData(ctx, address, &ethereum.SignTypedDataRequest{
-		Namespace:       multitenancy.TenantIDFromContext(ctx),
+	tenants := utils.AllowedTenants(multitenancy.TenantIDFromContext(ctx))
+	_, err = c.ucs.GetAccount().Execute(ctx, address, tenants)
+	if err != nil {
+		httputil.WriteError(rw, fmt.Sprintf("account %s was not found", address), http.StatusBadRequest)
+		return
+	}
+	signature, err := c.keyManagerClient.SignTypedData(ctx, c.storeName, address, &qkmtypes.SignTypedDataRequest{
 		DomainSeparator: signRequest.DomainSeparator,
 		Types:           signRequest.Types,
 		Message:         signRequest.Message,
@@ -308,7 +331,7 @@ func (c *AccountsController) signTypedData(rw http.ResponseWriter, request *http
 // @Summary Verifies the signature of a typed data message following the EIP-712 standard
 // @Description Verifies if a typed data message has been signed by the Ethereum account passed as argument following the EIP-712 standard
 // @Accept json
-// @Param request body ethereum.VerifyTypedDataRequest{domainSeparator=ethereum.DomainSeparator} true "Typed data to sign"
+// @Param request body qkmtypes.VerifyTypedDataRequest{domainSeparator=qkmtypes.DomainSeparator} true "Typed data to sign"
 // @Success 204
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 401 {object} httputil.ErrorResponse "Unauthorized"
@@ -316,20 +339,14 @@ func (c *AccountsController) signTypedData(rw http.ResponseWriter, request *http
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /accounts/verify-typed-data-signature [post]
 func (c *AccountsController) verifyTypedDataSignature(rw http.ResponseWriter, request *http.Request) {
-	verifyRequest := &ethereum.VerifyTypedDataRequest{}
+	verifyRequest := &qkmtypes.VerifyTypedDataRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, verifyRequest)
 	if err != nil {
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	verifyRequest.Address, err = utils.ParseHexToMixedCaseEthAddress(verifyRequest.Address)
-	if err != nil {
-		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	err = c.keyManagerClient.ETHVerifyTypedDataSignature(request.Context(), verifyRequest)
+	err = c.keyManagerClient.VerifyTypedDataSignature(request.Context(), c.storeName, verifyRequest)
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -341,7 +358,7 @@ func (c *AccountsController) verifyTypedDataSignature(rw http.ResponseWriter, re
 // @Summary Verifies the signature of a message
 // @Description Verifies if a message has been signed by the Ethereum account passed as argument
 // @Accept json
-// @Param request body ethereum.VerifyPayloadRequest true "signature and message to verify"
+// @Param request body qkmtypes.VerifyEth1SignatureRequest true "signature and message to verify"
 // @Success 204
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 401 {object} httputil.ErrorResponse "Unauthorized"
@@ -349,20 +366,14 @@ func (c *AccountsController) verifyTypedDataSignature(rw http.ResponseWriter, re
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /accounts/verify-signature [post]
 func (c *AccountsController) verifySignature(rw http.ResponseWriter, request *http.Request) {
-	verifyRequest := &ethereum.VerifyPayloadRequest{}
+	verifyRequest := &qkmtypes.VerifyEth1SignatureRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, verifyRequest)
 	if err != nil {
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	verifyRequest.Address, err = utils.ParseHexToMixedCaseEthAddress(verifyRequest.Address)
-	if err != nil {
-		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	err = c.keyManagerClient.ETHVerifySignature(request.Context(), verifyRequest)
+	err = c.keyManagerClient.VerifyEth1Signature(request.Context(), c.storeName, verifyRequest)
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return

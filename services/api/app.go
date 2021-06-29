@@ -12,7 +12,7 @@ import (
 
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient"
 
-	keymanager "github.com/ConsenSys/orchestrate/services/key-manager/client"
+	qkmclient "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/client"
 
 	pkgsarama "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
 	pkgproxy "github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/handler/proxy"
@@ -34,7 +34,7 @@ func NewAPI(
 	cfg *Config,
 	pgmngr postgres.Manager,
 	jwt, key auth.Checker,
-	keyManagerClient keymanager.KeyManagerClient,
+	keyManagerClient qkmclient.Eth1Client,
 	ec ethclient.Client,
 	syncProducer sarama.SyncProducer,
 	topicCfg *pkgsarama.KafkaTopicConfig,

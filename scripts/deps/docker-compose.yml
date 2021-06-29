@@ -111,7 +111,7 @@ services:
       VAULT_ADDR: ${VAULT_ADDR-http://vault:8200}
       PLUGIN_PATH: ${PLUGIN_PATH-/vault/plugins}
       TOKEN_PATH: ${TOKEN_PATH-/vault/token}
-      PLUGIN_VERSION: ${PLUGIN_VERSION-v0.0.10}
+      PLUGIN_VERSION: ${PLUGIN_VERSION-v0.0.11-alpha.4}
     restart: "no"
     depends_on:
       - vault
@@ -136,12 +136,29 @@ services:
       - vault-token:/vault/token
       - ./hashicorp/config/agent-config.hcl:/vault/config.hcl:ro
     entrypoint: vault agent -config=/vault/config.hcl
+
+  quorum-key-manager:
+    <<: *container-common
+    image: docker.consensys.net/priv/quorum-key-manager:develop
+#    image: quorum-key-manager:local
+    depends_on:
+      - vault
+    volumes:
+      - vault-token:/vault/token
+      - ./quorum-key-manager/:/manifests/
+    ports:
+      - 8180:8080
+      - 8181:8081
+    environment:
+      HTTP_PORT: 8080
+      HEALTH_PORT: 8081
+      MANIFEST_PATH: /manifests
+    command: run
     healthcheck:
-      test: [ "CMD", "wget", "--spider", "--proxy", "off", "http://vault:8200/v1/sys/health?standbyok=true" ]
+      test: [ "CMD", "wget", "--spider", "--proxy", "off", "http://quorum-key-manager:8081/ready" ]
       interval: 10s
       timeout: 3s
       retries: 10
-      start_period: 5s
 
 volumes:
   db-data-postgres-unit:

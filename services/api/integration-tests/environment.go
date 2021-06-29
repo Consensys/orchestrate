@@ -4,21 +4,23 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path"
 	"strconv"
 	"time"
 
-	ganacheDocker "github.com/ConsenSys/orchestrate/pkg/toolkit/integration-test/docker/container/ganache"
-
-	ethclient "github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/rpc"
-	"github.com/ConsenSys/orchestrate/services/api"
-	keymanagerclient "github.com/ConsenSys/orchestrate/services/key-manager/client"
-
 	"github.com/ConsenSys/orchestrate/pkg/broker/sarama"
+	qkm "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager"
+	qkmclient "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/client"
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/app"
 	authjwt "github.com/ConsenSys/orchestrate/pkg/toolkit/app/auth/jwt"
 	authkey "github.com/ConsenSys/orchestrate/pkg/toolkit/app/auth/key"
 	httputils "github.com/ConsenSys/orchestrate/pkg/toolkit/app/http"
+	ethclient "github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/rpc"
 	integrationtest "github.com/ConsenSys/orchestrate/pkg/toolkit/integration-test"
+	ganacheDocker "github.com/ConsenSys/orchestrate/pkg/toolkit/integration-test/docker/container/ganache"
+	hashicorpDocker "github.com/ConsenSys/orchestrate/pkg/toolkit/integration-test/docker/container/hashicorp"
+	quorumkeymanagerDocker "github.com/ConsenSys/orchestrate/pkg/toolkit/integration-test/docker/container/quorum-key-manager"
+	"github.com/ConsenSys/orchestrate/services/api"
 	"gopkg.in/h2non/gock.v1"
 	"k8s.io/apimachinery/pkg/util/rand"
 
@@ -38,15 +40,20 @@ const postgresContainerID = "postgres-api"
 const kafkaContainerID = "Kafka-api"
 const zookeeperContainerID = "zookeeper-api"
 const ganacheContainerID = "ganache-api"
-const keyManagerURL = "http://key-manager:8081"
+const qkmContainerID = "quorum-key-manager"
+const hashicorpContainerID = "hashicorp"
 const networkName = "api"
 const localhost = "localhost"
+const qkmStoreName = "orchestrate-eth1"
+const hashicorpMountPath = "orchestrate"
 
 var envPGHostPort string
 var envKafkaHostPort string
 var envHTTPPort string
 var envMetricsPort string
 var envGanacheHostPort string
+var envQKMHostPort string
+var envVaultHostPort string
 
 type IntegrationEnvironment struct {
 	ctx               context.Context
@@ -68,6 +75,8 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 	envMetricsPort = strconv.Itoa(rand.IntnRange(30000, 38082))
 	envKafkaHostPort = strconv.Itoa(rand.IntnRange(20000, 29092))
 	envGanacheHostPort = strconv.Itoa(rand.IntnRange(10000, 15235))
+	envQKMHostPort = strconv.Itoa(rand.IntnRange(10000, 15235))
+	envVaultHostPort = strconv.Itoa(rand.IntnRange(10000, 15235))
 
 	// Define external hostname
 	kafkaExternalHostname := os.Getenv("KAFKA_HOST")
@@ -81,6 +90,8 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 		ganacheExternalHostname = localhost
 	}
 
+	quorumKeyManagerURL := fmt.Sprintf("http://localhost:%s", envQKMHostPort)
+
 	// Initialize environment flags
 	flgs := pflag.NewFlagSet("api-integration-test", pflag.ContinueOnError)
 	api.Flags(flgs)
@@ -89,12 +100,59 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 		"--rest-port=" + envHTTPPort,
 		"--db-port=" + envPGHostPort,
 		"--kafka-url=" + kafkaExternalHostname,
+		"--key-manager-url=" + quorumKeyManagerURL,
+		"--key-manager-store-name=" + qkmStoreName,
 		"--log-level=panic",
 	}
 
 	err := flgs.Parse(args)
 	if err != nil {
 		logger.WithError(err).Error("cannot parse environment flags")
+		return nil, err
+	}
+
+	rootToken := fmt.Sprintf("root_token_%v", strconv.Itoa(rand.IntnRange(0, 10000)))
+	pluginsPath, err := getPluginsPath()
+	if err != nil {
+		return nil, err
+	}
+
+	vaultContainer := hashicorpDocker.NewDefault().
+		SetHostPort(envVaultHostPort).
+		SetRootToken(rootToken).
+		SetPluginSourceDirectory(pluginsPath).
+		SetMountPath(hashicorpMountPath)
+
+	err = vaultContainer.DownloadPlugin()
+	if err != nil {
+		return nil, err
+	}
+
+	manifestsPath, err := getManifestsPath()
+	if err != nil {
+		return nil, err
+	}
+
+	qkmContainer := quorumkeymanagerDocker.NewDefault().
+		SetHostPort(envQKMHostPort).
+		SetManifestDirectory(manifestsPath)
+
+	err = qkmContainer.CreateManifest("manifest.yml", &qkm.Manifest{
+		Kind:    "Eth1Account",
+		Version: "0.0.1",
+		Name:    qkmStoreName,
+		Specs: map[string]interface{}{
+			"keystore": "HashicorpKeys",
+			"specs": map[string]string{
+				"mountPoint": hashicorpMountPath,
+				"address":    "http://" + hashicorpContainerID + ":8200",
+				"token":      rootToken,
+				"namespace":  "",
+			},
+		},
+	})
+
+	if err != nil {
 		return nil, err
 	}
 
@@ -109,7 +167,9 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 				SetKafkaInternalHostname(kafkaContainerID).
 				SetKafkaExternalHostname(kafkaExternalHostname),
 			},
-			ganacheContainerID: {Ganache: ganacheDocker.NewDefault().SetHostPort(envGanacheHostPort).SetHost(ganacheExternalHostname)},
+			hashicorpContainerID: {HashicorpVault: vaultContainer},
+			qkmContainerID:       {QuorumKeyManager: qkmContainer},
+			ganacheContainerID:   {Ganache: ganacheDocker.NewDefault().SetHostPort(envGanacheHostPort).SetHost(ganacheExternalHostname)},
 		},
 	}
 
@@ -135,6 +195,32 @@ func (env *IntegrationEnvironment) Start(ctx context.Context) error {
 	err := env.client.CreateNetwork(ctx, networkName)
 	if err != nil {
 		env.logger.WithError(err).Error("could not create network")
+		return err
+	}
+
+	// Start Hashicorp Vault
+	err = env.client.Up(ctx, hashicorpContainerID, networkName)
+	if err != nil {
+		env.logger.WithError(err).Error("could not up vault container")
+		return err
+	}
+
+	err = env.client.WaitTillIsReady(ctx, hashicorpContainerID, 10*time.Second)
+	if err != nil {
+		env.logger.WithError(err).Error("could not start vault")
+		return err
+	}
+
+	// Start quorum key manager
+	err = env.client.Up(ctx, qkmContainerID, networkName)
+	if err != nil {
+		env.logger.WithError(err).Error("could not up quorum-key-manager")
+		return err
+	}
+
+	err = env.client.WaitTillIsReady(ctx, qkmContainerID, 10*time.Second)
+	if err != nil {
+		env.logger.WithError(err).Error("could not start quorum-key-manager")
 		return err
 	}
 
@@ -229,15 +315,26 @@ func (env *IntegrationEnvironment) Start(ctx context.Context) error {
 func (env *IntegrationEnvironment) Teardown(ctx context.Context) {
 	env.logger.Info("tearing test suite down")
 
-	err := env.api.Stop(ctx)
+	if env.api != nil {
+		err := env.api.Stop(ctx)
+		if err != nil {
+			env.logger.WithError(err).Error("could not stop API")
+		}
+	}
+
+	err := env.client.Down(ctx, hashicorpContainerID)
 	if err != nil {
-		env.logger.WithError(err).Error("could not stop API")
+		env.logger.WithError(err).Errorf("could not down zookeeper")
+	}
+
+	err = env.client.Down(ctx, qkmContainerID)
+	if err != nil {
+		env.logger.WithError(err).Errorf("could not down zookeeper")
 	}
 
 	err = env.client.Down(ctx, ganacheContainerID)
 	if err != nil {
 		env.logger.WithError(err).Errorf("could not down ganache")
-		return
 	}
 
 	err = env.client.Down(ctx, postgresContainerID)
@@ -299,20 +396,36 @@ func newAPI(ctx context.Context, topicCfg *sarama.KafkaTopicConfig) (*app.App, e
 	interceptedHTTPClient := httputils.NewClient(httputils.NewDefaultConfig())
 	gock.InterceptClient(interceptedHTTPClient)
 
-	// We mock the calls to the key-manager
-	conf := keymanagerclient.NewConfig(keyManagerURL, nil)
-	keyManagerClient := keymanagerclient.NewHTTPClient(interceptedHTTPClient, conf)
-
 	pgmngr := postgres.GetManager()
 	txSchedulerConfig := api.NewConfig(viper.GetViper())
+
+	qkmClient := qkmclient.NewHTTPClient(httputils.NewClient(httputils.NewDefaultConfig()), &qkmclient.Config{
+		URL: fmt.Sprintf("http://localhost:%s", envQKMHostPort),
+	})
 
 	return api.NewAPI(
 		txSchedulerConfig,
 		pgmngr,
 		authjwt.GlobalChecker(), authkey.GlobalChecker(),
-		keyManagerClient,
+		qkmClient,
 		ethclient.GlobalClient(),
 		sarama.GlobalSyncProducer(),
 		topicCfg,
 	)
+}
+
+func getManifestsPath() (string, error) {
+	currDir, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+	return path.Join(currDir, "manifests"), nil
+}
+
+func getPluginsPath() (string, error) {
+	currDir, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+	return path.Join(currDir, "plugins"), nil
 }

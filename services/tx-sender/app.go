@@ -7,12 +7,12 @@ import (
 
 	pkgsarama "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
 	"github.com/ConsenSys/orchestrate/pkg/errors"
+	keymanager "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/client"
 	api "github.com/ConsenSys/orchestrate/pkg/sdk/client"
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/app"
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 	dbredis "github.com/ConsenSys/orchestrate/pkg/toolkit/database/redis"
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient"
-	keymanager "github.com/ConsenSys/orchestrate/services/key-manager/client"
 	"github.com/ConsenSys/orchestrate/services/tx-sender/service"
 	"github.com/ConsenSys/orchestrate/services/tx-sender/store/memory"
 	"github.com/ConsenSys/orchestrate/services/tx-sender/store/redis"

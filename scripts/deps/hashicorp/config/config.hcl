@@ -7,8 +7,8 @@ listener "tcp" {
   tls_disable = true
 }
 
-default_lease_ttl = "30s"
-max_lease_ttl = "1m"
+default_lease_ttl = "15m"
+max_lease_ttl = "30m"
 api_addr = "http://vault:8200"
 plugin_directory = "/vault/plugins"
 log_level = "Debug"

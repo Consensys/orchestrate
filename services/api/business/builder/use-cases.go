@@ -7,7 +7,7 @@ import (
 	"github.com/ConsenSys/orchestrate/services/api/business/use-cases/faucets"
 	"github.com/ConsenSys/orchestrate/services/api/metrics"
 	"github.com/ConsenSys/orchestrate/services/api/store"
-	keymanager "github.com/ConsenSys/orchestrate/services/key-manager/client"
+	qkmclient "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/client"
 	"github.com/Shopify/sarama"
 )
 
@@ -24,7 +24,7 @@ type useCases struct {
 func NewUseCases(
 	db store.DB,
 	appMetrics metrics.TransactionSchedulerMetrics,
-	keyManagerClient keymanager.KeyManagerClient,
+	keyManagerClient qkmclient.Eth1Client,
 	ec ethclient.Client,
 	producer sarama.SyncProducer,
 	topicsCfg *pkgsarama.KafkaTopicConfig,
@@ -36,8 +36,10 @@ func NewUseCases(
 	getFaucetCandidateUC := faucets.NewGetFaucetCandidateUseCase(faucetUseCases.SearchFaucets(), ec)
 	scheduleUseCases := newScheduleUseCases(db)
 	jobUseCases := newJobUseCases(db, appMetrics, producer, topicsCfg, chainUseCases.GetChain())
-	transactionUseCases := newTransactionUseCases(db, chainUseCases.SearchChains(), getFaucetCandidateUC, scheduleUseCases, jobUseCases, contractUseCases.GetContract())
-	accountUseCases := newAccountUseCases(db, keyManagerClient, chainUseCases.SearchChains(), transactionUseCases.SendTransaction(), getFaucetCandidateUC)
+	transactionUseCases := newTransactionUseCases(db, chainUseCases.SearchChains(), getFaucetCandidateUC, 
+		scheduleUseCases, jobUseCases, contractUseCases.GetContract())
+	accountUseCases := newAccountUseCases(db, keyManagerClient, chainUseCases.SearchChains(), 
+		transactionUseCases.SendTransaction(), getFaucetCandidateUC)
 
 	return &useCases{
 		jobUseCases:         jobUseCases,

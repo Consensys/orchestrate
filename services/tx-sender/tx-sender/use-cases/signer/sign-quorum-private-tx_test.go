@@ -4,13 +4,14 @@ package signer
 
 import (
 	"context"
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
-	"github.com/ConsenSys/orchestrate/pkg/types/keymanager/ethereum"
-	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
-	"github.com/ConsenSys/orchestrate/services/key-manager/client/mock"
-	"strconv"
 	"testing"
+
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	qkm "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager"
+	qkmmock "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/client/mocks"
+	"github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/types"
+	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
+	"github.com/consensys/quorum/common/hexutil"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -20,7 +21,9 @@ func TestSignQuorumPrivateTransaction_Execute(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockKeyManagerClient := mock.NewMockKeyManagerClient(ctrl)
+	globalStoreName := "test-store-name"
+	qkm.SetGlobalStoreName(globalStoreName)
+	mockKeyManagerClient := qkmmock.NewMockKeyManagerClient(ctrl)
 	ctx := context.Background()
 
 	usecase := NewSignQuorumPrivateTransactionUseCase(mockKeyManagerClient)
@@ -28,18 +31,13 @@ func TestSignQuorumPrivateTransaction_Execute(t *testing.T) {
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		job := testutils.FakeJob()
 		signature := "0x9a0a890215ea6e79d06f9665297996ab967db117f36c2090d6d6ead5a2d32d5265bc4bc766b5a833cb58b3319e44e952487559b9b939cb5268c0409398214c8b00"
-		nonce, _ := strconv.ParseUint(job.Transaction.Nonce, 10, 64)
-		gasLimit, _ := strconv.ParseUint(job.Transaction.Gas, 10, 64)
-		expectedRequest := &ethereum.SignQuorumPrivateTransactionRequest{
-			Namespace: multitenancy.DefaultTenant,
-			Nonce:     nonce,
-			To:        job.Transaction.To,
-			Amount:    job.Transaction.Value,
-			GasPrice:  job.Transaction.GasPrice,
-			GasLimit:  gasLimit,
-			Data:      job.Transaction.Data,
+		acc := qkm.FakeEth1AccountResponse(job.Transaction.From, []string{job.TenantID})
+		txData, _ := hexutil.Decode("0xde9325591179dad0b11f84231b5b5dcfce57f4b16247ab76010cef71a4e6aa0d")
+		expectedRequest := &types.SignHexPayloadRequest{
+			Data: txData,
 		}
-		mockKeyManagerClient.EXPECT().ETHSignQuorumPrivateTransaction(gomock.Any(), job.Transaction.From, expectedRequest).Return(signature, nil)
+		mockKeyManagerClient.EXPECT().GetEth1Account(gomock.Any(), globalStoreName, job.Transaction.From).Return(acc, nil)
+		mockKeyManagerClient.EXPECT().SignEth1Data(gomock.Any(), globalStoreName, job.Transaction.From, expectedRequest).Return(signature, nil)
 
 		raw, txHash, err := usecase.Execute(ctx, job)
 
@@ -52,17 +50,13 @@ func TestSignQuorumPrivateTransaction_Execute(t *testing.T) {
 		job := testutils.FakeJob()
 		job.Transaction.To = ""
 		signature := "0x9a0a890215ea6e79d06f9665297996ab967db117f36c2090d6d6ead5a2d32d5265bc4bc766b5a833cb58b3319e44e952487559b9b939cb5268c0409398214c8b00"
-		nonce, _ := strconv.ParseUint(job.Transaction.Nonce, 10, 64)
-		gasLimit, _ := strconv.ParseUint(job.Transaction.Gas, 10, 64)
-		expectedRequest := &ethereum.SignQuorumPrivateTransactionRequest{
-			Namespace: multitenancy.DefaultTenant,
-			Nonce:     nonce,
-			Amount:    job.Transaction.Value,
-			GasPrice:  job.Transaction.GasPrice,
-			GasLimit:  gasLimit,
-			Data:      job.Transaction.Data,
+		acc := qkm.FakeEth1AccountResponse(job.Transaction.From, []string{job.TenantID})
+		txData, _ := hexutil.Decode("0xa646977b9596105d021f2df1a6f4cdd83cb32c795e91c1cfc46197075b0a3009")
+		expectedRequest := &types.SignHexPayloadRequest{
+			Data: txData,
 		}
-		mockKeyManagerClient.EXPECT().ETHSignQuorumPrivateTransaction(gomock.Any(), job.Transaction.From, expectedRequest).Return(signature, nil)
+		mockKeyManagerClient.EXPECT().GetEth1Account(gomock.Any(), globalStoreName, job.Transaction.From).Return(acc, nil)
+		mockKeyManagerClient.EXPECT().SignEth1Data(gomock.Any(), globalStoreName, job.Transaction.From, expectedRequest).Return(signature, nil)
 
 		raw, txHash, err := usecase.Execute(ctx, job)
 
@@ -84,34 +78,51 @@ func TestSignQuorumPrivateTransaction_Execute(t *testing.T) {
 
 	t.Run("should fail with same error if ETHSignQuorumPrivateTransaction fails", func(t *testing.T) {
 		expectedErr := errors.InvalidFormatError("error")
-		mockKeyManagerClient.EXPECT().ETHSignQuorumPrivateTransaction(gomock.Any(), gomock.Any(), gomock.Any()).Return("", expectedErr)
+		job := testutils.FakeJob()
+		acc := qkm.FakeEth1AccountResponse(job.Transaction.From, []string{job.TenantID})
+		mockKeyManagerClient.EXPECT().GetEth1Account(gomock.Any(), globalStoreName, job.Transaction.From).Return(acc, nil)
+		mockKeyManagerClient.EXPECT().SignEth1Data(gomock.Any(), globalStoreName, gomock.Any(), gomock.Any()).Return("", expectedErr)
 
-		raw, txHash, err := usecase.Execute(ctx, testutils.FakeJob())
+		raw, txHash, err := usecase.Execute(ctx, job)
 
-		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(signQuorumPrivateTransactionComponent), err)
+		assert.True(t, errors.IsDependencyFailureError(err))
 		assert.Empty(t, raw)
 		assert.Empty(t, txHash)
 	})
 
 	t.Run("should fail with EncodingError if signature cannot be decoded", func(t *testing.T) {
 		signature := "invalidSignature"
-		mockKeyManagerClient.EXPECT().ETHSignQuorumPrivateTransaction(gomock.Any(), gomock.Any(), gomock.Any()).Return(signature, nil)
+		job := testutils.FakeJob()
+		acc := qkm.FakeEth1AccountResponse(job.Transaction.From, []string{job.TenantID})
+		mockKeyManagerClient.EXPECT().GetEth1Account(gomock.Any(), globalStoreName, job.Transaction.From).Return(acc, nil)
+		mockKeyManagerClient.EXPECT().SignEth1Data(gomock.Any(), globalStoreName, gomock.Any(), gomock.Any()).Return(signature, nil)
 
-		raw, txHash, err := usecase.Execute(ctx, testutils.FakeJob())
+		raw, txHash, err := usecase.Execute(ctx, job)
 
 		assert.True(t, errors.IsEncodingError(err))
 		assert.Empty(t, raw)
 		assert.Empty(t, txHash)
 	})
 
-	t.Run("should fail with InvalidParameterError if ETHSignQuorumPrivateTransaction fails to find tenant", func(t *testing.T) {
-		expectedErr := errors.NotFoundError("error")
-		mockKeyManagerClient.EXPECT().ETHSignQuorumPrivateTransaction(gomock.Any(), gomock.Any(), gomock.Any()).Return("", expectedErr).Times(2)
+	t.Run("should fail with IsDependencyFailureError if fails to find account", func(t *testing.T) {
+		job := testutils.FakeJob()
 
-		raw, txHash, err := usecase.Execute(ctx, testutils.FakeJob())
+		mockKeyManagerClient.EXPECT().GetEth1Account(gomock.Any(), globalStoreName, job.Transaction.From).
+			Return(nil,  errors.NotFoundError("account no found"))
 
-		assert.True(t, errors.IsInvalidParameterError(err))
-		assert.Empty(t, raw)
-		assert.Empty(t, txHash)
+		_, _, err := usecase.Execute(ctx, job)
+
+		assert.True(t, errors.IsDependencyFailureError(err))
+	})
+
+	t.Run("should fail with IsInvalidAuthenticationError if tenant is not allowed to access account", func(t *testing.T) {
+		job := testutils.FakeJob()
+		acc := qkm.FakeEth1AccountResponse(job.Transaction.From, []string{})
+
+		mockKeyManagerClient.EXPECT().GetEth1Account(gomock.Any(), globalStoreName, job.Transaction.From).Return(acc, nil)
+
+		_, _, err := usecase.Execute(ctx, testutils.FakeJob())
+
+		assert.True(t, errors.IsInvalidAuthenticationError(err))
 	})
 }

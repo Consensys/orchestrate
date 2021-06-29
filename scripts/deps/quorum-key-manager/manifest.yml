@@ -1,0 +1,18 @@
+#- kind: HashicorpKeys
+#  version: 0.0.1
+#  name: orchestrate-keys
+#  specs:
+#    mountPoint: orchestrate
+#    address: http://vault:8200
+#    tokenPath: "/vault/token/.vault-token"
+#    namespace: ''
+kind: Eth1Account
+version: 0.0.1
+name: orchestrate-eth1
+specs:
+  keystore: HashicorpKeys
+  specs:
+    mountPoint: orchestrate
+    address: http://vault:8200
+    tokenPath: "/vault/token/.vault-token"
+    namespace: ''

@@ -10,12 +10,12 @@ import (
 	orchestrateclient "github.com/ConsenSys/orchestrate/pkg/sdk/client"
 
 	broker "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
+	qkm "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager"
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/app"
 	httputils "github.com/ConsenSys/orchestrate/pkg/toolkit/app/http"
 	metricregistry "github.com/ConsenSys/orchestrate/pkg/toolkit/app/metrics/registry"
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/database/redis"
 	tcpmetrics "github.com/ConsenSys/orchestrate/pkg/toolkit/tcp/metrics"
-	keymanager "github.com/ConsenSys/orchestrate/services/key-manager/client"
 	"github.com/cenkalti/backoff/v4"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
@@ -82,7 +82,7 @@ func Flags(f *pflag.FlagSet) {
 	broker.KafkaConsumerFlags(f)
 	broker.KafkaTopicTxSender(f)
 	broker.KafkaTopicTxRecover(f)
-	keymanager.Flags(f)
+	qkm.Flags(f)
 	orchestrateclient.Flags(f)
 	httputils.MetricFlags(f)
 	metricregistry.Flags(f, tcpmetrics.ModuleName)

@@ -6,9 +6,10 @@ package mocks
 
 import (
 	context "context"
-	gomock "github.com/golang/mock/gomock"
 	entities "github.com/ConsenSys/orchestrate/pkg/types/entities"
 	usecases "github.com/ConsenSys/orchestrate/services/api/business/use-cases"
+	hexutil "github.com/ethereum/go-ethereum/common/hexutil"
+	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )
 
@@ -153,7 +154,7 @@ func (m *MockCreateAccountUseCase) EXPECT() *MockCreateAccountUseCaseMockRecorde
 }
 
 // Execute mocks base method
-func (m *MockCreateAccountUseCase) Execute(ctx context.Context, identity *entities.Account, privateKey, chainName, tenantID string) (*entities.Account, error) {
+func (m *MockCreateAccountUseCase) Execute(ctx context.Context, identity *entities.Account, privateKey hexutil.Bytes, chainName, tenantID string) (*entities.Account, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Execute", ctx, identity, privateKey, chainName, tenantID)
 	ret0, _ := ret[0].(*entities.Account)
