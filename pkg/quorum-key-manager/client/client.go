@@ -8,16 +8,6 @@ import (
 
 //go:generate mockgen -source=client.go -destination=mocks/client.go -package=mocks
 
-type KeysClient interface {
-	CreateKey(ctx context.Context, storeName string, request *types.CreateKeyRequest) (*types.KeyResponse, error)
-	ImportKey(ctx context.Context, storeName string, request *types.ImportKeyRequest) (*types.KeyResponse, error)
-	SignKey(ctx context.Context, storeName, id string, request *types.SignBase64PayloadRequest) (string, error)
-	VerifyKeySignature(ctx context.Context, storeName string, request *types.VerifyKeySignatureRequest) error
-	GetKey(ctx context.Context, storeName, id string) (*types.KeyResponse, error)
-	ListKeys(ctx context.Context, storeName string) ([]string, error)
-	DestroyKey(ctx context.Context, storeName, id string) error
-}
-
 type Eth1Client interface {
 	CreateEth1Account(ctx context.Context, storeName string, request *types.CreateEth1AccountRequest) (*types.Eth1AccountResponse, error)
 	ImportEth1Account(ctx context.Context, storeName string, request *types.ImportEth1AccountRequest) (*types.Eth1AccountResponse, error)
@@ -39,6 +29,5 @@ type Eth1Client interface {
 }
 
 type KeyManagerClient interface {
-	KeysClient
 	Eth1Client
 }

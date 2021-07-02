@@ -60,11 +60,11 @@ func (uc *createAccountUseCase) Execute(ctx context.Context, account *entities.A
 		return nil, errors.AlreadyExistsError(errMsg).ExtendComponent(createAccountComponent)
 	}
 
-	var accountID = generateAccountID(tenantID, account.Alias)
+	var accountID = generateKeyID(tenantID, account.Alias)
 	var resp *qkmtypes.Eth1AccountResponse
 	if privateKey != nil {
 		resp, err = uc.keyManagerClient.ImportEth1Account(ctx, uc.storeName, &qkmtypes.ImportEth1AccountRequest{
-			ID:         accountID,
+			KeyID:      accountID,
 			PrivateKey: privateKey,
 			Tags: map[string]string{
 				qkm.TagIDAllowedTenants: tenantID,
@@ -91,7 +91,7 @@ func (uc *createAccountUseCase) Execute(ctx context.Context, account *entities.A
 		}
 	} else {
 		resp, err = uc.keyManagerClient.CreateEth1Account(ctx, uc.storeName, &qkmtypes.CreateEth1AccountRequest{
-			ID: accountID,
+			KeyID: accountID,
 			Tags: map[string]string{
 				qkm.TagIDAllowedTenants: tenantID,
 			},
@@ -146,7 +146,7 @@ func isAccountAlreadyExistErr(err interface{}) bool {
 	return false
 }
 
-func generateAccountID(tenantID, alias string) string {
+func generateKeyID(tenantID, alias string) string {
 	if alias == "" {
 		return utils.RandString(14)
 	}

@@ -46,7 +46,7 @@ func TestCreateAccount_Execute(t *testing.T) {
 		mockSearchUC.EXPECT().Execute(gomock.Any(), &entities.AccountFilters{Aliases: []string{accEntity.Alias}}, tenants)
 		acc := qkm.FakeEth1AccountResponse(accEntity.Address, []string{tenantID})
 		mockClient.EXPECT().CreateEth1Account(gomock.Any(), globalStoreName, &qkmtypes.CreateEth1AccountRequest{
-			ID: generateAccountID(tenantID, accEntity.Alias),
+			KeyID: generateKeyID(tenantID, accEntity.Alias),
 			Tags: map[string]string{
 				qkm.TagIDAllowedTenants: tenantID,
 			},
@@ -72,7 +72,7 @@ func TestCreateAccount_Execute(t *testing.T) {
 		mockSearchUC.EXPECT().Execute(gomock.Any(), &entities.AccountFilters{Aliases: []string{accEntity.Alias}}, tenants)
 		acc := qkm.FakeEth1AccountResponse(accEntity.Address, []string{tenantID})
 		mockClient.EXPECT().ImportEth1Account(gomock.Any(), globalStoreName, &qkmtypes.ImportEth1AccountRequest{
-			ID:         generateAccountID(tenantID, accEntity.Alias),
+			KeyID:      generateKeyID(tenantID, accEntity.Alias),
 			PrivateKey: bPrivKey,
 			Tags: map[string]string{
 				qkm.TagIDAllowedTenants: tenantID,
@@ -99,7 +99,7 @@ func TestCreateAccount_Execute(t *testing.T) {
 		mockFundAccountUC.EXPECT().Execute(gomock.Any(), gomock.Any(), chainName, tenantID).Return(nil)
 		acc := qkm.FakeEth1AccountResponse(accEntity.Address, []string{tenantID})
 		mockClient.EXPECT().CreateEth1Account(gomock.Any(), globalStoreName, &qkmtypes.CreateEth1AccountRequest{
-			ID: generateAccountID(tenantID, accEntity.Alias),
+			KeyID: generateKeyID(tenantID, accEntity.Alias),
 			Tags: map[string]string{
 				qkm.TagIDAllowedTenants: tenantID,
 			},
@@ -147,7 +147,7 @@ func TestCreateAccount_Execute(t *testing.T) {
 
 		mockSearchUC.EXPECT().Execute(gomock.Any(), &entities.AccountFilters{Aliases: []string{accEntity.Alias}}, tenants)
 		mockClient.EXPECT().CreateEth1Account(gomock.Any(), globalStoreName, &qkmtypes.CreateEth1AccountRequest{
-			ID: generateAccountID(tenantID, accEntity.Alias),
+			KeyID: generateKeyID(tenantID, accEntity.Alias),
 			Tags: map[string]string{
 				qkm.TagIDAllowedTenants: tenantID,
 			},
@@ -165,7 +165,7 @@ func TestCreateAccount_Execute(t *testing.T) {
 		mockSearchUC.EXPECT().Execute(gomock.Any(), &entities.AccountFilters{Aliases: []string{accEntity.Alias}}, tenants)
 		acc := qkm.FakeEth1AccountResponse(accEntity.Address, []string{tenantID})
 		mockClient.EXPECT().CreateEth1Account(gomock.Any(), globalStoreName, &qkmtypes.CreateEth1AccountRequest{
-			ID: generateAccountID(tenantID, accEntity.Alias),
+			KeyID: generateKeyID(tenantID, accEntity.Alias),
 			Tags: map[string]string{
 				qkm.TagIDAllowedTenants: tenantID,
 			},
@@ -187,7 +187,7 @@ func TestCreateAccount_Execute(t *testing.T) {
 		mockSearchUC.EXPECT().Execute(gomock.Any(), &entities.AccountFilters{Aliases: []string{accEntity.Alias}}, tenants)
 		acc := qkm.FakeEth1AccountResponse(accEntity.Address, []string{tenantID})
 		mockClient.EXPECT().CreateEth1Account(gomock.Any(), globalStoreName, &qkmtypes.CreateEth1AccountRequest{
-			ID: generateAccountID(tenantID, accEntity.Alias),
+			KeyID: generateKeyID(tenantID, accEntity.Alias),
 			Tags: map[string]string{
 				qkm.TagIDAllowedTenants: tenantID,
 			},
@@ -210,7 +210,7 @@ func TestCreateAccount_Execute(t *testing.T) {
 		mockSearchUC.EXPECT().Execute(gomock.Any(), &entities.AccountFilters{Aliases: []string{accEntity.Alias}}, tenants)
 		acc := qkm.FakeEth1AccountResponse(accEntity.Address, []string{tenantID})
 		mockClient.EXPECT().CreateEth1Account(gomock.Any(), globalStoreName, &qkmtypes.CreateEth1AccountRequest{
-			ID: generateAccountID(tenantID, accEntity.Alias),
+			KeyID: generateKeyID(tenantID, accEntity.Alias),
 			Tags: map[string]string{
 				qkm.TagIDAllowedTenants: tenantID,
 			},
@@ -235,7 +235,7 @@ func TestCreateAccount_Execute(t *testing.T) {
 		mockSearchUC.EXPECT().Execute(gomock.Any(), &entities.AccountFilters{Aliases: []string{accEntity.Alias}}, tenants)
 		acc := qkm.FakeEth1AccountResponse(accEntity.Address, []string{tenantID})
 		mockClient.EXPECT().CreateEth1Account(gomock.Any(), globalStoreName, &qkmtypes.CreateEth1AccountRequest{
-			ID: generateAccountID(tenantID, accEntity.Alias),
+			KeyID: generateKeyID(tenantID, accEntity.Alias),
 			Tags: map[string]string{
 				qkm.TagIDAllowedTenants: tenantID,
 			},
