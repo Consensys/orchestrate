@@ -123,6 +123,12 @@ each of the service DBs you intend to migrate:
 ```
 $> orchestrate api migrate copy-db
 ```
+## v2.5.9 (2021-07-07)
+
+### 🛠 Bug fixes
+* Database overload querying for registered chains
+
+### 🛠 Features
 
 ## v2.5.8 (2021-06-02)
 

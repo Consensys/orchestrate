@@ -4,14 +4,13 @@ import (
 	"context"
 	"time"
 
+	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
+	pg "github.com/ConsenSys/orchestrate/pkg/toolkit/database/postgres"
 	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 	"github.com/ConsenSys/orchestrate/services/api/store"
 	"github.com/ConsenSys/orchestrate/services/api/store/models"
 	gopg "github.com/go-pg/pg/v9"
-
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
-	pg "github.com/ConsenSys/orchestrate/pkg/toolkit/database/postgres"
 	"github.com/gofrs/uuid"
 )
 
@@ -82,7 +81,7 @@ func (agent *PGChain) FindOneByName(ctx context.Context, name string, tenants []
 func (agent *PGChain) Search(ctx context.Context, filters *entities.ChainFilters, tenants []string) ([]*models.Chain, error) {
 	var chains []*models.Chain
 
-	query := agent.db.ModelContext(ctx, &chains).Relation("PrivateTxManagers")
+	query := agent.db.ModelContext(ctx, &chains)
 
 	if len(filters.Names) > 0 {
 		query = query.Where("name in (?)", gopg.In(filters.Names))
@@ -90,12 +89,36 @@ func (agent *PGChain) Search(ctx context.Context, filters *entities.ChainFilters
 
 	query = pg.WhereAllowedTenants(query, "tenant_id", tenants).Order("created_at ASC")
 
-	err := pg.Select(ctx, query)
-	if err != nil {
+	if err := pg.Select(ctx, query); err != nil {
 		if !errors.IsNotFoundError(err) {
 			agent.logger.WithContext(ctx).WithError(err).Error("failed to search chains")
 		}
 		return nil, errors.FromError(err).ExtendComponent(chainDAComponent)
+	}
+
+	if len(chains) == 0 {
+		return chains, nil
+	}
+
+	// We manually link chains to privateTxManager avoiding GO-PG strategy of one query per chain
+	chainUUIDs := make([]string, len(chains))
+	chainsMap := map[string]*models.Chain{}
+	for idx, c := range chains {
+		chainUUIDs[idx] = c.UUID
+		chainsMap[c.UUID] = c
+	}
+
+	var privateTxManagers []*models.PrivateTxManager
+	query = agent.db.ModelContext(ctx, &privateTxManagers)
+	query = query.Where("chain_uuid in (?)", gopg.In(chainUUIDs))
+
+	if err := pg.Select(ctx, query); err != nil {
+		agent.logger.WithContext(ctx).WithError(err).Error("failed to search for private tx manager")
+		return nil, errors.FromError(err).ExtendComponent(chainDAComponent)
+	}
+
+	for _, pm := range privateTxManagers {
+		chainsMap[pm.ChainUUID].PrivateTxManagers = []*models.PrivateTxManager{pm}
 	}
 
 	return chains, nil
