@@ -19,7 +19,7 @@ import (
 	"github.com/docker/go-connections/nat"
 )
 
-const defaultHashicorpVaultImage = "docker.consensys.net/priv/quorum-key-manager:develop"
+const defaultHashicorpVaultImage = "docker.consensys.net/pub/quorum-key-manager:v21.7.0-alpha.1"
 const defaultHostPort = "8080"
 const defaultHost = "localhost"
 
@@ -95,7 +95,7 @@ func (q *QuorumKeyManager) GenerateContainerConfig(_ context.Context, configurat
 			"8080/tcp": struct{}{},
 			"8081/tcp": struct{}{},
 		},
-		Cmd: []string{"run", "--manifest-path=/manifests"},
+		Cmd: []string{"run", "--manifest-path=/manifests", "--http-host=0.0.0.0", "--log-level=debug"},
 	}
 
 	hostConfig := &dockercontainer.HostConfig{

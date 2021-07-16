@@ -12,8 +12,8 @@ import (
 	"testing"
 
 	qkm "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager"
-	qkmmock "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/client/mocks"
-	qkmtypes "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/types"
+	qkmmock "github.com/consensys/quorum-key-manager/pkg/client/mock"
+	qkmtypes "github.com/consensys/quorum-key-manager/src/stores/api/types"
 	"github.com/ConsenSys/orchestrate/pkg/types/api"
 	"github.com/ConsenSys/orchestrate/pkg/utils"
 	"github.com/ConsenSys/orchestrate/services/api/business/use-cases"

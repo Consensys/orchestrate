@@ -4,14 +4,14 @@ package integrationtests
 
 import (
 	"context"
-	"github.com/ConsenSys/orchestrate/pkg/types/api"
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
-	"github.com/stretchr/testify/require"
-
 	"testing"
 	"time"
 
 	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/ConsenSys/orchestrate/pkg/types/api"
+	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	"github.com/stretchr/testify/require"
+
 	"github.com/ConsenSys/orchestrate/pkg/sdk/client"
 	clientutils "github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/client-utils"
 	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
@@ -150,15 +150,18 @@ func (s *transactionsTestSuite) TestSuccess() {
 		})
 		require.NoError(t, err)
 
-		accountFaucet := testutils.FakeAccount()
-		accountFaucet.Alias = "MyFaucetCreditor"
-		accountFaucet.Address = "0xc675Ad3c014706878f93d9d2c0a17a23DBFf3425"
+		accountFaucetAlias := "MyFaucetCreditor"
+		req := testutils.FakeImportAccountRequest()
+		req.Alias = accountFaucetAlias
+		// Ganache imported account with 1000ETH
+		req.PrivateKey = "56202652fdffd802b7252a456dbd8f3ecc0352bbde76c23b40afe8aebd714e2e"
+		accResp, err := s.client.ImportAccount(s.env.ctx, req)
 		require.NoError(t, err)
 
 		faucetRequest := testutils.FakeRegisterFaucetRequest()
 		faucetRequest.Name = "faucet-integration-tests"
 		faucetRequest.ChainRule = chainWithFaucet.UUID
-		faucetRequest.CreditorAccount = accountFaucet.Address
+		faucetRequest.CreditorAccount = accResp.Address
 		faucet, err := s.client.RegisterFaucet(s.env.ctx, faucetRequest)
 		require.NoError(s.T(), err)
 

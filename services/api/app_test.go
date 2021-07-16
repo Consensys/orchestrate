@@ -3,7 +3,7 @@
 package api
 
 import (
-	mocks2 "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/client/mocks"
+	mocks2 "github.com/consensys/quorum-key-manager/pkg/client/mock"
 	ethclientmock "github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/mock"
 	"testing"
 

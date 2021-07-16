@@ -6,10 +6,10 @@ import (
 	"net/http"
 
 	qkm "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager"
-	"github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/client"
-	qkmtypes "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/types"
 	"github.com/ConsenSys/orchestrate/pkg/types/api"
 	"github.com/ConsenSys/orchestrate/services/api/service/formatters"
+	"github.com/consensys/quorum-key-manager/pkg/client"
+	qkmtypes "github.com/consensys/quorum-key-manager/src/stores/api/types"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 
 	jsonutils "github.com/ConsenSys/orchestrate/pkg/encoding/json"
@@ -173,8 +173,7 @@ func (c *AccountsController) importKey(rw http.ResponseWriter, request *http.Req
 
 	var bPrivKey []byte
 	if req.PrivateKey != "" {
-		req.PrivateKey = "0x" + req.PrivateKey
-		bPrivKey, err = hexutil.Decode(req.PrivateKey)
+		bPrivKey, err = hexutil.Decode("0x" + req.PrivateKey)
 		if err != nil {
 			httputil.WriteError(rw, "invalid private key format", http.StatusBadRequest)
 			return

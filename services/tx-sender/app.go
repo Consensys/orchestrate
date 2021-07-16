@@ -7,7 +7,6 @@ import (
 
 	pkgsarama "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
 	"github.com/ConsenSys/orchestrate/pkg/errors"
-	keymanager "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/client"
 	api "github.com/ConsenSys/orchestrate/pkg/sdk/client"
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/app"
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
@@ -20,6 +19,7 @@ import (
 	"github.com/ConsenSys/orchestrate/services/tx-sender/tx-sender/nonce"
 	"github.com/Shopify/sarama"
 	"github.com/cenkalti/backoff/v4"
+	keymanager "github.com/consensys/quorum-key-manager/pkg/client"
 	"github.com/hashicorp/go-multierror"
 )
 

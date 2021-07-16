@@ -6,14 +6,14 @@ import (
 
 	"github.com/ConsenSys/orchestrate/pkg/errors"
 	qkm "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager"
-	"github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/client"
-	qkmtypes "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/types"
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 	"github.com/ConsenSys/orchestrate/pkg/utils"
 	"github.com/ConsenSys/orchestrate/services/api/business/parsers"
 	usecases "github.com/ConsenSys/orchestrate/services/api/business/use-cases"
 	"github.com/ConsenSys/orchestrate/services/api/store"
+	"github.com/consensys/quorum-key-manager/pkg/client"
+	qkmtypes "github.com/consensys/quorum-key-manager/src/stores/api/types"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 )

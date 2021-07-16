@@ -4,6 +4,11 @@
 ### ⚠ BREAKING CHANGES
 * Integration of Quorum Key Manager as replacement of Orchestrate Key Manager service
 
+## v21.1.7 (2021-07-06)
+
+### 🛠 Bug fixes
+* Database overload querying for registered chains
+
 ## v21.1.6 (2021-06-25)
 ### 🛠 Bug fixes
 * Incorrect transition to FAILED status on rpc node connectivity issues
@@ -123,7 +128,7 @@ each of the service DBs you intend to migrate:
 ```
 $> orchestrate api migrate copy-db
 ```
-## v2.5.9 (2021-07-07)
+## v2.5.9 (2021-07-06)
 
 ### 🛠 Bug fixes
 * Database overload querying for registered chains

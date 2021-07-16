@@ -12,7 +12,7 @@ import (
 
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient"
 
-	qkmclient "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/client"
+	qkmclient "github.com/consensys/quorum-key-manager/pkg/client"
 
 	pkgsarama "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
 	pkgproxy "github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/handler/proxy"

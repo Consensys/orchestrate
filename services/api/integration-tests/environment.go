@@ -10,7 +10,6 @@ import (
 
 	"github.com/ConsenSys/orchestrate/pkg/broker/sarama"
 	qkm "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager"
-	qkmclient "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/client"
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/app"
 	authjwt "github.com/ConsenSys/orchestrate/pkg/toolkit/app/auth/jwt"
 	authkey "github.com/ConsenSys/orchestrate/pkg/toolkit/app/auth/key"
@@ -102,7 +101,7 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 		"--kafka-url=" + kafkaExternalHostname,
 		"--key-manager-url=" + quorumKeyManagerURL,
 		"--key-manager-store-name=" + qkmStoreName,
-		"--log-level=panic",
+		"--log-level=error",
 	}
 
 	err := flgs.Parse(args)
@@ -322,12 +321,12 @@ func (env *IntegrationEnvironment) Teardown(ctx context.Context) {
 		}
 	}
 
-	err := env.client.Down(ctx, hashicorpContainerID)
+	err := env.client.Down(ctx, qkmContainerID)
 	if err != nil {
 		env.logger.WithError(err).Errorf("could not down zookeeper")
 	}
 
-	err = env.client.Down(ctx, qkmContainerID)
+	err = env.client.Down(ctx, hashicorpContainerID)
 	if err != nil {
 		env.logger.WithError(err).Errorf("could not down zookeeper")
 	}
@@ -392,6 +391,7 @@ func newAPI(ctx context.Context, topicCfg *sarama.KafkaTopicConfig) (*app.App, e
 	authkey.Init(ctx)
 	sarama.InitSyncProducer(ctx)
 	ethclient.Init(ctx)
+	qkm.Init()
 
 	interceptedHTTPClient := httputils.NewClient(httputils.NewDefaultConfig())
 	gock.InterceptClient(interceptedHTTPClient)
@@ -399,15 +399,11 @@ func newAPI(ctx context.Context, topicCfg *sarama.KafkaTopicConfig) (*app.App, e
 	pgmngr := postgres.GetManager()
 	txSchedulerConfig := api.NewConfig(viper.GetViper())
 
-	qkmClient := qkmclient.NewHTTPClient(httputils.NewClient(httputils.NewDefaultConfig()), &qkmclient.Config{
-		URL: fmt.Sprintf("http://localhost:%s", envQKMHostPort),
-	})
-
 	return api.NewAPI(
 		txSchedulerConfig,
 		pgmngr,
 		authjwt.GlobalChecker(), authkey.GlobalChecker(),
-		qkmClient,
+		qkm.GlobalClient(),
 		ethclient.GlobalClient(),
 		sarama.GlobalSyncProducer(),
 		topicCfg,

@@ -8,8 +8,8 @@ import (
 
 	"github.com/ConsenSys/orchestrate/pkg/errors"
 	qkm "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager"
-	qkmmock "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/client/mocks"
-	"github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/types"
+	qkmmock "github.com/consensys/quorum-key-manager/pkg/client/mock"
+	"github.com/consensys/quorum-key-manager/src/stores/api/types"
 	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
 	"github.com/consensys/quorum/common/hexutil"
 

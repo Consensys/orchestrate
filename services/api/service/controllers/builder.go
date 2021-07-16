@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	qkm "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/client"
+	qkm "github.com/consensys/quorum-key-manager/pkg/client"
 
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/config/dynamic"
 	usecases "github.com/ConsenSys/orchestrate/services/api/business/use-cases"

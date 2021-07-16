@@ -111,7 +111,7 @@ services:
       VAULT_ADDR: ${VAULT_ADDR-http://vault:8200}
       PLUGIN_PATH: ${PLUGIN_PATH-/vault/plugins}
       TOKEN_PATH: ${TOKEN_PATH-/vault/token}
-      PLUGIN_VERSION: ${PLUGIN_VERSION-v0.0.11-alpha.4}
+      PLUGIN_VERSION: ${PLUGIN_VERSION-v0.0.11-alpha.3}
     restart: "no"
     depends_on:
       - vault
@@ -139,8 +139,7 @@ services:
 
   quorum-key-manager:
     <<: *container-common
-    image: docker.consensys.net/priv/quorum-key-manager:develop
-#    image: quorum-key-manager:local
+    image: docker.consensys.net/pub/quorum-key-manager:v21.7.0-alpha.1
     depends_on:
       - vault
     volumes:

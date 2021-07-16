@@ -8,7 +8,7 @@ import (
 
 	"github.com/ConsenSys/orchestrate/pkg/errors"
 	qkm "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager"
-	qkmtypes "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/types"
+	qkmtypes "github.com/consensys/quorum-key-manager/src/stores/api/types"
 	"github.com/ConsenSys/orchestrate/pkg/types/entities"
 	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
 	mocks2 "github.com/ConsenSys/orchestrate/services/api/business/use-cases/mocks"
@@ -17,7 +17,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 
-	qkmmock "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/client/mocks"
+	qkmmock "github.com/consensys/quorum-key-manager/pkg/client/mock"
 )
 
 func TestCreateAccount_Execute(t *testing.T) {

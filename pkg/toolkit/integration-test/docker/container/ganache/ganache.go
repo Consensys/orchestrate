@@ -17,6 +17,11 @@ const defaultGanacheImage = "trufflesuite/ganache-cli:v6.12.1"
 const defaultHostPort = "8545"
 const defaultHost = "localhost"
 
+var accounts = map[string]string{
+	"0x56202652fdffd802b7252a456dbd8f3ecc0352bbde76c23b40afe8aebd714e2e": "1000000000000000000000",
+	"0x5FBB50BFF6DFAD35C4A374C9237BA2F7EAED9C6868E0108CB259B62D68029B1A": "1000000000000000000000",
+}
+
 type Ganache struct{}
 
 type Config struct {
@@ -49,12 +54,18 @@ func (*Ganache) GenerateContainerConfig(_ context.Context, configuration interfa
 		return nil, nil, nil, fmt.Errorf("invalid configuration type (expected %T but got %T)", cfg, configuration)
 	}
 
+	cmd := []string{"ganache-cli", "--blockTime", "1"}
+	for privKey, balance := range accounts {
+		cmd = append(cmd, fmt.Sprintf(`--account="%s,%s"`, privKey, balance))
+	}
+
 	containerCfg := &dockercontainer.Config{
 		Image: cfg.Image,
 		ExposedPorts: nat.PortSet{
 			"8545/tcp": struct{}{},
 		},
-		Cmd: []string{"ganache-cli", "--mnemonic", "surge arm pulse bus piano poet thrive erase angry dwarf cargo vanish", "--blockTime", "1"},
+		// Cmd: []string{"ganache-cli", "--mnemonic", "surge arm pulse bus piano poet thrive erase angry dwarf cargo vanish", "--blockTime", "1"},
+		Cmd: cmd,
 	}
 
 	hostConfig := &dockercontainer.HostConfig{}

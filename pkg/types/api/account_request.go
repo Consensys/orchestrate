@@ -1,7 +1,7 @@
 package api
 
 import (
-	qkmtypes "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/types"
+	qkmtypes "github.com/consensys/quorum-key-manager/src/stores/api/types"
 )
 
 type CreateAccountRequest struct {

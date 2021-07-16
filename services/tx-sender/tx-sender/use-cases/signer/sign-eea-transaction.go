@@ -5,8 +5,8 @@ import (
 
 	"github.com/ConsenSys/orchestrate/pkg/encoding/rlp"
 	qkm "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager"
-	qkmtypes "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/types"
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
+	qkmtypes "github.com/consensys/quorum-key-manager/src/stores/api/types"
 
 	pkgcryto "github.com/ConsenSys/orchestrate/pkg/crypto/ethereum"
 
@@ -19,7 +19,7 @@ import (
 	usecases "github.com/ConsenSys/orchestrate/services/tx-sender/tx-sender/use-cases"
 
 	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/client"
+	"github.com/consensys/quorum-key-manager/pkg/client"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
 )
@@ -39,6 +39,7 @@ func NewSignEEATransactionUseCase(keyManagerClient client.KeyManagerClient) usec
 		keyManagerClient: keyManagerClient,
 		logger:           log.NewLogger().SetComponent(signEEATransactionComponent),
 		storeName:        qkm.GlobalStoreName(),
+		// storeName:        "orchestrate-eth1",
 	}
 }
 

@@ -24,7 +24,7 @@ const defaultHostPort = "8200"
 const defaultRootToken = "myRoot"
 const defaultHost = "localhost"
 const pluginFileName = "orchestrate-hashicorp-vault-plugin"
-const pluginVersion = "v0.0.11-alpha.4"
+const pluginVersion = "v0.0.11-alpha.3"
 const defaultMountPath = "orchestrate"
 
 type Vault struct{}

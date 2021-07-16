@@ -4,27 +4,24 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"path"
 	"strconv"
 	"time"
 
 	"github.com/ConsenSys/orchestrate/pkg/broker/sarama"
 	qkm "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager"
-	qkmclient "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/client"
 	"github.com/ConsenSys/orchestrate/pkg/sdk/client"
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/app"
 	httputils "github.com/ConsenSys/orchestrate/pkg/toolkit/app/http"
 	redis2 "github.com/ConsenSys/orchestrate/pkg/toolkit/database/redis"
 	ethclient "github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/rpc"
 	integrationtest "github.com/ConsenSys/orchestrate/pkg/toolkit/integration-test"
-	hashicorpDocker "github.com/ConsenSys/orchestrate/pkg/toolkit/integration-test/docker/container/hashicorp"
-	quorumkeymanagerDocker "github.com/ConsenSys/orchestrate/pkg/toolkit/integration-test/docker/container/quorum-key-manager"
 	txsender "github.com/ConsenSys/orchestrate/services/tx-sender"
 	"github.com/ConsenSys/orchestrate/services/tx-sender/store"
 	"github.com/ConsenSys/orchestrate/services/tx-sender/store/redis"
 	sarama2 "github.com/Shopify/sarama"
 	"github.com/alicebob/miniredis"
 	"github.com/cenkalti/backoff/v4"
+	qkmclient "github.com/consensys/quorum-key-manager/pkg/client"
 	"gopkg.in/h2non/gock.v1"
 	"k8s.io/apimachinery/pkg/util/rand"
 
@@ -40,16 +37,12 @@ import (
 const kafkaContainerID = "Kafka-tx-sender"
 const zookeeperContainerID = "zookeeper-tx-sender"
 const apiURL = "http://api:8081"
+const keyManagerURL = "http://key-manager:8081"
 const apiMetricsURL = "http://api:8082"
 const networkName = "tx-sender"
 const qkmStoreName = "orchestrate-eth1"
-const hashicorpContainerID = "hashicorp"
-const qkmContainerID = "quorum-key-manager"
-const hashicorpMountPath = "orchestrate"
 const maxRecoveryDefault = 1
 
-var envQKMHostPort string
-var envVaultHostPort string
 var envKafkaHostPort string
 var envMetricsPort string
 
@@ -70,8 +63,6 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 	logger := log.FromContext(ctx)
 	envMetricsPort = strconv.Itoa(rand.IntnRange(30000, 38082))
 	envKafkaHostPort = strconv.Itoa(rand.IntnRange(20000, 29092))
-	envQKMHostPort = strconv.Itoa(rand.IntnRange(10000, 15235))
-	envVaultHostPort = strconv.Itoa(rand.IntnRange(10000, 15235))
 
 	// Define external hostname
 	kafkaExternalHostname := os.Getenv("KAFKA_HOST")
@@ -81,8 +72,6 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 
 	kafkaExternalHostname = fmt.Sprintf("%s:%s", kafkaExternalHostname, envKafkaHostPort)
 
-	quorumKeyManagerURL := fmt.Sprintf("http://localhost:%s", envQKMHostPort)
-
 	// Initialize environment flags
 	flgs := pflag.NewFlagSet("tx-sender-integration-test", pflag.ContinueOnError)
 	txsender.Flags(flgs)
@@ -90,60 +79,15 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 		"--metrics-port=" + envMetricsPort,
 		"--kafka-url=" + kafkaExternalHostname,
 		"--nonce-manager-type=" + txsender.NonceManagerTypeRedis,
-		"--key-manager-url=" + quorumKeyManagerURL,
+		"--key-manager-url=" + keyManagerURL,
 		"--key-manager-store-name=" + qkmStoreName,
 		"--api-url=" + apiURL,
-		"--log-level=panic",
+		"--log-level=error",
 	}
 
 	err := flgs.Parse(args)
 	if err != nil {
 		logger.WithError(err).Error("cannot parse environment flags")
-		return nil, err
-	}
-
-	rootToken := fmt.Sprintf("root_token_%v", strconv.Itoa(rand.IntnRange(0, 10000)))
-	pluginsPath, err := getPluginsPath()
-	if err != nil {
-		return nil, err
-	}
-
-	vaultContainer := hashicorpDocker.NewDefault().
-		SetHostPort(envVaultHostPort).
-		SetRootToken(rootToken).
-		SetPluginSourceDirectory(pluginsPath).
-		SetMountPath(hashicorpMountPath)
-
-	err = vaultContainer.DownloadPlugin()
-	if err != nil {
-		return nil, err
-	}
-
-	manifestsPath, err := getManifestsPath()
-	if err != nil {
-		return nil, err
-	}
-
-	qkmContainer := quorumkeymanagerDocker.NewDefault().
-		SetHostPort(envQKMHostPort).
-		SetManifestDirectory(manifestsPath)
-
-	err = qkmContainer.CreateManifest("manifest.yml", &qkm.Manifest{
-		Kind:    "Eth1Account",
-		Version: "0.0.1",
-		Name:    qkmStoreName,
-		Specs: map[string]interface{}{
-			"keystore": "HashicorpKeys",
-			"specs": map[string]string{
-				"mountPoint": hashicorpMountPath,
-				"address":    "http://" + hashicorpContainerID + ":8200",
-				"token":      rootToken,
-				"namespace":  "",
-			},
-		},
-	})
-
-	if err != nil {
 		return nil, err
 	}
 
@@ -157,8 +101,6 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 				SetKafkaInternalHostname(kafkaContainerID).
 				SetKafkaExternalHostname(kafkaExternalHostname),
 			},
-			hashicorpContainerID: {HashicorpVault: vaultContainer},
-			qkmContainerID:       {QuorumKeyManager: qkmContainer},
 		},
 	}
 
@@ -192,32 +134,6 @@ func (env *IntegrationEnvironment) Start(ctx context.Context) error {
 	err := env.client.CreateNetwork(ctx, networkName)
 	if err != nil {
 		env.logger.WithError(err).Error("could not create network")
-		return err
-	}
-
-	// Start Hashicorp Vault
-	err = env.client.Up(ctx, hashicorpContainerID, networkName)
-	if err != nil {
-		env.logger.WithError(err).Error("could not up vault container")
-		return err
-	}
-
-	err = env.client.WaitTillIsReady(ctx, hashicorpContainerID, 10*time.Second)
-	if err != nil {
-		env.logger.WithError(err).Error("could not start vault")
-		return err
-	}
-
-	// Start quorum key manager
-	err = env.client.Up(ctx, qkmContainerID, networkName)
-	if err != nil {
-		env.logger.WithError(err).Error("could not up quorum-key-manager")
-		return err
-	}
-
-	err = env.client.WaitTillIsReady(ctx, qkmContainerID, 10*time.Second)
-	if err != nil {
-		env.logger.WithError(err).Error("could not start quorum-key-manager")
 		return err
 	}
 
@@ -308,13 +224,14 @@ func newTxSender(ctx context.Context, txSenderConfig *txsender.Config, redisCli 
 	// Initialize dependencies
 	sarama.InitSyncProducer(ctx)
 	sarama.InitConsumerGroup(ctx, txSenderConfig.GroupName)
+	qkm.Init()
 
 	httpClient := httputils.NewClient(httputils.NewDefaultConfig())
 	gock.InterceptClient(httpClient)
 
 	ec := ethclient.NewClient(testBackOff, httpClient)
-	qkmClient := qkmclient.NewHTTPClient(httputils.NewClient(httputils.NewDefaultConfig()), &qkmclient.Config{
-		URL: fmt.Sprintf("http://localhost:%s", envQKMHostPort),
+	qkmClient := qkmclient.NewHTTPClient(httpClient, &qkmclient.Config{
+		URL: keyManagerURL,
 	})
 
 	conf2 := client.NewConfig(apiURL, nil)
@@ -328,20 +245,4 @@ func newTxSender(ctx context.Context, txSenderConfig *txsender.Config, redisCli 
 
 func testBackOff() backoff.BackOff {
 	return backoff.WithMaxRetries(backoff.NewConstantBackOff(time.Second), maxRecoveryDefault)
-}
-
-func getManifestsPath() (string, error) {
-	currDir, err := os.Getwd()
-	if err != nil {
-		return "", err
-	}
-	return path.Join(currDir, "manifests"), nil
-}
-
-func getPluginsPath() (string, error) {
-	currDir, err := os.Getwd()
-	if err != nil {
-		return "", err
-	}
-	return path.Join(currDir, "plugins"), nil
 }

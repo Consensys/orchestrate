@@ -3,7 +3,7 @@ package builder
 import (
 	"github.com/ConsenSys/orchestrate/pkg/sdk/client"
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient"
-	keymanager "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/client"
+	keymanager "github.com/consensys/quorum-key-manager/pkg/client"
 	"github.com/ConsenSys/orchestrate/services/tx-sender/tx-sender/nonce"
 	usecases "github.com/ConsenSys/orchestrate/services/tx-sender/tx-sender/use-cases"
 	"github.com/ConsenSys/orchestrate/services/tx-sender/tx-sender/use-cases/crafter"

@@ -14,6 +14,8 @@ import (
 
 	"github.com/ConsenSys/orchestrate/pkg/encoding/json"
 	encoding "github.com/ConsenSys/orchestrate/pkg/encoding/proto"
+	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
+	quorumkeymanager "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager"
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http"
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/httputil"
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/rpc"
@@ -23,11 +25,13 @@ import (
 	"github.com/ConsenSys/orchestrate/pkg/types/tx"
 	"github.com/ConsenSys/orchestrate/pkg/utils"
 	"github.com/Shopify/sarama"
+	"github.com/consensys/quorum-key-manager/src/stores/api/types"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/gofrs/uuid"
 	"github.com/gogo/protobuf/proto"
 	"github.com/hashicorp/go-multierror"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"gopkg.in/h2non/gock.v1"
 )
@@ -42,6 +46,7 @@ type txSenderEthereumTestSuite struct {
 }
 
 func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Public() {
+	signature := "0xd35c752d3498e6f5ca1630d264802a992a141ca4b6a3f439d673c75e944e5fb05278aaa5fabbeac362c321b54e298dedae2d31471e432c26ea36a8d49cf08f1e01"
 	raw := "0xf85380839896808252088083989680808216b4a0d35c752d3498e6f5ca1630d264802a992a141ca4b6a3f439d673c75e944e5fb0a05278aaa5fabbeac362c321b54e298dedae2d31471e432c26ea36a8d49cf08f1e"
 	txHash := "0x6621fbe1e2848446e38d99bfda159cdd83f555ae0ed7a4f3e1c3c79f7d6d74f3"
 
@@ -50,6 +55,19 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Public() {
 		wg := &multierror.Group{}
 
 		envelope := fakeEnvelope()
+
+		gock.New(keyManagerURL).
+			Get(fmt.Sprintf("/stores/%s/eth1/%s", qkmStoreName, envelope.GetFromString())).
+			Reply(200).JSON(&types.Eth1AccountResponse{
+			Address: ethcommon.HexToAddress(envelope.GetFromString()),
+			Tags: map[string]string{
+				quorumkeymanager.TagIDAllowedTenants: multitenancy.DefaultTenant,
+			},
+		})
+
+		gock.New(keyManagerURL).
+			Post(fmt.Sprintf("/stores/%s/eth1/%s/sign-data", qkmStoreName, envelope.GetFromString())).
+			Reply(200).BodyString(signature)
 
 		gock.New(apiURL).
 			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
@@ -62,12 +80,9 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Public() {
 			Reply(200).JSON(&api.JobResponse{})
 
 		err := s.sendEnvelope(envelope.TxEnvelopeAsRequest())
-		if err != nil {
-			assert.Fail(t, err.Error())
-			return
-		}
+		require.NoError(s.T(), err)
 
-		err = waitTimeout(wg, time.Second*2)
+		err = waitTimeout(wg, waitForEnvelopeTimeOut)
 		assert.NoError(t, err)
 	})
 
@@ -76,6 +91,18 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Public() {
 		wg := &multierror.Group{}
 
 		envelope := fakeEnvelope()
+		gock.New(keyManagerURL).
+			Get(fmt.Sprintf("/stores/%s/eth1/%s", qkmStoreName, envelope.GetFromString())).
+			Reply(200).JSON(&types.Eth1AccountResponse{
+			Address: ethcommon.HexToAddress(envelope.GetFromString()),
+			Tags: map[string]string{
+				quorumkeymanager.TagIDAllowedTenants: multitenancy.DefaultTenant,
+			},
+		})
+
+		gock.New(keyManagerURL).
+			Post(fmt.Sprintf("/stores/%s/eth1/%s/sign-data", qkmStoreName, envelope.GetFromString())).
+			Reply(200).BodyString(signature)
 
 		gock.New(apiURL).
 			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
@@ -111,7 +138,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Public() {
 			return
 		}
 
-		err = waitTimeout(wg, time.Second*2)
+		err = waitTimeout(wg, waitForEnvelopeTimeOut)
 		assert.NoError(t, err)
 	})
 
@@ -120,6 +147,19 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Public() {
 		wg := &multierror.Group{}
 
 		envelope := fakeEnvelope()
+
+		gock.New(keyManagerURL).
+			Get(fmt.Sprintf("/stores/%s/eth1/%s", qkmStoreName, envelope.GetFromString())).
+			Reply(200).JSON(&types.Eth1AccountResponse{
+			Address: ethcommon.HexToAddress(envelope.GetFromString()),
+			Tags: map[string]string{
+				quorumkeymanager.TagIDAllowedTenants: multitenancy.DefaultTenant,
+			},
+		})
+
+		gock.New(keyManagerURL).
+			Post(fmt.Sprintf("/stores/%s/eth1/%s/sign-data", qkmStoreName, envelope.GetFromString())).
+			Reply(200).BodyString(signature)
 
 		gock.New(apiURL).
 			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
@@ -165,7 +205,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Public() {
 			return
 		}
 
-		err = waitTimeout(wg, time.Second*2)
+		err = waitTimeout(wg, waitForEnvelopeTimeOut)
 		assert.NoError(t, err)
 	})
 
@@ -196,7 +236,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Public() {
 			return
 		}
 
-		err = waitTimeout(wg, time.Second*2)
+		err = waitTimeout(wg, waitForEnvelopeTimeOut)
 		assert.NoError(t, err)
 	})
 
@@ -205,6 +245,15 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Public() {
 		wg := &multierror.Group{}
 
 		envelope := fakeEnvelope()
+
+		gock.New(keyManagerURL).
+			Get(fmt.Sprintf("/stores/%s/eth1/%s", qkmStoreName, envelope.GetFromString())).
+			Reply(200).JSON(&types.Eth1AccountResponse{
+			Address: ethcommon.HexToAddress(envelope.GetFromString()),
+			Tags: map[string]string{
+				quorumkeymanager.TagIDAllowedTenants: "not_allowed_tenant",
+			},
+		})
 
 		gock.New(apiURL).
 			Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
@@ -224,7 +273,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Public() {
 			return
 		}
 
-		err = waitTimeout(wg, time.Second*2)
+		err = waitTimeout(wg, waitForEnvelopeTimeOut)
 		assert.NoError(t, err)
 
 		assert.Equal(t, envelope.GetID(), retrievedEnvelope.GetID())
@@ -237,6 +286,19 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Public() {
 		wg := &multierror.Group{}
 
 		envelope := fakeEnvelope()
+
+		gock.New(keyManagerURL).
+			Get(fmt.Sprintf("/stores/%s/eth1/%s", qkmStoreName, envelope.GetFromString())).
+			Reply(200).JSON(&types.Eth1AccountResponse{
+			Address: ethcommon.HexToAddress(envelope.GetFromString()),
+			Tags: map[string]string{
+				quorumkeymanager.TagIDAllowedTenants: multitenancy.DefaultTenant,
+			},
+		})
+
+		gock.New(keyManagerURL).
+			Post(fmt.Sprintf("/stores/%s/eth1/%s/sign-data", qkmStoreName, envelope.GetFromString())).
+			Reply(200).BodyString(signature)
 
 		gock.New(apiURL).
 			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
@@ -286,6 +348,19 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Public() {
 
 		envelope := fakeEnvelope()
 
+		gock.New(keyManagerURL).
+			Get(fmt.Sprintf("/stores/%s/eth1/%s", qkmStoreName, envelope.GetFromString())).
+			Reply(200).JSON(&types.Eth1AccountResponse{
+			Address: ethcommon.HexToAddress(envelope.GetFromString()),
+			Tags: map[string]string{
+				quorumkeymanager.TagIDAllowedTenants: multitenancy.DefaultTenant,
+			},
+		})
+
+		gock.New(keyManagerURL).
+			Post(fmt.Sprintf("/stores/%s/eth1/%s/sign-data", qkmStoreName, envelope.GetFromString())).
+			Reply(200).BodyString(signature)
+
 		gock.New(apiURL).
 			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
 			AddMatcher(ethCallMatcher(wg, "eth_sendRawTransaction")).
@@ -314,7 +389,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Public() {
 			return
 		}
 
-		err = waitTimeout(wg, time.Second*2)
+		err = waitTimeout(wg, waitForEnvelopeTimeOut)
 		assert.NoError(t, err)
 
 		assert.Equal(t, envelope.GetID(), retrievedEnvelope.GetID())
@@ -352,7 +427,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Raw_Public() {
 			return
 		}
 
-		err = waitTimeout(wg, time.Second*2)
+		err = waitTimeout(wg, waitForEnvelopeTimeOut)
 		assert.NoError(t, err)
 	})
 
@@ -390,7 +465,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Raw_Public() {
 			return
 		}
 
-		err = waitTimeout(wg, time.Second*2)
+		err = waitTimeout(wg, waitForEnvelopeTimeOut)
 		assert.NoError(t, err)
 	})
 
@@ -423,7 +498,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Raw_Public() {
 			return
 		}
 
-		err = waitTimeout(wg, time.Second*2)
+		err = waitTimeout(wg, waitForEnvelopeTimeOut)
 		assert.NoError(t, err)
 
 		retrievedEnvelope, err := s.env.consumer.WaitForEnvelope(envelope.GetID(), s.env.srvConfig.RecoverTopic,
@@ -440,6 +515,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Raw_Public() {
 }
 
 func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_EEA() {
+	signature := "0xd35c752d3498e6f5ca1630d264802a992a141ca4b6a3f439d673c75e944e5fb05278aaa5fabbeac362c321b54e298dedae2d31471e432c26ea36a8d49cf08f1e01"
 	txHash := "0x6621fbe1e2848446e38d99bfda159cdd83f555ae0ed7a4f3e1c3c79f7d6d74f3"
 
 	s.T().Run("should sign and send a EEA transaction successfully", func(t *testing.T) {
@@ -450,6 +526,19 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_EEA() {
 
 		envelope := fakeEnvelope()
 		_ = envelope.SetJobType(tx.JobType_ETH_ORION_EEA_TX)
+
+		gock.New(keyManagerURL).
+			Get(fmt.Sprintf("/stores/%s/eth1/%s", qkmStoreName, envelope.GetFromString())).
+			Reply(200).JSON(&types.Eth1AccountResponse{
+			Address: ethcommon.HexToAddress(envelope.GetFromString()),
+			Tags: map[string]string{
+				quorumkeymanager.TagIDAllowedTenants: multitenancy.DefaultTenant,
+			},
+		})
+
+		gock.New(keyManagerURL).
+			Post(fmt.Sprintf("/stores/%s/eth1/%s/sign-data", qkmStoreName, envelope.GetFromString())).
+			Reply(200).BodyString(signature)
 
 		gock.New(apiURL).
 			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
@@ -476,7 +565,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_EEA() {
 			return
 		}
 
-		err = waitTimeout(wg, time.Second*2)
+		err = waitTimeout(wg, waitForEnvelopeTimeOut)
 		assert.NoError(t, err)
 	})
 
@@ -503,7 +592,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_EEA() {
 			return
 		}
 
-		err = waitTimeout(wg, time.Second*2)
+		err = waitTimeout(wg, waitForEnvelopeTimeOut)
 		assert.NoError(t, err)
 	})
 
@@ -530,7 +619,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_EEA() {
 			return
 		}
 
-		err = waitTimeout(wg, time.Second*2)
+		err = waitTimeout(wg, waitForEnvelopeTimeOut)
 		assert.NoError(t, err)
 
 		retrievedEnvelope, err := s.env.consumer.WaitForEnvelope(envelope.GetID(), s.env.srvConfig.RecoverTopic,
@@ -547,6 +636,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_EEA() {
 }
 
 func (s *txSenderEthereumTestSuite) TestTxSender_Tessera_Marking() {
+	signature := "0xd35c752d3498e6f5ca1630d264802a992a141ca4b6a3f439d673c75e944e5fb05278aaa5fabbeac362c321b54e298dedae2d31471e432c26ea36a8d49cf08f1e01"
 	raw := "0xf851808398968082520880839896808026a0d35c752d3498e6f5ca1630d264802a992a141ca4b6a3f439d673c75e944e5fb0a05278aaa5fabbeac362c321b54e298dedae2d31471e432c26ea36a8d49cf08f1e"
 	txHash := "0x226d79b217b5ebfeddd08662f3ae1bb1b2cb339d50bbcb708b53ad5f4c71c5ea"
 
@@ -557,6 +647,19 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Tessera_Marking() {
 		envelope := fakeEnvelope()
 		envelope.Nonce = nil
 		_ = envelope.SetJobType(tx.JobType_ETH_TESSERA_MARKING_TX)
+
+		gock.New(keyManagerURL).
+			Get(fmt.Sprintf("/stores/%s/eth1/%s", qkmStoreName, envelope.GetFromString())).
+			Reply(200).JSON(&types.Eth1AccountResponse{
+			Address: ethcommon.HexToAddress(envelope.GetFromString()),
+			Tags: map[string]string{
+				quorumkeymanager.TagIDAllowedTenants: multitenancy.DefaultTenant,
+			},
+		})
+
+		gock.New(keyManagerURL).
+			Post(fmt.Sprintf("/stores/%s/eth1/%s/sign-data", qkmStoreName, envelope.GetFromString())).
+			Reply(200).BodyString(signature)
 
 		gock.New(apiURL).
 			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
@@ -581,10 +684,10 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Tessera_Marking() {
 			return
 		}
 
-		err = waitTimeout(wg, time.Second*2)
+		err = waitTimeout(wg, waitForEnvelopeTimeOut)
 		assert.NoError(t, err)
 	})
-	
+
 	s.T().Run("should sign, fail to send, and resend Tessera marking transaction successfully", func(t *testing.T) {
 		defer gock.Off()
 		wg := &multierror.Group{}
@@ -592,6 +695,19 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Tessera_Marking() {
 		envelope := fakeEnvelope()
 		envelope.Nonce = nil
 		_ = envelope.SetJobType(tx.JobType_ETH_TESSERA_MARKING_TX)
+
+		gock.New(keyManagerURL).
+			Get(fmt.Sprintf("/stores/%s/eth1/%s", qkmStoreName, envelope.GetFromString())).
+			Reply(200).JSON(&types.Eth1AccountResponse{
+			Address: ethcommon.HexToAddress(envelope.GetFromString()),
+			Tags: map[string]string{
+				quorumkeymanager.TagIDAllowedTenants: multitenancy.DefaultTenant,
+			},
+		})
+
+		gock.New(keyManagerURL).
+			Post(fmt.Sprintf("/stores/%s/eth1/%s/sign-data", qkmStoreName, envelope.GetFromString())).
+			Reply(200).BodyString(signature)
 
 		gock.New(apiURL).
 			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
@@ -602,7 +718,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Tessera_Marking() {
 			Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
 			AddMatcher(txStatusUpdateMatcher(wg, entities.StatusPending, "")).
 			Reply(200).JSON(&api.JobResponse{})
-		
+
 		gock.New(apiURL).
 			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
 			AddMatcher(ethCallMatcher(wg, "eth_sendRawPrivateTransaction", raw, map[string]interface{}{
@@ -628,7 +744,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Tessera_Marking() {
 			return
 		}
 
-		err = waitTimeout(wg, time.Second*2)
+		err = waitTimeout(wg, waitForEnvelopeTimeOut)
 		assert.NoError(t, err)
 	})
 
@@ -662,7 +778,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Tessera_Marking() {
 			return
 		}
 
-		err = waitTimeout(wg, time.Second*2)
+		err = waitTimeout(wg, waitForEnvelopeTimeOut)
 		assert.NoError(t, err)
 	})
 
@@ -672,6 +788,19 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Tessera_Marking() {
 
 		envelope := fakeEnvelope()
 		_ = envelope.SetJobType(tx.JobType_ETH_TESSERA_MARKING_TX)
+
+		gock.New(keyManagerURL).
+			Get(fmt.Sprintf("/stores/%s/eth1/%s", qkmStoreName, envelope.GetFromString())).
+			Reply(200).JSON(&types.Eth1AccountResponse{
+			Address: ethcommon.HexToAddress(envelope.GetFromString()),
+			Tags: map[string]string{
+				quorumkeymanager.TagIDAllowedTenants: multitenancy.DefaultTenant,
+			},
+		})
+
+		gock.New(keyManagerURL).
+			Post(fmt.Sprintf("/stores/%s/eth1/%s/sign-data", qkmStoreName, envelope.GetFromString())).
+			Reply(200).BodyString(signature)
 
 		gock.New(apiURL).
 			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
@@ -694,7 +823,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Tessera_Marking() {
 			return
 		}
 
-		err = waitTimeout(wg, time.Second*2)
+		err = waitTimeout(wg, waitForEnvelopeTimeOut)
 		assert.NoError(t, err)
 
 		retrievedEnvelope, err := s.env.consumer.WaitForEnvelope(envelope.GetID(), s.env.srvConfig.RecoverTopic,
@@ -739,7 +868,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Tessera_Private() {
 			return
 		}
 
-		err = waitTimeout(wg, time.Second*2)
+		err = waitTimeout(wg, waitForEnvelopeTimeOut)
 		assert.NoError(t, err)
 	})
 
@@ -766,7 +895,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Tessera_Private() {
 			return
 		}
 
-		err = waitTimeout(wg, time.Second*2)
+		err = waitTimeout(wg, waitForEnvelopeTimeOut)
 		assert.NoError(t, err)
 
 		retrievedEnvelope, err := s.env.consumer.WaitForEnvelope(envelope.GetID(), s.env.srvConfig.RecoverTopic,
@@ -783,6 +912,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Tessera_Private() {
 }
 
 func (s *txSenderEthereumTestSuite) TestTxSender_XNonceManager() {
+	signature := "0xd35c752d3498e6f5ca1630d264802a992a141ca4b6a3f439d673c75e944e5fb05278aaa5fabbeac362c321b54e298dedae2d31471e432c26ea36a8d49cf08f1e01"
 	txHash := "0x6621fbe1e2848446e38d99bfda159cdd83f555ae0ed7a4f3e1c3c79f7d6d74f3"
 
 	s.T().Run("should increment account nonce on consecutive transaction successfully", func(t *testing.T) {
@@ -799,6 +929,19 @@ func (s *txSenderEthereumTestSuite) TestTxSender_XNonceManager() {
 					AddMatcher(ethCallMatcher(wg, "eth_getTransactionCount", envelope.From.String(), "pending")).
 					Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"0x0\"}")
 			}
+
+			gock.New(keyManagerURL).
+				Get(fmt.Sprintf("/stores/%s/eth1/%s", qkmStoreName, envelope.GetFromString())).
+				Reply(200).JSON(&types.Eth1AccountResponse{
+				Address: ethcommon.HexToAddress(envelope.GetFromString()),
+				Tags: map[string]string{
+					quorumkeymanager.TagIDAllowedTenants: multitenancy.DefaultTenant,
+				},
+			})
+
+			gock.New(keyManagerURL).
+				Post(fmt.Sprintf("/stores/%s/eth1/%s/sign-data", qkmStoreName, envelope.GetFromString())).
+				Reply(200).BodyString(signature)
 
 			gock.New(apiURL).
 				Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
@@ -824,7 +967,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_XNonceManager() {
 				return
 			}
 
-			err = waitTimeout(wg, time.Second*2)
+			err = waitTimeout(wg, waitForEnvelopeTimeOut)
 			assert.NoError(t, err)
 			gock.Off()
 		}
@@ -847,6 +990,19 @@ func (s *txSenderEthereumTestSuite) TestTxSender_XNonceManager() {
 					AddMatcher(ethCallMatcher(wg, "eth_getTransactionCount", envelope.From.String(), "pending")).
 					Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"0x0\"}")
 
+				gock.New(keyManagerURL).
+					Get(fmt.Sprintf("/stores/%s/eth1/%s", qkmStoreName, envelope.GetFromString())).
+					Reply(200).JSON(&types.Eth1AccountResponse{
+					Address: ethcommon.HexToAddress(envelope.GetFromString()),
+					Tags: map[string]string{
+						quorumkeymanager.TagIDAllowedTenants: multitenancy.DefaultTenant,
+					},
+				})
+
+				gock.New(keyManagerURL).
+					Post(fmt.Sprintf("/stores/%s/eth1/%s/sign-data", qkmStoreName, envelope.GetFromString())).
+					Reply(200).BodyString(signature)
+
 				gock.New(apiURL).
 					Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
 					AddMatcher(ethCallMatcher(wg, "eth_sendRawTransaction")).
@@ -859,6 +1015,19 @@ func (s *txSenderEthereumTestSuite) TestTxSender_XNonceManager() {
 			}
 
 			if idx == 1 {
+				gock.New(keyManagerURL).
+					Get(fmt.Sprintf("/stores/%s/eth1/%s", qkmStoreName, envelope.GetFromString())).Times(2).
+					Reply(200).JSON(&types.Eth1AccountResponse{
+					Address: ethcommon.HexToAddress(envelope.GetFromString()),
+					Tags: map[string]string{
+						quorumkeymanager.TagIDAllowedTenants: multitenancy.DefaultTenant,
+					},
+				})
+
+				gock.New(keyManagerURL).
+					Post(fmt.Sprintf("/stores/%s/eth1/%s/sign-data", qkmStoreName, envelope.GetFromString())).Times(2).
+					Reply(200).BodyString(signature)
+
 				gock.New(apiURL).
 					Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
 					AddMatcher(txStatusUpdateMatcher(wg, entities.StatusPending, "1")).
@@ -898,6 +1067,19 @@ func (s *txSenderEthereumTestSuite) TestTxSender_XNonceManager() {
 			}
 
 			if idx > 1 {
+				gock.New(keyManagerURL).
+					Get(fmt.Sprintf("/stores/%s/eth1/%s", qkmStoreName, envelope.GetFromString())).
+					Reply(200).JSON(&types.Eth1AccountResponse{
+					Address: ethcommon.HexToAddress(envelope.GetFromString()),
+					Tags: map[string]string{
+						quorumkeymanager.TagIDAllowedTenants: multitenancy.DefaultTenant,
+					},
+				})
+
+				gock.New(keyManagerURL).
+					Post(fmt.Sprintf("/stores/%s/eth1/%s/sign-data", qkmStoreName, envelope.GetFromString())).
+					Reply(200).BodyString(signature)
+
 				gock.New(apiURL).
 					Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
 					AddMatcher(ethCallMatcher(wg, "eth_sendRawTransaction")).
@@ -920,7 +1102,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_XNonceManager() {
 				return
 			}
 
-			err = waitTimeout(wg, time.Second*2)
+			err = waitTimeout(wg, waitForEnvelopeTimeOut)
 			assert.NoError(t, err)
 			gock.Off()
 		}
@@ -940,6 +1122,19 @@ func (s *txSenderEthereumTestSuite) TestTxSender_XNonceManager() {
 				Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
 				AddMatcher(ethCallMatcher(wg, "eth_getTransactionCount", envelope.From.String(), "pending")).
 				Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"0x0\"}")
+
+			gock.New(keyManagerURL).
+				Get(fmt.Sprintf("/stores/%s/eth1/%s", qkmStoreName, envelope.GetFromString())).
+				Reply(200).JSON(&types.Eth1AccountResponse{
+				Address: ethcommon.HexToAddress(envelope.GetFromString()),
+				Tags: map[string]string{
+					quorumkeymanager.TagIDAllowedTenants: multitenancy.DefaultTenant,
+				},
+			})
+
+			gock.New(keyManagerURL).
+				Post(fmt.Sprintf("/stores/%s/eth1/%s/sign-data", qkmStoreName, envelope.GetFromString())).
+				Reply(200).BodyString(signature)
 
 			gock.New(apiURL).
 				Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
@@ -973,7 +1168,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_XNonceManager() {
 				}
 			}
 
-			err := waitTimeout(wg, time.Second*2)
+			err := waitTimeout(wg, waitForEnvelopeTimeOut)
 			assert.NoError(t, err)
 
 			gock.Off()
@@ -1140,8 +1335,12 @@ func txStatusUpdateMatcher(wg *multierror.Group, status entities.JobStatus, nonc
 func ethCallMatcher(wg *multierror.Group, method string, args ...interface{}) gock.MatchFunc {
 	cerr := make(chan error, 1)
 	wg.Go(func() error {
-		err := <-cerr
-		return err
+		select {
+		case err := <-cerr:
+			return err
+		case <-time.After(waitForEnvelopeTimeOut):
+			return fmt.Errorf("timeout after %s", waitForEnvelopeTimeOut.String())
+		}
 	})
 
 	return func(rw *http2.Request, grw *gock.Request) (bool, error) {

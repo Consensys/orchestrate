@@ -89,6 +89,8 @@ commands:
             echo 'export KAFKA_SASL_MECHANISM=PLAIN' >> $BASH_ENV
             echo 'export KAFKA_SASL_USER=${QA_KAFKA_SASL_USER}' >> $BASH_ENV
             echo 'export KAFKA_SASL_PASSWORD=${QA_KAFKA_SASL_PASSWORD}' >> $BASH_ENV
+            echo 'export KEY_MANAGER_URL=${QA_QUORUM_KEY_MANAGER_URL}' >> $BASH_ENV
+            echo 'export KEY_MANAGER_STORE_NAME=${QA_KEY_MANAGER_STORE_NAME}' >> $BASH_ENV
             echo 'export TOPIC_TX_SENDER=${ORCHESTRATE_NAMESPACE}-tx-sender' >> $BASH_ENV
             echo 'export TOPIC_TX_RECOVER=${ORCHESTRATE_NAMESPACE}-tx-recover' >> $BASH_ENV
             echo 'export TOPIC_TX_DECODED=${ORCHESTRATE_NAMESPACE}-tx-decoded' >> $BASH_ENV
@@ -400,8 +402,7 @@ workflows:
             tags:
               only: /^v.*/
             branches:
-#             only: /.*/
-              only: master
+             only: /.*/
       - push-orchestrate-image:
           filters:
             branches:

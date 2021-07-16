@@ -3,7 +3,7 @@ package quorumkeymanager
 import (
 	"strings"
 
-	"github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/types"
+	"github.com/consensys/quorum-key-manager/src/stores/api/types"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 )

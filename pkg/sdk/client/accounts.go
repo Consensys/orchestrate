@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	qkmtypes "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/types"
 	"github.com/ConsenSys/orchestrate/pkg/types/api"
+	qkmtypes "github.com/consensys/quorum-key-manager/src/stores/api/types"
 
 	clientutils "github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/client-utils"
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/httputil"

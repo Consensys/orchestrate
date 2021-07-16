@@ -3,7 +3,7 @@ package client
 import (
 	"context"
 
-	qkmtypes "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/types"
+	qkmtypes "github.com/consensys/quorum-key-manager/src/stores/api/types"
 
 	types "github.com/ConsenSys/orchestrate/pkg/types/api"
 	"github.com/ConsenSys/orchestrate/pkg/types/entities"

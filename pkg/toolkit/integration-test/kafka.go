@@ -149,7 +149,7 @@ func msgHandler(reg *chanregistry.ChanRegistry) engine.HandlerFunc {
 			txctx.Logger.WithError(err).Error("dispatcher: envelope dispatched with errors")
 		}
 
-		txctx.Logger.Infof("dispatcher: envelope dispatched")
+		txctx.Logger.Info("dispatcher: envelope dispatched")
 	}
 }
 

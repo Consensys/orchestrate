@@ -7,7 +7,7 @@ import (
 	"github.com/ConsenSys/orchestrate/services/api/business/use-cases/faucets"
 	"github.com/ConsenSys/orchestrate/services/api/metrics"
 	"github.com/ConsenSys/orchestrate/services/api/store"
-	qkmclient "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/client"
+	qkmclient "github.com/consensys/quorum-key-manager/pkg/client"
 	"github.com/Shopify/sarama"
 )
 

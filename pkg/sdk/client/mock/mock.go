@@ -6,7 +6,7 @@ package mock
 
 import (
 	context "context"
-	types "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/types"
+	types "github.com/consensys/quorum-key-manager/src/stores/api/types"
 	api "github.com/ConsenSys/orchestrate/pkg/types/api"
 	entities "github.com/ConsenSys/orchestrate/pkg/types/entities"
 	gomock "github.com/golang/mock/gomock"

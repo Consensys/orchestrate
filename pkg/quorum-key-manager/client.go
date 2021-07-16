@@ -3,9 +3,9 @@ package quorumkeymanager
 import (
 	"sync"
 
-	qkm "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager/client"
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http"
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
+	qkm "github.com/consensys/quorum-key-manager/pkg/client"
 	"github.com/spf13/viper"
 )
 

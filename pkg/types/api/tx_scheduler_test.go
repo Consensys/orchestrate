@@ -10,7 +10,7 @@ import (
 func TestTransactionParams_BasicSuccessful(t *testing.T) {
 	params := TransactionParams{
 		From:            "0x88a5C2d9919e46F883EB62F7b8Dd9d0CC45bc290",
-		To:              "0x88a5C2d9919e46F883EB62F7b8Dd9d0CC45bc291",
+		To:              "0x88a5C2d9919e46F883EB62F7b8Dd9d0CC45bc290",
 		MethodSignature: "Constructor()",
 	}
 
@@ -20,7 +20,7 @@ func TestTransactionParams_BasicSuccessful(t *testing.T) {
 
 func TestTransactionParams_SuccessfulOneTimeKeyWithoutFrom(t *testing.T) {
 	params := TransactionParams{
-		To:              "0x88a5C2d9919e46F883EB62F7b8Dd9d0CC45bc291",
+		To:              "0x88a5C2d9919e46F883EB62F7b8Dd9d0CC45bc290",
 		MethodSignature: "Constructor()",
 		OneTimeKey:      true,
 	}
