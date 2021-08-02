@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/ConsenSys/orchestrate/pkg/errors"
 	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/auth"
 	authutils "github.com/ConsenSys/orchestrate/pkg/toolkit/app/auth/utils"
@@ -75,7 +76,12 @@ func (a *Auth) Handler(h http.Handler) http.Handler {
 
 		// Perform API Key Authentication
 		checkedCtx, err := a.key.Check(authCtx)
-		if err == nil {
+		if err != nil {
+			log.FromContext(authCtx).WithError(err).Errorf("unauthorized request")
+			a.writeUnauthorized(rw, err)
+			return
+		}
+		if checkedCtx != nil {
 			// Bypass JWT authentication
 			log.FromContext(checkedCtx).
 				WithField("tenant_id", multitenancy.TenantIDFromContext(checkedCtx)).
@@ -87,7 +93,12 @@ func (a *Auth) Handler(h http.Handler) http.Handler {
 
 		// Perform JWT Authentication
 		checkedCtx, err = a.jwt.Check(authCtx)
-		if err == nil {
+		if err != nil {
+			log.FromContext(authCtx).WithError(err).Errorf("unauthorized request")
+			a.writeUnauthorized(rw, err)
+			return
+		}
+		if checkedCtx != nil {
 			// JWT Authentication succeeded
 			log.FromContext(checkedCtx).
 				WithField("tenant_id", multitenancy.TenantIDFromContext(checkedCtx)).
@@ -95,10 +106,12 @@ func (a *Auth) Handler(h http.Handler) http.Handler {
 				Debugf("authentication succeeded (JWT)")
 
 			a.serveNext(rw, req.WithContext(checkedCtx), h)
-		} else {
-			log.FromContext(checkedCtx).WithError(err).Errorf("authentication failed")
-			a.writeUnauthorized(rw, err)
+			return
 		}
+
+		err = errors.UnauthorizedError("missing required credentials")
+		log.FromContext(authCtx).WithError(err).Errorf("unauthorized request")
+		a.writeUnauthorized(rw, err)
 	})
 }
 

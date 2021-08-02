@@ -78,7 +78,7 @@ func (uc *sendTesseraPrivateTxUseCase) sendTx(ctx context.Context, job *entities
 	enclaveKey, err := uc.ec.StoreRaw(ctx, proxyTessera, data, job.Transaction.PrivateFrom)
 	if err != nil {
 		errMsg := "cannot send tessera private transaction"
-		logger.WithError(err).Errorf(errMsg)
+		logger.WithError(err).Error(errMsg)
 		return "", err
 	}
 

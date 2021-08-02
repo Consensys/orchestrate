@@ -21,15 +21,14 @@ func New(key string) *Key {
 
 // Parse and verify the validity of the Token (UUID or Access) and return a struct for a JWT (JSON Web Token)
 func (checker *Key) Check(ctx context.Context) (context.Context, error) {
-	if checker.key == "" {
-		// If no key provided we deactivate authentication
-		return ctx, nil
+	if checker == nil || checker.key == "" {
+		return nil, nil
 	}
 
 	// Extract Key from context
 	apiKey := authutils.APIKeyFromContext(ctx)
 	if apiKey == "" {
-		return ctx, errors.UnauthorizedError("missing API key")
+		return nil, nil
 	}
 
 	if apiKey != checker.key {

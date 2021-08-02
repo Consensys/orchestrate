@@ -60,15 +60,15 @@ const authPrefix = "Bearer "
 
 // Parse and verify the validity of the Token (UUID or Access) and return a struct for a JWT (JSON Web Token)
 func (checker *JWT) Check(ctx context.Context) (context.Context, error) {
-	if checker.cert == nil {
+	if checker == nil || checker.cert == nil {
 		// If no certificate provided we deactivate authentication
-		return ctx, nil
+		return nil, nil
 	}
 
 	// Extract Access Token from context
 	bearer, ok := authutils.ParseAuth(authPrefix, authutils.AuthorizationFromContext(ctx))
 	if !ok {
-		return ctx, errors.UnauthorizedError("missing Access Token")
+		return nil, nil
 	}
 
 	// Parse and validate token injected in context

@@ -9,6 +9,10 @@
 ### 🛠 Bug fixes
 * Database overload querying for registered chains
 
+## v21.1.7 (WIP)
+### 🛠 Bug fixes
+* Empty tenant_id when no AUTH_API_KEY is defined
+
 ## v21.1.6 (2021-06-25)
 ### 🛠 Bug fixes
 * Incorrect transition to FAILED status on rpc node connectivity issues
