@@ -56,6 +56,7 @@ services/api/integration-tests/manifests
 services/tx-sender/integration-tests/plugins
 services/tx-sender/integration-tests/manifests
 
+!**/**/.gitkeep
 
 # API Doc
 node_modules

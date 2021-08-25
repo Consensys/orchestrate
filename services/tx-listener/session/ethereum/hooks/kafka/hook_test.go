@@ -63,7 +63,7 @@ func Test_AfterNewBlock(t *testing.T) {
 	var fakeJobs = []*entities.Job{testutils.FakeJob()}
 	fakeJobs[0].Receipt = receipt
 
-	ec := mock.NewMockChainStateReader(ctrl)
+	ec := mock.NewMockMultiClient(ctrl)
 	client := mock2.NewMockOrchestrateClient(ctrl)
 	producer := mocks.NewSyncProducer(t, nil)
 
@@ -194,6 +194,77 @@ func Test_AfterNewBlock(t *testing.T) {
 	})
 }
 
+func Test_AfterNewBlock_Priv(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	receipt := &types.Receipt{
+		TxHash:          "0xf2beaddb2dc4e4c9055148a808365edbadd5f418c31631dcba9ad99af34ae66b",
+		ContractAddress: "0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C",
+		PrivateFrom:     "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=",
+		PrivacyGroupId:  "kg1O8oXDhVqN0+bYJCZk2YtB0Febs3QEU+dAnUPDRIo=",
+		Logs: []*types.Log{
+			{
+				TxHash:  "0xf2beaddb2dc4e4c9055148a808365edbadd5f418c31631dcba9ad99af34ae66b",
+				Address: "0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C",
+				Topics: []string{
+					"0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+					"0x000000000000000000000000ba826fec90cefdf6706858e5fbafcb27a290fbe0",
+					"0x0000000000000000000000004aee792a88edda29932254099b9d1e06d537883f",
+				},
+				Data:        "0x000000000000000000000000000000000000000000000001a055690d9db80000",
+				BlockNumber: block.Number().Uint64(),
+				BlockHash:   block.Hash().Hex(),
+				TxIndex:     0,
+				Index:       0,
+				Removed:     false,
+			},
+		},
+	}
+	var fakeJobs = []*entities.Job{testutils.FakeJob()}
+	fakeJobs[0].Receipt = receipt
+
+	ec := mock.NewMockMultiClient(ctrl)
+	client := mock2.NewMockOrchestrateClient(ctrl)
+	producer := mocks.NewSyncProducer(t, nil)
+
+	// Initialize hook
+	conf := &Config{
+		OutTopic: "test-topic-decoded",
+	}
+
+	t.Run("should process after new block successfully", func(t *testing.T) {
+		ec.EXPECT().PrivCodeAt(gomock.Any(), gomock.Any(), gomock.Any(),gomock.Any(), gomock.Any()).Return(ethcommon.Hex2Bytes("0xabcd"), nil)
+		client.EXPECT().SetContractAddressCodeHash(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+		client.EXPECT().GetContractEvents(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(&txschedulertypes.GetContractEventsBySignHashResponse{
+			Event: "{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"tokens\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"}",
+		}, nil)
+		client.EXPECT().UpdateJob(gomock.Any(), gomock.Any(), &txschedulertypes.UpdateJobRequest{
+			Status:  entities.StatusMined,
+			Message: fmt.Sprintf("transaction mined in block %v", block.NumberU64()),
+		}).Return(&txschedulertypes.JobResponse{}, nil)
+		producer.ExpectSendMessageAndSucceed()
+
+		expectedDecodedData := map[string]string{
+			"tokens": "30000000000000000000",
+			"from":   "0xBA826fEc90CEFdf6706858E5FbaFcb27A290Fbe0",
+			"to":     "0x4aEE792A88eDDA29932254099b9d1e06D537883f",
+		}
+
+		hk := NewHook(conf, ec, producer, client)
+
+		var block ethtypes.Block
+		err := rlp.DecodeBytes(blockEnc, &block)
+		assert.NoError(t, err)
+
+		err = hk.AfterNewBlock(context.Background(), c, &block, fakeJobs)
+
+		assert.NoError(t, err, "AfterNewBlockEnvelope should not error")
+		assert.Equal(t, "Transfer(address,address,uint256)", fakeJobs[0].Receipt.Logs[0].Event)
+		assert.Equal(t, expectedDecodedData, fakeJobs[0].Receipt.Logs[0].DecodedData)
+	})
+}
+
 func Test_DecodeReceipt(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -203,7 +274,7 @@ func Test_DecodeReceipt(t *testing.T) {
 		OutTopic: "test-topic-decoded",
 	}
 
-	ec := mock.NewMockChainStateReader(ctrl)
+	ec := mock.NewMockMultiClient(ctrl)
 	producer := mocks.NewSyncProducer(t, nil)
 	client := mock2.NewMockOrchestrateClient(ctrl)
 

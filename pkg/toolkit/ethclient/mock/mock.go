@@ -7,11 +7,11 @@ package mock
 import (
 	context "context"
 	json "encoding/json"
-	types0 "github.com/ConsenSys/orchestrate/pkg/ethereum/types"
-	ethereum0 "github.com/ConsenSys/orchestrate/pkg/types/ethereum"
-	ethereum "github.com/ethereum/go-ethereum"
+	types "github.com/ConsenSys/orchestrate/pkg/ethereum/types"
+	ethereum "github.com/ConsenSys/orchestrate/pkg/types/ethereum"
+	ethereum0 "github.com/ethereum/go-ethereum"
 	common "github.com/ethereum/go-ethereum/common"
-	types "github.com/ethereum/go-ethereum/core/types"
+	types0 "github.com/ethereum/go-ethereum/core/types"
 	gomock "github.com/golang/mock/gomock"
 	big "math/big"
 	reflect "reflect"
@@ -41,7 +41,7 @@ func (m *MockTransactionSender) EXPECT() *MockTransactionSenderMockRecorder {
 }
 
 // SendTransaction mocks base method
-func (m *MockTransactionSender) SendTransaction(ctx context.Context, url string, args *types0.SendTxArgs) (common.Hash, error) {
+func (m *MockTransactionSender) SendTransaction(ctx context.Context, url string, args *types.SendTxArgs) (common.Hash, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SendTransaction", ctx, url, args)
 	ret0, _ := ret[0].(common.Hash)
@@ -215,10 +215,10 @@ func (m *MockChainLedgerReader) EXPECT() *MockChainLedgerReaderMockRecorder {
 }
 
 // BlockByHash mocks base method
-func (m *MockChainLedgerReader) BlockByHash(ctx context.Context, url string, hash common.Hash) (*types.Block, error) {
+func (m *MockChainLedgerReader) BlockByHash(ctx context.Context, url string, hash common.Hash) (*types0.Block, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "BlockByHash", ctx, url, hash)
-	ret0, _ := ret[0].(*types.Block)
+	ret0, _ := ret[0].(*types0.Block)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -230,10 +230,10 @@ func (mr *MockChainLedgerReaderMockRecorder) BlockByHash(ctx, url, hash interfac
 }
 
 // BlockByNumber mocks base method
-func (m *MockChainLedgerReader) BlockByNumber(ctx context.Context, url string, number *big.Int) (*types.Block, error) {
+func (m *MockChainLedgerReader) BlockByNumber(ctx context.Context, url string, number *big.Int) (*types0.Block, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "BlockByNumber", ctx, url, number)
-	ret0, _ := ret[0].(*types.Block)
+	ret0, _ := ret[0].(*types0.Block)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -245,10 +245,10 @@ func (mr *MockChainLedgerReaderMockRecorder) BlockByNumber(ctx, url, number inte
 }
 
 // HeaderByHash mocks base method
-func (m *MockChainLedgerReader) HeaderByHash(ctx context.Context, url string, hash common.Hash) (*types.Header, error) {
+func (m *MockChainLedgerReader) HeaderByHash(ctx context.Context, url string, hash common.Hash) (*types0.Header, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "HeaderByHash", ctx, url, hash)
-	ret0, _ := ret[0].(*types.Header)
+	ret0, _ := ret[0].(*types0.Header)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -260,10 +260,10 @@ func (mr *MockChainLedgerReaderMockRecorder) HeaderByHash(ctx, url, hash interfa
 }
 
 // HeaderByNumber mocks base method
-func (m *MockChainLedgerReader) HeaderByNumber(ctx context.Context, url string, number *big.Int) (*types.Header, error) {
+func (m *MockChainLedgerReader) HeaderByNumber(ctx context.Context, url string, number *big.Int) (*types0.Header, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "HeaderByNumber", ctx, url, number)
-	ret0, _ := ret[0].(*types.Header)
+	ret0, _ := ret[0].(*types0.Header)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -275,10 +275,10 @@ func (mr *MockChainLedgerReaderMockRecorder) HeaderByNumber(ctx, url, number int
 }
 
 // TransactionByHash mocks base method
-func (m *MockChainLedgerReader) TransactionByHash(ctx context.Context, url string, hash common.Hash) (*types.Transaction, bool, error) {
+func (m *MockChainLedgerReader) TransactionByHash(ctx context.Context, url string, hash common.Hash) (*types0.Transaction, bool, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "TransactionByHash", ctx, url, hash)
-	ret0, _ := ret[0].(*types.Transaction)
+	ret0, _ := ret[0].(*types0.Transaction)
 	ret1, _ := ret[1].(bool)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
@@ -291,10 +291,10 @@ func (mr *MockChainLedgerReaderMockRecorder) TransactionByHash(ctx, url, hash in
 }
 
 // TransactionReceipt mocks base method
-func (m *MockChainLedgerReader) TransactionReceipt(ctx context.Context, url string, txHash common.Hash) (*ethereum0.Receipt, error) {
+func (m *MockChainLedgerReader) TransactionReceipt(ctx context.Context, url string, txHash common.Hash) (*ethereum.Receipt, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "TransactionReceipt", ctx, url, txHash)
-	ret0, _ := ret[0].(*ethereum0.Receipt)
+	ret0, _ := ret[0].(*ethereum.Receipt)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -329,10 +329,10 @@ func (m *MockEEAChainLedgerReader) EXPECT() *MockEEAChainLedgerReaderMockRecorde
 }
 
 // PrivateTransactionReceipt mocks base method
-func (m *MockEEAChainLedgerReader) PrivateTransactionReceipt(ctx context.Context, url string, txHash common.Hash) (*ethereum0.Receipt, error) {
+func (m *MockEEAChainLedgerReader) PrivateTransactionReceipt(ctx context.Context, url string, txHash common.Hash) (*ethereum.Receipt, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "PrivateTransactionReceipt", ctx, url, txHash)
-	ret0, _ := ret[0].(*ethereum0.Receipt)
+	ret0, _ := ret[0].(*ethereum.Receipt)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -341,6 +341,21 @@ func (m *MockEEAChainLedgerReader) PrivateTransactionReceipt(ctx context.Context
 func (mr *MockEEAChainLedgerReaderMockRecorder) PrivateTransactionReceipt(ctx, url, txHash interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivateTransactionReceipt", reflect.TypeOf((*MockEEAChainLedgerReader)(nil).PrivateTransactionReceipt), ctx, url, txHash)
+}
+
+// PrivCodeAt mocks base method
+func (m *MockEEAChainLedgerReader) PrivCodeAt(ctx context.Context, url string, account common.Address, privateGroupID string, blockNumber *big.Int) ([]byte, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PrivCodeAt", ctx, url, account, privateGroupID, blockNumber)
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PrivCodeAt indicates an expected call of PrivCodeAt
+func (mr *MockEEAChainLedgerReaderMockRecorder) PrivCodeAt(ctx, url, account, privateGroupID, blockNumber interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivCodeAt", reflect.TypeOf((*MockEEAChainLedgerReader)(nil).PrivCodeAt), ctx, url, account, privateGroupID, blockNumber)
 }
 
 // MockChainStateReader is a mock of ChainStateReader interface
@@ -631,7 +646,7 @@ func (m *MockContractCaller) EXPECT() *MockContractCallerMockRecorder {
 }
 
 // CallContract mocks base method
-func (m *MockContractCaller) CallContract(ctx context.Context, url string, msg *ethereum.CallMsg, blockNumber *big.Int) ([]byte, error) {
+func (m *MockContractCaller) CallContract(ctx context.Context, url string, msg *ethereum0.CallMsg, blockNumber *big.Int) ([]byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CallContract", ctx, url, msg, blockNumber)
 	ret0, _ := ret[0].([]byte)
@@ -646,7 +661,7 @@ func (mr *MockContractCallerMockRecorder) CallContract(ctx, url, msg, blockNumbe
 }
 
 // PendingCallContract mocks base method
-func (m *MockContractCaller) PendingCallContract(ctx context.Context, url string, msg *ethereum.CallMsg) ([]byte, error) {
+func (m *MockContractCaller) PendingCallContract(ctx context.Context, url string, msg *ethereum0.CallMsg) ([]byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "PendingCallContract", ctx, url, msg)
 	ret0, _ := ret[0].([]byte)
@@ -684,7 +699,7 @@ func (m *MockGasEstimator) EXPECT() *MockGasEstimatorMockRecorder {
 }
 
 // EstimateGas mocks base method
-func (m *MockGasEstimator) EstimateGas(ctx context.Context, url string, msg *ethereum.CallMsg) (uint64, error) {
+func (m *MockGasEstimator) EstimateGas(ctx context.Context, url string, msg *ethereum0.CallMsg) (uint64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EstimateGas", ctx, url, msg)
 	ret0, _ := ret[0].(uint64)
@@ -775,10 +790,10 @@ func (mr *MockChainSyncReaderMockRecorder) Network(ctx, url interface{}) *gomock
 }
 
 // SyncProgress mocks base method
-func (m *MockChainSyncReader) SyncProgress(ctx context.Context, url string) (*ethereum.SyncProgress, error) {
+func (m *MockChainSyncReader) SyncProgress(ctx context.Context, url string) (*ethereum0.SyncProgress, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SyncProgress", ctx, url)
-	ret0, _ := ret[0].(*ethereum.SyncProgress)
+	ret0, _ := ret[0].(*ethereum0.SyncProgress)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -813,7 +828,7 @@ func (m *MockMultiClient) EXPECT() *MockMultiClientMockRecorder {
 }
 
 // SendTransaction mocks base method
-func (m *MockMultiClient) SendTransaction(ctx context.Context, url string, args *types0.SendTxArgs) (common.Hash, error) {
+func (m *MockMultiClient) SendTransaction(ctx context.Context, url string, args *types.SendTxArgs) (common.Hash, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SendTransaction", ctx, url, args)
 	ret0, _ := ret[0].(common.Hash)
@@ -858,10 +873,10 @@ func (mr *MockMultiClientMockRecorder) SendRawPrivateTransaction(ctx, url, raw i
 }
 
 // BlockByHash mocks base method
-func (m *MockMultiClient) BlockByHash(ctx context.Context, url string, hash common.Hash) (*types.Block, error) {
+func (m *MockMultiClient) BlockByHash(ctx context.Context, url string, hash common.Hash) (*types0.Block, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "BlockByHash", ctx, url, hash)
-	ret0, _ := ret[0].(*types.Block)
+	ret0, _ := ret[0].(*types0.Block)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -873,10 +888,10 @@ func (mr *MockMultiClientMockRecorder) BlockByHash(ctx, url, hash interface{}) *
 }
 
 // BlockByNumber mocks base method
-func (m *MockMultiClient) BlockByNumber(ctx context.Context, url string, number *big.Int) (*types.Block, error) {
+func (m *MockMultiClient) BlockByNumber(ctx context.Context, url string, number *big.Int) (*types0.Block, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "BlockByNumber", ctx, url, number)
-	ret0, _ := ret[0].(*types.Block)
+	ret0, _ := ret[0].(*types0.Block)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -888,10 +903,10 @@ func (mr *MockMultiClientMockRecorder) BlockByNumber(ctx, url, number interface{
 }
 
 // HeaderByHash mocks base method
-func (m *MockMultiClient) HeaderByHash(ctx context.Context, url string, hash common.Hash) (*types.Header, error) {
+func (m *MockMultiClient) HeaderByHash(ctx context.Context, url string, hash common.Hash) (*types0.Header, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "HeaderByHash", ctx, url, hash)
-	ret0, _ := ret[0].(*types.Header)
+	ret0, _ := ret[0].(*types0.Header)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -903,10 +918,10 @@ func (mr *MockMultiClientMockRecorder) HeaderByHash(ctx, url, hash interface{}) 
 }
 
 // HeaderByNumber mocks base method
-func (m *MockMultiClient) HeaderByNumber(ctx context.Context, url string, number *big.Int) (*types.Header, error) {
+func (m *MockMultiClient) HeaderByNumber(ctx context.Context, url string, number *big.Int) (*types0.Header, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "HeaderByNumber", ctx, url, number)
-	ret0, _ := ret[0].(*types.Header)
+	ret0, _ := ret[0].(*types0.Header)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -918,10 +933,10 @@ func (mr *MockMultiClientMockRecorder) HeaderByNumber(ctx, url, number interface
 }
 
 // TransactionByHash mocks base method
-func (m *MockMultiClient) TransactionByHash(ctx context.Context, url string, hash common.Hash) (*types.Transaction, bool, error) {
+func (m *MockMultiClient) TransactionByHash(ctx context.Context, url string, hash common.Hash) (*types0.Transaction, bool, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "TransactionByHash", ctx, url, hash)
-	ret0, _ := ret[0].(*types.Transaction)
+	ret0, _ := ret[0].(*types0.Transaction)
 	ret1, _ := ret[1].(bool)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
@@ -934,10 +949,10 @@ func (mr *MockMultiClientMockRecorder) TransactionByHash(ctx, url, hash interfac
 }
 
 // TransactionReceipt mocks base method
-func (m *MockMultiClient) TransactionReceipt(ctx context.Context, url string, txHash common.Hash) (*ethereum0.Receipt, error) {
+func (m *MockMultiClient) TransactionReceipt(ctx context.Context, url string, txHash common.Hash) (*ethereum.Receipt, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "TransactionReceipt", ctx, url, txHash)
-	ret0, _ := ret[0].(*ethereum0.Receipt)
+	ret0, _ := ret[0].(*ethereum.Receipt)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -1069,7 +1084,7 @@ func (mr *MockMultiClientMockRecorder) PendingNonceAt(ctx, url, account interfac
 }
 
 // CallContract mocks base method
-func (m *MockMultiClient) CallContract(ctx context.Context, url string, msg *ethereum.CallMsg, blockNumber *big.Int) ([]byte, error) {
+func (m *MockMultiClient) CallContract(ctx context.Context, url string, msg *ethereum0.CallMsg, blockNumber *big.Int) ([]byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CallContract", ctx, url, msg, blockNumber)
 	ret0, _ := ret[0].([]byte)
@@ -1084,7 +1099,7 @@ func (mr *MockMultiClientMockRecorder) CallContract(ctx, url, msg, blockNumber i
 }
 
 // PendingCallContract mocks base method
-func (m *MockMultiClient) PendingCallContract(ctx context.Context, url string, msg *ethereum.CallMsg) ([]byte, error) {
+func (m *MockMultiClient) PendingCallContract(ctx context.Context, url string, msg *ethereum0.CallMsg) ([]byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "PendingCallContract", ctx, url, msg)
 	ret0, _ := ret[0].([]byte)
@@ -1099,7 +1114,7 @@ func (mr *MockMultiClientMockRecorder) PendingCallContract(ctx, url, msg interfa
 }
 
 // EstimateGas mocks base method
-func (m *MockMultiClient) EstimateGas(ctx context.Context, url string, msg *ethereum.CallMsg) (uint64, error) {
+func (m *MockMultiClient) EstimateGas(ctx context.Context, url string, msg *ethereum0.CallMsg) (uint64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EstimateGas", ctx, url, msg)
 	ret0, _ := ret[0].(uint64)
@@ -1144,10 +1159,10 @@ func (mr *MockMultiClientMockRecorder) Network(ctx, url interface{}) *gomock.Cal
 }
 
 // SyncProgress mocks base method
-func (m *MockMultiClient) SyncProgress(ctx context.Context, url string) (*ethereum.SyncProgress, error) {
+func (m *MockMultiClient) SyncProgress(ctx context.Context, url string) (*ethereum0.SyncProgress, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SyncProgress", ctx, url)
-	ret0, _ := ret[0].(*ethereum.SyncProgress)
+	ret0, _ := ret[0].(*ethereum0.SyncProgress)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -1189,10 +1204,10 @@ func (mr *MockMultiClientMockRecorder) PrivCreatePrivacyGroup(ctx, endpoint, add
 }
 
 // PrivateTransactionReceipt mocks base method
-func (m *MockMultiClient) PrivateTransactionReceipt(ctx context.Context, url string, txHash common.Hash) (*ethereum0.Receipt, error) {
+func (m *MockMultiClient) PrivateTransactionReceipt(ctx context.Context, url string, txHash common.Hash) (*ethereum.Receipt, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "PrivateTransactionReceipt", ctx, url, txHash)
-	ret0, _ := ret[0].(*ethereum0.Receipt)
+	ret0, _ := ret[0].(*ethereum.Receipt)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -1201,6 +1216,21 @@ func (m *MockMultiClient) PrivateTransactionReceipt(ctx context.Context, url str
 func (mr *MockMultiClientMockRecorder) PrivateTransactionReceipt(ctx, url, txHash interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivateTransactionReceipt", reflect.TypeOf((*MockMultiClient)(nil).PrivateTransactionReceipt), ctx, url, txHash)
+}
+
+// PrivCodeAt mocks base method
+func (m *MockMultiClient) PrivCodeAt(ctx context.Context, url string, account common.Address, privateGroupID string, blockNumber *big.Int) ([]byte, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PrivCodeAt", ctx, url, account, privateGroupID, blockNumber)
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PrivCodeAt indicates an expected call of PrivCodeAt
+func (mr *MockMultiClientMockRecorder) PrivCodeAt(ctx, url, account, privateGroupID, blockNumber interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivCodeAt", reflect.TypeOf((*MockMultiClient)(nil).PrivCodeAt), ctx, url, account, privateGroupID, blockNumber)
 }
 
 // PrivEEANonce mocks base method
@@ -1351,7 +1381,7 @@ func (m *MockClient) EXPECT() *MockClientMockRecorder {
 }
 
 // SendTransaction mocks base method
-func (m *MockClient) SendTransaction(ctx context.Context, url string, args *types0.SendTxArgs) (common.Hash, error) {
+func (m *MockClient) SendTransaction(ctx context.Context, url string, args *types.SendTxArgs) (common.Hash, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SendTransaction", ctx, url, args)
 	ret0, _ := ret[0].(common.Hash)
@@ -1396,10 +1426,10 @@ func (mr *MockClientMockRecorder) SendRawPrivateTransaction(ctx, url, raw interf
 }
 
 // BlockByHash mocks base method
-func (m *MockClient) BlockByHash(ctx context.Context, url string, hash common.Hash) (*types.Block, error) {
+func (m *MockClient) BlockByHash(ctx context.Context, url string, hash common.Hash) (*types0.Block, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "BlockByHash", ctx, url, hash)
-	ret0, _ := ret[0].(*types.Block)
+	ret0, _ := ret[0].(*types0.Block)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -1411,10 +1441,10 @@ func (mr *MockClientMockRecorder) BlockByHash(ctx, url, hash interface{}) *gomoc
 }
 
 // BlockByNumber mocks base method
-func (m *MockClient) BlockByNumber(ctx context.Context, url string, number *big.Int) (*types.Block, error) {
+func (m *MockClient) BlockByNumber(ctx context.Context, url string, number *big.Int) (*types0.Block, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "BlockByNumber", ctx, url, number)
-	ret0, _ := ret[0].(*types.Block)
+	ret0, _ := ret[0].(*types0.Block)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -1426,10 +1456,10 @@ func (mr *MockClientMockRecorder) BlockByNumber(ctx, url, number interface{}) *g
 }
 
 // HeaderByHash mocks base method
-func (m *MockClient) HeaderByHash(ctx context.Context, url string, hash common.Hash) (*types.Header, error) {
+func (m *MockClient) HeaderByHash(ctx context.Context, url string, hash common.Hash) (*types0.Header, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "HeaderByHash", ctx, url, hash)
-	ret0, _ := ret[0].(*types.Header)
+	ret0, _ := ret[0].(*types0.Header)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -1441,10 +1471,10 @@ func (mr *MockClientMockRecorder) HeaderByHash(ctx, url, hash interface{}) *gomo
 }
 
 // HeaderByNumber mocks base method
-func (m *MockClient) HeaderByNumber(ctx context.Context, url string, number *big.Int) (*types.Header, error) {
+func (m *MockClient) HeaderByNumber(ctx context.Context, url string, number *big.Int) (*types0.Header, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "HeaderByNumber", ctx, url, number)
-	ret0, _ := ret[0].(*types.Header)
+	ret0, _ := ret[0].(*types0.Header)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -1456,10 +1486,10 @@ func (mr *MockClientMockRecorder) HeaderByNumber(ctx, url, number interface{}) *
 }
 
 // TransactionByHash mocks base method
-func (m *MockClient) TransactionByHash(ctx context.Context, url string, hash common.Hash) (*types.Transaction, bool, error) {
+func (m *MockClient) TransactionByHash(ctx context.Context, url string, hash common.Hash) (*types0.Transaction, bool, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "TransactionByHash", ctx, url, hash)
-	ret0, _ := ret[0].(*types.Transaction)
+	ret0, _ := ret[0].(*types0.Transaction)
 	ret1, _ := ret[1].(bool)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
@@ -1472,10 +1502,10 @@ func (mr *MockClientMockRecorder) TransactionByHash(ctx, url, hash interface{}) 
 }
 
 // TransactionReceipt mocks base method
-func (m *MockClient) TransactionReceipt(ctx context.Context, url string, txHash common.Hash) (*ethereum0.Receipt, error) {
+func (m *MockClient) TransactionReceipt(ctx context.Context, url string, txHash common.Hash) (*ethereum.Receipt, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "TransactionReceipt", ctx, url, txHash)
-	ret0, _ := ret[0].(*ethereum0.Receipt)
+	ret0, _ := ret[0].(*ethereum.Receipt)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -1607,7 +1637,7 @@ func (mr *MockClientMockRecorder) PendingNonceAt(ctx, url, account interface{}) 
 }
 
 // CallContract mocks base method
-func (m *MockClient) CallContract(ctx context.Context, url string, msg *ethereum.CallMsg, blockNumber *big.Int) ([]byte, error) {
+func (m *MockClient) CallContract(ctx context.Context, url string, msg *ethereum0.CallMsg, blockNumber *big.Int) ([]byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CallContract", ctx, url, msg, blockNumber)
 	ret0, _ := ret[0].([]byte)
@@ -1622,7 +1652,7 @@ func (mr *MockClientMockRecorder) CallContract(ctx, url, msg, blockNumber interf
 }
 
 // PendingCallContract mocks base method
-func (m *MockClient) PendingCallContract(ctx context.Context, url string, msg *ethereum.CallMsg) ([]byte, error) {
+func (m *MockClient) PendingCallContract(ctx context.Context, url string, msg *ethereum0.CallMsg) ([]byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "PendingCallContract", ctx, url, msg)
 	ret0, _ := ret[0].([]byte)
@@ -1637,7 +1667,7 @@ func (mr *MockClientMockRecorder) PendingCallContract(ctx, url, msg interface{})
 }
 
 // EstimateGas mocks base method
-func (m *MockClient) EstimateGas(ctx context.Context, url string, msg *ethereum.CallMsg) (uint64, error) {
+func (m *MockClient) EstimateGas(ctx context.Context, url string, msg *ethereum0.CallMsg) (uint64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EstimateGas", ctx, url, msg)
 	ret0, _ := ret[0].(uint64)
@@ -1682,10 +1712,10 @@ func (mr *MockClientMockRecorder) Network(ctx, url interface{}) *gomock.Call {
 }
 
 // SyncProgress mocks base method
-func (m *MockClient) SyncProgress(ctx context.Context, url string) (*ethereum.SyncProgress, error) {
+func (m *MockClient) SyncProgress(ctx context.Context, url string) (*ethereum0.SyncProgress, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SyncProgress", ctx, url)
-	ret0, _ := ret[0].(*ethereum.SyncProgress)
+	ret0, _ := ret[0].(*ethereum0.SyncProgress)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -1739,7 +1769,7 @@ func (m *MockEEAClient) EXPECT() *MockEEAClientMockRecorder {
 }
 
 // CallContract mocks base method
-func (m *MockEEAClient) CallContract(ctx context.Context, url string, msg *ethereum.CallMsg, blockNumber *big.Int) ([]byte, error) {
+func (m *MockEEAClient) CallContract(ctx context.Context, url string, msg *ethereum0.CallMsg, blockNumber *big.Int) ([]byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CallContract", ctx, url, msg, blockNumber)
 	ret0, _ := ret[0].([]byte)
@@ -1754,7 +1784,7 @@ func (mr *MockEEAClientMockRecorder) CallContract(ctx, url, msg, blockNumber int
 }
 
 // PendingCallContract mocks base method
-func (m *MockEEAClient) PendingCallContract(ctx context.Context, url string, msg *ethereum.CallMsg) ([]byte, error) {
+func (m *MockEEAClient) PendingCallContract(ctx context.Context, url string, msg *ethereum0.CallMsg) ([]byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "PendingCallContract", ctx, url, msg)
 	ret0, _ := ret[0].([]byte)
@@ -1769,7 +1799,7 @@ func (mr *MockEEAClientMockRecorder) PendingCallContract(ctx, url, msg interface
 }
 
 // EstimateGas mocks base method
-func (m *MockEEAClient) EstimateGas(ctx context.Context, url string, msg *ethereum.CallMsg) (uint64, error) {
+func (m *MockEEAClient) EstimateGas(ctx context.Context, url string, msg *ethereum0.CallMsg) (uint64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EstimateGas", ctx, url, msg)
 	ret0, _ := ret[0].(uint64)
@@ -1814,10 +1844,10 @@ func (mr *MockEEAClientMockRecorder) Network(ctx, url interface{}) *gomock.Call 
 }
 
 // SyncProgress mocks base method
-func (m *MockEEAClient) SyncProgress(ctx context.Context, url string) (*ethereum.SyncProgress, error) {
+func (m *MockEEAClient) SyncProgress(ctx context.Context, url string) (*ethereum0.SyncProgress, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SyncProgress", ctx, url)
-	ret0, _ := ret[0].(*ethereum.SyncProgress)
+	ret0, _ := ret[0].(*ethereum0.SyncProgress)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -1859,10 +1889,10 @@ func (mr *MockEEAClientMockRecorder) PrivCreatePrivacyGroup(ctx, endpoint, addre
 }
 
 // PrivateTransactionReceipt mocks base method
-func (m *MockEEAClient) PrivateTransactionReceipt(ctx context.Context, url string, txHash common.Hash) (*ethereum0.Receipt, error) {
+func (m *MockEEAClient) PrivateTransactionReceipt(ctx context.Context, url string, txHash common.Hash) (*ethereum.Receipt, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "PrivateTransactionReceipt", ctx, url, txHash)
-	ret0, _ := ret[0].(*ethereum0.Receipt)
+	ret0, _ := ret[0].(*ethereum.Receipt)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -1871,6 +1901,21 @@ func (m *MockEEAClient) PrivateTransactionReceipt(ctx context.Context, url strin
 func (mr *MockEEAClientMockRecorder) PrivateTransactionReceipt(ctx, url, txHash interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivateTransactionReceipt", reflect.TypeOf((*MockEEAClient)(nil).PrivateTransactionReceipt), ctx, url, txHash)
+}
+
+// PrivCodeAt mocks base method
+func (m *MockEEAClient) PrivCodeAt(ctx context.Context, url string, account common.Address, privateGroupID string, blockNumber *big.Int) ([]byte, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PrivCodeAt", ctx, url, account, privateGroupID, blockNumber)
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PrivCodeAt indicates an expected call of PrivCodeAt
+func (mr *MockEEAClientMockRecorder) PrivCodeAt(ctx, url, account, privateGroupID, blockNumber interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivCodeAt", reflect.TypeOf((*MockEEAClient)(nil).PrivCodeAt), ctx, url, account, privateGroupID, blockNumber)
 }
 
 // PrivEEANonce mocks base method
@@ -1957,7 +2002,7 @@ func (m *MockQuorumClient) EXPECT() *MockQuorumClientMockRecorder {
 }
 
 // CallContract mocks base method
-func (m *MockQuorumClient) CallContract(ctx context.Context, url string, msg *ethereum.CallMsg, blockNumber *big.Int) ([]byte, error) {
+func (m *MockQuorumClient) CallContract(ctx context.Context, url string, msg *ethereum0.CallMsg, blockNumber *big.Int) ([]byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CallContract", ctx, url, msg, blockNumber)
 	ret0, _ := ret[0].([]byte)
@@ -1972,7 +2017,7 @@ func (mr *MockQuorumClientMockRecorder) CallContract(ctx, url, msg, blockNumber 
 }
 
 // PendingCallContract mocks base method
-func (m *MockQuorumClient) PendingCallContract(ctx context.Context, url string, msg *ethereum.CallMsg) ([]byte, error) {
+func (m *MockQuorumClient) PendingCallContract(ctx context.Context, url string, msg *ethereum0.CallMsg) ([]byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "PendingCallContract", ctx, url, msg)
 	ret0, _ := ret[0].([]byte)
@@ -1987,7 +2032,7 @@ func (mr *MockQuorumClientMockRecorder) PendingCallContract(ctx, url, msg interf
 }
 
 // EstimateGas mocks base method
-func (m *MockQuorumClient) EstimateGas(ctx context.Context, url string, msg *ethereum.CallMsg) (uint64, error) {
+func (m *MockQuorumClient) EstimateGas(ctx context.Context, url string, msg *ethereum0.CallMsg) (uint64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EstimateGas", ctx, url, msg)
 	ret0, _ := ret[0].(uint64)
@@ -2032,10 +2077,10 @@ func (mr *MockQuorumClientMockRecorder) Network(ctx, url interface{}) *gomock.Ca
 }
 
 // SyncProgress mocks base method
-func (m *MockQuorumClient) SyncProgress(ctx context.Context, url string) (*ethereum.SyncProgress, error) {
+func (m *MockQuorumClient) SyncProgress(ctx context.Context, url string) (*ethereum0.SyncProgress, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SyncProgress", ctx, url)
-	ret0, _ := ret[0].(*ethereum.SyncProgress)
+	ret0, _ := ret[0].(*ethereum0.SyncProgress)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -2047,10 +2092,10 @@ func (mr *MockQuorumClientMockRecorder) SyncProgress(ctx, url interface{}) *gomo
 }
 
 // BlockByHash mocks base method
-func (m *MockQuorumClient) BlockByHash(ctx context.Context, url string, hash common.Hash) (*types.Block, error) {
+func (m *MockQuorumClient) BlockByHash(ctx context.Context, url string, hash common.Hash) (*types0.Block, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "BlockByHash", ctx, url, hash)
-	ret0, _ := ret[0].(*types.Block)
+	ret0, _ := ret[0].(*types0.Block)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -2062,10 +2107,10 @@ func (mr *MockQuorumClientMockRecorder) BlockByHash(ctx, url, hash interface{}) 
 }
 
 // BlockByNumber mocks base method
-func (m *MockQuorumClient) BlockByNumber(ctx context.Context, url string, number *big.Int) (*types.Block, error) {
+func (m *MockQuorumClient) BlockByNumber(ctx context.Context, url string, number *big.Int) (*types0.Block, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "BlockByNumber", ctx, url, number)
-	ret0, _ := ret[0].(*types.Block)
+	ret0, _ := ret[0].(*types0.Block)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -2077,10 +2122,10 @@ func (mr *MockQuorumClientMockRecorder) BlockByNumber(ctx, url, number interface
 }
 
 // HeaderByHash mocks base method
-func (m *MockQuorumClient) HeaderByHash(ctx context.Context, url string, hash common.Hash) (*types.Header, error) {
+func (m *MockQuorumClient) HeaderByHash(ctx context.Context, url string, hash common.Hash) (*types0.Header, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "HeaderByHash", ctx, url, hash)
-	ret0, _ := ret[0].(*types.Header)
+	ret0, _ := ret[0].(*types0.Header)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -2092,10 +2137,10 @@ func (mr *MockQuorumClientMockRecorder) HeaderByHash(ctx, url, hash interface{})
 }
 
 // HeaderByNumber mocks base method
-func (m *MockQuorumClient) HeaderByNumber(ctx context.Context, url string, number *big.Int) (*types.Header, error) {
+func (m *MockQuorumClient) HeaderByNumber(ctx context.Context, url string, number *big.Int) (*types0.Header, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "HeaderByNumber", ctx, url, number)
-	ret0, _ := ret[0].(*types.Header)
+	ret0, _ := ret[0].(*types0.Header)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -2107,10 +2152,10 @@ func (mr *MockQuorumClientMockRecorder) HeaderByNumber(ctx, url, number interfac
 }
 
 // TransactionByHash mocks base method
-func (m *MockQuorumClient) TransactionByHash(ctx context.Context, url string, hash common.Hash) (*types.Transaction, bool, error) {
+func (m *MockQuorumClient) TransactionByHash(ctx context.Context, url string, hash common.Hash) (*types0.Transaction, bool, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "TransactionByHash", ctx, url, hash)
-	ret0, _ := ret[0].(*types.Transaction)
+	ret0, _ := ret[0].(*types0.Transaction)
 	ret1, _ := ret[1].(bool)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
@@ -2123,10 +2168,10 @@ func (mr *MockQuorumClientMockRecorder) TransactionByHash(ctx, url, hash interfa
 }
 
 // TransactionReceipt mocks base method
-func (m *MockQuorumClient) TransactionReceipt(ctx context.Context, url string, txHash common.Hash) (*ethereum0.Receipt, error) {
+func (m *MockQuorumClient) TransactionReceipt(ctx context.Context, url string, txHash common.Hash) (*ethereum.Receipt, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "TransactionReceipt", ctx, url, txHash)
-	ret0, _ := ret[0].(*ethereum0.Receipt)
+	ret0, _ := ret[0].(*ethereum.Receipt)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

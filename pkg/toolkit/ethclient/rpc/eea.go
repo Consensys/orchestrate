@@ -3,6 +3,7 @@ package rpc
 import (
 	"context"
 	"encoding/json"
+	"math/big"
 
 	"github.com/ConsenSys/orchestrate/pkg/errors"
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/utils"
@@ -73,6 +74,18 @@ func (ec *Client) PrivFindPrivacyGroup(ctx context.Context, endpoint string, mem
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
 	return groupIDs, nil
+}
+
+// PrivCodeAt returns the contract code of the given account.
+// The block number can be nil, in which case the code is taken from the latest known block.
+// https://besu.hyperledger.org/en/stable/Reference/API-Methods/#priv_getcode
+func (ec *Client) PrivCodeAt(ctx context.Context, endpoint string, account ethcommon.Address, privateGroupID string, blockNumber *big.Int) ([]byte, error) {
+	var code hexutil.Bytes
+	err := ec.Call(ctx, endpoint, utils.ProcessResult(&code), "priv_getCode", privateGroupID, account, toBlockNumArg(blockNumber))
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
+	return code, nil
 }
 
 func (ec *Client) EEAPrivPrecompiledContractAddr(ctx context.Context, endpoint string) (ethcommon.Address, error) {

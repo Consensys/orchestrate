@@ -6,10 +6,10 @@ package mocks
 
 import (
 	context "context"
+	ethereum "github.com/ConsenSys/orchestrate/pkg/types/ethereum"
 	common "github.com/ethereum/go-ethereum/common"
 	types "github.com/ethereum/go-ethereum/core/types"
 	gomock "github.com/golang/mock/gomock"
-	ethereum "github.com/ConsenSys/orchestrate/pkg/types/ethereum"
 	big "math/big"
 	reflect "reflect"
 )
@@ -321,4 +321,19 @@ func (m *MockEthClient) PrivateTransactionReceipt(ctx context.Context, url strin
 func (mr *MockEthClientMockRecorder) PrivateTransactionReceipt(ctx, url, txHash interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivateTransactionReceipt", reflect.TypeOf((*MockEthClient)(nil).PrivateTransactionReceipt), ctx, url, txHash)
+}
+
+// PrivCodeAt mocks base method
+func (m *MockEthClient) PrivCodeAt(ctx context.Context, url string, account common.Address, privateGroupID string, blockNumber *big.Int) ([]byte, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PrivCodeAt", ctx, url, account, privateGroupID, blockNumber)
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PrivCodeAt indicates an expected call of PrivCodeAt
+func (mr *MockEthClientMockRecorder) PrivCodeAt(ctx, url, account, privateGroupID, blockNumber interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrivCodeAt", reflect.TypeOf((*MockEthClient)(nil).PrivCodeAt), ctx, url, account, privateGroupID, blockNumber)
 }

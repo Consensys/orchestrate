@@ -34,7 +34,7 @@ const component = "tx-listener.session.ethereum.hook"
 
 type Hook struct {
 	conf     *Config
-	ec       ethclient.ChainStateReader
+	ec       ethclient.MultiClient
 	producer sarama.SyncProducer
 	client   sdk.OrchestrateClient
 	logger   *log.Logger
@@ -42,7 +42,7 @@ type Hook struct {
 
 func NewHook(
 	conf *Config,
-	ec ethclient.ChainStateReader,
+	ec ethclient.MultiClient,
 	producer sarama.SyncProducer,
 	client sdk.OrchestrateClient,
 ) *Hook {
@@ -228,24 +228,35 @@ func GetAbi(e *ethAbi.Event) string {
 }
 
 func (hk *Hook) registerDeployedContract(ctx context.Context, c *dynamic.Chain, receipt *types.Receipt, block *ethtypes.Block) error {
-	if receipt.ContractAddress != "" && receipt.ContractAddress != "0x0000000000000000000000000000000000000000" {
-		logger := hk.logger.WithContext(ctx).WithField("contract_address", receipt.ContractAddress)
-
-		logger.Debug("register new deployed contract")
-		code, err := hk.ec.CodeAt(ctx, c.URL, ethcommon.HexToAddress(receipt.ContractAddress), block.Number())
-		if err != nil {
-			return err
-		}
-
-		err = hk.client.SetContractAddressCodeHash(ctx, receipt.ContractAddress, c.ChainID,
-			&api.SetContractCodeHashRequest{
-				CodeHash: crypto.Keccak256Hash(code).String(),
-			})
-		if err != nil {
-			logger.WithError(err).Error("failed to register contract")
-			return err
-		}
+	if receipt.ContractAddress == "" || receipt.ContractAddress == "0x0000000000000000000000000000000000000000" {
+		return nil
 	}
+
+	logger := hk.logger.WithContext(ctx).WithField("contract_address", receipt.ContractAddress)
+	logger.Debug("register new deployed contract")
+	var code []byte
+	var err error
+	if receipt.PrivacyGroupId != "" {
+		// Fetch EEA deployed contract code
+		code, err = hk.ec.PrivCodeAt(ctx, c.URL, ethcommon.HexToAddress(receipt.ContractAddress), receipt.PrivacyGroupId, block.Number())
+	} else {
+		code, err = hk.ec.CodeAt(ctx, c.URL, ethcommon.HexToAddress(receipt.ContractAddress), block.Number())
+	}
+
+	if err != nil {
+		return err
+	}
+
+	err = hk.client.SetContractAddressCodeHash(ctx, receipt.ContractAddress, c.ChainID,
+		&api.SetContractCodeHashRequest{
+			CodeHash: crypto.Keccak256Hash(code).String(),
+		})
+	if err != nil {
+		logger.WithError(err).Error("failed to register contract")
+		return err
+	}
+
+	logger.Info("contract has been registered successfully")
 	return nil
 }
 

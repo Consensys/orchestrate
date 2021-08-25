@@ -69,6 +69,10 @@ type ChainLedgerReader interface {
 type EEAChainLedgerReader interface {
 	// TransactionReceipt returns the receipt of a transaction by transaction hash.
 	PrivateTransactionReceipt(ctx context.Context, url string, txHash ethcommon.Hash) (*proto.Receipt, error)
+
+	// PrivCodeAt returns contract code of the given account.
+	// The block number can be nil, in which case the code is taken from the latest known block.
+	PrivCodeAt(ctx context.Context, url string, account ethcommon.Address, privateGroupID string, blockNumber *big.Int) ([]byte, error)
 }
 
 // ChainStateReader is a service to access a blockchain state information

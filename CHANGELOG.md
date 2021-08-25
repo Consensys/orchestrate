@@ -4,14 +4,15 @@
 ### ⚠ BREAKING CHANGES
 * Integration of Quorum Key Manager as replacement of Orchestrate Key Manager service
 
+## v21.1.8 (WIP)
+### 🛠 Bug fixes
+* Empty tenant_id when no AUTH_API_KEY is defined
+* Decoded logs for EEA private contract 
+
 ## v21.1.7 (2021-07-06)
 
 ### 🛠 Bug fixes
 * Database overload querying for registered chains
-
-## v21.1.7 (WIP)
-### 🛠 Bug fixes
-* Empty tenant_id when no AUTH_API_KEY is defined
 
 ## v21.1.6 (2021-06-25)
 ### 🛠 Bug fixes
