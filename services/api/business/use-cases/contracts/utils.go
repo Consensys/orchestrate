@@ -1,7 +1,7 @@
 package contracts
 
 import (
-	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
+	ethabi "github.com/ConsenSys/orchestrate/pkg/go-ethereum/v1_9_12/accounts/abi"
 )
 
 // returns the selector associated to a signature hash

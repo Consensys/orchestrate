@@ -7,7 +7,7 @@ import (
 
 	"github.com/ConsenSys/orchestrate/pkg/types/tx"
 
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -29,6 +29,6 @@ func TestMarshaller(t *testing.T) {
 
 func TestMarshallerError(t *testing.T) {
 	b, err := Marshal(nil)
-	assert.Error(t, err, "Marshal should error on nil")
+	assert.NoError(t, err, "Marshal should not error on nil")
 	assert.Equal(t, []byte(nil), b, "Marshal nil should be correct")
 }

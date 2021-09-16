@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/ConsenSys/orchestrate/pkg/errors"
+	ethabi "github.com/ConsenSys/orchestrate/pkg/go-ethereum/v1_9_12/accounts/abi"
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/database"
 	"github.com/ConsenSys/orchestrate/pkg/types/entities"
@@ -11,7 +12,6 @@ import (
 	usecases "github.com/ConsenSys/orchestrate/services/api/business/use-cases"
 	"github.com/ConsenSys/orchestrate/services/api/store"
 	"github.com/ConsenSys/orchestrate/services/api/store/models"
-	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"

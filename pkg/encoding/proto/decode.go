@@ -2,7 +2,7 @@ package proto
 
 import (
 	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 )
 
 // Unmarshal parses the protocol buffer representation in `buf`
@@ -23,7 +23,7 @@ func Unmarshal(buf []byte, pb proto.Message) error {
 // writes the decoded result to pb
 func UnmarshalMerge(buf []byte, pb proto.Message) error {
 	// Unmarshal
-	err := proto.UnmarshalMerge(buf, pb)
+	err := proto.UnmarshalOptions{Merge: true}.Unmarshal(buf, pb)
 	if err != nil {
 		return errors.EncodingError(err.Error()).SetComponent(component)
 	}

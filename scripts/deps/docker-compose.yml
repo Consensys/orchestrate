@@ -4,7 +4,12 @@ x-container-common: &container-common
   restart: ${CONTAINER_RESTART-on-failure}
   networks:
     - orchestrate
-    - quorum
+
+x-qkm-common: &qkm-common
+  DB_HOST: ${DB_HOST-postgres}
+  DB_PORT: ${DB_PORT-}
+  LOG_LEVEL: ${LOG_LEVEL-debug}
+  LOG_FORMAT: ${LOG_FORMAT-text}
 
 x-postgres-common: &postgres-common
   environment:
@@ -67,17 +72,17 @@ services:
   postgres-unit:
     <<: *container-common
     <<: *postgres-common
-    image: postgres:13.1-alpine
+    image: postgres:13.4-alpine
     command: ["postgres", "-c", "log_statement=all", "-c", "log_destination=stderr", "-c", "log_connections=1", "-c", "log_disconnections=1"]
     ports:
       - 5432:5432
     volumes:
       - db-data-postgres-unit:/var/lib/postgresql/data
 
-  postgres-api:
+  postgres:
     <<: *container-common
     <<: *postgres-common
-    image: postgres:13.1-alpine
+    image: postgres:13.4-alpine
     #    command: ["postgres", "-c", "max_connections=100"]
     #    command: ["postgres", "-c", "log_statement=all"]
     volumes:
@@ -111,7 +116,7 @@ services:
       VAULT_ADDR: ${VAULT_ADDR-http://vault:8200}
       PLUGIN_PATH: ${PLUGIN_PATH-/vault/plugins}
       TOKEN_PATH: ${TOKEN_PATH-/vault/token}
-      PLUGIN_VERSION: ${PLUGIN_VERSION-v0.0.11-alpha.3}
+      PLUGIN_VERSION: ${PLUGIN_VERSION-v0.0.11}
     restart: "no"
     depends_on:
       - vault
@@ -137,21 +142,31 @@ services:
       - ./hashicorp/config/agent-config.hcl:/vault/config.hcl:ro
     entrypoint: vault agent -config=/vault/config.hcl
 
+  quorum-key-manager-migration:
+    <<: *container-common
+    image: docker.consensys.net/pub/quorum-key-manager:v21.7.0-alpha.5
+    #    image: quorum-key-manager:local
+    environment:
+      <<: *qkm-common
+    restart: "no"
+    command: migrate up
+
   quorum-key-manager:
     <<: *container-common
-    image: docker.consensys.net/pub/quorum-key-manager:v21.7.0-alpha.1
+    image: docker.consensys.net/pub/quorum-key-manager:v21.7.0-alpha.5
+    #    image: quorum-key-manager:local
     depends_on:
       - vault
+      - quorum-key-manager-migration
     volumes:
       - vault-token:/vault/token
-      - ./quorum-key-manager/:/manifests/
+      - ./quorum-key-manager/manifest.yml:/manifests/manifest.yml
     ports:
       - 8180:8080
       - 8181:8081
     environment:
-      HTTP_PORT: 8080
+      <<: *qkm-common
       HTTP_HOST: 0.0.0.0
-      HEALTH_PORT: 8081
       MANIFEST_PATH: /manifests
     command: run
     healthcheck:
@@ -172,9 +187,5 @@ volumes:
 
 networks:
   orchestrate:
+    name: orchestrate
     driver: bridge
-  quorum:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.16.238.0/23

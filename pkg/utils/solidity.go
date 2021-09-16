@@ -44,7 +44,7 @@ func ParseSignature(sig string) (name, args string, err error) {
 	return parts[1], parts[2], nil
 }
 
-// VerifySignature makes hashes short for a limited column size
+// VerifyMessageSignature makes hashes short for a limited column size
 func IsValidSignature(s string) bool {
 	return signaturePattern.MatchString(s)
 }

@@ -10,7 +10,7 @@ import (
 
 	"github.com/ConsenSys/orchestrate/pkg/types/tx"
 
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 	"github.com/stretchr/testify/assert"
 	"github.com/ConsenSys/orchestrate/pkg/errors"
 )

@@ -32,7 +32,7 @@ func TestLog(t *testing.T) {
 	var topics []string
 	topics = append(topics, log.GetTopics()...)
 	assert.Equal(t, []string{"0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef", "0x00000000000000000000000080b2c9d7cbbf30a1b0fc8983c647d754c6525615"}, topics, "Topics should match")
-	assert.Equal(t, hexutil.Encode([]byte{0x1a, 0x05, 0x56, 0x90, 0xd9, 0xdb, 0x80, 0x00}), log.Data, "Data should match")
+	assert.Equal(t, hexutil.Encode([]byte{0x1a, 0x05, 0x56, 0x90, 0xd9, 0xdb, 0x80, 0x00}), log.Data, "Message should match")
 	assert.Equal(t, uint64(2019236), log.BlockNumber, "Blocknumber should match")
 	assert.Equal(t, "0x3b198bfd5d2907285af009e9ae84a0ecd63677110d89d7e030251acb87f6487e", log.GetTxHash(), "TxHash should match")
 	assert.Equal(t, uint64(3), log.TxIndex, "TxIndex should match")
@@ -133,9 +133,6 @@ func TestReceipt_UnmarshalJSON(t *testing.T) {
 				GasUsed:              tt.fields.GasUsed,
 				CumulativeGasUsed:    tt.fields.CumulativeGasUsed,
 				RevertReason:         tt.fields.RevertReason,
-				XXX_NoUnkeyedLiteral: tt.fields.XXX_NoUnkeyedLiteral,
-				XXX_unrecognized:     tt.fields.XXX_unrecognized,
-				XXX_sizecache:        tt.fields.XXX_sizecache,
 			}
 			r := &Receipt{}
 			if err := r.UnmarshalJSON(tt.args.input); (err != nil) != tt.wantErr {

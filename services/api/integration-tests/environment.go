@@ -35,11 +35,13 @@ import (
 	"github.com/spf13/viper"
 )
 
-const postgresContainerID = "postgres-api"
+const postgresContainerID = "postgres"
+const qkmPostgresContainerID = "qkm-postgres"
 const kafkaContainerID = "Kafka-api"
 const zookeeperContainerID = "zookeeper-api"
 const ganacheContainerID = "ganache-api"
 const qkmContainerID = "quorum-key-manager"
+const qkmContainerMigrateID = "quorum-key-manager-migrate"
 const hashicorpContainerID = "hashicorp"
 const networkName = "api"
 const localhost = "localhost"
@@ -47,6 +49,7 @@ const qkmStoreName = "orchestrate-eth1"
 const hashicorpMountPath = "orchestrate"
 
 var envPGHostPort string
+var envQKMPGHostPort string
 var envKafkaHostPort string
 var envHTTPPort string
 var envMetricsPort string
@@ -70,6 +73,7 @@ type IntegrationEnvironment struct {
 func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, error) {
 	logger := log.FromContext(ctx)
 	envPGHostPort = strconv.Itoa(rand.IntnRange(10000, 15235))
+	envQKMPGHostPort = strconv.Itoa(rand.IntnRange(10000, 15235))
 	envHTTPPort = strconv.Itoa(rand.IntnRange(20000, 28080))
 	envMetricsPort = strconv.Itoa(rand.IntnRange(30000, 38082))
 	envKafkaHostPort = strconv.Itoa(rand.IntnRange(20000, 29092))
@@ -101,7 +105,7 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 		"--kafka-url=" + kafkaExternalHostname,
 		"--key-manager-url=" + quorumKeyManagerURL,
 		"--key-manager-store-name=" + qkmStoreName,
-		"--log-level=error",
+		"--log-level=warn",
 	}
 
 	err := flgs.Parse(args)
@@ -134,10 +138,14 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 
 	qkmContainer := quorumkeymanagerDocker.NewDefault().
 		SetHostPort(envQKMHostPort).
+		SetDBHost(qkmPostgresContainerID).
 		SetManifestDirectory(manifestsPath)
 
+	qkmContainerMigrate := quorumkeymanagerDocker.NewDefaultMigrate().
+		SetDBHost(qkmPostgresContainerID)
+
 	err = qkmContainer.CreateManifest("manifest.yml", &qkm.Manifest{
-		Kind:    "Eth1Account",
+		Kind:    "Ethereum",
 		Version: "0.0.1",
 		Name:    qkmStoreName,
 		Specs: map[string]interface{}{
@@ -158,17 +166,19 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 	// Initialize environment container setup
 	composition := &config.Composition{
 		Containers: map[string]*config.Container{
-			postgresContainerID:  {Postgres: postgresDocker.NewDefault().SetHostPort(envPGHostPort)},
-			zookeeperContainerID: {Zookeeper: zookeeper.NewDefault()},
+			postgresContainerID:    {Postgres: postgresDocker.NewDefault().SetHostPort(envPGHostPort)},
+			qkmPostgresContainerID: {Postgres: postgresDocker.NewDefault().SetHostPort(envQKMPGHostPort)},
+			zookeeperContainerID:   {Zookeeper: zookeeper.NewDefault()},
 			kafkaContainerID: {Kafka: kafkaDocker.NewDefault().
 				SetHostPort(envKafkaHostPort).
 				SetZookeeperHostname(zookeeperContainerID).
 				SetKafkaInternalHostname(kafkaContainerID).
 				SetKafkaExternalHostname(kafkaExternalHostname),
 			},
-			hashicorpContainerID: {HashicorpVault: vaultContainer},
-			qkmContainerID:       {QuorumKeyManager: qkmContainer},
-			ganacheContainerID:   {Ganache: ganacheDocker.NewDefault().SetHostPort(envGanacheHostPort).SetHost(ganacheExternalHostname)},
+			hashicorpContainerID:  {HashicorpVault: vaultContainer},
+			qkmContainerMigrateID: {QuorumKeyManagerMigrate: qkmContainerMigrate},
+			qkmContainerID:        {QuorumKeyManager: qkmContainer},
+			ganacheContainerID:    {Ganache: ganacheDocker.NewDefault().SetHostPort(envGanacheHostPort).SetHost(ganacheExternalHostname)},
 		},
 	}
 
@@ -210,16 +220,9 @@ func (env *IntegrationEnvironment) Start(ctx context.Context) error {
 		return err
 	}
 
-	// Start quorum key manager
-	err = env.client.Up(ctx, qkmContainerID, networkName)
+	err = env.client.Up(ctx, qkmPostgresContainerID, networkName)
 	if err != nil {
-		env.logger.WithError(err).Error("could not up quorum-key-manager")
-		return err
-	}
-
-	err = env.client.WaitTillIsReady(ctx, qkmContainerID, 10*time.Second)
-	if err != nil {
-		env.logger.WithError(err).Error("could not start quorum-key-manager")
+		env.logger.WithError(err).Error("could not up QKM postgres")
 		return err
 	}
 
@@ -233,6 +236,26 @@ func (env *IntegrationEnvironment) Start(ctx context.Context) error {
 	err = env.client.WaitTillIsReady(ctx, postgresContainerID, 10*time.Second)
 	if err != nil {
 		env.logger.WithError(err).Error("could not start postgres")
+		return err
+	}
+
+	// Start quorum key manager migration
+	err = env.client.Up(ctx, qkmContainerMigrateID, networkName)
+	if err != nil {
+		env.logger.WithError(err).Error("could not up quorum-key-manager")
+		return err
+	}
+
+	// Start quorum key manager
+	err = env.client.Up(ctx, qkmContainerID, networkName)
+	if err != nil {
+		env.logger.WithError(err).Error("could not up quorum-key-manager")
+		return err
+	}
+
+	err = env.client.WaitTillIsReady(ctx, qkmContainerID, 10*time.Second)
+	if err != nil {
+		env.logger.WithError(err).Error("could not start quorum-key-manager")
 		return err
 	}
 
@@ -321,39 +344,49 @@ func (env *IntegrationEnvironment) Teardown(ctx context.Context) {
 		}
 	}
 
-	err := env.client.Down(ctx, qkmContainerID)
+	err := env.client.Down(ctx, qkmContainerMigrateID)
 	if err != nil {
-		env.logger.WithError(err).Errorf("could not down zookeeper")
+		env.logger.WithError(err).Error("could not down quorum-key-manager-migration")
+	}
+
+	err = env.client.Down(ctx, qkmContainerID)
+	if err != nil {
+		env.logger.WithError(err).Error("could not down quorum-key-manager")
 	}
 
 	err = env.client.Down(ctx, hashicorpContainerID)
 	if err != nil {
-		env.logger.WithError(err).Errorf("could not down zookeeper")
+		env.logger.WithError(err).Error("could not down zookeeper")
 	}
 
 	err = env.client.Down(ctx, ganacheContainerID)
 	if err != nil {
-		env.logger.WithError(err).Errorf("could not down ganache")
+		env.logger.WithError(err).Error("could not down ganache")
+	}
+
+	err = env.client.Down(ctx, qkmPostgresContainerID)
+	if err != nil {
+		env.logger.WithError(err).Error("could not down qkm postgres")
 	}
 
 	err = env.client.Down(ctx, postgresContainerID)
 	if err != nil {
-		env.logger.WithError(err).Errorf("could not down postgres")
+		env.logger.WithError(err).Error("could not down postgres")
 	}
 
 	err = env.client.Down(ctx, kafkaContainerID)
 	if err != nil {
-		env.logger.WithError(err).Errorf("could not down Kafka")
+		env.logger.WithError(err).Error("could not down Kafka")
 	}
 
 	err = env.client.Down(ctx, zookeeperContainerID)
 	if err != nil {
-		env.logger.WithError(err).Errorf("could not down zookeeper")
+		env.logger.WithError(err).Error("could not down zookeeper")
 	}
 
 	err = env.client.RemoveNetwork(ctx, networkName)
 	if err != nil {
-		env.logger.WithError(err).Errorf("could not remove network")
+		env.logger.WithError(err).Error("could not remove network")
 	}
 }
 

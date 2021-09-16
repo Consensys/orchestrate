@@ -5,7 +5,7 @@ package abi
 import (
 	"testing"
 
-	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/ConsenSys/orchestrate/pkg/go-ethereum/v1_9_12/accounts/abi"
 	"github.com/stretchr/testify/assert"
 )
 

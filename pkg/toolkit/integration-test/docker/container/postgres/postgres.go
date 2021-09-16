@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/database/postgres"
+	"github.com/consensys/quorum-key-manager/pkg/common"
 	dockercontainer "github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/go-connections/nat"
@@ -14,7 +15,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const DefaultPostgresImage = "postgres:13.1-alpine"
+const DefaultPostgresImage = "postgres:13.4-alpine"
 
 const defaultPassword = "postgres"
 const defaultHostPort = "5432"
@@ -53,12 +54,18 @@ func (g *Postgres) GenerateContainerConfig(ctx context.Context, configuration in
 		Env: []string{
 			fmt.Sprintf("POSTGRES_PASSWORD=%v", cfg.Password),
 		},
+		Cmd: []string{"postgres", "-c", "log_statement=all"},
 		ExposedPorts: nat.PortSet{
 			"5432/tcp": struct{}{},
 		},
 	}
 
-	hostConfig := &dockercontainer.HostConfig{}
+	hostConfig := &dockercontainer.HostConfig{
+		Resources: dockercontainer.Resources{
+			OomKillDisable: common.ToPtr(true).(*bool),
+			PidsLimit:      common.ToPtr(int64(-1)).(*int64),
+		},
+	}
 	if cfg.Port != "" {
 		hostConfig.PortBindings = nat.PortMap{
 			"5432/tcp": []nat.PortBinding{{HostIP: "0.0.0.0", HostPort: cfg.Port}},

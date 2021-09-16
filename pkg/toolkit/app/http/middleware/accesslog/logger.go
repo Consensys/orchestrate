@@ -23,7 +23,7 @@ import (
 type key string
 
 const (
-	// DataTableKey is the key within the request context used to store the Log Data Table.
+	// DataTableKey is the key within the request context used to store the Log Message Table.
 	DataTableKey key = "LogDataTable"
 
 	// CommonFormat is the common logging format (CLF).

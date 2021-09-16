@@ -33,6 +33,7 @@ func New() *Compose {
 	factory.reflect.AddGenerator(goreflect.TypeOf(&hashicorp.Config{}), &hashicorp.Vault{})
 	factory.reflect.AddGenerator(goreflect.TypeOf(&ganache.Config{}), &ganache.Ganache{})
 	factory.reflect.AddGenerator(goreflect.TypeOf(&quorumkeymanager.Config{}), &quorumkeymanager.QuorumKeyManager{})
+	factory.reflect.AddGenerator(goreflect.TypeOf(&quorumkeymanager.ConfigMigrate{}), &quorumkeymanager.QuorumKeyManagerMigrate{})
 
 	return factory
 }

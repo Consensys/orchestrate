@@ -19,3 +19,7 @@ func Hash(object interface{}) (hash ethcommon.Hash, err error) {
 func Encode(object interface{}) ([]byte, error) {
 	return rlp.EncodeToBytes(object)
 }
+
+func Decode(data []byte, object interface{}) error {
+	return rlp.DecodeBytes(data, object)
+}

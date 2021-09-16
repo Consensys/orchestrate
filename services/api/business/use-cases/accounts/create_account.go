@@ -26,13 +26,13 @@ type createAccountUseCase struct {
 	db               store.DB
 	searchUC         usecases.SearchAccountsUseCase
 	fundAccountUC    usecases.FundAccountUseCase
-	keyManagerClient client.Eth1Client
+	keyManagerClient client.EthClient
 	storeName        string
 	logger           *log.Logger
 }
 
 func NewCreateAccountUseCase(db store.DB, searchUC usecases.SearchAccountsUseCase, fundAccountUC usecases.FundAccountUseCase,
-	keyManagerClient client.Eth1Client) usecases.CreateAccountUseCase {
+	keyManagerClient client.EthClient) usecases.CreateAccountUseCase {
 	return &createAccountUseCase{
 		db:               db,
 		searchUC:         searchUC,
@@ -61,9 +61,9 @@ func (uc *createAccountUseCase) Execute(ctx context.Context, account *entities.A
 	}
 
 	var accountID = generateKeyID(tenantID, account.Alias)
-	var resp *qkmtypes.Eth1AccountResponse
+	var resp *qkmtypes.EthAccountResponse
 	if privateKey != nil {
-		resp, err = uc.keyManagerClient.ImportEth1Account(ctx, uc.storeName, &qkmtypes.ImportEth1AccountRequest{
+		resp, err = uc.keyManagerClient.ImportEthAccount(ctx, uc.storeName, &qkmtypes.ImportEthAccountRequest{
 			KeyID:      accountID,
 			PrivateKey: privateKey,
 			Tags: map[string]string{
@@ -76,13 +76,13 @@ func (uc *createAccountUseCase) Execute(ctx context.Context, account *entities.A
 			logger.WithError(err).Debug("duplicated account has been imported")
 			privKey, _ := crypto.HexToECDSA(privateKey.String()[2:])
 			address := crypto.PubkeyToAddress(privKey.PublicKey).Hex()
-			resp, err = uc.keyManagerClient.GetEth1Account(ctx, uc.storeName, address)
+			resp, err = uc.keyManagerClient.GetEthAccount(ctx, uc.storeName, address)
 			if err == nil {
 				logger.WithField("address", address).Debug("updating account to amend allowed tenants")
 				// @TODO Prevent duplicated tenantIds
 				curTags := resp.Tags
 				curTags[qkm.TagIDAllowedTenants] += qkm.TagSeparatorAllowedTenants + tenantID
-				_, err = uc.keyManagerClient.UpdateEth1Account(ctx, uc.storeName, address, &qkmtypes.UpdateEth1AccountRequest{
+				_, err = uc.keyManagerClient.UpdateEthAccount(ctx, uc.storeName, address, &qkmtypes.UpdateEthAccountRequest{
 					Tags: curTags,
 				})
 			} else {
@@ -90,7 +90,7 @@ func (uc *createAccountUseCase) Execute(ctx context.Context, account *entities.A
 			}
 		}
 	} else {
-		resp, err = uc.keyManagerClient.CreateEth1Account(ctx, uc.storeName, &qkmtypes.CreateEth1AccountRequest{
+		resp, err = uc.keyManagerClient.CreateEthAccount(ctx, uc.storeName, &qkmtypes.CreateEthAccountRequest{
 			KeyID: accountID,
 			Tags: map[string]string{
 				qkm.TagIDAllowedTenants: tenantID,

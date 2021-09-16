@@ -1,13 +1,14 @@
 # Orchestrate Release Notes
 
-## v21.7.0 (WIP)
+## v21.9.0 (WIP)
 ### ⚠ BREAKING CHANGES
 * Integration of Quorum Key Manager as replacement of Orchestrate Key Manager service
+* Removed endpoints `/accounts/{address}/sign` and `/accounts/{address}/verify-signature` in favor of `/accounts/{address}/sign-message` and `/accounts/verify-message` accordingly to EIP-191 standards
 
-## v21.1.8 (WIP)
+## v21.1.8 (2021-08-25)
 ### 🛠 Bug fixes
-* Empty tenant_id when no AUTH_API_KEY is defined
-* Decoded logs for EEA private contract 
+* Wrong tenant assigment when API_KEY was not defined
+* Missing decoded logs in kafka receipts for private contract events
 
 ## v21.1.7 (2021-07-06)
 

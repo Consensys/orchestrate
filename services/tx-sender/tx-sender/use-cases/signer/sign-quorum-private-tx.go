@@ -40,21 +40,38 @@ func NewSignQuorumPrivateTransactionUseCase(keyManagerClient client.KeyManagerCl
 }
 
 // Execute signs a quorum private transaction
-func (uc *signQuorumPrivateTransactionUseCase) Execute(ctx context.Context, job *entities.Job) (raw, txHash string, err error) {
+func (uc *signQuorumPrivateTransactionUseCase) Execute(ctx context.Context, job *entities.Job) (signedRaw, txHash string, err error) {
 	logger := uc.logger.WithContext(ctx).WithField("one_time_key", job.InternalData.OneTimeKey)
 
-	signer := pkgcryto.GetQuorumPrivateTxSigner()
 	transaction := parsers.ETHTransactionToQuorumTransaction(job.Transaction)
 	transaction.SetPrivate()
-
-	var decodedSignature []byte
 	if job.InternalData.OneTimeKey {
-		decodedSignature, err = uc.signWithOneTimeKey(ctx, transaction, signer)
+		signedRaw, txHash, err = uc.signWithOneTimeKey(ctx, transaction)
 	} else {
-		decodedSignature, err = uc.signWithAccount(ctx, job, transaction, signer)
+		signedRaw, txHash, err = uc.signWithAccount(ctx, job, transaction)
 	}
 	if err != nil {
 		return "", "", errors.FromError(err).ExtendComponent(signQuorumPrivateTransactionComponent)
+	}
+
+	logger.WithField("tx_hash", txHash).Debug("quorum private transaction signed successfully")
+	return signedRaw, txHash, nil
+}
+
+func (uc *signQuorumPrivateTransactionUseCase) signWithOneTimeKey(ctx context.Context, transaction *quorumtypes.Transaction) (signedRaw, txHash string, err error) {
+	logger := uc.logger.WithContext(ctx)
+	privKey, err := crypto.GenerateKey()
+	if err != nil {
+		errMessage := "failed to generate Ethereum account"
+		logger.WithError(err).Error(errMessage)
+		return "", "", errors.CryptoOperationError(errMessage)
+	}
+
+	signer := pkgcryto.GetQuorumPrivateTxSigner()
+	decodedSignature, err := pkgcryto.SignQuorumPrivateTransaction(transaction, privKey, signer)
+	if err != nil {
+		logger.WithError(err).Error("failed to sign private transaction")
+		return "", "", err
 	}
 
 	signedTx, err := transaction.WithSignature(signer, decodedSignature)
@@ -64,70 +81,52 @@ func (uc *signQuorumPrivateTransactionUseCase) Execute(ctx context.Context, job 
 		return "", "", errors.InvalidParameterError(errMessage).ExtendComponent(signQuorumPrivateTransactionComponent)
 	}
 
-	signedRaw, err := rlp.Encode(signedTx)
+	signedRawB, err := rlp.Encode(signedTx)
 	if err != nil {
 		errMessage := "failed to RLP encode signed quorum private transaction"
 		logger.WithError(err).Error(errMessage)
 		return "", "", errors.CryptoOperationError(errMessage).ExtendComponent(signQuorumPrivateTransactionComponent)
 	}
-	txHash = signedTx.Hash().Hex()
 
-	logger.WithField("tx_hash", txHash).Debug("quorum private transaction signed successfully")
-	return hexutil.Encode(signedRaw), txHash, nil
+	return hexutil.Encode(signedRawB), signedTx.Hash().Hex(), nil
 }
 
-func (uc *signQuorumPrivateTransactionUseCase) signWithOneTimeKey(ctx context.Context, transaction *quorumtypes.Transaction,
-	signer quorumtypes.Signer) ([]byte, error) {
-	logger := uc.logger.WithContext(ctx)
-	privKey, err := crypto.GenerateKey()
-	if err != nil {
-		errMessage := "failed to generate Ethereum account"
-		logger.WithError(err).Error(errMessage)
-		return nil, errors.CryptoOperationError(errMessage)
-	}
-
-	sign, err := pkgcryto.SignQuorumPrivateTransaction(transaction, privKey, signer)
-	if err != nil {
-		logger.WithError(err).Error("failed to sign private transaction")
-		return nil, err
-	}
-
-	return sign, nil
-}
-
-func (uc *signQuorumPrivateTransactionUseCase) signWithAccount(ctx context.Context, job *entities.Job,
-	tx *quorumtypes.Transaction, signer quorumtypes.Signer) ([]byte, error) {
+func (uc *signQuorumPrivateTransactionUseCase) signWithAccount(ctx context.Context, job *entities.Job, tx *quorumtypes.Transaction) (signedRaw, txHash string, err error) {
 	logger := uc.logger.WithContext(ctx)
 	tenants := utils.AllowedTenants(job.TenantID)
 	isAllowed, err := qkm.IsTenantAllowed(ctx, uc.keyManagerClient, tenants, uc.storeName, job.Transaction.From)
 	if err != nil {
 		errMsg := "failed to to sign private quorum transaction, cannot fetch account"
 		uc.logger.WithField("address", job.Transaction.From).WithError(err).Error(errMsg)
-		return nil, errors.DependencyFailureError(errMsg).AppendReason(err.Error())
+		return "", "", errors.DependencyFailureError(errMsg).AppendReason(err.Error())
 	}
 
 	if !isAllowed {
 		errMessage := "failed to to sign private quorum transaction, tenant is not allowed"
 		logger.WithField("address", job.Transaction.From).WithField("tenants", tenants).Error(errMessage)
-		return nil, errors.InvalidAuthenticationError(errMessage)
+		return "", "", errors.InvalidAuthenticationError(errMessage)
 	}
 
-	txData := signer.Hash(tx).Bytes()
-	sig, err := uc.keyManagerClient.SignEth1Data(ctx, uc.storeName, job.Transaction.From, &qkmtypes.SignHexPayloadRequest{
-		Data: txData,
+	signedRaw, err = uc.keyManagerClient.SignQuorumPrivateTransaction(ctx, uc.storeName, job.Transaction.From, &qkmtypes.SignQuorumPrivateTransactionRequest{
+		Nonce:    hexutil.Uint64(tx.Nonce()),
+		To:       tx.To(),
+		Value:    hexutil.Big(*tx.Value()),
+		GasPrice: hexutil.Big(*tx.GasPrice()),
+		GasLimit: hexutil.Uint64(tx.Gas()),
+		Data:     tx.Data(),
 	})
 	if err != nil {
 		errMsg := "failed to sign quorum private transaction using key manager"
-		logger.Error(errMsg)
-		return nil, errors.DependencyFailureError(errMsg).AppendReason(err.Error())
+		logger.WithError(err).Error(errMsg)
+		return "", "", errors.DependencyFailureError(errMsg).AppendReason(err.Error())
 	}
 
-	decodedSignature, err := hexutil.Decode(sig)
+	err = rlp.Decode(hexutil.MustDecode(signedRaw), &tx)
 	if err != nil {
-		errMessage := "failed to decode quorum signature"
+		errMessage := "failed to decode quorum signed transaction"
 		logger.WithError(err).Error(errMessage)
-		return nil, errors.EncodingError(errMessage)
+		return "", "", errors.EncodingError(errMessage)
 	}
 
-	return decodedSignature, nil
+	return signedRaw, tx.Hash().Hex(), nil
 }

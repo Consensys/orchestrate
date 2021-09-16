@@ -106,7 +106,7 @@ func (uc *sendETHRawTxUseCase) rawTxDecoder(raw string) (*entities.ETHTransactio
 		return nil, err
 	}
 
-	msg, err := tx.AsMessage(types.NewEIP155Signer(tx.ChainId()))
+	msg, err := tx.AsMessage(types.NewEIP155Signer(tx.ChainId()), nil)
 	if err != nil {
 		return nil, err
 	}

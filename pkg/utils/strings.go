@@ -3,6 +3,7 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
+	"math/big"
 	"reflect"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -20,6 +21,15 @@ func ShortString(s string, tailLength int) string {
 func IsHexString(s string) bool {
 	_, err := hexutil.Decode(s)
 	return err == nil
+}
+
+func MustEncodeBigInt(s string) *big.Int {
+	b, ok := new(big.Int).SetString(s, 10)
+	if !ok {
+		panic("failed to convert to big.Int")
+	}
+
+	return b
 }
 
 func ParseIArrayToStringArray(ints []interface{}) ([]string, error) {

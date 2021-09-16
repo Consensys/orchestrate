@@ -10,7 +10,7 @@ import (
 	"github.com/ConsenSys/orchestrate/pkg/types/tx"
 
 	"github.com/Shopify/sarama"
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 	err "github.com/ConsenSys/orchestrate/pkg/types/error"
 	"github.com/ConsenSys/orchestrate/pkg/types/ethereum"
 )

@@ -12,6 +12,7 @@ import (
 
 	"github.com/ConsenSys/orchestrate/pkg/errors"
 	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	"github.com/ethereum/go-ethereum/trie"
 
 	backoffmock "github.com/ConsenSys/orchestrate/pkg/backoff/mock"
 	txschedulertypes "github.com/ConsenSys/orchestrate/pkg/types/api"
@@ -122,7 +123,7 @@ func TestSession_Run(t *testing.T) {
 			txs = append(txs, tx)
 		}
 
-		block := types.NewBlock(&types.Header{Number: blockPosition}, txs, []*types.Header{}, []*types.Receipt{})
+		block := types.NewBlock(&types.Header{Number: blockPosition}, txs, []*types.Header{}, []*types.Receipt{}, new(trie.Trie))
 		chain := newFakeChain()
 		session := NewSession(chain, mockEthClient, mockClient, mockHook, mockOffsetManager, mockMetrics)
 		backoff := &backoffmock.MockIntervalBackoff{}
@@ -613,7 +614,7 @@ func newFakeBlock(blockPosition *big.Int, to string) *types.Block {
 		[]byte{},
 	)}
 
-	return types.NewBlock(&types.Header{Number: blockPosition}, txs, []*types.Header{}, []*types.Receipt{})
+	return types.NewBlock(&types.Header{Number: blockPosition}, txs, []*types.Header{}, []*types.Receipt{}, new(trie.Trie))
 }
 
 func newFakeReceipt() *ethereum.Receipt {

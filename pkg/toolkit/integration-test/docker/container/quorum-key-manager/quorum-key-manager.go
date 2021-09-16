@@ -19,7 +19,7 @@ import (
 	"github.com/docker/go-connections/nat"
 )
 
-const defaultHashicorpVaultImage = "docker.consensys.net/pub/quorum-key-manager:v21.7.0-alpha.1"
+const defaultHashicorpVaultImage = "docker.consensys.net/pub/quorum-key-manager:v21.7.0-alpha.5"
 const defaultHostPort = "8080"
 const defaultHost = "localhost"
 
@@ -30,14 +30,18 @@ type Config struct {
 	Port              string
 	MetricsPort       string
 	Host              string
+	DBPort            string
+	DBHost            string
 	ManifestDirectory string
 }
 
 func NewDefault() *Config {
 	return &Config{
-		Image: defaultHashicorpVaultImage,
-		Port:  defaultHostPort,
-		Host:  defaultHost,
+		Image:  defaultHashicorpVaultImage,
+		Port:   defaultHostPort,
+		Host:   defaultHost,
+		DBHost: defaultDBHost,
+		DBPort: defaultDBPort,
 	}
 }
 
@@ -53,6 +57,16 @@ func (cfg *Config) SetHost(host string) *Config {
 		cfg.Host = host
 	}
 
+	return cfg
+}
+
+func (cfg *Config) SetDBPort(port string) *Config {
+	cfg.DBPort = port
+	return cfg
+}
+
+func (cfg *Config) SetDBHost(host string) *Config {
+	cfg.DBHost = host
 	return cfg
 }
 
@@ -91,6 +105,10 @@ func (q *QuorumKeyManager) GenerateContainerConfig(_ context.Context, configurat
 
 	containerCfg := &dockercontainer.Config{
 		Image: cfg.Image,
+		Env: []string{
+			fmt.Sprintf("DB_PORT=%v", cfg.DBPort),
+			fmt.Sprintf("DB_HOST=%v", cfg.DBHost),
+		},
 		ExposedPorts: nat.PortSet{
 			"8080/tcp": struct{}{},
 			"8081/tcp": struct{}{},
@@ -99,6 +117,9 @@ func (q *QuorumKeyManager) GenerateContainerConfig(_ context.Context, configurat
 	}
 
 	hostConfig := &dockercontainer.HostConfig{
+		RestartPolicy: dockercontainer.RestartPolicy{
+			Name: "always",
+		},
 		Mounts: []mount.Mount{
 			{
 				Type:   mount.TypeBind,

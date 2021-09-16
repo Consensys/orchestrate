@@ -16,6 +16,7 @@ import (
 	encoding "github.com/ConsenSys/orchestrate/pkg/encoding/sarama"
 	"github.com/ConsenSys/orchestrate/pkg/errors"
 	"github.com/ConsenSys/orchestrate/pkg/ethereum/abi"
+	ethAbi "github.com/ConsenSys/orchestrate/pkg/go-ethereum/v1_9_12/accounts/abi"
 	sdk "github.com/ConsenSys/orchestrate/pkg/sdk/client"
 	"github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient"
 	ierror "github.com/ConsenSys/orchestrate/pkg/types/error"
@@ -23,11 +24,10 @@ import (
 	"github.com/ConsenSys/orchestrate/pkg/types/tx"
 	"github.com/ConsenSys/orchestrate/services/tx-listener/dynamic"
 	"github.com/Shopify/sarama"
-	ethAbi "github.com/ethereum/go-ethereum/accounts/abi"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 )
 
 const component = "tx-listener.session.ethereum.hook"

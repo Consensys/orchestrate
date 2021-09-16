@@ -21,7 +21,7 @@ func loadVaultAccounts(db migrations.DB) error {
 		return nil
 	}
 
-	accounts, err := client.ListEth1Accounts(ctx, storeName)
+	accounts, err := client.ListEthAccounts(ctx, storeName, 0, 0)
 	if err != nil {
 		log.WithError(err).Errorf("could not get list of accounts")
 		return err
@@ -29,7 +29,7 @@ func loadVaultAccounts(db migrations.DB) error {
 
 	var queryInsertItems []string
 	for _, accountID := range accounts {
-		acc, err2 := client.GetEth1Account(ctx, storeName, accountID)
+		acc, err2 := client.GetEthAccount(ctx, storeName, accountID)
 		if err2 != nil {
 			log.WithField("account_id", accountID).WithError(err2).Error("Could not get account")
 			return err2

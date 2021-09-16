@@ -107,8 +107,8 @@ func (c *HTTPClient) SearchAccounts(ctx context.Context, filters *entities.Accou
 	return resp, nil
 }
 
-func (c *HTTPClient) SignPayload(ctx context.Context, address string, req *api.SignPayloadRequest) (string, error) {
-	reqURL := fmt.Sprintf("%v/accounts/%s/sign", c.config.URL, address)
+func (c *HTTPClient) SignMessage(ctx context.Context, address string, req *api.SignMessageRequest) (string, error) {
+	reqURL := fmt.Sprintf("%v/accounts/%s/sign-message", c.config.URL, address)
 
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, req)
 	if err != nil {
@@ -131,8 +131,8 @@ func (c *HTTPClient) SignTypedData(ctx context.Context, address string, request 
 	return httputil.ParseStringResponse(ctx, response)
 }
 
-func (c *HTTPClient) VerifySignature(ctx context.Context, request *qkmtypes.VerifyEth1SignatureRequest) error {
-	reqURL := fmt.Sprintf("%v/accounts/verify-signature", c.config.URL)
+func (c *HTTPClient) VerifyMessageSignature(ctx context.Context, request *qkmtypes.VerifyRequest) error {
+	reqURL := fmt.Sprintf("%v/accounts/verify-message", c.config.URL)
 
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, request)
 	if err != nil {
@@ -144,7 +144,7 @@ func (c *HTTPClient) VerifySignature(ctx context.Context, request *qkmtypes.Veri
 }
 
 func (c *HTTPClient) VerifyTypedDataSignature(ctx context.Context, request *qkmtypes.VerifyTypedDataRequest) error {
-	reqURL := fmt.Sprintf("%v/accounts/verify-typed-data-signature", c.config.URL)
+	reqURL := fmt.Sprintf("%v/accounts/verify-typed-data", c.config.URL)
 
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, request)
 	if err != nil {

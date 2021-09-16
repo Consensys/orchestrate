@@ -57,6 +57,7 @@ run:
   deadline: 20m
   skip-dirs:
     - .gocache
+    - /pkg/go-ethereum
     - /build
     - /public
     - mock

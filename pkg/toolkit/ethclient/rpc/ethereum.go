@@ -14,6 +14,7 @@ import (
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/trie"
 )
 
 // BlockByHash returns the given full block.
@@ -26,7 +27,7 @@ func (ec *Client) BlockByHash(ctx context.Context, endpoint string, hash ethcomm
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
 
-	return ethtypes.NewBlock(header, body.Transactions, []*ethtypes.Header{}, []*ethtypes.Receipt{}), nil
+	return ethtypes.NewBlock(header, body.Transactions, []*ethtypes.Header{}, []*ethtypes.Receipt{}, new(trie.Trie)), nil
 }
 
 // BlockByNumber returns a block from the current canonical chain. If number is nil, the
@@ -43,7 +44,7 @@ func (ec *Client) BlockByNumber(ctx context.Context, endpoint string, number *bi
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
 
-	return ethtypes.NewBlock(header, body.Transactions, []*ethtypes.Header{}, []*ethtypes.Receipt{}), nil
+	return ethtypes.NewBlock(header, body.Transactions, []*ethtypes.Header{}, []*ethtypes.Receipt{}, new(trie.Trie)), nil
 }
 
 func processHeaderResult(head **ethtypes.Header) ProcessResultFunc {

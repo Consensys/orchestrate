@@ -19,12 +19,12 @@ import (
 	"github.com/docker/go-connections/nat"
 )
 
-const defaultHashicorpVaultImage = "library/vault:1.6.2"
+const defaultHashicorpVaultImage = "library/vault:1.8.2"
 const defaultHostPort = "8200"
 const defaultRootToken = "myRoot"
 const defaultHost = "localhost"
 const pluginFileName = "orchestrate-hashicorp-vault-plugin"
-const pluginVersion = "v0.0.11-alpha.3"
+const pluginVersion = "v0.0.11"
 const defaultMountPath = "orchestrate"
 
 type Vault struct{}

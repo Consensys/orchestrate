@@ -82,7 +82,7 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 		"--key-manager-url=" + keyManagerURL,
 		"--key-manager-store-name=" + qkmStoreName,
 		"--api-url=" + apiURL,
-		"--log-level=error",
+		"--log-level=info",
 	}
 
 	err := flgs.Parse(args)

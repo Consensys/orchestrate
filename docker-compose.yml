@@ -55,6 +55,7 @@ x-container-common: &container-common
   networks:
     - orchestrate
     - quorum
+    - besu
   volumes:
     - ./build/bin/orchestrate:/bin/main:ro
   labels:
@@ -66,7 +67,7 @@ x-proxy-common: &proxy-common
 
 x-api-common: &api-common
   API_STORE_TYPE: ${API_STORE_TYPE-}
-  DB_HOST: postgres-api
+  DB_HOST: postgres
 
 services:
   api-migration-init:
@@ -141,7 +142,10 @@ volumes:
 networks:
   orchestrate:
     external:
-      name: deps_orchestrate
+      name: orchestrate
   quorum:
     external:
-      name: deps_quorum
+      name: quorum
+  besu:
+    external:
+      name: besu

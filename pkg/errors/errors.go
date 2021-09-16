@@ -41,7 +41,7 @@ const (
 	FailedPrecondition        = InvalidState + 1<<8 // System not in required state (subclass 241XX)
 	Conflicted                = InvalidState + 2<<8 // Conflict with current system state (subclass 242XX)
 
-	// Data Errors (class 42XXX)
+	// Message Errors (class 42XXX)
 	Data               uint64 = 4<<16 + 2<<12
 	OutOfRange                = Data + 1     // Out of range (code 42001)
 	Encoding                  = Data + 1<<8  // Invalid Encoding (subclass 421XX)
@@ -81,7 +81,7 @@ const (
 
 	// Internal errors (class FFXXX)
 	Internal      uint64 = 15<<16 + 15<<12
-	DataCorrupted        = Internal + 1<<8 // Data corrupted (subclass FF1XX)
+	DataCorrupted        = Internal + 1<<8 // Message corrupted (subclass FF1XX)
 )
 
 // Warningf are raised to indicate a warning
@@ -289,12 +289,12 @@ func IsConflictedError(err error) bool {
 	return isErrorClass(FromError(err).GetCode(), Conflicted)
 }
 
-// DataError is raised when a provided Data does not match expected format
+// DataError is raised when a provided Message does not match expected format
 func DataError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(Data, format, a...)
 }
 
-// IsDataError indicate whether an error is a Data error
+// IsDataError indicate whether an error is a Message error
 func IsDataError(err error) bool {
 	return isErrorClass(FromError(err).GetCode(), Data)
 }
@@ -314,7 +314,7 @@ func IsEncodingError(err error) bool {
 	return isErrorClass(FromError(err).GetCode(), Encoding)
 }
 
-// SolidityError is raised when a Data related in transaction crafting is incorrect
+// SolidityError is raised when a Message related in transaction crafting is incorrect
 func SolidityError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(Solidity, format, a...)
 }
@@ -348,12 +348,12 @@ func InvalidTopicsCountError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(InvalidTopicsCount, format, a...)
 }
 
-// InvalidEventDataError is raised when event Data is invalid
+// InvalidEventDataError is raised when event Message is invalid
 func InvalidEventDataError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(InvalidLog, format, a...)
 }
 
-// InvalidFormatError is raised when a Data does not match an expected format
+// InvalidFormatError is raised when a Message does not match an expected format
 func InvalidFormatError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(InvalidFormat, format, a...)
 }
@@ -440,7 +440,7 @@ func IsInvalidCryptographicSignatureError(err error) bool {
 
 // InvalidCryptographicSignature
 
-// StorageError is raised when an error is encountered while accessing stored Data
+// StorageError is raised when an error is encountered while accessing stored Message
 func StorageError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(Storage, format, a...)
 }
@@ -450,7 +450,7 @@ func IsStorageError(err error) bool {
 	return isErrorClass(FromError(err).GetCode(), Storage)
 }
 
-// ConstraintViolatedError is raised when a Data constraint has been violated
+// ConstraintViolatedError is raised when a Message constraint has been violated
 func ConstraintViolatedError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(ConstraintViolated, format, a...)
 }
@@ -460,7 +460,7 @@ func IsConstraintViolatedError(err error) bool {
 	return isErrorClass(FromError(err).GetCode(), ConstraintViolated)
 }
 
-// AlreadyExistsError is raised when a Data constraint has been violated
+// AlreadyExistsError is raised when a Message constraint has been violated
 func AlreadyExistsError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(AlreadyExists, format, a...)
 }
@@ -470,12 +470,12 @@ func IsAlreadyExistsError(err error) bool {
 	return isErrorClass(FromError(err).GetCode(), AlreadyExists)
 }
 
-// NoDataFoundError is raised when accessing a missing Data
+// NoDataFoundError is raised when accessing a missing Message
 func NotFoundError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(NotFound, format, a...)
 }
 
-// IsNotFoundError indicate whether an error is a no Data found error
+// IsNotFoundError indicate whether an error is a no Message found error
 func IsNotFoundError(err error) bool {
 	return isErrorClass(FromError(err).GetCode(), NotFound)
 }
@@ -503,7 +503,7 @@ func IsDependencyFailureError(err error) bool {
 	return isErrorClass(FromError(err).GetCode(), Internal)
 }
 
-// DataCorruptedError is raised loading a corrupted Data
+// DataCorruptedError is raised loading a corrupted Message
 func DataCorruptedError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(DataCorrupted, format, a...)
 }

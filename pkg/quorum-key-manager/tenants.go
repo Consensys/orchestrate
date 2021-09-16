@@ -13,8 +13,8 @@ const (
 	TagSeparatorAllowedTenants = ","
 )
 
-func IsTenantAllowed(ctx context.Context, client qkmclient.Eth1Client, tenants []string, storeName, address string) (bool, error) {
-	acc, err := client.GetEth1Account(ctx, storeName, address)
+func IsTenantAllowed(ctx context.Context, client qkmclient.EthClient, tenants []string, storeName, address string) (bool, error) {
+	acc, err := client.GetEthAccount(ctx, storeName, address)
 	if err != nil {
 		return false, err
 	}

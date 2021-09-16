@@ -87,8 +87,10 @@ services:
 networks:
   orchestrate:
     external:
-      name: deps_orchestrate
-
+      name: orchestrate
   quorum:
     external:
-      name: deps_quorum
+      name: quorum
+  besu:
+    external:
+      name: besu

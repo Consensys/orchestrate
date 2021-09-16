@@ -22,11 +22,11 @@ import (
 
 type AccountsController struct {
 	ucs              usecases.AccountUseCases
-	keyManagerClient client.Eth1Client
+	keyManagerClient client.EthClient
 	storeName        string
 }
 
-func NewAccountsController(accountUCs usecases.AccountUseCases, keyManagerClient client.Eth1Client) *AccountsController {
+func NewAccountsController(accountUCs usecases.AccountUseCases, keyManagerClient client.EthClient) *AccountsController {
 	return &AccountsController{
 		accountUCs,
 		keyManagerClient,
@@ -41,10 +41,10 @@ func (c *AccountsController) Append(router *mux.Router) {
 	router.Methods(http.MethodPost).Path("/accounts/import").HandlerFunc(c.importKey)
 	router.Methods(http.MethodGet).Path("/accounts/{address}").HandlerFunc(c.getOne)
 	router.Methods(http.MethodPatch).Path("/accounts/{address}").HandlerFunc(c.update)
-	router.Methods(http.MethodPost).Path("/accounts/{address}/sign").HandlerFunc(c.signPayload)
+	router.Methods(http.MethodPost).Path("/accounts/{address}/sign-message").HandlerFunc(c.signMessage)
 	router.Methods(http.MethodPost).Path("/accounts/{address}/sign-typed-data").HandlerFunc(c.signTypedData)
-	router.Methods(http.MethodPost).Path("/accounts/verify-signature").HandlerFunc(c.verifySignature)
-	router.Methods(http.MethodPost).Path("/accounts/verify-typed-data-signature").HandlerFunc(c.verifyTypedDataSignature)
+	router.Methods(http.MethodPost).Path("/accounts/verify-message").HandlerFunc(c.verifyMessageSignature)
+	router.Methods(http.MethodPost).Path("/accounts/verify-typed-data").HandlerFunc(c.verifyTypedDataSignature)
 }
 
 // @Summary Creates a new Account
@@ -232,8 +232,8 @@ func (c *AccountsController) update(rw http.ResponseWriter, request *http.Reques
 	_ = json.NewEncoder(rw).Encode(formatters.FormatAccountResponse(accRes))
 }
 
-// @Summary Sign arbitrary data
-// @Description Sign sent data using provided account
+// @Summary Sign Message (EIP-191)
+// @Description Sign message, following EIP-191, data using selected account
 // @Accept json
 // @Produce text/plain
 // @Security ApiKeyAuth
@@ -245,10 +245,10 @@ func (c *AccountsController) update(rw http.ResponseWriter, request *http.Reques
 // @Failure 401 {object} httputil.ErrorResponse "Unauthorized"
 // @Failure 404 {object} httputil.ErrorResponse "Account not found"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
-// @Router /accounts/{address}/sign [post]
-func (c *AccountsController) signPayload(rw http.ResponseWriter, request *http.Request) {
+// @Router /accounts/{address}/sign-message [post]
+func (c *AccountsController) signMessage(rw http.ResponseWriter, request *http.Request) {
 	ctx := request.Context()
-	payloadRequest := &api.SignPayloadRequest{}
+	payloadRequest := &api.SignMessageRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, payloadRequest)
 	if err != nil {
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
@@ -268,8 +268,8 @@ func (c *AccountsController) signPayload(rw http.ResponseWriter, request *http.R
 		return
 	}
 
-	signature, err := c.keyManagerClient.SignEth1(request.Context(), c.storeName, address, &qkmtypes.SignHexPayloadRequest{
-		Data: hexutil.MustDecode(payloadRequest.Data),
+	signature, err := c.keyManagerClient.SignMessage(request.Context(), c.storeName, address, &qkmtypes.SignMessageRequest{
+		Message: hexutil.MustDecode(payloadRequest.Message),
 	})
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
@@ -336,7 +336,7 @@ func (c *AccountsController) signTypedData(rw http.ResponseWriter, request *http
 // @Failure 401 {object} httputil.ErrorResponse "Unauthorized"
 // @Failure 422 {object} httputil.ErrorResponse "Invalid parameters"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
-// @Router /accounts/verify-typed-data-signature [post]
+// @Router /accounts/verify-typed-data [post]
 func (c *AccountsController) verifyTypedDataSignature(rw http.ResponseWriter, request *http.Request) {
 	verifyRequest := &qkmtypes.VerifyTypedDataRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, verifyRequest)
@@ -345,7 +345,7 @@ func (c *AccountsController) verifyTypedDataSignature(rw http.ResponseWriter, re
 		return
 	}
 
-	err = c.keyManagerClient.VerifyTypedDataSignature(request.Context(), c.storeName, verifyRequest)
+	err = c.keyManagerClient.VerifyTypedData(request.Context(), c.storeName, verifyRequest)
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -354,25 +354,25 @@ func (c *AccountsController) verifyTypedDataSignature(rw http.ResponseWriter, re
 	rw.WriteHeader(http.StatusNoContent)
 }
 
-// @Summary Verifies the signature of a message
+// @Summary Verifies the signature of a message (EIP-191)
 // @Description Verifies if a message has been signed by the Ethereum account passed as argument
 // @Accept json
-// @Param request body qkmtypes.VerifyEth1SignatureRequest true "signature and message to verify"
+// @Param request body qkmtypes.VerifyRequest true "signature and message to verify"
 // @Success 204
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 401 {object} httputil.ErrorResponse "Unauthorized"
 // @Failure 422 {object} httputil.ErrorResponse "Invalid parameters"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
-// @Router /accounts/verify-signature [post]
-func (c *AccountsController) verifySignature(rw http.ResponseWriter, request *http.Request) {
-	verifyRequest := &qkmtypes.VerifyEth1SignatureRequest{}
+// @Router /accounts/verify-message [post]
+func (c *AccountsController) verifyMessageSignature(rw http.ResponseWriter, request *http.Request) {
+	verifyRequest := &qkmtypes.VerifyRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, verifyRequest)
 	if err != nil {
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	err = c.keyManagerClient.VerifyEth1Signature(request.Context(), c.storeName, verifyRequest)
+	err = c.keyManagerClient.VerifyMessage(request.Context(), c.storeName, verifyRequest)
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return

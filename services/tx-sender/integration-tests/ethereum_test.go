@@ -28,16 +28,16 @@ import (
 	"github.com/consensys/quorum-key-manager/src/stores/api/types"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/gofrs/uuid"
-	"github.com/gogo/protobuf/proto"
 	"github.com/hashicorp/go-multierror"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	"google.golang.org/protobuf/proto"
 	"gopkg.in/h2non/gock.v1"
 )
 
 const (
-	waitForEnvelopeTimeOut = 2 * time.Second
+	waitForEnvelopeTimeOut = 5 * time.Second
 )
 
 type txSenderEthereumTestSuite struct {
@@ -46,8 +46,7 @@ type txSenderEthereumTestSuite struct {
 }
 
 func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Public() {
-	signature := "0xd35c752d3498e6f5ca1630d264802a992a141ca4b6a3f439d673c75e944e5fb05278aaa5fabbeac362c321b54e298dedae2d31471e432c26ea36a8d49cf08f1e01"
-	raw := "0xf85380839896808252088083989680808216b4a0d35c752d3498e6f5ca1630d264802a992a141ca4b6a3f439d673c75e944e5fb0a05278aaa5fabbeac362c321b54e298dedae2d31471e432c26ea36a8d49cf08f1e"
+	signedRawTx := "0xf85380839896808252088083989680808216b4a0d35c752d3498e6f5ca1630d264802a992a141ca4b6a3f439d673c75e944e5fb0a05278aaa5fabbeac362c321b54e298dedae2d31471e432c26ea36a8d49cf08f1e"
 	txHash := "0x6621fbe1e2848446e38d99bfda159cdd83f555ae0ed7a4f3e1c3c79f7d6d74f3"
 
 	s.T().Run("should sign and send public ethereum transaction successfully", func(t *testing.T) {
@@ -57,8 +56,8 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Public() {
 		envelope := fakeEnvelope()
 
 		gock.New(keyManagerURL).
-			Get(fmt.Sprintf("/stores/%s/eth1/%s", qkmStoreName, envelope.GetFromString())).
-			Reply(200).JSON(&types.Eth1AccountResponse{
+			Get(fmt.Sprintf("/stores/%s/ethereum/%s", qkmStoreName, envelope.GetFromString())).
+			Reply(200).JSON(&types.EthAccountResponse{
 			Address: ethcommon.HexToAddress(envelope.GetFromString()),
 			Tags: map[string]string{
 				quorumkeymanager.TagIDAllowedTenants: multitenancy.DefaultTenant,
@@ -66,12 +65,12 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Public() {
 		})
 
 		gock.New(keyManagerURL).
-			Post(fmt.Sprintf("/stores/%s/eth1/%s/sign-data", qkmStoreName, envelope.GetFromString())).
-			Reply(200).BodyString(signature)
+			Post(fmt.Sprintf("/stores/%s/ethereum/%s/sign-transaction", qkmStoreName, envelope.GetFromString())).
+			Reply(200).BodyString(signedRawTx)
 
 		gock.New(apiURL).
-			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
-			AddMatcher(ethCallMatcher(wg, "eth_sendRawTransaction", raw)).
+			Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
+			AddMatcher(ethCallMatcher(wg, "eth_sendRawTransaction", signedRawTx)).
 			Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"" + txHash + "\"}")
 
 		gock.New(apiURL).
@@ -92,8 +91,8 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Public() {
 
 		envelope := fakeEnvelope()
 		gock.New(keyManagerURL).
-			Get(fmt.Sprintf("/stores/%s/eth1/%s", qkmStoreName, envelope.GetFromString())).
-			Reply(200).JSON(&types.Eth1AccountResponse{
+			Get(fmt.Sprintf("/stores/%s/ethereum/%s", qkmStoreName, envelope.GetFromString())).
+			Reply(200).JSON(&types.EthAccountResponse{
 			Address: ethcommon.HexToAddress(envelope.GetFromString()),
 			Tags: map[string]string{
 				quorumkeymanager.TagIDAllowedTenants: multitenancy.DefaultTenant,
@@ -101,27 +100,27 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Public() {
 		})
 
 		gock.New(keyManagerURL).
-			Post(fmt.Sprintf("/stores/%s/eth1/%s/sign-data", qkmStoreName, envelope.GetFromString())).
-			Reply(200).BodyString(signature)
+			Post(fmt.Sprintf("/stores/%s/ethereum/%s/sign-transaction", qkmStoreName, envelope.GetFromString())).
+			Reply(200).BodyString(signedRawTx)
 
 		gock.New(apiURL).
-			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
+			Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
 			AddMatcher(ethCallMatcher(wg, "eth_gasPrice")).
 			Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"0x989680\"}")
 
 		gock.New(apiURL).
-			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
+			Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
 			AddMatcher(ethCallMatcher(wg, "eth_estimateGas")).
 			Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"0x5208\"}")
 
 		gock.New(apiURL).
-			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
+			Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
 			AddMatcher(ethCallMatcher(wg, "eth_getTransactionCount", envelope.From.String(), "pending")).
 			Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"0x0\"}")
 
 		gock.New(apiURL).
-			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
-			AddMatcher(ethCallMatcher(wg, "eth_sendRawTransaction", raw)).
+			Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
+			AddMatcher(ethCallMatcher(wg, "eth_sendRawTransaction", signedRawTx)).
 			Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"" + txHash + "\"}")
 
 		gock.New(apiURL).
@@ -149,8 +148,8 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Public() {
 		envelope := fakeEnvelope()
 
 		gock.New(keyManagerURL).
-			Get(fmt.Sprintf("/stores/%s/eth1/%s", qkmStoreName, envelope.GetFromString())).
-			Reply(200).JSON(&types.Eth1AccountResponse{
+			Get(fmt.Sprintf("/stores/%s/ethereum/%s", qkmStoreName, envelope.GetFromString())).
+			Reply(200).JSON(&types.EthAccountResponse{
 			Address: ethcommon.HexToAddress(envelope.GetFromString()),
 			Tags: map[string]string{
 				quorumkeymanager.TagIDAllowedTenants: multitenancy.DefaultTenant,
@@ -158,21 +157,21 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Public() {
 		})
 
 		gock.New(keyManagerURL).
-			Post(fmt.Sprintf("/stores/%s/eth1/%s/sign-data", qkmStoreName, envelope.GetFromString())).
-			Reply(200).BodyString(signature)
+			Post(fmt.Sprintf("/stores/%s/ethereum/%s/sign-transaction", qkmStoreName, envelope.GetFromString())).
+			Reply(200).BodyString(signedRawTx)
 
 		gock.New(apiURL).
-			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
+			Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
 			AddMatcher(ethCallMatcher(wg, "eth_gasPrice")).
 			Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"0x989680\"}")
 
 		gock.New(apiURL).
-			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
+			Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
 			AddMatcher(ethCallMatcher(wg, "eth_estimateGas")).
 			Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"0x5208\"}")
 
 		gock.New(apiURL).
-			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
+			Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
 			AddMatcher(ethCallMatcher(wg, "eth_getTransactionCount", envelope.From.String(), "pending")).
 			Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"0x0\"}")
 
@@ -182,8 +181,8 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Public() {
 			Reply(200).JSON(&api.JobResponse{})
 
 		gock.New(apiURL).
-			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
-			AddMatcher(ethCallMatcher(wg, "eth_sendRawTransaction", raw)).
+			Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
+			AddMatcher(ethCallMatcher(wg, "eth_sendRawTransaction", signedRawTx)).
 			Reply(429).BodyString("")
 
 		gock.New(apiURL).
@@ -192,8 +191,8 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Public() {
 			Reply(200).JSON(&api.JobResponse{})
 
 		gock.New(apiURL).
-			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
-			AddMatcher(ethCallMatcher(wg, "eth_sendRawTransaction", raw)).
+			Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
+			AddMatcher(ethCallMatcher(wg, "eth_sendRawTransaction", signedRawTx)).
 			Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"" + txHash + "\"}")
 
 		envelope.GasPrice = nil
@@ -215,7 +214,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Public() {
 
 		envelope := fakeEnvelope()
 		gock.New(apiURL).
-			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
+			Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
 			AddMatcher(ethCallMatcher(wg, "eth_sendRawTransaction")).
 			Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"" + txHash + "\"}")
 
@@ -247,8 +246,8 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Public() {
 		envelope := fakeEnvelope()
 
 		gock.New(keyManagerURL).
-			Get(fmt.Sprintf("/stores/%s/eth1/%s", qkmStoreName, envelope.GetFromString())).
-			Reply(200).JSON(&types.Eth1AccountResponse{
+			Get(fmt.Sprintf("/stores/%s/ethereum/%s", qkmStoreName, envelope.GetFromString())).
+			Reply(200).JSON(&types.EthAccountResponse{
 			Address: ethcommon.HexToAddress(envelope.GetFromString()),
 			Tags: map[string]string{
 				quorumkeymanager.TagIDAllowedTenants: "not_allowed_tenant",
@@ -288,8 +287,8 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Public() {
 		envelope := fakeEnvelope()
 
 		gock.New(keyManagerURL).
-			Get(fmt.Sprintf("/stores/%s/eth1/%s", qkmStoreName, envelope.GetFromString())).
-			Reply(200).JSON(&types.Eth1AccountResponse{
+			Get(fmt.Sprintf("/stores/%s/ethereum/%s", qkmStoreName, envelope.GetFromString())).
+			Reply(200).JSON(&types.EthAccountResponse{
 			Address: ethcommon.HexToAddress(envelope.GetFromString()),
 			Tags: map[string]string{
 				quorumkeymanager.TagIDAllowedTenants: multitenancy.DefaultTenant,
@@ -297,16 +296,16 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Public() {
 		})
 
 		gock.New(keyManagerURL).
-			Post(fmt.Sprintf("/stores/%s/eth1/%s/sign-data", qkmStoreName, envelope.GetFromString())).
-			Reply(200).BodyString(signature)
+			Post(fmt.Sprintf("/stores/%s/ethereum/%s/sign-transaction", qkmStoreName, envelope.GetFromString())).
+			Reply(200).BodyString(signedRawTx)
 
 		gock.New(apiURL).
-			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
+			Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
 			AddMatcher(ethCallMatcher(wg, "eth_getTransactionCount", envelope.From.String(), "pending")).
 			Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"0x0\"}")
 
 		gock.New(apiURL).
-			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
+			Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
 			AddMatcher(ethCallMatcher(wg, "eth_sendRawTransaction")).
 			Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"" + txHash + "\"}")
 
@@ -349,8 +348,8 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Public() {
 		envelope := fakeEnvelope()
 
 		gock.New(keyManagerURL).
-			Get(fmt.Sprintf("/stores/%s/eth1/%s", qkmStoreName, envelope.GetFromString())).
-			Reply(200).JSON(&types.Eth1AccountResponse{
+			Get(fmt.Sprintf("/stores/%s/ethereum/%s", qkmStoreName, envelope.GetFromString())).
+			Reply(200).JSON(&types.EthAccountResponse{
 			Address: ethcommon.HexToAddress(envelope.GetFromString()),
 			Tags: map[string]string{
 				quorumkeymanager.TagIDAllowedTenants: multitenancy.DefaultTenant,
@@ -358,11 +357,11 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Public() {
 		})
 
 		gock.New(keyManagerURL).
-			Post(fmt.Sprintf("/stores/%s/eth1/%s/sign-data", qkmStoreName, envelope.GetFromString())).
-			Reply(200).BodyString(signature)
+			Post(fmt.Sprintf("/stores/%s/ethereum/%s/sign-transaction", qkmStoreName, envelope.GetFromString())).
+			Reply(200).BodyString(signedRawTx)
 
 		gock.New(apiURL).
-			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
+			Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
 			AddMatcher(ethCallMatcher(wg, "eth_sendRawTransaction")).
 			Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"error\":\"invalid_raw\"}")
 
@@ -399,7 +398,6 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Public() {
 }
 
 func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Raw_Public() {
-	// signature := "0xd35c752d3498e6f5ca1630d264802a992a141ca4b6a3f439d673c75e944e5fb05278aaa5fabbeac362c321b54e298dedae2d31471e432c26ea36a8d49cf08f1e01"
 	raw := "0xf85380839896808252088083989680808216b4a0d35c752d3498e6f5ca1630d264802a992a141ca4b6a3f439d673c75e944e5fb0a05278aaa5fabbeac362c321b54e298dedae2d31471e432c26ea36a8d49cf08f1e"
 	txHash := "0x6621fbe1e2848446e38d99bfda159cdd83f555ae0ed7a4f3e1c3c79f7d6d74f3"
 
@@ -412,7 +410,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Raw_Public() {
 		_ = envelope.SetRawString(raw)
 
 		gock.New(apiURL).
-			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
+			Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
 			AddMatcher(ethCallMatcher(wg, "eth_sendRawTransaction", raw)).
 			Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"" + txHash + "\"}")
 
@@ -445,7 +443,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Raw_Public() {
 			Reply(200).JSON(&api.JobResponse{})
 
 		gock.New(apiURL).
-			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
+			Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
 			AddMatcher(ethCallMatcher(wg, "eth_sendRawTransaction", raw)).
 			Reply(429).BodyString("")
 
@@ -455,7 +453,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Raw_Public() {
 			Reply(200).JSON(&api.JobResponse{})
 
 		gock.New(apiURL).
-			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
+			Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
 			AddMatcher(ethCallMatcher(wg, "eth_sendRawTransaction", raw)).
 			Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"" + txHash + "\"}")
 
@@ -478,7 +476,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Raw_Public() {
 		_ = envelope.SetRawString(raw)
 
 		gock.New(apiURL).
-			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
+			Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
 			AddMatcher(ethCallMatcher(wg, "eth_sendRawTransaction", raw)).
 			Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"invalid_raw\"}")
 
@@ -515,21 +513,20 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Raw_Public() {
 }
 
 func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_EEA() {
-	signature := "0xd35c752d3498e6f5ca1630d264802a992a141ca4b6a3f439d673c75e944e5fb05278aaa5fabbeac362c321b54e298dedae2d31471e432c26ea36a8d49cf08f1e01"
 	txHash := "0x6621fbe1e2848446e38d99bfda159cdd83f555ae0ed7a4f3e1c3c79f7d6d74f3"
 
 	s.T().Run("should sign and send a EEA transaction successfully", func(t *testing.T) {
 		defer gock.Off()
 		wg := &multierror.Group{}
 
-		raw := "0xf8be8080808083989680808216b4a0d35c752d3498e6f5ca1630d264802a992a141ca4b6a3f439d673c75e944e5fb0a05278aaa5fabbeac362c321b54e298dedae2d31471e432c26ea36a8d49cf08f1ea0035695b4cc4b0941e60551d7a19cf30603db5bfc23e5ac43a56f57f25f75486af842a0035695b4cc4b0941e60551d7a19cf30603db5bfc23e5ac43a56f57f25f75486aa0075695b4cc4b0941e60551d7a19cf30603db5bfc23e5ac43a56f57f25f75486a8a72657374726963746564"
+		signedRawTx := "0xf8be8080808083989680808216b4a0d35c752d3498e6f5ca1630d264802a992a141ca4b6a3f439d673c75e944e5fb0a05278aaa5fabbeac362c321b54e298dedae2d31471e432c26ea36a8d49cf08f1ea0035695b4cc4b0941e60551d7a19cf30603db5bfc23e5ac43a56f57f25f75486af842a0035695b4cc4b0941e60551d7a19cf30603db5bfc23e5ac43a56f57f25f75486aa0075695b4cc4b0941e60551d7a19cf30603db5bfc23e5ac43a56f57f25f75486a8a72657374726963746564"
 
 		envelope := fakeEnvelope()
 		_ = envelope.SetJobType(tx.JobType_ETH_ORION_EEA_TX)
 
 		gock.New(keyManagerURL).
-			Get(fmt.Sprintf("/stores/%s/eth1/%s", qkmStoreName, envelope.GetFromString())).
-			Reply(200).JSON(&types.Eth1AccountResponse{
+			Get(fmt.Sprintf("/stores/%s/ethereum/%s", qkmStoreName, envelope.GetFromString())).
+			Reply(200).JSON(&types.EthAccountResponse{
 			Address: ethcommon.HexToAddress(envelope.GetFromString()),
 			Tags: map[string]string{
 				quorumkeymanager.TagIDAllowedTenants: multitenancy.DefaultTenant,
@@ -537,18 +534,18 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_EEA() {
 		})
 
 		gock.New(keyManagerURL).
-			Post(fmt.Sprintf("/stores/%s/eth1/%s/sign-data", qkmStoreName, envelope.GetFromString())).
-			Reply(200).BodyString(signature)
+			Post(fmt.Sprintf("/stores/%s/ethereum/%s/sign-eea-transaction", qkmStoreName, envelope.GetFromString())).
+			Reply(200).BodyString(signedRawTx)
 
 		gock.New(apiURL).
-			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
+			Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
 			AddMatcher(ethCallMatcher(wg, "priv_getEeaTransactionCount", envelope.From.String(),
 				envelope.PrivateFrom, envelope.PrivateFor)).
 			Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"0x0\"}")
 
 		gock.New(apiURL).
-			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
-			AddMatcher(ethCallMatcher(wg, "priv_distributeRawTransaction", raw)).
+			Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
+			AddMatcher(ethCallMatcher(wg, "priv_distributeRawTransaction", signedRawTx)).
 			Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"" + txHash + "\"}")
 
 		gock.New(apiURL).
@@ -577,7 +574,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_EEA() {
 		_ = envelope.SetJobType(tx.JobType_ETH_ORION_EEA_TX)
 
 		gock.New(apiURL).
-			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
+			Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
 			AddMatcher(ethCallMatcher(wg, "priv_distributeRawTransaction")).
 			Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"" + txHash + "\"}")
 
@@ -604,7 +601,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_EEA() {
 		_ = envelope.SetJobType(tx.JobType_ETH_ORION_EEA_TX)
 
 		gock.New(apiURL).
-			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
+			Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
 			AddMatcher(ethCallMatcher(wg, "priv_distributeRawTransaction")).
 			Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"invalid_raw\"}")
 
@@ -636,8 +633,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_EEA() {
 }
 
 func (s *txSenderEthereumTestSuite) TestTxSender_Tessera_Marking() {
-	signature := "0xd35c752d3498e6f5ca1630d264802a992a141ca4b6a3f439d673c75e944e5fb05278aaa5fabbeac362c321b54e298dedae2d31471e432c26ea36a8d49cf08f1e01"
-	raw := "0xf851808398968082520880839896808026a0d35c752d3498e6f5ca1630d264802a992a141ca4b6a3f439d673c75e944e5fb0a05278aaa5fabbeac362c321b54e298dedae2d31471e432c26ea36a8d49cf08f1e"
+	signedTxRaw := "0xf851808398968082520880839896808026a0d35c752d3498e6f5ca1630d264802a992a141ca4b6a3f439d673c75e944e5fb0a05278aaa5fabbeac362c321b54e298dedae2d31471e432c26ea36a8d49cf08f1e"
 	txHash := "0x226d79b217b5ebfeddd08662f3ae1bb1b2cb339d50bbcb708b53ad5f4c71c5ea"
 
 	s.T().Run("should sign and send Tessera marking transaction successfully", func(t *testing.T) {
@@ -649,8 +645,8 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Tessera_Marking() {
 		_ = envelope.SetJobType(tx.JobType_ETH_TESSERA_MARKING_TX)
 
 		gock.New(keyManagerURL).
-			Get(fmt.Sprintf("/stores/%s/eth1/%s", qkmStoreName, envelope.GetFromString())).
-			Reply(200).JSON(&types.Eth1AccountResponse{
+			Get(fmt.Sprintf("/stores/%s/ethereum/%s", qkmStoreName, envelope.GetFromString())).
+			Reply(200).JSON(&types.EthAccountResponse{
 			Address: ethcommon.HexToAddress(envelope.GetFromString()),
 			Tags: map[string]string{
 				quorumkeymanager.TagIDAllowedTenants: multitenancy.DefaultTenant,
@@ -658,17 +654,17 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Tessera_Marking() {
 		})
 
 		gock.New(keyManagerURL).
-			Post(fmt.Sprintf("/stores/%s/eth1/%s/sign-data", qkmStoreName, envelope.GetFromString())).
-			Reply(200).BodyString(signature)
+			Post(fmt.Sprintf("/stores/%s/ethereum/%s/sign-quorum-private-transaction", qkmStoreName, envelope.GetFromString())).
+			Reply(200).BodyString(signedTxRaw)
 
 		gock.New(apiURL).
-			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
+			Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
 			AddMatcher(ethCallMatcher(wg, "eth_getTransactionCount")).
 			Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"0x0\"}")
 
 		gock.New(apiURL).
-			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
-			AddMatcher(ethCallMatcher(wg, "eth_sendRawPrivateTransaction", raw, map[string]interface{}{
+			Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
+			AddMatcher(ethCallMatcher(wg, "eth_sendRawPrivateTransaction", signedTxRaw, map[string]interface{}{
 				"privateFor": envelope.PrivateFor,
 			})).
 			Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"" + txHash + "\"}")
@@ -697,8 +693,8 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Tessera_Marking() {
 		_ = envelope.SetJobType(tx.JobType_ETH_TESSERA_MARKING_TX)
 
 		gock.New(keyManagerURL).
-			Get(fmt.Sprintf("/stores/%s/eth1/%s", qkmStoreName, envelope.GetFromString())).
-			Reply(200).JSON(&types.Eth1AccountResponse{
+			Get(fmt.Sprintf("/stores/%s/ethereum/%s", qkmStoreName, envelope.GetFromString())).
+			Reply(200).JSON(&types.EthAccountResponse{
 			Address: ethcommon.HexToAddress(envelope.GetFromString()),
 			Tags: map[string]string{
 				quorumkeymanager.TagIDAllowedTenants: multitenancy.DefaultTenant,
@@ -706,11 +702,11 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Tessera_Marking() {
 		})
 
 		gock.New(keyManagerURL).
-			Post(fmt.Sprintf("/stores/%s/eth1/%s/sign-data", qkmStoreName, envelope.GetFromString())).
-			Reply(200).BodyString(signature)
+			Post(fmt.Sprintf("/stores/%s/ethereum/%s/sign-quorum-private-transaction", qkmStoreName, envelope.GetFromString())).
+			Reply(200).BodyString(signedTxRaw)
 
 		gock.New(apiURL).
-			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
+			Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
 			AddMatcher(ethCallMatcher(wg, "eth_getTransactionCount")).
 			Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"0x0\"}")
 
@@ -720,8 +716,8 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Tessera_Marking() {
 			Reply(200).JSON(&api.JobResponse{})
 
 		gock.New(apiURL).
-			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
-			AddMatcher(ethCallMatcher(wg, "eth_sendRawPrivateTransaction", raw, map[string]interface{}{
+			Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
+			AddMatcher(ethCallMatcher(wg, "eth_sendRawPrivateTransaction", signedTxRaw, map[string]interface{}{
 				"privateFor": envelope.PrivateFor,
 			})).
 			Reply(429).BodyString("")
@@ -732,8 +728,8 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Tessera_Marking() {
 			Reply(200).JSON(&api.JobResponse{})
 
 		gock.New(apiURL).
-			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
-			AddMatcher(ethCallMatcher(wg, "eth_sendRawPrivateTransaction", raw, map[string]interface{}{
+			Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
+			AddMatcher(ethCallMatcher(wg, "eth_sendRawPrivateTransaction", signedTxRaw, map[string]interface{}{
 				"privateFor": envelope.PrivateFor,
 			})).
 			Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"" + txHash + "\"}")
@@ -756,7 +752,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Tessera_Marking() {
 		_ = envelope.SetJobType(tx.JobType_ETH_TESSERA_MARKING_TX)
 
 		gock.New(apiURL).
-			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
+			Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
 			AddMatcher(ethCallMatcher(wg, "eth_sendRawPrivateTransaction")).
 			Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"" + txHash + "\"}")
 
@@ -790,8 +786,8 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Tessera_Marking() {
 		_ = envelope.SetJobType(tx.JobType_ETH_TESSERA_MARKING_TX)
 
 		gock.New(keyManagerURL).
-			Get(fmt.Sprintf("/stores/%s/eth1/%s", qkmStoreName, envelope.GetFromString())).
-			Reply(200).JSON(&types.Eth1AccountResponse{
+			Get(fmt.Sprintf("/stores/%s/ethereum/%s", qkmStoreName, envelope.GetFromString())).
+			Reply(200).JSON(&types.EthAccountResponse{
 			Address: ethcommon.HexToAddress(envelope.GetFromString()),
 			Tags: map[string]string{
 				quorumkeymanager.TagIDAllowedTenants: multitenancy.DefaultTenant,
@@ -799,11 +795,11 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Tessera_Marking() {
 		})
 
 		gock.New(keyManagerURL).
-			Post(fmt.Sprintf("/stores/%s/eth1/%s/sign-data", qkmStoreName, envelope.GetFromString())).
-			Reply(200).BodyString(signature)
+			Post(fmt.Sprintf("/stores/%s/ethereum/%s/sign-quorum-private-transaction", qkmStoreName, envelope.GetFromString())).
+			Reply(200).BodyString(signedTxRaw)
 
 		gock.New(apiURL).
-			Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
+			Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
 			AddMatcher(ethCallMatcher(wg, "eth_sendRawPrivateTransaction")).
 			Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"error\":\"invalid_raw\"}")
 
@@ -912,332 +908,335 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Tessera_Private() {
 }
 
 func (s *txSenderEthereumTestSuite) TestTxSender_XNonceManager() {
-	signature := "0xd35c752d3498e6f5ca1630d264802a992a141ca4b6a3f439d673c75e944e5fb05278aaa5fabbeac362c321b54e298dedae2d31471e432c26ea36a8d49cf08f1e01"
+	signedRawTx := "0xf85380839896808252088083989680808216b4a0d35c752d3498e6f5ca1630d264802a992a141ca4b6a3f439d673c75e944e5fb0a05278aaa5fabbeac362c321b54e298dedae2d31471e432c26ea36a8d49cf08f1e"
 	txHash := "0x6621fbe1e2848446e38d99bfda159cdd83f555ae0ed7a4f3e1c3c79f7d6d74f3"
+	txHash2 := "0x6621fbe1e2848446e38d99bfda159cdd83f555ae0ed7a4f3e1c3c79f7d6d74f4"
 
 	s.T().Run("should increment account nonce on consecutive transaction successfully", func(t *testing.T) {
 		envelope := fakeEnvelope()
 		envelope.Nonce = nil
-
+	
 		for idx := 0; idx < 3; idx++ {
 			wg := &multierror.Group{}
 			_ = envelope.SetJobUUID(uuid.Must(uuid.NewV4()).String())
-
+	
 			if idx == 0 {
 				gock.New(apiURL).
-					Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
+					Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
 					AddMatcher(ethCallMatcher(wg, "eth_getTransactionCount", envelope.From.String(), "pending")).
 					Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"0x0\"}")
 			}
-
+	
 			gock.New(keyManagerURL).
-				Get(fmt.Sprintf("/stores/%s/eth1/%s", qkmStoreName, envelope.GetFromString())).
-				Reply(200).JSON(&types.Eth1AccountResponse{
+				Get(fmt.Sprintf("/stores/%s/ethereum/%s", qkmStoreName, envelope.GetFromString())).
+				Reply(200).JSON(&types.EthAccountResponse{
 				Address: ethcommon.HexToAddress(envelope.GetFromString()),
 				Tags: map[string]string{
 					quorumkeymanager.TagIDAllowedTenants: multitenancy.DefaultTenant,
 				},
 			})
-
+	
 			gock.New(keyManagerURL).
-				Post(fmt.Sprintf("/stores/%s/eth1/%s/sign-data", qkmStoreName, envelope.GetFromString())).
-				Reply(200).BodyString(signature)
-
-			gock.New(apiURL).
-				Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
-				AddMatcher(ethCallMatcher(wg, "eth_sendRawTransaction")).
-				Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"" + txHash + "\"}")
-
+				Post(fmt.Sprintf("/stores/%s/ethereum/%s/sign-transaction", qkmStoreName, envelope.GetFromString())).
+				Reply(200).BodyString(signedRawTx)
+	
+			if idx == 2 {
+				gock.New(apiURL).
+					Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
+					AddMatcher(ethCallMatcher(wg, "eth_sendRawTransaction")).
+					Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"" + txHash2 + "\"}")
+			} else {
+				gock.New(apiURL).
+					Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
+					AddMatcher(ethCallMatcher(wg, "eth_sendRawTransaction")).
+					Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"" + txHash + "\"}")
+			}
+	
 			gock.New(apiURL).
 				Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
 				AddMatcher(txStatusUpdateMatcher(wg, entities.StatusPending, fmt.Sprintf("%d", idx))).
 				Reply(200).JSON(&api.JobResponse{})
-
+	
 			// Warning because txHash does not match
-			if idx > 0 {
+			if idx == 2 {
 				gock.New(apiURL).
 					Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
 					AddMatcher(txStatusUpdateMatcher(wg, entities.StatusWarning, fmt.Sprintf("%d", idx))).
 					Reply(200).JSON(&api.JobResponse{})
 			}
-
+	
 			err := s.sendEnvelope(envelope.TxEnvelopeAsRequest())
 			if err != nil {
 				assert.Fail(t, err.Error())
 				return
 			}
-
+	
 			err = waitTimeout(wg, waitForEnvelopeTimeOut)
 			assert.NoError(t, err)
 			gock.Off()
 		}
-
+	
 		nonce, _, _ := s.env.ns.GetLastSent(envelope.PartitionKey())
 		assert.Equal(t, uint64(2), nonce)
 	})
 
-	s.T().Run("should re-fetch nonce on nonce too low errors", func(t *testing.T) {
-		envelope := fakeEnvelope()
-		envelope.Nonce = nil
-
-		for idx := 0; idx < 3; idx++ {
-			wg := &multierror.Group{}
-			_ = envelope.SetJobUUID(uuid.Must(uuid.NewV4()).String())
-
-			if idx == 0 {
-				gock.New(apiURL).
-					Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
-					AddMatcher(ethCallMatcher(wg, "eth_getTransactionCount", envelope.From.String(), "pending")).
-					Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"0x0\"}")
-
-				gock.New(keyManagerURL).
-					Get(fmt.Sprintf("/stores/%s/eth1/%s", qkmStoreName, envelope.GetFromString())).
-					Reply(200).JSON(&types.Eth1AccountResponse{
-					Address: ethcommon.HexToAddress(envelope.GetFromString()),
-					Tags: map[string]string{
-						quorumkeymanager.TagIDAllowedTenants: multitenancy.DefaultTenant,
-					},
-				})
-
-				gock.New(keyManagerURL).
-					Post(fmt.Sprintf("/stores/%s/eth1/%s/sign-data", qkmStoreName, envelope.GetFromString())).
-					Reply(200).BodyString(signature)
-
-				gock.New(apiURL).
-					Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
-					AddMatcher(ethCallMatcher(wg, "eth_sendRawTransaction")).
-					Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"" + txHash + "\"}")
-
-				gock.New(apiURL).
-					Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
-					AddMatcher(txStatusUpdateMatcher(wg, entities.StatusPending, fmt.Sprintf("%d", idx))).
-					Reply(200).JSON(&api.JobResponse{})
-			}
-
-			if idx == 1 {
-				gock.New(keyManagerURL).
-					Get(fmt.Sprintf("/stores/%s/eth1/%s", qkmStoreName, envelope.GetFromString())).Times(2).
-					Reply(200).JSON(&types.Eth1AccountResponse{
-					Address: ethcommon.HexToAddress(envelope.GetFromString()),
-					Tags: map[string]string{
-						quorumkeymanager.TagIDAllowedTenants: multitenancy.DefaultTenant,
-					},
-				})
-
-				gock.New(keyManagerURL).
-					Post(fmt.Sprintf("/stores/%s/eth1/%s/sign-data", qkmStoreName, envelope.GetFromString())).Times(2).
-					Reply(200).BodyString(signature)
-
-				gock.New(apiURL).
-					Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
-					AddMatcher(txStatusUpdateMatcher(wg, entities.StatusPending, "1")).
-					Reply(200).JSON(&api.JobResponse{})
-
-				resp := utils2.JSONRpcMessage{Error: &utils2.JSONError{Code: 100, Message: "nonce too low"}}
-				bresp, _ := json.Marshal(resp)
-				gock.New(apiURL).
-					Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
-					AddMatcher(ethCallMatcher(wg, "eth_sendRawTransaction")).
-					Reply(200).BodyString(string(bresp))
-
-				gock.New(apiURL).
-					Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
-					AddMatcher(ethCallMatcher(wg, "eth_getTransactionCount", envelope.From.String(), "pending")).
-					Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"0x2\"}")
-
-				gock.New(apiURL).
-					Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
-					AddMatcher(txStatusUpdateMatcher(wg, entities.StatusRecovering, "")).
-					Reply(200).JSON(&api.JobResponse{})
-
-				gock.New(apiURL).
-					Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
-					AddMatcher(ethCallMatcher(wg, "eth_sendRawTransaction")).
-					Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"" + txHash + "\"}")
-
-				gock.New(apiURL).
-					Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
-					AddMatcher(txStatusUpdateMatcher(wg, entities.StatusPending, "2")).
-					Reply(200).JSON(&api.JobResponse{})
-
-				gock.New(apiURL).
-					Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
-					AddMatcher(txStatusUpdateMatcher(wg, entities.StatusWarning, "")).
-					Reply(200).JSON(&api.JobResponse{})
-			}
-
-			if idx > 1 {
-				gock.New(keyManagerURL).
-					Get(fmt.Sprintf("/stores/%s/eth1/%s", qkmStoreName, envelope.GetFromString())).
-					Reply(200).JSON(&types.Eth1AccountResponse{
-					Address: ethcommon.HexToAddress(envelope.GetFromString()),
-					Tags: map[string]string{
-						quorumkeymanager.TagIDAllowedTenants: multitenancy.DefaultTenant,
-					},
-				})
-
-				gock.New(keyManagerURL).
-					Post(fmt.Sprintf("/stores/%s/eth1/%s/sign-data", qkmStoreName, envelope.GetFromString())).
-					Reply(200).BodyString(signature)
-
-				gock.New(apiURL).
-					Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
-					AddMatcher(ethCallMatcher(wg, "eth_sendRawTransaction")).
-					Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"" + txHash + "\"}")
-
-				gock.New(apiURL).
-					Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
-					AddMatcher(txStatusUpdateMatcher(wg, entities.StatusPending, "3")).
-					Reply(200).JSON(&api.JobResponse{})
-
-				gock.New(apiURL).
-					Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
-					AddMatcher(txStatusUpdateMatcher(wg, entities.StatusWarning, "3")).
-					Reply(200).JSON(&api.JobResponse{})
-			}
-
-			err := s.sendEnvelope(envelope.TxEnvelopeAsRequest())
-			if err != nil {
-				assert.Fail(t, err.Error())
-				return
-			}
-
-			err = waitTimeout(wg, waitForEnvelopeTimeOut)
-			assert.NoError(t, err)
-			gock.Off()
-		}
-
-		nonce, _, _ := s.env.ns.GetLastSent(envelope.PartitionKey())
-		assert.Equal(t, uint64(3), nonce)
-	})
-
-	s.T().Run("should retry on nonce too low errors till max recover", func(t *testing.T) {
-		envelope := fakeEnvelope()
-		envelope.Nonce = nil
-
-		for idx := 0; idx <= maxRecoveryDefault; idx++ {
-			wg := &multierror.Group{}
-
-			gock.New(apiURL).
-				Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
-				AddMatcher(ethCallMatcher(wg, "eth_getTransactionCount", envelope.From.String(), "pending")).
-				Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"0x0\"}")
-
-			gock.New(keyManagerURL).
-				Get(fmt.Sprintf("/stores/%s/eth1/%s", qkmStoreName, envelope.GetFromString())).
-				Reply(200).JSON(&types.Eth1AccountResponse{
-				Address: ethcommon.HexToAddress(envelope.GetFromString()),
-				Tags: map[string]string{
-					quorumkeymanager.TagIDAllowedTenants: multitenancy.DefaultTenant,
-				},
-			})
-
-			gock.New(keyManagerURL).
-				Post(fmt.Sprintf("/stores/%s/eth1/%s/sign-data", qkmStoreName, envelope.GetFromString())).
-				Reply(200).BodyString(signature)
-
-			gock.New(apiURL).
-				Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
-				AddMatcher(txStatusUpdateMatcher(wg, entities.StatusPending, "0")).
-				Reply(200).JSON(&api.JobResponse{})
-
-			resp := utils2.JSONRpcMessage{Error: &utils2.JSONError{Code: 100, Message: "nonce too low"}}
-			bresp, _ := json.Marshal(resp)
-			gock.New(apiURL).
-				Post(fmt.Sprintf("/%s", envelope.GetChainUUID())).
-				AddMatcher(ethCallMatcher(wg, "eth_sendRawTransaction")).
-				Reply(200).BodyString(string(bresp))
-
-			if idx < maxRecoveryDefault {
-				gock.New(apiURL).
-					Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
-					AddMatcher(txStatusUpdateMatcher(wg, entities.StatusRecovering, "")).
-					Reply(200).JSON(&api.JobResponse{})
-			} else {
-				gock.New(apiURL).
-					Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
-					AddMatcher(txStatusUpdateMatcher(wg, entities.StatusFailed, "")).
-					Reply(200).JSON(&api.JobResponse{})
-			}
-
-			if idx == 0 {
+		s.T().Run("should re-fetch nonce on nonce too low errors", func(t *testing.T) {
+			envelope := fakeEnvelope()
+			envelope.Nonce = nil
+		
+			for idx := 0; idx < 3; idx++ {
+				wg := &multierror.Group{}
+				_ = envelope.SetJobUUID(uuid.Must(uuid.NewV4()).String())
+		
+				if idx == 0 {
+					gock.New(apiURL).
+						Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
+						AddMatcher(ethCallMatcher(wg, "eth_getTransactionCount", envelope.From.String(), "pending")).
+						Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"0x0\"}")
+		
+					gock.New(keyManagerURL).
+						Get(fmt.Sprintf("/stores/%s/ethereum/%s", qkmStoreName, envelope.GetFromString())).
+						Reply(200).JSON(&types.EthAccountResponse{
+						Address: ethcommon.HexToAddress(envelope.GetFromString()),
+						Tags: map[string]string{
+							quorumkeymanager.TagIDAllowedTenants: multitenancy.DefaultTenant,
+						},
+					})
+		
+					gock.New(keyManagerURL).
+						Post(fmt.Sprintf("/stores/%s/ethereum/%s/sign-transaction", qkmStoreName, envelope.GetFromString())).
+						Reply(200).BodyString(signedRawTx)
+		
+					gock.New(apiURL).
+						Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
+						AddMatcher(ethCallMatcher(wg, "eth_sendRawTransaction")).
+						Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"" + txHash + "\"}")
+		
+					gock.New(apiURL).
+						Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
+						AddMatcher(txStatusUpdateMatcher(wg, entities.StatusPending, fmt.Sprintf("%d", idx))).
+						Reply(200).JSON(&api.JobResponse{})
+				}
+		
+				if idx == 1 {
+					gock.New(keyManagerURL).
+						Get(fmt.Sprintf("/stores/%s/ethereum/%s", qkmStoreName, envelope.GetFromString())).Times(2).
+						Reply(200).JSON(&types.EthAccountResponse{
+						Address: ethcommon.HexToAddress(envelope.GetFromString()),
+						Tags: map[string]string{
+							quorumkeymanager.TagIDAllowedTenants: multitenancy.DefaultTenant,
+						},
+					})
+		
+					gock.New(keyManagerURL).
+						Post(fmt.Sprintf("/stores/%s/ethereum/%s/sign-transaction", qkmStoreName, envelope.GetFromString())).Times(2).
+						Reply(200).BodyString(signedRawTx)
+		
+					gock.New(apiURL).
+						Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
+						AddMatcher(txStatusUpdateMatcher(wg, entities.StatusPending, "1")).
+						Reply(200).JSON(&api.JobResponse{})
+		
+					resp := utils2.JSONRpcMessage{Error: &utils2.JSONError{Code: 100, Message: "nonce too low"}}
+					bresp, _ := json.Marshal(resp)
+					gock.New(apiURL).
+						Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
+						AddMatcher(ethCallMatcher(wg, "eth_sendRawTransaction")).
+						Reply(200).BodyString(string(bresp))
+		
+					gock.New(apiURL).
+						Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
+						AddMatcher(ethCallMatcher(wg, "eth_getTransactionCount", envelope.From.String(), "pending")).
+						Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"0x2\"}")
+		
+					gock.New(apiURL).
+						Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
+						AddMatcher(txStatusUpdateMatcher(wg, entities.StatusRecovering, "")).
+						Reply(200).JSON(&api.JobResponse{})
+		
+					gock.New(apiURL).
+						Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
+						AddMatcher(ethCallMatcher(wg, "eth_sendRawTransaction")).
+						Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"" + txHash + "\"}")
+		
+					gock.New(apiURL).
+						Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
+						AddMatcher(txStatusUpdateMatcher(wg, entities.StatusPending, "2")).
+						Reply(200).JSON(&api.JobResponse{})
+				}
+		
+				if idx > 1 {
+					gock.New(keyManagerURL).
+						Get(fmt.Sprintf("/stores/%s/ethereum/%s", qkmStoreName, envelope.GetFromString())).
+						Reply(200).JSON(&types.EthAccountResponse{
+						Address: ethcommon.HexToAddress(envelope.GetFromString()),
+						Tags: map[string]string{
+							quorumkeymanager.TagIDAllowedTenants: multitenancy.DefaultTenant,
+						},
+					})
+		
+					gock.New(keyManagerURL).
+						Post(fmt.Sprintf("/stores/%s/ethereum/%s/sign-transaction", qkmStoreName, envelope.GetFromString())).
+						Reply(200).BodyString(signedRawTx)
+		
+					gock.New(apiURL).
+						Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
+						AddMatcher(ethCallMatcher(wg, "eth_sendRawTransaction")).
+						Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"" + txHash2 + "\"}")
+		
+					gock.New(apiURL).
+						Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
+						AddMatcher(txStatusUpdateMatcher(wg, entities.StatusPending, "3")).
+						Reply(200).JSON(&api.JobResponse{})
+		
+					gock.New(apiURL).
+						Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
+						AddMatcher(txStatusUpdateMatcher(wg, entities.StatusWarning, "3")).
+						Reply(200).JSON(&api.JobResponse{})
+				}
+		
 				err := s.sendEnvelope(envelope.TxEnvelopeAsRequest())
 				if err != nil {
 					assert.Fail(t, err.Error())
 					return
 				}
+		
+				err = waitTimeout(wg, waitForEnvelopeTimeOut)
+				assert.NoError(t, err)
+				gock.Off()
 			}
-
-			err := waitTimeout(wg, waitForEnvelopeTimeOut)
-			assert.NoError(t, err)
-
-			gock.Off()
-		}
-
-		_, ok, _ := s.env.ns.GetLastSent(envelope.PartitionKey())
-		assert.False(t, ok)
-	})
-}
-
-func (s *txSenderEthereumTestSuite) TestTxSender_ZHealthCheck() {
-	type healthRes struct {
-		API   string `json:"api,omitempty"`
-		Kafka string `json:"kafka,omitempty"`
-		Redis string `json:"redis,omitempty"`
+		
+			nonce, _, _ := s.env.ns.GetLastSent(envelope.PartitionKey())
+			assert.Equal(t, uint64(3), nonce)
+		})
+		
+		s.T().Run("should retry on nonce too low errors till max recover", func(t *testing.T) {
+			envelope := fakeEnvelope()
+			envelope.Nonce = nil
+		
+			for idx := 0; idx <= maxRecoveryDefault; idx++ {
+				wg := &multierror.Group{}
+		
+				gock.New(apiURL).
+					Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
+					AddMatcher(ethCallMatcher(wg, "eth_getTransactionCount", envelope.From.String(), "pending")).
+					Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"0x0\"}")
+		
+				gock.New(keyManagerURL).
+					Get(fmt.Sprintf("/stores/%s/ethereum/%s", qkmStoreName, envelope.GetFromString())).
+					Reply(200).JSON(&types.EthAccountResponse{
+					Address: ethcommon.HexToAddress(envelope.GetFromString()),
+					Tags: map[string]string{
+						quorumkeymanager.TagIDAllowedTenants: multitenancy.DefaultTenant,
+					},
+				})
+		
+				gock.New(keyManagerURL).
+					Post(fmt.Sprintf("/stores/%s/ethereum/%s/sign-transaction", qkmStoreName, envelope.GetFromString())).
+					Reply(200).BodyString(signedRawTx)
+		
+				gock.New(apiURL).
+					Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
+					AddMatcher(txStatusUpdateMatcher(wg, entities.StatusPending, "0")).
+					Reply(200).JSON(&api.JobResponse{})
+		
+				resp := utils2.JSONRpcMessage{Error: &utils2.JSONError{Code: 100, Message: "nonce too low"}}
+				bresp, _ := json.Marshal(resp)
+				gock.New(apiURL).
+					Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
+					AddMatcher(ethCallMatcher(wg, "eth_sendRawTransaction")).
+					Reply(200).BodyString(string(bresp))
+		
+				if idx < maxRecoveryDefault {
+					gock.New(apiURL).
+						Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
+						AddMatcher(txStatusUpdateMatcher(wg, entities.StatusRecovering, "")).
+						Reply(200).JSON(&api.JobResponse{})
+				} else {
+					gock.New(apiURL).
+						Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
+						AddMatcher(txStatusUpdateMatcher(wg, entities.StatusFailed, "")).
+						Reply(200).JSON(&api.JobResponse{})
+				}
+		
+				if idx == 0 {
+					err := s.sendEnvelope(envelope.TxEnvelopeAsRequest())
+					if err != nil {
+						assert.Fail(t, err.Error())
+						return
+					}
+				}
+		
+				err := waitTimeout(wg, waitForEnvelopeTimeOut)
+				assert.NoError(t, err)
+		
+				gock.Off()
+			}
+		
+			_, ok, _ := s.env.ns.GetLastSent(envelope.PartitionKey())
+			assert.False(t, ok)
+		})
 	}
-
-	httpClient := http.NewClient(http.NewDefaultConfig())
-	ctx := s.env.ctx
-	s.T().Run("should retrieve positive health check over service dependencies", func(t *testing.T) {
-		req, err := http2.NewRequest("GET", fmt.Sprintf("%s/ready?full=1", s.env.metricsURL), nil)
-		assert.NoError(s.T(), err)
-
-		gock.New(apiMetricsURL).Get("/live").Reply(200)
-		defer gock.Off()
-
-		resp, err := httpClient.Do(req)
-		if err != nil {
-			assert.Fail(s.T(), err.Error())
-			return
+	
+	func (s *txSenderEthereumTestSuite) TestTxSender_ZHealthCheck() {
+		type healthRes struct {
+			API   string `json:"api,omitempty"`
+			Kafka string `json:"kafka,omitempty"`
+			Redis string `json:"redis,omitempty"`
 		}
-
-		assert.Equal(s.T(), 200, resp.StatusCode)
-		status := healthRes{}
-		err = json.UnmarshalBody(resp.Body, &status)
-		assert.NoError(s.T(), err)
-		assert.Equal(s.T(), "OK", status.API)
-		assert.Equal(s.T(), "OK", status.Kafka)
-		assert.Equal(s.T(), "OK", status.Redis)
-	})
-
-	s.T().Run("should retrieve a negative health check over kafka service", func(t *testing.T) {
-		req, err := http2.NewRequest("GET", fmt.Sprintf("%s/ready?full=1", s.env.metricsURL), nil)
-		assert.NoError(s.T(), err)
-
-		gock.New(apiMetricsURL).Get("/live").Reply(200)
-		defer gock.Off()
-
-		// Kill Kafka on first call so data is added in DB and status is CREATED but does not get updated to STARTED
-		err = s.env.client.Stop(ctx, kafkaContainerID)
-		assert.NoError(t, err)
-
-		resp, err := httpClient.Do(req)
-		if err != nil {
-			assert.Fail(s.T(), err.Error())
-			return
-		}
-
-		err = s.env.client.StartServiceAndWait(ctx, kafkaContainerID, 10*time.Second)
-		assert.NoError(t, err)
-
-		assert.Equal(s.T(), 503, resp.StatusCode)
-		status := healthRes{}
-		err = json.UnmarshalBody(resp.Body, &status)
-		assert.NoError(s.T(), err)
-		assert.NotEqual(s.T(), "OK", status.Kafka)
-		assert.Equal(s.T(), "OK", status.API)
-		assert.Equal(s.T(), "OK", status.Redis)
-	})
+	
+		httpClient := http.NewClient(http.NewDefaultConfig())
+		ctx := s.env.ctx
+		s.T().Run("should retrieve positive health check over service dependencies", func(t *testing.T) {
+			req, err := http2.NewRequest("GET", fmt.Sprintf("%s/ready?full=1", s.env.metricsURL), nil)
+			assert.NoError(s.T(), err)
+	
+			gock.New(apiMetricsURL).Get("/live").Reply(200)
+			defer gock.Off()
+	
+			resp, err := httpClient.Do(req)
+			if err != nil {
+				assert.Fail(s.T(), err.Error())
+				return
+			}
+	
+			assert.Equal(s.T(), 200, resp.StatusCode)
+			status := healthRes{}
+			err = json.UnmarshalBody(resp.Body, &status)
+			assert.NoError(s.T(), err)
+			assert.Equal(s.T(), "OK", status.API)
+			assert.Equal(s.T(), "OK", status.Kafka)
+			assert.Equal(s.T(), "OK", status.Redis)
+		})
+	
+		s.T().Run("should retrieve a negative health check over kafka service", func(t *testing.T) {
+			req, err := http2.NewRequest("GET", fmt.Sprintf("%s/ready?full=1", s.env.metricsURL), nil)
+			assert.NoError(s.T(), err)
+	
+			gock.New(apiMetricsURL).Get("/live").Reply(200)
+			defer gock.Off()
+	
+			// Kill Kafka on first call so data is added in DB and status is CREATED but does not get updated to STARTED
+			err = s.env.client.Stop(ctx, kafkaContainerID)
+			assert.NoError(t, err)
+	
+			resp, err := httpClient.Do(req)
+			if err != nil {
+				assert.Fail(s.T(), err.Error())
+				return
+			}
+	
+			err = s.env.client.StartServiceAndWait(ctx, kafkaContainerID, 10*time.Second)
+			assert.NoError(t, err)
+	
+			assert.Equal(s.T(), 503, resp.StatusCode)
+			status := healthRes{}
+			err = json.UnmarshalBody(resp.Body, &status)
+			assert.NoError(s.T(), err)
+			assert.NotEqual(s.T(), "OK", status.Kafka)
+			assert.Equal(s.T(), "OK", status.API)
+			assert.Equal(s.T(), "OK", status.Redis)
+		})
 }
 
 func fakeEnvelope() *tx.Envelope {

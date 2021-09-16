@@ -34,12 +34,12 @@ func NewAPI(
 	cfg *Config,
 	pgmngr postgres.Manager,
 	jwt, key auth.Checker,
-	keyManagerClient qkmclient.Eth1Client,
+	keyManagerClient qkmclient.EthClient,
 	ec ethclient.Client,
 	syncProducer sarama.SyncProducer,
 	topicCfg *pkgsarama.KafkaTopicConfig,
 ) (*app.App, error) {
-	// Create Data agents
+	// Create Message agents
 	db, err := multi.Build(context.Background(), cfg.Store, pgmngr)
 	if err != nil {
 		return nil, err

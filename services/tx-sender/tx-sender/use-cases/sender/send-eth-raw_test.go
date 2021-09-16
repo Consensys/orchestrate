@@ -105,7 +105,8 @@ func decodeRaw(raw string) *entities.ETHTransaction {
 	var tx *types.Transaction
 	rawb, _ := hexutil.Decode(raw)
 	_ = rlp.DecodeBytes(rawb, &tx)
-	msg, _ := tx.AsMessage(types.NewEIP155Signer(tx.ChainId()))
+	msg, _ := tx.AsMessage(types.NewEIP155Signer(tx.ChainId()), nil)
+
 	return &entities.ETHTransaction{
 		From:     msg.From().String(),
 		Data:     "0x" + ethcommon.Bytes2Hex(tx.Data()),

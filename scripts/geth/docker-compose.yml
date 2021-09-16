@@ -55,4 +55,4 @@ volumes:
 networks:
   orchestrate:
     external:
-      name: deps_orchestrate
+      name: orchestrate

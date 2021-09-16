@@ -12,7 +12,7 @@ import (
 	"github.com/ConsenSys/orchestrate/pkg/utils/envelope"
 	utils2 "github.com/ConsenSys/orchestrate/services/tx-sender/tx-sender/utils"
 	"github.com/cenkalti/backoff/v4"
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 
 	encoding "github.com/ConsenSys/orchestrate/pkg/encoding/proto"
 	"github.com/ConsenSys/orchestrate/pkg/errors"

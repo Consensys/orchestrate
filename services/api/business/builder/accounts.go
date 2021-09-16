@@ -16,7 +16,7 @@ type accountUseCases struct {
 
 func newAccountUseCases(
 	db store.DB,
-	keyManagerClient qkmclient.Eth1Client,
+	keyManagerClient qkmclient.EthClient,
 	searchChainsUC usecases.SearchChainsUseCase,
 	sendTxUC usecases.SendTxUseCase,
 	getFaucetCandidateUC usecases.GetFaucetCandidateUseCase,

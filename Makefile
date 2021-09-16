@@ -4,7 +4,7 @@ INTEGRATION_TEST_PACKAGES ?= $(shell go list ./... | grep integration-tests )
 ORCH_SERVICES = tx-sender tx-listener api
 ORCH_MIGRATE = api
 DEPS_VAULT = vault vault-init vault-agent
-DEPS_POSTGRES = postgres-api
+DEPS_POSTGRES = postgres
 DEPS_KAFKA = zookeeper kafka
 
 UNAME_S := $(shell uname -s)
@@ -16,6 +16,10 @@ ifeq ($(UNAME_S),Darwin)
 endif
 
 .PHONY: all run-coverage coverage fmt fmt-check vet lint misspell-check misspell race tools help
+
+networks:
+	@docker network create --driver=bridge --subnet=172.16.239.0/24 besu || true
+	@docker network create --driver=bridge --subnet=172.16.238.0/24 quorum || true
 
 # Linters
 run-coverage: ## Generate global code coverage report
@@ -129,7 +133,7 @@ gobuild-e2e: ## Build Orchestrate e2e Docker image
 	@GOOS=linux GOARCH=amd64 go build -i -o ./build/bin/test ./tests/cmd
 
 orchestrate: gobuild ## Start Orchestrate
-	@docker-compose up -d $(ORCH_SERVICES)
+	@docker-compose up --force-recreate --build -d $(ORCH_SERVICES)
 
 ci-orchestrate:
 	@docker-compose up -d $(ORCH_SERVICES)
@@ -158,7 +162,7 @@ quorum-key-manager:
 
 deps-persistent: deps-vault deps-postgres deps-redis
 
-deps: deps-persistent deps-kafka quorum-key-manager
+deps: networks deps-persistent deps-kafka quorum-key-manager
 
 down-deps:
 	@docker-compose -f scripts/deps/docker-compose.yml down --volumes --timeout 0
@@ -196,7 +200,7 @@ postgres:
 down-postgres:
 	@docker-compose -f scripts/deps/docker-compose.yml rm --force -s -v postgres-unit
 
-up: deps-persistent quorum geth besu deps-kafka quorum-key-manager bootstrap-deps orchestrate ## Start Orchestrate and deps
+up: networks deps-persistent quorum geth besu deps-kafka quorum-key-manager bootstrap-deps orchestrate ## Start Orchestrate and deps
 
 dev: deps orchestrate ## Start Orchestrate and light deps
 

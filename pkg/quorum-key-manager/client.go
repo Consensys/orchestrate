@@ -25,7 +25,10 @@ func Init() {
 			return
 		}
 		logger := log.NewLogger().SetComponent(component)
-		client = qkm.NewHTTPClient(http.NewClient(http.NewConfig(vipr)), &qkm.Config{
+		httpCfg := http.NewConfig(vipr)
+		// User's JWT is forwarded to QKM on every request
+		// httpCfg.AuthHeaderForward = true
+		client = qkm.NewHTTPClient(http.NewClient(httpCfg), &qkm.Config{
 			URL: cfg.URL,
 		})
 		storeNameID = vipr.GetString(StoreNameViperKey)

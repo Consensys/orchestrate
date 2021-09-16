@@ -216,7 +216,7 @@ services:
       - NODE_ID=3
       - PRIVATE_CONFIG=${PRIVATE_CONFIG:-/data/tm/tm.ipc}
       - QUORUM_CONSENSUS=${QUORUM_CONS_ALGO:-istanbul}
-      - TESSERA_CLIENT=172.16.238.23:9000 
+      - TESSERA_CLIENT=172.16.238.23:9000
     volumes:
       - ./config/quorum/passwords.txt:/config/passwords.txt
       - ./config/quorum/${QUORUM_CONS_ALGO:-istanbul}Genesis.json:/config/genesis.json
@@ -264,8 +264,11 @@ services:
 
 networks:
   quorum:
-    external:
-      name: deps_quorum
+    driver: bridge
+    name: quorum
+    ipam:
+      config:
+        - subnet: 172.16.238.0/24
 
 volumes:
   vol1:

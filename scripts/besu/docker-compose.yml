@@ -74,7 +74,7 @@ services:
       - 20000:8545/tcp
       - 20001:8546/tcp
     networks:
-      quorum:
+      besu:
         ipv4_address: 172.16.239.11
   
   orion1:
@@ -89,7 +89,7 @@ services:
       - ./config/orion/networkFiles/orion1:/keys/
       - ./config/orion/log-config.xml:/config/log-config.xml
     networks:
-      quorum:
+      besu:
         ipv4_address: 172.16.239.21
   
   validator2:
@@ -112,7 +112,7 @@ services:
       - 20002:8545/tcp
       - 20003:8546/tcp
     networks:
-      quorum:
+      besu:
         ipv4_address: 172.16.239.12
   
   orion2:
@@ -127,7 +127,7 @@ services:
       - ./config/orion/networkFiles/orion2:/keys/
       - ./config/orion/log-config.xml:/config/log-config.xml
     networks:
-      quorum:
+      besu:
         ipv4_address: 172.16.239.22
         
   validator3:
@@ -150,7 +150,7 @@ services:
       - 20004:8545/tcp
       - 20005:8546/tcp
     networks:
-      quorum:
+      besu:
         ipv4_address: 172.16.239.13
 
   orion3:
@@ -165,7 +165,7 @@ services:
       - ./config/orion/networkFiles/orion3:/keys/
       - ./config/orion/log-config.xml:/config/log-config.xml
     networks:
-      quorum:
+      besu:
         ipv4_address: 172.16.239.23
         
   validator4:
@@ -188,7 +188,7 @@ services:
       - 20006:8545/tcp
       - 20007:8546/tcp
     networks:
-      quorum:
+      besu:
         ipv4_address: 172.16.239.14
 
   orion4:
@@ -203,13 +203,16 @@ services:
       - ./config/orion/networkFiles/orion4:/keys/
       - ./config/orion/log-config.xml:/config/log-config.xml
     networks:
-      quorum:
+      besu:
         ipv4_address: 172.16.239.24
 
 volumes:
   public-keys:
 
 networks:
-  quorum:
-    external:
-      name: deps_quorum
+  besu:
+    driver: bridge
+    name: besu
+    ipam:
+      config:
+        - subnet: 172.16.239.0/24

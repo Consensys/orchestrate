@@ -22,8 +22,8 @@ type UpdateAccountRequest struct {
 	Attributes map[string]string `json:"attributes,omitempty"`
 }
 
-type SignPayloadRequest struct {
-	Data string `json:"data" validate:"required,isHex" example:"0x6d79206461746120746f207369676e"`
+type SignMessageRequest struct {
+	Message string `json:"data" validate:"required,isHex" example:"0x6d79206461746120746f207369676e"`
 }
 
 type SignTypedDataRequest struct {

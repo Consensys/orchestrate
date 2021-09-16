@@ -278,16 +278,16 @@ func (s *accountsCtrlTestSuite) TestAccountController_SignPayload() {
 		rw := httptest.NewRecorder()
 		payload := "0x1234"
 		signature := "0xsignature"
-		requestBytes, _ := json.Marshal(&api.SignPayloadRequest{Data: payload})
+		requestBytes, _ := json.Marshal(&api.SignMessageRequest{Message: payload})
 
 		httpRequest := httptest.
-			NewRequest(http.MethodPost, fmt.Sprintf("/accounts/%v/sign", acc.Address), bytes.NewReader(requestBytes)).
+			NewRequest(http.MethodPost, fmt.Sprintf("/accounts/%v/sign-message", acc.Address), bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 
 		s.getAccountUC.EXPECT().Execute(gomock.Any(), mixedCaseTestAddress, 
 			 utils.AllowedTenants(s.tenants[0])).Return(acc, nil)
-		s.keyManagerClient.EXPECT().SignEth1(gomock.Any(), globalStoreName, mixedCaseTestAddress, &qkmtypes.SignHexPayloadRequest{
-			Data: hexutil.MustDecode(payload),
+		s.keyManagerClient.EXPECT().SignMessage(gomock.Any(), globalStoreName, mixedCaseTestAddress, &qkmtypes.SignMessageRequest{
+			Message: hexutil.MustDecode(payload),
 		}).Return(signature, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -306,10 +306,10 @@ func (s *accountsCtrlTestSuite) TestAccountController_VerifySignature() {
 		requestBytes, _ := json.Marshal(request)
 
 		httpRequest := httptest.
-			NewRequest(http.MethodPost, "/accounts/verify-signature", bytes.NewReader(requestBytes)).
+			NewRequest(http.MethodPost, "/accounts/verify-message", bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 
-		s.keyManagerClient.EXPECT().VerifyEth1Signature(gomock.Any(), globalStoreName, request).Return(nil)
+		s.keyManagerClient.EXPECT().VerifyMessage(gomock.Any(), globalStoreName, request).Return(nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -326,10 +326,10 @@ func (s *accountsCtrlTestSuite) TestAccountController_VerifyTypedDataSignature()
 		requestBytes, _ := json.Marshal(request)
 
 		httpRequest := httptest.
-			NewRequest(http.MethodPost, "/accounts/verify-typed-data-signature", bytes.NewReader(requestBytes)).
+			NewRequest(http.MethodPost, "/accounts/verify-typed-data", bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 
-		s.keyManagerClient.EXPECT().VerifyTypedDataSignature(gomock.Any(), globalStoreName, request).Return(nil)
+		s.keyManagerClient.EXPECT().VerifyTypedData(gomock.Any(), globalStoreName, request).Return(nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 

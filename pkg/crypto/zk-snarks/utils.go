@@ -1,8 +1,8 @@
 package zksnarks
 
 import (
-	"github.com/consensys/gnark-crypto/crypto/hash"
 	"github.com/consensys/gnark-crypto/ecc/bn254/twistededwards/eddsa"
+	"github.com/consensys/gnark-crypto/hash"
 
 	"github.com/ConsenSys/orchestrate/pkg/errors"
 	"github.com/consensys/quorum/common/hexutil"

@@ -1,8 +1,8 @@
 package testutils
 
 import (
+	ethabi "github.com/ConsenSys/orchestrate/pkg/go-ethereum/v1_9_12/accounts/abi"
 	"github.com/ConsenSys/orchestrate/pkg/types/entities"
-	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
 	"k8s.io/apimachinery/pkg/util/rand"
 )
 

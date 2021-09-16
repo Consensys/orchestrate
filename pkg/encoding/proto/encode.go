@@ -2,7 +2,7 @@ package proto
 
 import (
 	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 )
 
 // Marshal a proto into a message assumed to be an Envelope

@@ -9,7 +9,7 @@ import (
 
 func FakeCreateAccountRequest() *api.CreateAccountRequest {
 	return &api.CreateAccountRequest{
-		Alias: fmt.Sprintf("Alias_%s", utils.RandString(5)),
+		Alias: fmt.Sprintf("Alias_%s", utils.RandString(10)),
 		Attributes: map[string]string{
 			"attr1": "val1",
 			"attr2": "val2",

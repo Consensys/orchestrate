@@ -51,7 +51,7 @@ type Builder struct {
 	contractsCtrl *ContractsController
 }
 
-func NewBuilder(ucs usecases.UseCases, keyManagerClient qkm.Eth1Client) *Builder {
+func NewBuilder(ucs usecases.UseCases, keyManagerClient qkm.EthClient) *Builder {
 	return &Builder{
 		txCtrl:        NewTransactionsController(ucs),
 		schedulesCtrl: NewSchedulesController(ucs),

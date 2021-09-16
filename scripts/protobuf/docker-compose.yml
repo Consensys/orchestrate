@@ -5,9 +5,8 @@ services:
     build:
       context: .
       args:
-        PROTOC_TAG: '3.11.4'
-        PROTOC_GEN_GO_TAG: 'v1.3.5'
-        GRPC_GATEWAY_TAG: 'v1.14.3'
+        PROTOC_TAG: '3.17.3'
+        PROTOC_GEN_GO_TAG: 'v1.26.0'
     command: sh scripts/protobuf/generate-proto.sh
     volumes:
       - ../../:/src

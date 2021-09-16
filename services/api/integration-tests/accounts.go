@@ -23,7 +23,6 @@ import (
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"gopkg.in/h2non/gock.v1"
 )
 
 type accountsTestSuite struct {
@@ -40,12 +39,14 @@ func (s *accountsTestSuite) TestCreateAccounts() {
 	s.T().Run("should create account successfully by querying key-manager API", func(t *testing.T) {
 		txRequest := testutils.FakeCreateAccountRequest()
 
-		resp, err := s.client.CreateAccount(ctx, txRequest)
-		if err != nil {
-			assert.Fail(s.T(), err.Error())
-			return
-		}
+		ethAccRes, err := s.client.CreateAccount(ctx, txRequest)
+		require.NoError(s.T(), err)
+		
+		resp, err := s.client.GetAccount(ctx, ethAccRes.Address)
+		require.NoError(s.T(), err)
 
+		assert.Equal(s.T(), resp.Address, ethAccRes.Address)
+		assert.Equal(s.T(), resp.PublicKey, ethAccRes.PublicKey)
 		assert.Equal(s.T(), resp.Alias, txRequest.Alias)
 		assert.Equal(s.T(), resp.TenantID, "_")
 	})
@@ -54,10 +55,7 @@ func (s *accountsTestSuite) TestCreateAccounts() {
 		txRequest := testutils.FakeCreateAccountRequest()
 
 		_, err := s.client.CreateAccount(ctx, txRequest)
-		if err != nil {
-			assert.Fail(s.T(), err.Error())
-			return
-		}
+		require.NoError(s.T(), err)
 
 		_, err = s.client.CreateAccount(ctx, txRequest)
 		assert.Error(s.T(), err)
@@ -132,10 +130,7 @@ func (s *accountsTestSuite) TestImport() {
 		txRequest.PrivateKey = privKey
 
 		resp, err := s.client.ImportAccount(ctx, txRequest)
-		if err != nil {
-			assert.Fail(s.T(), err.Error())
-			return
-		}
+		require.NoError(s.T(), err)
 
 		assert.Equal(s.T(), resp.Alias, txRequest.Alias)
 		assert.Equal(s.T(), resp.TenantID, "_")
@@ -148,10 +143,7 @@ func (s *accountsTestSuite) TestImport() {
 		txRequest.PrivateKey = privKey
 
 		_, err = s.client.ImportAccount(ctx, txRequest)
-		if err != nil {
-			assert.Fail(s.T(), err.Error())
-			return
-		}
+		require.NoError(s.T(), err)
 
 		privKey, _, err = createNewKey()
 		require.NoError(s.T(), err)
@@ -169,50 +161,17 @@ func (s *accountsTestSuite) TestSearch() {
 		txRequest := testutils.FakeCreateAccountRequest()
 
 		ethAccRes, err := s.client.CreateAccount(ctx, txRequest)
-		if err != nil {
-			assert.Fail(s.T(), err.Error())
-			return
-		}
-
+		require.NoError(s.T(), err)
 		resp, err := s.client.SearchAccounts(ctx, &entities.AccountFilters{
 			Aliases: []string{txRequest.Alias},
 		})
-		if err != nil {
-			assert.Fail(s.T(), err.Error())
-			return
-		}
+		require.NoError(s.T(), err)
 
 		assert.Len(s.T(), resp, 1)
 		assert.Equal(s.T(), resp[0].Address, ethAccRes.Address)
 		assert.Equal(s.T(), resp[0].PublicKey, ethAccRes.PublicKey)
 		assert.Equal(s.T(), resp[0].Alias, txRequest.Alias)
 		assert.Equal(s.T(), resp[0].TenantID, "_")
-	})
-}
-
-func (s *accountsTestSuite) TestGetOne() {
-	ctx := s.env.ctx
-
-	s.T().Run("should create account and get it by address successfully", func(t *testing.T) {
-		defer gock.Off()
-		txRequest := testutils.FakeCreateAccountRequest()
-
-		ethAccRes, err := s.client.CreateAccount(ctx, txRequest)
-		if err != nil {
-			assert.Fail(s.T(), err.Error())
-			return
-		}
-
-		resp, err := s.client.GetAccount(ctx, ethAccRes.Address)
-		if err != nil {
-			assert.Fail(s.T(), err.Error())
-			return
-		}
-
-		assert.Equal(s.T(), resp.Address, ethAccRes.Address)
-		assert.Equal(s.T(), resp.PublicKey, ethAccRes.PublicKey)
-		assert.Equal(s.T(), resp.Alias, txRequest.Alias)
-		assert.Equal(s.T(), resp.TenantID, "_")
 	})
 }
 
@@ -223,17 +182,11 @@ func (s *accountsTestSuite) TestUpdate() {
 		txRequest := testutils.FakeCreateAccountRequest()
 
 		ethAccRes, err := s.client.CreateAccount(ctx, txRequest)
-		if err != nil {
-			assert.Fail(s.T(), err.Error())
-			return
-		}
+		require.NoError(s.T(), err)
 
 		txRequest2 := testutils.FakeUpdateAccountRequest()
 		resp, err := s.client.UpdateAccount(ctx, ethAccRes.Address, txRequest2)
-		if err != nil {
-			assert.Fail(s.T(), err.Error())
-			return
-		}
+		require.NoError(s.T(), err)
 
 		assert.Equal(s.T(), resp.Alias, txRequest2.Alias)
 		assert.Equal(s.T(), resp.Attributes, txRequest2.Attributes)
@@ -241,30 +194,32 @@ func (s *accountsTestSuite) TestUpdate() {
 	})
 }
 
-func (s *accountsTestSuite) TestSignPayload() {
+func (s *accountsTestSuite) TestSignMessageAndVerify() {
 	ctx := s.env.ctx
 	txRequest := testutils.FakeCreateAccountRequest()
 	ethAccRes, err := s.client.CreateAccount(ctx, txRequest)
 	require.NoError(s.T(), err)
+	
+	message := hexutil.Encode([]byte("my data to sign"))
+	var signedPayload string
 
-	s.T().Run("should sign payload successfully", func(t *testing.T) {
+	s.T().Run("should sign message successfully", func(t *testing.T) {
 		address := ethAccRes.Address
-		payload := hexutil.Encode([]byte("my data to sign"))
 
-		signedPayload, err := s.client.SignPayload(ctx, address, &api.SignPayloadRequest{
-			Data: payload,
+		signedPayload, err = s.client.SignMessage(ctx, address, &api.SignMessageRequest{
+			Message: message,
 		})
-		assert.NoError(s.T(), err)
+		require.NoError(s.T(), err)
 		assert.NotEmpty(s.T(), signedPayload)
 	})
-}
-
-func (s *accountsTestSuite) TestVerifySignature() {
-	ctx := s.env.ctx
-
+	
 	s.T().Run("should verify signature successfully", func(t *testing.T) {
-		verifyRequest := qkm.FakeVerifyPayloadRequest()
-		err := s.client.VerifySignature(ctx, verifyRequest)
+		verifyRequest := &qkmtypes.VerifyRequest{
+			Data: hexutil.MustDecode(message),
+			Signature: hexutil.MustDecode(signedPayload),
+			Address: common.HexToAddress(ethAccRes.Address),
+		}
+		err := s.client.VerifyMessageSignature(ctx, verifyRequest)
 		assert.NoError(s.T(), err)
 	})
 }

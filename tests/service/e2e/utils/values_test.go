@@ -190,7 +190,7 @@ func TestParseEnvelope(t *testing.T) {
 					{Value: "GasPrice"},
 					{Value: "Nonce"},
 					{Value: "ID"},
-					{Value: "Data"},
+					{Value: "Message"},
 					{Value: "Raw"},
 					{Value: "TxHash"},
 					{Value: "ChainID"},

@@ -8,8 +8,8 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
-func FakeEth1AccountResponse(addr string, tenants []string) *types.Eth1AccountResponse {
-	return &types.Eth1AccountResponse{
+func FakeEthAccountResponse(addr string, tenants []string) *types.EthAccountResponse {
+	return &types.EthAccountResponse{
 		Address: ethcommon.HexToAddress(addr),
 		Tags: map[string]string{
 			TagIDAllowedTenants: strings.Join(tenants, TagSeparatorAllowedTenants),
@@ -42,8 +42,8 @@ func FakeSignTypedDataRequest() *types.SignTypedDataRequest {
 	}
 }
 
-func FakeVerifyPayloadRequest() *types.VerifyEth1SignatureRequest {
-	return &types.VerifyEth1SignatureRequest{
+func FakeVerifyPayloadRequest() *types.VerifyRequest {
+	return &types.VerifyRequest{
 		Data:      hexutil.MustDecode(hexutil.Encode([]byte("my data to sign"))),
 		Signature: hexutil.MustDecode("0x34334af7bacf5d82bb892c838beda65331232c29e122b3485f31e14eda731dbb0ebae9d1eed72c099ff4c3b462aebf449068f717f3638a6facd0b3dddf2529a500"),
 		Address:   ethcommon.HexToAddress("0x5Cc634233E4a454d47aACd9fC68801482Fb02610"),

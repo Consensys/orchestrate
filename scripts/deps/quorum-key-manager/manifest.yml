@@ -1,4 +1,4 @@
-kind: Eth1Account
+kind: Ethereum
 version: 0.0.1
 name: orchestrate-eth1
 specs:

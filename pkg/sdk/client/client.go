@@ -59,9 +59,9 @@ type AccountClient interface {
 	GetAccount(ctx context.Context, address string) (*types.AccountResponse, error)
 	ImportAccount(ctx context.Context, request *types.ImportAccountRequest) (*types.AccountResponse, error)
 	UpdateAccount(ctx context.Context, address string, request *types.UpdateAccountRequest) (*types.AccountResponse, error)
-	SignPayload(ctx context.Context, address string, request *types.SignPayloadRequest) (string, error)
+	SignMessage(ctx context.Context, address string, request *types.SignMessageRequest) (string, error)
 	SignTypedData(ctx context.Context, address string, request *types.SignTypedDataRequest) (string, error)
-	VerifySignature(ctx context.Context, request *qkmtypes.VerifyEth1SignatureRequest) error
+	VerifyMessageSignature(ctx context.Context, request *qkmtypes.VerifyRequest) error
 	VerifyTypedDataSignature(ctx context.Context, request *qkmtypes.VerifyTypedDataRequest) error
 }
 

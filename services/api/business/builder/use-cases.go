@@ -24,7 +24,7 @@ type useCases struct {
 func NewUseCases(
 	db store.DB,
 	appMetrics metrics.TransactionSchedulerMetrics,
-	keyManagerClient qkmclient.Eth1Client,
+	keyManagerClient qkmclient.EthClient,
 	ec ethclient.Client,
 	producer sarama.SyncProducer,
 	topicsCfg *pkgsarama.KafkaTopicConfig,

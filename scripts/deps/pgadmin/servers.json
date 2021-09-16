@@ -5,7 +5,7 @@
       "Group": "Orchestrate",
       "Port": 5432,
       "Username": "postgres",
-      "Host": "postgres-api",
+      "Host": "postgres",
       "SSLMode": "prefer",
       "MaintenanceDB": "postgres",
       "PassFile": "/pgadmin4/password",

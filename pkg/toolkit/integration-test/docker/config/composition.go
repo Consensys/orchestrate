@@ -15,12 +15,13 @@ type Composition struct {
 }
 
 type Container struct {
-	Postgres         *postgres.Config
-	Zookeeper        *zookeeper.Config
-	Kafka            *kafka.Config
-	HashicorpVault   *hashicorp.Config
-	Ganache          *ganache.Config
-	QuorumKeyManager *quorumkeymanager.Config
+	Postgres                *postgres.Config
+	Zookeeper               *zookeeper.Config
+	Kafka                   *kafka.Config
+	HashicorpVault          *hashicorp.Config
+	Ganache                 *ganache.Config
+	QuorumKeyManager        *quorumkeymanager.Config
+	QuorumKeyManagerMigrate *quorumkeymanager.ConfigMigrate
 }
 
 func (c *Container) Field() (interface{}, error) {

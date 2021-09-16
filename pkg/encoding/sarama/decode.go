@@ -4,7 +4,7 @@ import (
 	"github.com/ConsenSys/orchestrate/pkg/broker/sarama"
 	encoding "github.com/ConsenSys/orchestrate/pkg/encoding/proto"
 	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 )
 
 // Unmarshal a sarama message into a protobuffer

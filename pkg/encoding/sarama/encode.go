@@ -4,7 +4,7 @@ import (
 	encoding "github.com/ConsenSys/orchestrate/pkg/encoding/proto"
 	"github.com/ConsenSys/orchestrate/pkg/errors"
 	"github.com/Shopify/sarama"
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 )
 
 // Marshal a proto into a e a sarama.ProducerMessage
