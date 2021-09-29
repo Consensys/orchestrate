@@ -4,12 +4,12 @@
 
 Download the repository:
 ```bash
-go get -u github.com/ConsenSys/orchestrate
+go get -u github.com/consensys/orchestrate
 ```
 
 Go to downloaded repository:
 ```bash
-cd ${GOPATH}/src/github.com/ConsenSys/orchestrate
+cd ${GOPATH}/src/github.com/consensys/orchestrate
 ```
 
 Install vendors locally:

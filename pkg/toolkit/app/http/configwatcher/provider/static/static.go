@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/configwatcher/provider"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/configwatcher/provider"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 )
 
 type Provider struct {

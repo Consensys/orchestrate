@@ -1,12 +1,12 @@
 package builder
 
 import (
-	pkgsarama "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient"
-	usecases "github.com/ConsenSys/orchestrate/services/api/business/use-cases"
-	"github.com/ConsenSys/orchestrate/services/api/business/use-cases/faucets"
-	"github.com/ConsenSys/orchestrate/services/api/metrics"
-	"github.com/ConsenSys/orchestrate/services/api/store"
+	pkgsarama "github.com/consensys/orchestrate/pkg/broker/sarama"
+	"github.com/consensys/orchestrate/pkg/toolkit/ethclient"
+	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
+	"github.com/consensys/orchestrate/services/api/business/use-cases/faucets"
+	"github.com/consensys/orchestrate/services/api/metrics"
+	"github.com/consensys/orchestrate/services/api/store"
 	qkmclient "github.com/consensys/quorum-key-manager/pkg/client"
 	"github.com/Shopify/sarama"
 )

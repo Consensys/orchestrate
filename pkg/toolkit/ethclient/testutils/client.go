@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	pkgUtils "github.com/ConsenSys/orchestrate/pkg/utils"
+	pkgUtils "github.com/consensys/orchestrate/pkg/utils"
 )
 
 var TestConfig = &pkgUtils.Config{

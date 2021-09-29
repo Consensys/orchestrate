@@ -5,8 +5,8 @@ package registry
 import (
 	"testing"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/config/dynamic"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/metrics/mock"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/config/dynamic"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/metrics/mock"
 	"github.com/golang/mock/gomock"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/assert"

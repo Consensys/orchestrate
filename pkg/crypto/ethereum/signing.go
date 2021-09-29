@@ -6,9 +6,9 @@ import (
 
 	quorumtypes "github.com/consensys/quorum/core/types"
 
-	"github.com/ConsenSys/orchestrate/pkg/encoding/rlp"
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/pkg/encoding/rlp"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 )

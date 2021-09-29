@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/encoding/json"
-	"github.com/ConsenSys/orchestrate/tests/utils"
+	"github.com/consensys/orchestrate/pkg/encoding/json"
+	"github.com/consensys/orchestrate/tests/utils"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )

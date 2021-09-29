@@ -1,7 +1,7 @@
 package client
 
 import (
-	"github.com/ConsenSys/orchestrate/pkg/utils"
+	"github.com/consensys/orchestrate/pkg/utils"
 )
 
 func (c *HTTPClient) ChainProxyURL(uuid string) string {

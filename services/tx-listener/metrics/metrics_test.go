@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"testing"
 
-	metrics1 "github.com/ConsenSys/orchestrate/pkg/toolkit/app/metrics"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/metrics/testutils"
+	metrics1 "github.com/consensys/orchestrate/pkg/toolkit/app/metrics"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/metrics/testutils"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

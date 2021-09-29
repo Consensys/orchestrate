@@ -3,7 +3,7 @@ package testutils
 import (
 	"sync"
 
-	"github.com/ConsenSys/orchestrate/pkg/engine"
+	"github.com/consensys/orchestrate/pkg/engine"
 	"github.com/stretchr/testify/suite"
 )
 

@@ -3,15 +3,15 @@ package sender
 import (
 	"context"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/sdk/client"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient"
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
-	"github.com/ConsenSys/orchestrate/pkg/utils"
-	"github.com/ConsenSys/orchestrate/services/tx-sender/tx-sender/nonce"
-	usecases "github.com/ConsenSys/orchestrate/services/tx-sender/tx-sender/use-cases"
-	utils2 "github.com/ConsenSys/orchestrate/services/tx-sender/tx-sender/utils"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/sdk/client"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/toolkit/ethclient"
+	"github.com/consensys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/pkg/utils"
+	"github.com/consensys/orchestrate/services/tx-sender/tx-sender/nonce"
+	usecases "github.com/consensys/orchestrate/services/tx-sender/tx-sender/use-cases"
+	utils2 "github.com/consensys/orchestrate/services/tx-sender/tx-sender/utils"
 )
 
 const sendEEAPrivateTxComponent = "use-cases.send-eea-private-tx"

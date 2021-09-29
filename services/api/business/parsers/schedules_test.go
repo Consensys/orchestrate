@@ -3,13 +3,13 @@
 package parsers
 
 import (
-	testutils2 "github.com/ConsenSys/orchestrate/pkg/types/testutils"
+	testutils2 "github.com/consensys/orchestrate/pkg/types/testutils"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/ConsenSys/orchestrate/services/api/store/models/testutils"
+	"github.com/consensys/orchestrate/services/api/store/models/testutils"
 
-	"github.com/ConsenSys/orchestrate/pkg/encoding/json"
+	"github.com/consensys/orchestrate/pkg/encoding/json"
 )
 
 func TestParsersSchedule_NewModelFromEntity(t *testing.T) {

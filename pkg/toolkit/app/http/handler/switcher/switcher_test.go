@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/handler/mock"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/handler/mock"
 	"github.com/golang/mock/gomock"
 )
 

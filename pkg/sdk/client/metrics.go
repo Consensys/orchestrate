@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	clientutils "github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/client-utils"
-	promcli "github.com/ConsenSys/orchestrate/pkg/toolkit/app/metrics/client"
+	clientutils "github.com/consensys/orchestrate/pkg/toolkit/app/http/client-utils"
+	promcli "github.com/consensys/orchestrate/pkg/toolkit/app/metrics/client"
 	healthz "github.com/heptiolabs/healthcheck"
 	dto "github.com/prometheus/client_model/go"
 )

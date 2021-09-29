@@ -4,11 +4,11 @@ import (
 	"context"
 	"sync"
 
-	txscheduler "github.com/ConsenSys/orchestrate/pkg/sdk/client"
+	txscheduler "github.com/consensys/orchestrate/pkg/sdk/client"
 
-	broker "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
-	ethclient "github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/rpc"
-	"github.com/ConsenSys/orchestrate/pkg/utils"
+	broker "github.com/consensys/orchestrate/pkg/broker/sarama"
+	ethclient "github.com/consensys/orchestrate/pkg/toolkit/ethclient/rpc"
+	"github.com/consensys/orchestrate/pkg/utils"
 )
 
 var (

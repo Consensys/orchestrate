@@ -4,7 +4,7 @@ import (
 	"net"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/tcp/metrics"
+	"github.com/consensys/orchestrate/pkg/toolkit/tcp/metrics"
 	kitmetrics "github.com/go-kit/kit/metrics"
 )
 

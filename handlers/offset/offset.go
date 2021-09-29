@@ -1,8 +1,8 @@
 package offset
 
 import (
-	broker "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
-	"github.com/ConsenSys/orchestrate/pkg/engine"
+	broker "github.com/consensys/orchestrate/pkg/broker/sarama"
+	"github.com/consensys/orchestrate/pkg/engine"
 )
 
 // Marker is a Middleware handler that marks offsets

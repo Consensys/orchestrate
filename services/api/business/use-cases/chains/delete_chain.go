@@ -3,13 +3,13 @@ package chains
 import (
 	"context"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/database"
-	"github.com/ConsenSys/orchestrate/services/api/business/parsers"
+	"github.com/consensys/orchestrate/pkg/toolkit/database"
+	"github.com/consensys/orchestrate/services/api/business/parsers"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
-	usecases "github.com/ConsenSys/orchestrate/services/api/business/use-cases"
-	"github.com/ConsenSys/orchestrate/services/api/store"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
+	"github.com/consensys/orchestrate/services/api/store"
 )
 
 const deleteChainComponent = "use-cases.delete-chain"

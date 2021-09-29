@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	integrationtest "github.com/ConsenSys/orchestrate/pkg/toolkit/integration-test"
-	"github.com/ConsenSys/orchestrate/pkg/utils"
+	integrationtest "github.com/consensys/orchestrate/pkg/toolkit/integration-test"
+	"github.com/consensys/orchestrate/pkg/utils"
 	"github.com/stretchr/testify/suite"
 )
 

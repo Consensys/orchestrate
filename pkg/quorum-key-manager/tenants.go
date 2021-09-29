@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	"github.com/ConsenSys/orchestrate/pkg/utils"
+	"github.com/consensys/orchestrate/pkg/utils"
 	qkmclient "github.com/consensys/quorum-key-manager/pkg/client"
 )
 

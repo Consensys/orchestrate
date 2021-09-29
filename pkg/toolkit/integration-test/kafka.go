@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"time"
 
-	loader "github.com/ConsenSys/orchestrate/handlers/loader/sarama"
-	"github.com/ConsenSys/orchestrate/handlers/offset"
-	sarama2 "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
-	"github.com/ConsenSys/orchestrate/pkg/engine"
-	"github.com/ConsenSys/orchestrate/pkg/types/tx"
-	"github.com/ConsenSys/orchestrate/tests/utils/chanregistry"
 	"github.com/Shopify/sarama"
+	loader "github.com/consensys/orchestrate/handlers/loader/sarama"
+	"github.com/consensys/orchestrate/handlers/offset"
+	sarama2 "github.com/consensys/orchestrate/pkg/broker/sarama"
+	"github.com/consensys/orchestrate/pkg/engine"
+	"github.com/consensys/orchestrate/pkg/types/tx"
+	"github.com/consensys/orchestrate/tests/utils/chanregistry"
 	log "github.com/sirupsen/logrus"
 )
 

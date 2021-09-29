@@ -8,9 +8,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 	"github.com/Shopify/sarama"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	"github.com/hashicorp/go-multierror"
 	healthz "github.com/heptiolabs/healthcheck"
 	"github.com/sirupsen/logrus"

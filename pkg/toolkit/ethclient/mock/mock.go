@@ -7,8 +7,8 @@ package mock
 import (
 	context "context"
 	json "encoding/json"
-	types "github.com/ConsenSys/orchestrate/pkg/ethereum/types"
-	ethereum "github.com/ConsenSys/orchestrate/pkg/types/ethereum"
+	types "github.com/consensys/orchestrate/pkg/ethereum/types"
+	ethereum "github.com/consensys/orchestrate/pkg/types/ethereum"
 	ethereum0 "github.com/ethereum/go-ethereum"
 	common "github.com/ethereum/go-ethereum/common"
 	types0 "github.com/ethereum/go-ethereum/core/types"

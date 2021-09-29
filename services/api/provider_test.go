@@ -3,16 +3,16 @@
 package api
 
 import (
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
-	"github.com/ConsenSys/orchestrate/pkg/utils"
-	"github.com/ConsenSys/orchestrate/services/api/proxy"
+	"github.com/consensys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/pkg/utils"
+	"github.com/consensys/orchestrate/services/api/proxy"
 	"math"
 	"reflect"
 	"testing"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/config/dynamic"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/config/dynamic"
 	traefikdynamic "github.com/containous/traefik/v2/pkg/config/dynamic"
 	"github.com/stretchr/testify/assert"
 )

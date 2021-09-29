@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/tests/service/stress/assets"
+	"github.com/consensys/orchestrate/tests/service/stress/assets"
 )
 
 type WorkloadConfig struct {

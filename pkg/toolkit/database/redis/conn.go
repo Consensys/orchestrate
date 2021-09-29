@@ -3,8 +3,8 @@ package redis
 import (
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/tls"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/toolkit/tls"
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/gomodule/redigo/redis"
 )

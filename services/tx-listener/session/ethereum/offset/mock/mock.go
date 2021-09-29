@@ -7,7 +7,7 @@ package mock
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
-	dynamic "github.com/ConsenSys/orchestrate/services/tx-listener/dynamic"
+	dynamic "github.com/consensys/orchestrate/services/tx-listener/dynamic"
 	reflect "reflect"
 )
 

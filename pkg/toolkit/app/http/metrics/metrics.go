@@ -1,9 +1,9 @@
 package metrics
 
 import (
-	metrics1 "github.com/ConsenSys/orchestrate/pkg/toolkit/app/metrics"
-	promcol "github.com/ConsenSys/orchestrate/pkg/toolkit/app/metrics/collector"
-	pkgmetrics "github.com/ConsenSys/orchestrate/pkg/toolkit/app/metrics/multi"
+	metrics1 "github.com/consensys/orchestrate/pkg/toolkit/app/metrics"
+	promcol "github.com/consensys/orchestrate/pkg/toolkit/app/metrics/collector"
+	pkgmetrics "github.com/consensys/orchestrate/pkg/toolkit/app/metrics/multi"
 	"github.com/go-kit/kit/metrics/discard"
 	"github.com/prometheus/client_golang/prometheus"
 )

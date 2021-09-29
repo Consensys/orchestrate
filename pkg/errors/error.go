@@ -3,7 +3,7 @@ package errors
 import (
 	"fmt"
 
-	ierror "github.com/ConsenSys/orchestrate/pkg/types/error"
+	ierror "github.com/consensys/orchestrate/pkg/types/error"
 )
 
 // Errorf creates an error according to a format specifier

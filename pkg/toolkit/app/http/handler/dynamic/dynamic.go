@@ -6,12 +6,12 @@ import (
 	"net/http"
 	"reflect"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/config/dynamic"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/handler"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/handler/healthcheck"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/handler/prometheus"
-	reflecthandler "github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/handler/reflect"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/handler/swagger"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/config/dynamic"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/handler"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/handler/healthcheck"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/handler/prometheus"
+	reflecthandler "github.com/consensys/orchestrate/pkg/toolkit/app/http/handler/reflect"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/handler/swagger"
 )
 
 type Builder struct {

@@ -4,7 +4,7 @@ import (
 	"net"
 	"net/http"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/transport"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/transport"
 )
 
 // NewClient creates an HTTP client

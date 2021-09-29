@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	authutils "github.com/ConsenSys/orchestrate/pkg/toolkit/app/auth/utils"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/transport"
+	authutils "github.com/consensys/orchestrate/pkg/toolkit/app/auth/utils"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/transport"
 	"github.com/stretchr/testify/assert"
 )
 

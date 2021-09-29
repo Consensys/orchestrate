@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/database/postgres"
+	"github.com/consensys/orchestrate/pkg/toolkit/database/postgres"
 	"github.com/consensys/quorum-key-manager/pkg/common"
 	dockercontainer "github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"

@@ -3,9 +3,9 @@ package hook
 import (
 	"context"
 
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/pkg/types/entities"
 
-	"github.com/ConsenSys/orchestrate/services/tx-listener/dynamic"
+	"github.com/consensys/orchestrate/services/tx-listener/dynamic"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 )
 

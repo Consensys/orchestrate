@@ -5,28 +5,28 @@ import (
 	"fmt"
 	"net/http"
 
-	qkm "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager"
-	"github.com/ConsenSys/orchestrate/pkg/types/api"
-	"github.com/ConsenSys/orchestrate/services/api/service/formatters"
+	qkm "github.com/consensys/orchestrate/pkg/quorum-key-manager"
+	"github.com/consensys/orchestrate/pkg/types/api"
+	"github.com/consensys/orchestrate/services/api/service/formatters"
 	"github.com/consensys/quorum-key-manager/pkg/client"
 	qkmtypes "github.com/consensys/quorum-key-manager/src/stores/api/types"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 
-	jsonutils "github.com/ConsenSys/orchestrate/pkg/encoding/json"
-	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/httputil"
-	"github.com/ConsenSys/orchestrate/pkg/utils"
-	usecases "github.com/ConsenSys/orchestrate/services/api/business/use-cases"
+	jsonutils "github.com/consensys/orchestrate/pkg/encoding/json"
+	"github.com/consensys/orchestrate/pkg/multitenancy"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/httputil"
+	"github.com/consensys/orchestrate/pkg/utils"
+	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
 	"github.com/gorilla/mux"
 )
 
 type AccountsController struct {
 	ucs              usecases.AccountUseCases
-	keyManagerClient client.EthClient
+	keyManagerClient client.KeyManagerClient
 	storeName        string
 }
 
-func NewAccountsController(accountUCs usecases.AccountUseCases, keyManagerClient client.EthClient) *AccountsController {
+func NewAccountsController(accountUCs usecases.AccountUseCases, keyManagerClient client.KeyManagerClient) *AccountsController {
 	return &AccountsController{
 		accountUCs,
 		keyManagerClient,
@@ -345,7 +345,7 @@ func (c *AccountsController) verifyTypedDataSignature(rw http.ResponseWriter, re
 		return
 	}
 
-	err = c.keyManagerClient.VerifyTypedData(request.Context(), c.storeName, verifyRequest)
+	err = c.keyManagerClient.VerifyTypedData(request.Context(), verifyRequest)
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -372,7 +372,7 @@ func (c *AccountsController) verifyMessageSignature(rw http.ResponseWriter, requ
 		return
 	}
 
-	err = c.keyManagerClient.VerifyMessage(request.Context(), c.storeName, verifyRequest)
+	err = c.keyManagerClient.VerifyMessage(request.Context(), verifyRequest)
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return

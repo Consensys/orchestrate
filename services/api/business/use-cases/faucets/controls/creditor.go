@@ -4,12 +4,12 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/pkg/types/entities"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/toolkit/ethclient"
 )
 
 const creditorComponent = "faucet.control.creditor"

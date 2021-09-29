@@ -3,10 +3,10 @@
 package integrationtests
 
 import (
-	"github.com/ConsenSys/orchestrate/pkg/sdk/client"
-	ethclient "github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/rpc"
-	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
-	"github.com/ConsenSys/orchestrate/pkg/utils"
+	"github.com/consensys/orchestrate/pkg/sdk/client"
+	ethclient "github.com/consensys/orchestrate/pkg/toolkit/ethclient/rpc"
+	"github.com/consensys/orchestrate/pkg/types/testutils"
+	"github.com/consensys/orchestrate/pkg/utils"
 	"github.com/cenkalti/backoff/v4"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"

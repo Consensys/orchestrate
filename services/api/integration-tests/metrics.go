@@ -4,19 +4,19 @@ package integrationtests
 
 import (
 	"fmt"
-	"github.com/ConsenSys/orchestrate/pkg/encoding/json"
+	"github.com/consensys/orchestrate/pkg/encoding/json"
 	http2 "net/http"
 	"testing"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/sdk/client"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http"
-	httpmetrics "github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/metrics"
-	metrics1 "github.com/ConsenSys/orchestrate/pkg/toolkit/app/metrics"
-	testutils2 "github.com/ConsenSys/orchestrate/pkg/toolkit/app/metrics/testutils"
-	tpcmetrics "github.com/ConsenSys/orchestrate/pkg/toolkit/tcp/metrics"
-	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
-	"github.com/ConsenSys/orchestrate/services/api/metrics"
+	"github.com/consensys/orchestrate/pkg/sdk/client"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http"
+	httpmetrics "github.com/consensys/orchestrate/pkg/toolkit/app/http/metrics"
+	metrics1 "github.com/consensys/orchestrate/pkg/toolkit/app/metrics"
+	testutils2 "github.com/consensys/orchestrate/pkg/toolkit/app/metrics/testutils"
+	tpcmetrics "github.com/consensys/orchestrate/pkg/toolkit/tcp/metrics"
+	"github.com/consensys/orchestrate/pkg/types/testutils"
+	"github.com/consensys/orchestrate/services/api/metrics"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )

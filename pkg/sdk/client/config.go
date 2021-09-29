@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/backoff"
+	"github.com/consensys/orchestrate/pkg/backoff"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )

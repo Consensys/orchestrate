@@ -73,7 +73,7 @@ gen-mocks:
 	@go generate -run mockgen ./...
 
 gen-swagger:
-	@go generate github.com/ConsenSys/orchestrate/services/api/service/controllers
+	@go generate github.com/consensys/orchestrate/services/api/service/controllers
 
 gen-deepcopy:
 	@bash scripts/deepcopy/generate.sh
@@ -118,7 +118,7 @@ topics: ## Create kafka topics
 	@bash scripts/deps/kafka/initTopics.sh
 
 gobuild: ## Build Orchestrate Go binary
-	@GOOS=linux GOARCH=amd64 go build -i -o ./build/bin/orchestrate
+	@GOOS=linux GOARCH=amd64 go build -o ./build/bin/orchestrate
 
 docker-build: ## Build Orchestrate Docker image
 	@DOCKER_BUILDKIT=1 docker build -t orchestrate .
@@ -130,7 +130,7 @@ bootstrap-deps: bootstrap ## Wait for dependencies to be ready
 	@bash scripts/bootstrap-deps.sh
 
 gobuild-e2e: ## Build Orchestrate e2e Docker image
-	@GOOS=linux GOARCH=amd64 go build -i -o ./build/bin/test ./tests/cmd
+	@GOOS=linux GOARCH=amd64 go build -o ./build/bin/test ./tests/cmd
 
 orchestrate: gobuild ## Start Orchestrate
 	@docker-compose up --force-recreate --build -d $(ORCH_SERVICES)

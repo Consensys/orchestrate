@@ -1,8 +1,8 @@
 package sarama
 
 import (
-	"github.com/ConsenSys/orchestrate/pkg/errors"
 	"github.com/Shopify/sarama"
+	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/spf13/viper"
 )
 

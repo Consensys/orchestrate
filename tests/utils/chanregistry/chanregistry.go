@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/ConsenSys/orchestrate/pkg/types/tx"
+	"github.com/consensys/orchestrate/pkg/types/tx"
 )
 
 // ChanRegistry holds a set of indexed envelopes channels

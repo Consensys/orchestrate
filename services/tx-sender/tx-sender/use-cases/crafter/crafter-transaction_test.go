@@ -7,12 +7,12 @@ import (
 	"math/big"
 	"testing"
 
-	mock2 "github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/mock"
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
-	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
-	"github.com/ConsenSys/orchestrate/pkg/types/tx"
-	"github.com/ConsenSys/orchestrate/pkg/utils"
-	"github.com/ConsenSys/orchestrate/services/tx-sender/tx-sender/nonce/mocks"
+	mock2 "github.com/consensys/orchestrate/pkg/toolkit/ethclient/mock"
+	"github.com/consensys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/pkg/types/testutils"
+	"github.com/consensys/orchestrate/pkg/types/tx"
+	"github.com/consensys/orchestrate/pkg/utils"
+	"github.com/consensys/orchestrate/services/tx-sender/tx-sender/nonce/mocks"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 
 	"github.com/golang/mock/gomock"

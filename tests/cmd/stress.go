@@ -4,11 +4,11 @@ import (
 	"context"
 	"os"
 
-	broker "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
+	broker "github.com/consensys/orchestrate/pkg/broker/sarama"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
-	"github.com/ConsenSys/orchestrate/pkg/utils"
-	"github.com/ConsenSys/orchestrate/tests/service/stress"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/utils"
+	"github.com/consensys/orchestrate/tests/service/stress"
 	"github.com/spf13/cobra"
 )
 

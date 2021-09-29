@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/config/dynamic"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/httputil"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/middleware"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/middleware/secure"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/config/dynamic"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/httputil"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/middleware"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/middleware/secure"
 	"github.com/justinas/alice"
 )
 

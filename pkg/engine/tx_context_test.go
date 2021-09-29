@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
-	ierror "github.com/ConsenSys/orchestrate/pkg/types/error"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	ierror "github.com/consensys/orchestrate/pkg/types/error"
 	"github.com/stretchr/testify/assert"
 )
 

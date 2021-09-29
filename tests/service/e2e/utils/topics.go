@@ -1,8 +1,8 @@
 package utils
 
 import (
-	"github.com/ConsenSys/orchestrate/pkg/broker/sarama"
-	"github.com/ConsenSys/orchestrate/tests/utils"
+	"github.com/consensys/orchestrate/pkg/broker/sarama"
+	"github.com/consensys/orchestrate/tests/utils"
 )
 
 var TOPICS = map[string]string{

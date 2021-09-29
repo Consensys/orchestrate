@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	pkgsarama "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/integration-test/docker/container/zookeeper"
+	pkgsarama "github.com/consensys/orchestrate/pkg/broker/sarama"
+	"github.com/consensys/orchestrate/pkg/toolkit/integration-test/docker/container/zookeeper"
 	dockercontainer "github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/go-connections/nat"

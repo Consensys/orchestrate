@@ -3,16 +3,16 @@ package units
 import (
 	"context"
 
-	"github.com/ConsenSys/orchestrate/pkg/encoding/json"
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	orchestrateclient "github.com/ConsenSys/orchestrate/pkg/sdk/client"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
-	"github.com/ConsenSys/orchestrate/pkg/types/api"
-	"github.com/ConsenSys/orchestrate/pkg/types/tx"
-	"github.com/ConsenSys/orchestrate/pkg/utils"
-	utils2 "github.com/ConsenSys/orchestrate/tests/service/stress/utils"
-	utils3 "github.com/ConsenSys/orchestrate/tests/utils"
-	"github.com/ConsenSys/orchestrate/tests/utils/chanregistry"
+	"github.com/consensys/orchestrate/pkg/encoding/json"
+	"github.com/consensys/orchestrate/pkg/errors"
+	orchestrateclient "github.com/consensys/orchestrate/pkg/sdk/client"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/types/api"
+	"github.com/consensys/orchestrate/pkg/types/tx"
+	"github.com/consensys/orchestrate/pkg/utils"
+	utils2 "github.com/consensys/orchestrate/tests/service/stress/utils"
+	utils3 "github.com/consensys/orchestrate/tests/utils"
+	"github.com/consensys/orchestrate/tests/utils/chanregistry"
 )
 
 func BatchDeployContractTest(ctx context.Context, cfg *WorkloadConfig, client orchestrateclient.OrchestrateClient, chanReg *chanregistry.ChanRegistry) error {

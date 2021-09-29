@@ -1,9 +1,9 @@
 package consumer
 
 import (
-	broker "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
-	"github.com/ConsenSys/orchestrate/pkg/engine"
 	"github.com/Shopify/sarama"
+	broker "github.com/consensys/orchestrate/pkg/broker/sarama"
+	"github.com/consensys/orchestrate/pkg/engine"
 )
 
 type EmbeddingConsumerGroupHandler struct {

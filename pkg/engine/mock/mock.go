@@ -6,7 +6,7 @@ package mock
 
 import (
 	gomock "github.com/golang/mock/gomock"
-	engine "github.com/ConsenSys/orchestrate/pkg/engine"
+	engine "github.com/consensys/orchestrate/pkg/engine"
 	reflect "reflect"
 )
 

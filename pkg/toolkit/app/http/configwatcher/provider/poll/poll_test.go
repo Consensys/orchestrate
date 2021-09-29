@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/configwatcher/provider"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/configwatcher/provider/poll"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/configwatcher/testutils"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/configwatcher/provider"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/configwatcher/provider/poll"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/configwatcher/testutils"
 	"github.com/stretchr/testify/assert"
 )
 

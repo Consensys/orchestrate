@@ -3,10 +3,10 @@ package api
 import (
 	"os"
 
-	"github.com/ConsenSys/orchestrate/services/api"
+	"github.com/consensys/orchestrate/services/api"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/utils"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

@@ -5,17 +5,17 @@ package chainregistry
 import (
 	"context"
 	"fmt"
-	"github.com/ConsenSys/orchestrate/pkg/sdk/client/mock"
-	"github.com/ConsenSys/orchestrate/pkg/types/api"
-	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
-	"github.com/ConsenSys/orchestrate/pkg/utils"
+	"github.com/consensys/orchestrate/pkg/sdk/client/mock"
+	"github.com/consensys/orchestrate/pkg/types/api"
+	"github.com/consensys/orchestrate/pkg/types/testutils"
+	"github.com/consensys/orchestrate/pkg/utils"
 	"testing"
 	"time"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"github.com/ConsenSys/orchestrate/services/tx-listener/dynamic"
+	"github.com/consensys/orchestrate/services/tx-listener/dynamic"
 )
 
 type ProviderTestSuite struct {

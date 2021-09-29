@@ -4,13 +4,13 @@ import (
 	"context"
 	"testing"
 
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
-	mocks2 "github.com/ConsenSys/orchestrate/services/api/business/use-cases/mocks"
+	"github.com/consensys/orchestrate/pkg/types/entities"
+	mocks2 "github.com/consensys/orchestrate/services/api/business/use-cases/mocks"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
-	"github.com/ConsenSys/orchestrate/services/api/business/parsers"
-	"github.com/ConsenSys/orchestrate/services/api/store/mocks"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/types/testutils"
+	"github.com/consensys/orchestrate/services/api/business/parsers"
+	"github.com/consensys/orchestrate/services/api/store/mocks"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"

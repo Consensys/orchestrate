@@ -6,7 +6,7 @@ import (
 	"context"
 	"testing"
 
-	testutilsdynamic "github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/config/dynamic/testutils"
+	testutilsdynamic "github.com/consensys/orchestrate/pkg/toolkit/app/http/config/dynamic/testutils"
 	"github.com/stretchr/testify/assert"
 )
 

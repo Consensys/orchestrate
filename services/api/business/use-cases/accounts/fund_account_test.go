@@ -5,15 +5,15 @@ package accounts
 import (
 	"context"
 	"fmt"
-	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
-	"github.com/ConsenSys/orchestrate/services/api/business/use-cases/mocks"
+	"github.com/consensys/orchestrate/pkg/multitenancy"
+	"github.com/consensys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/services/api/business/use-cases/mocks"
 	"testing"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/types/testutils"
 )
 
 var (

@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/types/tx"
+	"github.com/consensys/orchestrate/pkg/types/tx"
 )
 
 type Tracker struct {

@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"strconv"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	ethabi "github.com/ConsenSys/orchestrate/pkg/go-ethereum/v1_9_12/accounts/abi"
+	"github.com/consensys/orchestrate/pkg/errors"
+	ethabi "github.com/consensys/orchestrate/pkg/go-ethereum/v1_9_12/accounts/abi"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 )

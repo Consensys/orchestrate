@@ -1,7 +1,7 @@
 package testutils
 
 import (
-	"github.com/ConsenSys/orchestrate/pkg/types/api"
+	"github.com/consensys/orchestrate/pkg/types/api"
 	"github.com/gofrs/uuid"
 )
 

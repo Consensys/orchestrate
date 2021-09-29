@@ -7,8 +7,8 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/stretchr/testify/assert"
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	err "github.com/ConsenSys/orchestrate/pkg/types/error"
+	"github.com/consensys/orchestrate/pkg/errors"
+	err "github.com/consensys/orchestrate/pkg/types/error"
 )
 
 func TestNewClient(t *testing.T) {

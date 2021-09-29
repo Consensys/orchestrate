@@ -4,15 +4,15 @@ import (
 	"context"
 	"fmt"
 
-	usecases "github.com/ConsenSys/orchestrate/services/api/business/use-cases"
+	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/errors"
 
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/pkg/types/entities"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
-	"github.com/ConsenSys/orchestrate/services/api/store"
-	"github.com/ConsenSys/orchestrate/services/api/store/models"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/services/api/store"
+	"github.com/consensys/orchestrate/services/api/store/models"
 )
 
 const updateChildrenComponent = "use-cases.update-children"

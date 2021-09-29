@@ -4,9 +4,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/backoff"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/backoff"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	"github.com/spf13/viper"
 )
 

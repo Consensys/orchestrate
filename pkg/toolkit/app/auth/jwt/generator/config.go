@@ -3,8 +3,8 @@ package generator
 import (
 	"fmt"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/auth/jwt"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/tls/certificate"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/auth/jwt"
+	"github.com/consensys/orchestrate/pkg/toolkit/tls/certificate"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )

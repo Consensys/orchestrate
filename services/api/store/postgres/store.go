@@ -1,10 +1,10 @@
 package postgres
 
 import (
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/database"
-	pg "github.com/ConsenSys/orchestrate/pkg/toolkit/database/postgres"
-	dataagents "github.com/ConsenSys/orchestrate/services/api/store/postgres/data-agents"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/toolkit/database"
+	pg "github.com/consensys/orchestrate/pkg/toolkit/database/postgres"
+	dataagents "github.com/consensys/orchestrate/services/api/store/postgres/data-agents"
 )
 
 type PGDB struct {

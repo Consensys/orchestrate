@@ -4,10 +4,10 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/ConsenSys/orchestrate/pkg/types/api"
+	"github.com/consensys/orchestrate/pkg/types/api"
 
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
-	"github.com/ConsenSys/orchestrate/pkg/utils"
+	"github.com/consensys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/pkg/utils"
 )
 
 func FormatCreateAccountRequest(req *api.CreateAccountRequest) *entities.Account {

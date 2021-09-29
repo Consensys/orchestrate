@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/broker/sarama/mock"
-	"github.com/ConsenSys/orchestrate/pkg/engine"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/broker/sarama/mock"
+	"github.com/consensys/orchestrate/pkg/engine"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	"github.com/Shopify/sarama"
 	"github.com/stretchr/testify/assert"
 )

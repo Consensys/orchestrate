@@ -1,14 +1,14 @@
 package builder
 
 import (
-	"github.com/ConsenSys/orchestrate/pkg/sdk/client"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient"
+	"github.com/consensys/orchestrate/pkg/sdk/client"
+	"github.com/consensys/orchestrate/pkg/toolkit/ethclient"
 	keymanager "github.com/consensys/quorum-key-manager/pkg/client"
-	"github.com/ConsenSys/orchestrate/services/tx-sender/tx-sender/nonce"
-	usecases "github.com/ConsenSys/orchestrate/services/tx-sender/tx-sender/use-cases"
-	"github.com/ConsenSys/orchestrate/services/tx-sender/tx-sender/use-cases/crafter"
-	"github.com/ConsenSys/orchestrate/services/tx-sender/tx-sender/use-cases/sender"
-	"github.com/ConsenSys/orchestrate/services/tx-sender/tx-sender/use-cases/signer"
+	"github.com/consensys/orchestrate/services/tx-sender/tx-sender/nonce"
+	usecases "github.com/consensys/orchestrate/services/tx-sender/tx-sender/use-cases"
+	"github.com/consensys/orchestrate/services/tx-sender/tx-sender/use-cases/crafter"
+	"github.com/consensys/orchestrate/services/tx-sender/tx-sender/use-cases/sender"
+	"github.com/consensys/orchestrate/services/tx-sender/tx-sender/use-cases/signer"
 )
 
 type useCases struct {

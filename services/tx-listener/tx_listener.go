@@ -3,14 +3,14 @@ package txlistener
 import (
 	"context"
 
-	orchestrateclient "github.com/ConsenSys/orchestrate/pkg/sdk/client"
-	"github.com/ConsenSys/orchestrate/services/tx-listener/metrics"
-	"github.com/ConsenSys/orchestrate/services/tx-listener/session"
+	orchestrateclient "github.com/consensys/orchestrate/pkg/sdk/client"
+	"github.com/consensys/orchestrate/services/tx-listener/metrics"
+	"github.com/consensys/orchestrate/services/tx-listener/session"
 
-	provider "github.com/ConsenSys/orchestrate/services/tx-listener/providers"
-	"github.com/ConsenSys/orchestrate/services/tx-listener/session/ethereum"
-	hook "github.com/ConsenSys/orchestrate/services/tx-listener/session/ethereum/hooks"
-	"github.com/ConsenSys/orchestrate/services/tx-listener/session/ethereum/offset"
+	provider "github.com/consensys/orchestrate/services/tx-listener/providers"
+	"github.com/consensys/orchestrate/services/tx-listener/session/ethereum"
+	hook "github.com/consensys/orchestrate/services/tx-listener/session/ethereum/hooks"
+	"github.com/consensys/orchestrate/services/tx-listener/session/ethereum/offset"
 )
 
 type TxListener struct {

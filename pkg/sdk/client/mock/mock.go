@@ -7,8 +7,8 @@ package mock
 import (
 	context "context"
 	types "github.com/consensys/quorum-key-manager/src/stores/api/types"
-	api "github.com/ConsenSys/orchestrate/pkg/types/api"
-	entities "github.com/ConsenSys/orchestrate/pkg/types/entities"
+	api "github.com/consensys/orchestrate/pkg/types/api"
+	entities "github.com/consensys/orchestrate/pkg/types/entities"
 	gomock "github.com/golang/mock/gomock"
 	healthcheck "github.com/heptiolabs/healthcheck"
 	io_prometheus_client "github.com/prometheus/client_model/go"

@@ -5,16 +5,16 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	orchestrateclient "github.com/ConsenSys/orchestrate/pkg/sdk/client"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
-	types "github.com/ConsenSys/orchestrate/pkg/types/api"
-	usecases "github.com/ConsenSys/orchestrate/services/tx-sentry/tx-sentry/use-cases"
+	"github.com/consensys/orchestrate/pkg/errors"
+	orchestrateclient "github.com/consensys/orchestrate/pkg/sdk/client"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	types "github.com/consensys/orchestrate/pkg/types/api"
+	usecases "github.com/consensys/orchestrate/services/tx-sentry/tx-sentry/use-cases"
 
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/pkg/types/entities"
 
-	pkgbackoff "github.com/ConsenSys/orchestrate/pkg/backoff"
 	"github.com/cenkalti/backoff/v4"
+	pkgbackoff "github.com/consensys/orchestrate/pkg/backoff"
 )
 
 //go:generate mockgen -source=session_manager.go -destination=mocks/session_manager.go -package=mocks

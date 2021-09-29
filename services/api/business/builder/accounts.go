@@ -2,9 +2,9 @@ package builder
 
 import (
 	qkmclient "github.com/consensys/quorum-key-manager/pkg/client"
-	usecases "github.com/ConsenSys/orchestrate/services/api/business/use-cases"
-	"github.com/ConsenSys/orchestrate/services/api/business/use-cases/accounts"
-	"github.com/ConsenSys/orchestrate/services/api/store"
+	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
+	"github.com/consensys/orchestrate/services/api/business/use-cases/accounts"
+	"github.com/consensys/orchestrate/services/api/store"
 )
 
 type accountUseCases struct {

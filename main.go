@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/ConsenSys/orchestrate/cmd"
+	"github.com/consensys/orchestrate/cmd"
 	log "github.com/sirupsen/logrus"
 )
 

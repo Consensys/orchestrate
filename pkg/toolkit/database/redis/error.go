@@ -1,8 +1,8 @@
 package redis
 
 import (
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	ierror "github.com/ConsenSys/orchestrate/pkg/types/error"
+	"github.com/consensys/orchestrate/pkg/errors"
+	ierror "github.com/consensys/orchestrate/pkg/types/error"
 	"github.com/gomodule/redigo/redis"
 )
 

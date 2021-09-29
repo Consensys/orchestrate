@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -3,7 +3,7 @@ package session
 import (
 	"context"
 
-	"github.com/ConsenSys/orchestrate/services/tx-listener/dynamic"
+	"github.com/consensys/orchestrate/services/tx-listener/dynamic"
 )
 
 type Session interface {

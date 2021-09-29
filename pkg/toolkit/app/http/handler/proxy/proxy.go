@@ -13,9 +13,9 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/config/dynamic"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/httputil"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/middleware/loadbalancer"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/config/dynamic"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/httputil"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/middleware/loadbalancer"
 	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/containous/traefik/v2/pkg/types"

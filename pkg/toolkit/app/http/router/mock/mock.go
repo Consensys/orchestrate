@@ -6,7 +6,7 @@ package mock
 
 import (
 	context "context"
-	router "github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/router"
+	router "github.com/consensys/orchestrate/pkg/toolkit/app/http/router"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )

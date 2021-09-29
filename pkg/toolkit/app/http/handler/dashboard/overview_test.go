@@ -10,8 +10,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/config/dynamic"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/config/runtime"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/config/dynamic"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/config/runtime"
 	traefikdynamic "github.com/containous/traefik/v2/pkg/config/dynamic"
 	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
 	"github.com/containous/traefik/v2/pkg/provider/docker"

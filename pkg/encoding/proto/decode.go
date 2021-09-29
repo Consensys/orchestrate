@@ -1,7 +1,7 @@
 package proto
 
 import (
-	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/errors"
 	"google.golang.org/protobuf/proto"
 )
 

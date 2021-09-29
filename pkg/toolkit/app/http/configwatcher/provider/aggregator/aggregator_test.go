@@ -6,10 +6,10 @@ import (
 	"context"
 	"testing"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/configwatcher/provider"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/configwatcher/provider/aggregator"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/configwatcher/provider/mock"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/configwatcher/testutils"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/configwatcher/provider"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/configwatcher/provider/aggregator"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/configwatcher/provider/mock"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/configwatcher/testutils"
 	"github.com/stretchr/testify/assert"
 )
 

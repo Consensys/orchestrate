@@ -3,22 +3,22 @@ package signer
 import (
 	"context"
 
-	"github.com/ConsenSys/orchestrate/pkg/encoding/rlp"
-	qkm "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/encoding/rlp"
+	qkm "github.com/consensys/orchestrate/pkg/quorum-key-manager"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	qkmtypes "github.com/consensys/quorum-key-manager/src/stores/api/types"
 
-	pkgcryto "github.com/ConsenSys/orchestrate/pkg/crypto/ethereum"
+	pkgcryto "github.com/consensys/orchestrate/pkg/crypto/ethereum"
 
-	"github.com/ConsenSys/orchestrate/pkg/utils"
+	"github.com/consensys/orchestrate/pkg/utils"
 
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
-	"github.com/ConsenSys/orchestrate/services/tx-sender/tx-sender/parsers"
+	"github.com/consensys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/services/tx-sender/tx-sender/parsers"
 	"github.com/ethereum/go-ethereum/crypto"
 
-	usecases "github.com/ConsenSys/orchestrate/services/tx-sender/tx-sender/use-cases"
+	usecases "github.com/consensys/orchestrate/services/tx-sender/tx-sender/use-cases"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/quorum-key-manager/pkg/client"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"

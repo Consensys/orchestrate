@@ -11,7 +11,7 @@ import (
 	"github.com/docker/docker/api/types/mount"
 	api2 "github.com/hashicorp/vault/api"
 
-	httputils "github.com/ConsenSys/orchestrate/pkg/toolkit/app/http"
+	httputils "github.com/consensys/orchestrate/pkg/toolkit/app/http"
 	log "github.com/sirupsen/logrus"
 
 	dockercontainer "github.com/docker/docker/api/types/container"
@@ -77,7 +77,7 @@ func (cfg *Config) SetPluginSourceDirectory(dir string) *Config {
 }
 
 func (cfg *Config) DownloadPlugin() error {
-	url := fmt.Sprintf("https://github.com/ConsenSys/orchestrate-hashicorp-vault-plugin/releases/download/%s/%s", pluginVersion, pluginFileName)
+	url := fmt.Sprintf("https://github.com/consensys/orchestrate-hashicorp-vault-plugin/releases/download/%s/%s", pluginVersion, pluginFileName)
 	err := downloadPlugin(fmt.Sprintf("%s/%s", cfg.PluginSourceDirectory, pluginFileName), url)
 	if err != nil {
 		return err

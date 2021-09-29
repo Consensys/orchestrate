@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/tls/certificate"
-	tlstestutils "github.com/ConsenSys/orchestrate/pkg/toolkit/tls/testutils"
+	"github.com/consensys/orchestrate/pkg/toolkit/tls/certificate"
+	tlstestutils "github.com/consensys/orchestrate/pkg/toolkit/tls/testutils"
 	"github.com/stretchr/testify/require"
 )
 

@@ -11,20 +11,20 @@ import (
 	"strings"
 	"testing"
 
-	qkm "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager"
+	qkm "github.com/consensys/orchestrate/pkg/quorum-key-manager"
 	qkmmock "github.com/consensys/quorum-key-manager/pkg/client/mock"
 	qkmtypes "github.com/consensys/quorum-key-manager/src/stores/api/types"
-	"github.com/ConsenSys/orchestrate/pkg/types/api"
-	"github.com/ConsenSys/orchestrate/pkg/utils"
-	"github.com/ConsenSys/orchestrate/services/api/business/use-cases"
-	"github.com/ConsenSys/orchestrate/services/api/service/formatters"
+	"github.com/consensys/orchestrate/pkg/types/api"
+	"github.com/consensys/orchestrate/pkg/utils"
+	"github.com/consensys/orchestrate/services/api/business/use-cases"
+	"github.com/consensys/orchestrate/services/api/service/formatters"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 
-	"github.com/ConsenSys/orchestrate/pkg/encoding/json"
-	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
-	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
-	"github.com/ConsenSys/orchestrate/services/api/business/use-cases/mocks"
+	"github.com/consensys/orchestrate/pkg/encoding/json"
+	"github.com/consensys/orchestrate/pkg/multitenancy"
+	"github.com/consensys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/pkg/types/testutils"
+	"github.com/consensys/orchestrate/services/api/business/use-cases/mocks"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"
@@ -309,7 +309,7 @@ func (s *accountsCtrlTestSuite) TestAccountController_VerifySignature() {
 			NewRequest(http.MethodPost, "/accounts/verify-message", bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 
-		s.keyManagerClient.EXPECT().VerifyMessage(gomock.Any(), globalStoreName, request).Return(nil)
+		s.keyManagerClient.EXPECT().VerifyMessage(gomock.Any(), request).Return(nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -329,7 +329,7 @@ func (s *accountsCtrlTestSuite) TestAccountController_VerifyTypedDataSignature()
 			NewRequest(http.MethodPost, "/accounts/verify-typed-data", bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 
-		s.keyManagerClient.EXPECT().VerifyTypedData(gomock.Any(), globalStoreName, request).Return(nil)
+		s.keyManagerClient.EXPECT().VerifyTypedData(gomock.Any(), request).Return(nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 

@@ -5,8 +5,8 @@ import (
 	"crypto/rsa"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/auth/jwt"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/tls/certificate"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/auth/jwt"
+	"github.com/consensys/orchestrate/pkg/toolkit/tls/certificate"
 	"github.com/ory/fosite"
 	"github.com/ory/fosite/handler/oauth2"
 	"github.com/ory/fosite/handler/openid"

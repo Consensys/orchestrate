@@ -3,15 +3,15 @@ package txsender
 import (
 	"context"
 
-	orchestrateClient "github.com/ConsenSys/orchestrate/pkg/sdk/client"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
-	dbredis "github.com/ConsenSys/orchestrate/pkg/toolkit/database/redis"
-	ethclient "github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/rpc"
 	sarama2 "github.com/Shopify/sarama"
+	orchestrateClient "github.com/consensys/orchestrate/pkg/sdk/client"
+	"github.com/consensys/orchestrate/pkg/toolkit/app"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	dbredis "github.com/consensys/orchestrate/pkg/toolkit/database/redis"
+	ethclient "github.com/consensys/orchestrate/pkg/toolkit/ethclient/rpc"
 
-	"github.com/ConsenSys/orchestrate/pkg/broker/sarama"
-	qkm "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager"
+	"github.com/consensys/orchestrate/pkg/broker/sarama"
+	qkm "github.com/consensys/orchestrate/pkg/quorum-key-manager"
 	"github.com/spf13/viper"
 )
 

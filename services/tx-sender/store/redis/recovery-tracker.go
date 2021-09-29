@@ -1,8 +1,8 @@
 package redis
 
 import (
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/database/redis"
-	"github.com/ConsenSys/orchestrate/services/tx-sender/store"
+	"github.com/consensys/orchestrate/pkg/toolkit/database/redis"
+	"github.com/consensys/orchestrate/services/tx-sender/store"
 )
 
 type nonceRecoveryTracker struct {

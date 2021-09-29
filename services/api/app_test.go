@@ -3,17 +3,17 @@
 package api
 
 import (
-	ethclientmock "github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/mock"
+	ethclientmock "github.com/consensys/orchestrate/pkg/toolkit/ethclient/mock"
 	mocks2 "github.com/consensys/quorum-key-manager/pkg/client/mock"
 
 	"testing"
 
-	"github.com/ConsenSys/orchestrate/pkg/broker/sarama"
+	"github.com/consensys/orchestrate/pkg/broker/sarama"
 
 	"github.com/Shopify/sarama/mocks"
 
-	mockauth "github.com/ConsenSys/orchestrate/pkg/toolkit/app/auth/mock"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/database/postgres"
+	mockauth "github.com/consensys/orchestrate/pkg/toolkit/app/auth/mock"
+	"github.com/consensys/orchestrate/pkg/toolkit/database/postgres"
 	"github.com/golang/mock/gomock"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"

@@ -6,7 +6,7 @@ import (
 	"net"
 	"strings"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/tcp"
+	"github.com/consensys/orchestrate/pkg/toolkit/tcp"
 )
 
 type Dialer struct {

@@ -6,13 +6,13 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/ConsenSys/orchestrate/tests/service/e2e/cucumber/alias"
+	"github.com/consensys/orchestrate/tests/service/e2e/cucumber/alias"
 
-	broker "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
-	"github.com/ConsenSys/orchestrate/pkg/engine"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
-	"github.com/ConsenSys/orchestrate/pkg/types/tx"
-	"github.com/ConsenSys/orchestrate/tests/utils/chanregistry"
+	broker "github.com/consensys/orchestrate/pkg/broker/sarama"
+	"github.com/consensys/orchestrate/pkg/engine"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/types/tx"
+	"github.com/consensys/orchestrate/tests/utils/chanregistry"
 	"github.com/Shopify/sarama"
 	"github.com/stretchr/testify/assert"
 )

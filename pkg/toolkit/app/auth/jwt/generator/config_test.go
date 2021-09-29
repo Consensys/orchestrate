@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	tlstestutils "github.com/ConsenSys/orchestrate/pkg/toolkit/tls/testutils"
+	tlstestutils "github.com/consensys/orchestrate/pkg/toolkit/tls/testutils"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"

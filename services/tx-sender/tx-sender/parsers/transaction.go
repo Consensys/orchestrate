@@ -6,7 +6,7 @@ import (
 
 	quorumtypes "github.com/consensys/quorum/core/types"
 
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/quorum/common/hexutil"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"

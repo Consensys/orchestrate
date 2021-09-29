@@ -7,8 +7,8 @@
 package tx
 
 import (
-	error1 "github.com/ConsenSys/orchestrate/pkg/types/error"
-	ethereum "github.com/ConsenSys/orchestrate/pkg/types/ethereum"
+	error1 "github.com/consensys/orchestrate/pkg/types/error"
+	ethereum "github.com/consensys/orchestrate/pkg/types/ethereum"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"

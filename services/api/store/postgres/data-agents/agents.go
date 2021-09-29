@@ -1,8 +1,8 @@
 package dataagents
 
 import (
-	pg "github.com/ConsenSys/orchestrate/pkg/toolkit/database/postgres"
-	"github.com/ConsenSys/orchestrate/services/api/store"
+	pg "github.com/consensys/orchestrate/pkg/toolkit/database/postgres"
+	"github.com/consensys/orchestrate/services/api/store"
 )
 
 type PGAgents struct {

@@ -1,11 +1,11 @@
 package envelope
 
 import (
-	encoding "github.com/ConsenSys/orchestrate/pkg/encoding/sarama"
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
-	"github.com/ConsenSys/orchestrate/pkg/utils"
 	"github.com/Shopify/sarama"
+	encoding "github.com/consensys/orchestrate/pkg/encoding/sarama"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/pkg/utils"
 )
 
 func SendJobMessage(job *entities.Job, kafkaProducer sarama.SyncProducer, topic string) (partition int32, offset int64, err error) {

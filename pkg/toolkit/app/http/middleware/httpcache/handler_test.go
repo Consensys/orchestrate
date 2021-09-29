@@ -9,10 +9,10 @@ import (
 	"testing"
 	"time"
 
-	mockhandler "github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/handler/mock"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/middleware/httpcache/mocks"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
-	"github.com/ConsenSys/orchestrate/pkg/utils"
+	mockhandler "github.com/consensys/orchestrate/pkg/toolkit/app/http/handler/mock"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/middleware/httpcache/mocks"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/utils"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )

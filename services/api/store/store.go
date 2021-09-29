@@ -3,10 +3,10 @@ package store
 import (
 	"context"
 
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/pkg/types/entities"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/database"
-	"github.com/ConsenSys/orchestrate/services/api/store/models"
+	"github.com/consensys/orchestrate/pkg/toolkit/database"
+	"github.com/consensys/orchestrate/services/api/store/models"
 )
 
 //go:generate mockgen -source=store.go -destination=mocks/mock.go -package=mocks

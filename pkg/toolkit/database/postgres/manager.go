@@ -4,7 +4,7 @@ import (
 	"context"
 	"sync"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	tlog "github.com/containous/traefik/v2/pkg/log"
 	"github.com/go-pg/pg/v9"
 	"github.com/sirupsen/logrus"

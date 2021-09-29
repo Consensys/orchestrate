@@ -5,7 +5,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/ConsenSys/orchestrate/tests/service/e2e/utils"
+	"github.com/consensys/orchestrate/tests/service/e2e/utils"
 	"github.com/containous/traefik/v2/pkg/log"
 )
 

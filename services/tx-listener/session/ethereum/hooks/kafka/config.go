@@ -1,7 +1,7 @@
 package kafka
 
 import (
-	broker "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
+	broker "github.com/consensys/orchestrate/pkg/broker/sarama"
 	"github.com/spf13/viper"
 )
 

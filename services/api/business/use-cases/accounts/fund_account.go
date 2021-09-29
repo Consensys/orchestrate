@@ -3,15 +3,15 @@ package accounts
 import (
 	"context"
 
-	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
+	"github.com/consensys/orchestrate/pkg/multitenancy"
 
-	"github.com/ConsenSys/orchestrate/pkg/utils"
+	"github.com/consensys/orchestrate/pkg/utils"
 
-	usecases "github.com/ConsenSys/orchestrate/services/api/business/use-cases"
+	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/types/entities"
 )
 
 const fundAccountComponent = "use-cases.fund-account"

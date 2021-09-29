@@ -9,9 +9,9 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/services/api/store/mocks"
-	models2 "github.com/ConsenSys/orchestrate/services/api/store/models"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/services/api/store/mocks"
+	models2 "github.com/consensys/orchestrate/services/api/store/models"
 )
 
 func TestSetCodeHash_Execute(t *testing.T) {

@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ConsenSys/orchestrate/pkg/types/api"
+	"github.com/consensys/orchestrate/pkg/types/api"
 	qkmtypes "github.com/consensys/quorum-key-manager/src/stores/api/types"
 
-	clientutils "github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/client-utils"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/httputil"
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	clientutils "github.com/consensys/orchestrate/pkg/toolkit/app/http/client-utils"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/httputil"
+	"github.com/consensys/orchestrate/pkg/types/entities"
 )
 
 func (c *HTTPClient) GetAccount(ctx context.Context, address string) (*api.AccountResponse, error) {

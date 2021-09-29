@@ -3,8 +3,8 @@ package api
 import (
 	"math"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/utils"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/utils"
 )
 
 type GasPriceParams struct {

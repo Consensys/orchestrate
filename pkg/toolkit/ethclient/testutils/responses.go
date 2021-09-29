@@ -6,7 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/utils"
+	"github.com/consensys/orchestrate/pkg/toolkit/ethclient/utils"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"

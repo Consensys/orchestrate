@@ -3,7 +3,7 @@ package dynamic
 import (
 	"reflect"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/configwatcher/provider"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/configwatcher/provider"
 	traefikdynamic "github.com/containous/traefik/v2/pkg/config/dynamic"
 	"github.com/containous/traefik/v2/pkg/log"
 )

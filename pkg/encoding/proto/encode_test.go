@@ -5,7 +5,7 @@ package proto
 import (
 	"testing"
 
-	"github.com/ConsenSys/orchestrate/pkg/types/tx"
+	"github.com/consensys/orchestrate/pkg/types/tx"
 
 	"google.golang.org/protobuf/proto"
 	"github.com/stretchr/testify/assert"

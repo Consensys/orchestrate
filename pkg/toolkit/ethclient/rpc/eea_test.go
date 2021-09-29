@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/testutils"
-	proto "github.com/ConsenSys/orchestrate/pkg/types/ethereum"
-	pkgUtils "github.com/ConsenSys/orchestrate/pkg/utils"
+	"github.com/consensys/orchestrate/pkg/toolkit/ethclient/testutils"
+	proto "github.com/consensys/orchestrate/pkg/types/ethereum"
+	pkgUtils "github.com/consensys/orchestrate/pkg/utils"
 	"github.com/cenkalti/backoff/v4"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"

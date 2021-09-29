@@ -6,7 +6,7 @@ package mocks
 
 import (
 	gomock "github.com/golang/mock/gomock"
-	usecases "github.com/ConsenSys/orchestrate/services/tx-sender/tx-sender/use-cases"
+	usecases "github.com/consensys/orchestrate/services/tx-sender/tx-sender/use-cases"
 	reflect "reflect"
 )
 

@@ -3,9 +3,9 @@ package key
 import (
 	"context"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
-	authutils "github.com/ConsenSys/orchestrate/pkg/toolkit/app/auth/utils"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/multitenancy"
+	authutils "github.com/consensys/orchestrate/pkg/toolkit/app/auth/utils"
 )
 
 // Key is a Checker for API Key authentication

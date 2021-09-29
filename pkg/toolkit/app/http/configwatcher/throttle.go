@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/utils"
+	"github.com/consensys/orchestrate/pkg/utils"
 	"github.com/eapache/channels"
 )
 

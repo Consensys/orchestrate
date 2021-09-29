@@ -3,14 +3,14 @@ package dataagents
 import (
 	"context"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
-	pg "github.com/ConsenSys/orchestrate/pkg/toolkit/database/postgres"
-	"github.com/ConsenSys/orchestrate/services/api/store"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	pg "github.com/consensys/orchestrate/pkg/toolkit/database/postgres"
+	"github.com/consensys/orchestrate/services/api/store"
 	"github.com/go-pg/pg/v9/orm"
 	"github.com/gofrs/uuid"
 
-	"github.com/ConsenSys/orchestrate/services/api/store/models"
+	"github.com/consensys/orchestrate/services/api/store/models"
 )
 
 const scheduleDAComponent = "data-agents.schedule"

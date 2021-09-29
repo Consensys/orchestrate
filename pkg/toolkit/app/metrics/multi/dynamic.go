@@ -3,8 +3,8 @@ package multi
 import (
 	"sync"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/config/dynamic"
-	promcol "github.com/ConsenSys/orchestrate/pkg/toolkit/app/metrics/collector"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/config/dynamic"
+	promcol "github.com/consensys/orchestrate/pkg/toolkit/app/metrics/collector"
 	"github.com/prometheus/client_golang/prometheus"
 )
 

@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 	"math/big"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/errors"
 	quorumtypes "github.com/consensys/quorum/core/types"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"

@@ -5,8 +5,8 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 
-	"github.com/ConsenSys/orchestrate/pkg/engine"
-	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/engine"
+	"github.com/consensys/orchestrate/pkg/errors"
 )
 
 // Tracer is a facade to manage OpenTracing utilities more easily

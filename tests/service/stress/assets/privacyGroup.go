@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient"
-	"github.com/ConsenSys/orchestrate/pkg/utils"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/toolkit/ethclient"
+	"github.com/consensys/orchestrate/pkg/utils"
 )
 
 var privacyGroupsCtxKey ctxKey = "besuPrivacyGroups"

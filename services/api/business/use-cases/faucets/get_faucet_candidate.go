@@ -5,12 +5,12 @@ import (
 	"math/big"
 	"reflect"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient"
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
-	usecases "github.com/ConsenSys/orchestrate/services/api/business/use-cases"
-	"github.com/ConsenSys/orchestrate/services/api/business/use-cases/faucets/controls"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/toolkit/ethclient"
+	"github.com/consensys/orchestrate/pkg/types/entities"
+	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
+	"github.com/consensys/orchestrate/services/api/business/use-cases/faucets/controls"
 )
 
 const getFaucetCandidateComponent = "use-cases.faucet-candidate"

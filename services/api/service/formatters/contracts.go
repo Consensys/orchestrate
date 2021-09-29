@@ -4,11 +4,11 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/ConsenSys/orchestrate/pkg/encoding/json"
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	types "github.com/ConsenSys/orchestrate/pkg/types/api"
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
-	"github.com/ConsenSys/orchestrate/pkg/utils"
+	"github.com/consensys/orchestrate/pkg/encoding/json"
+	"github.com/consensys/orchestrate/pkg/errors"
+	types "github.com/consensys/orchestrate/pkg/types/api"
+	"github.com/consensys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/pkg/utils"
 )
 
 func FormatRegisterContractRequest(req *types.RegisterContractRequest) (*entities.Contract, error) {

@@ -3,7 +3,7 @@
 package controls
 
 import (
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/pkg/types/entities"
 	"sort"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"

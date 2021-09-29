@@ -4,14 +4,14 @@ package accounts
 
 import (
 	"context"
-	parsers2 "github.com/ConsenSys/orchestrate/services/api/business/parsers"
+	parsers2 "github.com/consensys/orchestrate/services/api/business/parsers"
 	"testing"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/services/api/store/mocks"
-	"github.com/ConsenSys/orchestrate/services/api/store/models/testutils"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/services/api/store/mocks"
+	"github.com/consensys/orchestrate/services/api/store/models/testutils"
 )
 
 func TestGetAccount_Execute(t *testing.T) {

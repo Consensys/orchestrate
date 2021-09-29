@@ -22,7 +22,7 @@ commands:
   # - staging
   # potential remote namespace: 
   # - staging-v21-1 (CIRCLE_TAG=v21.1.4)
-  # - qa (CIRCLE_BRANCH=master)
+  # - qa (CIRCLE_BRANCH=main)
   # - qa-v21-1 (CIRCLE_BRANCH=maintenance/v21.1)
   set_remote_environment_variables:
     description: "Set remote environment values"
@@ -59,10 +59,10 @@ commands:
             - run:
                 name: Set Orchestrate Namespace
                 command: |
-                 if [ "${CIRCLE_TAG}" ]; then echo 'export TAG=${CIRCLE_TAG%.*}' >> $BASH_ENV && echo 'export ORCHESTRATE_NAMESPACE=${ENVIRONMENT_VALUES}-${TAG//./-}' >> $BASH_ENV;
-                 elif [ "${CIRCLE_BRANCH}" == "master" ]; then echo 'export ORCHESTRATE_NAMESPACE=${ENVIRONMENT_VALUES}' >> $BASH_ENV; 
-                 else echo 'export TAG=${CIRCLE_BRANCH#"maintenance/"}' >> $BASH_ENV && echo 'export ORCHESTRATE_NAMESPACE=${ENVIRONMENT_VALUES}-${TAG//./-}' >> $BASH_ENV;
-                 fi
+                  if [ "${CIRCLE_TAG}" ]; then echo 'export TAG=${CIRCLE_TAG%.*}' >> $BASH_ENV && echo 'export ORCHESTRATE_NAMESPACE=${ENVIRONMENT_VALUES}-${TAG//./-}' >> $BASH_ENV;
+                  elif [ "${CIRCLE_BRANCH}" == "main" ]; then echo 'export ORCHESTRATE_NAMESPACE=${ENVIRONMENT_VALUES}' >> $BASH_ENV; 
+                  else echo 'export TAG=${CIRCLE_BRANCH#"maintenance/"}' >> $BASH_ENV && echo 'export ORCHESTRATE_NAMESPACE=${ENVIRONMENT_VALUES}-${TAG//./-}' >> $BASH_ENV;
+                  fi
 
   prepare_e2e:
     description: "Orchestrate e2e environment"
@@ -402,11 +402,11 @@ workflows:
             tags:
               only: /^v.*/
             branches:
-             only: /.*/
+              only: /.*/
       - push-orchestrate-image:
           filters:
             branches:
-              only: master
+              only: main
             tags:
               only: /^v.*/
           requires:
@@ -430,26 +430,26 @@ workflows:
       - deploy-qa:
           filters:
             branches:
-              only: master
+              only: main
           requires:
             - push-orchestrate-image
       - run-e2e:
           filters:
             branches:
-              only: master
+              only: main
           requires:
             - deploy-qa
       - run-stress:
           filters:
             branches:
-              only: master
+              only: main
           requires:
             - run-e2e
             - deploy-qa
       - release-latest:
           filters:
             branches:
-              only: master
+              only: main
             tags:
               ignore: /.*/
           requires:
@@ -488,7 +488,7 @@ workflows:
   #         filters:
   #           branches:
   #             only:
-  #               - master
+  #               - main
   #   jobs:
   #     - run-stress:
   #         environment_values: "staging"

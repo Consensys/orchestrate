@@ -3,7 +3,7 @@ package api
 import (
 	"testing"
 
-	"github.com/ConsenSys/orchestrate/pkg/utils"
+	"github.com/consensys/orchestrate/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 

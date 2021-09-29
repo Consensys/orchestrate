@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/config/dynamic"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/config/dynamic"
 	"github.com/sirupsen/logrus"
 	"github.com/vulcand/oxy/roundrobin"
 )

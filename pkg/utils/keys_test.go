@@ -8,7 +8,7 @@ import (
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
-	ierror "github.com/ConsenSys/orchestrate/pkg/types/error"
+	ierror "github.com/consensys/orchestrate/pkg/types/error"
 )
 
 func TestKafkaChainTopic(t *testing.T) {

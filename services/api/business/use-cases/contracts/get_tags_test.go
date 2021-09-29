@@ -9,8 +9,8 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/services/api/store/mocks"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/services/api/store/mocks"
 )
 
 func TestGetTags_Execute(t *testing.T) {

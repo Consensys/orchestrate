@@ -3,9 +3,9 @@ package testutils
 import (
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/pkg/types/entities"
 
-	"github.com/ConsenSys/orchestrate/pkg/utils"
+	"github.com/consensys/orchestrate/pkg/utils"
 
 	"github.com/gofrs/uuid"
 )

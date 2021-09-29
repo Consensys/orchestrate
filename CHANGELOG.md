@@ -66,7 +66,7 @@
 
 #### Identity Management API
 * Release the Identity API on top of the `orchestate-api`, allowing dynamic CRUD operation over accounts whose keys are stored in Vault
-* Integrate [Orchestrate HashiCorp Vault plugin](https://github.com/Consensys/orchestrate-hashicorp-vault-plugin) to enhance security
+* Integrate [Orchestrate HashiCorp Vault plugin](https://github.com/consensys/orchestrate-hashicorp-vault-plugin) to enhance security
 
 #### Metrics & logging
 * Add application metrics:

@@ -1,7 +1,7 @@
 package ethereum
 
 import (
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient"
+	"github.com/consensys/orchestrate/pkg/toolkit/ethclient"
 )
 
 //go:generate mockgen -source=eth_client.go -destination=mocks/eth_client.go -package=mocks

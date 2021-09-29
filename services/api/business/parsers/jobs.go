@@ -1,8 +1,8 @@
 package parsers
 
 import (
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
-	"github.com/ConsenSys/orchestrate/services/api/store/models"
+	"github.com/consensys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/services/api/store/models"
 )
 
 func NewJobModelFromEntities(job *entities.Job, scheduleID *int) *models.Job {

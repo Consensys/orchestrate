@@ -5,16 +5,16 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
-	"github.com/ConsenSys/orchestrate/services/api/store"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/services/api/store"
 	"github.com/go-pg/pg/v9/orm"
 
-	pg "github.com/ConsenSys/orchestrate/pkg/toolkit/database/postgres"
+	pg "github.com/consensys/orchestrate/pkg/toolkit/database/postgres"
 	gopg "github.com/go-pg/pg/v9"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/services/api/store/models"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/services/api/store/models"
 	"github.com/gofrs/uuid"
 )
 

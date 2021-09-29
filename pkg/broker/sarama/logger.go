@@ -3,8 +3,8 @@ package sarama
 import (
 	"fmt"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 	"github.com/Shopify/sarama"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	"github.com/sirupsen/logrus"
 )
 

@@ -6,10 +6,10 @@ package mocks
 
 import (
 	context "context"
-	database "github.com/ConsenSys/orchestrate/pkg/toolkit/database"
-	entities "github.com/ConsenSys/orchestrate/pkg/types/entities"
-	store "github.com/ConsenSys/orchestrate/services/api/store"
-	models "github.com/ConsenSys/orchestrate/services/api/store/models"
+	database "github.com/consensys/orchestrate/pkg/toolkit/database"
+	entities "github.com/consensys/orchestrate/pkg/types/entities"
+	store "github.com/consensys/orchestrate/services/api/store"
+	models "github.com/consensys/orchestrate/services/api/store/models"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )

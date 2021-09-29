@@ -11,9 +11,9 @@ import (
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	ierror "github.com/ConsenSys/orchestrate/pkg/types/error"
-	"github.com/ConsenSys/orchestrate/pkg/types/ethereum"
+	"github.com/consensys/orchestrate/pkg/errors"
+	ierror "github.com/consensys/orchestrate/pkg/types/error"
+	"github.com/consensys/orchestrate/pkg/types/ethereum"
 )
 
 func TestNewEnvelope(t *testing.T) {

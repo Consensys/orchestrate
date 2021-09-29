@@ -3,16 +3,16 @@ package jobs
 import (
 	"context"
 
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
-	"github.com/ConsenSys/orchestrate/pkg/utils/envelope"
-	usecases "github.com/ConsenSys/orchestrate/services/api/business/use-cases"
+	"github.com/consensys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/pkg/utils/envelope"
+	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
 
-	pkgsarama "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
-	"github.com/ConsenSys/orchestrate/services/api/business/parsers"
-	"github.com/ConsenSys/orchestrate/services/api/store"
 	"github.com/Shopify/sarama"
+	pkgsarama "github.com/consensys/orchestrate/pkg/broker/sarama"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/services/api/business/parsers"
+	"github.com/consensys/orchestrate/services/api/store"
 )
 
 const resendJobTxComponent = "use-cases.resend-job-tx"

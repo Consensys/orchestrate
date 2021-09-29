@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"sync"
 
-	orchestrateclient "github.com/ConsenSys/orchestrate/pkg/sdk/client"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
-	"github.com/ConsenSys/orchestrate/pkg/types/api"
+	orchestrateclient "github.com/consensys/orchestrate/pkg/sdk/client"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/types/api"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/services/tx-listener/dynamic"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/services/tx-listener/dynamic"
 )
 
 const component = "tx-listener.offset"

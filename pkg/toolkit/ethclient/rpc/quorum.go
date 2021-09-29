@@ -9,10 +9,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/encoding/json"
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/utils"
 	"github.com/cenkalti/backoff/v4"
+	"github.com/consensys/orchestrate/pkg/encoding/json"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/toolkit/ethclient/utils"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 

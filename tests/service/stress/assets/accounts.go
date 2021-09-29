@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
-	"github.com/ConsenSys/orchestrate/pkg/types/api"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/types/api"
 
-	orchestrateclient "github.com/ConsenSys/orchestrate/pkg/sdk/client"
+	orchestrateclient "github.com/consensys/orchestrate/pkg/sdk/client"
 )
 
 var accountCtxKey ctxKey = "accounts"

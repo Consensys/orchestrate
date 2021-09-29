@@ -3,8 +3,8 @@ package sarama
 import (
 	"context"
 
-	"github.com/ConsenSys/orchestrate/pkg/engine"
 	"github.com/Shopify/sarama"
+	"github.com/consensys/orchestrate/pkg/engine"
 )
 
 // Pipe take a channel of sarama.ConsumerMessage and pipes it into a channel of engine.Msg

@@ -12,14 +12,14 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
-	"github.com/ConsenSys/orchestrate/pkg/broker/sarama"
-	encoding "github.com/ConsenSys/orchestrate/pkg/encoding/proto"
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
-	"github.com/ConsenSys/orchestrate/pkg/types/tx"
-	"github.com/ConsenSys/orchestrate/services/api/store/mocks"
-	"github.com/ConsenSys/orchestrate/services/api/store/models"
-	"github.com/ConsenSys/orchestrate/services/api/store/models/testutils"
+	"github.com/consensys/orchestrate/pkg/broker/sarama"
+	encoding "github.com/consensys/orchestrate/pkg/encoding/proto"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/pkg/types/tx"
+	"github.com/consensys/orchestrate/services/api/store/mocks"
+	"github.com/consensys/orchestrate/services/api/store/models"
+	"github.com/consensys/orchestrate/services/api/store/models/testutils"
 )
 
 func TestResendJobTx_Execute(t *testing.T) {

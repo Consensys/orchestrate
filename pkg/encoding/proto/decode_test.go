@@ -8,11 +8,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/types/tx"
+	"github.com/consensys/orchestrate/pkg/types/tx"
 
 	"google.golang.org/protobuf/proto"
 	"github.com/stretchr/testify/assert"
-	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/errors"
 )
 
 func init() {

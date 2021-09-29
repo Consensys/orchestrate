@@ -4,14 +4,14 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/ConsenSys/orchestrate/pkg/types/api"
+	"github.com/consensys/orchestrate/pkg/types/api"
 
-	jsonutils "github.com/ConsenSys/orchestrate/pkg/encoding/json"
-	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/httputil"
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
-	usecases "github.com/ConsenSys/orchestrate/services/api/business/use-cases"
-	"github.com/ConsenSys/orchestrate/services/api/service/formatters"
+	jsonutils "github.com/consensys/orchestrate/pkg/encoding/json"
+	"github.com/consensys/orchestrate/pkg/multitenancy"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/httputil"
+	"github.com/consensys/orchestrate/pkg/types/entities"
+	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
+	"github.com/consensys/orchestrate/services/api/service/formatters"
 	"github.com/gorilla/mux"
 )
 

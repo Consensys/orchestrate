@@ -3,7 +3,7 @@ package chainregistry
 import (
 	"sync"
 
-	orchestrateclient "github.com/ConsenSys/orchestrate/pkg/sdk/client"
+	orchestrateclient "github.com/consensys/orchestrate/pkg/sdk/client"
 )
 
 var (

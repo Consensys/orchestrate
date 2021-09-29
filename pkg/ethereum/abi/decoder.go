@@ -7,13 +7,13 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/ConsenSys/orchestrate/pkg/go-ethereum/v1_9_12/accounts/abi"
+	"github.com/consensys/orchestrate/pkg/go-ethereum/v1_9_12/accounts/abi"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 
-	encoding "github.com/ConsenSys/orchestrate/pkg/encoding/json"
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/types/ethereum"
+	encoding "github.com/consensys/orchestrate/pkg/encoding/json"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/types/ethereum"
 )
 
 // FormatIndexedArg transforms a data to string

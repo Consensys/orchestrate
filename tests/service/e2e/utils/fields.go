@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/errors"
 	gherkin "github.com/cucumber/messages-go/v10"
 	"github.com/ethereum/go-ethereum/common"
 )

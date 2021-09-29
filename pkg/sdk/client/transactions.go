@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/httputil"
-	types "github.com/ConsenSys/orchestrate/pkg/types/api"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/httputil"
+	types "github.com/consensys/orchestrate/pkg/types/api"
 
-	clientutils "github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/client-utils"
+	clientutils "github.com/consensys/orchestrate/pkg/toolkit/app/http/client-utils"
 )
 
 func (c *HTTPClient) SendContractTransaction(ctx context.Context, txRequest *types.SendTransactionRequest) (*types.TransactionResponse, error) {

@@ -1,7 +1,7 @@
 package metrics
 
 import (
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/config/dynamic"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/config/dynamic"
 	"github.com/prometheus/client_golang/prometheus"
 )
 

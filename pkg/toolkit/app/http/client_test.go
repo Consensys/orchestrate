@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/auth/utils"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/auth/utils"
 	"github.com/stretchr/testify/assert"
 )
 

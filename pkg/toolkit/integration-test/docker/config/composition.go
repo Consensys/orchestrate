@@ -1,13 +1,13 @@
 package config
 
 import (
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/integration-test/docker/container/ganache"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/integration-test/docker/container/hashicorp"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/integration-test/docker/container/kafka"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/integration-test/docker/container/postgres"
-	quorumkeymanager "github.com/ConsenSys/orchestrate/pkg/toolkit/integration-test/docker/container/quorum-key-manager"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/integration-test/docker/container/zookeeper"
-	"github.com/ConsenSys/orchestrate/pkg/utils"
+	"github.com/consensys/orchestrate/pkg/toolkit/integration-test/docker/container/ganache"
+	"github.com/consensys/orchestrate/pkg/toolkit/integration-test/docker/container/hashicorp"
+	"github.com/consensys/orchestrate/pkg/toolkit/integration-test/docker/container/kafka"
+	"github.com/consensys/orchestrate/pkg/toolkit/integration-test/docker/container/postgres"
+	quorumkeymanager "github.com/consensys/orchestrate/pkg/toolkit/integration-test/docker/container/quorum-key-manager"
+	"github.com/consensys/orchestrate/pkg/toolkit/integration-test/docker/container/zookeeper"
+	"github.com/consensys/orchestrate/pkg/utils"
 )
 
 type Composition struct {

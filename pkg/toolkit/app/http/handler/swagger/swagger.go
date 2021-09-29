@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/config/dynamic"
-	swaggerui "github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/handler/swagger/genstatic"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/config/dynamic"
+	swaggerui "github.com/consensys/orchestrate/pkg/toolkit/app/http/handler/swagger/genstatic"
 	assetfs "github.com/elazarl/go-bindata-assetfs"
 	"github.com/gorilla/mux"
 )

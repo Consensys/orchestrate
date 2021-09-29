@@ -4,7 +4,7 @@ import "pkg/types/error/error.proto";
 import "pkg/types/ethereum/receipt.proto";
 import "pkg/types/ethereum/transaction.proto";
 
-option go_package = "github.com/ConsenSys/orchestrate/pkg/types/tx";
+option go_package = "github.com/consensys/orchestrate/pkg/types/tx";
 
 package tx;
 

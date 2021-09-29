@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/config/dynamic"
-	metrics1 "github.com/ConsenSys/orchestrate/pkg/toolkit/app/metrics"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/metrics/testutils"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/config/dynamic"
+	metrics1 "github.com/consensys/orchestrate/pkg/toolkit/app/metrics"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/metrics/testutils"
 	traefikdynamic "github.com/containous/traefik/v2/pkg/config/dynamic"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/assert"

@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
+	"github.com/consensys/orchestrate/pkg/multitenancy"
 )
 
 const (

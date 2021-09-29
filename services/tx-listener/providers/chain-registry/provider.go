@@ -4,14 +4,14 @@ import (
 	"context"
 	"time"
 
-	orchestrateclient "github.com/ConsenSys/orchestrate/pkg/sdk/client"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
-	"github.com/ConsenSys/orchestrate/pkg/types/api"
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
-	"github.com/ConsenSys/orchestrate/pkg/utils"
+	orchestrateclient "github.com/consensys/orchestrate/pkg/sdk/client"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/types/api"
+	"github.com/consensys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/pkg/utils"
 
-	"github.com/ConsenSys/orchestrate/services/tx-listener/dynamic"
 	"github.com/cenkalti/backoff/v4"
+	"github.com/consensys/orchestrate/services/tx-listener/dynamic"
 	"github.com/containous/traefik/v2/pkg/job"
 	"github.com/containous/traefik/v2/pkg/safe"
 )

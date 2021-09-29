@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"testing"
 
-	mockmid "github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/middleware/mock"
-	reflectmid "github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/middleware/reflect"
+	mockmid "github.com/consensys/orchestrate/pkg/toolkit/app/http/middleware/mock"
+	reflectmid "github.com/consensys/orchestrate/pkg/toolkit/app/http/middleware/reflect"
 	"github.com/golang/mock/gomock"
 )
 

@@ -4,7 +4,7 @@ import (
 	"context"
 	"sync"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 )
 
 const component = "engine"

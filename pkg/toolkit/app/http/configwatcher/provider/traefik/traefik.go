@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/config/dynamic"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/configwatcher/provider"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/config/dynamic"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/configwatcher/provider"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	traefikdynamic "github.com/containous/traefik/v2/pkg/config/dynamic"
 	traefikprovider "github.com/containous/traefik/v2/pkg/provider"
 	"github.com/containous/traefik/v2/pkg/safe"

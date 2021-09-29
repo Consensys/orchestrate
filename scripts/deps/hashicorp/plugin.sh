@@ -4,7 +4,7 @@ VERSION="${PLUGIN_VERSION}"
 FILE_PATH="${PLUGIN_PATH}"
 
 FILES="orchestrate-hashicorp-vault-plugin SHA256SUM"
-GITHUB_URL="https://github.com/ConsenSys/orchestrate-hashicorp-vault-plugin"
+GITHUB_URL="https://github.com/consensys/orchestrate-hashicorp-vault-plugin"
 
 echo "Installing orchestrate-hashicorp-vault-plugin version '$VERSION'"
 for FILE in ${FILES}; do

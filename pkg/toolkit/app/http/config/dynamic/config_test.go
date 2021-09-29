@@ -6,8 +6,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/config/dynamic"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/config/dynamic/testutils"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/config/dynamic"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/config/dynamic/testutils"
 	"github.com/stretchr/testify/assert"
 )
 

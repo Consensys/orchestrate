@@ -1,7 +1,7 @@
 package abi
 
 import (
-	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/errors"
 )
 
 type Crafter interface {

@@ -8,8 +8,8 @@ import (
 	"io"
 	"net"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/tcp"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/tls"
+	"github.com/consensys/orchestrate/pkg/toolkit/tcp"
+	"github.com/consensys/orchestrate/pkg/toolkit/tls"
 )
 
 type SSLDialer struct {

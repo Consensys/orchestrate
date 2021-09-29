@@ -6,14 +6,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/httputil"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/httputil"
 
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/pkg/types/entities"
 
-	types "github.com/ConsenSys/orchestrate/pkg/types/api"
+	types "github.com/consensys/orchestrate/pkg/types/api"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	clientutils "github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/client-utils"
+	"github.com/consensys/orchestrate/pkg/errors"
+	clientutils "github.com/consensys/orchestrate/pkg/toolkit/app/http/client-utils"
 )
 
 func (c *HTTPClient) GetJob(ctx context.Context, jobUUID string) (*types.JobResponse, error) {

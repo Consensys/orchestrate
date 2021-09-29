@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/tls"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/tls/certificate"
+	"github.com/consensys/orchestrate/pkg/toolkit/tls"
+	"github.com/consensys/orchestrate/pkg/toolkit/tls/certificate"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )

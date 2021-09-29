@@ -5,11 +5,11 @@ import (
 	"math"
 	"math/big"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	orchestrateclient "github.com/ConsenSys/orchestrate/pkg/sdk/client"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
-	types "github.com/ConsenSys/orchestrate/pkg/types/api"
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/pkg/errors"
+	orchestrateclient "github.com/consensys/orchestrate/pkg/sdk/client"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	types "github.com/consensys/orchestrate/pkg/types/api"
+	"github.com/consensys/orchestrate/pkg/types/entities"
 )
 
 //go:generate mockgen -source=retry_session_job.go -destination=mocks/retry_session_job.go -package=mocks

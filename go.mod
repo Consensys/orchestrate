@@ -1,6 +1,6 @@
-module github.com/ConsenSys/orchestrate
+module github.com/consensys/orchestrate
 
-go 1.15
+go 1.16
 
 require (
 	github.com/Shopify/sarama v1.27.2
@@ -10,7 +10,7 @@ require (
 	github.com/cenkalti/backoff/v4 v4.0.2
 	github.com/consensys/gnark-crypto v0.5.0
 	github.com/consensys/quorum v2.7.0+incompatible
-	github.com/consensys/quorum-key-manager v0.0.0-20210915155309-4f9aa1dba946
+	github.com/consensys/quorum-key-manager v0.0.0-20210922104442-c2cd4d2be057
 	github.com/containous/alice v0.0.0-20181107144136-d83ebdd94cbd
 	github.com/containous/traefik/v2 v2.2.0
 	github.com/cucumber/godog v0.10.1-0.20200625081220-c7d739336b87
@@ -61,7 +61,6 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.7.0
-	github.com/swaggo/swag v1.7.1 // indirect
 	github.com/uber/jaeger-client-go v2.22.1+incompatible
 	github.com/uber/jaeger-lib v2.2.0+incompatible
 	github.com/unrolled/secure v1.0.7

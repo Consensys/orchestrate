@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strconv"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/httputil"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/httputil"
 	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/gorilla/mux"

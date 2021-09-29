@@ -1,10 +1,10 @@
 package sarama
 
 import (
-	broker "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
-	encoding "github.com/ConsenSys/orchestrate/pkg/encoding/sarama"
-	"github.com/ConsenSys/orchestrate/pkg/engine"
-	"github.com/ConsenSys/orchestrate/pkg/types/tx"
+	broker "github.com/consensys/orchestrate/pkg/broker/sarama"
+	encoding "github.com/consensys/orchestrate/pkg/encoding/sarama"
+	"github.com/consensys/orchestrate/pkg/engine"
+	"github.com/consensys/orchestrate/pkg/types/tx"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )

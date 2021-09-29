@@ -6,14 +6,14 @@ import (
 	"math"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/config/dynamic"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/configwatcher/provider"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/configwatcher/provider/poll"
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
-	"github.com/ConsenSys/orchestrate/pkg/utils"
-	usecases "github.com/ConsenSys/orchestrate/services/api/business/use-cases"
+	"github.com/consensys/orchestrate/pkg/multitenancy"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/config/dynamic"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/configwatcher/provider"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/configwatcher/provider/poll"
+	"github.com/consensys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/pkg/utils"
+	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
 	traefikdynamic "github.com/containous/traefik/v2/pkg/config/dynamic"
 )
 

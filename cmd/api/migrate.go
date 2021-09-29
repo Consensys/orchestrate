@@ -1,9 +1,9 @@
 package api
 
 import (
-	qkm "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/database/postgres"
-	"github.com/ConsenSys/orchestrate/services/api/store/postgres/migrations"
+	qkm "github.com/consensys/orchestrate/pkg/quorum-key-manager"
+	"github.com/consensys/orchestrate/pkg/toolkit/database/postgres"
+	"github.com/consensys/orchestrate/services/api/store/postgres/migrations"
 	"github.com/go-pg/pg/v9"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"

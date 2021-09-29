@@ -5,15 +5,15 @@ package transactions
 import (
 	"context"
 	"fmt"
-	testutils2 "github.com/ConsenSys/orchestrate/pkg/types/testutils"
-	mocks2 "github.com/ConsenSys/orchestrate/services/api/business/use-cases/mocks"
-	"github.com/ConsenSys/orchestrate/services/api/store/models/testutils"
+	testutils2 "github.com/consensys/orchestrate/pkg/types/testutils"
+	mocks2 "github.com/consensys/orchestrate/services/api/business/use-cases/mocks"
+	"github.com/consensys/orchestrate/services/api/store/models/testutils"
 	"testing"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/services/api/store/mocks"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/services/api/store/mocks"
 )
 
 func TestGetTx_Execute(t *testing.T) {

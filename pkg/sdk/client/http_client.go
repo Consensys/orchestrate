@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"time"
 
-	backoff2 "github.com/ConsenSys/orchestrate/pkg/backoff"
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
 	"github.com/cenkalti/backoff/v4"
+	backoff2 "github.com/consensys/orchestrate/pkg/backoff"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 )
 
 type HTTPClient struct {

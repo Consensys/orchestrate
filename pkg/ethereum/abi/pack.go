@@ -1,7 +1,7 @@
 package abi
 
 import (
-	ethabi "github.com/ConsenSys/orchestrate/pkg/go-ethereum/v1_9_12/accounts/abi"
+	ethabi "github.com/consensys/orchestrate/pkg/go-ethereum/v1_9_12/accounts/abi"
 )
 
 // Pack automatically cast string args into correct Solidity type and pack arguments

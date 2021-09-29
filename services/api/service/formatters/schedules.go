@@ -1,8 +1,8 @@
 package formatters
 
 import (
-	types "github.com/ConsenSys/orchestrate/pkg/types/api"
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	types "github.com/consensys/orchestrate/pkg/types/api"
+	"github.com/consensys/orchestrate/pkg/types/entities"
 )
 
 func FormatScheduleResponse(schedule *entities.Schedule) *types.ScheduleResponse {

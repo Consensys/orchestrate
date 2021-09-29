@@ -3,8 +3,8 @@ package dashboard
 import (
 	"math"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/config/dynamic"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/config/dynamic"
 	traefikdynamic "github.com/containous/traefik/v2/pkg/config/dynamic"
 )
 

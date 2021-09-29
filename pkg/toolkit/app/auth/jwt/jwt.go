@@ -7,10 +7,10 @@ import (
 	"crypto/x509"
 	"fmt"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
-	authutils "github.com/ConsenSys/orchestrate/pkg/toolkit/app/auth/utils"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/tls/certificate"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/multitenancy"
+	authutils "github.com/consensys/orchestrate/pkg/toolkit/app/auth/utils"
+	"github.com/consensys/orchestrate/pkg/toolkit/tls/certificate"
 	"github.com/dgrijalva/jwt-go"
 )
 

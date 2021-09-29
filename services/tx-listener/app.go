@@ -1,15 +1,15 @@
 package txlistener
 
 import (
-	pkgsarama "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
-	orchestrateclient "github.com/ConsenSys/orchestrate/pkg/sdk/client"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app"
-	listenermetrics "github.com/ConsenSys/orchestrate/services/tx-listener/metrics"
-	provider "github.com/ConsenSys/orchestrate/services/tx-listener/providers"
-	"github.com/ConsenSys/orchestrate/services/tx-listener/session/ethereum"
-	hook "github.com/ConsenSys/orchestrate/services/tx-listener/session/ethereum/hooks"
-	"github.com/ConsenSys/orchestrate/services/tx-listener/session/ethereum/offset"
-	txsentry "github.com/ConsenSys/orchestrate/services/tx-sentry"
+	pkgsarama "github.com/consensys/orchestrate/pkg/broker/sarama"
+	orchestrateclient "github.com/consensys/orchestrate/pkg/sdk/client"
+	"github.com/consensys/orchestrate/pkg/toolkit/app"
+	listenermetrics "github.com/consensys/orchestrate/services/tx-listener/metrics"
+	provider "github.com/consensys/orchestrate/services/tx-listener/providers"
+	"github.com/consensys/orchestrate/services/tx-listener/session/ethereum"
+	hook "github.com/consensys/orchestrate/services/tx-listener/session/ethereum/hooks"
+	"github.com/consensys/orchestrate/services/tx-listener/session/ethereum/offset"
+	txsentry "github.com/consensys/orchestrate/services/tx-sentry"
 	"github.com/spf13/viper"
 )
 

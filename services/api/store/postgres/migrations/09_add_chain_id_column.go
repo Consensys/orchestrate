@@ -3,8 +3,8 @@ package migrations
 import (
 	"context"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	ethclient "github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/rpc"
+	"github.com/consensys/orchestrate/pkg/errors"
+	ethclient "github.com/consensys/orchestrate/pkg/toolkit/ethclient/rpc"
 	"github.com/go-pg/migrations/v7"
 	log "github.com/sirupsen/logrus"
 )

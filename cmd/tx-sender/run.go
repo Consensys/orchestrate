@@ -3,9 +3,9 @@ package txsender
 import (
 	"os"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/utils"
-	txsender "github.com/ConsenSys/orchestrate/services/tx-sender"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/utils"
+	txsender "github.com/consensys/orchestrate/services/tx-sender"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

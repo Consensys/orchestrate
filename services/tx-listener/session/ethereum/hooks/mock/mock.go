@@ -8,8 +8,8 @@ import (
 	context "context"
 	types "github.com/ethereum/go-ethereum/core/types"
 	gomock "github.com/golang/mock/gomock"
-	entities "github.com/ConsenSys/orchestrate/pkg/types/entities"
-	dynamic "github.com/ConsenSys/orchestrate/services/tx-listener/dynamic"
+	entities "github.com/consensys/orchestrate/pkg/types/entities"
+	dynamic "github.com/consensys/orchestrate/services/tx-listener/dynamic"
 	reflect "reflect"
 )
 

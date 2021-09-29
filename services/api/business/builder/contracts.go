@@ -1,9 +1,9 @@
 package builder
 
 import (
-	usecases "github.com/ConsenSys/orchestrate/services/api/business/use-cases"
-	"github.com/ConsenSys/orchestrate/services/api/business/use-cases/contracts"
-	"github.com/ConsenSys/orchestrate/services/api/store"
+	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
+	"github.com/consensys/orchestrate/services/api/business/use-cases/contracts"
+	"github.com/consensys/orchestrate/services/api/store"
 )
 
 type contractUseCases struct {

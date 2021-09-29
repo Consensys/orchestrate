@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	qkm "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager"
+	qkm "github.com/consensys/orchestrate/pkg/quorum-key-manager"
 	"github.com/go-pg/migrations/v7"
 	log "github.com/sirupsen/logrus"
 )

@@ -4,11 +4,11 @@ import (
 	"context"
 	"sync"
 
-	"github.com/ConsenSys/orchestrate/pkg/types/tx"
+	"github.com/consensys/orchestrate/pkg/types/tx"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
-	ierror "github.com/ConsenSys/orchestrate/pkg/types/error"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	ierror "github.com/consensys/orchestrate/pkg/types/error"
 )
 
 // Envelope is the most important part of an engine.

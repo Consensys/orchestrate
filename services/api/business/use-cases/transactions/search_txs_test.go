@@ -5,17 +5,17 @@ package transactions
 import (
 	"context"
 	"fmt"
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
-	testutils3 "github.com/ConsenSys/orchestrate/pkg/types/testutils"
-	mocks2 "github.com/ConsenSys/orchestrate/services/api/business/use-cases/mocks"
-	"github.com/ConsenSys/orchestrate/services/api/store/models"
-	"github.com/ConsenSys/orchestrate/services/api/store/models/testutils"
+	"github.com/consensys/orchestrate/pkg/types/entities"
+	testutils3 "github.com/consensys/orchestrate/pkg/types/testutils"
+	mocks2 "github.com/consensys/orchestrate/services/api/business/use-cases/mocks"
+	"github.com/consensys/orchestrate/services/api/store/models"
+	"github.com/consensys/orchestrate/services/api/store/models/testutils"
 	"testing"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/services/api/store/mocks"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/services/api/store/mocks"
 )
 
 func TestSearchTxs_Execute(t *testing.T) {

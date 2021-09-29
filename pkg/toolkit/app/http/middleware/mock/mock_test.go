@@ -5,7 +5,7 @@ package mock
 import (
 	"testing"
 
-	mockhandler "github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/handler/mock"
+	mockhandler "github.com/consensys/orchestrate/pkg/toolkit/app/http/handler/mock"
 	"github.com/golang/mock/gomock"
 )
 

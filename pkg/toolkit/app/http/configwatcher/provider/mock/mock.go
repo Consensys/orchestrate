@@ -3,7 +3,7 @@ package mock
 import (
 	"context"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/configwatcher/provider"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/configwatcher/provider"
 )
 
 type Provider struct {

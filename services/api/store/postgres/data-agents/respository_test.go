@@ -9,11 +9,11 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/database/postgres"
-	pgTestUtils "github.com/ConsenSys/orchestrate/pkg/toolkit/database/postgres/testutils"
-	"github.com/ConsenSys/orchestrate/services/api/store/models"
-	"github.com/ConsenSys/orchestrate/services/api/store/postgres/migrations"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/toolkit/database/postgres"
+	pgTestUtils "github.com/consensys/orchestrate/pkg/toolkit/database/postgres/testutils"
+	"github.com/consensys/orchestrate/services/api/store/models"
+	"github.com/consensys/orchestrate/services/api/store/postgres/migrations"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )

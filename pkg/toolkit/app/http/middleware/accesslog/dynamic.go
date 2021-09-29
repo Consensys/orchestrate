@@ -1,7 +1,7 @@
 package accesslog
 
 import (
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/config/dynamic"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/config/dynamic"
 	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
 )
 

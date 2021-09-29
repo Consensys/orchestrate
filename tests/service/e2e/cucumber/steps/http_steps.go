@@ -9,8 +9,8 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/tests/service/e2e/utils"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/tests/service/e2e/utils"
 	"github.com/cucumber/godog"
 	gherkin "github.com/cucumber/messages-go/v10"
 	merror "github.com/hashicorp/go-multierror"

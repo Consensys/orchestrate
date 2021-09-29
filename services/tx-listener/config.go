@@ -1,15 +1,15 @@
 package txlistener
 
 import (
-	broker "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
-	orchestrateclient "github.com/ConsenSys/orchestrate/pkg/sdk/client"
-	authkey "github.com/ConsenSys/orchestrate/pkg/toolkit/app/auth/key"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
-	metricregistry "github.com/ConsenSys/orchestrate/pkg/toolkit/app/metrics/registry"
-	tcpmetrics "github.com/ConsenSys/orchestrate/pkg/toolkit/tcp/metrics"
-	provider "github.com/ConsenSys/orchestrate/services/tx-listener/providers/chain-registry"
-	txsentry "github.com/ConsenSys/orchestrate/services/tx-sentry"
+	broker "github.com/consensys/orchestrate/pkg/broker/sarama"
+	orchestrateclient "github.com/consensys/orchestrate/pkg/sdk/client"
+	authkey "github.com/consensys/orchestrate/pkg/toolkit/app/auth/key"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	metricregistry "github.com/consensys/orchestrate/pkg/toolkit/app/metrics/registry"
+	tcpmetrics "github.com/consensys/orchestrate/pkg/toolkit/tcp/metrics"
+	provider "github.com/consensys/orchestrate/services/tx-listener/providers/chain-registry"
+	txsentry "github.com/consensys/orchestrate/services/tx-sentry"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )

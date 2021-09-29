@@ -1,6 +1,6 @@
 package api
 
-import "github.com/ConsenSys/orchestrate/pkg/types/entities"
+import "github.com/consensys/orchestrate/pkg/types/entities"
 
 type RegisterContractRequest struct {
 	ABI              interface{} `json:"abi,omitempty" validate:"required"`

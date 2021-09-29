@@ -5,8 +5,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	authjwt "github.com/ConsenSys/orchestrate/pkg/toolkit/app/auth/jwt"
-	authkey "github.com/ConsenSys/orchestrate/pkg/toolkit/app/auth/key"
+	authjwt "github.com/consensys/orchestrate/pkg/toolkit/app/auth/jwt"
+	authkey "github.com/consensys/orchestrate/pkg/toolkit/app/auth/key"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

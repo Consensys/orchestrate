@@ -7,21 +7,21 @@ import (
 	"fmt"
 	"testing"
 
-	testutils3 "github.com/ConsenSys/orchestrate/pkg/types/testutils"
-	"github.com/ConsenSys/orchestrate/services/api/business/parsers"
+	testutils3 "github.com/consensys/orchestrate/pkg/types/testutils"
+	"github.com/consensys/orchestrate/services/api/business/parsers"
 
 	"github.com/gofrs/uuid"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
-	usecases "github.com/ConsenSys/orchestrate/services/api/business/use-cases"
-	"github.com/ConsenSys/orchestrate/services/api/business/use-cases/mocks"
-	mocks2 "github.com/ConsenSys/orchestrate/services/api/store/mocks"
-	"github.com/ConsenSys/orchestrate/services/api/store/models"
-	testutils2 "github.com/ConsenSys/orchestrate/services/api/store/models/testutils"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/multitenancy"
+	"github.com/consensys/orchestrate/pkg/types/entities"
+	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
+	"github.com/consensys/orchestrate/services/api/business/use-cases/mocks"
+	mocks2 "github.com/consensys/orchestrate/services/api/store/mocks"
+	"github.com/consensys/orchestrate/services/api/store/models"
+	testutils2 "github.com/consensys/orchestrate/services/api/store/models/testutils"
 )
 
 type sendTxSuite struct {

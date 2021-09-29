@@ -1,7 +1,7 @@
 package testutils
 
 import (
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/pkg/types/entities"
 )
 
 func FakeLog() *entities.Log {

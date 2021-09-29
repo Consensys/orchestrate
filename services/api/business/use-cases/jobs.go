@@ -3,8 +3,8 @@ package usecases
 import (
 	"context"
 
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
-	"github.com/ConsenSys/orchestrate/services/api/store"
+	"github.com/consensys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/services/api/store"
 )
 
 //go:generate mockgen -source=jobs.go -destination=mocks/jobs.go -package=mocks

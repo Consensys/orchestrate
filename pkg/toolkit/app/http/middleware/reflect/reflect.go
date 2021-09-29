@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"reflect"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/middleware"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/middleware"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 )
 
 const component = "http.middleware"

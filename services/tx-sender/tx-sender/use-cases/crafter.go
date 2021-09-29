@@ -3,7 +3,7 @@ package usecases
 import (
 	"context"
 
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/pkg/types/entities"
 )
 
 //go:generate mockgen -source=crafter.go -destination=mocks/crafter.go -package=mocks

@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"strings"
 
-	clientutils "github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/client-utils"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/httputil"
-	types "github.com/ConsenSys/orchestrate/pkg/types/api"
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	clientutils "github.com/consensys/orchestrate/pkg/toolkit/app/http/client-utils"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/httputil"
+	types "github.com/consensys/orchestrate/pkg/types/api"
+	"github.com/consensys/orchestrate/pkg/types/entities"
 )
 
 func (c *HTTPClient) GetFaucet(ctx context.Context, uuid string) (*types.FaucetResponse, error) {

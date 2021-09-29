@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
-	ethclientutils "github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/utils"
-	"github.com/ConsenSys/orchestrate/pkg/utils"
-	"github.com/ConsenSys/orchestrate/services/tx-listener/dynamic"
-	provider "github.com/ConsenSys/orchestrate/services/tx-listener/providers"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	ethclientutils "github.com/consensys/orchestrate/pkg/toolkit/ethclient/utils"
+	"github.com/consensys/orchestrate/pkg/utils"
+	"github.com/consensys/orchestrate/services/tx-listener/dynamic"
+	provider "github.com/consensys/orchestrate/services/tx-listener/providers"
 )
 
 const component = "tx-listener.session-manager"

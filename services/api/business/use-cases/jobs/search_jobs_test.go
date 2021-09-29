@@ -5,17 +5,17 @@ package jobs
 import (
 	"context"
 	"github.com/gofrs/uuid"
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/pkg/types/entities"
 	"testing"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/services/api/business/parsers"
-	"github.com/ConsenSys/orchestrate/services/api/store/mocks"
-	"github.com/ConsenSys/orchestrate/services/api/store/models"
-	"github.com/ConsenSys/orchestrate/services/api/store/models/testutils"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/services/api/business/parsers"
+	"github.com/consensys/orchestrate/services/api/store/mocks"
+	"github.com/consensys/orchestrate/services/api/store/models"
+	"github.com/consensys/orchestrate/services/api/store/models/testutils"
 )
 
 func TestSearchJobs_Execute(t *testing.T) {

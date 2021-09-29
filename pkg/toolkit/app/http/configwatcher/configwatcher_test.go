@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/configwatcher/provider/mock"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/configwatcher/testutils"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/configwatcher/provider/mock"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/configwatcher/testutils"
 	"github.com/stretchr/testify/assert"
 )
 

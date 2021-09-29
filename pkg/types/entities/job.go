@@ -3,7 +3,7 @@ package entities
 import (
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/types/ethereum"
+	"github.com/consensys/orchestrate/pkg/types/ethereum"
 )
 
 type JobType string

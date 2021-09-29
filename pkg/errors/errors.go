@@ -1,7 +1,7 @@
 package errors
 
 import (
-	ierror "github.com/ConsenSys/orchestrate/pkg/types/error"
+	ierror "github.com/consensys/orchestrate/pkg/types/error"
 )
 
 // Error codes are uint64 for performances purposes but should be seen as 5 nibbles hex codes

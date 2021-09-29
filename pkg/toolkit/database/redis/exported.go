@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	healthz "github.com/heptiolabs/healthcheck"
 	"github.com/spf13/viper"
 )

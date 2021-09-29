@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"time"
 
-	qkm "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager"
-	httputils "github.com/ConsenSys/orchestrate/pkg/toolkit/app/http"
+	qkm "github.com/consensys/orchestrate/pkg/quorum-key-manager"
+	httputils "github.com/consensys/orchestrate/pkg/toolkit/app/http"
 	"github.com/docker/docker/api/types/mount"
 	log "github.com/sirupsen/logrus"
 
@@ -19,7 +19,7 @@ import (
 	"github.com/docker/go-connections/nat"
 )
 
-const defaultHashicorpVaultImage = "docker.consensys.net/pub/quorum-key-manager:v21.7.0-alpha.5"
+const defaultHashicorpVaultImage = "docker.consensys.net/pub/quorum-key-manager:v21.9.0"
 const defaultHostPort = "8080"
 const defaultHost = "localhost"
 

@@ -10,12 +10,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/docker/docker/api/types/network"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/integration-test/docker/config"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/integration-test/docker/container"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/integration-test/docker/container/compose"
+	"github.com/consensys/orchestrate/pkg/toolkit/integration-test/docker/config"
+	"github.com/consensys/orchestrate/pkg/toolkit/integration-test/docker/container"
+	"github.com/consensys/orchestrate/pkg/toolkit/integration-test/docker/container/compose"
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/docker/docker/api/types"
 	dockercontainer "github.com/docker/docker/api/types/container"

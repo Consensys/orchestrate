@@ -1,8 +1,8 @@
 package auth
 
 import (
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/auth/jwt"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/auth/key"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/auth/jwt"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/auth/key"
 	"github.com/spf13/pflag"
 )
 

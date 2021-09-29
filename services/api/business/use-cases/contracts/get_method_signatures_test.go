@@ -9,9 +9,9 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
-	mocks2 "github.com/ConsenSys/orchestrate/services/api/business/use-cases/mocks"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/types/testutils"
+	mocks2 "github.com/consensys/orchestrate/services/api/business/use-cases/mocks"
 )
 
 func TestGetMethodSignatures_Execute(t *testing.T) {

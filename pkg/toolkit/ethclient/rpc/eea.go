@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"math/big"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/utils"
-	proto "github.com/ConsenSys/orchestrate/pkg/types/ethereum"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/toolkit/ethclient/utils"
+	proto "github.com/consensys/orchestrate/pkg/types/ethereum"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 )

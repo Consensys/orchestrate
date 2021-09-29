@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/ConsenSys/orchestrate/pkg/utils"
+	"github.com/consensys/orchestrate/pkg/utils"
 )
 
 type Annotations struct {

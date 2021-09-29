@@ -5,16 +5,16 @@ package parsers
 import (
 	"testing"
 
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
-	"github.com/ConsenSys/orchestrate/pkg/utils/envelope"
+	"github.com/consensys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/pkg/utils/envelope"
 
-	testutils2 "github.com/ConsenSys/orchestrate/pkg/types/testutils"
-	"github.com/ConsenSys/orchestrate/pkg/types/tx"
+	testutils2 "github.com/consensys/orchestrate/pkg/types/testutils"
+	"github.com/consensys/orchestrate/pkg/types/tx"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/ConsenSys/orchestrate/services/api/store/models/testutils"
+	"github.com/consensys/orchestrate/services/api/store/models/testutils"
 
-	"github.com/ConsenSys/orchestrate/pkg/encoding/json"
+	"github.com/consensys/orchestrate/pkg/encoding/json"
 )
 
 func TestParsersJob_NewModelFromEntity(t *testing.T) {

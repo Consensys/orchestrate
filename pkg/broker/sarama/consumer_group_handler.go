@@ -3,8 +3,8 @@ package sarama
 import (
 	"context"
 
-	"github.com/ConsenSys/orchestrate/pkg/engine"
 	"github.com/Shopify/sarama"
+	"github.com/consensys/orchestrate/pkg/engine"
 	log "github.com/sirupsen/logrus"
 )
 

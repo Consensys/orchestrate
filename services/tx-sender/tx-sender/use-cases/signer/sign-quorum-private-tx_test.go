@@ -6,9 +6,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	qkm "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager"
-	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
+	"github.com/consensys/orchestrate/pkg/errors"
+	qkm "github.com/consensys/orchestrate/pkg/quorum-key-manager"
+	"github.com/consensys/orchestrate/pkg/types/testutils"
 	qkmmock "github.com/consensys/quorum-key-manager/pkg/client/mock"
 	"github.com/consensys/quorum-key-manager/src/stores/api/types"
 	"github.com/golang/mock/gomock"

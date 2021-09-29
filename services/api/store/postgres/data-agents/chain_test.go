@@ -6,15 +6,15 @@ package dataagents
 
 import (
 	"context"
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
-	"github.com/ConsenSys/orchestrate/services/api/store/models/testutils"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/multitenancy"
+	"github.com/consensys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/services/api/store/models/testutils"
 	"github.com/stretchr/testify/assert"
 	"testing"
 
-	pgTestUtils "github.com/ConsenSys/orchestrate/pkg/toolkit/database/postgres/testutils"
-	"github.com/ConsenSys/orchestrate/services/api/store/postgres/migrations"
+	pgTestUtils "github.com/consensys/orchestrate/pkg/toolkit/database/postgres/testutils"
+	"github.com/consensys/orchestrate/services/api/store/postgres/migrations"
 	"github.com/stretchr/testify/suite"
 )
 

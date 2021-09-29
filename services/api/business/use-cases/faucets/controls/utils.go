@@ -4,8 +4,8 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/toolkit/ethclient"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	log "github.com/sirupsen/logrus"
 )

@@ -9,7 +9,7 @@ import (
 
 	gherkin "github.com/cucumber/messages-go/v10"
 	"github.com/stretchr/testify/assert"
-	"github.com/ConsenSys/orchestrate/pkg/types/tx"
+	"github.com/consensys/orchestrate/pkg/types/tx"
 )
 
 type TestStruct struct {

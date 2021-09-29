@@ -6,11 +6,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	backoffmock "github.com/ConsenSys/orchestrate/pkg/backoff/mock"
-	"github.com/ConsenSys/orchestrate/pkg/encoding/json"
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/httputil"
-	types "github.com/ConsenSys/orchestrate/pkg/types/api"
+	backoffmock "github.com/consensys/orchestrate/pkg/backoff/mock"
+	"github.com/consensys/orchestrate/pkg/encoding/json"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/httputil"
+	types "github.com/consensys/orchestrate/pkg/types/api"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )

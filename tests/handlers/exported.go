@@ -3,8 +3,8 @@ package handlers
 import (
 	"context"
 
-	"github.com/ConsenSys/orchestrate/pkg/utils"
-	"github.com/ConsenSys/orchestrate/tests/handlers/dispatcher"
+	"github.com/consensys/orchestrate/pkg/utils"
+	"github.com/consensys/orchestrate/tests/handlers/dispatcher"
 )
 
 // Init handlers

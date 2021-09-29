@@ -7,7 +7,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
 

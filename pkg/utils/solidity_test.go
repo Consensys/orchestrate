@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	ierror "github.com/ConsenSys/orchestrate/pkg/types/error"
+	ierror "github.com/consensys/orchestrate/pkg/types/error"
 )
 
 func TestGetSignature(t *testing.T) {

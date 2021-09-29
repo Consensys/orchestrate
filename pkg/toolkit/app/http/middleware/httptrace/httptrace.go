@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"net/http/httptrace"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/config/dynamic"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/config/dynamic"
 	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/sirupsen/logrus"
 )

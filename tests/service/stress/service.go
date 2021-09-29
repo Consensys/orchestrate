@@ -6,17 +6,17 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/toolkit/ethclient"
 	"github.com/spf13/viper"
 
-	orchestrateclient "github.com/ConsenSys/orchestrate/pkg/sdk/client"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
-	utils2 "github.com/ConsenSys/orchestrate/pkg/utils"
-	"github.com/ConsenSys/orchestrate/tests/service/stress/assets"
-	"github.com/ConsenSys/orchestrate/tests/service/stress/units"
-	"github.com/ConsenSys/orchestrate/tests/utils/chanregistry"
 	"github.com/Shopify/sarama"
+	orchestrateclient "github.com/consensys/orchestrate/pkg/sdk/client"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	utils2 "github.com/consensys/orchestrate/pkg/utils"
+	"github.com/consensys/orchestrate/tests/service/stress/assets"
+	"github.com/consensys/orchestrate/tests/service/stress/units"
+	"github.com/consensys/orchestrate/tests/utils/chanregistry"
 )
 
 type WorkLoadTest func(context.Context, *units.WorkloadConfig, orchestrateclient.OrchestrateClient, *chanregistry.ChanRegistry) error

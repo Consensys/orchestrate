@@ -4,14 +4,14 @@ import (
 	"context"
 	"os"
 
-	broker "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
+	broker "github.com/consensys/orchestrate/pkg/broker/sarama"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 
-	"github.com/ConsenSys/orchestrate/pkg/utils"
-	"github.com/ConsenSys/orchestrate/tests/service/e2e"
-	"github.com/ConsenSys/orchestrate/tests/service/e2e/cucumber"
-	"github.com/ConsenSys/orchestrate/tests/service/e2e/cucumber/steps"
+	"github.com/consensys/orchestrate/pkg/utils"
+	"github.com/consensys/orchestrate/tests/service/e2e"
+	"github.com/consensys/orchestrate/tests/service/e2e/cucumber"
+	"github.com/consensys/orchestrate/tests/service/e2e/cucumber/steps"
 	"github.com/spf13/cobra"
 )
 

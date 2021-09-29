@@ -6,9 +6,9 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
-	"github.com/ConsenSys/orchestrate/pkg/types/tx"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/pkg/types/tx"
 	gherkin "github.com/cucumber/messages-go/v10"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/mitchellh/mapstructure"

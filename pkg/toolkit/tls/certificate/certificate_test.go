@@ -3,8 +3,8 @@ package certificate_test
 import (
 	"testing"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/tls/certificate"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/tls/testutils"
+	"github.com/consensys/orchestrate/pkg/toolkit/tls/certificate"
+	"github.com/consensys/orchestrate/pkg/toolkit/tls/testutils"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -7,7 +7,7 @@ import (
 
 	"k8s.io/apimachinery/pkg/util/rand"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/database/postgres"
+	"github.com/consensys/orchestrate/pkg/toolkit/database/postgres"
 	"github.com/go-pg/migrations/v7"
 	"github.com/go-pg/pg/v9"
 	"github.com/spf13/viper"

@@ -7,7 +7,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	"github.com/ConsenSys/orchestrate/pkg/sdk/client/mock"
+	"github.com/consensys/orchestrate/pkg/sdk/client/mock"
 )
 
 func TestInit(t *testing.T) {

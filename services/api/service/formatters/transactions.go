@@ -7,10 +7,10 @@ import (
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
 
-	types "github.com/ConsenSys/orchestrate/pkg/types/api"
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	types "github.com/consensys/orchestrate/pkg/types/api"
+	"github.com/consensys/orchestrate/pkg/types/entities"
 
-	"github.com/ConsenSys/orchestrate/pkg/utils"
+	"github.com/consensys/orchestrate/pkg/utils"
 )
 
 func FormatSendTxRequest(sendTxRequest *types.SendTransactionRequest, idempotencyKey string) *entities.TxRequest {

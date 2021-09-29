@@ -5,8 +5,8 @@ package tcp_test
 import (
 	"testing"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/tcp"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/tcp/mock"
+	"github.com/consensys/orchestrate/pkg/toolkit/tcp"
+	"github.com/consensys/orchestrate/pkg/toolkit/tcp/mock"
 	"github.com/golang/mock/gomock"
 )
 

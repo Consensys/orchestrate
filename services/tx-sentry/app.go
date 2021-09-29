@@ -4,15 +4,15 @@ import (
 	"context"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
-	orchestrateclient "github.com/ConsenSys/orchestrate/pkg/sdk/client"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
-	"github.com/ConsenSys/orchestrate/services/tx-sentry/service/listeners"
-	"github.com/ConsenSys/orchestrate/services/tx-sentry/service/parsers"
-	usecases "github.com/ConsenSys/orchestrate/services/tx-sentry/tx-sentry/use-cases"
 	"github.com/cenkalti/backoff/v4"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/multitenancy"
+	orchestrateclient "github.com/consensys/orchestrate/pkg/sdk/client"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/services/tx-sentry/service/listeners"
+	"github.com/consensys/orchestrate/services/tx-sentry/service/parsers"
+	usecases "github.com/consensys/orchestrate/services/tx-sentry/tx-sentry/use-cases"
 	backoffjob "github.com/containous/traefik/v2/pkg/job"
 )
 

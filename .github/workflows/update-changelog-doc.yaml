@@ -16,7 +16,7 @@ jobs:
         with:
           repository: "${{github.repository_owner}}/doc.orchestrate"
           token: ${{ secrets.OPS_TOKEN }}
-          ref: 'master'
+          ref: 'main'
           path: docsite
       - name: Copy changelog to doc with header
         run: |

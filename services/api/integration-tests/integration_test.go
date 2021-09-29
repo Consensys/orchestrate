@@ -4,12 +4,12 @@ package integrationtests
 
 import (
 	"context"
-	"github.com/ConsenSys/orchestrate/pkg/sdk/client"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http"
-	integrationtest "github.com/ConsenSys/orchestrate/pkg/toolkit/integration-test"
-	"github.com/ConsenSys/orchestrate/pkg/types/api"
-	"github.com/ConsenSys/orchestrate/pkg/types/testutils"
-	"github.com/ConsenSys/orchestrate/pkg/utils"
+	"github.com/consensys/orchestrate/pkg/sdk/client"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http"
+	integrationtest "github.com/consensys/orchestrate/pkg/toolkit/integration-test"
+	"github.com/consensys/orchestrate/pkg/types/api"
+	"github.com/consensys/orchestrate/pkg/types/testutils"
+	"github.com/consensys/orchestrate/pkg/utils"
 	"github.com/stretchr/testify/suite"
 	"gopkg.in/h2non/gock.v1"
 	"os"

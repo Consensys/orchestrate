@@ -5,7 +5,7 @@
 package mock
 
 import (
-	dynamic "github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/config/dynamic"
+	dynamic "github.com/consensys/orchestrate/pkg/toolkit/app/http/config/dynamic"
 	metrics "github.com/go-kit/kit/metrics"
 	gomock "github.com/golang/mock/gomock"
 	prometheus "github.com/prometheus/client_golang/prometheus"

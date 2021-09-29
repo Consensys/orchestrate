@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/Shopify/sarama/mocks"
-	broker "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
+	broker "github.com/consensys/orchestrate/pkg/broker/sarama"
 
 	"github.com/stretchr/testify/assert"
 )

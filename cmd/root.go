@@ -1,10 +1,10 @@
 package cmd
 
 import (
-	"github.com/ConsenSys/orchestrate/cmd/api"
-	txlistener "github.com/ConsenSys/orchestrate/cmd/tx-listener"
-	txsender "github.com/ConsenSys/orchestrate/cmd/tx-sender"
-	"github.com/ConsenSys/orchestrate/cmd/utils"
+	"github.com/consensys/orchestrate/cmd/api"
+	txlistener "github.com/consensys/orchestrate/cmd/tx-listener"
+	txsender "github.com/consensys/orchestrate/cmd/tx-sender"
+	"github.com/consensys/orchestrate/cmd/utils"
 	"github.com/spf13/cobra"
 )
 

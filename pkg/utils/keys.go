@@ -5,7 +5,7 @@ import (
 	"math/big"
 	"regexp"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/errors"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 )
 

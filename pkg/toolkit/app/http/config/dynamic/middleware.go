@@ -6,7 +6,7 @@ import (
 	traefikdynamic "github.com/containous/traefik/v2/pkg/config/dynamic"
 	traefiktypes "github.com/containous/traefik/v2/pkg/types"
 
-	"github.com/ConsenSys/orchestrate/pkg/utils"
+	"github.com/consensys/orchestrate/pkg/utils"
 )
 
 // +k8s:deepcopy-gen=true

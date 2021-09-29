@@ -1,8 +1,8 @@
 package registry
 
 import (
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/config/dynamic"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/metrics"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/config/dynamic"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/metrics"
 	prom "github.com/prometheus/client_golang/prometheus"
 )
 

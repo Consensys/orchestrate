@@ -1,8 +1,8 @@
 package testutils
 
 import (
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/tls"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/tls/certificate"
+	"github.com/consensys/orchestrate/pkg/toolkit/tls"
+	"github.com/consensys/orchestrate/pkg/toolkit/tls/certificate"
 )
 
 var (

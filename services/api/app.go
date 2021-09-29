@@ -5,36 +5,36 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/middleware/httpcache"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/middleware/ratelimit"
-	"github.com/ConsenSys/orchestrate/services/api/proxy"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/middleware/httpcache"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/middleware/ratelimit"
+	"github.com/consensys/orchestrate/services/api/proxy"
 	"github.com/dgraph-io/ristretto"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient"
+	"github.com/consensys/orchestrate/pkg/toolkit/ethclient"
 
 	qkmclient "github.com/consensys/quorum-key-manager/pkg/client"
 
-	pkgsarama "github.com/ConsenSys/orchestrate/pkg/broker/sarama"
-	pkgproxy "github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/handler/proxy"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/database"
-	"github.com/ConsenSys/orchestrate/services/api/business/builder"
-	"github.com/ConsenSys/orchestrate/services/api/metrics"
 	"github.com/Shopify/sarama"
+	pkgsarama "github.com/consensys/orchestrate/pkg/broker/sarama"
+	pkgproxy "github.com/consensys/orchestrate/pkg/toolkit/app/http/handler/proxy"
+	"github.com/consensys/orchestrate/pkg/toolkit/database"
+	"github.com/consensys/orchestrate/services/api/business/builder"
+	"github.com/consensys/orchestrate/services/api/metrics"
 	"github.com/go-pg/pg/v9/orm"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/auth"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/config/dynamic"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/database/postgres"
-	"github.com/ConsenSys/orchestrate/services/api/service/controllers"
-	"github.com/ConsenSys/orchestrate/services/api/store/multi"
+	"github.com/consensys/orchestrate/pkg/toolkit/app"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/auth"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/config/dynamic"
+	"github.com/consensys/orchestrate/pkg/toolkit/database/postgres"
+	"github.com/consensys/orchestrate/services/api/service/controllers"
+	"github.com/consensys/orchestrate/services/api/store/multi"
 )
 
 func NewAPI(
 	cfg *Config,
 	pgmngr postgres.Manager,
 	jwt, key auth.Checker,
-	keyManagerClient qkmclient.EthClient,
+	keyManagerClient qkmclient.KeyManagerClient,
 	ec ethclient.Client,
 	syncProducer sarama.SyncProducer,
 	topicCfg *pkgsarama.KafkaTopicConfig,

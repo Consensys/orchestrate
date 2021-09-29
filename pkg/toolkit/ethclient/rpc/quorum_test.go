@@ -10,9 +10,9 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/testutils"
-	pkgUtils "github.com/ConsenSys/orchestrate/pkg/utils"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/toolkit/ethclient/testutils"
+	pkgUtils "github.com/consensys/orchestrate/pkg/utils"
 	"github.com/cenkalti/backoff/v4"
 	"github.com/stretchr/testify/assert"
 )

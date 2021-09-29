@@ -14,7 +14,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/config/dynamic"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/config/dynamic"
 	"github.com/dgraph-io/ristretto"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/time/rate"

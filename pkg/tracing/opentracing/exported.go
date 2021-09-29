@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"sync"
 
-	"github.com/ConsenSys/orchestrate/pkg/tracing/opentracing/jaeger"
+	"github.com/consensys/orchestrate/pkg/tracing/opentracing/jaeger"
 	extOpentracing "github.com/opentracing/opentracing-go"
 	log "github.com/sirupsen/logrus"
 )

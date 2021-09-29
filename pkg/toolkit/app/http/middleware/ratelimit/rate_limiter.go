@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/config/dynamic"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/httputil"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/config/dynamic"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/httputil"
 	"github.com/containous/traefik/v2/pkg/log"
 	"golang.org/x/time/rate"
 )

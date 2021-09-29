@@ -7,8 +7,8 @@ import (
 
 	qkm "github.com/consensys/quorum-key-manager/pkg/client"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/config/dynamic"
-	usecases "github.com/ConsenSys/orchestrate/services/api/business/use-cases"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/config/dynamic"
+	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
 	"github.com/gorilla/mux"
 )
 
@@ -51,7 +51,7 @@ type Builder struct {
 	contractsCtrl *ContractsController
 }
 
-func NewBuilder(ucs usecases.UseCases, keyManagerClient qkm.EthClient) *Builder {
+func NewBuilder(ucs usecases.UseCases, keyManagerClient qkm.KeyManagerClient) *Builder {
 	return &Builder{
 		txCtrl:        NewTransactionsController(ucs),
 		schedulesCtrl: NewSchedulesController(ucs),

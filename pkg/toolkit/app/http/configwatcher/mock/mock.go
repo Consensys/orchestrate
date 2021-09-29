@@ -6,7 +6,7 @@ package mock
 
 import (
 	context "context"
-	configwatcher "github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/configwatcher"
+	configwatcher "github.com/consensys/orchestrate/pkg/toolkit/app/http/configwatcher"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )

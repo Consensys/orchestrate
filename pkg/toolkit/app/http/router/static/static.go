@@ -3,7 +3,7 @@ package static
 import (
 	"context"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/router"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/router"
 )
 
 type Builder struct {

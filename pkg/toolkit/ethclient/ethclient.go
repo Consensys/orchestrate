@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"math/big"
 
-	"github.com/ConsenSys/orchestrate/pkg/ethereum/types"
-	proto "github.com/ConsenSys/orchestrate/pkg/types/ethereum"
+	"github.com/consensys/orchestrate/pkg/ethereum/types"
+	proto "github.com/consensys/orchestrate/pkg/types/ethereum"
 	eth "github.com/ethereum/go-ethereum"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"

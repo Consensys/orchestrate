@@ -9,8 +9,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/tcp/metrics"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/toolkit/tcp/metrics"
 	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
 	"github.com/sirupsen/logrus"
 )

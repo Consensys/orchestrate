@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/database/postgres"
-	"github.com/ConsenSys/orchestrate/services/api/store"
-	storePG "github.com/ConsenSys/orchestrate/services/api/store/postgres"
+	"github.com/consensys/orchestrate/pkg/toolkit/database/postgres"
+	"github.com/consensys/orchestrate/services/api/store"
+	storePG "github.com/consensys/orchestrate/services/api/store/postgres"
 )
 
 const storeServiceName = "api.store"

@@ -3,9 +3,9 @@ package txlistener
 import (
 	"os"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/utils"
-	txlistener "github.com/ConsenSys/orchestrate/services/tx-listener"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/utils"
+	txlistener "github.com/consensys/orchestrate/services/tx-listener"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

@@ -4,14 +4,14 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ConsenSys/orchestrate/pkg/ethereum/abi"
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
-	"github.com/ConsenSys/orchestrate/pkg/utils"
-	usecases "github.com/ConsenSys/orchestrate/services/api/business/use-cases"
+	"github.com/consensys/orchestrate/pkg/ethereum/abi"
+	"github.com/consensys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/pkg/utils"
+	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 )
 
 const sendDeployTxComponent = "use-cases.send-deploy-tx"

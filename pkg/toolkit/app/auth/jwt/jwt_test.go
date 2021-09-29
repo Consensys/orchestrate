@@ -6,12 +6,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/auth/jwt"
-	jwtgenerator "github.com/ConsenSys/orchestrate/pkg/toolkit/app/auth/jwt/generator"
-	authutils "github.com/ConsenSys/orchestrate/pkg/toolkit/app/auth/utils"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/tls/certificate"
-	tlstestutils "github.com/ConsenSys/orchestrate/pkg/toolkit/tls/testutils"
+	"github.com/consensys/orchestrate/pkg/multitenancy"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/auth/jwt"
+	jwtgenerator "github.com/consensys/orchestrate/pkg/toolkit/app/auth/jwt/generator"
+	authutils "github.com/consensys/orchestrate/pkg/toolkit/app/auth/utils"
+	"github.com/consensys/orchestrate/pkg/toolkit/tls/certificate"
+	tlstestutils "github.com/consensys/orchestrate/pkg/toolkit/tls/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	ethclient "github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/rpc"
+	ethclient "github.com/consensys/orchestrate/pkg/toolkit/ethclient/rpc"
 	log "github.com/sirupsen/logrus"
 
 	dockercontainer "github.com/docker/docker/api/types/container"

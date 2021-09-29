@@ -4,12 +4,12 @@ import (
 	"context"
 	"testing"
 
-	"github.com/ConsenSys/orchestrate/services/api/store/models/testutils"
+	"github.com/consensys/orchestrate/services/api/store/models/testutils"
 
-	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
+	"github.com/consensys/orchestrate/pkg/multitenancy"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/services/api/store/mocks"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/services/api/store/mocks"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"

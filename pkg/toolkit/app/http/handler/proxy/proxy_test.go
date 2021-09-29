@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/config/dynamic"
-	"github.com/ConsenSys/orchestrate/pkg/utils"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/config/dynamic"
+	"github.com/consensys/orchestrate/pkg/utils"
 	"github.com/containous/traefik/v2/pkg/testhelpers"
 	"github.com/oxtoacart/bpool"
 )

@@ -3,8 +3,8 @@ package tls_test
 import (
 	"testing"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/tls"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/tls/testutils"
+	"github.com/consensys/orchestrate/pkg/toolkit/tls"
+	"github.com/consensys/orchestrate/pkg/toolkit/tls/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

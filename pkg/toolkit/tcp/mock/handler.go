@@ -5,7 +5,7 @@
 package mock
 
 import (
-	tcp "github.com/ConsenSys/orchestrate/pkg/toolkit/tcp"
+	tcp "github.com/consensys/orchestrate/pkg/toolkit/tcp"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )

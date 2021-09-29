@@ -3,15 +3,15 @@ package api
 import (
 	"context"
 
-	ethclient "github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/rpc"
+	ethclient "github.com/consensys/orchestrate/pkg/toolkit/ethclient/rpc"
 
-	qkm "github.com/ConsenSys/orchestrate/pkg/quorum-key-manager"
+	qkm "github.com/consensys/orchestrate/pkg/quorum-key-manager"
 
-	"github.com/ConsenSys/orchestrate/pkg/broker/sarama"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app"
-	authjwt "github.com/ConsenSys/orchestrate/pkg/toolkit/app/auth/jwt"
-	authkey "github.com/ConsenSys/orchestrate/pkg/toolkit/app/auth/key"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/database/postgres"
+	"github.com/consensys/orchestrate/pkg/broker/sarama"
+	"github.com/consensys/orchestrate/pkg/toolkit/app"
+	authjwt "github.com/consensys/orchestrate/pkg/toolkit/app/auth/jwt"
+	authkey "github.com/consensys/orchestrate/pkg/toolkit/app/auth/key"
+	"github.com/consensys/orchestrate/pkg/toolkit/database/postgres"
 	"github.com/spf13/viper"
 )
 

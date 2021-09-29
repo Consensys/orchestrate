@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/config/runtime"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/http/handler/dashboard/genstatic"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/config/runtime"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/handler/dashboard/genstatic"
 	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
 	assetfs "github.com/elazarl/go-bindata-assetfs"
 	"github.com/gorilla/mux"

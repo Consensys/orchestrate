@@ -6,7 +6,7 @@ package mocks
 
 import (
 	context "context"
-	ethereum "github.com/ConsenSys/orchestrate/pkg/types/ethereum"
+	ethereum "github.com/consensys/orchestrate/pkg/types/ethereum"
 	common "github.com/ethereum/go-ethereum/common"
 	types "github.com/ethereum/go-ethereum/core/types"
 	gomock "github.com/golang/mock/gomock"

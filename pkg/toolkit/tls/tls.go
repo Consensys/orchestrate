@@ -5,7 +5,7 @@ import (
 	"crypto/x509"
 	"fmt"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/tls/certificate"
+	"github.com/consensys/orchestrate/pkg/toolkit/tls/certificate"
 )
 
 var (

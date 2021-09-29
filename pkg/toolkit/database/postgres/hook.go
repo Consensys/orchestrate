@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/go-pg/pg/v9"
 	log "github.com/sirupsen/logrus"
 )

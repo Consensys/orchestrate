@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/integration-test/docker/container"
+	"github.com/consensys/orchestrate/pkg/toolkit/integration-test/docker/container"
 	dockercontainer "github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
 )

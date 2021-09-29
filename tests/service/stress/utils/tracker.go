@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/broker/sarama"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
-	"github.com/ConsenSys/orchestrate/pkg/types/tx"
-	"github.com/ConsenSys/orchestrate/tests/utils"
-	"github.com/ConsenSys/orchestrate/tests/utils/chanregistry"
-	"github.com/ConsenSys/orchestrate/tests/utils/tracker"
+	"github.com/consensys/orchestrate/pkg/broker/sarama"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/types/tx"
+	"github.com/consensys/orchestrate/tests/utils"
+	"github.com/consensys/orchestrate/tests/utils/chanregistry"
+	"github.com/consensys/orchestrate/tests/utils/tracker"
 )
 
 var Topics = map[string]string{

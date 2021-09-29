@@ -13,9 +13,9 @@ import (
 	"testing"
 	"time"
 
-	mock3 "github.com/ConsenSys/orchestrate/pkg/toolkit/app/metrics/mock"
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/tcp/metrics"
-	mock2 "github.com/ConsenSys/orchestrate/pkg/toolkit/tcp/metrics/mock"
+	mock3 "github.com/consensys/orchestrate/pkg/toolkit/app/metrics/mock"
+	"github.com/consensys/orchestrate/pkg/toolkit/tcp/metrics"
+	mock2 "github.com/consensys/orchestrate/pkg/toolkit/tcp/metrics/mock"
 	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
 	traefiktypes "github.com/containous/traefik/v2/pkg/types"
 	"github.com/golang/mock/gomock"

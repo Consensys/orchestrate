@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ConsenSys/orchestrate/pkg/utils"
+	"github.com/consensys/orchestrate/pkg/utils"
 	log "github.com/sirupsen/logrus"
 )
 

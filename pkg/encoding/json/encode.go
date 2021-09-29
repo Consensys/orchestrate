@@ -3,7 +3,7 @@ package json
 import (
 	"encoding/json"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/errors"
 )
 
 // Marshal returns the JSON encoding of v

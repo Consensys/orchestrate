@@ -3,10 +3,10 @@ package testutils
 import (
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/multitenancy"
+	"github.com/consensys/orchestrate/pkg/multitenancy"
 
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
-	"github.com/ConsenSys/orchestrate/pkg/utils"
+	"github.com/consensys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/pkg/utils"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 )
 

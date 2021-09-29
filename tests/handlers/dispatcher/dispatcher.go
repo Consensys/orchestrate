@@ -1,10 +1,10 @@
 package dispatcher
 
 import (
-	"github.com/ConsenSys/orchestrate/pkg/engine"
-	"github.com/ConsenSys/orchestrate/tests/service/e2e/cucumber/alias"
-	"github.com/ConsenSys/orchestrate/tests/utils"
-	"github.com/ConsenSys/orchestrate/tests/utils/chanregistry"
+	"github.com/consensys/orchestrate/pkg/engine"
+	"github.com/consensys/orchestrate/tests/service/e2e/cucumber/alias"
+	"github.com/consensys/orchestrate/tests/utils"
+	"github.com/consensys/orchestrate/tests/utils/chanregistry"
 	log "github.com/sirupsen/logrus"
 )
 

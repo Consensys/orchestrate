@@ -3,7 +3,7 @@ package multi
 import (
 	"fmt"
 
-	pgstore "github.com/ConsenSys/orchestrate/services/api/store/postgres"
+	pgstore "github.com/consensys/orchestrate/services/api/store/postgres"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )

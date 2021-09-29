@@ -6,18 +6,18 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
-	"github.com/ConsenSys/orchestrate/services/tx-listener/metrics"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/services/tx-listener/metrics"
 
-	"github.com/ConsenSys/orchestrate/services/tx-listener/session"
+	"github.com/consensys/orchestrate/services/tx-listener/session"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	orchestrateclient "github.com/ConsenSys/orchestrate/pkg/sdk/client"
-	"github.com/ConsenSys/orchestrate/services/tx-listener/dynamic"
-	hook "github.com/ConsenSys/orchestrate/services/tx-listener/session/ethereum/hooks"
-	"github.com/ConsenSys/orchestrate/services/tx-listener/session/ethereum/offset"
 	"github.com/cenkalti/backoff/v4"
+	"github.com/consensys/orchestrate/pkg/errors"
+	orchestrateclient "github.com/consensys/orchestrate/pkg/sdk/client"
+	"github.com/consensys/orchestrate/services/tx-listener/dynamic"
+	hook "github.com/consensys/orchestrate/services/tx-listener/session/ethereum/hooks"
+	"github.com/consensys/orchestrate/services/tx-listener/session/ethereum/offset"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 )

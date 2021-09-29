@@ -12,13 +12,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/toolkit/app/log"
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/types/entities"
 
-	"github.com/ConsenSys/orchestrate/pkg/encoding/json"
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	ethclient "github.com/ConsenSys/orchestrate/pkg/toolkit/ethclient/utils"
-	"github.com/ConsenSys/orchestrate/pkg/utils"
+	"github.com/consensys/orchestrate/pkg/encoding/json"
+	"github.com/consensys/orchestrate/pkg/errors"
+	ethclient "github.com/consensys/orchestrate/pkg/toolkit/ethclient/utils"
+	"github.com/consensys/orchestrate/pkg/utils"
 )
 
 var rpcCachedMethods = map[string]bool{

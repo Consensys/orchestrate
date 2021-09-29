@@ -1,8 +1,8 @@
 package cucumber
 
 import (
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/tests/service/e2e/cucumber/steps"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/tests/service/e2e/cucumber/steps"
 	"github.com/cucumber/godog"
 	log "github.com/sirupsen/logrus"
 )

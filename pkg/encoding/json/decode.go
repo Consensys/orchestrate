@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/ConsenSys/orchestrate/pkg/utils"
+	"github.com/consensys/orchestrate/pkg/utils"
 	"github.com/go-playground/validator/v10"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/errors"
 )
 
 // Unmarshal parses the JSON-encoded data and stores the result in the value pointed to by v

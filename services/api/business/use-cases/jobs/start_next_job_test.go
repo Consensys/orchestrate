@@ -8,14 +8,14 @@ import (
 	"time"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
-	"github.com/ConsenSys/orchestrate/pkg/types/entities"
-	mocks2 "github.com/ConsenSys/orchestrate/services/api/business/use-cases/mocks"
-	"github.com/ConsenSys/orchestrate/services/api/store/models"
+	"github.com/consensys/orchestrate/pkg/types/entities"
+	mocks2 "github.com/consensys/orchestrate/services/api/business/use-cases/mocks"
+	"github.com/consensys/orchestrate/services/api/store/models"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	"github.com/ConsenSys/orchestrate/services/api/store/mocks"
-	testutils2 "github.com/ConsenSys/orchestrate/services/api/store/models/testutils"
+	"github.com/consensys/orchestrate/services/api/store/mocks"
+	testutils2 "github.com/consensys/orchestrate/services/api/store/models/testutils"
 )
 
 func TestStartNextJob_Execute(t *testing.T) {

@@ -4,8 +4,8 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/ConsenSys/orchestrate/pkg/errors"
-	"github.com/ConsenSys/orchestrate/services/tx-sender/store"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/services/tx-sender/store"
 	"github.com/dgraph-io/ristretto"
 )
 
