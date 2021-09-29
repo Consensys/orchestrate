@@ -3,7 +3,7 @@ package jwt
 import (
 	"context"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt"
 )
 
 type authCtxKey string

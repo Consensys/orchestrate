@@ -13,10 +13,9 @@ require (
 	github.com/consensys/quorum-key-manager v0.0.0-20210922104442-c2cd4d2be057
 	github.com/containous/alice v0.0.0-20181107144136-d83ebdd94cbd
 	github.com/containous/traefik/v2 v2.2.0
-	github.com/cucumber/godog v0.10.1-0.20200625081220-c7d739336b87
+	github.com/cucumber/godog v0.11.0
 	github.com/cucumber/messages-go/v10 v10.0.3
-	github.com/dgraph-io/ristretto v0.0.2
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/dgraph-io/ristretto v0.0.3
 	github.com/dnaeon/go-vcr v1.0.1 // indirect
 	github.com/docker/docker v17.12.0-ce-rc1.0.20200618181300-9dc6525e6118+incompatible
 	github.com/docker/go-connections v0.4.0
@@ -31,6 +30,7 @@ require (
 	github.com/go-test/deep v1.0.2 // indirect
 	github.com/gofrs/uuid v3.3.0+incompatible
 	github.com/gogo/protobuf v1.3.2 // indirect
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/golang/mock v1.5.0
 	github.com/golang/protobuf v1.5.0
 	github.com/gomodule/redigo v1.8.2
@@ -46,11 +46,11 @@ require (
 	github.com/heptiolabs/healthcheck v0.0.0-20180807145615-6ff867650f40
 	github.com/justinas/alice v1.2.0
 	github.com/mitchellh/copystructure v1.0.0
-	github.com/mitchellh/mapstructure v1.2.2
+	github.com/mitchellh/mapstructure v1.3.2
 	github.com/mitchellh/reflectwalk v1.0.1 // indirect
 	github.com/nmvalera/striped-mutex v0.1.0
 	github.com/opentracing/opentracing-go v1.1.0
-	github.com/ory/fosite v0.30.6
+	github.com/ory/fosite v0.34.1
 	github.com/oxtoacart/bpool v0.0.0-20190530202638-03653db5a59c
 	github.com/prometheus/client_golang v1.5.1
 	github.com/prometheus/client_model v0.2.0

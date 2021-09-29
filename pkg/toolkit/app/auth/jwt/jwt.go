@@ -11,7 +11,7 @@ import (
 	"github.com/consensys/orchestrate/pkg/multitenancy"
 	authutils "github.com/consensys/orchestrate/pkg/toolkit/app/auth/utils"
 	"github.com/consensys/orchestrate/pkg/toolkit/tls/certificate"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt"
 )
 
 // Structure to define the parser of the Token and what have to be verify in the Token
