@@ -53,7 +53,7 @@
       <div class="collapse navbar-collapse" id="navbarsExampleDefault">
         <ul class="navbar-nav mr-auto">
           <li class="nav-item dropdown">
-            <button class="nav-btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">latest (master)</button>
+            <button class="nav-btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">latest (main</button>
             <div class="dropdown-menu" aria-labelledby="versionDropDown" id="versionsList">
               <a class="version-number-item dropdown-item active" href="#latest">latest</a>
             </div>
@@ -73,7 +73,7 @@
     <script>
 
       // default version list in case of JSON loading issue
-      let versions = {'latest': {'spec': 'latest', 'source': 'master'}};
+      let versions = {'latest': {'spec': 'latest', 'source': 'main'}};
       const DEFAULT_VERSION = Object.keys(versions)[0];
 
       // return the JSON OPENAPI spec path to load for a version
