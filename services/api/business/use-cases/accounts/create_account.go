@@ -141,7 +141,7 @@ func isAccountAlreadyExistErr(err interface{}) bool {
 		return false
 	}
 	if qerr, ok := err.(*client.ResponseError); ok {
-		return qerr.ErrorCode == qkm.AlreadyExists
+		return qerr.ErrorCode == qkm.AlreadyExists || qerr.ErrorCode == qkm.StatusConflict
 	}
 	return false
 }

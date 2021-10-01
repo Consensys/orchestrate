@@ -4,7 +4,7 @@ version: '3.6'
 x-quorum-def:
   &quorum-def
   restart: "on-failure"
-  image: quorumengineering/quorum:20.10.0
+  image: quorumengineering/quorum:21.4.2
   expose:
     - 30303
     - 8545
@@ -57,7 +57,7 @@ x-quorum-def:
 
 x-tessera-def:
   &tessera-def
-  image: quorumengineering/tessera:21.1.0
+  image: quorumengineering/tessera:21.7.0
   expose:
     - 9000
     - 9080
@@ -132,7 +132,7 @@ x-tessera-def:
           }
       EOF
           cat /data/tm/tessera-config-09.json
-          java -Xms128M -Xmx128M -jar /tessera/tessera-app.jar -configfile /data/tm/tessera-config-09.json
+          /tessera/bin/tessera -configfile /data/tm/tessera-config-09.json
 
 services:
   quorum1:
@@ -265,7 +265,7 @@ services:
 networks:
   quorum:
     driver: bridge
-    name: quorum
+    name: orchestrate_quorum
     ipam:
       config:
         - subnet: 172.16.238.0/24

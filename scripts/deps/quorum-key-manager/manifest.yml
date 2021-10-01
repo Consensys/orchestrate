@@ -8,8 +8,7 @@ specs:
     address: http://vault:8200
     tokenPath: "/vault/token/.vault-token"
     namespace: ''
-#- kind: Eth1Account
-#  version: 0.0.1
+#- kind: Ethereum
 #  name: orchestrate-eth1
 #  specs:
 #    keystore: AKVKeys

@@ -8,7 +8,7 @@ x-container-common: &container-common
 services:
   geth:
     <<: *container-common
-    image: ethereum/client-go:v1.9.0
+    image: ethereum/client-go:stable
     entrypoint:
       - /bin/sh
       - -c
@@ -29,7 +29,6 @@ services:
         --password "/nodeData/password" \
         --allow-insecure-unlock \
         --mine \
-        --debug \
         --ipcdisable \
         --syncmode "full"
     volumes:
@@ -54,5 +53,4 @@ volumes:
 
 networks:
   orchestrate:
-    external:
-      name: orchestrate
+    name: orchestrate_geth

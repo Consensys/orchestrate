@@ -4,11 +4,14 @@ version: '3.6'
 x-default-variables: &default-variables
   LOG4J_CONFIGURATION_FILE: /config/log-config.xml
   JAVA_OPTS: -Xms512m -Xmx512m -XX:MaxMetaspaceSize=256m
+
+x-service-variables: &service-variables
+  OTEL_RESOURCE_ATTRIBUTES: service.name=validator1,service.version=${BESU_VERSION:-latest}
   
 x-besu-bootnode-def:
   &besu-bootnode-def
   restart: "on-failure"
-  image: hyperledger/besu:20.10.4
+  image: hyperledger/besu:${BESU_VERSION:-21.7.4}
   entrypoint:
     - /bin/bash
     - -c
@@ -18,201 +21,271 @@ x-besu-bootnode-def:
       --config-file=/config/config.toml \
       --p2p-host=$$(hostname -i) \
       --genesis-file=/config/genesis.json \
-      --node-private-key-file=/opt/besu/keys/key \
+      --node-private-key-file=/opt/besu/keys/nodekey \
       --min-gas-price=0 \
-      --privacy-enabled \
-      --privacy-url=$${ORION_CLIENTURL} \
-      --privacy-public-key-file=/config/orion/orion.pub \
-      --privacy-onchain-groups-enabled=false \
       --rpc-http-api=EEA,WEB3,ETH,NET,PRIV,PERM,IBFT \
       --rpc-ws-api=EEA,WEB3,ETH,NET,PRIV,PERM,IBFT ;
 
 x-besu-def:
   &besu-def
   restart: "on-failure"
-  image: hyperledger/besu:20.10.4
+  image: hyperledger/besu:${BESU_VERSION:-latest}
+  environment:
+    - LOG4J_CONFIGURATION_FILE=/config/log-config.xml
   entrypoint:
     - /bin/bash
     - -c
     - |
+
       while [ ! -f "/opt/besu/public-keys/bootnode_pubkey" ]; do sleep 5; done ;
+
       /opt/besu/bin/besu \
       --config-file=/config/config.toml \
       --p2p-host=$$(hostname -i) \
       --genesis-file=/config/genesis.json \
-      --node-private-key-file=/opt/besu/keys/key \
+      --node-private-key-file=/opt/besu/keys/nodekey \
       --min-gas-price=0 \
       --privacy-enabled \
-      --privacy-url=$${ORION_CLIENTURL} \
-      --privacy-public-key-file=/config/orion/orion.pub \
-      --privacy-onchain-groups-enabled=false \
-      --rpc-http-api=EEA,WEB3,ETH,NET,PRIV,PERM,IBFT \
-      --rpc-ws-api=EEA,WEB3,ETH,NET,PRIV,PERM,IBFT ;
+      --privacy-url=$${TESSERA_URL} \
+      --privacy-public-key-file=/opt/besu/keys/tm.pub \
+      --privacy-onchain-groups-enabled=${PRIVACY_ONCHAIN_GROUPS_ENABLED:-false} \
+      --rpc-http-api=EEA,WEB3,ETH,NET,PRIV,PERM,${BESU_CONS_API:-IBFT} \
+      --rpc-ws-api=EEA,WEB3,ETH,NET,PRIV,PERM,${BESU_CONS_API:-IBFT} ;
 
-x-orion-def:
-  &orion-def
-  image: consensys/quorum-orion:20.10.1
-  command: ["/config/orion.conf"]
+x-tessera-def:
+  &tessera-def
+  image: quorumengineering/tessera:${QUORUM_TESSERA_VERSION:-21.7.0}
+  expose:
+    - 9000
+    - 9080
+    - 9101
+  restart: "no"
+  healthcheck:
+    test: ["CMD", "wget", "--spider", "--proxy", "off", "http://localhost:9000/upcheck"]
+    interval: 3s
+    timeout: 3s
+    retries: 20
+    start_period: 5s
+  entrypoint:
+    - /bin/sh
+    - -c
+    - |
+      mkdir -p /var/log/tessera/;
+      mkdir -p /data/tm/;
+      cp /config/keys/tm.* /data/tm/ ;
+
+          cat <<EOF > /data/tm/tessera-config-09.json
+          {
+            "mode": "orion",
+            "useWhiteList": false,
+            "jdbc": {
+              "username": "sa",
+              "password": "",
+              "url": "jdbc:h2:./data/tm/db;MODE=Oracle;TRACE_LEVEL_SYSTEM_OUT=0",
+              "autoCreateTables": true
+            },
+            "serverConfigs":[
+            {
+              "app":"ThirdParty",
+              "enabled": true,
+              "serverAddress": "http://$$(hostname -i):9080",
+              "communicationType" : "REST"
+            },
+            {
+              "app":"Q2T",
+              "enabled": true,
+              "serverAddress": "http://$$(hostname -i):9101",
+              "sslConfig": {
+                "tls": "OFF"
+              },
+              "communicationType" : "REST"
+            },
+            {
+              "app":"P2P",
+              "enabled": true,
+              "serverAddress": "http://$$(hostname -i):9000",
+              "sslConfig": {
+                "tls": "OFF"
+              },
+              "communicationType" : "REST"
+            }
+            ],
+            "peer": [
+                {
+                    "url": "http://tessera2:9000"
+                },
+                {
+                    "url": "http://tessera3:9000"
+                },
+                {
+                    "url": "http://tessera4:9000"
+                }
+            ],
+            "keys": {
+              "passwords": [],
+              "keyData": [
+                {
+                  "config": $$(cat /data/tm/tm.key),
+                  "publicKey": "$$(cat /data/tm/tm.pub)"
+                }
+              ]
+            },
+            "alwaysSendTo": []
+          }
+      EOF
+        cat /data/tm/tessera-config-09.json
+        /tessera/bin/tessera -configfile /data/tm/tessera-config-09.json 
 
 services:
   validator1:
     <<: *besu-bootnode-def
     environment:
       <<: *default-variables
-      ORION_CLIENTURL: http://orion1:8888
+      <<: *service-variables
     volumes:
       - public-keys:/tmp/
       - ./config/besu/config.toml:/config/config.toml
       - ./config/besu/permissions_config.toml:/config/permissions_config.toml
+      - ./config/besu/static-nodes.json:/config/static-nodes.json
       - ./config/besu/log-config.xml:/config/log-config.xml
+      - ./config/besu/log-config-splunk.xml:/config/log-config-splunk.xml
+#      - ./logs/besu:/tmp/besu
       - ./config/besu/ibft2Genesis.json:/config/genesis.json
-      - ./config/besu/networkFiles/validator1/keys:/opt/besu/keys
-      - ./config/orion/networkFiles/orion1/nodeKey.pub:/config/orion/orion.pub
-    depends_on:
-      - orion1
+      - ./config/nodes/validator1:/opt/besu/keys
     ports:
       - 20000:8545/tcp
       - 20001:8546/tcp
     networks:
       besu:
         ipv4_address: 172.16.239.11
-  
-  orion1:
-    <<: *orion-def
+
+  tessera2:
+    <<: *tessera-def
+    ports:
+      - 9181:9080
     environment:
-      <<: *default-variables
-      ORION_OTHERNODES: http://orion2:8080/,http://orion3:8080/,http://orion4:8080/
-      ORION_NODEURL: http://orion1:8080
-      ORION_CLIENTURL: http://orion1:8888
+      - TESSERA_CONFIG_TYPE="-09"
     volumes:
-      - ./config/orion/orion.conf:/config/orion.conf
-      - ./config/orion/networkFiles/orion1:/keys/
-      - ./config/orion/log-config.xml:/config/log-config.xml
+      - ./config/nodes/validator2:/config/keys
+      - tessera2:/data
+#      - ./logs/tessera:/var/log/tessera/
     networks:
       besu:
-        ipv4_address: 172.16.239.21
-  
+        ipv4_address: 172.16.239.26
+
   validator2:
     <<: *besu-def
     environment:
-      <<: *default-variables
-      ORION_CLIENTURL: http://orion2:8888
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=validator2,service.version=${BESU_VERSION:-latest}
+      - NODE_ID=6
+      - TESSERA_URL=http://tessera2:9101
     volumes:
       - public-keys:/opt/besu/public-keys/
       - ./config/besu/config.toml:/config/config.toml
       - ./config/besu/permissions_config.toml:/config/permissions_config.toml
+      - ./config/besu/static-nodes.json:/config/static-nodes.json
       - ./config/besu/log-config.xml:/config/log-config.xml
+#      - ./logs/besu:/tmp/besu
       - ./config/besu/ibft2Genesis.json:/config/genesis.json
-      - ./config/besu/networkFiles/validator2/keys:/opt/besu/keys
-      - ./config/orion/networkFiles/orion2/nodeKey.pub:/config/orion/orion.pub
+      - ./config/nodes/validator2:/opt/besu/keys
     depends_on:
       - validator1
-      - orion2
+      - tessera2
     ports:
       - 20002:8545/tcp
       - 20003:8546/tcp
     networks:
       besu:
-        ipv4_address: 172.16.239.12
-  
-  orion2:
-    <<: *orion-def
+        ipv4_address: 172.16.239.16
+        
+  tessera3:
+    <<: *tessera-def
+    ports:
+      - 9182:9080
     environment:
-      <<: *default-variables
-      ORION_OTHERNODES: http://orion1:8080/,http://orion3:8080/,http://orion4:8080/
-      ORION_NODEURL: http://orion2:8080
-      ORION_CLIENTURL: http://orion2:8888
+      - TESSERA_CONFIG_TYPE="-09"
     volumes:
-      - ./config/orion/orion.conf:/config/orion.conf
-      - ./config/orion/networkFiles/orion2:/keys/
-      - ./config/orion/log-config.xml:/config/log-config.xml
+      - ./config/nodes/validator3:/config/keys
+      - tessera3:/data
+#      - ./logs/tessera:/var/log/tessera/
     networks:
       besu:
-        ipv4_address: 172.16.239.22
+        ipv4_address: 172.16.239.27
         
   validator3:
     <<: *besu-def
     environment:
-      <<: *default-variables
-      ORION_CLIENTURL: http://orion3:8888
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=validator3,service.version=${BESU_VERSION:-latest}
+      - NODE_ID=7
+      - TESSERA_URL=http://tessera3:9101
     volumes:
       - public-keys:/opt/besu/public-keys/
       - ./config/besu/config.toml:/config/config.toml
       - ./config/besu/permissions_config.toml:/config/permissions_config.toml
+      - ./config/besu/static-nodes.json:/config/static-nodes.json
       - ./config/besu/log-config.xml:/config/log-config.xml
+#      - ./logs/besu:/tmp/besu
       - ./config/besu/ibft2Genesis.json:/config/genesis.json
-      - ./config/besu/networkFiles/validator3/keys:/opt/besu/keys
-      - ./config/orion/networkFiles/orion3/nodeKey.pub:/config/orion/orion.pub
+      - ./config/nodes/validator3:/opt/besu/keys
     depends_on:
       - validator1
-      - orion3
+      - tessera3
     ports:
       - 20004:8545/tcp
       - 20005:8546/tcp
     networks:
       besu:
-        ipv4_address: 172.16.239.13
+        ipv4_address: 172.16.239.17
 
-  orion3:
-    <<: *orion-def
+  tessera4:
+    <<: *tessera-def
+    ports:
+      - 9183:9080
     environment:
-      <<: *default-variables
-      ORION_OTHERNODES: http://orion1:8080/,http://orion2:8080/,http://orion4:8080/
-      ORION_NODEURL: http://orion3:8080
-      ORION_CLIENTURL: http://orion3:8888
+      - TESSERA_CONFIG_TYPE="-09"
     volumes:
-      - ./config/orion/orion.conf:/config/orion.conf
-      - ./config/orion/networkFiles/orion3:/keys/
-      - ./config/orion/log-config.xml:/config/log-config.xml
+      - ./config/nodes/validator4:/config/keys
+      - tessera4:/data
+#      - ./logs/tessera:/var/log/tessera/
     networks:
       besu:
-        ipv4_address: 172.16.239.23
-        
+        ipv4_address: 172.16.239.28
+
   validator4:
     <<: *besu-def
     environment:
-      <<: *default-variables
-      ORION_CLIENTURL: http://orion4:8888
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=validator4,service.version=${BESU_VERSION:-latest}
+      - NODE_ID=8
+      - TESSERA_URL=http://tessera4:9101
     volumes:
       - public-keys:/opt/besu/public-keys/
       - ./config/besu/config.toml:/config/config.toml
       - ./config/besu/permissions_config.toml:/config/permissions_config.toml
+      - ./config/besu/static-nodes.json:/config/static-nodes.json
       - ./config/besu/log-config.xml:/config/log-config.xml
+#      - ./logs/besu:/tmp/besu
       - ./config/besu/ibft2Genesis.json:/config/genesis.json
-      - ./config/besu/networkFiles/validator4/keys:/opt/besu/keys
-      - ./config/orion/networkFiles/orion4/nodeKey.pub:/config/orion/orion.pub
+      - ./config/nodes/validator4:/opt/besu/keys
     depends_on:
       - validator1
-      - orion3
+      - tessera4
     ports:
       - 20006:8545/tcp
       - 20007:8546/tcp
     networks:
       besu:
-        ipv4_address: 172.16.239.14
-
-  orion4:
-    <<: *orion-def
-    environment:
-      <<: *default-variables
-      ORION_OTHERNODES: http://orion1:8080/,http://orion2:8080/,http://orion3:8080/
-      ORION_NODEURL: http://orion4:8080
-      ORION_CLIENTURL: http://orion4:8888
-    volumes:
-      - ./config/orion/orion.conf:/config/orion.conf
-      - ./config/orion/networkFiles/orion4:/keys/
-      - ./config/orion/log-config.xml:/config/log-config.xml
-    networks:
-      besu:
-        ipv4_address: 172.16.239.24
-
+        ipv4_address: 172.16.239.18
+        
 volumes:
   public-keys:
+  tessera2:
+  tessera3:
+  tessera4:
 
 networks:
   besu:
     driver: bridge
-    name: besu
+    name: orchestrate_besu
     ipam:
       config:
         - subnet: 172.16.239.0/24

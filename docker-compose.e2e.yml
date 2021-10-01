@@ -26,7 +26,6 @@ x-container-common: &container-common
   entrypoint: /bin/main
   networks:
     - orchestrate
-    - quorum
   tty: true
 
 services:
@@ -88,9 +87,3 @@ networks:
   orchestrate:
     external:
       name: orchestrate
-  quorum:
-    external:
-      name: quorum
-  besu:
-    external:
-      name: besu

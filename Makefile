@@ -18,8 +18,9 @@ endif
 .PHONY: all run-coverage coverage fmt fmt-check vet lint misspell-check misspell race tools help
 
 networks:
-	@docker network create --driver=bridge --subnet=172.16.239.0/24 besu || true
-	@docker network create --driver=bridge --subnet=172.16.238.0/24 quorum || true
+	@docker network create --driver=bridge --subnet=172.16.239.0/24 orchestrate_besu || true
+	@docker network create --driver=bridge --subnet=172.16.238.0/24 orchestrate_quorum || true
+	@docker network create orchestrate_geth || true
 
 # Linters
 run-coverage: ## Generate global code coverage report

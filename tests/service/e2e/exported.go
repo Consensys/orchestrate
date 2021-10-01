@@ -170,7 +170,7 @@ func importTestIdentities(ctx context.Context, testData *utils3.TestData) error 
 			})
 
 			if err != nil {
-				if errors.IsAlreadyExistsError(err) {
+				if errors.IsAlreadyExistsError(err) || errors.IsConflictedError(err) {
 					continue
 				}
 
