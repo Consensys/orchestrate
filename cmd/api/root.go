@@ -12,6 +12,7 @@ func NewRootCommand() *cobra.Command {
 
 	rootCmd.AddCommand(newRunCommand())
 	rootCmd.AddCommand(newMigrateCmd())
+	rootCmd.AddCommand(newAccountCmd())
 
 	return rootCmd
 }

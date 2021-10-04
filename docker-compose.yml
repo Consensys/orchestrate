@@ -89,6 +89,14 @@ services:
       - api-migration-init
     command: api migrate up
 
+  account-import:
+    <<: *container-common
+    environment:
+      <<: *default-variables
+      <<: *api-common
+    restart: "no"
+    command: api account import
+    
   api:
     <<: *container-common
     ports:

@@ -2,6 +2,7 @@ package accounts
 
 import (
 	"context"
+	"crypto/md5"
 	"fmt"
 
 	"github.com/consensys/orchestrate/pkg/errors"
@@ -148,8 +149,10 @@ func isAccountAlreadyExistErr(err interface{}) bool {
 
 func generateKeyID(tenantID, alias string) string {
 	if alias == "" {
-		return utils.RandString(14)
+		return utils.RandString(20)
 	}
 
-	return fmt.Sprintf("%s%s", tenantID, alias)
+	// The goal is to generate an unique ID to prevent duplicated aliases using md5 it generates values compliant
+	// with AKV and AWS which requires regex [a-zA-z]+$
+	return fmt.Sprintf("%x", md5.Sum([]byte(tenantID+alias)))
 }

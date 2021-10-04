@@ -1,7 +1,6 @@
 package api
 
 import (
-	qkm "github.com/consensys/orchestrate/pkg/quorum-key-manager"
 	"github.com/consensys/orchestrate/pkg/toolkit/database/postgres"
 	"github.com/consensys/orchestrate/services/api/store/postgres/migrations"
 	"github.com/go-pg/pg/v9"
@@ -61,7 +60,6 @@ func newMigrateCmd() *cobra.Command {
 		Short: "Upgrade database",
 		Long:  "Runs all available migrations or up to [target] if argument is provided",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			qkm.Init()
 			return migrate(db, append([]string{"up"}, args...)...)
 		},
 	}
