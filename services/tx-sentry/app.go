@@ -6,9 +6,9 @@ import (
 
 	"github.com/cenkalti/backoff/v4"
 	"github.com/consensys/orchestrate/pkg/errors"
-	"github.com/consensys/orchestrate/pkg/multitenancy"
 	orchestrateclient "github.com/consensys/orchestrate/pkg/sdk/client"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/services/tx-sentry/service/listeners"
 	"github.com/consensys/orchestrate/services/tx-sentry/service/parsers"

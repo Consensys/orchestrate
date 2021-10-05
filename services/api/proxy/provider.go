@@ -6,11 +6,11 @@ import (
 	"math"
 	"time"
 
-	"github.com/consensys/orchestrate/pkg/multitenancy"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/config/dynamic"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/configwatcher/provider"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/configwatcher/provider/poll"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/pkg/utils"
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"

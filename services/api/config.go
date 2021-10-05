@@ -2,15 +2,14 @@ package api
 
 import (
 	broker "github.com/consensys/orchestrate/pkg/broker/sarama"
-	"github.com/consensys/orchestrate/pkg/multitenancy"
 	qkm "github.com/consensys/orchestrate/pkg/quorum-key-manager"
 	"github.com/consensys/orchestrate/pkg/toolkit/app"
 	authjwt "github.com/consensys/orchestrate/pkg/toolkit/app/auth/jwt"
 	authkey "github.com/consensys/orchestrate/pkg/toolkit/app/auth/key"
-	"github.com/consensys/orchestrate/pkg/toolkit/app/http"
 	httpmetrics "github.com/consensys/orchestrate/pkg/toolkit/app/http/metrics"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	metricregistry "github.com/consensys/orchestrate/pkg/toolkit/app/metrics/registry"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	tcpmetrics "github.com/consensys/orchestrate/pkg/toolkit/tcp/metrics"
 	"github.com/consensys/orchestrate/services/api/metrics"
 	"github.com/consensys/orchestrate/services/api/proxy"
@@ -29,8 +28,8 @@ func Flags(f *pflag.FlagSet) {
 	broker.KafkaTopicTxSender(f)
 	qkm.Flags(f)
 	store.Flags(f)
-	http.Flags(f)
-	http.MetricFlags(f)
+	app.Flags(f)
+	app.MetricFlags(f)
 	metricregistry.Flags(f, httpmetrics.ModuleName, tcpmetrics.ModuleName, metrics.ModuleName)
 	proxy.Flags(f)
 }

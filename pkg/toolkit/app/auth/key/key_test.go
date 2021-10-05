@@ -6,7 +6,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/consensys/orchestrate/pkg/multitenancy"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	authutils "github.com/consensys/orchestrate/pkg/toolkit/app/auth/utils"
 	"github.com/stretchr/testify/assert"
 )

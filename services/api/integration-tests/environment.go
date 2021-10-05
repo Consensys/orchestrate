@@ -45,7 +45,7 @@ const qkmContainerMigrateID = "quorum-key-manager-migrate"
 const hashicorpContainerID = "hashicorp"
 const networkName = "api"
 const localhost = "localhost"
-const qkmStoreName = "orchestrate-eth1"
+const qkmStoreName = "orchestrate-eth"
 const hashicorpMountPath = "orchestrate"
 
 var envPGHostPort string

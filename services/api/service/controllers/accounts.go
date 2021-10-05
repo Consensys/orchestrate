@@ -13,8 +13,8 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 
 	jsonutils "github.com/consensys/orchestrate/pkg/encoding/json"
-	"github.com/consensys/orchestrate/pkg/multitenancy"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/httputil"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/utils"
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
 	"github.com/gorilla/mux"
@@ -238,7 +238,7 @@ func (c *AccountsController) update(rw http.ResponseWriter, request *http.Reques
 // @Produce text/plain
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Param request body api.SignPayloadRequest true "Payload to sign"
+// @Param request body api.SignMessageRequest true "Payload to sign"
 // @Param address path string true "selected account address"
 // @Success 200 {string} string "Signed payload"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
@@ -283,7 +283,7 @@ func (c *AccountsController) signMessage(rw http.ResponseWriter, request *http.R
 // @Description Signs typed data using ECDSA and the private key of an existing account following the EIP-712 standard
 // @Accept json
 // @Produce text/plain
-// @Param request body api.SignTypedDataRequest{domainSeparator=ethereum.DomainSeparator,types=map[string]ethereum.Type} true "Typed data to sign"
+// @Param request body api.SignTypedDataRequest{domainSeparator=qkmtypes.DomainSeparator,types=map[string]qkmtypes.Type} true "Typed data to sign"
 // @Param address path string true "selected account address"
 // @Success 200 {string} string "Signed payload"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"

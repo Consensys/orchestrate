@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/cenkalti/backoff/v4"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/auth/key"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	"github.com/consensys/orchestrate/pkg/utils"
 	"github.com/spf13/viper"
@@ -26,10 +27,11 @@ func Init(_ context.Context) {
 		}
 		logger := log.NewLogger().SetComponent(component)
 
-		newBackOff := func() backoff.BackOff { return utils.NewBackOff(utils.NewConfig(viper.GetViper())) }
+		vipr := viper.GetViper()
+		newBackOff := func() backoff.BackOff { return utils.NewBackOff(utils.NewConfig(vipr)) }
 
-		httpCfg := http.NewConfig(viper.GetViper())
-
+		httpCfg := http.NewDefaultConfig()
+		httpCfg.XAPIKey = vipr.GetString(key.APIKeyViperKey)
 		// Deactivate context authToken forwarding for RPC client requests
 		httpCfg.AuthHeaderForward = false
 

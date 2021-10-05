@@ -292,7 +292,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/keymanager.SignPayloadRequest"
+                            "$ref": "#/definitions/keymanager.SignMessageRequest"
                         }
                     },
                     {
@@ -774,7 +774,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/keymanager.SignPayloadRequest"
+                            "$ref": "#/definitions/keymanager.SignMessageRequest"
                         }
                     }
                 ],
@@ -1076,7 +1076,7 @@
                 }
             }
         },
-        "keymanager.SignPayloadRequest": {
+        "keymanager.SignMessageRequest": {
             "type": "object",
             "required": [
                 "data"

@@ -10,7 +10,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/consensys/orchestrate/pkg/multitenancy"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	mockhandler "github.com/consensys/orchestrate/pkg/toolkit/app/http/handler/mock"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/httputil"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/metrics/mock"

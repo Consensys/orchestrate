@@ -6,10 +6,10 @@ import (
 	"net/http"
 
 	"github.com/consensys/orchestrate/pkg/errors"
-	"github.com/consensys/orchestrate/pkg/multitenancy"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/auth"
 	authutils "github.com/consensys/orchestrate/pkg/toolkit/app/auth/utils"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/config/dynamic"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/containous/traefik/v2/pkg/log"
 )
 
@@ -68,7 +68,7 @@ func (a *Auth) Handler(h http.Handler) http.Handler {
 			req.Header.Get(authutils.APIKeyHeader),
 		)
 
-		// Extract API Key credentials from HTTP headers
+		// Extract TenantID from HTTP headers
 		authCtx = multitenancy.WithTenantID(
 			authCtx,
 			req.Header.Get(multitenancy.TenantIDHeader),

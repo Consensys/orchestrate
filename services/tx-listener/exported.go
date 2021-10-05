@@ -10,7 +10,6 @@ import (
 	"github.com/consensys/orchestrate/pkg/toolkit/app"
 	authkey "github.com/consensys/orchestrate/pkg/toolkit/app/auth/key"
 	authutils "github.com/consensys/orchestrate/pkg/toolkit/app/auth/utils"
-	"github.com/consensys/orchestrate/pkg/toolkit/app/http"
 	ethclient "github.com/consensys/orchestrate/pkg/toolkit/ethclient/rpc"
 	"github.com/consensys/orchestrate/pkg/utils"
 	registryprovider "github.com/consensys/orchestrate/services/tx-listener/providers/chain-registry"
@@ -40,7 +39,7 @@ func NewApp(ctx context.Context) (*app.App, error) {
 		},
 	)
 
-	httpClient := http.NewClient(http.NewConfig(viper.GetViper()))
+	httpClient := app.NewHTTPClient(viper.GetViper())
 	backoffConf := orchestrateclient.NewConfigFromViper(viper.GetViper(),
 		backoff.IncrementalBackOffWithMaxRetries(time.Millisecond*500, time.Second, 5))
 	client := orchestrateclient.NewHTTPClient(httpClient, backoffConf)

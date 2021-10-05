@@ -13,11 +13,8 @@ func AddXAPIKeyHeaderValue(req *http.Request, apiKey string) {
 	req.Header.Add(APIKeyHeader, apiKey)
 }
 
-func AddAuthorizationHeader(req *http.Request) {
-	authorization := AuthorizationFromContext(req.Context())
-	if authorization != "" {
-		req.Header.Add(AuthorizationHeader, authorization)
-	}
+func AddAuthorizationHeaderValue(req *http.Request, authorization string) {
+	req.Header.Add(AuthorizationHeader, authorization)
 }
 
 func GetAuthorizationHeader(req *http.Request) string {

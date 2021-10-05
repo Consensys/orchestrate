@@ -4,7 +4,7 @@ package integrationtests
 
 import (
 	"github.com/stretchr/testify/require"
-	"github.com/consensys/orchestrate/pkg/multitenancy"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/api"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 

@@ -8,8 +8,8 @@ import (
 	"fmt"
 
 	"github.com/consensys/orchestrate/pkg/errors"
-	"github.com/consensys/orchestrate/pkg/multitenancy"
 	authutils "github.com/consensys/orchestrate/pkg/toolkit/app/auth/utils"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/toolkit/tls/certificate"
 	"github.com/golang-jwt/jwt"
 )

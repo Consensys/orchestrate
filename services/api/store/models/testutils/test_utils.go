@@ -11,7 +11,7 @@ import (
 
 	"github.com/consensys/orchestrate/pkg/utils"
 
-	"github.com/consensys/orchestrate/pkg/multitenancy"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/services/api/store/models"
 	"github.com/gofrs/uuid"
 )

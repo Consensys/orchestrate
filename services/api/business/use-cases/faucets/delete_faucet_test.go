@@ -6,7 +6,7 @@ import (
 
 	"github.com/consensys/orchestrate/services/api/store/models/testutils"
 
-	"github.com/consensys/orchestrate/pkg/multitenancy"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 
 	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/services/api/store/mocks"

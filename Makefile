@@ -201,7 +201,7 @@ postgres:
 down-postgres:
 	@docker-compose -f scripts/deps/docker-compose.yml rm --force -s -v postgres-unit
 
-up: networks deps-persistent quorum geth besu deps-kafka quorum-key-manager bootstrap-deps orchestrate ## Start Orchestrate and deps
+up: networks deps-persistent quorum besu geth deps-kafka quorum-key-manager bootstrap-deps orchestrate ## Start Orchestrate and deps
 
 dev: deps orchestrate ## Start Orchestrate and light deps
 

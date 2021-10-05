@@ -248,6 +248,27 @@ jobs:
             ORCHESTRATE_REPOSITORY=${DOCKER_REGISTRY_DEV_REPO}/orchestrate
             make deploy-remote-env
 
+  run-e2e-local:
+    machine:
+      image: ubuntu-2004:202010-01
+    resource_class: xlarge
+    steps:
+      - run:
+          name: Uninstall Go
+          command: sudo rm -rvf /usr/local/go/
+      - go/install:
+          version: 1.16.8
+      - prepare_golang
+      - run:
+          name: e2e local tests
+          command: |
+            set +e
+            cp .env.multitenancy .env
+            make up
+            echo "Wait 20 seconds for services to boot up correctly..."
+            sleep 20
+            make run-e2e
+
   run-e2e:
     docker:
       - image: cimg/go:1.15.8-node
@@ -403,6 +424,16 @@ workflows:
               only: /^v.*/
             branches:
               only: /.*/
+      - run-e2e-local:
+            filters:
+              branches:
+                only: main
+            requires:
+              - lint
+              - gobuild
+              - test
+              - race
+              - integration
       - push-orchestrate-image:
           filters:
             branches:
@@ -415,6 +446,7 @@ workflows:
             - test
             - race
             - integration
+            - run-e2e-local
       - push-orchestrate-e2e-image:
           filters:
             branches:

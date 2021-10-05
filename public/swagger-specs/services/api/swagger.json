@@ -200,13 +200,13 @@
                 }
             }
         },
-        "/accounts/verify-signature": {
+        "/accounts/verify-message": {
             "post": {
                 "description": "Verifies if a message has been signed by the Ethereum account passed as argument",
                 "consumes": [
                     "application/json"
                 ],
-                "summary": "Verifies the signature of a message",
+                "summary": "Verifies the signature of a message (EIP-191)",
                 "parameters": [
                     {
                         "description": "signature and message to verify",
@@ -214,7 +214,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/ethereum.VerifyPayloadRequest"
+                            "$ref": "#/definitions/types.VerifyRequest"
                         }
                     }
                 ],
@@ -249,7 +249,7 @@
                 }
             }
         },
-        "/accounts/verify-typed-data-signature": {
+        "/accounts/verify-typed-data": {
             "post": {
                 "description": "Verifies if a typed data message has been signed by the Ethereum account passed as argument following the EIP-712 standard",
                 "consumes": [
@@ -265,13 +265,13 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/ethereum.VerifyTypedDataRequest"
+                                    "$ref": "#/definitions/types.VerifyTypedDataRequest"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "domainSeparator": {
-                                            "$ref": "#/definitions/ethereum.DomainSeparator"
+                                            "$ref": "#/definitions/types.DomainSeparator"
                                         }
                                     }
                                 }
@@ -430,7 +430,7 @@
                 }
             }
         },
-        "/accounts/{address}/sign": {
+        "/accounts/{address}/sign-message": {
             "post": {
                 "security": [
                     {
@@ -440,14 +440,14 @@
                         "JWTAuth": []
                     }
                 ],
-                "description": "Sign sent data using provided account",
+                "description": "Sign message, following EIP-191, data using selected account",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "text/plain"
                 ],
-                "summary": "Sign arbitrary data",
+                "summary": "Sign Message (EIP-191)",
                 "parameters": [
                     {
                         "description": "Payload to sign",
@@ -455,7 +455,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.SignPayloadRequest"
+                            "$ref": "#/definitions/api.SignMessageRequest"
                         }
                     },
                     {
@@ -525,12 +525,12 @@
                                     "type": "object",
                                     "properties": {
                                         "domainSeparator": {
-                                            "$ref": "#/definitions/ethereum.DomainSeparator"
+                                            "$ref": "#/definitions/types.DomainSeparator"
                                         },
                                         "types": {
                                             "type": "object",
                                             "additionalProperties": {
-                                                "$ref": "#/definitions/ethereum.Type"
+                                                "$ref": "#/definitions/types.Type"
                                             }
                                         }
                                     }
@@ -2720,6 +2720,12 @@
                     "type": "string",
                     "example": "2020-07-09T12:35:42.115395Z"
                 },
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
                 "listenerBackOffDuration": {
                     "type": "string",
                     "example": "5s"
@@ -3220,6 +3226,12 @@
                 "urls"
             ],
             "properties": {
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
                 "listener": {
                     "$ref": "#/definitions/api.RegisterListenerRequest"
                 },
@@ -3389,7 +3401,7 @@
                 }
             }
         },
-        "api.SignPayloadRequest": {
+        "api.SignMessageRequest": {
             "type": "object",
             "required": [
                 "data"
@@ -3397,7 +3409,7 @@
             "properties": {
                 "data": {
                     "type": "string",
-                    "example": "data to sign"
+                    "example": "0x6d79206461746120746f207369676e"
                 }
             }
         },
@@ -3411,7 +3423,7 @@
             ],
             "properties": {
                 "domainSeparator": {
-                    "$ref": "#/definitions/ethereum.DomainSeparator"
+                    "$ref": "#/definitions/types.DomainSeparator"
                 },
                 "message": {
                     "type": "object",
@@ -3426,7 +3438,7 @@
                     "additionalProperties": {
                         "type": "array",
                         "items": {
-                            "$ref": "#/definitions/ethereum.Type"
+                            "$ref": "#/definitions/types.Type"
                         }
                     }
                 }
@@ -3603,6 +3615,12 @@
         "api.UpdateChainRequest": {
             "type": "object",
             "properties": {
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
                 "listener": {
                     "$ref": "#/definitions/api.UpdateListenerRequest"
                 },
@@ -3896,7 +3914,20 @@
                 }
             }
         },
-        "ethereum.DomainSeparator": {
+        "httputil.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 24000
+                },
+                "message": {
+                    "type": "string",
+                    "example": "error message"
+                }
+            }
+        },
+        "types.DomainSeparator": {
             "type": "object",
             "required": [
                 "chainID",
@@ -3926,7 +3957,7 @@
                 }
             }
         },
-        "ethereum.SignTypedDataRequest": {
+        "types.SignTypedDataRequest": {
             "type": "object",
             "required": [
                 "domainSeparator",
@@ -3936,7 +3967,7 @@
             ],
             "properties": {
                 "domainSeparator": {
-                    "$ref": "#/definitions/ethereum.DomainSeparator"
+                    "$ref": "#/definitions/types.DomainSeparator"
                 },
                 "message": {
                     "type": "object",
@@ -3946,22 +3977,18 @@
                     "type": "string",
                     "example": "Mail"
                 },
-                "namespace": {
-                    "type": "string",
-                    "example": "tenant_id"
-                },
                 "types": {
                     "type": "object",
                     "additionalProperties": {
                         "type": "array",
                         "items": {
-                            "$ref": "#/definitions/ethereum.Type"
+                            "$ref": "#/definitions/types.Type"
                         }
                     }
                 }
             }
         },
-        "ethereum.Type": {
+        "types.Type": {
             "type": "object",
             "required": [
                 "name",
@@ -3978,7 +4005,7 @@
                 }
             }
         },
-        "ethereum.VerifyPayloadRequest": {
+        "types.VerifyRequest": {
             "type": "object",
             "required": [
                 "address",
@@ -3992,7 +4019,7 @@
                 },
                 "data": {
                     "type": "string",
-                    "example": "my data to sign"
+                    "example": "0xfeaeee..."
                 },
                 "signature": {
                     "type": "string",
@@ -4000,7 +4027,7 @@
                 }
             }
         },
-        "ethereum.VerifyTypedDataRequest": {
+        "types.VerifyTypedDataRequest": {
             "type": "object",
             "required": [
                 "address",
@@ -4013,24 +4040,11 @@
                     "example": "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"
                 },
                 "data": {
-                    "$ref": "#/definitions/ethereum.SignTypedDataRequest"
+                    "$ref": "#/definitions/types.SignTypedDataRequest"
                 },
                 "signature": {
                     "type": "string",
                     "example": "0x6019a3c8..."
-                }
-            }
-        },
-        "httputil.ErrorResponse": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "integer",
-                    "example": 24000
-                },
-                "message": {
-                    "type": "string",
-                    "example": "error message"
                 }
             }
         }

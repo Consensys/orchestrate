@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/consensys/orchestrate/pkg/errors"
-	"github.com/consensys/orchestrate/pkg/multitenancy"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	qkm "github.com/consensys/orchestrate/pkg/quorum-key-manager"
 	"github.com/consensys/orchestrate/pkg/types/testutils"
 	qkmmock "github.com/consensys/quorum-key-manager/pkg/client/mock"

@@ -1,6 +1,7 @@
 package http
 
 import (
+	"crypto/tls"
 	"net"
 	"net/http"
 
@@ -15,31 +16,49 @@ func NewClient(cfg *Config) *http.Client {
 	}
 
 	/** Execution flow
-	1. (only multi-tenancy) Attach Authentication Headers, if they are part of context
-	2. (only multi-tenancy) Attach API-KEY headers, only if Authentication was not set before
+	1. Attach Authentication Headers, if they are part of context
+	2. Attach X-API-KEY header, only if Authentication was not set before
+	2. Attach Authorization header, only if Authentication was not set before
 	3. Retry on 429 responses
 	*/
 	middlewares := []transport.Middleware{}
-	if cfg.MultiTenancy {
-		if cfg.AuthHeaderForward {
-			middlewares = append(middlewares, transport.NewAuthHeadersTransport())
-		}
+	if cfg.Authorization != "" {
+		middlewares = append(middlewares, transport.NewAuthHeadersTransport(cfg.Authorization))
+	}
 
-		if cfg.APIKey != "" {
-			middlewares = append(middlewares, transport.NewAPIKeyHeadersTransport(cfg.APIKey))
-		}
+	if cfg.AuthHeaderForward {
+		middlewares = append(middlewares, transport.NewContextAuthHeadersTransport())
+	}
+
+	if cfg.XAPIKey != "" {
+		middlewares = append(middlewares, transport.NewXAPIKeyHeadersTransport(cfg.XAPIKey))
 	}
 
 	middlewares = append(middlewares, transport.NewRetry429Transport())
 
+	t := &http.Transport{
+		Proxy:                 http.ProxyFromEnvironment,
+		DialContext:           dialer.DialContext,
+		MaxIdleConnsPerHost:   cfg.MaxIdleConnsPerHost,
+		IdleConnTimeout:       cfg.IdleConnTimeout,
+		TLSHandshakeTimeout:   cfg.TLSHandshakeTimeout,
+		ExpectContinueTimeout: cfg.ExpectContinueTimeout,
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: cfg.InsecureSkipVerify,
+		},
+	}
+
+	if cfg.ClientCert != nil {
+		t.TLSClientConfig = &tls.Config{
+			InsecureSkipVerify: cfg.InsecureSkipVerify,
+			Certificates:       []tls.Certificate{*cfg.ClientCert},
+			GetClientCertificate: func(info *tls.CertificateRequestInfo) (*tls.Certificate, error) {
+				return cfg.ClientCert, nil
+			},
+		}
+	}
+
 	return &http.Client{
-		Transport: NewTransport(&http.Transport{
-			Proxy:                 http.ProxyFromEnvironment,
-			DialContext:           dialer.DialContext,
-			MaxIdleConnsPerHost:   cfg.MaxIdleConnsPerHost,
-			IdleConnTimeout:       cfg.IdleConnTimeout,
-			TLSHandshakeTimeout:   cfg.TLSHandshakeTimeout,
-			ExpectContinueTimeout: cfg.ExpectContinueTimeout,
-		}, middlewares...),
+		Transport: NewTransport(t, middlewares...),
 	}
 }

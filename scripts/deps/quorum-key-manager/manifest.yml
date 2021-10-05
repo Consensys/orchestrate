@@ -1,6 +1,6 @@
 kind: Ethereum
 version: 0.0.1
-name: orchestrate-eth1
+name: orchestrate-eth
 specs:
   keystore: HashicorpKeys
   specs:
@@ -9,7 +9,7 @@ specs:
     tokenPath: "/vault/token/.vault-token"
     namespace: ''
 #- kind: Ethereum
-#  name: orchestrate-eth1
+#  name: orchestrate-eth
 #  specs:
 #    keystore: AKVKeys
 #    specs:

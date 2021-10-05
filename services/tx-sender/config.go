@@ -13,7 +13,6 @@ import (
 	broker "github.com/consensys/orchestrate/pkg/broker/sarama"
 	qkm "github.com/consensys/orchestrate/pkg/quorum-key-manager"
 	"github.com/consensys/orchestrate/pkg/toolkit/app"
-	httputils "github.com/consensys/orchestrate/pkg/toolkit/app/http"
 	metricregistry "github.com/consensys/orchestrate/pkg/toolkit/app/metrics/registry"
 	"github.com/consensys/orchestrate/pkg/toolkit/database/redis"
 	tcpmetrics "github.com/consensys/orchestrate/pkg/toolkit/tcp/metrics"
@@ -84,7 +83,7 @@ func Flags(f *pflag.FlagSet) {
 	broker.KafkaTopicTxRecover(f)
 	qkm.Flags(f)
 	orchestrateclient.Flags(f)
-	httputils.MetricFlags(f)
+	app.MetricFlags(f)
 	metricregistry.Flags(f, tcpmetrics.ModuleName)
 	redis.Flags(f)
 

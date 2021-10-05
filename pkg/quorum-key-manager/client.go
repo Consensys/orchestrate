@@ -3,7 +3,6 @@ package quorumkeymanager
 import (
 	"sync"
 
-	"github.com/consensys/orchestrate/pkg/toolkit/app/http"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	qkm "github.com/consensys/quorum-key-manager/pkg/client"
 	"github.com/spf13/viper"
@@ -25,10 +24,12 @@ func Init() {
 			return
 		}
 		logger := log.NewLogger().SetComponent(component)
-		httpCfg := http.NewConfig(vipr)
-		// User's JWT is forwarded to QKM on every request
-		// httpCfg.AuthHeaderForward = true
-		client = qkm.NewHTTPClient(http.NewClient(httpCfg), &qkm.Config{
+		httpClient, err := NewHTTPClient(vipr)
+		if err != nil {
+			logger.WithError(err).Error("failed to initialize Key Manager Client")
+			return
+		}
+		client = qkm.NewHTTPClient(httpClient, &qkm.Config{
 			URL: cfg.URL,
 		})
 		storeNameID = vipr.GetString(StoreNameViperKey)

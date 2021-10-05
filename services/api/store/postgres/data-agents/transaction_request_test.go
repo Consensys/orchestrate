@@ -6,7 +6,7 @@ package dataagents
 
 import (
 	"context"
-	"github.com/consensys/orchestrate/pkg/multitenancy"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"testing"
 

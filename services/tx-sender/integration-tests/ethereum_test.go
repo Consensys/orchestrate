@@ -14,7 +14,7 @@ import (
 
 	"github.com/consensys/orchestrate/pkg/encoding/json"
 	encoding "github.com/consensys/orchestrate/pkg/encoding/proto"
-	"github.com/consensys/orchestrate/pkg/multitenancy"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	quorumkeymanager "github.com/consensys/orchestrate/pkg/quorum-key-manager"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/httputil"

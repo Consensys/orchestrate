@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/consensys/orchestrate/pkg/multitenancy"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/services/api/store/models"
 	"github.com/ethereum/go-ethereum/common"

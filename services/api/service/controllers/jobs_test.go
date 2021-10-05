@@ -24,7 +24,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"github.com/consensys/orchestrate/pkg/encoding/json"
 	"github.com/consensys/orchestrate/pkg/errors"
-	"github.com/consensys/orchestrate/pkg/multitenancy"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/services/api/service/formatters"
 )
 

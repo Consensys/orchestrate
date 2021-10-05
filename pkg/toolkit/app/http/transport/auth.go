@@ -7,19 +7,23 @@ import (
 )
 
 type AuthHeadersTransport struct {
-	T http.RoundTripper
+	auth string
+	T    http.RoundTripper
 }
 
-// NewAuthHeadersTransport creates a new transport to attach context authentication values into request headers
-func NewAuthHeadersTransport() Middleware {
+func NewAuthHeadersTransport(jwt string) Middleware {
 	return func(nxt http.RoundTripper) http.RoundTripper {
 		return &AuthHeadersTransport{
-			T: nxt,
+			T:    nxt,
+			auth: jwt,
 		}
 	}
 }
 
 func (t *AuthHeadersTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	authutils.AddAuthorizationHeader(req)
+	if authutils.GetAuthorizationHeader(req) == "" {
+		authutils.AddAuthorizationHeaderValue(req, t.auth)
+	}
+
 	return t.T.RoundTrip(req)
 }

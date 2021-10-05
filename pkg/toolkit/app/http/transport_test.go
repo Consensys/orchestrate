@@ -24,7 +24,7 @@ func (t *MockTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 
 func TestAuthHeadersTransport(t *testing.T) {
 	mockTransport := &MockTransport{}
-	tt := transport.NewAuthHeadersTransport()(mockTransport)
+	tt := transport.NewContextAuthHeadersTransport()(mockTransport)
 
 	// Test without setting authorization in context
 	req, _ := http.NewRequest(http.MethodGet, "", nil)
@@ -45,7 +45,7 @@ func TestAuthHeadersTransport(t *testing.T) {
 
 func TestAuthAPIKeyHeadersTransport(t *testing.T) {
 	mockTransport := &MockTransport{}
-	tt := transport.NewAPIKeyHeadersTransport("test-auth")(mockTransport)
+	tt := transport.NewXAPIKeyHeadersTransport("test-auth")(mockTransport)
 
 	// Test setting X-API-Key in context
 	ctxTwo := authutils.WithAPIKey(context.Background(), "test-auth")

@@ -3,8 +3,8 @@ package txlistener
 import (
 	broker "github.com/consensys/orchestrate/pkg/broker/sarama"
 	orchestrateclient "github.com/consensys/orchestrate/pkg/sdk/client"
+	"github.com/consensys/orchestrate/pkg/toolkit/app"
 	authkey "github.com/consensys/orchestrate/pkg/toolkit/app/auth/key"
-	"github.com/consensys/orchestrate/pkg/toolkit/app/http"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	metricregistry "github.com/consensys/orchestrate/pkg/toolkit/app/metrics/registry"
 	tcpmetrics "github.com/consensys/orchestrate/pkg/toolkit/tcp/metrics"
@@ -31,7 +31,7 @@ func Flags(f *pflag.FlagSet) {
 	authkey.Flags(f)
 	broker.KafkaProducerFlags(f)
 	broker.KafkaTopicTxDecoded(f)
-	http.MetricFlags(f)
+	app.MetricFlags(f)
 	metricregistry.Flags(f, tcpmetrics.ModuleName)
 	txsentry.Flags(f)
 	provider.Flags(f)

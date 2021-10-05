@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/consensys/orchestrate/pkg/multitenancy"
 	"github.com/consensys/orchestrate/pkg/toolkit/app"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
 	"github.com/dgraph-io/ristretto"
 	"github.com/spf13/pflag"

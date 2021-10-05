@@ -154,13 +154,15 @@ services:
   quorum-key-manager:
     <<: *container-common
     image: docker.consensys.net/pub/quorum-key-manager:v21.9.0
-    #    image: quorum-key-manager:local
     depends_on:
       - vault
       - quorum-key-manager-migration
     volumes:
       - vault-token:/vault/token
       - ./quorum-key-manager/manifest.yml:/manifests/manifest.yml
+      - ./quorum-key-manager/certificates:/certificates
+      - ./quorum-key-manager/ca:/ca
+      - ./quorum-key-manager/apikey:/apikey
     ports:
       - 8180:8080
       - 8181:8081
@@ -168,9 +170,17 @@ services:
       <<: *qkm-common
       HTTP_HOST: 0.0.0.0
       MANIFEST_PATH: /manifests
+      HTTPS_ENABLED: "true"
+      HTTPS_SERVER_KEY: /certificates/https.key
+      HTTPS_SERVER_CERT: /certificates/https.crt
+      AUTH_OIDC_CA_CERT: /ca/ca.crt
+      AUTH_OIDC_CA_KEY: /ca/ca.key
+      AUTH_OIDC_CA_KEY_PASSWORD: password
+      AUTH_TLS_CA: /ca/ca.crt
+      AUTH_API_KEY_FILE: /apikey/sample.csv
     command: run
     healthcheck:
-      test: [ "CMD", "wget", "--spider", "--proxy", "off", "http://quorum-key-manager:8081/ready" ]
+      test: [ "CMD", "wget", "--spider", "--proxy", "off", "https://quorum-key-manager:8081/ready" ]
       interval: 10s
       timeout: 3s
       retries: 10

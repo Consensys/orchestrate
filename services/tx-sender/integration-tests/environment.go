@@ -40,7 +40,7 @@ const apiURL = "http://api:8081"
 const keyManagerURL = "http://key-manager:8081"
 const apiMetricsURL = "http://api:8082"
 const networkName = "tx-sender"
-const qkmStoreName = "orchestrate-eth1"
+const qkmStoreName = "orchestrate-eth"
 const maxRecoveryDefault = 1
 
 var envKafkaHostPort string

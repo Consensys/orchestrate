@@ -6,9 +6,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/consensys/orchestrate/pkg/multitenancy"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/httputil"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/metrics"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 )
 
 type Builder struct {

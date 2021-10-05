@@ -23,8 +23,7 @@ func TestDefaultClient(t *testing.T) {
 
 func TestApiKeyClient(t *testing.T) {
 	cfg := NewDefaultConfig()
-	cfg.MultiTenancy = true
-	cfg.APIKey = "ApiKey"
+	cfg.XAPIKey = "ApiKey"
 
 	client := NewClient(cfg)
 	req := &http.Request{
@@ -34,12 +33,11 @@ func TestApiKeyClient(t *testing.T) {
 	_, _ = client.Transport.RoundTrip(req)
 	
 	assert.Empty(t, req.Header.Get(utils.AuthorizationHeader))
-	assert.Equal(t, cfg.APIKey, req.Header.Get(utils.APIKeyHeader))
+	assert.Equal(t, cfg.XAPIKey, req.Header.Get(utils.APIKeyHeader))
 }
 
 func TestAuthTokenForwardClient(t *testing.T) {
 	cfg := NewDefaultConfig()
-	cfg.MultiTenancy = true
 
 	client := NewClient(cfg)
 	req := &http.Request{
@@ -54,8 +52,7 @@ func TestAuthTokenForwardClient(t *testing.T) {
 
 func TestMultitenancyClient(t *testing.T) {
 	cfg := NewDefaultConfig()
-	cfg.MultiTenancy = true
-	cfg.APIKey = "ApiKey"
+	cfg.XAPIKey = "ApiKey"
 
 	client := NewClient(cfg)
 	req := &http.Request{
@@ -70,7 +67,6 @@ func TestMultitenancyClient(t *testing.T) {
 
 func TestSkipAuthTokenForwardClient(t *testing.T) {
 	cfg := NewDefaultConfig()
-	cfg.MultiTenancy = true
 	cfg.AuthHeaderForward = false
 
 	client := NewClient(cfg)

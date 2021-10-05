@@ -35,10 +35,27 @@ func (c *HTTP) TraefikStatic() *traefikstatic.Configuration {
 func NewConfig(vipr *viper.Viper) *Config {
 	return &Config{
 		HTTP: &HTTP{
-			EntryPoints: http.NewEPsConfig(vipr),
+			EntryPoints: NewEPsConfig(vipr),
 		},
 		Watcher: configwatcher.NewConfig(vipr),
 		Log:     log.NewConfig(vipr),
 		Metrics: metricsregister.NewConfig(vipr),
+	}
+}
+
+func NewEPsConfig(vipr *viper.Viper) traefikstatic.EntryPoints {
+	httpEp := &traefikstatic.EntryPoint{
+		Address: url(vipr.GetString(hostnameViperKey), vipr.GetUint(httpPortViperKey)),
+	}
+	httpEp.SetDefaults()
+
+	metricsEp := &traefikstatic.EntryPoint{
+		Address: url(vipr.GetString(metricsHostnameViperKey), vipr.GetUint(metricsPortViperKey)),
+	}
+	metricsEp.SetDefaults()
+
+	return traefikstatic.EntryPoints{
+		http.DefaultHTTPAppEntryPoint: httpEp,
+		http.DefaultMetricsEntryPoint: metricsEp,
 	}
 }
