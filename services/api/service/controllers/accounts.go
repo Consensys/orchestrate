@@ -49,6 +49,7 @@ func (c *AccountsController) Append(router *mux.Router) {
 
 // @Summary Creates a new Account
 // @Description Creates a new Account
+// @Tags Accounts
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -82,6 +83,7 @@ func (c *AccountsController) create(rw http.ResponseWriter, request *http.Reques
 
 // @Summary Fetch a account by address
 // @Description Fetch a single account by address
+// @Tags Accounts
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
@@ -112,6 +114,7 @@ func (c *AccountsController) getOne(rw http.ResponseWriter, request *http.Reques
 
 // @Summary Search accounts by provided filters
 // @Description Get a list of filtered accounts
+// @Tags Accounts
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -148,6 +151,7 @@ func (c *AccountsController) search(rw http.ResponseWriter, request *http.Reques
 
 // @Summary Creates a new Account by importing a private key
 // @Description Creates a new Account by importing a private key
+// @Tags Accounts
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -192,6 +196,7 @@ func (c *AccountsController) importKey(rw http.ResponseWriter, request *http.Req
 
 // @Summary Update account by Address
 // @Description Update a specific account by Address
+// @Tags Accounts
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -234,6 +239,7 @@ func (c *AccountsController) update(rw http.ResponseWriter, request *http.Reques
 
 // @Summary Sign Message (EIP-191)
 // @Description Sign message, following EIP-191, data using selected account
+// @Tags Accounts
 // @Accept json
 // @Produce text/plain
 // @Security ApiKeyAuth
@@ -281,6 +287,7 @@ func (c *AccountsController) signMessage(rw http.ResponseWriter, request *http.R
 
 // @Summary Signs typed data using an existing account following the EIP-712 standard
 // @Description Signs typed data using ECDSA and the private key of an existing account following the EIP-712 standard
+// @Tags Accounts
 // @Accept json
 // @Produce text/plain
 // @Param request body api.SignTypedDataRequest{domainSeparator=qkmtypes.DomainSeparator,types=map[string]qkmtypes.Type} true "Typed data to sign"
@@ -329,6 +336,7 @@ func (c *AccountsController) signTypedData(rw http.ResponseWriter, request *http
 
 // @Summary Verifies the signature of a typed data message following the EIP-712 standard
 // @Description Verifies if a typed data message has been signed by the Ethereum account passed as argument following the EIP-712 standard
+// @Tags Accounts
 // @Accept json
 // @Param request body qkmtypes.VerifyTypedDataRequest{domainSeparator=qkmtypes.DomainSeparator} true "Typed data to sign"
 // @Success 204
@@ -356,6 +364,7 @@ func (c *AccountsController) verifyTypedDataSignature(rw http.ResponseWriter, re
 
 // @Summary Verifies the signature of a message (EIP-191)
 // @Description Verifies if a message has been signed by the Ethereum account passed as argument
+// @Tags Accounts
 // @Accept json
 // @Param request body qkmtypes.VerifyRequest true "signature and message to verify"
 // @Success 204

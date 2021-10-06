@@ -14,7 +14,3 @@ apis:
     tags:
       add:
         - "Orchestrate API"
-  - url: 'public/swagger-specs/services/key-manager/swagger.json'
-    tags:
-      add:
-        - "Key Manager"

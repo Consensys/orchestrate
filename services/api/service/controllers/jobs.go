@@ -39,6 +39,7 @@ func (c *JobsController) Append(router *mux.Router) {
 
 // @Summary Search jobs by provided filters
 // @Description Get a list of filtered jobs
+// @Tags Jobs
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -75,6 +76,7 @@ func (c *JobsController) search(rw http.ResponseWriter, request *http.Request) {
 
 // @Summary Creates a new Job
 // @Description Creates a new job as part of an already created schedule
+// @Tags Jobs
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -113,6 +115,7 @@ func (c *JobsController) create(rw http.ResponseWriter, request *http.Request) {
 
 // @Summary Fetch a job by uuid
 // @Description Fetch a single job by uuid
+// @Tags Jobs
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
@@ -138,6 +141,7 @@ func (c *JobsController) getOne(rw http.ResponseWriter, request *http.Request) {
 
 // @Summary Start a Job by UUID
 // @Description Starts a specific job by UUID, effectively executing the transaction asynchronously
+// @Tags Jobs
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
@@ -162,6 +166,7 @@ func (c *JobsController) start(rw http.ResponseWriter, request *http.Request) {
 
 // @Summary Resend Job transaction by UUID
 // @Description Resend transaction of specific job by UUID, effectively executing the re-sending of transaction asynchronously
+// @Tags Jobs
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
@@ -187,6 +192,7 @@ func (c *JobsController) resend(rw http.ResponseWriter, request *http.Request) {
 // @Summary Update job by UUID
 // @Description Update a specific job by UUID
 // @Description WARNING: Reserved for advanced users. Orchestrate does not recommend using this endpoint.
+// @Tags Jobs
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth

@@ -48,10 +48,7 @@ func (ec *Client) StoreRaw(ctx context.Context, endpoint string, data []byte, pr
 	storeRawResponse := &StoreRawResponse{}
 	err := ec.postRequest(ctx, endpoint, "storeraw", request, storeRawResponse)
 	if err != nil {
-		if errors.IsDataCorruptedError(err) {
-			return "", err
-		}
-		return "", errors.HTTPConnectionError("failed to send a request to Tessera enclave: %s", err)
+		return "", errors.FromError(err).SetMessage("failed to send a request to Tessera enclave: %s", err)
 	}
 
 	enclaveKey, err := base64.StdEncoding.DecodeString(storeRawResponse.Key)
@@ -167,10 +164,18 @@ func (ec *Client) retryHTTPRequest(requestURL string, doRequest func() (*http.Re
 
 			statusClass := getStatusClass(resp)
 			if statusClass != successStatusClass {
-				err = errors.HTTPConnectionError("request to '%s' failed - %d", requestURL, resp.StatusCode)
+				switch resp.StatusCode {
+				// Follow official go-quorum docs https://consensys.github.io/tessera/#operation/encryptAndStoreVersion
+				case 404:
+					err = errors.InvalidParameterError("'from' key in request body not found")
+				default:
+					err = errors.HTTPConnectionError("request to '%s' failed. code: %d", requestURL, resp.StatusCode)
+				}
+
 				if statusClass != serverErrorStatusClass {
 					err = backoff.Permanent(err)
 				}
+
 				return err
 			}
 

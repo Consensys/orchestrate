@@ -35,6 +35,7 @@ func (c *ChainsController) Append(router *mux.Router) {
 }
 
 // @Summary Retrieves a list of all registered chains
+// @Tags Chains
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
@@ -67,6 +68,7 @@ func (c *ChainsController) search(rw http.ResponseWriter, request *http.Request)
 }
 
 // @Summary Retrieves a chain by ID
+// @Tags Chains
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
@@ -90,6 +92,7 @@ func (c *ChainsController) getOne(rw http.ResponseWriter, request *http.Request)
 }
 
 // @Summary Updates a chain by ID
+// @Tags Chains
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -124,6 +127,7 @@ func (c *ChainsController) update(rw http.ResponseWriter, request *http.Request)
 }
 
 // @Summary Registers a new chain
+// @Tags Chains
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -162,6 +166,7 @@ func (c *ChainsController) register(rw http.ResponseWriter, request *http.Reques
 }
 
 // @Summary Deletes a chain by ID
+// @Tags Chains
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth

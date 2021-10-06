@@ -13,20 +13,20 @@ func NewHTTPClient(vipr *viper.Viper) (*http.Client, error) {
 	// Support user's JWT forwarding
 	cfg.AuthHeaderForward = true
 
+	cfg.InsecureSkipVerify = vipr.GetBool(tlsSkipVerifyViperKey)
 	APIKey := vipr.GetString(AuthAPIKeyViperKey)
 	if APIKey != "" {
 		cfg.Authorization = "Basic " + APIKey
 	}
 
-	certFile := vipr.GetString(AuthTLSCertViperKey)
-	keyFile := vipr.GetString(AuthTLSKeyViperKey)
+	certFile := vipr.GetString(AuthClientTLSCertViperKey)
+	keyFile := vipr.GetString(AuthClientTLSKeyViperKey)
 	if certFile != "" && keyFile != "" {
 		cert, err := tls.LoadX509KeyPair(certFile, keyFile)
 		if err != nil {
 			return nil, err
 		}
 		cfg.ClientCert = &cert
-		cfg.InsecureSkipVerify = vipr.GetBool(AuthTLSSkipVerifyViperKey)
 	}
 
 	return http2.NewClient(cfg), nil

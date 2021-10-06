@@ -51,6 +51,7 @@ func (c *TransactionsController) Append(router *mux.Router) {
 // @Description Creates and executes a new smart contract transaction request
 // @Description The transaction can be private (Tessera, Orion).
 // @Description The transaction can be a One Time Key transaction in 0 gas private networks
+// @Tags Transactions
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -92,6 +93,7 @@ func (c *TransactionsController) send(rw http.ResponseWriter, request *http.Requ
 // @Description Creates and executes a new contract deployment request
 // @Description The transaction can be private (Tessera, Orion).
 // @Description The transaction can be a One Time Key transaction in 0 gas private networks
+// @Tags Transactions
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -131,6 +133,7 @@ func (c *TransactionsController) deployContract(rw http.ResponseWriter, request 
 
 // @Summary Creates and sends a raw transaction
 // @Description Creates and executes a new raw transaction request
+// @Tags Transactions
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -166,6 +169,7 @@ func (c *TransactionsController) sendRaw(rw http.ResponseWriter, request *http.R
 
 // @Summary Creates and sends a transfer transaction
 // @Description Creates and executes a new transfer request
+// @Tags Transactions
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -206,6 +210,7 @@ func (c *TransactionsController) transfer(rw http.ResponseWriter, request *http.
 
 // @Summary Fetch a transaction request by uuid
 // @Description Fetch a single transaction request by uuid
+// @Tags Transactions
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
@@ -231,6 +236,7 @@ func (c *TransactionsController) getOne(rw http.ResponseWriter, request *http.Re
 
 // @Summary Search transaction requests by provided filters
 // @Description Get a list of filtered transaction requests
+// @Tags Transactions
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth

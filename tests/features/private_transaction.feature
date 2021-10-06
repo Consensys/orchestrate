@@ -10,9 +10,6 @@ Feature: Private transactions
     And I have created the following accounts
       | alias    | Headers.Authorization    |
       | account1 | Bearer {{tenant1.token}} |
-      | account2 | Bearer {{tenant1.token}} |
-      | account3 | Bearer {{tenant1.token}} |
-      | account4 | Bearer {{tenant1.token}} |
     And I register the following contracts
       | name        | artifacts        | Headers.Authorization    |
       | SimpleToken | SimpleToken.json | Bearer {{tenant1.token}} |
@@ -133,6 +130,38 @@ Feature: Private transactions
       | code   | message |
       | 271360 | ~       |
 
+  @quorum
+  Scenario: Fail to deploy private ERC20 contract with invalid private from
+    Given I set the headers
+      | Key           | Value                    |
+      | Authorization | Bearer {{tenant1.token}} |
+    When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
+      """
+      {
+        "chain": "{{chain.quorum0.Name}}",
+        "params": {
+          "from": "{{account1}}",
+          "protocol": "Tessera",
+          "privateFrom": "{{global.nodes.quorum[1].privateAddress[0]}}",
+          "privateFor": [
+            "{{global.nodes.quorum[0].privateAddress[0]}}"
+          ],
+          "contractName": "SimpleToken"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}"
+        }
+      }
+      """
+    Then the response code should be 202
+    Then I register the following response fields
+      | alias           | path         |
+      | jobPrivTxOne    | jobs[0].uuid |
+      | jobMarkingTxOne | jobs[1].uuid |
+      | evlpID          | uuid         |
+    Then Envelopes should be in topic "tx.sender"
+    Then Envelopes should be in topic "tx.recover"
+      
   @quorum
   Scenario: Force not correlative nonce for private and public txs in Quorum/Tessera
     Given I register the following alias
@@ -260,7 +289,7 @@ Feature: Private transactions
       {
         "chain": "{{chain.besu0.Name}}",
         "params": {
-          "from": "{{account2}}",
+          "from": "{{account1}}",
           "protocol": "Orion",
           "privateFrom": "{{global.nodes.besu[0].privateAddress[0]}}",
           "privateFor": [
@@ -290,7 +319,7 @@ Feature: Private transactions
     Then the response code should be 200
     And Response should have the following fields
       | status | logs[0].status | logs[1].status | logs[2].status | transaction.from |
-      | STORED | CREATED        | STARTED        | STORED         | {{account2}}     |
+      | STORED | CREATED        | STARTED        | STORED         | {{account1}}     |
     When I send "GET" request to "{{global.api}}/jobs/{{jobMarkingTxTwo}}"
     Then the response code should be 200
     And Response should have the following fields
@@ -307,7 +336,7 @@ Feature: Private transactions
       {
         "chain": "{{chain.besu0.Name}}",
         "params": {
-          "from": "{{account2}}",
+          "from": "{{account1}}",
           "to": "{{counterContractAddr}}",
           "methodSignature": "transfer(address,uint256)",
           "args": [
@@ -340,6 +369,11 @@ Feature: Private transactions
       | besuDeployContractTxTwoID   | {{random.uuid}} |
       | besuDeployContractTxThreeID | {{random.uuid}} |
       | besuDeployContractTxFourID  | {{random.uuid}} |
+    And I have created the following accounts
+      | alias    | Headers.Authorization    |
+      | account2 | Bearer {{tenant1.token}} |
+      | account3 | Bearer {{tenant1.token}} |
+      | account4 | Bearer {{tenant1.token}} |
     Then I track the following envelopes
       | ID                              |
       | {{besuDeployContractTxOneID}}   |
@@ -445,6 +479,11 @@ Feature: Private transactions
       | besuDeployContractTxTwoID   | {{random.uuid}} |
       | besuDeployContractTxThreeID | {{random.uuid}} |
       | besuDeployContractTxFourID  | {{random.uuid}} |
+    And I have created the following accounts
+      | alias    | Headers.Authorization    |
+      | account2 | Bearer {{tenant1.token}} |
+      | account3 | Bearer {{tenant1.token}} |
+      | account4 | Bearer {{tenant1.token}} |
     Then I track the following envelopes
       | ID                              |
       | {{besuDeployContractTxOneID}}   |

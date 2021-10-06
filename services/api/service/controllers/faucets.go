@@ -32,6 +32,7 @@ func (c *FaucetsController) Append(router *mux.Router) {
 }
 
 // @Summary Retrieves a list of all registered faucets
+// @Tags Faucets
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
@@ -64,6 +65,7 @@ func (c *FaucetsController) search(rw http.ResponseWriter, request *http.Request
 }
 
 // @Summary Retrieves a faucet by ID
+// @Tags Faucets
 // @Produce json
 // @Param uuid path string true "ID of the faucet"
 // @Success 200 {object} api.FaucetResponse
@@ -84,6 +86,7 @@ func (c *FaucetsController) getOne(rw http.ResponseWriter, request *http.Request
 }
 
 // @Summary Registers a new faucet
+// @Tags Faucets
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -116,6 +119,7 @@ func (c *FaucetsController) register(rw http.ResponseWriter, request *http.Reque
 }
 
 // @Summary Updates a faucet by ID
+// @Tags Faucets
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -152,6 +156,7 @@ func (c *FaucetsController) update(rw http.ResponseWriter, request *http.Request
 }
 
 // @Summary Deletes a faucet by ID
+// @Tags Faucets
 // @Security ApiKeyAuth
 // @Security JWTAuth
 // @Param uuid path string true "ID of the faucet"

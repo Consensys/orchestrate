@@ -32,6 +32,9 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Accounts"
+                ],
                 "summary": "Search accounts by provided filters",
                 "parameters": [
                     {
@@ -91,6 +94,9 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Accounts"
+                ],
                 "summary": "Creates a new Account",
                 "parameters": [
                     {
@@ -147,6 +153,9 @@
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "Accounts"
                 ],
                 "summary": "Creates a new Account by importing a private key",
                 "parameters": [
@@ -206,6 +215,9 @@
                 "consumes": [
                     "application/json"
                 ],
+                "tags": [
+                    "Accounts"
+                ],
                 "summary": "Verifies the signature of a message (EIP-191)",
                 "parameters": [
                     {
@@ -254,6 +266,9 @@
                 "description": "Verifies if a typed data message has been signed by the Ethereum account passed as argument following the EIP-712 standard",
                 "consumes": [
                     "application/json"
+                ],
+                "tags": [
+                    "Accounts"
                 ],
                 "summary": "Verifies the signature of a typed data message following the EIP-712 standard",
                 "parameters": [
@@ -324,6 +339,9 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Accounts"
+                ],
                 "summary": "Fetch a account by address",
                 "parameters": [
                     {
@@ -376,6 +394,9 @@
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "Accounts"
                 ],
                 "summary": "Update account by Address",
                 "parameters": [
@@ -447,6 +468,9 @@
                 "produces": [
                     "text/plain"
                 ],
+                "tags": [
+                    "Accounts"
+                ],
                 "summary": "Sign Message (EIP-191)",
                 "parameters": [
                     {
@@ -508,6 +532,9 @@
                 ],
                 "produces": [
                     "text/plain"
+                ],
+                "tags": [
+                    "Accounts"
                 ],
                 "summary": "Signs typed data using an existing account following the EIP-712 standard",
                 "parameters": [
@@ -599,6 +626,9 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Chains"
+                ],
                 "summary": "Retrieves a list of all registered chains",
                 "responses": {
                     "200": {
@@ -650,6 +680,9 @@
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "Chains"
                 ],
                 "summary": "Registers a new chain",
                 "parameters": [
@@ -725,6 +758,9 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Chains"
+                ],
                 "summary": "Retrieves a chain by ID",
                 "parameters": [
                     {
@@ -786,6 +822,9 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Chains"
+                ],
                 "summary": "Deletes a chain by ID",
                 "parameters": [
                     {
@@ -834,6 +873,9 @@
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "Chains"
                 ],
                 "summary": "Updates a chain by ID",
                 "parameters": [
@@ -923,6 +965,9 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Contracts"
+                ],
                 "summary": "Returns a list of all registered contracts",
                 "responses": {
                     "200": {
@@ -957,6 +1002,9 @@
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "Contracts"
                 ],
                 "summary": "Register new solidity contract",
                 "parameters": [
@@ -1036,6 +1084,9 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Contracts"
+                ],
                 "summary": "Set the codeHash of the given contract address",
                 "parameters": [
                     {
@@ -1091,6 +1142,9 @@
                 "description": "Retrieve events using hash of signature",
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "Contracts"
                 ],
                 "summary": "Retrieve events using hash of signature",
                 "parameters": [
@@ -1151,6 +1205,9 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Contracts"
+                ],
                 "summary": "Returns a list of all tags",
                 "responses": {
                     "200": {
@@ -1190,6 +1247,9 @@
                 "description": "Fetch solidity contract data by {name} and {tag}",
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "Contracts"
                 ],
                 "summary": "Fetch registered contract data",
                 "parameters": [
@@ -1268,6 +1328,9 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Contracts"
+                ],
                 "summary": "Get method signatures of registered contract",
                 "parameters": [
                     {
@@ -1323,6 +1386,9 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Faucets"
+                ],
                 "summary": "Retrieves a list of all registered faucets",
                 "responses": {
                     "200": {
@@ -1362,6 +1428,9 @@
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "Faucets"
                 ],
                 "summary": "Registers a new faucet",
                 "parameters": [
@@ -1408,6 +1477,9 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Faucets"
+                ],
                 "summary": "Retrieves a faucet by ID",
                 "parameters": [
                     {
@@ -1447,6 +1519,9 @@
                     {
                         "JWTAuth": []
                     }
+                ],
+                "tags": [
+                    "Faucets"
                 ],
                 "summary": "Deletes a faucet by ID",
                 "parameters": [
@@ -1496,6 +1571,9 @@
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "Faucets"
                 ],
                 "summary": "Updates a faucet by ID",
                 "parameters": [
@@ -1566,6 +1644,9 @@
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "Jobs"
                 ],
                 "summary": "Search jobs by provided filters",
                 "parameters": [
@@ -1671,6 +1752,9 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Jobs"
+                ],
                 "summary": "Creates a new Job",
                 "parameters": [
                     {
@@ -1764,6 +1848,9 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Jobs"
+                ],
                 "summary": "Fetch a job by uuid",
                 "parameters": [
                     {
@@ -1846,6 +1933,9 @@
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "Jobs"
                 ],
                 "summary": "Update job by UUID",
                 "parameters": [
@@ -1946,6 +2036,9 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Jobs"
+                ],
                 "summary": "Resend Job transaction by UUID",
                 "parameters": [
                     {
@@ -1988,6 +2081,9 @@
                 "description": "Starts a specific job by UUID, effectively executing the transaction asynchronously",
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "Jobs"
                 ],
                 "summary": "Start a Job by UUID",
                 "parameters": [
@@ -2032,6 +2128,9 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Schedules"
+                ],
                 "summary": "Get all schedules",
                 "responses": {
                     "200": {
@@ -2066,6 +2165,9 @@
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "Schedules"
                 ],
                 "summary": "Creates a new Schedule",
                 "parameters": [
@@ -2136,6 +2238,9 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Schedules"
+                ],
                 "summary": "Fetch a schedule by uuid",
                 "parameters": [
                     {
@@ -2184,6 +2289,9 @@
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "Transactions"
                 ],
                 "summary": "Search transaction requests by provided filters",
                 "parameters": [
@@ -2239,6 +2347,9 @@
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "Transactions"
                 ],
                 "summary": "Creates and sends a new contract deployment",
                 "parameters": [
@@ -2339,6 +2450,9 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Transactions"
+                ],
                 "summary": "Creates and sends a new contract transaction",
                 "parameters": [
                     {
@@ -2438,6 +2552,9 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Transactions"
+                ],
                 "summary": "Creates and sends a raw transaction",
                 "parameters": [
                     {
@@ -2524,6 +2641,9 @@
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "Transactions"
                 ],
                 "summary": "Creates and sends a transfer transaction",
                 "parameters": [
@@ -2620,6 +2740,9 @@
                 "description": "Fetch a single transaction request by uuid",
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "Transactions"
                 ],
                 "summary": "Fetch a transaction request by uuid",
                 "parameters": [

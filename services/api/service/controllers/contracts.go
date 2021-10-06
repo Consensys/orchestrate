@@ -42,6 +42,7 @@ func (c *ContractsController) Append(router *mux.Router) {
 
 // @Summary Returns a list of all registered contracts
 // @Description Returns a list of all registered contracts
+// @Tags Contracts
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
@@ -67,6 +68,7 @@ func (c *ContractsController) getCatalog(rw http.ResponseWriter, request *http.R
 
 // @Summary Register new solidity contract
 // @Description Register new solidity contract in Orchestrate
+// @Tags Contracts
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -111,6 +113,7 @@ func (c *ContractsController) register(rw http.ResponseWriter, request *http.Req
 
 // @Summary Set the codeHash of the given contract address
 // @Description Retrieve events using hash of signature
+// @Tags Contracts
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
@@ -150,6 +153,7 @@ func (c *ContractsController) setCodeHash(rw http.ResponseWriter, request *http.
 
 // @Summary Retrieve events using hash of signature
 // @Description Retrieve events using hash of signature
+// @Tags Contracts
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
@@ -191,6 +195,7 @@ func (c *ContractsController) getEvents(rw http.ResponseWriter, request *http.Re
 
 // @Summary Returns a list of all tags
 // @Description Returns a list of all tags from given contract name
+// @Tags Contracts
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
@@ -217,6 +222,7 @@ func (c *ContractsController) getTags(rw http.ResponseWriter, request *http.Requ
 
 // @Summary Fetch registered contract data
 // @Description Fetch solidity contract data by {name} and {tag}
+// @Tags Contracts
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
@@ -241,6 +247,7 @@ func (c *ContractsController) getContract(rw http.ResponseWriter, request *http.
 
 // @Summary Get method signatures of registered contract
 // @Description Get method signatures of registered contract by {name} and {tag}
+// @Tags Contracts
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth

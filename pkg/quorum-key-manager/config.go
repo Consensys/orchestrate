@@ -14,14 +14,14 @@ func init() {
 	_ = viper.BindEnv(MetricsURLViperKey, metricsURLEnv)
 	viper.SetDefault(StoreNameViperKey, StoreNameDefault)
 	_ = viper.BindEnv(StoreNameViperKey, storeNameEnv)
-	viper.SetDefault(AuthTLSSkipVerifyViperKey, AuthTLSSKipVerifyDefault)
-	_ = viper.BindEnv(AuthTLSSkipVerifyViperKey, authTSLSkipVerifyEnv)
+	viper.SetDefault(tlsSkipVerifyViperKey, tlsSKipVerifyDefault)
+	_ = viper.BindEnv(tlsSkipVerifyViperKey, tlsSkipVerifyEnv)
 	viper.SetDefault(AuthAPIKeyViperKey, AuthAPIKeyDefault)
 	_ = viper.BindEnv(AuthAPIKeyViperKey, authAPIKeyEnv)
-	viper.SetDefault(AuthTLSCertViperKey, AuthTLSCertDefault)
-	_ = viper.BindEnv(AuthTLSCertViperKey, authTLSCertEnv)
-	viper.SetDefault(AuthTLSKeyViperKey, AuthTLSKeyDefault)
-	_ = viper.BindEnv(AuthTLSKeyViperKey, authTLSKeyEnv)
+	viper.SetDefault(AuthClientTLSCertViperKey, AuthClientTLSCertDefault)
+	_ = viper.BindEnv(AuthClientTLSCertViperKey, authClientTLSCertEnv)
+	viper.SetDefault(AuthClientTLSKeyViperKey, AuthClientTLSKeyDefault)
+	_ = viper.BindEnv(AuthClientTLSKeyViperKey, authClientTLSKeyEnv)
 }
 
 const (
@@ -67,6 +67,20 @@ Environment variable: %q`, storeNameEnv)
 }
 
 const (
+	tlsSkipVerifyFlag     = "key-manager-tls-skip-verify"
+	tlsSkipVerifyViperKey = "key.manager.tls.skip.verify"
+	tlsSKipVerifyDefault  = false
+	tlsSkipVerifyEnv      = "KEY_MANAGER_TLS_SKIP_VERIFY"
+)
+
+func tlsSkipVerify(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Key Manager, disables SSL certificate verification.
+Environment variable: %q`, tlsSkipVerifyEnv)
+	f.Bool(tlsSkipVerifyFlag, tlsSKipVerifyDefault, desc)
+	_ = viper.BindPFlag(tlsSkipVerifyViperKey, f.Lookup(tlsSkipVerifyFlag))
+}
+
+const (
 	authAPIKeyFlag     = "key-manager-api-key"
 	AuthAPIKeyViperKey = "key.manager.api.key"
 	AuthAPIKeyDefault  = ""
@@ -81,52 +95,38 @@ Environment variable: %q`, authAPIKeyEnv)
 }
 
 const (
-	authTLSCertFlag     = "key-manager-tls-cert"
-	AuthTLSCertViperKey = "key.manager.tls.cert"
-	AuthTLSCertDefault  = ""
-	authTLSCertEnv      = "KEY_MANAGER_TLS_CERT"
+	authClientTLSCertFlag     = "key-manager-client-tls-cert"
+	AuthClientTLSCertViperKey = "key.manager.client.tls.cert"
+	AuthClientTLSCertDefault  = ""
+	authClientTLSCertEnv      = "KEY_MANAGER_CLIENT_TLS_CERT"
 )
 
 const (
-	authTLSKeyFlag     = "key-manager-tls-key"
-	AuthTLSKeyViperKey = "key.manager.tls.key"
-	AuthTLSKeyDefault  = ""
-	authTLSKeyEnv      = "KEY_MANAGER_TLS_KEY"
-)
-
-const (
-	authTLSSkipVerifyFlag     = "key-manager-tls-skip-verify"
-	AuthTLSSkipVerifyViperKey = "key.manager.tls.skip.verify"
-	AuthTLSSKipVerifyDefault  = false
-	authTSLSkipVerifyEnv      = "KEY_MANAGER_TLS_SKIP_VERIFY"
+	authClientTLSKeyFlag     = "key-manager-client-tls-key"
+	AuthClientTLSKeyViperKey = "key.manager.client.tls.key"
+	AuthClientTLSKeyDefault  = ""
+	authClientTLSKeyEnv      = "KEY_MANAGER_CLIENT_TLS_KEY"
 )
 
 func authTLSCert(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Key Manager mutual TLS authentication (crt file).
-Environment variable: %q`, authTLSCertEnv)
-	f.String(authTLSCertFlag, AuthTLSCertDefault, desc)
-	_ = viper.BindPFlag(AuthTLSCertViperKey, f.Lookup(authTLSCertFlag))
+Environment variable: %q`, authClientTLSCertEnv)
+	f.String(authClientTLSCertFlag, AuthClientTLSCertDefault, desc)
+	_ = viper.BindPFlag(AuthClientTLSCertViperKey, f.Lookup(authClientTLSCertFlag))
 }
 
 func authTLSKey(f *pflag.FlagSet) {
 	desc := fmt.Sprintf(`Key Manager mutual TLS authentication (key file).
-Environment variable: %q`, authTLSKeyEnv)
-	f.String(authTLSKeyFlag, AuthTLSKeyDefault, desc)
-	_ = viper.BindPFlag(AuthTLSKeyViperKey, f.Lookup(authTLSKeyFlag))
-}
-
-func authTLSSkipVerify(f *pflag.FlagSet) {
-	desc := fmt.Sprintf(`Key Manager mutual TLS authentication, disables SSL certificate verification.
-Environment variable: %q`, authTSLSkipVerifyEnv)
-	f.Bool(authTLSSkipVerifyFlag, AuthTLSSKipVerifyDefault, desc)
-	_ = viper.BindPFlag(AuthTLSSkipVerifyViperKey, f.Lookup(authTLSSkipVerifyFlag))
+Environment variable: %q`, authClientTLSKeyEnv)
+	f.String(authClientTLSKeyFlag, AuthClientTLSKeyDefault, desc)
+	_ = viper.BindPFlag(AuthClientTLSKeyViperKey, f.Lookup(authClientTLSKeyFlag))
 }
 
 func Flags(f *pflag.FlagSet) {
 	url(f)
 	metricsURL(f)
 	storeName(f)
-	authTLSSkipVerify(f)
+	tlsSkipVerify(f)
 	authAPIKey(f)
 	authTLSCert(f)
 	authTLSKey(f)
