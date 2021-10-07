@@ -9,7 +9,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/consensys/orchestrate/pkg/go-ethereum/v1_9_12/accounts/abi"
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/consensys/orchestrate/pkg/types/ethereum"
 )
@@ -78,102 +78,102 @@ func TestFormatNonIndexedArg(t *testing.T) {
 		expectedOutput string
 	}{
 		{
-			abi.Type{Type: reflect.TypeOf(&big.Int{}), T: abi.IntTy},
+			newType("int"),
 			uint8(2),
 			"2",
 		},
 		{
-			abi.Type{Type: reflect.TypeOf(&big.Int{}), T: abi.IntTy},
+			newType("int"),
 			[]uint8{1, 2},
 			"[1 2]",
 		},
 		{
-			abi.Type{Type: reflect.TypeOf(&big.Int{}), T: abi.IntTy},
+			newType("int"),
 			uint16(2),
 			"2",
 		},
 		{
-			abi.Type{Type: reflect.TypeOf(&big.Int{}), T: abi.IntTy},
+			newType("int"),
 			[]uint16{1, 2},
 			"[1 2]",
 		},
 		{
-			abi.Type{Type: reflect.TypeOf(&big.Int{}), T: abi.IntTy},
+			newType("int"),
 			uint32(2),
 			"2",
 		},
 		{
-			abi.Type{Type: reflect.TypeOf(&big.Int{}), T: abi.IntTy},
+			newType("int"),
 			[]uint32{1, 2},
 			"[1 2]",
 		},
 		{
-			abi.Type{Type: reflect.TypeOf(&big.Int{}), T: abi.IntTy},
+			newType("int"),
 			uint64(2),
 			"2",
 		},
 		{
-			abi.Type{Type: reflect.TypeOf(&big.Int{}), T: abi.IntTy},
+			newType("int"),
 			[]uint64{1, 2},
 			"[1 2]",
 		},
 		{
-			abi.Type{Type: reflect.TypeOf(&big.Int{}), T: abi.IntTy},
+			newType("int"),
 			big.NewInt(2),
 			"2",
 		},
 		{
-			abi.Type{Type: reflect.TypeOf(&big.Int{}), T: abi.IntTy},
+			newType("int"),
 			[]*big.Int{big.NewInt(1), big.NewInt(2)},
 			"[1 2]",
 		},
 		{
-			abi.Type{Type: reflect.TypeOf(&big.Int{}), T: abi.IntTy},
+			newType("int"),
 			int8(-2),
 			"-2",
 		},
 		{
-			abi.Type{Type: reflect.TypeOf(&big.Int{}), T: abi.IntTy},
+			newType("int"),
 			[]int8{-1, -2},
 			"[-1 -2]",
 		},
 		{
-			abi.Type{Type: reflect.TypeOf(&big.Int{}), T: abi.IntTy},
+			newType("int"),
 			int16(-2),
 			"-2",
 		},
 		{
-			abi.Type{Type: reflect.TypeOf(&big.Int{}), T: abi.IntTy},
+			newType("int"),
 			[]int16{-1, -2},
 			"[-1 -2]",
 		},
 		{
-			abi.Type{Type: reflect.TypeOf(&big.Int{}), T: abi.IntTy},
+			newType("int"),
 			int32(-2),
 			"-2",
 		},
 		{
-			abi.Type{Type: reflect.TypeOf(&big.Int{}), T: abi.IntTy},
+			newType("int"),
 			[]int32{-1, -2},
 			"[-1 -2]",
 		},
 		{
-			abi.Type{Type: reflect.TypeOf(&big.Int{}), T: abi.IntTy},
+			newType("int"),
 			int64(-2),
 			"-2",
 		},
 		{
-			abi.Type{Type: reflect.TypeOf(&big.Int{}), T: abi.IntTy},
+			newType("int"),
 			[]int64{-1, -2},
 			"[-1 -2]",
 		},
 		{
-			abi.Type{Type: reflect.TypeOf(byte(0)), T: abi.FixedBytesTy},
+			newType("bytes32"),
 			[32]byte{1},
 			"0x0100000000000000000000000000000000000000000000000000000000000000",
 		},
 		{
-			abi.Type{Type: reflect.TypeOf(ethcommon.Address{}), T: abi.AddressTy},
+			newType("address"),
 			ethcommon.HexToAddress("01"),
 			"0x0000000000000000000000000000000000000001",
 		},
@@ -185,6 +185,11 @@ func TestFormatNonIndexedArg(t *testing.T) {
 		}
 	}
 
+}
+
+func newType(typeString string) abi.Type {
+	t, _ := abi.NewType(typeString, "", nil)
+	return t
 }
 
 func TestDecode(t *testing.T) {

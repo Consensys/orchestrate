@@ -51,7 +51,7 @@ func TestGetIndexedCount(t *testing.T) {
 		"Unknown":      0,
 	}
 	for i, e := range erc20ABI.Events {
-		c := getIndexedCount(e)
+		c := getIndexedCount(&e)
 		assert.Equal(t, expected[i], c)
 	}
 }

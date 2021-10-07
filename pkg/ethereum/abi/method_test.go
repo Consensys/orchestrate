@@ -5,7 +5,6 @@ package abi
 import (
 	"testing"
 
-	"github.com/consensys/orchestrate/pkg/go-ethereum/v1_9_12/accounts/abi"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -32,7 +31,7 @@ func TestSignatureToMethod(t *testing.T) {
 
 	tests := []struct {
 		sig    string
-		result *abi.Method
+		result *Method
 		err    bool
 	}{
 		// {sig: "FunctionTest(address[3])", result: abi.Method{}, err: nil},

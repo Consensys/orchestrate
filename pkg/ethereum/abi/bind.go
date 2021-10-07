@@ -8,7 +8,7 @@ import (
 	"strconv"
 
 	"github.com/consensys/orchestrate/pkg/errors"
-	ethabi "github.com/consensys/orchestrate/pkg/go-ethereum/v1_9_12/accounts/abi"
+	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 )
@@ -18,11 +18,11 @@ const falseStr = "false"
 
 // BindArgs cast string arguments into expected go-ethereum types
 func BindArgs(arguments *ethabi.Arguments, args ...string) ([]interface{}, error) {
-	if arguments.LengthNonIndexed() != len(args) {
+	if len(arguments.NonIndexed()) != len(args) {
 		return nil,
 			errors.InvalidArgsCountError(
 				"invalid arguments count (expected %v but got %v)",
-				arguments.LengthNonIndexed(), len(args),
+				len(arguments.NonIndexed()), len(args),
 			)
 	}
 
@@ -55,7 +55,7 @@ func BindArg(t *ethabi.Type, arg string) (interface{}, error) {
 		if len(data) > t.Size {
 			return nil, errors.InvalidArgError("invalid fixed bytes %s of size %d - too big for %s", arg, len(data), t.String())
 		}
-		array := reflect.New(t.Type).Elem()
+		array := reflect.New(t.GetType()).Elem()
 
 		data = ethcommon.LeftPadBytes(data, t.Size)
 		reflect.Copy(array, reflect.ValueOf(data[0:t.Size]))
@@ -150,8 +150,8 @@ func checkArgNumber(arg string) (isNeg, hasHexPrefix bool, err error) {
 
 func bindBigIntArg(t *ethabi.Type, arg string, isNegative, has0xPrefix bool) (interface{}, error) {
 	// Check that it is a pointer to big int
-	if t.Kind != reflect.Ptr {
-		return nil, errors.InvalidArgError("invalid type for %s - expected type kind %s but got %s", arg, reflect.Ptr, t.Kind)
+	if t.GetType().Kind() != reflect.Ptr {
+		return nil, errors.InvalidArgError("invalid type for %s - expected type kind %s but got %s", arg, reflect.Ptr, t.String())
 	}
 
 	base := 10
@@ -232,7 +232,7 @@ func bindUintArg(t *ethabi.Type, arg string, has0xPrefix bool) (interface{}, err
 
 func bindArrayArg(t *ethabi.Type, arg string) (interface{}, error) {
 	elemType, _ := ethabi.NewType(t.Elem.String(), "", nil)
-	slice := reflect.MakeSlice(reflect.SliceOf(elemType.Type), 0, 0)
+	slice := reflect.MakeSlice(reflect.SliceOf(elemType.GetType()), 0, 0)
 
 	var argArray []string
 	err := json.Unmarshal([]byte(arg), &argArray)

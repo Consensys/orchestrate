@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/consensys/orchestrate/pkg/errors"
-	ethabi "github.com/consensys/orchestrate/pkg/go-ethereum/v1_9_12/accounts/abi"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	"github.com/consensys/orchestrate/pkg/toolkit/database"
 	"github.com/consensys/orchestrate/pkg/types/entities"
@@ -12,6 +11,7 @@ import (
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
 	"github.com/consensys/orchestrate/services/api/store"
 	"github.com/consensys/orchestrate/services/api/store/models"
+	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -117,14 +117,14 @@ func (uc *registerContractUseCase) Execute(ctx context.Context, contract *entiti
 
 func getMethods(contractAbi *ethabi.ABI, deployedBytecode string, codeHash common.Hash, methodJSONs map[string]string) []*models.MethodModel {
 	var methods []*models.MethodModel
+	// nolint
 	for _, m := range contractAbi.Methods {
-		method := m
-		sel := sigHashToSelector(method.ID())
+		sel := sigHashToSelector(m.ID)
 		if deployedBytecode != "" {
 			methods = append(methods, &models.MethodModel{
 				Codehash: codeHash.Hex(),
 				Selector: sel,
-				ABI:      methodJSONs[method.Sig()],
+				ABI:      methodJSONs[m.Sig],
 			})
 		}
 	}
@@ -134,15 +134,15 @@ func getMethods(contractAbi *ethabi.ABI, deployedBytecode string, codeHash commo
 
 func getEvents(contractAbi *ethabi.ABI, deployedBytecode string, codeHash common.Hash, eventJSONs map[string]string) []*models.EventModel {
 	var events []*models.EventModel
+	// nolint
 	for _, e := range contractAbi.Events {
-		event := e
-		indexedCount := getIndexedCount(event)
+		indexedCount := getIndexedCount(&e)
 		if deployedBytecode != "" {
 			events = append(events, &models.EventModel{
 				Codehash:          codeHash.Hex(),
-				SigHash:           event.ID().Hex(),
+				SigHash:           e.ID.Hex(),
 				IndexedInputCount: indexedCount,
-				ABI:               eventJSONs[event.Sig()],
+				ABI:               eventJSONs[e.Sig],
 			})
 		}
 	}

@@ -1,11 +1,7 @@
 package abi
 
-import (
-	ethabi "github.com/consensys/orchestrate/pkg/go-ethereum/v1_9_12/accounts/abi"
-)
-
 // Pack automatically cast string args into correct Solidity type and pack arguments
-func Pack(method *ethabi.Method, args ...string) ([]byte, error) {
+func Pack(method *Method, args ...string) ([]byte, error) {
 	// Cast arguments
 	boundArgs, err := BindArgs(&method.Inputs, args...)
 	if err != nil {

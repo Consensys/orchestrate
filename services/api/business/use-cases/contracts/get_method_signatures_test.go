@@ -42,7 +42,7 @@ func TestGetMethodSignatures_Execute(t *testing.T) {
 		signatures, err := usecase.Execute(ctx, contract.Name, contract.Tag, constructorMethodName)
 
 		assert.NoError(t, err)
-		assert.Equal(t, signatures[0], "constructor()")
+		assert.Equal(t, signatures[0], "constructor")
 	})
 
 	t.Run("should execute use case successfully and return an empty array if nothing is found", func(t *testing.T) {

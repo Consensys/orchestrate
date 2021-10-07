@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/consensys/orchestrate/pkg/errors"
-	ethabi "github.com/consensys/orchestrate/pkg/go-ethereum/v1_9_12/accounts/abi"
+	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
 )
 
 const DefaultTagValue = "latest"
@@ -26,12 +26,12 @@ type Contract struct {
 
 type Method struct {
 	Signature string `json:"signature" example:"transfer(address,uint256)"`
-	ABI       string `json:"abi" example:"[{anonymous: false, inputs: [{indexed: false, name: account, type: address}, name: MinterAdded, type: event}]}]"`
+	ABI       string `json:"abi,omitempty" example:"[{anonymous: false, inputs: [{indexed: false, name: account, type: address}, name: MinterAdded, type: event}]}]"`
 }
 
 type Event struct {
 	Signature string `json:"signature" example:"transfer(address,uint256)"`
-	ABI       string `json:"abi" example:"[{anonymous: false, inputs: [{indexed: false, name: account, type: address}, name: MinterAdded, type: event}]}]"`
+	ABI       string `json:"abi,omitempty" example:"[{anonymous: false, inputs: [{indexed: false, name: account, type: address}, name: MinterAdded, type: event}]}]"`
 }
 
 type Arguments struct {

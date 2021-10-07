@@ -4,7 +4,7 @@ x-default-variables: &default-variables
   API_URL: ${API_URL-http://api:8081}
   API_METRICS_URL: ${API_METRICS_URL-http://api:8082}
   KEY_MANAGER_URL: ${KEY_MANAGER_URL-https://quorum-key-manager:8080}
-  KEY_MANAGER_METRICS_URL: ${KEY_MANAGER_URL-http://quorum-key-manager:8081}
+  KEY_MANAGER_METRICS_URL: ${KEY_MANAGER_URL-https://quorum-key-manager:8081}
   KEY_MANAGER_STORE_NAME: ${KEY_MANAGER_STORE_NAME-}
   KEY_MANAGER_TLS_SKIP_VERIFY: ${KEY_MANAGER_TLS_SKIP_VERIFY-}
   KEY_MANAGER_API_KEY: ${KEY_MANAGER_API_KEY-}

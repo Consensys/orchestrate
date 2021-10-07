@@ -52,7 +52,6 @@ func (uc *sendContractTxUseCase) computeTxData(method string, args []interface{}
 	}
 
 	txDataBytes, err := crafter.CraftCall(method, sArgs...)
-
 	if err != nil {
 		errMessage := "invalid method signature"
 		uc.logger.WithError(err).WithField("method", method).WithField("args", args).Error(errMessage)

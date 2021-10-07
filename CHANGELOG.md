@@ -5,6 +5,11 @@
 * Integration of Quorum Key Manager as replacement of Orchestrate Key Manager service
 * Removed endpoints `/accounts/{address}/sign` and `/accounts/{address}/verify-signature` in favor of `/accounts/{address}/sign-message` and `/accounts/verify-message` accordingly to EIP-191 standards
 
+## v21.1.9 (WIP)
+### 🛠 Bug fixes
+* Incorrect server name verification using Postgres in `verify-ca` mode 
+* Tx-sender exits sending Tessera private transaction with invalid 'from'
+
 ## v21.1.8 (2021-08-25)
 ### 🛠 Bug fixes
 * Wrong tenant assigment when API_KEY was not defined

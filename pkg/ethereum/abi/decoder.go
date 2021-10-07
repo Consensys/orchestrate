@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/consensys/orchestrate/pkg/go-ethereum/v1_9_12/accounts/abi"
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 
@@ -36,9 +36,9 @@ func FormatIndexedArg(t *abi.Type, arg ethcommon.Hash) (string, error) {
 	case abi.AddressTy:
 		return ethcommon.HexToAddress(arg.Hex()).Hex(), nil
 	case abi.FixedBytesTy:
-		return fmt.Sprintf("%v", hexutil.Encode(arg[ethcommon.HashLength-t.Type.Size():])), nil
+		return fmt.Sprintf("%v", hexutil.Encode(arg[ethcommon.HashLength-t.Size:])), nil
 	case abi.BytesTy, abi.ArrayTy, abi.TupleTy:
-		return "", errors.FeatureNotSupportedError("not supported go-ethereum type %q", t.Kind)
+		return "", errors.FeatureNotSupportedError("not supported go-ethereum type %s", t.String())
 	default:
 		return fmt.Sprintf("%v", arg), nil
 	}
@@ -62,11 +62,11 @@ func GetElemType(t *abi.Type) (abi.Type, error) {
 		// Simple struct containing elementary types
 		nestedTypes := regexp.MustCompile(`\((.*?)\)`).FindStringSubmatch(fmt.Sprintf("%v", t.Elem))
 		nestedTypesList := strings.Split(nestedTypes[1], ",")
-		tupleArgs := make([]abi.ArgumentMarshaling, t.Type.Elem().NumField())
+		tupleArgs := make([]abi.ArgumentMarshaling, t.GetType().Elem().NumField())
 
-		for i := 0; i < t.Type.Elem().NumField(); i++ {
+		for i := 0; i < t.GetType().Elem().NumField(); i++ {
 			tupleArgs[i] = abi.ArgumentMarshaling{
-				Name: t.Type.Elem().Field(i).Name,
+				Name: t.GetType().Elem().Field(i).Name,
 				Type: nestedTypesList[i],
 			}
 		}
@@ -151,13 +151,13 @@ func FormatNonIndexedArg(t *abi.Type, arg interface{}) (string, error) {
 	case abi.TupleTy:
 		return FormatNonIndexedTupleArg(t, arg)
 	default:
-		return "", errors.FeatureNotSupportedError("not supported go-ethereum type %q", t.Kind)
+		return "", errors.FeatureNotSupportedError("not supported go-ethereum type %s", t.String())
 	}
 }
 
 // Decode event data to string
 func Decode(event *abi.Event, txLog *ethereum.Log) (map[string]string, error) {
-	expectedTopics := len(event.Inputs) - event.Inputs.LengthNonIndexed()
+	expectedTopics := len(event.Inputs) - len(event.Inputs.NonIndexed())
 	if expectedTopics != len(txLog.Topics)-1 {
 		return nil, errors.InvalidTopicsCountError(
 			"invalid topics count (expected %v but got %v)",

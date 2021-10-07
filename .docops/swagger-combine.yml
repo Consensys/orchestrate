@@ -11,6 +11,3 @@ externalDocs:
   url: "https://docs.orchestrate.consensys.net/"
 apis:
   - url: 'public/swagger-specs/services/api/swagger.json'
-    tags:
-      add:
-        - "Orchestrate API"

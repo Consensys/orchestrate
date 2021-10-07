@@ -6,7 +6,7 @@ import (
 
 	pkgjson "github.com/consensys/orchestrate/pkg/encoding/json"
 	"github.com/consensys/orchestrate/pkg/errors"
-	ethabi "github.com/consensys/orchestrate/pkg/go-ethereum/v1_9_12/accounts/abi"
+	ethabi "github.com/consensys/orchestrate/pkg/ethereum/abi"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 )

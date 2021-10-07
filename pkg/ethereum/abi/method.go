@@ -5,11 +5,11 @@ import (
 	"strings"
 
 	"github.com/consensys/orchestrate/pkg/errors"
-	ethabi "github.com/consensys/orchestrate/pkg/go-ethereum/v1_9_12/accounts/abi"
+	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
 )
 
-func ParseMethod(methodABI []byte) (*ethabi.Method, error) {
-	var method *ethabi.Method
+func ParseMethod(methodABI []byte) (*Method, error) {
+	var method *Method
 	err := json.Unmarshal(methodABI, &method)
 	if err != nil {
 		return nil, err
@@ -18,13 +18,13 @@ func ParseMethod(methodABI []byte) (*ethabi.Method, error) {
 }
 
 // ParseMethodSignature create a method from a method signature string
-func ParseMethodSignature(methodSig string) (*ethabi.Method, error) {
+func ParseMethodSignature(methodSig string) (*Method, error) {
 	splt := strings.Split(methodSig, "(")
 	if len(splt) != 2 || splt[0] == "" || splt[1] == "" { // || splt[1][len(splt[1])-1:] != ")" {
 		return nil, errors.InvalidSignatureError("Invalid method signature %q", methodSig)
 	}
 
-	method := &ethabi.Method{
+	method := &Method{
 		RawName: splt[0],
 		Const:   false,
 		Inputs:  ethabi.Arguments{},
