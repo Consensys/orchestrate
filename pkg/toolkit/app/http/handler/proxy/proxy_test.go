@@ -11,7 +11,7 @@ import (
 
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/config/dynamic"
 	"github.com/consensys/orchestrate/pkg/utils"
-	"github.com/containous/traefik/v2/pkg/testhelpers"
+	"github.com/traefik/traefik/v2/pkg/testhelpers"
 	"github.com/oxtoacart/bpool"
 )
 

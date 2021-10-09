@@ -92,14 +92,26 @@ services:
 
   vault:
     <<: *container-common
-    image: library/vault:1.6.2
+    image: consensys/quorum-hashicorp-vault-plugin:v1.1.1
     tty: true
+    restart: "no"
     cap_add:
       - IPC_LOCK
     volumes:
-      - vault-plugin:/vault/plugins
-      - ./hashicorp/config/config.hcl:/vault/config.hcl:ro
-    entrypoint: vault server -config=/vault/config.hcl
+      - vault-token:/vault/token
+      - ./hashicorp/config.hcl:/vault/config.hcl:ro
+    environment:
+      ROOT_TOKEN_PATH: /vault/token/.root
+      VAULT_ADDR: http://vault:8200
+      PLUGIN_MOUNT_PATH: orchestrate
+      PLUGIN_PATH: /vault/plugins
+      VAULT_IS_READY: /vault/token/.ready
+    entrypoint:
+      - sh
+      - -c
+      - |
+        ( sleep 2 && vault-init.sh && cat > $${VAULT_IS_READY} ) &
+         vault server -config=/vault/config.hcl
     ports:
       - 8200:8200
     healthcheck:
@@ -109,43 +121,36 @@ services:
       retries: 10
       start_period: 5s
 
-  vault-init:
-    <<: *container-common
-    build: ./hashicorp
-    environment:
-      VAULT_ADDR: ${VAULT_ADDR-http://vault:8200}
-      PLUGIN_PATH: ${PLUGIN_PATH-/vault/plugins}
-      TOKEN_PATH: ${TOKEN_PATH-/vault/token}
-      PLUGIN_VERSION: ${PLUGIN_VERSION-v0.0.11}
-    restart: "no"
-    depends_on:
-      - vault
-    volumes:
-      - vault-token:/vault/token
-      - vault-plugin:/vault/plugins
-      - ./hashicorp/init.sh:/init.sh
-      - ./hashicorp/plugin.sh:/plugin.sh
-    command: >
-      sh -c "./plugin.sh && ./init.sh"
-
   vault-agent:
     <<: *container-common
-    image: library/vault:1.6.2
+    image: consensys/quorum-hashicorp-vault-plugin:v1.1.1
     tty: true
     depends_on:
       - vault
-      - vault-init
     cap_add:
       - IPC_LOCK
+    environment:
+      ROOT_TOKEN_PATH: /vault/token/.root
+      VAULT_ADDR: http://vault:8200
+      PLUGIN_MOUNT_PATH: orchestrate
+      SECRET_FILE_PATH: /vault/token/secret
+      ROLE_FILE_PATH: /vault/token/role
+      VAULT_IS_READY: /vault/token/.ready
     volumes:
       - vault-token:/vault/token
-      - ./hashicorp/config/agent-config.hcl:/vault/config.hcl:ro
-    entrypoint: vault agent -config=/vault/config.hcl
+      - ./hashicorp/agent-config.hcl:/vault/config.hcl:ro
+      - ./hashicorp/agent-init.sh:/usr/local/bin/agent-init.sh
+    entrypoint:
+      - sh
+      - -c
+      - |
+
+        agent-init.sh
+        vault agent -config=/vault/config.hcl
 
   quorum-key-manager-migration:
     <<: *container-common
-    image: docker.consensys.net/pub/quorum-key-manager:v21.9.0
-    #    image: quorum-key-manager:local
+    image: consensys/quorum-key-manager:v21.9.1
     environment:
       <<: *qkm-common
     restart: "no"
@@ -153,7 +158,7 @@ services:
 
   quorum-key-manager:
     <<: *container-common
-    image: docker.consensys.net/pub/quorum-key-manager:v21.9.0
+    image: consensys/quorum-key-manager:v21.9.1
     depends_on:
       - vault
       - quorum-key-manager-migration

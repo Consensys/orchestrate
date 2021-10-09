@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	"github.com/consensys/orchestrate/tests/service/e2e/utils"
-	"github.com/containous/traefik/v2/pkg/log"
+	"github.com/traefik/traefik/v2/pkg/log"
 )
 
 // Registry allows to store aliases

@@ -18,20 +18,19 @@ import (
 	redis2 "github.com/consensys/orchestrate/pkg/toolkit/database/redis"
 	ethclient "github.com/consensys/orchestrate/pkg/toolkit/ethclient/rpc"
 	integrationtest "github.com/consensys/orchestrate/pkg/toolkit/integration-test"
-	txsender "github.com/consensys/orchestrate/services/tx-sender"
-	"github.com/consensys/orchestrate/services/tx-sender/store"
-	"github.com/consensys/orchestrate/services/tx-sender/store/redis"
-	qkmclient "github.com/consensys/quorum-key-manager/pkg/client"
-	"gopkg.in/h2non/gock.v1"
-	"k8s.io/apimachinery/pkg/util/rand"
-
 	"github.com/consensys/orchestrate/pkg/toolkit/integration-test/docker"
 	"github.com/consensys/orchestrate/pkg/toolkit/integration-test/docker/config"
 	kafkaDocker "github.com/consensys/orchestrate/pkg/toolkit/integration-test/docker/container/kafka"
 	"github.com/consensys/orchestrate/pkg/toolkit/integration-test/docker/container/zookeeper"
-	"github.com/containous/traefik/v2/pkg/log"
+	"github.com/consensys/orchestrate/pkg/utils"
+	txsender "github.com/consensys/orchestrate/services/tx-sender"
+	"github.com/consensys/orchestrate/services/tx-sender/store"
+	"github.com/consensys/orchestrate/services/tx-sender/store/redis"
+	qkmclient "github.com/consensys/quorum-key-manager/pkg/client"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	"github.com/traefik/traefik/v2/pkg/log"
+	"gopkg.in/h2non/gock.v1"
 )
 
 const kafkaContainerID = "Kafka-tx-sender"
@@ -61,8 +60,8 @@ type IntegrationEnvironment struct {
 
 func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, error) {
 	logger := log.FromContext(ctx)
-	envMetricsPort = strconv.Itoa(rand.IntnRange(30000, 38082))
-	envKafkaHostPort = strconv.Itoa(rand.IntnRange(20000, 29092))
+	envMetricsPort = strconv.Itoa(utils.RandIntRange(30000, 38082))
+	envKafkaHostPort = strconv.Itoa(utils.RandIntRange(20000, 29092))
 
 	// Define external hostname
 	kafkaExternalHostname := os.Getenv("KAFKA_HOST")

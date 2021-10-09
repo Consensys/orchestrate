@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"strings"
 
-	traefiklog "github.com/containous/traefik/v2/pkg/log"
-	traefiktypes "github.com/containous/traefik/v2/pkg/types"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	traefiklog "github.com/traefik/traefik/v2/pkg/log"
+	traefiktypes "github.com/traefik/traefik/v2/pkg/types"
 )
 
 func init() {

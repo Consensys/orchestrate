@@ -3,13 +3,8 @@ package hashicorp
 import (
 	"context"
 	"fmt"
-	"io"
 	"net/http"
-	"os"
 	"time"
-
-	"github.com/docker/docker/api/types/mount"
-	api2 "github.com/hashicorp/vault/api"
 
 	httputils "github.com/consensys/orchestrate/pkg/toolkit/app/http"
 	log "github.com/sirupsen/logrus"
@@ -19,23 +14,20 @@ import (
 	"github.com/docker/go-connections/nat"
 )
 
-const defaultHashicorpVaultImage = "library/vault:1.8.2"
+const defaultHashicorpVaultImage = "consensys/quorum-hashicorp-vault-plugin:v1.1.1"
 const defaultHostPort = "8200"
 const defaultRootToken = "myRoot"
 const defaultHost = "localhost"
-const pluginFileName = "orchestrate-hashicorp-vault-plugin"
-const pluginVersion = "v0.0.11"
 const defaultMountPath = "orchestrate"
 
 type Vault struct{}
 
 type Config struct {
-	Image                 string
-	Host                  string
-	Port                  string
-	RootToken             string
-	MonthPath             string
-	PluginSourceDirectory string
+	Image     string
+	Host      string
+	Port      string
+	RootToken string
+	MonthPath string
 }
 
 func NewDefault() *Config {
@@ -71,20 +63,6 @@ func (cfg *Config) SetMountPath(mountPath string) *Config {
 	return cfg
 }
 
-func (cfg *Config) SetPluginSourceDirectory(dir string) *Config {
-	cfg.PluginSourceDirectory = dir
-	return cfg
-}
-
-func (cfg *Config) DownloadPlugin() error {
-	url := fmt.Sprintf("https://github.com/consensys/orchestrate-hashicorp-vault-plugin/releases/download/%s/%s", pluginVersion, pluginFileName)
-	err := downloadPlugin(fmt.Sprintf("%s/%s", cfg.PluginSourceDirectory, pluginFileName), url)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func (vault *Vault) GenerateContainerConfig(_ context.Context, configuration interface{}) (*dockercontainer.Config, *dockercontainer.HostConfig, *network.NetworkingConfig, error) {
 	cfg, ok := configuration.(*Config)
 	if !ok {
@@ -94,25 +72,23 @@ func (vault *Vault) GenerateContainerConfig(_ context.Context, configuration int
 	containerCfg := &dockercontainer.Config{
 		Image: cfg.Image,
 		Env: []string{
+			fmt.Sprintf("PLUGIN_MOUNT_PATH=%v", cfg.MonthPath),
 			fmt.Sprintf("VAULT_DEV_ROOT_TOKEN_ID=%v", cfg.RootToken),
 		},
 		ExposedPorts: nat.PortSet{
 			"8200/tcp": struct{}{},
 		},
 		Tty: true,
-		Cmd: []string{"server", "-dev", "-dev-plugin-dir=/vault/plugins", "-log-level=debug"},
+		Entrypoint: []string{"sh", "-c", `
+		(sleep 2 ; vault-init-dev.sh)&
+		vault server -dev -dev-plugin-dir=/vault/plugins -dev-listen-address="0.0.0.0:8200" -log-level=debug
+		`},
 	}
 
 	hostConfig := &dockercontainer.HostConfig{
 		CapAdd: []string{"IPC_LOCK"},
-		Mounts: []mount.Mount{
-			{
-				Type:   mount.TypeBind,
-				Source: cfg.PluginSourceDirectory,
-				Target: "/vault/plugins",
-			},
-		},
 	}
+
 	if cfg.Port != "" {
 		hostConfig.PortBindings = nat.PortMap{
 			"8200/tcp": []nat.PortBinding{{HostIP: "0.0.0.0", HostPort: cfg.Port}},
@@ -120,27 +96,6 @@ func (vault *Vault) GenerateContainerConfig(_ context.Context, configuration int
 	}
 
 	return containerCfg, hostConfig, nil, nil
-}
-
-func (vault *Vault) enablePlugin(serverAddr, rootToken, mountPath string) error {
-	// Enable orchestrate secret engine
-	vaultClient, err := api2.NewClient(&api2.Config{
-		Address: serverAddr,
-	})
-	if err != nil {
-		return err
-	}
-
-	vaultClient.SetToken(rootToken)
-	return vaultClient.Sys().Mount(mountPath, &api2.MountInput{
-		Type:        "plugin",
-		Description: "Orchestrate Wallets",
-		Config: api2.MountConfigInput{
-			ForceNoCache:              true,
-			PassthroughRequestHeaders: []string{"X-Vault-Namespace"},
-		},
-		PluginName: pluginFileName,
-	})
 }
 
 func (vault *Vault) WaitForService(ctx context.Context, configuration interface{}, timeout time.Duration) error {
@@ -184,31 +139,5 @@ waitForServiceLoop:
 		return cerr
 	}
 
-	if err := vault.enablePlugin(serverAddr, cfg.RootToken, cfg.MonthPath); err != nil {
-		return err
-	}
-
 	return nil
-}
-
-func downloadPlugin(filepath, url string) error {
-	resp, err := http.Get(url)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	out, err := os.Create(filepath)
-	if err != nil {
-		return err
-	}
-	defer out.Close()
-
-	err = os.Chmod(filepath, 0777)
-	if err != nil {
-		return err
-	}
-
-	_, err = io.Copy(out, resp.Body)
-	return err
 }

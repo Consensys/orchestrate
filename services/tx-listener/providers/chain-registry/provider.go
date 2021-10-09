@@ -12,8 +12,8 @@ import (
 
 	"github.com/cenkalti/backoff/v4"
 	"github.com/consensys/orchestrate/services/tx-listener/dynamic"
-	"github.com/containous/traefik/v2/pkg/job"
-	"github.com/containous/traefik/v2/pkg/safe"
+	"github.com/traefik/traefik/v2/pkg/job"
+	"github.com/traefik/traefik/v2/pkg/safe"
 )
 
 const component = "tx-listener.chain-registry.provider"

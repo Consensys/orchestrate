@@ -3,8 +3,8 @@ package dashboard
 import (
 	"net/http"
 
-	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/gorilla/mux"
+	"github.com/traefik/traefik/v2/pkg/log"
 )
 
 // UI exposes dashboard user interface

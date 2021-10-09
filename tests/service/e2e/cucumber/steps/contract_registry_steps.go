@@ -7,9 +7,9 @@ import (
 	authutils "github.com/consensys/orchestrate/pkg/toolkit/app/auth/utils"
 	"github.com/consensys/orchestrate/pkg/types/api"
 	"github.com/consensys/orchestrate/tests/service/e2e/utils"
-	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/cucumber/godog"
 	gherkin "github.com/cucumber/messages-go/v10"
+	"github.com/traefik/traefik/v2/pkg/log"
 )
 
 func (sc *ScenarioContext) iRegisterTheFollowingContract(table *gherkin.PickleStepArgument_PickleTable) error {

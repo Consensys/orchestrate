@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/containous/traefik/v2/pkg/log"
+	"github.com/traefik/traefik/v2/pkg/log"
 )
 
 func WaitForServiceLive(ctx context.Context, url, name string, timeout time.Duration) {

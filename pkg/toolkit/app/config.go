@@ -5,9 +5,9 @@ import (
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/configwatcher"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	metricsregister "github.com/consensys/orchestrate/pkg/toolkit/app/metrics/registry"
-	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
-	traefiktypes "github.com/containous/traefik/v2/pkg/types"
 	"github.com/spf13/viper"
+	traefikstatic "github.com/traefik/traefik/v2/pkg/config/static"
+	traefiktypes "github.com/traefik/traefik/v2/pkg/types"
 )
 
 type Config struct {

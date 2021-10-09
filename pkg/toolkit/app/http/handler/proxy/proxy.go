@@ -16,10 +16,10 @@ import (
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/config/dynamic"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/httputil"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/middleware/loadbalancer"
-	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
-	"github.com/containous/traefik/v2/pkg/log"
-	"github.com/containous/traefik/v2/pkg/types"
 	"github.com/oxtoacart/bpool"
+	traefiktypes "github.com/traefik/paerser/types"
+	traefikstatic "github.com/traefik/traefik/v2/pkg/config/static"
+	"github.com/traefik/traefik/v2/pkg/log"
 )
 
 // StatusClientClosedRequest non-standard HTTP status code for client disconnection
@@ -77,7 +77,7 @@ func (b *Builder) Build(ctx context.Context, name string, configuration interfac
 }
 
 func New(cfg *dynamic.ReverseProxy, transport http.RoundTripper, pool gohttputil.BufferPool, respModifier func(*http.Response) error) (*gohttputil.ReverseProxy, error) {
-	var flushInterval types.Duration
+	var flushInterval traefiktypes.Duration
 	if cfg.ResponseForwarding != nil && cfg.ResponseForwarding.FlushInterval != "" {
 		err := flushInterval.Set(cfg.ResponseForwarding.FlushInterval)
 		if err != nil {
@@ -86,7 +86,7 @@ func New(cfg *dynamic.ReverseProxy, transport http.RoundTripper, pool gohttputil
 	}
 
 	if flushInterval == 0 {
-		flushInterval = types.Duration(100 * time.Millisecond)
+		flushInterval = traefiktypes.Duration(100 * time.Millisecond)
 	}
 
 	return &gohttputil.ReverseProxy{

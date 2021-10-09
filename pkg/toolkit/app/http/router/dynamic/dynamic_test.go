@@ -9,10 +9,10 @@ import (
 	testutilsdynamic "github.com/consensys/orchestrate/pkg/toolkit/app/http/config/dynamic/testutils"
 	mhandler "github.com/consensys/orchestrate/pkg/toolkit/app/http/handler/mock"
 	mmiddleware "github.com/consensys/orchestrate/pkg/toolkit/app/http/middleware/mock"
-	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
-	traefiktypes "github.com/containous/traefik/v2/pkg/types"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
+	traefikstatic "github.com/traefik/traefik/v2/pkg/config/static"
+	traefiktypes "github.com/traefik/traefik/v2/pkg/types"
 )
 
 func TestBuilder(t *testing.T) {

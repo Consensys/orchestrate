@@ -5,7 +5,7 @@ import (
 
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/config/dynamic"
-	traefikdynamic "github.com/containous/traefik/v2/pkg/config/dynamic"
+	traefikdynamic "github.com/traefik/traefik/v2/pkg/config/dynamic"
 )
 
 func AddDynamicConfig(cfg *dynamic.Configuration) {

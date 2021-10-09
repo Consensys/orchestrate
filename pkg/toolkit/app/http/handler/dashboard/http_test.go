@@ -15,7 +15,7 @@ import (
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/config/dynamic"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/config/runtime"
 	"github.com/consensys/orchestrate/pkg/utils"
-	traefikdynamic "github.com/containous/traefik/v2/pkg/config/dynamic"
+	traefikdynamic "github.com/traefik/traefik/v2/pkg/config/dynamic"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

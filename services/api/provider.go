@@ -13,7 +13,7 @@ import (
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/configwatcher/provider/static"
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
 	"github.com/consensys/orchestrate/services/api/proxy"
-	traefikdynamic "github.com/containous/traefik/v2/pkg/config/dynamic"
+	traefikdynamic "github.com/traefik/traefik/v2/pkg/config/dynamic"
 )
 
 const (

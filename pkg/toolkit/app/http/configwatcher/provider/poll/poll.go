@@ -8,7 +8,7 @@ import (
 	"github.com/cenkalti/backoff/v4"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/configwatcher/provider"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
-	"github.com/containous/traefik/v2/pkg/job"
+	"github.com/traefik/traefik/v2/pkg/job"
 )
 
 type Provider struct {

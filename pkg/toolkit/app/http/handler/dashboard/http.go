@@ -11,8 +11,8 @@ import (
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/config/runtime"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/configwatcher/provider"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/httputil"
-	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/gorilla/mux"
+	"github.com/traefik/traefik/v2/pkg/log"
 )
 
 // InfosResponse  information exposed by the API handler.

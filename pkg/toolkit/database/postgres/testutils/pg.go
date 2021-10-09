@@ -3,11 +3,11 @@ package testutils
 import (
 	"context"
 	"fmt"
+	"strings"
 	"testing"
 
-	"k8s.io/apimachinery/pkg/util/rand"
-
 	"github.com/consensys/orchestrate/pkg/toolkit/database/postgres"
+	"github.com/consensys/orchestrate/pkg/utils"
 	"github.com/go-pg/migrations/v7"
 	"github.com/go-pg/pg/v9"
 	"github.com/spf13/viper"
@@ -59,7 +59,7 @@ func (helper *PGTestHelper) Connect(ctx context.Context, opts *pg.Options) *pg.D
 
 func (helper *PGTestHelper) CreateAndConnect(ctx context.Context, opts *pg.Options) (*pg.DB, error) {
 	if opts.Database == "" {
-		opts.Database = fmt.Sprintf("test_%s", rand.String(10))
+		opts.Database = strings.ToLower(fmt.Sprintf("test_%s", utils.RandString(10)))
 	}
 
 	root := helper.Connect(ctx, helper.opts)
@@ -73,6 +73,7 @@ func (helper *PGTestHelper) CreateAndConnect(ctx context.Context, opts *pg.Optio
 	if err != nil {
 		return nil, err
 	}
+
 	return helper.Connect(ctx, opts), nil
 }
 

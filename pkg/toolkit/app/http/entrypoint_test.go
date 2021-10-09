@@ -17,7 +17,7 @@ import (
 	mock3 "github.com/consensys/orchestrate/pkg/toolkit/app/metrics/mock"
 	mock2 "github.com/consensys/orchestrate/pkg/toolkit/tcp/metrics/mock"
 	"github.com/consensys/orchestrate/pkg/toolkit/tls/generate"
-	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
+	traefikstatic "github.com/traefik/traefik/v2/pkg/config/static"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

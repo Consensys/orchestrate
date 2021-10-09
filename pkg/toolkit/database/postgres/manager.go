@@ -5,9 +5,9 @@ import (
 	"sync"
 
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
-	tlog "github.com/containous/traefik/v2/pkg/log"
 	"github.com/go-pg/pg/v9"
 	"github.com/sirupsen/logrus"
+	tlog "github.com/traefik/traefik/v2/pkg/log"
 )
 
 //go:generate mockgen -source=manager.go -destination=mocks/manager.go -package=mocks

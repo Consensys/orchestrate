@@ -3,8 +3,9 @@ package dynamic
 import (
 	"time"
 
-	traefikdynamic "github.com/containous/traefik/v2/pkg/config/dynamic"
-	traefiktypes "github.com/containous/traefik/v2/pkg/types"
+	traefiktypes2 "github.com/traefik/paerser/types"
+	traefikdynamic "github.com/traefik/traefik/v2/pkg/config/dynamic"
+	traefiktypes "github.com/traefik/traefik/v2/pkg/types"
 
 	"github.com/consensys/orchestrate/pkg/utils"
 )
@@ -211,7 +212,7 @@ func (f *AccessLogFilters) ToTraefikType() *traefiktypes.AccessLogFilters {
 	return &traefiktypes.AccessLogFilters{
 		StatusCodes:   f.StatusCodes,
 		RetryAttempts: f.RetryAttempts,
-		MinDuration:   traefiktypes.Duration(f.MinDuration),
+		MinDuration:   traefiktypes2.Duration(f.MinDuration),
 	}
 }
 

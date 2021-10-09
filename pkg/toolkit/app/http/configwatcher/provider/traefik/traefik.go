@@ -7,9 +7,9 @@ import (
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/config/dynamic"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/configwatcher/provider"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
-	traefikdynamic "github.com/containous/traefik/v2/pkg/config/dynamic"
-	traefikprovider "github.com/containous/traefik/v2/pkg/provider"
-	"github.com/containous/traefik/v2/pkg/safe"
+	traefikdynamic "github.com/traefik/traefik/v2/pkg/config/dynamic"
+	traefikprovider "github.com/traefik/traefik/v2/pkg/provider"
+	"github.com/traefik/traefik/v2/pkg/safe"
 )
 
 type Provider struct {

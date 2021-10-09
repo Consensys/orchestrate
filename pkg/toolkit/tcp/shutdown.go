@@ -4,7 +4,7 @@ import (
 	"context"
 	"io"
 
-	"github.com/containous/traefik/v2/pkg/log"
+	"github.com/traefik/traefik/v2/pkg/log"
 )
 
 type Shutdownable interface {

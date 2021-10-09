@@ -1,7 +1,9 @@
+ARG VERSION=nonroot
+
 ############################
 # STEP 1 build executable Orchestrate binary
 ############################
-FROM golang:1.15-buster AS builder
+FROM golang:1.16-buster AS builder
 
 RUN apt-get update && \
 	apt-get install --no-install-recommends -y \
@@ -24,7 +26,7 @@ RUN upx /bin/main
 ############################
 # STEP 2 build a small image
 ############################
-FROM alpine:3.13
+FROM gcr.io/distroless/static:$VERSION
 
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /etc/passwd /etc/passwd

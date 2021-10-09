@@ -11,8 +11,8 @@ import (
 
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	"github.com/consensys/orchestrate/pkg/toolkit/tcp/metrics"
-	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
 	"github.com/sirupsen/logrus"
+	traefikstatic "github.com/traefik/traefik/v2/pkg/config/static"
 )
 
 const component = "tcp"

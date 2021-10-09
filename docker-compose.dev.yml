@@ -1,0 +1,164 @@
+version: "3.7"
+
+x-default-variables: &default-variables
+  API_URL: ${API_URL-http://api:8081}
+  API_METRICS_URL: ${API_METRICS_URL-http://api:8082}
+  KEY_MANAGER_URL: ${KEY_MANAGER_URL-https://quorum-key-manager:8080}
+  KEY_MANAGER_METRICS_URL: ${KEY_MANAGER_URL-https://quorum-key-manager:8081}
+  KEY_MANAGER_STORE_NAME: ${KEY_MANAGER_STORE_NAME-}
+  KEY_MANAGER_TLS_SKIP_VERIFY: ${KEY_MANAGER_TLS_SKIP_VERIFY-}
+  KEY_MANAGER_API_KEY: ${KEY_MANAGER_API_KEY-}
+  KEY_MANAGER_CLIENT_TLS_CERT: ${KEY_MANAGER_CLIENT_TLS_CERT-}
+  KEY_MANAGER_CLIENT_TLS_KEY: ${KEY_MANAGER_CLIENT_TLS_KEY-}
+  TX_SENDER_METRICS_URL: ${TX_SENDER_METRICS_URL-http://tx-sender:8082}
+  TX_LISTENER_METRICS_URL: ${TX_LISTENER_METRICS_URL-http://tx-listener:8082}
+  ETH_CLIENT_RETRY_MAX_ELAPSED_TIME: 5s
+  LOG_LEVEL: ${LOG_LEVEL-debug}
+  LOG_FORMAT: ${LOG_FORMAT-}
+  LOG_TIMESTAMP: ${LOG_TIMESTAMP-true}
+  NONCE_MANAGER_TYPE: ${NONCE_MANAGER_TYPE-redis}
+  REDIS_HOST: ${REDIS_HOST-redis}
+  REDIS_PORT: ${REDIS_PORT-6379}
+  REDIS_PASSWORD: ${REDIS_PASSWORD-}
+  REDIS_DATABASE: ${REDIS_DATABASE-}
+  REDIS_TLS_ENABLE: ${REDIS_TLS_ENABLE-}
+  REDIS_TLS_CERT: ${REDIS_TLS_CERT-}
+  REDIS_TLS_KEY: ${REDIS_TLS_KEY-}
+  REDIS_TLS_CA: ${REDIS_TLS_CA-}
+  REDIS_EXPIRATION: ${REDIS_EXPIRATION-}
+  REDIS_TLS_SKIP_VERIFY: ${REDIS_TLS_SKIP_VERIFY-}
+  MULTI_TENANCY_ENABLED: ${MULTI_TENANCY_ENABLED-false}
+  AUTH_JWT_CLAIMS_NAMESPACE: ${AUTH_JWT_CLAIMS_NAMESPACE-http://tenant.info/}
+  AUTH_JWT_CERTIFICATE: ${AUTH_JWT_CERTIFICATE-}
+  AUTH_API_KEY: ${AUTH_API_KEY-}
+  KAFKA_URL: ${KAFKA_URL-kafka:29092}
+  KAFKA_SASL_ENABLED: ${KAFKA_SASL_ENABLED-false}
+  KAFKA_SASL_MECHANISM: ${KAFKA_SASL_MECHANISM-PLAIN}
+  KAFKA_SASL_USER: ${KAFKA_SASL_USER-}
+  KAFKA_SASL_PASSWORD: ${KAFKA_SASL_PASSWORD-}
+  KAFKA_TLS_ENABLED: ${KAFKA_TLS_ENABLED-false}
+  KAFKA_TLS_INSECURE_SKIP_VERIFY: ${KAFKA_TLS_INSECURE_SKIP_VERIFY-false}
+  KAFKA_NUM_CONSUMERS: ${KAFKA_NUM_CONSUMERS-}
+  DB_TLS_SSLMODE: ${DB_TLS_SSLMODE-}
+  DB_TLS_CERT: ${DB_TLS_CERT-}
+  DB_TLS_KEY: ${DB_TLS_KEY-}
+  DB_TLS_CA: ${DB_TLS_CA-}
+  DB_HOST: ${DB_HOST-}
+  DB_PORT: ${DB_PORT-}
+  DB_DATABASE: ${DB_DATABASE-}
+  DB_POOLSIZE: ${DB_POOLSIZE-}
+  DB_POOL_TIMEOUT: ${DB_POOL_TIMEOUT-}
+  METRICS_MODULES: ${METRICS_MODULES-}
+
+x-container-common: &container-common
+  image: golang:1.15-buster
+  restart: ${CONTAINER_RESTART-on-failure}
+  entrypoint: /bin/main
+  tty: true
+  networks:
+    - orchestrate
+    - quorum
+    - besu
+    - geth
+  volumes:
+    - ./build/bin/orchestrate:/bin/main:ro
+  labels:
+    filebeat: "true"
+
+x-proxy-common: &proxy-common
+  PROXY_MAXIDLECONNSPERHOST: ${PROXY_MAXIDLECONNSPERHOST-}
+  PROXY_CACHE_TTL: ${PROXY_CACHE_TTL-}
+
+x-api-common: &api-common
+  API_STORE_TYPE: ${API_STORE_TYPE-}
+  DB_HOST: postgres
+
+services:
+  api-migration-init:
+    <<: *container-common
+    environment:
+      <<: *default-variables
+      <<: *api-common
+    restart: "no"
+    command: api migrate init
+
+  api-migration:
+    <<: *container-common
+    environment:
+      <<: *default-variables
+      <<: *api-common
+    restart: "no"
+    depends_on:
+      - api-migration-init
+    command: api migrate up
+
+  account-import:
+    <<: *container-common
+    environment:
+      <<: *default-variables
+      <<: *api-common
+    restart: "no"
+    command: api account import
+    
+  api:
+    <<: *container-common
+    ports:
+      - 8031:8081
+      - 8032:8082
+    environment:
+      <<: *default-variables
+      <<: *api-common
+      <<: *proxy-common
+    volumes:
+      - ./build/bin/orchestrate:/bin/main:ro
+      - ./scripts/deps/quorum-key-manager/certificates:/certificates
+    depends_on:
+      - api-migration
+    command: api run
+    labels:
+      filebeat: "false"
+
+  tx-sender:
+    <<: *container-common
+    ports:
+      - 8062:8082
+    environment:
+      <<: *default-variables
+    volumes:
+      - ./build/bin/orchestrate:/bin/main
+      - ./scripts/deps/quorum-key-manager/certificates:/certificates
+    depends_on:
+      - api
+    command: tx-sender run
+
+  tx-listener:
+    ports:
+      - 8082:8082
+    <<: *container-common
+    environment:
+      <<: *default-variables
+    depends_on:
+      - api
+    command: tx-listener run
+
+  generate-jwt:
+    <<: *container-common
+    environment:
+      <<: *default-variables
+      AUTH_JWT_PRIVATE_KEY: ${AUTH_JWT_PRIVATE_KEY-}
+    command: utils generate-jwt --tenant=${TENANT_ID-_} --expiration=${EXPIRATION-24h}
+    restart: "no"
+
+networks:
+  orchestrate:
+    external:
+      name: orchestrate
+  quorum:
+    external:
+      name: orchestrate_quorum
+  besu:
+    external:
+      name: orchestrate_besu
+  geth:
+    external:
+      name: orchestrate_geth

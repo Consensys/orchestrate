@@ -22,9 +22,9 @@ import (
 	dynrouter "github.com/consensys/orchestrate/pkg/toolkit/app/http/router/dynamic"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/metrics"
 	metricregistry "github.com/consensys/orchestrate/pkg/toolkit/app/metrics/registry"
-	traefikdynamic "github.com/containous/traefik/v2/pkg/config/dynamic"
 	healthz "github.com/heptiolabs/healthcheck"
 	prom "github.com/prometheus/client_golang/prometheus"
+	traefikdynamic "github.com/traefik/traefik/v2/pkg/config/dynamic"
 )
 
 type Option func(*App) error

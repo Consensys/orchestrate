@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	"github.com/consensys/orchestrate/pkg/errors"
-	"github.com/containous/traefik/v2/pkg/log"
+	"github.com/traefik/traefik/v2/pkg/log"
 )
 
 const (

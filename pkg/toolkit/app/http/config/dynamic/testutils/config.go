@@ -2,7 +2,7 @@ package testutils
 
 import (
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/config/dynamic"
-	traefikdynamic "github.com/containous/traefik/v2/pkg/config/dynamic"
+	traefikdynamic "github.com/traefik/traefik/v2/pkg/config/dynamic"
 )
 
 var Configs = map[string]interface{}{

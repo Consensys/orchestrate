@@ -16,10 +16,10 @@ import (
 	"github.com/consensys/orchestrate/pkg/toolkit/integration-test/docker/config"
 	"github.com/consensys/orchestrate/pkg/toolkit/integration-test/docker/container"
 	"github.com/consensys/orchestrate/pkg/toolkit/integration-test/docker/container/compose"
-	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/docker/docker/api/types"
 	dockercontainer "github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
+	"github.com/traefik/traefik/v2/pkg/log"
 )
 
 type Client struct {

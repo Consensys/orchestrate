@@ -13,10 +13,10 @@ import (
 	"github.com/consensys/orchestrate/pkg/toolkit/tcp"
 	"github.com/consensys/orchestrate/pkg/toolkit/tcp/metrics"
 	"github.com/consensys/orchestrate/pkg/utils"
-	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
-	tlog "github.com/containous/traefik/v2/pkg/log"
-	"github.com/containous/traefik/v2/pkg/middlewares/forwardedheaders"
 	"github.com/hashicorp/go-multierror"
+	traefikstatic "github.com/traefik/traefik/v2/pkg/config/static"
+	tlog "github.com/traefik/traefik/v2/pkg/log"
+	"github.com/traefik/traefik/v2/pkg/middlewares/forwardedheaders"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 )

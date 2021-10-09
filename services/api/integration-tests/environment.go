@@ -14,25 +14,24 @@ import (
 	authjwt "github.com/consensys/orchestrate/pkg/toolkit/app/auth/jwt"
 	authkey "github.com/consensys/orchestrate/pkg/toolkit/app/auth/key"
 	httputils "github.com/consensys/orchestrate/pkg/toolkit/app/http"
+	"github.com/consensys/orchestrate/pkg/toolkit/database/postgres"
 	ethclient "github.com/consensys/orchestrate/pkg/toolkit/ethclient/rpc"
 	integrationtest "github.com/consensys/orchestrate/pkg/toolkit/integration-test"
-	ganacheDocker "github.com/consensys/orchestrate/pkg/toolkit/integration-test/docker/container/ganache"
-	hashicorpDocker "github.com/consensys/orchestrate/pkg/toolkit/integration-test/docker/container/hashicorp"
-	quorumkeymanagerDocker "github.com/consensys/orchestrate/pkg/toolkit/integration-test/docker/container/quorum-key-manager"
-	"github.com/consensys/orchestrate/services/api"
-	"gopkg.in/h2non/gock.v1"
-	"k8s.io/apimachinery/pkg/util/rand"
-
-	"github.com/consensys/orchestrate/pkg/toolkit/database/postgres"
 	"github.com/consensys/orchestrate/pkg/toolkit/integration-test/docker"
 	"github.com/consensys/orchestrate/pkg/toolkit/integration-test/docker/config"
+	ganacheDocker "github.com/consensys/orchestrate/pkg/toolkit/integration-test/docker/container/ganache"
+	hashicorpDocker "github.com/consensys/orchestrate/pkg/toolkit/integration-test/docker/container/hashicorp"
 	kafkaDocker "github.com/consensys/orchestrate/pkg/toolkit/integration-test/docker/container/kafka"
 	postgresDocker "github.com/consensys/orchestrate/pkg/toolkit/integration-test/docker/container/postgres"
+	quorumkeymanagerDocker "github.com/consensys/orchestrate/pkg/toolkit/integration-test/docker/container/quorum-key-manager"
 	"github.com/consensys/orchestrate/pkg/toolkit/integration-test/docker/container/zookeeper"
+	"github.com/consensys/orchestrate/pkg/utils"
+	"github.com/consensys/orchestrate/services/api"
 	"github.com/consensys/orchestrate/services/api/store/postgres/migrations"
-	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	"github.com/traefik/traefik/v2/pkg/log"
+	"gopkg.in/h2non/gock.v1"
 )
 
 const postgresContainerID = "postgres"
@@ -72,14 +71,14 @@ type IntegrationEnvironment struct {
 
 func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, error) {
 	logger := log.FromContext(ctx)
-	envPGHostPort = strconv.Itoa(rand.IntnRange(10000, 15235))
-	envQKMPGHostPort = strconv.Itoa(rand.IntnRange(10000, 15235))
-	envHTTPPort = strconv.Itoa(rand.IntnRange(20000, 28080))
-	envMetricsPort = strconv.Itoa(rand.IntnRange(30000, 38082))
-	envKafkaHostPort = strconv.Itoa(rand.IntnRange(20000, 29092))
-	envGanacheHostPort = strconv.Itoa(rand.IntnRange(10000, 15235))
-	envQKMHostPort = strconv.Itoa(rand.IntnRange(10000, 15235))
-	envVaultHostPort = strconv.Itoa(rand.IntnRange(10000, 15235))
+	envPGHostPort = strconv.Itoa(utils.RandIntRange(10000, 15235))
+	envQKMPGHostPort = strconv.Itoa(utils.RandIntRange(10000, 15235))
+	envHTTPPort = strconv.Itoa(utils.RandIntRange(20000, 28080))
+	envMetricsPort = strconv.Itoa(utils.RandIntRange(30000, 38082))
+	envKafkaHostPort = strconv.Itoa(utils.RandIntRange(20000, 29092))
+	envGanacheHostPort = strconv.Itoa(utils.RandIntRange(10000, 15235))
+	envQKMHostPort = strconv.Itoa(utils.RandIntRange(10000, 15235))
+	envVaultHostPort = strconv.Itoa(utils.RandIntRange(10000, 15235))
 
 	// Define external hostname
 	kafkaExternalHostname := os.Getenv("KAFKA_HOST")
@@ -114,22 +113,11 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 		return nil, err
 	}
 
-	rootToken := fmt.Sprintf("root_token_%v", strconv.Itoa(rand.IntnRange(0, 10000)))
-	pluginsPath, err := getPluginsPath()
-	if err != nil {
-		return nil, err
-	}
-
+	rootToken := fmt.Sprintf("root_token_%v", strconv.Itoa(utils.RandIntRange(0, 10000)))
 	vaultContainer := hashicorpDocker.NewDefault().
 		SetHostPort(envVaultHostPort).
 		SetRootToken(rootToken).
-		SetPluginSourceDirectory(pluginsPath).
 		SetMountPath(hashicorpMountPath)
-
-	err = vaultContainer.DownloadPlugin()
-	if err != nil {
-		return nil, err
-	}
 
 	manifestsPath, err := getManifestsPath()
 	if err != nil {
@@ -449,12 +437,4 @@ func getManifestsPath() (string, error) {
 		return "", err
 	}
 	return path.Join(currDir, "manifests"), nil
-}
-
-func getPluginsPath() (string, error) {
-	currDir, err := os.Getwd()
-	if err != nil {
-		return "", err
-	}
-	return path.Join(currDir, "plugins"), nil
 }

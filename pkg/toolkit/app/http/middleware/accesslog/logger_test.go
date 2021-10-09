@@ -16,7 +16,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/containous/traefik/v2/pkg/types"
+	"github.com/traefik/traefik/v2/pkg/types"
+	traefiktypes "github.com/traefik/paerser/types"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -452,7 +453,7 @@ func TestNewLogHandlerOutputStdout(t *testing.T) {
 				FilePath: "",
 				Format:   CommonFormat,
 				Filters: &types.AccessLogFilters{
-					MinDuration: types.Duration(1 * time.Hour),
+					MinDuration: traefiktypes.Duration(1 * time.Hour),
 				},
 			},
 			expectedLog: ``,
@@ -463,7 +464,7 @@ func TestNewLogHandlerOutputStdout(t *testing.T) {
 				FilePath: "",
 				Format:   CommonFormat,
 				Filters: &types.AccessLogFilters{
-					MinDuration: types.Duration(1 * time.Millisecond),
+					MinDuration: traefiktypes.Duration(1 * time.Millisecond),
 				},
 			},
 			expectedLog: `TestHost - TestUser [13/Apr/2016:07:14:19 -0700] "POST testpath HTTP/0.0" 123 12 "testReferer" "testUserAgent" 23 "testRouter" "http://127.0.0.1/testService" 1ms`,

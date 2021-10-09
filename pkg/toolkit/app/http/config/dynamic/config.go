@@ -4,8 +4,8 @@ import (
 	"reflect"
 
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/configwatcher/provider"
-	traefikdynamic "github.com/containous/traefik/v2/pkg/config/dynamic"
-	"github.com/containous/traefik/v2/pkg/log"
+	traefikdynamic "github.com/traefik/traefik/v2/pkg/config/dynamic"
+	"github.com/traefik/traefik/v2/pkg/log"
 )
 
 // Configuration is the root of the dynamic configuration

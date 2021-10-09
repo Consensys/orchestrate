@@ -14,9 +14,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/containous/alice"
-	"github.com/containous/traefik/v2/pkg/log"
-	"github.com/containous/traefik/v2/pkg/types"
+	"github.com/traefik/traefik/v2/pkg/log"
+	"github.com/traefik/traefik/v2/pkg/types"
+	traefiktypes "github.com/traefik/paerser/types"
 	"github.com/sirupsen/logrus"
 )
 
@@ -59,15 +59,6 @@ type Handler struct {
 	httpCodeRanges types.HTTPCodeRanges
 	logHandlerChan chan handlerParams
 	wg             sync.WaitGroup
-}
-
-// WrapHandler Wraps access log handler into an Alice Constructor.
-func WrapHandler(handler *Handler) alice.Constructor {
-	return func(next http.Handler) (http.Handler, error) {
-		return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-			handler.ServeHTTP(rw, req, next)
-		}), nil
-	}
 }
 
 // NewHandler creates a new Handler.
@@ -355,7 +346,7 @@ func (h *Handler) keepAccessLog(statusCode, retryAttempts int, duration time.Dur
 		return true
 	}
 
-	if h.config.Filters.MinDuration > 0 && (types.Duration(duration) > h.config.Filters.MinDuration) {
+	if h.config.Filters.MinDuration > 0 && (traefiktypes.Duration(duration) > h.config.Filters.MinDuration) {
 		return true
 	}
 

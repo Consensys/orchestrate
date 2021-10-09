@@ -5,7 +5,7 @@ package dynamic
 import (
 	"testing"
 
-	traefikdynamic "github.com/containous/traefik/v2/pkg/config/dynamic"
+	traefikdynamic "github.com/traefik/traefik/v2/pkg/config/dynamic"
 	"github.com/stretchr/testify/assert"
 )
 

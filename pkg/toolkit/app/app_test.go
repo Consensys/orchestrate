@@ -12,11 +12,11 @@ import (
 	"github.com/consensys/orchestrate/pkg/toolkit/app/metrics/mock"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/metrics/registry"
 	tcpmetrics "github.com/consensys/orchestrate/pkg/toolkit/tcp/metrics"
-	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
 	"github.com/golang/mock/gomock"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	traefikstatic "github.com/traefik/traefik/v2/pkg/config/static"
 )
 
 func newTestConfig() *Config {

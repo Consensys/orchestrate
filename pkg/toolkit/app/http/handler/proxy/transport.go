@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"time"
 
-	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
-	"github.com/containous/traefik/v2/pkg/log"
-	traefiktls "github.com/containous/traefik/v2/pkg/tls"
+	traefikstatic "github.com/traefik/traefik/v2/pkg/config/static"
+	"github.com/traefik/traefik/v2/pkg/log"
+	traefiktls "github.com/traefik/traefik/v2/pkg/tls"
 	"golang.org/x/net/http2"
 )
 

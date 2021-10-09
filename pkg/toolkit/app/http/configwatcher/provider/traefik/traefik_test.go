@@ -9,8 +9,8 @@ import (
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/config/dynamic"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/configwatcher/provider"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/configwatcher/provider/traefik"
-	traefikdynamic "github.com/containous/traefik/v2/pkg/config/dynamic"
-	"github.com/containous/traefik/v2/pkg/safe"
+	traefikdynamic "github.com/traefik/traefik/v2/pkg/config/dynamic"
+	"github.com/traefik/traefik/v2/pkg/safe"
 	"github.com/stretchr/testify/assert"
 )
 

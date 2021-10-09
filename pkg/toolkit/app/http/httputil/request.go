@@ -8,7 +8,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	traefiktls "github.com/containous/traefik/v2/pkg/tls"
+	traefiktls "github.com/traefik/traefik/v2/pkg/tls"
 )
 
 func GetMethod(r *http.Request) string {

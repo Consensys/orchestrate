@@ -16,13 +16,13 @@ import (
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/router"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	tlsmanager "github.com/consensys/orchestrate/pkg/toolkit/tls/manager"
-	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
-	tlog "github.com/containous/traefik/v2/pkg/log"
-	"github.com/containous/traefik/v2/pkg/middlewares/requestdecorator"
-	"github.com/containous/traefik/v2/pkg/rules"
-	traefiktypes "github.com/containous/traefik/v2/pkg/types"
 	"github.com/justinas/alice"
 	"github.com/sirupsen/logrus"
+	traefikstatic "github.com/traefik/traefik/v2/pkg/config/static"
+	tlog "github.com/traefik/traefik/v2/pkg/log"
+	"github.com/traefik/traefik/v2/pkg/middlewares/requestdecorator"
+	"github.com/traefik/traefik/v2/pkg/rules"
+	traefiktypes "github.com/traefik/traefik/v2/pkg/types"
 )
 
 type Builder struct {

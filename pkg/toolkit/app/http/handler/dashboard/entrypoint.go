@@ -8,9 +8,9 @@ import (
 	"strconv"
 
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/httputil"
-	traefikstatic "github.com/containous/traefik/v2/pkg/config/static"
-	"github.com/containous/traefik/v2/pkg/log"
 	"github.com/gorilla/mux"
+	traefikstatic "github.com/traefik/traefik/v2/pkg/config/static"
+	"github.com/traefik/traefik/v2/pkg/log"
 )
 
 type EntryPointResponse struct {

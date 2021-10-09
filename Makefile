@@ -3,7 +3,7 @@ PACKAGES ?= $(shell go list ./... | grep -Fv -e e2e -e examples -e genstatic -e 
 INTEGRATION_TEST_PACKAGES ?= $(shell go list ./... | grep integration-tests )
 ORCH_SERVICES = tx-sender tx-listener api
 ORCH_MIGRATE = api
-DEPS_VAULT = vault vault-init vault-agent
+DEPS_VAULT = vault vault-agent
 DEPS_POSTGRES = postgres
 DEPS_KAFKA = zookeeper kafka
 
@@ -65,7 +65,7 @@ stress: run-stress
 	@exit $(docker inspect orchestrategit_stress_1 --format='{{.State.ExitCode}}')
 
 stress-ci:
-	@docker-compose up stress
+	@docker-compose -f docker-compose.dev.yml up stress
 	@exit $(docker inspect orchestrate_stress_1 --format='{{.State.ExitCode}}')
 
 clean: protobuf gen-swagger gen-mocks mod-tidy lint coverage ## Run all clean-up tasks
@@ -137,16 +137,16 @@ gobuild-e2e: ## Build Orchestrate e2e Docker image
 	@GOOS=linux GOARCH=amd64 go build -o ./build/bin/test ./tests/cmd
 
 orchestrate: gobuild ## Start Orchestrate
-	@docker-compose up --force-recreate --build -d $(ORCH_SERVICES)
+	@docker-compose -f docker-compose.dev.yml up --force-recreate --build -d $(ORCH_SERVICES)
 
 ci-orchestrate:
-	@docker-compose up -d $(ORCH_SERVICES)
+	@docker-compose -f docker-compose.dev.yml up -d $(ORCH_SERVICES)
 
 stop-orchestrate: ## Stop Orchestrate
-	@docker-compose stop $(ORCH_SERVICES)
+	@docker-compose -f docker-compose.dev.yml stop $(ORCH_SERVICES)
 
 down-orchestrate:## Down Orchestrate
-	@docker-compose down --volumes --timeout 0
+	@docker-compose -f docker-compose.dev.yml down --volumes --timeout 0
 
 deps-postgres:
 	@docker-compose -f scripts/deps/docker-compose.yml up --build -d $(DEPS_POSTGRES)

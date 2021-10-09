@@ -2,8 +2,8 @@ package testutils
 
 import (
 	"github.com/consensys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/pkg/utils"
 	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
-	"k8s.io/apimachinery/pkg/util/rand"
 )
 
 const contractABI = ` [
@@ -281,7 +281,7 @@ const deployedBytecode = "0x6080604052348015600f57600080fd5b50600436106028576000
 // FakeContract returns a new fake contract
 func FakeContract() *entities.Contract {
 	return &entities.Contract{
-		Name:             rand.String(5),
+		Name:             utils.RandString(5),
 		Tag:              "v1.0.0",
 		ABI:              contractABI,
 		Bytecode:         bytecode,
@@ -295,7 +295,7 @@ func FakeContract() *entities.Contract {
 
 func FakeEventABI() *ethabi.Event {
 	return &ethabi.Event{
-		Name:      "event" + rand.String(5),
+		Name:      "event" + utils.RandString(5),
 		RawName:   "fake_event",
 		Anonymous: false,
 		Inputs:    []ethabi.Argument{{Name: "input1", Indexed: true}},

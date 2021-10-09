@@ -13,7 +13,7 @@ import (
 	"github.com/consensys/orchestrate/services/tx-sentry/service/listeners"
 	"github.com/consensys/orchestrate/services/tx-sentry/service/parsers"
 	usecases "github.com/consensys/orchestrate/services/tx-sentry/tx-sentry/use-cases"
-	backoffjob "github.com/containous/traefik/v2/pkg/job"
+	backoffjob "github.com/traefik/traefik/v2/pkg/job"
 )
 
 const txSentryComponent = "application.tx-sentry"
