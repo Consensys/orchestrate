@@ -38,25 +38,25 @@ func (uc createJobUseCase) WithDBTransaction(dbtx store.Tx) usecases.CreateJobUs
 }
 
 // Execute validates and creates a new transaction job
-func (uc *createJobUseCase) Execute(ctx context.Context, job *entities.Job, tenants []string) (*entities.Job, error) {
+func (uc *createJobUseCase) Execute(ctx context.Context, job *entities.Job, allowedTenants []string) (*entities.Job, error) {
 	ctx = log.WithFields(ctx, log.Field("chain", job.ChainUUID), log.Field("schedule", job.ScheduleUUID))
 	logger := uc.logger.WithContext(ctx)
 	logger.Debug("creating new job")
 
-	chainID, err := uc.getChainID(ctx, job.ChainUUID, tenants)
+	chainID, err := uc.getChainID(ctx, job.ChainUUID, allowedTenants)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(createJobComponent)
 	}
 	job.InternalData.ChainID = chainID
 
 	if job.Transaction.From != "" {
-		err = uc.validateAccountExists(ctx, job.Transaction.From, tenants)
+		err = uc.validateAccountAccess(ctx, job.Transaction.From, allowedTenants)
 		if err != nil {
 			return nil, errors.FromError(err).ExtendComponent(createJobComponent)
 		}
 	}
 
-	schedule, err := uc.db.Schedule().FindOneByUUID(ctx, job.ScheduleUUID, tenants)
+	schedule, err := uc.db.Schedule().FindOneByUUID(ctx, job.ScheduleUUID, allowedTenants)
 	if errors.IsNotFoundError(err) {
 		return nil, errors.InvalidParameterError("schedule does not exist").ExtendComponent(createJobComponent)
 	} else if err != nil {
@@ -83,7 +83,7 @@ func (uc *createJobUseCase) Execute(ctx context.Context, job *entities.Job, tena
 				return der
 			}
 
-			parentJobModel, der := tx.(store.Tx).Job().FindOneByUUID(ctx, parentJobUUID, tenants, false)
+			parentJobModel, der := tx.(store.Tx).Job().FindOneByUUID(ctx, parentJobUUID, allowedTenants, false)
 			if der != nil {
 				return der
 			}
@@ -117,7 +117,7 @@ func (uc *createJobUseCase) Execute(ctx context.Context, job *entities.Job, tena
 	return parsers.NewJobEntityFromModels(jobModel), nil
 }
 
-func (uc *createJobUseCase) validateAccountExists(ctx context.Context, address string, tenants []string) error {
+func (uc *createJobUseCase) validateAccountAccess(ctx context.Context, address string, tenants []string) error {
 	_, err := uc.db.Account().FindOneByAddress(ctx, address, tenants)
 	if errors.IsNotFoundError(err) {
 		return errors.InvalidParameterError("failed to get account")

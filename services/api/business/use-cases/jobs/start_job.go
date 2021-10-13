@@ -47,11 +47,11 @@ func NewStartJobUseCase(
 }
 
 // Execute sends a job to the Kafka topic
-func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID string, tenants []string) error {
+func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID string, allowedTenants []string) error {
 	logger := uc.logger.WithContext(ctx).WithField("job", jobUUID)
 	logger.Debug("starting job")
 
-	jobModel, err := uc.db.Job().FindOneByUUID(ctx, jobUUID, tenants, false)
+	jobModel, err := uc.db.Job().FindOneByUUID(ctx, jobUUID, allowedTenants, false)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(startJobComponent)
 	}

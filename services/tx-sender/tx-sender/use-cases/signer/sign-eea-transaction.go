@@ -99,20 +99,6 @@ func (uc *signEEATransactionUseCase) signWithAccount(ctx context.Context, job *e
 	privateArgs *entities.PrivateETHTransactionParams, tx *types.Transaction, chainID string) (string, error) {
 	logger := uc.logger.WithContext(ctx)
 
-	tenants := utils.AllowedTenants(job.TenantID)
-	isAllowed, err := qkm.IsTenantAllowed(ctx, uc.keyManagerClient, tenants, uc.storeName, job.Transaction.From)
-	if err != nil {
-		errMsg := "failed to to sign eea transaction, cannot fetch account"
-		uc.logger.WithField("address", job.Transaction.From).WithError(err).Error(errMsg)
-		return "", errors.DependencyFailureError(errMsg).AppendReason(err.Error())
-	}
-
-	if !isAllowed {
-		errMessage := "failed to to sign eea transaction, tenant is not allowed"
-		logger.WithField("address", job.Transaction.From).WithField("tenants", tenants).Error(errMessage)
-		return "", errors.InvalidAuthenticationError(errMessage)
-	}
-
 	signedRaw, err := uc.keyManagerClient.SignEEATransaction(ctx, uc.storeName, job.Transaction.From, &qkmtypes.SignEEATransactionRequest{
 		Nonce:          hexutil.Uint64(tx.Nonce()),
 		To:             tx.To(),

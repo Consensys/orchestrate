@@ -8,7 +8,6 @@ import (
 	qkm "github.com/consensys/orchestrate/pkg/quorum-key-manager"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	"github.com/consensys/orchestrate/pkg/types/entities"
-	"github.com/consensys/orchestrate/pkg/utils"
 	"github.com/consensys/orchestrate/services/tx-sender/tx-sender/parsers"
 	qkmtypes "github.com/consensys/quorum-key-manager/src/stores/api/types"
 	quorumtypes "github.com/consensys/quorum/core/types"
@@ -93,20 +92,6 @@ func (uc *signQuorumPrivateTransactionUseCase) signWithOneTimeKey(ctx context.Co
 
 func (uc *signQuorumPrivateTransactionUseCase) signWithAccount(ctx context.Context, job *entities.Job, tx *quorumtypes.Transaction) (signedRaw, txHash string, err error) {
 	logger := uc.logger.WithContext(ctx)
-	tenants := utils.AllowedTenants(job.TenantID)
-	isAllowed, err := qkm.IsTenantAllowed(ctx, uc.keyManagerClient, tenants, uc.storeName, job.Transaction.From)
-	if err != nil {
-		errMsg := "failed to to sign private quorum transaction, cannot fetch account"
-		uc.logger.WithField("address", job.Transaction.From).WithError(err).Error(errMsg)
-		return "", "", errors.DependencyFailureError(errMsg).AppendReason(err.Error())
-	}
-
-	if !isAllowed {
-		errMessage := "failed to to sign private quorum transaction, tenant is not allowed"
-		logger.WithField("address", job.Transaction.From).WithField("tenants", tenants).Error(errMessage)
-		return "", "", errors.InvalidAuthenticationError(errMessage)
-	}
-
 	signedRaw, err = uc.keyManagerClient.SignQuorumPrivateTransaction(ctx, uc.storeName, job.Transaction.From, &qkmtypes.SignQuorumPrivateTransactionRequest{
 		Nonce:    hexutil.Uint64(tx.Nonce()),
 		To:       tx.To(),

@@ -16,7 +16,6 @@ import (
 	"github.com/consensys/quorum-key-manager/pkg/client"
 	qkmtypes "github.com/consensys/quorum-key-manager/src/stores/api/types"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/crypto"
 )
 
 const (
@@ -71,25 +70,6 @@ func (uc *createAccountUseCase) Execute(ctx context.Context, account *entities.A
 				qkm.TagIDAllowedTenants: tenantID,
 			},
 		})
-
-		// In case key already exists we need to append the allowed tenants
-		if err != nil && isAccountAlreadyExistErr(err) {
-			logger.WithError(err).Debug("duplicated account has been imported")
-			privKey, _ := crypto.HexToECDSA(privateKey.String()[2:])
-			address := crypto.PubkeyToAddress(privKey.PublicKey).Hex()
-			resp, err = uc.keyManagerClient.GetEthAccount(ctx, uc.storeName, address)
-			if err == nil {
-				logger.WithField("address", address).Debug("updating account to amend allowed tenants")
-				// @TODO Prevent duplicated tenantIds
-				curTags := resp.Tags
-				curTags[qkm.TagIDAllowedTenants] += qkm.TagSeparatorAllowedTenants + tenantID
-				_, err = uc.keyManagerClient.UpdateEthAccount(ctx, uc.storeName, address, &qkmtypes.UpdateEthAccountRequest{
-					Tags: curTags,
-				})
-			} else {
-				logger.WithError(err).WithField("address", address).Debug("failed to find account")
-			}
-		}
 	} else {
 		resp, err = uc.keyManagerClient.CreateEthAccount(ctx, uc.storeName, &qkmtypes.CreateEthAccountRequest{
 			KeyID: accountID,
@@ -135,16 +115,6 @@ func (uc *createAccountUseCase) Execute(ctx context.Context, account *entities.A
 
 	logger.WithField("address", account.Address).Info("ethereum account created successfully")
 	return parsers.NewAccountEntityFromModels(accountModel), nil
-}
-
-func isAccountAlreadyExistErr(err interface{}) bool {
-	if err == nil {
-		return false
-	}
-	if qerr, ok := err.(*client.ResponseError); ok {
-		return qerr.ErrorCode == qkm.AlreadyExists || qerr.ErrorCode == qkm.StatusConflict
-	}
-	return false
 }
 
 func generateKeyID(tenantID, alias string) string {

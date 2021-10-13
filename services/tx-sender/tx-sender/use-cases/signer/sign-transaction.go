@@ -92,21 +92,6 @@ func (uc *signETHTransactionUseCase) signWithOneTimeKey(ctx context.Context, tra
 
 func (uc *signETHTransactionUseCase) signWithAccount(ctx context.Context, job *entities.Job, tx *types.Transaction, chainID string) (signedRaw, txHash string, err error) {
 	logger := uc.logger.WithContext(ctx)
-
-	tenants := utils.AllowedTenants(job.TenantID)
-	isAllowed, err := qkm.IsTenantAllowed(ctx, uc.keyManagerClient, tenants, uc.storeName, job.Transaction.From)
-	if err != nil {
-		errMsg := "failed to to sign transaction, cannot fetch account"
-		uc.logger.WithField("address", job.Transaction.From).WithError(err).Error(errMsg)
-		return "", "", errors.DependencyFailureError(errMsg).AppendReason(err.Error())
-	}
-
-	if !isAllowed {
-		errMessage := "failed to to sign transaction, tenant is not allowed"
-		logger.WithField("address", job.Transaction.From).WithField("tenants", tenants).Error(errMessage)
-		return "", "", errors.UnauthorizedError(errMessage)
-	}
-
 	signedRaw, err = uc.keyManagerClient.SignTransaction(ctx, uc.storeName, job.Transaction.From, &qkmtypes.SignETHTransactionRequest{
 		Nonce:           hexutil.Uint64(tx.Nonce()),
 		To:              tx.To(),

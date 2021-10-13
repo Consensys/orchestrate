@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/consensys/orchestrate/pkg/errors"
-	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	qkm "github.com/consensys/orchestrate/pkg/quorum-key-manager"
 	"github.com/consensys/orchestrate/pkg/types/testutils"
 	qkmmock "github.com/consensys/quorum-key-manager/pkg/client/mock"
@@ -31,8 +30,6 @@ func TestSignTransaction_Execute(t *testing.T) {
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		job := testutils.FakeJob()
 		signedRaw := "0xf86501822710825208944fed1fc4144c223ae3c1553be203cdfcbd38c58182c35080820713a09a0a890215ea6e79d06f9665297996ab967db117f36c2090d6d6ead5a2d32d52a065bc4bc766b5a833cb58b3319e44e952487559b9b939cb5268c0409398214c8b"
-		acc := qkm.FakeEthAccountResponse(job.Transaction.From, []string{multitenancy.DefaultTenant})
-		mockKeyManagerClient.EXPECT().GetEthAccount(gomock.Any(), globalStoreName, job.Transaction.From).Return(acc, nil)
 		mockKeyManagerClient.EXPECT().SignTransaction(gomock.Any(), globalStoreName, job.Transaction.From, gomock.AssignableToTypeOf(&types.SignETHTransactionRequest{})).Return(signedRaw, nil)
 
 		raw, txHash, err := usecase.Execute(ctx, job)
@@ -46,8 +43,6 @@ func TestSignTransaction_Execute(t *testing.T) {
 		job := testutils.FakeJob()
 		job.Transaction.To = ""
 		signedRaw := "0xf851018227108252088082c35080820713a09a0a890215ea6e79d06f9665297996ab967db117f36c2090d6d6ead5a2d32d52a065bc4bc766b5a833cb58b3319e44e952487559b9b939cb5268c0409398214c8b"
-		acc := qkm.FakeEthAccountResponse(job.Transaction.From, []string{job.TenantID})
-		mockKeyManagerClient.EXPECT().GetEthAccount(gomock.Any(), globalStoreName, job.Transaction.From).Return(acc, nil)
 		mockKeyManagerClient.EXPECT().SignTransaction(gomock.Any(), globalStoreName, job.Transaction.From, gomock.AssignableToTypeOf(&types.SignETHTransactionRequest{})).Return(signedRaw, nil)
 
 		raw, txHash, err := usecase.Execute(ctx, job)
@@ -70,10 +65,6 @@ func TestSignTransaction_Execute(t *testing.T) {
 
 	t.Run("should fail with same error if ETHSignTransaction fails", func(t *testing.T) {
 		expectedErr := errors.InvalidFormatError("error")
-		job := testutils.FakeJob()
-		acc := qkm.FakeEthAccountResponse(job.Transaction.From, []string{multitenancy.DefaultTenant})
-
-		mockKeyManagerClient.EXPECT().GetEthAccount(gomock.Any(), globalStoreName, job.Transaction.From).Return(acc, nil)
 		mockKeyManagerClient.EXPECT().SignTransaction(gomock.Any(), globalStoreName, gomock.Any(), gomock.Any()).Return("", expectedErr)
 
 		raw, txHash, err := usecase.Execute(ctx, testutils.FakeJob())
@@ -81,27 +72,5 @@ func TestSignTransaction_Execute(t *testing.T) {
 		assert.True(t, errors.IsDependencyFailureError(err))
 		assert.Empty(t, raw)
 		assert.Empty(t, txHash)
-	})
-
-	t.Run("should fail with IsDependencyFailureError if fails to find account", func(t *testing.T) {
-		job := testutils.FakeJob()
-
-		mockKeyManagerClient.EXPECT().GetEthAccount(gomock.Any(), globalStoreName, job.Transaction.From).
-			Return(nil, errors.NotFoundError("account no found"))
-
-		_, _, err := usecase.Execute(ctx, job)
-
-		assert.True(t, errors.IsDependencyFailureError(err))
-	})
-
-	t.Run("should fail with IsInvalidAuthenticationError if tenant is not allowed to access account", func(t *testing.T) {
-		job := testutils.FakeJob()
-		acc := qkm.FakeEthAccountResponse(job.Transaction.From, []string{})
-
-		mockKeyManagerClient.EXPECT().GetEthAccount(gomock.Any(), globalStoreName, job.Transaction.From).Return(acc, nil)
-
-		_, _, err := usecase.Execute(ctx, testutils.FakeJob())
-
-		assert.True(t, errors.IsInvalidAuthenticationError(err))
 	})
 }

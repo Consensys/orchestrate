@@ -75,7 +75,7 @@ func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequ
 	}
 
 	// Step 3: Insert Schedule + Job + Transaction + TxRequest atomically OR get tx request if it exists
-	txRequest, err = uc.selectOrInsertTxRequest(ctx, txRequest, txData, requestHash, chain.UUID, tenantID)
+	txRequest, err = uc.selectOrInsertTxRequest(ctx, txRequest, txData, requestHash, chain.UUID, tenantID, allowedTenants)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
 	}
@@ -125,15 +125,16 @@ func (uc *sendTxUsecase) selectOrInsertTxRequest(
 	ctx context.Context,
 	txRequest *entities.TxRequest,
 	txData, requestHash, chainUUID, tenantID string,
+	allowedTenants []string,
 ) (*entities.TxRequest, error) {
 	if txRequest.IdempotencyKey == "" {
-		return uc.insertNewTxRequest(ctx, txRequest, txData, requestHash, chainUUID, tenantID)
+		return uc.insertNewTxRequest(ctx, txRequest, txData, requestHash, chainUUID, tenantID, allowedTenants)
 	}
 
 	txRequestModel, err := uc.db.TransactionRequest().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey, tenantID)
 	switch {
 	case errors.IsNotFoundError(err):
-		return uc.insertNewTxRequest(ctx, txRequest, txData, requestHash, chainUUID, tenantID)
+		return uc.insertNewTxRequest(ctx, txRequest, txData, requestHash, chainUUID, tenantID, allowedTenants)
 	case err != nil:
 		return nil, err
 	case txRequestModel != nil && txRequestModel.RequestHash != requestHash:
@@ -149,6 +150,7 @@ func (uc *sendTxUsecase) insertNewTxRequest(
 	ctx context.Context,
 	txRequest *entities.TxRequest,
 	txData, requestHash, chainUUID, tenantID string,
+	allowedTenants []string,
 ) (*entities.TxRequest, error) {
 	err := database.ExecuteInDBTx(uc.db, func(dbtx database.Tx) error {
 		schedule := &models.Schedule{TenantID: tenantID}
@@ -184,8 +186,7 @@ func (uc *sendTxUsecase) insertNewTxRequest(
 			}
 
 			var job *entities.Job
-			job, err = uc.createJobUC.WithDBTransaction(dbtx.(store.Tx)).
-				Execute(ctx, txJob, []string{tenantID, multitenancy.DefaultTenant})
+			job, err = uc.createJobUC.WithDBTransaction(dbtx.(store.Tx)).Execute(ctx, txJob, allowedTenants)
 			if err != nil {
 				return err
 			}

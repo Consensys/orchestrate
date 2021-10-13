@@ -31,9 +31,9 @@ func NewStartNextJobUseCase(db store.DB, startJobUC usecases.StartJobUseCase) us
 }
 
 // Execute gets a job
-func (uc *startNextJobUseCase) Execute(ctx context.Context, jobUUID string, tenants []string) error {
+func (uc *startNextJobUseCase) Execute(ctx context.Context, jobUUID string, allowedTenants []string) error {
 	ctx = log.WithFields(ctx, log.Field("job", jobUUID))
-	jobModel, err := uc.db.Job().FindOneByUUID(ctx, jobUUID, tenants, false)
+	jobModel, err := uc.db.Job().FindOneByUUID(ctx, jobUUID, allowedTenants, false)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(startNextJobComponent)
 	}
@@ -45,7 +45,7 @@ func (uc *startNextJobUseCase) Execute(ctx context.Context, jobUUID string, tena
 	logger := uc.logger.WithContext(ctx).WithField("next_job", jobModel.NextJobUUID)
 	logger.Debug("start next job use-case")
 
-	nextJobModel, err := uc.db.Job().FindOneByUUID(ctx, jobModel.NextJobUUID, tenants, false)
+	nextJobModel, err := uc.db.Job().FindOneByUUID(ctx, jobModel.NextJobUUID, allowedTenants, false)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(startNextJobComponent)
 	}
@@ -62,7 +62,7 @@ func (uc *startNextJobUseCase) Execute(ctx context.Context, jobUUID string, tena
 		return errors.FromError(err).ExtendComponent(startNextJobComponent)
 	}
 
-	return uc.startJobUseCase.Execute(ctx, nextJobModel.UUID, tenants)
+	return uc.startJobUseCase.Execute(ctx, nextJobModel.UUID, allowedTenants)
 }
 
 func (uc *startNextJobUseCase) handleOrionMarkingTx(ctx context.Context, prevJobModel, jobModel *models.Job) error {

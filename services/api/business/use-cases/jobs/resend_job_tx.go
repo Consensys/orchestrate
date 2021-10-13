@@ -34,12 +34,12 @@ func NewResendJobTxUseCase(db store.DB, kafkaProducer sarama.SyncProducer, topic
 }
 
 // Execute sends a job to the Kafka topic
-func (uc *resendJobTxUseCase) Execute(ctx context.Context, jobUUID string, tenants []string) error {
+func (uc *resendJobTxUseCase) Execute(ctx context.Context, jobUUID string, allowedTenants []string) error {
 	ctx = log.WithFields(ctx, log.Field("job", jobUUID))
 	logger := uc.logger.WithContext(ctx)
 	logger.Debug("resending job transaction")
 
-	jobModel, err := uc.db.Job().FindOneByUUID(ctx, jobUUID, tenants, false)
+	jobModel, err := uc.db.Job().FindOneByUUID(ctx, jobUUID, allowedTenants, false)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(resendJobTxComponent)
 	}

@@ -36,7 +36,7 @@ func (uc updateChildrenUseCase) WithDBTransaction(dbtx store.Tx) usecases.Update
 	return &uc
 }
 
-func (uc *updateChildrenUseCase) Execute(ctx context.Context, jobUUID, parentJobUUID string, nextStatus entities.JobStatus, tenants []string) error {
+func (uc *updateChildrenUseCase) Execute(ctx context.Context, jobUUID, parentJobUUID string, nextStatus entities.JobStatus, allowedTenants []string) error {
 	ctx = log.WithFields(ctx, log.Field("job", jobUUID), log.Field("parent_job", parentJobUUID),
 		log.Field("next_status", nextStatus))
 	logger := uc.logger.WithContext(ctx)
@@ -52,7 +52,7 @@ func (uc *updateChildrenUseCase) Execute(ctx context.Context, jobUUID, parentJob
 	jobsToUpdate, err := uc.db.Job().Search(ctx, &entities.JobFilters{
 		ParentJobUUID: parentJobUUID,
 		Status:        entities.StatusPending,
-	}, tenants)
+	}, allowedTenants)
 
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(updateChildrenComponent)
