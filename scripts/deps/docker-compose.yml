@@ -165,8 +165,8 @@ services:
     volumes:
       - vault-token:/vault/token
       - ./quorum-key-manager/manifest.yml:/manifests/manifest.yml
-      - ./quorum-key-manager/certificates:/certificates
-      - ./quorum-key-manager/ca:/ca
+      - ./certificates:/certificates
+      - ./ca:/ca
       - ./quorum-key-manager/apikey:/apikey
     ports:
       - 8180:8080
@@ -178,9 +178,8 @@ services:
       HTTPS_ENABLED: "true"
       HTTPS_SERVER_KEY: /certificates/https.key
       HTTPS_SERVER_CERT: /certificates/https.crt
-      AUTH_OIDC_CA_CERT: /ca/ca.crt
-      AUTH_OIDC_CA_KEY: /ca/ca.key
-      AUTH_OIDC_CA_KEY_PASSWORD: password
+      AUTH_OIDC_CA_CERT: /certificates/client.crt
+#      AUTH_OIDC_ISSUER_URL: https://ggarrido.eu.auth0.com/.well-known/jwks.json
       AUTH_TLS_CA: /ca/ca.crt
       AUTH_API_KEY_FILE: /apikey/sample.csv
     command: run

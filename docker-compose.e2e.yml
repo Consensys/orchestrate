@@ -7,7 +7,7 @@ x-default-variables: &default-variables
   LOG_FORMAT: ${LOG_FORMAT-}
   MULTI_TENANCY_ENABLED: ${MULTI_TENANCY_ENABLED-}
   AUTH_JWT_CLAIMS_NAMESPACE: ${AUTH_JWT_CLAIMS_NAMESPACE-}
-  AUTH_JWT_CERTIFICATE: ${AUTH_JWT_CERTIFICATE-}
+  AUTH_JWT_CERT: ${AUTH_JWT_CERT-}
   AUTH_API_KEY: ${AUTH_API_KEY-}
   KAFKA_URL: ${KAFKA_URL-kafka:29092}
   KAFKA_SASL_ENABLED: ${KAFKA_SASL_ENABLED-false}
@@ -40,7 +40,7 @@ services:
       CUCUMBER_CONCURRENCY: ${CUCUMBER_CONCURRENCY-}
       CUCUMBER_TAGS: ${CUCUMBER_TAGS-}
       TEST_GLOBAL_DATA: ${TEST_GLOBAL_DATA-}
-      AUTH_JWT_PRIVATE_KEY: ${AUTH_JWT_PRIVATE_KEY-}
+      AUTH_JWT_KEY: ${AUTH_JWT_KEY-}
       CUCUMBER_STEPS_TIMEOUT: ${CUCUMBER_STEPS_TIMEOUT-30s}
       KAFKA_CONSUMER_GROUP_NAME: ${KAFKA_CONSUMER_GROUP_NAME-e2e}
     restart: "no"
@@ -50,6 +50,7 @@ services:
       - ./build/report:/report/output
       - ./tests/features:/features
       - ./tests/artifacts:/artifacts
+      - ./scripts/deps/certificates:/certificates
 
   report:
     build: ./scripts/report

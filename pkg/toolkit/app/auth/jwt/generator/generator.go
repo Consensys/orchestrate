@@ -3,6 +3,7 @@ package generator
 import (
 	"context"
 	"crypto/rsa"
+	"strings"
 	"time"
 
 	"github.com/consensys/orchestrate/pkg/toolkit/app/auth/jwt"
@@ -14,8 +15,8 @@ import (
 )
 
 type JWTGenerator struct {
-	ClaimsNamespace string
-	privateKey      *rsa.PrivateKey
+	OrchestrateClaimPath string
+	privateKey           *rsa.PrivateKey
 }
 
 func New(cfg *Config) (*JWTGenerator, error) {
@@ -25,40 +26,48 @@ func New(cfg *Config) (*JWTGenerator, error) {
 	}
 
 	return &JWTGenerator{
-		ClaimsNamespace: cfg.ClaimsNamespace,
-		privateKey:      cert.PrivateKey.(*rsa.PrivateKey),
+		OrchestrateClaimPath: cfg.OrchestrateClaimPath,
+		privateKey:           cert.PrivateKey.(*rsa.PrivateKey),
 	}, nil
 }
 
-func (j *JWTGenerator) GenerateAccessTokenWithTenantID(tenantID string, ttl time.Duration) (string, error) {
-	customClaims := map[string]interface{}{
-		j.ClaimsNamespace: &jwt.OrchestrateClaims{
-			TenantID: tenantID,
-		}}
-	return j.GenerateAccessToken(customClaims, ttl)
+func (j *JWTGenerator) GenerateAccessTokenWithTenantID(tenantID string, scope []string, ttl time.Duration) (string, error) {
+	return j.GenerateAccessToken(tenantID, scope, ttl)
 }
 
-func (j *JWTGenerator) GenerateAccessToken(customClaims map[string]interface{}, ttl time.Duration) (tokenValue string, err error) {
+func (j *JWTGenerator) GenerateAccessToken(tenantID string, scope []string, ttl time.Duration) (tokenValue string, err error) {
 	jwtGenerator := &oauth2.DefaultJWTStrategy{
 		JWTStrategy: &fositejwt.RS256JWTStrategy{
 			PrivateKey: j.privateKey,
 		},
 	}
+	standardClaims := &fositejwt.JWTClaims{
+		Issuer:    "Orchestrate",
+		IssuedAt:  time.Now().UTC(),
+		NotBefore: time.Now().UTC(),
+		Extra:     map[string]interface{}{},
+	}
+
+	if j.OrchestrateClaimPath == "" {
+		standardClaims.Subject = tenantID
+	} else {
+		standardClaims.Extra[j.OrchestrateClaimPath] = &jwt.OrchestrateClaims{
+			TenantID: tenantID,
+		}
+	}
+
+	if len(scope) > 0 {
+		standardClaims.Extra["scope"] = strings.Join(scope, "")
+	}
+
 	tokenRequest := &fosite.Request{
 		GrantedAudience: []string{"https://auth0.com/api/v2/"},
-		GrantedScope:    []string{"read:users", "update:users", "create:users"},
 		Client: &fosite.DefaultClient{
 			ID:     "App-test",
 			Secret: []byte("mysecret"),
 		},
 		Session: &oauth2.JWTSession{
-			JWTClaims: &fositejwt.JWTClaims{
-				Issuer:    "Orchestrate",
-				Subject:   "e2e-test",
-				IssuedAt:  time.Now().UTC(),
-				NotBefore: time.Now().UTC(),
-				Extra:     customClaims,
-			},
+			JWTClaims: standardClaims,
 			JWTHeader: &fositejwt.Headers{
 				Extra: make(map[string]interface{}),
 			},

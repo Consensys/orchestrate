@@ -8,7 +8,6 @@ require (
 	github.com/alicebob/miniredis v2.5.0+incompatible
 	github.com/c0va23/go-proxyprotocol v0.9.1
 	github.com/cenkalti/backoff/v4 v4.1.0
-	github.com/client9/misspell v0.3.4 // indirect
 	github.com/consensys/gnark-crypto v0.5.0
 	github.com/consensys/quorum v2.7.0+incompatible
 	github.com/consensys/quorum-key-manager v0.0.0-20211005102807-643afad3d0af
@@ -34,7 +33,6 @@ require (
 	github.com/gorilla/websocket v1.4.2
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1
-	github.com/hashicorp/vault/api v1.0.5-0.20200717191844-f687267c8086 // indirect
 	github.com/heptiolabs/healthcheck v0.0.0-20180807145615-6ff867650f40
 	github.com/justinas/alice v1.2.0
 	github.com/mitchellh/copystructure v1.0.0
@@ -65,6 +63,7 @@ require (
 	google.golang.org/protobuf v1.26.0
 	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0 // indirect
 	gopkg.in/h2non/gock.v1 v1.0.15
+	gopkg.in/square/go-jose.v2 v2.5.1
 	gopkg.in/yaml.v2 v2.4.0
 )
 

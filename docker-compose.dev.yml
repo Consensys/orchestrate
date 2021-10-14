@@ -28,9 +28,10 @@ x-default-variables: &default-variables
   REDIS_EXPIRATION: ${REDIS_EXPIRATION-}
   REDIS_TLS_SKIP_VERIFY: ${REDIS_TLS_SKIP_VERIFY-}
   MULTI_TENANCY_ENABLED: ${MULTI_TENANCY_ENABLED-false}
-  AUTH_JWT_CLAIMS_NAMESPACE: ${AUTH_JWT_CLAIMS_NAMESPACE-http://tenant.info/}
-  AUTH_JWT_CERTIFICATE: ${AUTH_JWT_CERTIFICATE-}
+  AUTH_JWT_CLAIMS_NAMESPACE: ${AUTH_JWT_CLAIMS_NAMESPACE-}
+  AUTH_JWT_CERT: ${AUTH_JWT_CERT-}
   AUTH_API_KEY: ${AUTH_API_KEY-}
+  AUTH_JWT_ISSUER_URL: ${AUTH_JWT_ISSUER_URL-}
   KAFKA_URL: ${KAFKA_URL-kafka:29092}
   KAFKA_SASL_ENABLED: ${KAFKA_SASL_ENABLED-false}
   KAFKA_SASL_MECHANISM: ${KAFKA_SASL_MECHANISM-PLAIN}
@@ -99,7 +100,7 @@ services:
       <<: *api-common
     restart: "no"
     command: api account import
-    
+
   api:
     <<: *container-common
     ports:
@@ -111,7 +112,7 @@ services:
       <<: *proxy-common
     volumes:
       - ./build/bin/orchestrate:/bin/main:ro
-      - ./scripts/deps/quorum-key-manager/certificates:/certificates
+      - ./scripts/deps/certificates:/certificates
     depends_on:
       - api-migration
     command: api run
@@ -126,7 +127,7 @@ services:
       <<: *default-variables
     volumes:
       - ./build/bin/orchestrate:/bin/main
-      - ./scripts/deps/quorum-key-manager/certificates:/certificates
+      - ./scripts/deps/certificates:/certificates
     depends_on:
       - api
     command: tx-sender run
@@ -142,10 +143,17 @@ services:
     command: tx-listener run
 
   generate-jwt:
-    <<: *container-common
+    image: golang:1.15-buster
+    entrypoint: /bin/main
+    tty: true
+    volumes:
+      - ./build/bin/orchestrate:/bin/main:ro
+      - ./scripts/deps/certificates:/certificates
     environment:
-      <<: *default-variables
-      AUTH_JWT_PRIVATE_KEY: ${AUTH_JWT_PRIVATE_KEY-}
+      AUTH_JWT_CLAIMS_NAMESPACE: ${AUTH_JWT_CLAIMS_NAMESPACE-}
+      AUTH_JWT_CERT: ${AUTH_JWT_CERT-}
+      AUTH_JWT_KEY: ${AUTH_JWT_KEY-}
+      TENANT_ID: ${TENANT_ID-}
     command: utils generate-jwt --tenant=${TENANT_ID-_} --expiration=${EXPIRATION-24h}
     restart: "no"
 

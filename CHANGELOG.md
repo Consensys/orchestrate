@@ -1,9 +1,15 @@
 # Orchestrate Release Notes
 
 ## v21.9.0 (WIP)
+### 🆕 Features
+* Support Token Issuer Servers to validate JWTs. Environment variable `AUTH_JWT_ISSUER_URL`
+* Added environment variable to read JWT cert from filesystem, `AUTH_JWT_CERT`
+
 ### ⚠ BREAKING CHANGES
 * Integration of Quorum Key Manager as replacement of Orchestrate Key Manager service
 * Removed endpoints `/accounts/{address}/sign` and `/accounts/{address}/verify-signature` in favor of `/accounts/{address}/sign-message` and `/accounts/verify-message` accordingly to EIP-191 standards
+* Deprecate usage of `AUTH_JWT_CERTIFICATE` in favor of `AUTH_JWT_CERT`
+* Deprecate usage of `AUTH_JWT_CLAIMS_NAMESPACE` in favor of standard claims using token `sub`
 
 ### 🛠 Bug fixes
 * Incorrect server name verification using Postgres in `verify-ca` mode 

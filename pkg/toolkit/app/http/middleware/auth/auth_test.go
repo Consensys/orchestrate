@@ -1,12 +1,14 @@
 package auth
 
 import (
+	"crypto/x509"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	authjwt "github.com/consensys/orchestrate/pkg/toolkit/app/auth/jwt"
 	authkey "github.com/consensys/orchestrate/pkg/toolkit/app/auth/key"
+	"github.com/consensys/orchestrate/pkg/toolkit/tls/certificate"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -16,7 +18,7 @@ type MockHandler struct {
 	served bool
 }
 
-func (h *MockHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+func (h *MockHandler) ServeHTTP(_ http.ResponseWriter, req *http.Request) {
 	h.served = true
 }
 
@@ -68,9 +70,8 @@ func TestAuth(t *testing.T) {
 			// Create HTTP handler
 			nextH := &MockHandler{}
 			jwtChecker, err := authjwt.New(&authjwt.Config{
-				ClaimsNamespace:      "http://orchestrate.info",
 				SkipClaimsValidation: true,
-				Certificate:          []byte(rawCert),
+				Certificates:         certificates([]byte(rawCert)),
 			})
 			require.NoError(t, err)
 
@@ -99,4 +100,10 @@ func TestAuth(t *testing.T) {
 			assert.Equal(t, test.expectedServed, nextH.served, "Given handler should have been called or ignored")
 		})
 	}
+}
+
+func certificates(content []byte) []*x509.Certificate {
+	bCert, _ := certificate.Decode(content, "CERTIFICATE")
+	cert, _ := x509.ParseCertificate(bCert[0])
+	return []*x509.Certificate{cert}
 }

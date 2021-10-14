@@ -26,7 +26,7 @@ func TestAuthServiceCertificate(t *testing.T) {
 }
 
 func TestTenantNamespace(t *testing.T) {
-	name := "auth.jawt.claims.namespace"
+	name := "auth.jwt.claims.namespace"
 	flgs := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	Flags(flgs)
 

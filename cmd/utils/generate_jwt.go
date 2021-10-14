@@ -40,7 +40,7 @@ func run(_ *cobra.Command, _ []string) {
 
 	// Start application
 	generator.Init(ctx)
-	jwt, err := generator.GlobalJWTGenerator().GenerateAccessTokenWithTenantID(tenant, expiration)
+	jwt, err := generator.GlobalJWTGenerator().GenerateAccessTokenWithTenantID(tenant, []string{"*:*"}, expiration)
 	if err != nil {
 		log.WithError(err).Fatalf("jwt-generator: could not generate JWT token")
 	}

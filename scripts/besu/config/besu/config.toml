@@ -36,4 +36,4 @@ bootnodes=["enode://8208a3f344695d44e9cf2c023683cbea7b9343e2f70a5e804bd2c93858e9
 # Discovery at boot is set to a list of static files, but will also discover new nodes should they be added
 # static nodes
 static-nodes-file="/config/static-nodes.json"
-discovery-enabled=true
+discovery-enabled=false

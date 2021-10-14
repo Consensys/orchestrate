@@ -242,7 +242,7 @@ func (sc *ScenarioContext) iHaveTheFollowingTenant(table *gherkin.PickleStepArgu
 		if tenantID == "" {
 			tenantID = uuid.Must(uuid.NewV4()).String()
 		}
-		token, err := sc.jwtGenerator.GenerateAccessTokenWithTenantID(tenantID, 24*time.Hour)
+		token, err := sc.jwtGenerator.GenerateAccessTokenWithTenantID(tenantID, []string{"*:*"}, 24*time.Hour)
 		if err != nil {
 			return err
 		}

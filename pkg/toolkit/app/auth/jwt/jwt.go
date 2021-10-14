@@ -10,26 +10,25 @@ import (
 	"github.com/consensys/orchestrate/pkg/errors"
 	authutils "github.com/consensys/orchestrate/pkg/toolkit/app/auth/utils"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
-	"github.com/consensys/orchestrate/pkg/toolkit/tls/certificate"
 	"github.com/golang-jwt/jwt"
+)
+
+const (
+	authPrefix              = "Bearer "
+	usernameTenantSeparator = "|"
 )
 
 // Structure to define the parser of the Token and what have to be verify in the Token
 type JWT struct {
-	cfg    *Config
-	parser *jwt.Parser
-	cert   *x509.Certificate
+	OrchestrateClaimPath string
+	parser               *jwt.Parser
+	certificates         []*x509.Certificate
 }
 
 func New(cfg *Config) (*JWT, error) {
-	cert, err := certificate.X509KeyPair(cfg.Certificate, nil)
-	if err != nil {
-		return nil, err
-	}
-
 	return &JWT{
-		cfg:  cfg,
-		cert: cert.Leaf,
+		OrchestrateClaimPath: cfg.OrchestrateClaimPath,
+		certificates:         cfg.Certificates,
 		parser: &jwt.Parser{
 			ValidMethods:         cfg.ValidMethods,
 			SkipClaimsValidation: cfg.SkipClaimsValidation,
@@ -37,45 +36,42 @@ func New(cfg *Config) (*JWT, error) {
 	}, nil
 }
 
-func (checker *JWT) key(token *jwt.Token) (interface{}, error) {
-	switch token.Method.Alg() {
-	case "RS256", "RS384", "RS512":
-		pubKey, ok := checker.cert.PublicKey.(*rsa.PublicKey)
-		if !ok {
-			return nil, fmt.Errorf("jwt: certificate is not an RSA public key")
+func (checker *JWT) keyFunc(token *jwt.Token) (interface{}, error) {
+	for _, cert := range checker.certificates {
+		if _, ok := token.Method.(*jwt.SigningMethodRSA); ok {
+			return cert.PublicKey.(*rsa.PublicKey), nil
 		}
-		return pubKey, nil
-	case "ES256", "ES384", "ES512":
-		pubKey, ok := checker.cert.PublicKey.(*ecdsa.PublicKey)
-		if !ok {
-			return nil, fmt.Errorf("jwt: certificate is not an ECDSA public key")
+		if _, ok := token.Method.(*jwt.SigningMethodECDSA); !ok {
+			return cert.PublicKey.(*ecdsa.PublicKey), nil
 		}
-		return pubKey, nil
-	default:
-		return nil, fmt.Errorf("jwt: unsupported token method signature %q", token.Method.Alg())
 	}
-}
 
-const authPrefix = "Bearer "
+	return nil, fmt.Errorf("unexpected method: %s", token.Method.Alg())
+}
 
 // Parse and verify the validity of the Token (UUID or Access) and return a struct for a JWT (JSON Web Token)
 func (checker *JWT) Check(ctx context.Context) (context.Context, error) {
-	if checker == nil || checker.cert == nil {
+	if len(checker.certificates) == 0 {
+		// If no certificate provided we deactivate authentication
+		return nil, nil
+	}
+
+	if checker == nil || checker.certificates == nil {
 		// If no certificate provided we deactivate authentication
 		return nil, nil
 	}
 
 	// Extract Access Token from context
-	bearer, ok := authutils.ParseAuth(authPrefix, authutils.AuthorizationFromContext(ctx))
+	bearerToken, ok := authutils.ParseAuth(authPrefix, authutils.AuthorizationFromContext(ctx))
 	if !ok {
 		return nil, nil
 	}
 
 	// Parse and validate token injected in context
 	token, err := checker.parser.ParseWithClaims(
-		bearer,
-		&Claims{namespace: checker.cfg.ClaimsNamespace},
-		checker.key,
+		bearerToken,
+		&Claims{namespace: checker.OrchestrateClaimPath},
+		checker.keyFunc,
 	)
 	if err != nil {
 		return ctx, errors.UnauthorizedError(err.Error())

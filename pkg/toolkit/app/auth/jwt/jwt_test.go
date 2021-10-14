@@ -2,6 +2,7 @@ package jwt_test
 
 import (
 	"context"
+	"crypto/x509"
 	"fmt"
 	"testing"
 	"time"
@@ -31,15 +32,15 @@ func TestJWT(t *testing.T) {
 		{
 			"invalid signature",
 			&jwt.Config{
-				ClaimsNamespace: "orchestrate.test",
-				Certificate:     []byte(tlstestutils.OneLineRSACertPEMB),
+				OrchestrateClaimPath: "orchestrate.test",
+				Certificates:         certificates([]byte(tlstestutils.OneLineRSACertPEMB)),
 			},
 			&jwtgenerator.Config{
 				KeyPair: &certificate.KeyPair{
 					Cert: []byte(tlstestutils.OneLineRSACertPEMA),
 					Key:  []byte(tlstestutils.OneLineRSAKeyPEMA),
 				},
-				ClaimsNamespace: "orchestrate.test",
+				OrchestrateClaimPath: "orchestrate.test",
 			},
 			"foo",
 			10 * time.Hour,
@@ -51,15 +52,15 @@ func TestJWT(t *testing.T) {
 		{
 			"expired token",
 			&jwt.Config{
-				ClaimsNamespace: "orchestrate.test",
-				Certificate:     []byte(tlstestutils.OneLineRSACertPEMA),
+				OrchestrateClaimPath: "orchestrate.test",
+				Certificates:         certificates([]byte(tlstestutils.OneLineRSACertPEMA)),
 			},
 			&jwtgenerator.Config{
 				KeyPair: &certificate.KeyPair{
 					Cert: []byte(tlstestutils.OneLineRSACertPEMA),
 					Key:  []byte(tlstestutils.OneLineRSAKeyPEMA),
 				},
-				ClaimsNamespace: "orchestrate.test",
+				OrchestrateClaimPath: "orchestrate.test",
 			},
 			"foo",
 			-10 * time.Second,
@@ -71,15 +72,15 @@ func TestJWT(t *testing.T) {
 		{
 			"distinct jwt custom claims namespace",
 			&jwt.Config{
-				ClaimsNamespace: "orchestrate.prod",
-				Certificate:     []byte(tlstestutils.OneLineRSACertPEMA),
+				OrchestrateClaimPath: "orchestrate.prod",
+				Certificates:         certificates([]byte(tlstestutils.OneLineRSACertPEMA)),
 			},
 			&jwtgenerator.Config{
 				KeyPair: &certificate.KeyPair{
 					Cert: []byte(tlstestutils.OneLineRSACertPEMA),
 					Key:  []byte(tlstestutils.OneLineRSAKeyPEMA),
 				},
-				ClaimsNamespace: "orchestrate.dev",
+				OrchestrateClaimPath: "orchestrate.dev",
 			},
 			"foo",
 			10 * time.Hour,
@@ -91,15 +92,15 @@ func TestJWT(t *testing.T) {
 		{
 			"empty tenant id",
 			&jwt.Config{
-				ClaimsNamespace: "orchestrate.test",
-				Certificate:     []byte(tlstestutils.OneLineRSACertPEMA),
+				OrchestrateClaimPath: "orchestrate.test",
+				Certificates:         certificates([]byte(tlstestutils.OneLineRSACertPEMA)),
 			},
 			&jwtgenerator.Config{
 				KeyPair: &certificate.KeyPair{
 					Cert: []byte(tlstestutils.OneLineRSACertPEMA),
 					Key:  []byte(tlstestutils.OneLineRSAKeyPEMA),
 				},
-				ClaimsNamespace: "orchestrate.test",
+				OrchestrateClaimPath: "orchestrate.test",
 			},
 			"",
 			10 * time.Hour,
@@ -111,15 +112,15 @@ func TestJWT(t *testing.T) {
 		{
 			"JWT foo accessing empty tenant",
 			&jwt.Config{
-				ClaimsNamespace: "orchestrate.test",
-				Certificate:     []byte(tlstestutils.OneLineRSACertPEMA),
+				OrchestrateClaimPath: "orchestrate.test",
+				Certificates:         certificates([]byte(tlstestutils.OneLineRSACertPEMA)),
 			},
 			&jwtgenerator.Config{
 				KeyPair: &certificate.KeyPair{
 					Cert: []byte(tlstestutils.OneLineRSACertPEMA),
 					Key:  []byte(tlstestutils.OneLineRSAKeyPEMA),
 				},
-				ClaimsNamespace: "orchestrate.test",
+				OrchestrateClaimPath: "orchestrate.test",
 			},
 			"foo",
 			10 * time.Hour,
@@ -131,15 +132,15 @@ func TestJWT(t *testing.T) {
 		{
 			"JWT foo accessing foo tenant",
 			&jwt.Config{
-				ClaimsNamespace: "orchestrate.test",
-				Certificate:     []byte(tlstestutils.OneLineRSACertPEMA),
+				OrchestrateClaimPath: "orchestrate.test",
+				Certificates:         certificates([]byte(tlstestutils.OneLineRSACertPEMA)),
 			},
 			&jwtgenerator.Config{
 				KeyPair: &certificate.KeyPair{
 					Cert: []byte(tlstestutils.OneLineRSACertPEMA),
 					Key:  []byte(tlstestutils.OneLineRSAKeyPEMA),
 				},
-				ClaimsNamespace: "orchestrate.test",
+				OrchestrateClaimPath: "orchestrate.test",
 			},
 			"foo",
 			10 * time.Hour,
@@ -151,15 +152,15 @@ func TestJWT(t *testing.T) {
 		{
 			"JWT foo accessing bar tenant",
 			&jwt.Config{
-				ClaimsNamespace: "orchestrate.test",
-				Certificate:     []byte(tlstestutils.OneLineRSACertPEMA),
+				OrchestrateClaimPath: "orchestrate.test",
+				Certificates:         certificates([]byte(tlstestutils.OneLineRSACertPEMA)),
 			},
 			&jwtgenerator.Config{
 				KeyPair: &certificate.KeyPair{
 					Cert: []byte(tlstestutils.OneLineRSACertPEMA),
 					Key:  []byte(tlstestutils.OneLineRSAKeyPEMA),
 				},
-				ClaimsNamespace: "orchestrate.test",
+				OrchestrateClaimPath: "orchestrate.test",
 			},
 			"foo",
 			10 * time.Hour,
@@ -171,15 +172,15 @@ func TestJWT(t *testing.T) {
 		{
 			"JWT * accessing empty tenant",
 			&jwt.Config{
-				ClaimsNamespace: "orchestrate.test",
-				Certificate:     []byte(tlstestutils.OneLineRSACertPEMA),
+				OrchestrateClaimPath: "orchestrate.test",
+				Certificates:         certificates([]byte(tlstestutils.OneLineRSACertPEMA)),
 			},
 			&jwtgenerator.Config{
 				KeyPair: &certificate.KeyPair{
 					Cert: []byte(tlstestutils.OneLineRSACertPEMA),
 					Key:  []byte(tlstestutils.OneLineRSAKeyPEMA),
 				},
-				ClaimsNamespace: "orchestrate.test",
+				OrchestrateClaimPath: "orchestrate.test",
 			},
 			"*",
 			10 * time.Hour,
@@ -191,15 +192,15 @@ func TestJWT(t *testing.T) {
 		{
 			"JWT * accessing foo tenant",
 			&jwt.Config{
-				ClaimsNamespace: "orchestrate.test",
-				Certificate:     []byte(tlstestutils.OneLineRSACertPEMA),
+				OrchestrateClaimPath: "orchestrate.test",
+				Certificates:         certificates([]byte(tlstestutils.OneLineRSACertPEMA)),
 			},
 			&jwtgenerator.Config{
 				KeyPair: &certificate.KeyPair{
 					Cert: []byte(tlstestutils.OneLineRSACertPEMA),
 					Key:  []byte(tlstestutils.OneLineRSAKeyPEMA),
 				},
-				ClaimsNamespace: "orchestrate.test",
+				OrchestrateClaimPath: "orchestrate.test",
 			},
 			"*",
 			10 * time.Hour,
@@ -211,15 +212,15 @@ func TestJWT(t *testing.T) {
 		{
 			"JWT * accessing default tenant",
 			&jwt.Config{
-				ClaimsNamespace: "orchestrate.test",
-				Certificate:     []byte(tlstestutils.OneLineRSACertPEMA),
+				OrchestrateClaimPath: "orchestrate.test",
+				Certificates:         certificates([]byte(tlstestutils.OneLineRSACertPEMA)),
 			},
 			&jwtgenerator.Config{
 				KeyPair: &certificate.KeyPair{
 					Cert: []byte(tlstestutils.OneLineRSACertPEMA),
 					Key:  []byte(tlstestutils.OneLineRSAKeyPEMA),
 				},
-				ClaimsNamespace: "orchestrate.test",
+				OrchestrateClaimPath: "orchestrate.test",
 			},
 			"*",
 			10 * time.Hour,
@@ -237,7 +238,7 @@ func TestJWT(t *testing.T) {
 			gen, err := jwtgenerator.New(tt.genCfg)
 			require.NoError(t, err)
 
-			token, err := gen.GenerateAccessTokenWithTenantID(tt.jwtTenantID, tt.jwtTTL)
+			token, err := gen.GenerateAccessTokenWithTenantID(tt.jwtTenantID, []string{"*:*"}, tt.jwtTTL)
 			require.NoError(t, err)
 
 			ctx := authutils.WithAuthorization(context.Background(), fmt.Sprintf("Bearer %v", token))
@@ -253,4 +254,10 @@ func TestJWT(t *testing.T) {
 			}
 		})
 	}
+}
+
+func certificates(content []byte) []*x509.Certificate {
+	bCert, _ := certificate.Decode(content, "CERTIFICATE")
+	cert, _ := x509.ParseCertificate(bCert[0])
+	return []*x509.Certificate{cert}
 }
