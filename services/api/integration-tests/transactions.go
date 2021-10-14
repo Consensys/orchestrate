@@ -4,6 +4,7 @@ package integrationtests
 
 import (
 	"context"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"testing"
 	"time"
 
@@ -154,7 +155,7 @@ func (s *transactionsTestSuite) TestSuccess() {
 		req := testutils.FakeImportAccountRequest()
 		req.Alias = accountFaucetAlias
 		// Ganache imported account with 1000ETH
-		req.PrivateKey = "56202652fdffd802b7252a456dbd8f3ecc0352bbde76c23b40afe8aebd714e2e"
+		req.PrivateKey = hexutil.MustDecode("0x56202652fdffd802b7252a456dbd8f3ecc0352bbde76c23b40afe8aebd714e2e")
 		accResp, err := s.client.ImportAccount(s.env.ctx, req)
 		require.NoError(t, err)
 

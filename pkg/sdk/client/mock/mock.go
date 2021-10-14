@@ -6,9 +6,9 @@ package mock
 
 import (
 	context "context"
-	types "github.com/consensys/quorum-key-manager/src/stores/api/types"
 	api "github.com/consensys/orchestrate/pkg/types/api"
 	entities "github.com/consensys/orchestrate/pkg/types/entities"
+	types "github.com/consensys/quorum-key-manager/src/stores/api/types"
 	gomock "github.com/golang/mock/gomock"
 	healthcheck "github.com/heptiolabs/healthcheck"
 	io_prometheus_client "github.com/prometheus/client_model/go"
@@ -366,7 +366,7 @@ func (mr *MockOrchestrateClientMockRecorder) UpdateAccount(ctx, address, request
 }
 
 // SignMessage mocks base method
-func (m *MockOrchestrateClient) SignMessage(ctx context.Context, address string, request *api.SignMessageRequest) (string, error) {
+func (m *MockOrchestrateClient) SignMessage(ctx context.Context, address string, request *types.SignMessageRequest) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SignMessage", ctx, address, request)
 	ret0, _ := ret[0].(string)
@@ -375,13 +375,13 @@ func (m *MockOrchestrateClient) SignMessage(ctx context.Context, address string,
 }
 
 // SignMessage indicates an expected call of SignMessage
-func (mr *MockOrchestrateClientMockRecorder) SignPayload(ctx, address, request interface{}) *gomock.Call {
+func (mr *MockOrchestrateClientMockRecorder) SignMessage(ctx, address, request interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignMessage", reflect.TypeOf((*MockOrchestrateClient)(nil).SignMessage), ctx, address, request)
 }
 
 // SignTypedData mocks base method
-func (m *MockOrchestrateClient) SignTypedData(ctx context.Context, address string, request *api.SignTypedDataRequest) (string, error) {
+func (m *MockOrchestrateClient) SignTypedData(ctx context.Context, address string, request *types.SignTypedDataRequest) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SignTypedData", ctx, address, request)
 	ret0, _ := ret[0].(string)
@@ -404,7 +404,7 @@ func (m *MockOrchestrateClient) VerifyMessageSignature(ctx context.Context, requ
 }
 
 // VerifyMessageSignature indicates an expected call of VerifyMessageSignature
-func (mr *MockOrchestrateClientMockRecorder) VerifySignature(ctx, request interface{}) *gomock.Call {
+func (mr *MockOrchestrateClientMockRecorder) VerifyMessageSignature(ctx, request interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifyMessageSignature", reflect.TypeOf((*MockOrchestrateClient)(nil).VerifyMessageSignature), ctx, request)
 }
@@ -1132,7 +1132,7 @@ func (mr *MockAccountClientMockRecorder) UpdateAccount(ctx, address, request int
 }
 
 // SignMessage mocks base method
-func (m *MockAccountClient) SignMessage(ctx context.Context, address string, request *api.SignMessageRequest) (string, error) {
+func (m *MockAccountClient) SignMessage(ctx context.Context, address string, request *types.SignMessageRequest) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SignMessage", ctx, address, request)
 	ret0, _ := ret[0].(string)
@@ -1141,13 +1141,13 @@ func (m *MockAccountClient) SignMessage(ctx context.Context, address string, req
 }
 
 // SignMessage indicates an expected call of SignMessage
-func (mr *MockAccountClientMockRecorder) SignPayload(ctx, address, request interface{}) *gomock.Call {
+func (mr *MockAccountClientMockRecorder) SignMessage(ctx, address, request interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignMessage", reflect.TypeOf((*MockAccountClient)(nil).SignMessage), ctx, address, request)
 }
 
 // SignTypedData mocks base method
-func (m *MockAccountClient) SignTypedData(ctx context.Context, address string, request *api.SignTypedDataRequest) (string, error) {
+func (m *MockAccountClient) SignTypedData(ctx context.Context, address string, request *types.SignTypedDataRequest) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SignTypedData", ctx, address, request)
 	ret0, _ := ret[0].(string)
@@ -1170,7 +1170,7 @@ func (m *MockAccountClient) VerifyMessageSignature(ctx context.Context, request 
 }
 
 // VerifyMessageSignature indicates an expected call of VerifyMessageSignature
-func (mr *MockAccountClientMockRecorder) VerifySignature(ctx, request interface{}) *gomock.Call {
+func (mr *MockAccountClientMockRecorder) VerifyMessageSignature(ctx, request interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifyMessageSignature", reflect.TypeOf((*MockAccountClient)(nil).VerifyMessageSignature), ctx, request)
 }

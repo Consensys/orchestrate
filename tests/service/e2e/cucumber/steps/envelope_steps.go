@@ -277,7 +277,7 @@ func (sc *ScenarioContext) iHaveTheFollowingAccount(table *gherkin.PickleStepArg
 		_ = w.Generate()
 		privBytes := crypto.FromECDSA(w.Priv())
 		accountMap["address"] = w.Address().Hex()
-		accountMap["private_key"] = hexutil.Encode(privBytes)[2:]
+		accountMap["private_key"] = hexutil.Encode(privBytes)
 		sc.aliases.Set(accountMap, sc.Pickle.Id, aliass)
 	}
 

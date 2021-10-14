@@ -5,18 +5,16 @@ import (
 	"fmt"
 	"net/http"
 
+	jsonutils "github.com/consensys/orchestrate/pkg/encoding/json"
 	qkm "github.com/consensys/orchestrate/pkg/quorum-key-manager"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/httputil"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/api"
+	"github.com/consensys/orchestrate/pkg/utils"
+	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
 	"github.com/consensys/orchestrate/services/api/service/formatters"
 	"github.com/consensys/quorum-key-manager/pkg/client"
 	qkmtypes "github.com/consensys/quorum-key-manager/src/stores/api/types"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-
-	jsonutils "github.com/consensys/orchestrate/pkg/encoding/json"
-	"github.com/consensys/orchestrate/pkg/toolkit/app/http/httputil"
-	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
-	"github.com/consensys/orchestrate/pkg/utils"
-	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
 	"github.com/gorilla/mux"
 )
 
@@ -34,7 +32,7 @@ func NewAccountsController(accountUCs usecases.AccountUseCases, keyManagerClient
 	}
 }
 
-// Add routes to router
+// Append Add routes to router
 func (c *AccountsController) Append(router *mux.Router) {
 	router.Methods(http.MethodGet).Path("/accounts").HandlerFunc(c.search)
 	router.Methods(http.MethodPost).Path("/accounts").HandlerFunc(c.create)
@@ -71,8 +69,7 @@ func (c *AccountsController) create(rw http.ResponseWriter, request *http.Reques
 		return
 	}
 
-	acc := formatters.FormatCreateAccountRequest(req)
-	acc, err = c.ucs.CreateAccount().Execute(ctx, acc, nil, req.Chain, multitenancy.TenantIDFromContext(ctx))
+	acc, err := c.ucs.CreateAccount().Execute(ctx, formatters.FormatCreateAccountRequest(req), nil, req.Chain, multitenancy.TenantIDFromContext(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -175,23 +172,13 @@ func (c *AccountsController) importKey(rw http.ResponseWriter, request *http.Req
 		return
 	}
 
-	var bPrivKey []byte
-	if req.PrivateKey != "" {
-		bPrivKey, err = hexutil.Decode("0x" + req.PrivateKey)
-		if err != nil {
-			httputil.WriteError(rw, "invalid private key format", http.StatusBadRequest)
-			return
-		}
-	}
-
-	accResp := formatters.FormatImportAccountRequest(req)
-	accResp, err = c.ucs.CreateAccount().Execute(ctx, accResp, bPrivKey, req.Chain, multitenancy.TenantIDFromContext(ctx))
+	acc, err := c.ucs.CreateAccount().Execute(ctx, formatters.FormatImportAccountRequest(req), req.PrivateKey, req.Chain, multitenancy.TenantIDFromContext(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
 	}
 
-	_ = json.NewEncoder(rw).Encode(formatters.FormatAccountResponse(accResp))
+	_ = json.NewEncoder(rw).Encode(formatters.FormatAccountResponse(acc))
 }
 
 // @Summary Update account by Address
@@ -254,7 +241,7 @@ func (c *AccountsController) update(rw http.ResponseWriter, request *http.Reques
 // @Router /accounts/{address}/sign-message [post]
 func (c *AccountsController) signMessage(rw http.ResponseWriter, request *http.Request) {
 	ctx := request.Context()
-	payloadRequest := &api.SignMessageRequest{}
+	payloadRequest := &qkmtypes.SignMessageRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, payloadRequest)
 	if err != nil {
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
@@ -275,7 +262,7 @@ func (c *AccountsController) signMessage(rw http.ResponseWriter, request *http.R
 	}
 
 	signature, err := c.keyManagerClient.SignMessage(request.Context(), c.storeName, address, &qkmtypes.SignMessageRequest{
-		Message: hexutil.MustDecode(payloadRequest.Message),
+		Message: payloadRequest.Message,
 	})
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
@@ -301,7 +288,7 @@ func (c *AccountsController) signMessage(rw http.ResponseWriter, request *http.R
 // @Router /accounts/{address}/sign-typed-data [post]
 func (c *AccountsController) signTypedData(rw http.ResponseWriter, request *http.Request) {
 	ctx := request.Context()
-	signRequest := &api.SignTypedDataRequest{}
+	signRequest := &qkmtypes.SignTypedDataRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, signRequest)
 	if err != nil {
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)

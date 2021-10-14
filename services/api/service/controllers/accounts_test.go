@@ -12,12 +12,12 @@ import (
 	"testing"
 
 	qkm "github.com/consensys/orchestrate/pkg/quorum-key-manager"
-	qkmmock "github.com/consensys/quorum-key-manager/pkg/client/mock"
-	qkmtypes "github.com/consensys/quorum-key-manager/src/stores/api/types"
 	"github.com/consensys/orchestrate/pkg/types/api"
 	"github.com/consensys/orchestrate/pkg/utils"
 	"github.com/consensys/orchestrate/services/api/business/use-cases"
 	"github.com/consensys/orchestrate/services/api/service/formatters"
+	qkmmock "github.com/consensys/quorum-key-manager/pkg/client/mock"
+	qkmtypes "github.com/consensys/quorum-key-manager/src/stores/api/types"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 
 	"github.com/consensys/orchestrate/pkg/encoding/json"
@@ -276,18 +276,18 @@ func (s *accountsCtrlTestSuite) TestAccountController_SignPayload() {
 		acc := testutils.FakeAccount()
 		acc.Address = inputTestAddress
 		rw := httptest.NewRecorder()
-		payload := "0x1234"
+		payload := hexutil.MustDecode("0x1234")
 		signature := "0xsignature"
-		requestBytes, _ := json.Marshal(&api.SignMessageRequest{Message: payload})
+		requestBytes, _ := json.Marshal(&qkmtypes.SignMessageRequest{Message: payload})
 
 		httpRequest := httptest.
 			NewRequest(http.MethodPost, fmt.Sprintf("/accounts/%v/sign-message", acc.Address), bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 
-		s.getAccountUC.EXPECT().Execute(gomock.Any(), mixedCaseTestAddress, 
-			 utils.AllowedTenants(s.tenants[0])).Return(acc, nil)
+		s.getAccountUC.EXPECT().Execute(gomock.Any(), mixedCaseTestAddress,
+			utils.AllowedTenants(s.tenants[0])).Return(acc, nil)
 		s.keyManagerClient.EXPECT().SignMessage(gomock.Any(), globalStoreName, mixedCaseTestAddress, &qkmtypes.SignMessageRequest{
-			Message: hexutil.MustDecode(payload),
+			Message: payload,
 		}).Return(signature, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)

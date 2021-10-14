@@ -107,7 +107,7 @@ func (c *HTTPClient) SearchAccounts(ctx context.Context, filters *entities.Accou
 	return resp, nil
 }
 
-func (c *HTTPClient) SignMessage(ctx context.Context, address string, req *api.SignMessageRequest) (string, error) {
+func (c *HTTPClient) SignMessage(ctx context.Context, address string, req *qkmtypes.SignMessageRequest) (string, error) {
 	reqURL := fmt.Sprintf("%v/accounts/%s/sign-message", c.config.URL, address)
 
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, req)
@@ -119,7 +119,7 @@ func (c *HTTPClient) SignMessage(ctx context.Context, address string, req *api.S
 	return httputil.ParseStringResponse(ctx, response)
 }
 
-func (c *HTTPClient) SignTypedData(ctx context.Context, address string, request *api.SignTypedDataRequest) (string, error) {
+func (c *HTTPClient) SignTypedData(ctx context.Context, address string, request *qkmtypes.SignTypedDataRequest) (string, error) {
 	reqURL := fmt.Sprintf("%v/accounts/%s/sign-typed-data", c.config.URL, address)
 
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, request)

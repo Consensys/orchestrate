@@ -20,9 +20,9 @@ import (
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/pkg/types/testutils"
 	"github.com/consensys/orchestrate/pkg/utils"
-	"github.com/traefik/traefik/v2/pkg/log"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	"github.com/traefik/traefik/v2/pkg/log"
 )
 
 type accountsTestSuite struct {
@@ -41,7 +41,7 @@ func (s *accountsTestSuite) TestCreateAccounts() {
 
 		ethAccRes, err := s.client.CreateAccount(ctx, txRequest)
 		require.NoError(s.T(), err)
-		
+
 		resp, err := s.client.GetAccount(ctx, ethAccRes.Address)
 		require.NoError(s.T(), err)
 
@@ -199,25 +199,25 @@ func (s *accountsTestSuite) TestSignMessageAndVerify() {
 	txRequest := testutils.FakeCreateAccountRequest()
 	ethAccRes, err := s.client.CreateAccount(ctx, txRequest)
 	require.NoError(s.T(), err)
-	
-	message := hexutil.Encode([]byte("my data to sign"))
+
+	message := hexutil.MustDecode("0xaeff")
 	var signedPayload string
 
 	s.T().Run("should sign message successfully", func(t *testing.T) {
 		address := ethAccRes.Address
 
-		signedPayload, err = s.client.SignMessage(ctx, address, &api.SignMessageRequest{
+		signedPayload, err = s.client.SignMessage(ctx, address, &qkmtypes.SignMessageRequest{
 			Message: message,
 		})
 		require.NoError(s.T(), err)
 		assert.NotEmpty(s.T(), signedPayload)
 	})
-	
+
 	s.T().Run("should verify signature successfully", func(t *testing.T) {
 		verifyRequest := &qkmtypes.VerifyRequest{
-			Data: hexutil.MustDecode(message),
+			Data:      message,
 			Signature: hexutil.MustDecode(signedPayload),
-			Address: common.HexToAddress(ethAccRes.Address),
+			Address:   common.HexToAddress(ethAccRes.Address),
 		}
 		err := s.client.VerifyMessageSignature(ctx, verifyRequest)
 		assert.NoError(s.T(), err)
@@ -235,7 +235,7 @@ func (s *accountsTestSuite) TestSignTypedData() {
 	var signature string
 
 	s.T().Run("should sign typed data successfully", func(t *testing.T) {
-		signature, err = s.client.SignTypedData(ctx, ethAccRes.Address, &api.SignTypedDataRequest{
+		signature, err = s.client.SignTypedData(ctx, ethAccRes.Address, &qkmtypes.SignTypedDataRequest{
 			DomainSeparator: typedDataRequest.DomainSeparator,
 			Types:           typedDataRequest.Types,
 			Message:         typedDataRequest.Message,
@@ -256,12 +256,11 @@ func (s *accountsTestSuite) TestSignTypedData() {
 	})
 }
 
-func createNewKey() (string, string, error) {
+func createNewKey() (privKey []byte, address string, err error) {
 	faucetKey, err := crypto.GenerateKey()
 	if err != nil {
-		return "", "", err
+		return nil, "", err
 	}
-	privKey := hexutil.Encode(faucetKey.D.Bytes())
-	address := crypto.PubkeyToAddress(faucetKey.PublicKey).String()
-	return privKey[2:], address, nil
+
+	return faucetKey.D.Bytes(), crypto.PubkeyToAddress(faucetKey.PublicKey).Hex(), nil
 }

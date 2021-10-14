@@ -1,5 +1,7 @@
 package utils
 
+import "github.com/ethereum/go-ethereum/common/hexutil"
+
 type TestData struct {
 	Nodes TestDataNodes `json:"nodes"`
 }
@@ -14,7 +16,7 @@ type TestDataChain struct {
 	URLs              []string                 `json:"URLs,omitempty"`
 	PrivateAddress    []string                 `json:"privateAddress,omitempty"`
 	FundedPublicKeys  []string                 `json:"fundedPublicKeys,omitempty"`
-	FundedPrivateKeys []string                 `json:"fundedPrivateKeys,omitempty"`
+	FundedPrivateKeys []hexutil.Bytes          `json:"fundedPrivateKeys,omitempty"`
 	PrivateTxManager  TestDataPrivateTxManager `json:"privateTxManager,omitempty"`
 }
 
