@@ -150,7 +150,7 @@ services:
 
   quorum-key-manager-migration:
     <<: *container-common
-    image: consensys/quorum-key-manager:v21.9.1
+    image: consensys/quorum-key-manager:v21.9.2
     environment:
       <<: *qkm-common
     restart: "no"
@@ -158,7 +158,7 @@ services:
 
   quorum-key-manager:
     <<: *container-common
-    image: consensys/quorum-key-manager:v21.9.1
+    image: consensys/quorum-key-manager:v21.9.2
     depends_on:
       - vault
       - quorum-key-manager-migration
