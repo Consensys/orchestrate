@@ -15,6 +15,12 @@
 * Incorrect server name verification using Postgres in `verify-ca` mode 
 * Tx-sender exits sending Tessera private transaction with invalid 'from'
 
+## v21.1.9 (2021-10-21)
+### 🛠 Bug fixes
+* Incorrect server name verification using Postgres in `verify-ca` mode
+* Tx-sender exits sending Tessera private transaction with invalid 'from'
+* Added logging in key-manager microservice
+
 ## v21.1.8 (2021-08-25)
 ### 🛠 Bug fixes
 * Wrong tenant assigment when API_KEY was not defined
