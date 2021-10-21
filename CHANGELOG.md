@@ -4,6 +4,7 @@
 ### 🆕 Features
 * Support Token Issuer Servers to validate JWTs. Environment variable `AUTH_JWT_ISSUER_URL`
 * Added environment variable to read JWT cert from filesystem, `AUTH_JWT_CERT`
+* Support for new transaction pricing mechanism (eip-1559)
 
 ### ⚠ BREAKING CHANGES
 * Integration of Quorum Key Manager as replacement of Orchestrate Key Manager service
