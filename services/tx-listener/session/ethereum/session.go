@@ -456,7 +456,6 @@ func isEEAPrivTx(transaction *ethtypes.Transaction, eeaPrivPrecompiledContractAd
 func (s *Session) fetchReceipt(ctx context.Context, job *entities.Job, txHash ethcommon.Hash) *Future {
 	return NewFuture(func() (interface{}, error) {
 		logger := s.logger.WithField("tx_hash", txHash.Hex()).WithField("chain", s.Chain.UUID)
-
 		logger.Debug("fetching fetch receipt...")
 
 		receipt, err := s.ec.TransactionReceipt(ctx, s.Chain.URL, txHash)

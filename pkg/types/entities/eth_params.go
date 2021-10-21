@@ -1,11 +1,19 @@
 package entities
 
+import (
+	"github.com/ethereum/go-ethereum/core/types"
+)
+
 type ETHTransactionParams struct {
 	From            string               `json:"from,omitempty"  example:"0x1abae27a0cbfb02945720425d3b80c7e09728534"`
 	To              string               `json:"to,omitempty" example:"0x1abae27a0cbfb02945720425d3b80c7e09728534"`
 	Value           string               `json:"value,omitempty"  example:"71500000 (wei)"`
 	GasPrice        string               `json:"gasPrice,omitempty" example:"71500000 (wei)"`
 	Gas             string               `json:"gas,omitempty" example:"21000"`
+	GasFeeCap       string               `json:"maxFeePerGas,omitempty" example:"71500000 (wei)"`
+	GasTipCap       string               `json:"maxPriorityFeePerGas,omitempty" example:"71500000 (wei)"`
+	AccessList      types.AccessList     `json:"accessList,omitempty" swaggertype:"array,object"`
+	TransactionType string               `json:"transactionType,omitempty" example:"dynamic_fee" enums:"legacy,dynamic_fee"`
 	MethodSignature string               `json:"methodSignature,omitempty" example:"transfer(address,uint256)"`
 	Args            []interface{}        `json:"args,omitempty"`
 	Raw             string               `json:"raw,omitempty" example:"0xfe378324abcde723"`

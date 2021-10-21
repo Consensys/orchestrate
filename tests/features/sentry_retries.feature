@@ -9,14 +9,14 @@ Feature: Send transactions using tx-sentry
       | tenant1 | {{random.uuid}} |
     And I have created the following accounts
       | alias    | ID              | Headers.Authorization    |
-      | account1 | {{random.uuid}} | Bearer {{tenant1.token}} |
-      | account2 | {{random.uuid}} | Bearer {{tenant1.token}} |
+      | account1 | {{random.uuid}} | {{tenant1.token}} |
+      | account2 | {{random.uuid}} | {{tenant1.token}} |
     Then I register the following contracts
       | name        | artifacts        | Headers.Authorization    |
-      | SimpleToken | SimpleToken.json | Bearer {{tenant1.token}} |
+      | SimpleToken | SimpleToken.json | {{tenant1.token}} |
     Given I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     Then I track the following envelopes
       | ID                  |
       | faucet-{{account1}} |
@@ -45,7 +45,7 @@ Feature: Send transactions using tx-sentry
       | txTwoID | {{random.uuid}} |
     Given I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/schedules" with json:
       """
       {}
@@ -130,7 +130,7 @@ Feature: Send transactions using tx-sentry
       | txTwoID | {{random.uuid}} |
     Given I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/schedules" with json:
       """
       {}
@@ -220,7 +220,7 @@ Feature: Send transactions using tx-sentry
       | txOneID | {{random.uuid}} |
     Given I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/schedules" with json:
       """
       {}

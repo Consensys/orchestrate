@@ -47,7 +47,7 @@ func (ec *Client) BlockByNumber(ctx context.Context, endpoint string, number *bi
 	return ethtypes.NewBlock(header, body.Transactions, []*ethtypes.Header{}, []*ethtypes.Receipt{}, new(trie.Trie)), nil
 }
 
-func processHeaderResult(head **ethtypes.Header) ProcessResultFunc {
+func processHeaderResult(head **ethtypes.Header) ParseResultFunc {
 	return func(result json.RawMessage) error {
 		err := utils.ProcessResult(head)(result)
 		if err != nil {
@@ -86,7 +86,7 @@ func (ec *Client) HeaderByNumber(ctx context.Context, endpoint string, number *b
 	return head, nil
 }
 
-func processTxResult(tx **ethtypes.Transaction, extra **txExtraInfo) ProcessResultFunc {
+func processTxResult(tx **ethtypes.Transaction, extra **txExtraInfo) ParseResultFunc {
 	return func(result json.RawMessage) error {
 		var raw json.RawMessage
 		err := utils.ProcessResult(&raw)(result)
@@ -155,7 +155,7 @@ type Progress struct {
 	KnownStates   hexutil.Uint64
 }
 
-func processProgressResult(progress **Progress) ProcessResultFunc {
+func processProgressResult(progress **Progress) ParseResultFunc {
 	return func(result json.RawMessage) error {
 		var raw json.RawMessage
 		err := utils.ProcessResult(&raw)(result)
@@ -339,7 +339,40 @@ func (ec *Client) SuggestGasPrice(ctx context.Context, endpoint string) (*big.In
 		return nil, errors.FromError(err).ExtendComponent(component)
 	}
 
-	return (*big.Int)(&hex), nil
+	return hex.ToInt(), nil
+}
+
+type FeeHistory struct {
+	OldestBlock   *hexutil.Big
+	Reward        [][]*hexutil.Big
+	BaseFeePerGas []*hexutil.Big
+	GasUsedRatio  []float64
+}
+
+func parseFeeHistoryResult(feeHistory **FeeHistory) ParseResultFunc {
+	return func(result json.RawMessage) error {
+		var raw json.RawMessage
+		err := utils.ProcessResult(&raw)(result)
+		if err != nil {
+			return err
+		}
+
+		err = json.Unmarshal(raw, feeHistory)
+		if err != nil {
+			return errors.EncodingError(err.Error())
+		}
+
+		return nil
+	}
+}
+
+func (ec *Client) FeeHistory(ctx context.Context, endpoint string, blockCount int, newestBlock string) (*FeeHistory, error) {
+	var feeHistory *FeeHistory
+	if err := ec.Call(ctx, endpoint, parseFeeHistoryResult(&feeHistory), "eth_feeHistory", blockCount, newestBlock, []interface{}{}); err != nil {
+		return nil, errors.FromError(err).ExtendComponent(component)
+	}
+
+	return feeHistory, nil
 }
 
 // EstimateGas tries to estimate the gas needed to execute a specific transaction based on

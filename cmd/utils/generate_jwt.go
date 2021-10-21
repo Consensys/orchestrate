@@ -1,12 +1,9 @@
 package utils
 
 import (
-	"context"
-	"os"
 	"time"
 
 	"github.com/consensys/orchestrate/pkg/toolkit/app/auth/jwt/generator"
-	"github.com/consensys/orchestrate/pkg/utils"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -30,19 +27,18 @@ func newGenerateJWTCommand() *cobra.Command {
 	return runCmd
 }
 
-func run(_ *cobra.Command, _ []string) {
-	// Create app
-	ctx, cancel := context.WithCancel(context.Background())
-
-	// Process signals
-	sig := utils.NewSignalListener(func(signal os.Signal) { cancel() })
-	defer sig.Close()
-
+func run(cmd *cobra.Command, _ []string) {
 	// Start application
-	generator.Init(ctx)
-	jwt, err := generator.GlobalJWTGenerator().GenerateAccessTokenWithTenantID(tenant, []string{"*:*"}, expiration)
+	generator.Init(cmd.Context())
+
+	gJwt := generator.GlobalJWTGenerator()
+	if gJwt == nil {
+		log.Fatal("jwt-generator: could not initialize it")
+	}
+
+	jwt, err := gJwt.GenerateAccessTokenWithTenantID(tenant, []string{"*:*"}, expiration)
 	if err != nil {
-		log.WithError(err).Fatalf("jwt-generator: could not generate JWT token")
+		log.WithError(err).Fatal("jwt-generator: could not generate JWT token")
 	}
 	log.WithFields(log.Fields{
 		"jwt":      jwt,

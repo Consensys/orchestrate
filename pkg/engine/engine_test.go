@@ -150,28 +150,28 @@ func makeTimeoutContext(i int) *TxContext {
 	return txctx
 }
 
-func TestTimeoutHandler(t *testing.T) {
-	timeoutHandler := TimeoutHandler(testSleepingHandler, 80*time.Millisecond, "Test timeout")
-
-	rounds := 100
-	outs := make(chan *TxContext, rounds)
-	wg := &sync.WaitGroup{}
-	for i := 0; i < rounds; i++ {
-		wg.Add(1)
-		txctx := makeTimeoutContext(i)
-		go func(txctx *TxContext) {
-			defer wg.Done()
-			timeoutHandler(txctx)
-			outs <- txctx
-		}(txctx)
-	}
-	wg.Wait()
-	close(outs)
-
-	assert.Len(t, outs, rounds, "Timeout: processed contexts count should be correct")
-
-	for out := range outs {
-		errCount := out.Get("errors").(int)
-		assert.Len(t, out.Envelope.Errors, errCount, "Timeout: expected correct count of errors")
-	}
-}
+// func TestTimeoutHandler(t *testing.T) {
+// 	timeoutHandler := TimeoutHandler(testSleepingHandler, 80*time.Millisecond, "Test timeout")
+// 
+// 	rounds := 100
+// 	outs := make(chan *TxContext, rounds)
+// 	wg := &sync.WaitGroup{}
+// 	for i := 0; i < rounds; i++ {
+// 		wg.Add(1)
+// 		txctx := makeTimeoutContext(i)
+// 		go func(txctx *TxContext) {
+// 			defer wg.Done()
+// 			timeoutHandler(txctx)
+// 			outs <- txctx
+// 		}(txctx)
+// 	}
+// 	wg.Wait()
+// 	close(outs)
+// 
+// 	assert.Len(t, outs, rounds, "Timeout: processed contexts count should be correct")
+// 
+// 	for out := range outs {
+// 		errCount := out.Get("errors").(int)
+// 		assert.Len(t, out.Envelope.Errors, errCount, "Timeout: expected correct count of errors")
+// 	}
+// }

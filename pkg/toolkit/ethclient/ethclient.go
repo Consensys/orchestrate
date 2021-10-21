@@ -6,6 +6,7 @@ import (
 	"math/big"
 
 	"github.com/consensys/orchestrate/pkg/ethereum/types"
+	"github.com/consensys/orchestrate/pkg/toolkit/ethclient/rpc"
 	proto "github.com/consensys/orchestrate/pkg/types/ethereum"
 	eth "github.com/ethereum/go-ethereum"
 	ethcommon "github.com/ethereum/go-ethereum/common"
@@ -145,6 +146,9 @@ type GasEstimator interface {
 type GasPricer interface {
 	// SuggestGasPrice retrieves the currently suggested gas price
 	SuggestGasPrice(ctx context.Context, url string) (*big.Int, error)
+
+	// FeeHistory retrieve historical baseFeeData
+	FeeHistory(ctx context.Context, url string, blockCount int, newestBlock string) (*rpc.FeeHistory, error)
 }
 
 // ChainSyncReader is a service to access to the node's current sync status

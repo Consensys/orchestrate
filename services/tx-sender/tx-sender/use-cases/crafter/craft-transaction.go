@@ -20,6 +20,9 @@ import (
 const estimationGasError = "cannot estimate gas usage"
 const craftTransactionComponent = "use-cases.craft-transaction"
 
+const mediumPriorityString = "1500000000" // 1.5 gwei
+const thresholdString = "500000000"       // 0.5 gwei
+
 type craftTxUseCase struct {
 	nonceManager     nonce.Manager
 	ec               ethclient.MultiClient
@@ -37,22 +40,31 @@ func NewCraftTransactionUseCase(ec ethclient.MultiClient, chainRegistryURL strin
 }
 
 func (uc *craftTxUseCase) Execute(ctx context.Context, job *entities.Job) error {
-	logger := uc.logger.WithContext(ctx)
-
-	if job.InternalData.ParentJobUUID == job.UUID {
-		logger.Debug("skip crafting for job resending")
-		return nil
-	}
-
 	if string(job.Type) == tx.JobType_ETH_ORION_MARKING_TX.String() {
 		if err := uc.craftEEAMarkingTx(ctx, job); err != nil {
 			return err
 		}
 	}
 
-	if job.Transaction.GasPrice == "" {
-		if err := uc.craftGasPrice(ctx, job); err != nil {
+	if job.Transaction.TransactionType == "" {
+		if err := uc.craftTransactionType(ctx, job); err != nil {
 			return err
+		}
+	}
+
+	switch job.Transaction.TransactionType {
+	case entities.LegacyTxType:
+		if job.Transaction.GasPrice == "" {
+			if err := uc.craftGasPrice(ctx, job); err != nil {
+				return err
+			}
+		}
+	default:
+		// We MUST recalculate gasFeeCap for child jobs
+		if job.Transaction.GasFeeCap == "" || job.InternalData.ParentJobUUID == job.UUID {
+			if err := uc.craftDynamicFeePrice(ctx, job); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -184,6 +196,76 @@ func (uc *craftTxUseCase) craftGasPrice(ctx context.Context, job *entities.Job) 
 		job.Transaction.GasPrice = gasPrice.String()
 	}
 
+	job.Transaction.TransactionType = entities.LegacyTxType
 	logger.WithField("value", job.Transaction.GasPrice).Debug("crafted gas price")
+	return nil
+}
+
+func (uc *craftTxUseCase) craftTransactionType(_ context.Context, job *entities.Job) error {
+	switch {
+	case job.Transaction.GasPrice != "" || job.InternalData.OneTimeKey:
+		job.Transaction.TransactionType = entities.LegacyTxType
+	case job.Transaction.GasTipCap != "" || job.Transaction.GasFeeCap != "":
+		job.Transaction.TransactionType = entities.DynamicFeeTxType
+	}
+
+	return nil
+}
+
+func (uc *craftTxUseCase) craftDynamicFeePrice(ctx context.Context, job *entities.Job) error {
+	logger := uc.logger.WithContext(ctx)
+
+	if string(job.Type) == tx.JobType_ETH_ORION_EEA_TX.String() {
+		logger.Debug("skip gas estimation for eea private transaction")
+		return nil
+	}
+
+	proxyURL := utils.GetProxyURL(uc.chainRegistryURL, job.ChainUUID)
+	feeHistory, err := uc.ec.FeeHistory(ctx, proxyURL, 1, "latest")
+	if err != nil {
+		logger.WithError(err).Debug("failed to fetch feeHistory. Fallback to craft GasPrice")
+		return uc.craftGasPrice(ctx, job)
+	}
+
+	if feeHistory == nil || len(feeHistory.BaseFeePerGas) == 0 {
+		logger.Debug("cannot extract base fee. Fallback to craft GasPrice")
+		return uc.craftGasPrice(ctx, job)
+	}
+
+	nextBlockBaseFeePerGas := feeHistory.BaseFeePerGas[len(feeHistory.BaseFeePerGas)-1].ToInt()
+	if nextBlockBaseFeePerGas.String() == "0" {
+		return uc.craftGasPrice(ctx, job)
+	}
+
+	var priorityFee *big.Int
+	if job.Transaction.GasTipCap == "" {
+		mediumPriority, _ := new(big.Int).SetString(mediumPriorityString, 10) // 1.5 gwei
+		threshold, _ := new(big.Int).SetString(thresholdString, 10)           // 0.5 gwei
+
+		switch job.InternalData.Priority {
+		case utils.PriorityVeryLow:
+			priorityFee = new(big.Int).Sub(mediumPriority, new(big.Int).Mul(threshold, big.NewInt(2))) // 0.5 gwei
+		case utils.PriorityLow:
+			priorityFee = new(big.Int).Sub(mediumPriority, threshold) // 1 gwei
+		case utils.PriorityMedium:
+			priorityFee = mediumPriority // 1.5 gwei
+		case utils.PriorityHigh:
+			priorityFee = new(big.Int).Add(mediumPriority, threshold) // 2 gwei
+		case utils.PriorityVeryHigh:
+			priorityFee = new(big.Int).Add(mediumPriority, new(big.Int).Mul(threshold, big.NewInt(2))) // 2.5 gwei
+		default:
+			priorityFee = mediumPriority
+		}
+
+		job.Transaction.GasTipCap = priorityFee.String()
+	} else {
+		priorityFee, _ = new(big.Int).SetString(job.Transaction.GasTipCap, 10)
+	}
+
+	job.Transaction.GasFeeCap = new(big.Int).Add(nextBlockBaseFeePerGas, priorityFee).String()
+	job.Transaction.TransactionType = entities.DynamicFeeTxType
+
+	logger.WithField("base", nextBlockBaseFeePerGas).WithField("tip", priorityFee).
+		Debug("crafted dynamic fees")
 	return nil
 }

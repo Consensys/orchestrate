@@ -12,7 +12,7 @@ Feature: Account management
       | wildcard  | *        |
     Given I register the following contracts
       | name        | artifacts        | Headers.Authorization     |
-      | SimpleToken | SimpleToken.json | Bearer {{wildcard.token}} |
+      | SimpleToken | SimpleToken.json | {{wildcard.token}} |
 
   Scenario: Accounts own by default tenant can be used by other authorized tenants
     Given I register the following alias
@@ -23,7 +23,7 @@ Feature: Account management
       | wildcardSendTxID | {{random.uuid}} |
     Given I set the headers
       | Key           | Value                     |
-      | Authorization | Bearer {{wildcard.token}} |
+      | Authorization | {{wildcard.token}} |
     When I send "POST" request to "{{global.api}}/accounts" with json:
   """
 {
@@ -45,7 +45,7 @@ Feature: Account management
       | {{fooSendTxID}} |
     Given I set the headers
       | Key           | Value                      |
-      | Authorization | Bearer {{tenantFoo.token}} |
+      | Authorization | {{tenantFoo.token}} |
     When I send "PATCH" request to "{{global.api}}/accounts/{{generatedAccAddr}}" with json:
   """
 {
@@ -79,7 +79,7 @@ Feature: Account management
       | {{fooSendTxID}} |
     Given I set the headers
       | Key           | Value                      |
-      | Authorization | Bearer {{tenantFoo.token}} |
+      | Authorization | {{tenantFoo.token}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
   """
 {
@@ -101,7 +101,7 @@ Feature: Account management
       | {{wildcardSendTxID}} |
     Given I set the headers
       | Key           | Value                     |
-      | Authorization | Bearer {{wildcard.token}} |
+      | Authorization | {{wildcard.token}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
   """
 {
@@ -129,7 +129,7 @@ Feature: Account management
       | wildcardSendTxID | {{random.uuid}} |
     Given I set the headers
       | Key           | Value                      |
-      | Authorization | Bearer {{tenantFoo.token}} |
+      | Authorization | {{tenantFoo.token}} |
     When I send "POST" request to "{{global.api}}/accounts" with json:
   """
 {
@@ -151,7 +151,7 @@ Feature: Account management
       | {{fooSendTxID}} |
     Given I set the headers
       | Key           | Value                      |
-      | Authorization | Bearer {{tenantFoo.token}} |
+      | Authorization | {{tenantFoo.token}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
   """
 {
@@ -173,7 +173,7 @@ Feature: Account management
       | {{barSendTxID}} |
     Given I set the headers
       | Key           | Value                      |
-      | Authorization | Bearer {{tenantBar.token}} |
+      | Authorization | {{tenantBar.token}} |
     When I send "PATCH" request to "{{global.api}}/accounts/{{generatedAccAddr}}" with json:
   """
 {
@@ -201,7 +201,7 @@ Feature: Account management
       | {{wildcardSendTxID}} |
     Given I set the headers
       | Key           | Value                     |
-      | Authorization | Bearer {{wildcard.token}} |
+      | Authorization | {{wildcard.token}} |
       | X-Tenant-ID   | foo                       |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
   """

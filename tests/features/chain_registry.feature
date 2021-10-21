@@ -16,7 +16,7 @@ Feature: Chain registry
       | tenant1 |
     Given I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     When I send "GET" request to "{{global.api}}/chains"
     Then the response code should be 200
 
@@ -69,7 +69,7 @@ Feature: Chain registry
       | tenant1 |
     Given I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/chains" with json:
       """
       {
@@ -168,7 +168,7 @@ Feature: Chain registry
       | tenant1 |
     Given I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/chains" with json:
       """
       {
@@ -204,7 +204,7 @@ Feature: Chain registry
       | tenant1 |
     Given I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/chains" with json:
       """
       {

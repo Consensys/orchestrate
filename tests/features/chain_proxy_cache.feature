@@ -11,7 +11,7 @@ Feature: Chain-Proxy Cache
   Scenario: Chain registry should cache "eth_getBlockByNumber" request for same chainUUID
     Given I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/proxy/chains/{{chain.besu1.UUID}}" with json:
       """
       {
@@ -30,7 +30,7 @@ Feature: Chain-Proxy Cache
       | -               | application/json |
     Given I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/proxy/chains/{{chain.besu1.UUID}}" with json:
       """
       {
@@ -68,7 +68,7 @@ Feature: Chain-Proxy Cache
   Scenario: Chain registry should ignore cache when user indicate it
     Given I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/proxy/chains/{{chain.besu1.UUID}}" with json:
       """
       {
@@ -88,7 +88,7 @@ Feature: Chain-Proxy Cache
     Given I set the headers
       | Key             | Value                    |
       | X-Cache-Control | no-cache                 |
-      | Authorization   | Bearer {{tenant1.token}} |
+      | Authorization   | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/proxy/chains/{{chain.besu1.UUID}}" with json:
       """
       {

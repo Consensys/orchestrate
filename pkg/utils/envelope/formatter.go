@@ -4,7 +4,10 @@ import (
 	"math/big"
 
 	"github.com/consensys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/pkg/types/ethereum"
 	"github.com/consensys/orchestrate/pkg/types/tx"
+	ethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 )
 
 func NewEnvelopeFromJob(job *entities.Job, headers map[string]string) *tx.TxEnvelope {
@@ -22,17 +25,21 @@ func NewEnvelopeFromJob(job *entities.Job, headers map[string]string) *tx.TxEnve
 			Id:      job.ScheduleUUID,
 			Headers: headers,
 			Params: &tx.Params{
-				From:           job.Transaction.From,
-				To:             job.Transaction.To,
-				Gas:            job.Transaction.Gas,
-				GasPrice:       job.Transaction.GasPrice,
-				Value:          job.Transaction.Value,
-				Nonce:          job.Transaction.Nonce,
-				Data:           job.Transaction.Data,
-				Raw:            job.Transaction.Raw,
-				PrivateFor:     job.Transaction.PrivateFor,
-				PrivateFrom:    job.Transaction.PrivateFrom,
-				PrivacyGroupId: job.Transaction.PrivacyGroupID,
+				From:            job.Transaction.From,
+				To:              job.Transaction.To,
+				Gas:             job.Transaction.Gas,
+				GasPrice:        job.Transaction.GasPrice,
+				GasFeeCap:       job.Transaction.GasFeeCap,
+				GasTipCap:       job.Transaction.GasTipCap,
+				Value:           job.Transaction.Value,
+				Nonce:           job.Transaction.Nonce,
+				Data:            job.Transaction.Data,
+				Raw:             job.Transaction.Raw,
+				PrivateFor:      job.Transaction.PrivateFor,
+				PrivateFrom:     job.Transaction.PrivateFrom,
+				PrivacyGroupId:  job.Transaction.PrivacyGroupID,
+				TransactionType: string(job.Transaction.TransactionType),
+				AccessList:      convertFromAccessList(job.Transaction.AccessList),
 			},
 			ContextLabels: contextLabels,
 			JobType:       tx.JobTypeMap[job.Type],
@@ -73,19 +80,58 @@ func NewJobFromEnvelope(envelope *tx.Envelope, tenantID string) *entities.Job {
 		},
 		TenantID: tenantID,
 		Transaction: &entities.ETHTransaction{
-			Hash:           envelope.GetTxHashString(),
-			From:           envelope.GetFromString(),
-			To:             envelope.GetToString(),
-			Nonce:          envelope.GetNonceString(),
-			Value:          envelope.GetValueString(),
-			GasPrice:       envelope.GetGasPriceString(),
-			Gas:            envelope.GetGasString(),
-			Data:           envelope.GetData(),
-			Raw:            envelope.GetRaw(),
-			PrivateFrom:    envelope.GetPrivateFrom(),
-			PrivateFor:     envelope.GetPrivateFor(),
-			PrivacyGroupID: envelope.GetPrivacyGroupID(),
-			EnclaveKey:     envelope.GetEnclaveKey(),
+			Hash:            envelope.GetTxHashString(),
+			From:            envelope.GetFromString(),
+			To:              envelope.GetToString(),
+			Nonce:           envelope.GetNonceString(),
+			Value:           envelope.GetValueString(),
+			GasPrice:        envelope.GetGasPriceString(),
+			Gas:             envelope.GetGasString(),
+			GasFeeCap:       envelope.GetGasFeeCapString(),
+			GasTipCap:       envelope.GetGasTipCapString(),
+			AccessList:      convertToAccessList(envelope.GetAccessList()),
+			TransactionType: entities.TransactionType(envelope.GetTransactionType()),
+			Data:            envelope.GetData(),
+			Raw:             envelope.GetRaw(),
+			PrivateFrom:     envelope.GetPrivateFrom(),
+			PrivateFor:      envelope.GetPrivateFor(),
+			PrivacyGroupID:  envelope.GetPrivacyGroupID(),
+			EnclaveKey:      envelope.GetEnclaveKey(),
 		},
 	}
+}
+
+func convertFromAccessList(accessList types.AccessList) []*ethereum.AccessTuple {
+	result := []*ethereum.AccessTuple{}
+	for _, t := range accessList {
+		tupl := &ethereum.AccessTuple{
+			Address:     t.Address.Hex(),
+			StorageKeys: []string{},
+		}
+
+		for _, k := range t.StorageKeys {
+			tupl.StorageKeys = append(tupl.StorageKeys, k.Hex())
+		}
+
+		result = append(result, tupl)
+	}
+
+	return result
+}
+
+func convertToAccessList(accessList []*ethereum.AccessTuple) types.AccessList {
+	result := types.AccessList{}
+	for _, item := range accessList {
+		storageKeys := []ethcommon.Hash{}
+		for _, sk := range item.StorageKeys {
+			storageKeys = append(storageKeys, ethcommon.HexToHash(sk))
+		}
+
+		result = append(result, types.AccessTuple{
+			Address:     ethcommon.HexToAddress(item.Address),
+			StorageKeys: storageKeys,
+		})
+	}
+
+	return result
 }

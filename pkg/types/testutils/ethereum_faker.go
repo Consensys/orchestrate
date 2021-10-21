@@ -1,10 +1,13 @@
 package testutils
 
 import (
+	"math/big"
 	"time"
 
+	"github.com/consensys/orchestrate/pkg/toolkit/ethclient/rpc"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	ethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 
 	"github.com/consensys/orchestrate/pkg/utils"
 )
@@ -111,4 +114,11 @@ func FakeAddress() ethcommon.Address {
 
 func FakeHash() ethcommon.Hash {
 	return ethcommon.HexToHash(utils.RandHexString(40))
+}
+
+func FakeFeeHistory(nextBaseFee *big.Int) *rpc.FeeHistory {
+	result := &rpc.FeeHistory{}
+	nBaseFee2 := hexutil.Big(*nextBaseFee)
+	result.BaseFeePerGas = []*hexutil.Big{&nBaseFee2}
+	return result
 }

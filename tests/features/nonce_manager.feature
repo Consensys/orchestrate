@@ -8,21 +8,21 @@ Feature: Nonce manager
       | alias   | tenantID        |
       | tenant1 | {{random.uuid}} |
     And I register the following contracts
-      | name        | artifacts        | Headers.Authorization    |
-      | SimpleToken | SimpleToken.json | Bearer {{tenant1.token}} |
+      | name        | artifacts        | Headers.Authorization |
+      | SimpleToken | SimpleToken.json | {{tenant1.token}}     |
     And I have created the following accounts
-      | alias    | ID              | Headers.Authorization    |
-      | account1 | {{random.uuid}} | Bearer {{tenant1.token}} |
-      | account2 | {{random.uuid}} | Bearer {{tenant1.token}} |
-      | account3 | {{random.uuid}} | Bearer {{tenant1.token}} |
+      | alias    | ID              | Headers.Authorization |
+      | account1 | {{random.uuid}} | {{tenant1.token}}     |
+      | account2 | {{random.uuid}} | {{tenant1.token}}     |
+      | account3 | {{random.uuid}} | {{tenant1.token}}     |
     Then I track the following envelopes
       | ID                  |
       | faucet-{{account1}} |
       | faucet-{{account2}} |
       | faucet-{{account3}} |
     Given I set the headers
-      | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Key           | Value             |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
   """
 {
@@ -72,7 +72,8 @@ Feature: Nonce manager
       """
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
-    
+
+  @test
   Scenario: Nonce recalibrating
     Given I register the following alias
       | alias | value              |
@@ -80,8 +81,8 @@ Feature: Nonce manager
       | to2   | {{random.account}} |
       | to3   | {{random.account}} |
     Then I set the headers
-      | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Key           | Value             |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/schedules" with json:
       """
 {}
@@ -195,8 +196,8 @@ Feature: Nonce manager
       | to2   | {{random.account}} |
       | to3   | {{random.account}} |
     Then I set the headers
-      | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Key           | Value             |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/schedules" with json:
       """
 {}
@@ -319,8 +320,8 @@ Feature: Nonce manager
       | alias | value              |
       | to1   | {{random.account}} |
     Then I set the headers
-      | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Key           | Value             |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/schedules" with json:
       """
 {}

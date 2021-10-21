@@ -15,9 +15,13 @@ type Transaction struct {
 	Nonce          string
 	Value          string
 	GasPrice       string
+	GasFeeCap      string
+	GasTipCap      string
 	Gas            string
 	Data           string
 	Raw            string
+	TxType         string
+	AccessList     interface{} `pg:",json"`
 	PrivateFrom    string
 	PrivateFor     []string `pg:",array"`
 	PrivacyGroupID string

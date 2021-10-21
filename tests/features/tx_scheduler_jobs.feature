@@ -12,13 +12,13 @@ Feature: Transaction Scheduler Jobs
   Scenario: Execute transfer transaction using jobs, step by step
     And I have created the following accounts
       | alias    | ID              | Headers.Authorization    |
-      | account1 | {{random.uuid}} | Bearer {{tenant1.token}} |
+      | account1 | {{random.uuid}} | {{tenant1.token}} |
     Then I track the following envelopes
       | ID                  |
       | faucet-{{account1}} |
     Given I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
       """
       {
@@ -42,7 +42,7 @@ Feature: Transaction Scheduler Jobs
       | to2   | {{random.account}} |
     Then  I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/schedules" with json:
       """
       {}
@@ -107,10 +107,10 @@ Feature: Transaction Scheduler Jobs
       | random_account | {{random.account}} |
     Given I sign the following transactions
       | alias | ID              | Data | Gas   | To                 | Nonce | privateKey             | ChainUUID     | Headers.Authorization    |
-      | rawTx | {{random.uuid}} | 0x   | 21000 | {{random_account}} | 0     | {{random.private_key}} | {{chain.besu0.UUID}} | Bearer {{tenant1.token}} |
+      | rawTx | {{random.uuid}} | 0x   | 21000 | {{random_account}} | 0     | {{random.private_key}} | {{chain.besu0.UUID}} | {{tenant1.token}} |
     Then  I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/schedules" with json:
       """
       {}

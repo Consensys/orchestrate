@@ -74,6 +74,7 @@ replace (
 	github.com/spf13/viper => github.com/spf13/viper v1.8.1
 	google.golang.org/api => google.golang.org/api v0.10.0
 	google.golang.org/grpc => google.golang.org/grpc v1.28.0 // indirect
+	hashicorp/consul => hashicorp/consul v1.10.1 // indirect
 )
 
 // Containous forks

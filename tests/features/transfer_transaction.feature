@@ -1,4 +1,4 @@
-@public-tx
+@transfer
 Feature: Send transfer transaction
   As an external developer
   I want to process a multiple transfer transaction using transaction scheduler API
@@ -9,15 +9,15 @@ Feature: Send transfer transaction
       | tenant1 | {{random.uuid}} |
     And I have created the following accounts
       | alias    | ID              | Headers.Authorization    |
-      | account1 | {{random.uuid}} | Bearer {{tenant1.token}} |
-      | account2 | {{random.uuid}} | Bearer {{tenant1.token}} |
+      | account1 | {{random.uuid}} | {{tenant1.token}} |
+      | account2 | {{random.uuid}} | {{tenant1.token}} |
     Then I track the following envelopes
       | ID                  |
       | faucet-{{account1}} |
       | faucet-{{account2}} |
     Given I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
       """
       {
@@ -94,7 +94,8 @@ Feature: Send transfer transaction
         "params": {
           "from": "{{account2}}",
           "to": "{{to2}}",
-          "value": "400000000"
+          "value": "400000000",
+          "transactionType": "legacy"
         },
         "labels": {
           "scenario.id": "{{scenarioID}}",
@@ -165,7 +166,7 @@ Feature: Send transfer transaction
       | to1   | {{random.account}} |
     Given I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
       """
       {
@@ -190,7 +191,7 @@ Feature: Send transfer transaction
       | to1   | {{random.account}} |
     Given I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
       """
       {
@@ -220,7 +221,7 @@ Feature: Send transfer transaction
       | {{transferTxOneID}} |
     Given I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
       """
       {

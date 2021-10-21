@@ -9,7 +9,7 @@ Feature: Listen to external transactions
       | tenant1 | {{random.uuid}} |
     And I register the following chains
       | alias | Name                | URLs                          | Headers.Authorization    | Listener.ExternalTxEnabled |
-      | besu  | besu-{{scenarioID}} | {{global.nodes.besu[2].URLs}} | Bearer {{tenant1.token}} | true                       |
+      | besu  | besu-{{scenarioID}} | {{global.nodes.besu[2].URLs}} | {{tenant1.token}} | true                       |
 
   Scenario: Listen to external tx
     Given I register the following alias
@@ -17,13 +17,13 @@ Feature: Listen to external transactions
       | random_account | {{random.account}} |
     Given I sign the following transactions
       | alias | ID              | Data | Gas   | To                 | Nonce | privateKey             | ChainUUID     | Headers.Authorization    |
-      | rawTx | {{random.uuid}} | 0x   | 21000 | {{random_account}} | 0     | {{random.private_key}} | {{besu.UUID}} | Bearer {{tenant1.token}} |
+      | rawTx | {{random.uuid}} | 0x   | 21000 | {{random_account}} | 0     | {{random.private_key}} | {{besu.UUID}} | {{tenant1.token}} |
     Then I track the following envelopes
       | ID                           |
       | {{global.external-tx-label}} |
     Given I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/proxy/chains/{{besu.UUID}}" with json:
       """
       {

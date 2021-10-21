@@ -12,19 +12,19 @@ Feature: Transaction Scheduler Jobs
       | tenantDefault | _        |
     Then I register the following contracts
       | name        | artifacts        | Headers.Authorization          |
-      | SimpleToken | SimpleToken.json | Bearer {{tenantDefault.token}} |
+      | SimpleToken | SimpleToken.json | {{tenantDefault.token}} |
     Then I register the following chains
       | alias | Name                | URLs                         | Headers.Authorization          |
-      | besu  | besu-{{scenarioID}} | {{global.nodes.besu[0].URLs}} | Bearer {{tenantDefault.token}} |
+      | besu  | besu-{{scenarioID}} | {{global.nodes.besu[0].URLs}} | {{tenantDefault.token}} |
     And I have created the following accounts
       | alias    | ID              | Headers.Authorization          |
-      | account1 | {{random.uuid}} | Bearer {{tenantDefault.token}} |
+      | account1 | {{random.uuid}} | {{tenantDefault.token}} |
     Then I track the following envelopes
       | ID                  |
       | faucet-{{account1}} |
     Given I set the headers
       | Key           | Value                          |
-      | Authorization | Bearer {{tenantDefault.token}} |
+      | Authorization | {{tenantDefault.token}} |
     When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
       """
       {
@@ -50,7 +50,7 @@ Feature: Transaction Scheduler Jobs
       | to1   | {{random.account}} |
     Then  I set the headers
       | Key           | Value                      |
-      | Authorization | Bearer {{tenantFoo.token}} |
+      | Authorization | {{tenantFoo.token}} |
     When I send "POST" request to "{{global.api}}/schedules" with json:
       """
       {}
@@ -81,7 +81,7 @@ Feature: Transaction Scheduler Jobs
       | {{scheduleOneUUID}} |
     Then  I set the headers
       | Key           | Value                      |
-      | Authorization | Bearer {{tenantBar.token}} |
+      | Authorization | {{tenantBar.token}} |
     When I send "PATCH" request to "{{global.api}}/jobs/{{txJobUUID}}" with json:
       """
       {
@@ -102,7 +102,7 @@ Feature: Transaction Scheduler Jobs
     Then the response code should be 404
     Then  I set the headers
       | Key           | Value                      |
-      | Authorization | Bearer {{tenantFoo.token}} |
+      | Authorization | {{tenantFoo.token}} |
     When I send "GET" request to "{{global.api}}/jobs/{{txJobUUID}}"
     Then the response code should be 200
     And Response should have the following fields

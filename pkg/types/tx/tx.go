@@ -59,10 +59,21 @@ func (m *TxRequest) Envelope() (*Envelope, error) {
 			SetPrivateFor(m.GetParams().GetPrivateFor()).
 			SetPrivateFrom(m.GetParams().GetPrivateFrom()).
 			SetPrivateTxType(m.GetParams().GetPrivateTxType()).
-			SetPrivacyGroupID(m.GetParams().GetPrivacyGroupId())
+			SetPrivacyGroupID(m.GetParams().GetPrivacyGroupId()).
+			SetAccessList(m.GetParams().GetAccessList()).
+			SetTransactionType(m.GetParams().GetTransactionType())
 	}
 
-	if errs := envelope.loadPtrFields(m.GetParams().GetGas(), m.GetParams().GetNonce(), m.GetParams().GetGasPrice(), m.GetParams().GetValue(), m.GetParams().GetFrom(), m.GetParams().GetTo()); len(errs) > 0 {
+	errs := envelope.loadPtrFields(m.GetParams().GetGas(),
+		m.GetParams().GetNonce(),
+		m.GetParams().GetGasPrice(),
+		m.GetParams().GetGasFeeCap(),
+		m.GetParams().GetGasTipCap(),
+		m.GetParams().GetValue(),
+		m.GetParams().GetFrom(),
+		m.GetParams().GetTo(),
+	)
+	if len(errs) > 0 {
 		return nil, errors.DataError("%v", errs)
 	}
 
@@ -92,10 +103,21 @@ func (m *TxResponse) Envelope() (*Envelope, error) {
 	if m.GetTransaction() != nil {
 		_ = envelope.
 			MustSetDataString(m.GetTransaction().GetData()).
-			MustSetRawString(m.GetTransaction().GetRaw())
+			MustSetRawString(m.GetTransaction().GetRaw()).
+			SetAccessList(m.GetTransaction().GetAccessList()).
+			SetTransactionType(m.GetTransaction().GetTxType())
 	}
 
-	if errs := envelope.loadPtrFields(m.GetTransaction().GetGas(), m.GetTransaction().GetNonce(), m.GetTransaction().GetGasPrice(), m.GetTransaction().GetValue(), m.GetTransaction().GetFrom(), m.GetTransaction().GetTo()); len(errs) > 0 {
+	errs := envelope.loadPtrFields(m.GetTransaction().GetGas(),
+		m.GetTransaction().GetNonce(),
+		m.GetTransaction().GetGasPrice(),
+		m.GetTransaction().GetGasFeeCap(),
+		m.GetTransaction().GetGasTipCap(),
+		m.GetTransaction().GetValue(),
+		m.GetTransaction().GetFrom(),
+		m.GetTransaction().GetTo())
+
+	if len(errs) > 0 {
 		return nil, errors.DataError("%v", errs)
 	}
 

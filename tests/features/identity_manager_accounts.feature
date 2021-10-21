@@ -9,7 +9,7 @@ Feature: Account management
       | tenant1 | {{random.uuid}} |
     Given I register the following contracts
       | name        | artifacts        | Headers.Authorization    |
-      | SimpleToken | SimpleToken.json | Bearer {{tenant1.token}} |
+      | SimpleToken | SimpleToken.json | {{tenant1.token}} |
 
   Scenario: Import account and update it and sign with it
     Given I register the following alias
@@ -22,7 +22,7 @@ Feature: Account management
       | importAcc |
     Given I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/accounts/import" with json:
   """
 {
@@ -79,7 +79,7 @@ Feature: Account management
       | sendTxID      | {{random.uuid}} |
     Given I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/accounts" with json:
   """
 {
@@ -98,7 +98,7 @@ Feature: Account management
       | {{sendTxID}} |
     Given I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
   """
 {
@@ -126,7 +126,7 @@ Feature: Account management
       | {{sendTxID}} |
     Given I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
   """
 {

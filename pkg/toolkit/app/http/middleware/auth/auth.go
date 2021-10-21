@@ -26,7 +26,7 @@ func NewBuilder(jwt, key auth.Checker, multitenancyEnabled bool) *Builder {
 	}
 }
 
-func (b *Builder) Build(ctx context.Context, name string, configuration interface{}) (mid func(http.Handler) http.Handler, respModifier func(resp *http.Response) error, err error) {
+func (b *Builder) Build(_ context.Context, _ string, configuration interface{}) (mid func(http.Handler) http.Handler, respModifier func(resp *http.Response) error, err error) {
 	cfg, ok := configuration.(*dynamic.Auth)
 	if !ok {
 		return nil, nil, fmt.Errorf("invalid configuration type (expected %T but got %T)", cfg, configuration)

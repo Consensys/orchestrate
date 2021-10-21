@@ -1,4 +1,4 @@
-@public-tx
+@deploy-contract
 Feature: Deploy ERC20 contract
   As an external developer
   I want to deploy a contract using transaction scheduler API
@@ -8,22 +8,20 @@ Feature: Deploy ERC20 contract
       | alias   | tenantID        |
       | tenant1 | {{random.uuid}} |
     And I have created the following accounts
-      | alias    | ID              | Headers.Authorization    |
-      | account1 | {{random.uuid}} | Bearer {{tenant1.token}} |
-      | account2 | {{random.uuid}} | Bearer {{tenant1.token}} |
+      | alias    | ID              | Headers.Authorization |
+      | account1 | {{random.uuid}} | {{tenant1.token}}     |
     Then I track the following envelopes
       | ID                  |
       | faucet-{{account1}} |
-      | faucet-{{account2}} |
     Given I set the headers
-      | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Key           | Value             |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
       """
       {
-        "chain": "{{chain.besu0.Name}}",
+        "chain": "{{chain.geth0.Name}}",
         "params": {
-          "from": "{{global.nodes.besu[0].fundedPublicKeys[0]}}",
+          "from": "{{global.nodes.geth[0].fundedPublicKeys[0]}}",
           "to": "{{account1}}",
           "value": "100000000000000000"
         },
@@ -34,40 +32,22 @@ Feature: Deploy ERC20 contract
       }
       """
     Then the response code should be 202
-    When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
-      """
-      {
-        "chain": "{{chain.geth0.Name}}",
-        "params": {
-          "from": "{{global.nodes.geth[0].fundedPublicKeys[0]}}",
-          "to": "{{account2}}",
-          "value": "100000000000000000"
-        },
-        "labels": {
-          "scenario.id": "{{scenarioID}}",
-          "id": "faucet-{{account2}}"
-        }
-      }
-      """
-    Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
 
-  @besu @geth
-  Scenario: Deploy ERC20
+  @besu
+  Scenario: Deploy ERC20 in Besu
     Given I register the following contracts
-      | name        | artifacts        | Headers.Authorization    |
-      | SimpleToken | SimpleToken.json | Bearer {{tenant1.token}} |
+      | name        | artifacts        | Headers.Authorization |
+      | SimpleToken | SimpleToken.json | {{tenant1.token}}     |
     Given I register the following alias
       | alias            | value           |
       | besuContractTxID | {{random.uuid}} |
-      | gethContractTxID | {{random.uuid}} |
     Then I track the following envelopes
       | ID                   |
       | {{besuContractTxID}} |
-      | {{gethContractTxID}} |
     Given I set the headers
-      | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Key           | Value             |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
@@ -86,13 +66,37 @@ Feature: Deploy ERC20 contract
     Then I register the following response fields
       | alias      | path         |
       | jobOneUUID | jobs[0].uuid |
+    Then Envelopes should be in topic "tx.decoded"
+    And Envelopes should have the following fields
+      | Receipt.Status | Receipt.ContractAddress |
+      | 1              | ~                       |
+    When I send "GET" request to "{{global.api}}/jobs/{{jobOneUUID}}"
+    Then the response code should be 200
+    And Response should have the following fields
+      | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status |
+      | MINED  | CREATED        | STARTED        | PENDING        | MINED          |
+
+  @geth
+  Scenario: Deploy ERC20 in Geth (dynamic_fee)
+    Given I register the following contracts
+      | name        | artifacts        | Headers.Authorization |
+      | SimpleToken | SimpleToken.json | {{tenant1.token}}     |
+    Given I register the following alias
+      | alias            | value           |
+      | gethContractTxID | {{random.uuid}} |
+    Then I track the following envelopes
+      | ID                   |
+      | {{gethContractTxID}} |
+    Given I set the headers
+      | Key           | Value             |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
         "chain": "{{chain.geth0.Name}}",
         "params": {
           "contractName": "SimpleToken",
-          "from": "{{account2}}"
+          "from": "{{account1}}"
         },
         "labels": {
           "scenario.id": "{{scenarioID}}",
@@ -103,30 +107,65 @@ Feature: Deploy ERC20 contract
     Then the response code should be 202
     Then I register the following response fields
       | alias      | path         |
-      | jobTwoUUID | jobs[0].uuid |
-    Then Envelopes should be in topic "tx.sender"
+      | jobUUID | jobs[0].uuid |
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
       | Receipt.Status | Receipt.ContractAddress |
       | 1              | ~                       |
+    When I send "GET" request to "{{global.api}}/jobs/{{jobUUID}}"
+    Then the response code should be 200
+    And Response should have the following fields
+      | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status |
+      | MINED  | CREATED        | STARTED        | PENDING        | MINED          |
+
+  @geth
+  Scenario: Deploy ERC20 in Geth (legacy)
+    Given I register the following contracts
+      | name        | artifacts        | Headers.Authorization |
+      | SimpleToken | SimpleToken.json | {{tenant1.token}}     |
+    Given I register the following alias
+      | alias            | value           |
+      | gethContractTxID | {{random.uuid}} |
+    Then I track the following envelopes
+      | ID                   |
+      | {{gethContractTxID}} |
+    Given I set the headers
+      | Key           | Value             |
+      | Authorization | {{tenant1.token}} |
+    When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
+      """
+      {
+        "chain": "{{chain.geth0.Name}}",
+        "params": {
+          "contractName": "SimpleToken",
+          "from": "{{account1}}",
+          "transactionType": "legacy"
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{gethContractTxID}}"
+        }
+      }
+      """
+    Then the response code should be 202
+    Then I register the following response fields
+      | alias      | path         |
+      | jobUUID | jobs[0].uuid |
+    Then Envelopes should be in topic "tx.decoded"
+    And Envelopes should have the following fields
+      | Receipt.Status | Receipt.ContractAddress |
       | 1              | ~                       |
-    When I send "GET" request to "{{global.api}}/jobs/{{jobOneUUID}}"
-    Then the response code should be 200
-    And Response should have the following fields
-      | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status |
-      | MINED  | CREATED        | STARTED        | PENDING        | MINED          |
-    When I send "GET" request to "{{global.api}}/jobs/{{jobTwoUUID}}"
+    When I send "GET" request to "{{global.api}}/jobs/{{jobUUID}}"
     Then the response code should be 200
     And Response should have the following fields
       | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status |
       | MINED  | CREATED        | STARTED        | PENDING        | MINED          |
 
-
-  @oneTimeKey
+  @oneTimeKey @besu
   Scenario: Deploy ERC20 with one-time-key
     Given I register the following contracts
-      | name        | artifacts        | Headers.Authorization    |
-      | SimpleToken | SimpleToken.json | Bearer {{tenant1.token}} |
+      | name        | artifacts        | Headers.Authorization |
+      | SimpleToken | SimpleToken.json | {{tenant1.token}}     |
     Given I register the following alias
       | alias            | value           |
       | besuContractTxID | {{random.uuid}} |
@@ -134,8 +173,8 @@ Feature: Deploy ERC20 contract
       | ID                   |
       | {{besuContractTxID}} |
     Given I set the headers
-      | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Key           | Value             |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
@@ -164,10 +203,11 @@ Feature: Deploy ERC20 contract
       | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status |
       | MINED  | CREATED        | STARTED        | PENDING        | MINED          |
 
+  @besu
   Scenario: Fail to deploy ERC20 with too low gas
     Given I register the following contracts
-      | name        | artifacts        | Headers.Authorization    |
-      | SimpleToken | SimpleToken.json | Bearer {{tenant1.token}} |
+      | name        | artifacts        | Headers.Authorization |
+      | SimpleToken | SimpleToken.json | {{tenant1.token}}     |
     Given I register the following alias
       | alias            | value           |
       | besuContractTxID | {{random.uuid}} |
@@ -175,8 +215,8 @@ Feature: Deploy ERC20 contract
       | ID                   |
       | {{besuContractTxID}} |
     Given I set the headers
-      | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Key           | Value             |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
@@ -206,10 +246,11 @@ Feature: Deploy ERC20 contract
       | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status |
       | FAILED | CREATED        | STARTED        | PENDING        | FAILED         |
 
+  @besu
   Scenario: Fail to deploy ERC20 with invalid contract tag
     Given I register the following contracts
-      | name        | artifacts        | Headers.Authorization    |
-      | SimpleToken | SimpleToken.json | Bearer {{tenant1.token}} |
+      | name        | artifacts        | Headers.Authorization |
+      | SimpleToken | SimpleToken.json | {{tenant1.token}}     |
     Given I register the following alias
       | alias            | value           |
       | besuContractTxID | {{random.uuid}} |
@@ -217,8 +258,8 @@ Feature: Deploy ERC20 contract
       | ID                   |
       | {{besuContractTxID}} |
     Given I set the headers
-      | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Key           | Value             |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
@@ -239,11 +280,11 @@ Feature: Deploy ERC20 contract
       | code   | message |
       | 271360 | ~       |
 
-
+  @besu
   Scenario: Fail to deploy ERC20 with missing contractName
     Given I register the following contracts
-      | name        | artifacts        | Headers.Authorization    |
-      | SimpleToken | SimpleToken.json | Bearer {{tenant1.token}} |
+      | name        | artifacts        | Headers.Authorization |
+      | SimpleToken | SimpleToken.json | {{tenant1.token}}     |
     Given I register the following alias
       | alias            | value           |
       | besuContractTxID | {{random.uuid}} |
@@ -251,8 +292,8 @@ Feature: Deploy ERC20 contract
       | ID                   |
       | {{besuContractTxID}} |
     Given I set the headers
-      | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Key           | Value             |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {

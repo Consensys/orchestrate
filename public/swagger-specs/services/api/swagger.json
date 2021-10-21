@@ -479,7 +479,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.SignMessageRequest"
+                            "$ref": "#/definitions/types.SignMessageRequest"
                         }
                     },
                     {
@@ -546,7 +546,7 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/api.SignTypedDataRequest"
+                                    "$ref": "#/definitions/types.SignTypedDataRequest"
                                 },
                                 {
                                     "type": "object",
@@ -3014,6 +3014,12 @@
                 "contractName"
             ],
             "properties": {
+                "accessList": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
+                },
                 "args": {
                     "type": "array",
                     "items": {
@@ -3043,6 +3049,14 @@
                 "gasPricePolicy": {
                     "$ref": "#/definitions/api.GasPriceParams"
                 },
+                "maxFeePerGas": {
+                    "type": "string",
+                    "example": "71500000 (wei)"
+                },
+                "maxPriorityFeePerGas": {
+                    "type": "string",
+                    "example": "71500000 (wei)"
+                },
                 "oneTimeKey": {
                     "type": "boolean",
                     "example": true
@@ -3068,6 +3082,15 @@
                 "protocol": {
                     "type": "string",
                     "example": "Tessera"
+                },
+                "transactionType": {
+                    "type": "string",
+                    "enum": [
+                        "legacy",
+                        "access_list",
+                        "dynamic_fee"
+                    ],
+                    "example": "dynamic_fee"
                 },
                 "value": {
                     "type": "string",
@@ -3212,7 +3235,7 @@
                 },
                 "privateKey": {
                     "type": "string",
-                    "example": "66232652FDFFD802B7252A456DBD8F3ECC0352BBDE76C23B40AFE8AEBD714E2D"
+                    "example": "0x66232652FDFFD802B7252A456DBD8F3ECC0352BBDE76C23B40AFE8AEBD714E2D"
                 }
             }
         },
@@ -3524,49 +3547,6 @@
                 }
             }
         },
-        "api.SignMessageRequest": {
-            "type": "object",
-            "required": [
-                "data"
-            ],
-            "properties": {
-                "data": {
-                    "type": "string",
-                    "example": "0x6d79206461746120746f207369676e"
-                }
-            }
-        },
-        "api.SignTypedDataRequest": {
-            "type": "object",
-            "required": [
-                "domainSeparator",
-                "message",
-                "messageType",
-                "types"
-            ],
-            "properties": {
-                "domainSeparator": {
-                    "$ref": "#/definitions/types.DomainSeparator"
-                },
-                "message": {
-                    "type": "object",
-                    "additionalProperties": true
-                },
-                "messageType": {
-                    "type": "string",
-                    "example": "Mail"
-                },
-                "types": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/definitions/types.Type"
-                        }
-                    }
-                }
-            }
-        },
         "api.TransactionParams": {
             "type": "object",
             "required": [
@@ -3574,6 +3554,12 @@
                 "to"
             ],
             "properties": {
+                "accessList": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
+                },
                 "args": {
                     "type": "array",
                     "items": {
@@ -3594,6 +3580,14 @@
                 },
                 "gasPricePolicy": {
                     "$ref": "#/definitions/api.GasPriceParams"
+                },
+                "maxFeePerGas": {
+                    "type": "string",
+                    "example": "71500000 (wei)"
+                },
+                "maxPriorityFeePerGas": {
+                    "type": "string",
+                    "example": "71500000 (wei)"
                 },
                 "methodSignature": {
                     "type": "string",
@@ -3628,6 +3622,15 @@
                 "to": {
                     "type": "string",
                     "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
+                },
+                "transactionType": {
+                    "type": "string",
+                    "enum": [
+                        "legacy",
+                        "access_list",
+                        "dynamic_fee"
+                    ],
+                    "example": "dynamic_fee"
                 },
                 "value": {
                     "type": "string",
@@ -3673,6 +3676,12 @@
                 "value"
             ],
             "properties": {
+                "accessList": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
+                },
                 "from": {
                     "type": "string",
                     "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
@@ -3688,9 +3697,26 @@
                 "gasPricePolicy": {
                     "$ref": "#/definitions/api.GasPriceParams"
                 },
+                "maxFeePerGas": {
+                    "type": "string",
+                    "example": "71500000 (wei)"
+                },
+                "maxPriorityFeePerGas": {
+                    "type": "string",
+                    "example": "71500000 (wei)"
+                },
                 "to": {
                     "type": "string",
                     "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
+                },
+                "transactionType": {
+                    "type": "string",
+                    "enum": [
+                        "legacy",
+                        "access_list",
+                        "dynamic_fee"
+                    ],
+                    "example": "dynamic_fee"
                 },
                 "value": {
                     "type": "string",
@@ -3834,6 +3860,12 @@
         "entities.ETHTransaction": {
             "type": "object",
             "properties": {
+                "accessList": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
+                },
                 "createdAt": {
                     "type": "string",
                     "example": "2020-07-09T12:35:42.115395Z"
@@ -3861,6 +3893,14 @@
                 "hash": {
                     "type": "string",
                     "example": "0xd41551c714c8ec769d2edad9adc250ae955d263da161bf59142b7500eea6715e"
+                },
+                "maxFeePerGas": {
+                    "type": "string",
+                    "example": "71500000 (wei)"
+                },
+                "maxPriorityFeePerGas": {
+                    "type": "string",
+                    "example": "71500000 (wei)"
                 },
                 "nonce": {
                     "type": "string",
@@ -3892,6 +3932,15 @@
                     "type": "string",
                     "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
                 },
+                "transactionType": {
+                    "type": "string",
+                    "enum": [
+                        "legacy",
+                        "access_list",
+                        "dynamic_fee"
+                    ],
+                    "example": "dynamic_fee"
+                },
                 "updatedAt": {
                     "type": "string",
                     "example": "2020-07-09T12:35:42.115395Z"
@@ -3905,6 +3954,12 @@
         "entities.ETHTransactionParams": {
             "type": "object",
             "properties": {
+                "accessList": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
+                },
                 "args": {
                     "type": "array",
                     "items": {
@@ -3928,6 +3983,14 @@
                     "example": "21000"
                 },
                 "gasPrice": {
+                    "type": "string",
+                    "example": "71500000 (wei)"
+                },
+                "maxFeePerGas": {
+                    "type": "string",
+                    "example": "71500000 (wei)"
+                },
+                "maxPriorityFeePerGas": {
                     "type": "string",
                     "example": "71500000 (wei)"
                 },
@@ -3968,6 +4031,15 @@
                 "to": {
                     "type": "string",
                     "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
+                },
+                "transactionType": {
+                    "type": "string",
+                    "enum": [
+                        "legacy",
+                        "access_list",
+                        "dynamic_fee"
+                    ],
+                    "example": "dynamic_fee"
                 },
                 "value": {
                     "type": "string",
@@ -4077,6 +4149,18 @@
                 "version": {
                     "type": "string",
                     "example": "v1.0.0"
+                }
+            }
+        },
+        "types.SignMessageRequest": {
+            "type": "object",
+            "required": [
+                "message"
+            ],
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "0xfeade..."
                 }
             }
         },

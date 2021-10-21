@@ -8,6 +8,7 @@ import (
 
 	"github.com/consensys/orchestrate/pkg/errors"
 	qkm "github.com/consensys/orchestrate/pkg/quorum-key-manager"
+	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/pkg/types/testutils"
 	qkmmock "github.com/consensys/quorum-key-manager/pkg/client/mock"
 	"github.com/consensys/quorum-key-manager/src/stores/api/types"
@@ -54,6 +55,7 @@ func TestSignTransaction_Execute(t *testing.T) {
 
 	t.Run("should execute use case successfully for one time key transactions", func(t *testing.T) {
 		job := testutils.FakeJob()
+		job.Transaction.TransactionType = entities.LegacyTxType
 		job.InternalData.OneTimeKey = true
 
 		raw, txHash, err := usecase.Execute(ctx, job)

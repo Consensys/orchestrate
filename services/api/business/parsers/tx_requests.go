@@ -20,40 +20,44 @@ func NewJobEntitiesFromTxRequest(txRequest *entities.TxRequest, chainUUID, txDat
 	var jobs []*entities.Job
 	switch {
 	case txRequest.Params.Protocol == entities.OrionChainType:
-		privTxJob := newJobEntityFromTxRequest(txRequest, newEthTransactionFromParams(txRequest.Params, txData), entities.OrionEEATransaction, chainUUID)
+		privTxJob := newJobEntityFromTxRequest(txRequest, newEthTransactionFromParams(txRequest.Params, txData, entities.LegacyTxType), entities.OrionEEATransaction, chainUUID)
 		markingTxJob := newJobEntityFromTxRequest(txRequest, &entities.ETHTransaction{}, entities.OrionMarkingTransaction, chainUUID)
 		markingTxJob.InternalData.OneTimeKey = true
 		jobs = append(jobs, privTxJob, markingTxJob)
 	case txRequest.Params.Protocol == entities.TesseraChainType:
-		privTxJob := newJobEntityFromTxRequest(txRequest, newEthTransactionFromParams(txRequest.Params, txData),
+		privTxJob := newJobEntityFromTxRequest(txRequest, newEthTransactionFromParams(txRequest.Params, txData, entities.LegacyTxType),
 			entities.TesseraPrivateTransaction, chainUUID)
 		markingTxJob := newJobEntityFromTxRequest(txRequest, &entities.ETHTransaction{From: txRequest.Params.From,
 			PrivateFor: txRequest.Params.PrivateFor}, entities.TesseraMarkingTransaction, chainUUID)
 		jobs = append(jobs, privTxJob, markingTxJob)
 	case txRequest.Params.Raw != "":
-		jobs = append(jobs, newJobEntityFromTxRequest(txRequest, newEthTransactionFromParams(txRequest.Params, txData),
+		jobs = append(jobs, newJobEntityFromTxRequest(txRequest, newEthTransactionFromParams(txRequest.Params, txData, entities.TransactionType(txRequest.Params.TransactionType)),
 			entities.EthereumRawTransaction, chainUUID))
 	default:
-		jobs = append(jobs, newJobEntityFromTxRequest(txRequest, newEthTransactionFromParams(txRequest.Params, txData),
+		jobs = append(jobs, newJobEntityFromTxRequest(txRequest, newEthTransactionFromParams(txRequest.Params, txData, entities.TransactionType(txRequest.Params.TransactionType)),
 			entities.EthereumTransaction, chainUUID))
 	}
 
 	return jobs
 }
 
-func newEthTransactionFromParams(params *entities.ETHTransactionParams, txData string) *entities.ETHTransaction {
+func newEthTransactionFromParams(params *entities.ETHTransactionParams, txData string, txType entities.TransactionType) *entities.ETHTransaction {
 	return &entities.ETHTransaction{
-		From:           params.From,
-		To:             params.To,
-		Nonce:          params.Nonce,
-		Value:          params.Value,
-		GasPrice:       params.GasPrice,
-		Gas:            params.Gas,
-		Raw:            params.Raw,
-		Data:           txData,
-		PrivateFrom:    params.PrivateFrom,
-		PrivateFor:     params.PrivateFor,
-		PrivacyGroupID: params.PrivacyGroupID,
+		From:            params.From,
+		To:              params.To,
+		Nonce:           params.Nonce,
+		Value:           params.Value,
+		GasPrice:        params.GasPrice,
+		Gas:             params.Gas,
+		GasFeeCap:       params.GasFeeCap,
+		GasTipCap:       params.GasTipCap,
+		AccessList:      params.AccessList,
+		TransactionType: txType,
+		Raw:             params.Raw,
+		Data:            txData,
+		PrivateFrom:     params.PrivateFrom,
+		PrivateFor:      params.PrivateFor,
+		PrivacyGroupID:  params.PrivacyGroupID,
 	}
 }
 

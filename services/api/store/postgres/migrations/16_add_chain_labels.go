@@ -14,13 +14,13 @@ ALTER TABLE chains
 	if err != nil {
 		return err
 	}
-	log.Info("Applying adding chain labels")
+	log.Info("Applied adding chain labels")
 
 	return nil
 }
 
 func downgradeAddChainLabels(db migrations.DB) error {
-	log.Debug("Undoing adding chain labels...")
+	log.Debug("Downgrading adding chain labels...")
 	_, err := db.Exec(`
 ALTER TABLE chains
 	DROP COLUMN labels;

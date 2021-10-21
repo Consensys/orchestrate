@@ -37,5 +37,19 @@ message Transaction {
     // e.g. 0x0a0cafa26ca3f411e6629e9e02c53f23713b0033d7a72e534136104b5447a210
     string tx_hash = 9;
 
+    string gas_fee_cap = 17;
+
+    string gas_tip_cap = 18;
+
+    repeated AccessTuple access_list = 19;
+    
+    string tx_type = 20;
     // ADD r, s, v?
+}
+
+
+message AccessTuple {
+    string address = 1;
+    
+    repeated string storageKeys = 2;
 }

@@ -192,6 +192,6 @@ func InitializeScenario(s *godog.ScenarioContext) {
 	})
 
 	initEnvelopeSteps(s, sc)
-	initHTTP(s, sc)
-	registerContractRegistrySteps(s, sc)
+	initHTTPSteps(s, sc)
+	initContractRegistrySteps(s, sc)
 }

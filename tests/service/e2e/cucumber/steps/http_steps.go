@@ -41,6 +41,9 @@ func (sc *ScenarioContext) iInjectHeaders(req *http.Request) error {
 	}
 
 	for k, v := range headers.(map[string]string) {
+		if v == "" {
+			continue
+		}
 		req.Header.Add(k, v)
 	}
 
@@ -268,7 +271,7 @@ func (sc *ScenarioContext) iSleep(s string) error {
 	return nil
 }
 
-func initHTTP(s *godog.ScenarioContext, sc *ScenarioContext) {
+func initHTTPSteps(s *godog.ScenarioContext, sc *ScenarioContext) {
 
 	s.BeforeScenario(sc.resetResponse)
 

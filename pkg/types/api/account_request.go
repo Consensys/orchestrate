@@ -13,7 +13,7 @@ type CreateAccountRequest struct {
 type ImportAccountRequest struct {
 	Alias      string            `json:"alias" validate:"omitempty" example:"personal-account"`
 	Chain      string            `json:"chain" validate:"omitempty" example:"quorum"`
-	PrivateKey hexutil.Bytes     `json:"privateKey" validate:"required" example:"0x66232652FDFFD802B7252A456DBD8F3ECC0352BBDE76C23B40AFE8AEBD714E2D"`
+	PrivateKey hexutil.Bytes     `json:"privateKey" validate:"required" example:"0x66232652FDFFD802B7252A456DBD8F3ECC0352BBDE76C23B40AFE8AEBD714E2D" swaggertype:"string"`
 	Attributes map[string]string `json:"attributes,omitempty"`
 }
 

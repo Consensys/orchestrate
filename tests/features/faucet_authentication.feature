@@ -13,14 +13,14 @@ Feature: Faucet funding
   Scenario: Generate account with faucet and different tenant
     And I register the following faucets
       | Name                  | ChainRule            | CreditorAccount                              | MaxBalance       | Amount           | Cooldown | Headers.Authorization      |
-      | faucet-{{scenarioID}} | {{chain.besu0.UUID}} | {{global.nodes.besu[0].fundedPublicKeys[0]}} | 1000000000000000 | 1000000000000000 | 1m       | Bearer {{tenantFoo.token}} |
+      | faucet-{{scenarioID}} | {{chain.besu0.UUID}} | {{global.nodes.besu[0].fundedPublicKeys[0]}} | 1000000000000000 | 1000000000000000 | 1m       | {{tenantFoo.token}} |
     And I have created the following accounts
       | alias    | ID              | ChainName            | Headers.Authorization      |
-      | account1 | {{random.uuid}} | {{chain.besu0.Name}} | Bearer {{tenantBar.token}} |
+      | account1 | {{random.uuid}} | {{chain.besu0.Name}} | {{tenantBar.token}} |
     Given I sleep "5s"
     Given I set the headers
       | Key             | Value                      |
-      | Authorization   | Bearer {{tenantBar.token}} |
+      | Authorization   | {{tenantBar.token}} |
       | X-Cache-Control | no-cache                   |
     When I send "POST" request to "{{global.api}}/proxy/chains/{{chain.besu0.UUID}}" with json:
       """
@@ -46,16 +46,16 @@ Feature: Faucet funding
       | transferOneID | {{random.uuid}}    |
     And I have created the following accounts
       | alias    | ID              | ChainName            | Headers.Authorization      |
-      | account1 | {{random.uuid}} | {{chain.besu0.Name}} | Bearer {{tenantBar.token}} |
+      | account1 | {{random.uuid}} | {{chain.besu0.Name}} | {{tenantBar.token}} |
     And I register the following faucets
       | Name                  | ChainRule            | CreditorAccount                              | MaxBalance       | Amount           | Cooldown | Headers.Authorization      |
-      | faucet-{{scenarioID}} | {{chain.besu0.UUID}} | {{global.nodes.besu[0].fundedPublicKeys[0]}} | 1000000000000000 | 1000000000000000 | 1m       | Bearer {{tenantFoo.token}} |
+      | faucet-{{scenarioID}} | {{chain.besu0.UUID}} | {{global.nodes.besu[0].fundedPublicKeys[0]}} | 1000000000000000 | 1000000000000000 | 1m       | {{tenantFoo.token}} |
     Then I track the following envelopes
       | ID                |
       | {{transferOneID}} |
     Given I set the headers
       | Key           | Value                      |
-      | Authorization | Bearer {{tenantBar.token}} |
+      | Authorization | {{tenantBar.token}} |
     When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
       """
       {
@@ -86,7 +86,7 @@ Feature: Faucet funding
       | FAILED | CREATED        | STARTED        | PENDING        | FAILED         |
     Given I set the headers
       | Key             | Value                      |
-      | Authorization   | Bearer {{tenantBar.token}} |
+      | Authorization   | {{tenantBar.token}} |
       | X-Cache-Control | no-cache                   |
     When I send "POST" request to "{{global.api}}/proxy/chains/{{chain.besu0.UUID}}" with json:
       """

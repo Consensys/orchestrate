@@ -113,6 +113,14 @@ message Params {
     string private_tx_type = 15;
 
     string privacy_group_id = 16;
+    
+    string gas_fee_cap = 17;
+
+    string gas_tip_cap = 18;
+
+    repeated ethereum.AccessTuple access_list = 19;
+    
+    string transaction_type = 20;
 }
 
 message TxResponse {

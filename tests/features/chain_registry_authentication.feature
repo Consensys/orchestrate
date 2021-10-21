@@ -63,7 +63,7 @@ Feature: Chain-Registry Authentication
       | wildcard | *        |
     Given I set the headers
       | Key           | Value                     |
-      | Authorization | Bearer {{wildcard.token}} |
+      | Authorization | {{wildcard.token}} |
     When I send "POST" request to "{{global.api}}/chains" with json:
       """
       {
@@ -95,7 +95,7 @@ Feature: Chain-Registry Authentication
       | wildcard | *        |
     Given I set the headers
       | Key           | Value                     |
-      | Authorization | Bearer {{wildcard.token}} |
+      | Authorization | {{wildcard.token}} |
       | X-Tenant-ID   | foo                       |
     When I send "POST" request to "{{global.api}}/chains" with json:
       """
@@ -123,7 +123,7 @@ Feature: Chain-Registry Authentication
       | wildcard  | *        |
     Given I set the headers
       | Key           | Value                      |
-      | Authorization | Bearer {{tenantFoo.token}} |
+      | Authorization | {{tenantFoo.token}} |
     When I send "POST" request to "{{global.api}}/chains" with json:
       """
       {
@@ -140,18 +140,18 @@ Feature: Chain-Registry Authentication
       | {{chainUUID}} | foo      |
     Given I set the headers
       | Key           | Value                      |
-      | Authorization | Bearer {{tenantBar.token}} |
+      | Authorization | {{tenantBar.token}} |
     When I send "GET" request to "{{global.api}}/chains/{{chainUUID}}"
     Then the response code should be 404
     Given I set the headers
       | Key           | Value                     |
-      | Authorization | Bearer {{wildcard.token}} |
+      | Authorization | {{wildcard.token}} |
       | X-Tenant-ID   | foo                       |
     When I send "GET" request to "{{global.api}}/chains/{{chainUUID}}"
     Then the response code should be 200
     Given I set the headers
       | Key           | Value                      |
-      | Authorization | Bearer {{tenantFoo.token}} |
+      | Authorization | {{tenantFoo.token}} |
     When I send "DELETE" request to "{{global.api}}/chains/{{chainUUID}}"
     Then the response code should be 204
 
@@ -164,7 +164,7 @@ Feature: Chain-Registry Authentication
       | wildcard  | *        |
     Given I set the headers
       | Key           | Value                     |
-      | Authorization | Bearer {{wildcard.token}} |
+      | Authorization | {{wildcard.token}} |
       | X-Tenant-ID   | _                         |
     When I send "POST" request to "{{global.api}}/chains" with json:
       """
@@ -182,17 +182,17 @@ Feature: Chain-Registry Authentication
       | {{chainUUID}} | _        |
     Given I set the headers
       | Key           | Value                      |
-      | Authorization | Bearer {{tenantBar.token}} |
+      | Authorization | {{tenantBar.token}} |
     When I send "GET" request to "{{global.api}}/chains/{{chainUUID}}"
     Then the response code should be 200
     Given I set the headers
       | Key           | Value                      |
-      | Authorization | Bearer {{tenantFoo.token}} |
+      | Authorization | {{tenantFoo.token}} |
     When I send "GET" request to "{{global.api}}/chains/{{chainUUID}}"
     Then the response code should be 200
     Given I set the headers
       | Key           | Value                     |
-      | Authorization | Bearer {{wildcard.token}} |
+      | Authorization | {{wildcard.token}} |
     When I send "DELETE" request to "{{global.api}}/chains/{{chainUUID}}"
     Then the response code should be 204
 
@@ -239,7 +239,7 @@ Feature: Chain-Registry Authentication
       | tenant1 | foo-{{scenarioID}} |
     Given I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/chains" with json:
       """
       {
@@ -260,7 +260,7 @@ Feature: Chain-Registry Authentication
     Then the response code should be 401
     Given I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     When I send "DELETE" request to "{{global.api}}/chains/{{chainUUID}}"
     Then the response code should be 204
 

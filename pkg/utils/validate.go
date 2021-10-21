@@ -43,6 +43,19 @@ func isBig(fl validator.FieldLevel) bool {
 	return true
 }
 
+func isTransactionType(fl validator.FieldLevel) bool {
+	if fl.Field().String() != "" {
+		switch entities.TransactionType(fl.Field().String()) {
+		case entities.LegacyTxType, entities.DynamicFeeTxType:
+			return true
+		default:
+			return false
+		}
+	}
+
+	return true
+}
+
 func isHash(fl validator.FieldLevel) bool {
 	if fl.Field().String() != "" {
 		return IsHash(fl.Field().String())
@@ -217,6 +230,7 @@ func init() {
 	_ = validate.RegisterValidation("isJobStatus", isJobStatus)
 	_ = validate.RegisterValidation("isGasIncrementLevel", isGasIncrementLevel)
 	_ = validate.RegisterValidation("isKeyType", isKeyType)
+	_ = validate.RegisterValidation("isTransactionType", isTransactionType)
 }
 
 func GetValidator() *validator.Validate {

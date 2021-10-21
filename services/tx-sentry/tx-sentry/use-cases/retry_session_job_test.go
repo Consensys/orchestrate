@@ -101,7 +101,7 @@ func TestCreateChildJob_Execute(t *testing.T) {
 		assert.NotEmpty(t, childJobUUID)
 	})
 
-	t.Run("should create a new child job by increasing the gasPrice by Increment", func(t *testing.T) {
+	t.Run("should create a new child job by increasing the gasPrice by Increment (legacyTx)", func(t *testing.T) {
 		parentJob := testutils.FakeJob()
 		childJob := testutils.FakeJob()
 		childJobResponse := testutils.FakeJobResponse()
@@ -110,6 +110,7 @@ func TestCreateChildJob_Execute(t *testing.T) {
 		parentJobResponse.Status = entities.StatusPending
 		parentJobResponse.Transaction.GasPrice = initialGasPrice
 		parentJobResponse.Transaction.Nonce = "1"
+		parentJobResponse.Transaction.TransactionType = entities.LegacyTxType
 		parentJobResponse.Annotations.GasPricePolicy.RetryPolicy.Increment = 0.06
 		parentJobResponse.Annotations.GasPricePolicy.RetryPolicy.Limit = 0.12
 
@@ -126,8 +127,35 @@ func TestCreateChildJob_Execute(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotEmpty(t, childJobUUID)
 	})
+	
+	t.Run("should create a new child job by increasing the gasPrice by Increment (dynamicTx)", func(t *testing.T) {
+		parentJob := testutils.FakeJob()
+		childJob := testutils.FakeJob()
+		childJobResponse := testutils.FakeJobResponse()
 
-	t.Run("should create a new child job by increasing the gasPrice and not exceed the limit", func(t *testing.T) {
+		parentJobResponse := testutils.FakeJobResponse()
+		parentJobResponse.Status = entities.StatusPending
+		parentJobResponse.Transaction.GasTipCap = initialGasPrice
+		parentJobResponse.Transaction.Nonce = "1"
+		parentJobResponse.Transaction.TransactionType = entities.DynamicFeeTxType
+		parentJobResponse.Annotations.GasPricePolicy.RetryPolicy.Increment = 0.06
+		parentJobResponse.Annotations.GasPricePolicy.RetryPolicy.Limit = 0.12
+
+		mockClient.EXPECT().GetJob(gomock.Any(), parentJob.UUID).Return(parentJobResponse, nil)
+		mockClient.EXPECT().CreateJob(gomock.Any(), gomock.Any()).
+			DoAndReturn(func(timeoutCtx context.Context, req *types.CreateJobRequest) (*types.JobResponse, error) {
+				assert.Equal(t, "1120000000", req.Transaction.GasTipCap)
+				assert.Equal(t, parentJobResponse.Transaction.Nonce, req.Transaction.Nonce)
+				return childJobResponse, nil
+			})
+		mockClient.EXPECT().StartJob(gomock.Any(), childJobResponse.UUID).Return(nil)
+
+		childJobUUID, err := usecase.Execute(ctx, parentJob.UUID, childJob.UUID, 1)
+		assert.NoError(t, err)
+		assert.NotEmpty(t, childJobUUID)
+	})
+
+	t.Run("should create a new child job by increasing the gasPrice and not exceed the limit (legacyTx)", func(t *testing.T) {
 		parentJob := testutils.FakeJob()
 		childJob := testutils.FakeJob()
 		childJobResponse := testutils.FakeJobResponse()
@@ -136,6 +164,7 @@ func TestCreateChildJob_Execute(t *testing.T) {
 		parentJobResponse.Status = entities.StatusPending
 		parentJobResponse.Transaction.GasPrice = initialGasPrice
 		parentJobResponse.Transaction.Nonce = "1"
+		parentJobResponse.Transaction.TransactionType = entities.LegacyTxType
 		parentJobResponse.Annotations.GasPricePolicy.RetryPolicy.Increment = 0.06
 		parentJobResponse.Annotations.GasPricePolicy.RetryPolicy.Limit = 0.05
 
@@ -143,6 +172,33 @@ func TestCreateChildJob_Execute(t *testing.T) {
 		mockClient.EXPECT().CreateJob(gomock.Any(), gomock.Any()).
 			DoAndReturn(func(timeoutCtx context.Context, req *types.CreateJobRequest) (*types.JobResponse, error) {
 				assert.Equal(t, "1050000000", req.Transaction.GasPrice)
+				assert.Equal(t, parentJobResponse.Transaction.Nonce, req.Transaction.Nonce)
+				return childJobResponse, nil
+			})
+		mockClient.EXPECT().StartJob(gomock.Any(), childJobResponse.UUID).Return(nil)
+
+		childJobUUID, err := usecase.Execute(ctx, parentJob.UUID, childJob.UUID, 1)
+		assert.NoError(t, err)
+		assert.NotEmpty(t, childJobUUID)
+	})
+	
+	t.Run("should create a new child job by increasing the gasPrice and not exceed the limit (dynamicTx)", func(t *testing.T) {
+		parentJob := testutils.FakeJob()
+		childJob := testutils.FakeJob()
+		childJobResponse := testutils.FakeJobResponse()
+
+		parentJobResponse := testutils.FakeJobResponse()
+		parentJobResponse.Status = entities.StatusPending
+		parentJobResponse.Transaction.GasTipCap = initialGasPrice
+		parentJobResponse.Transaction.Nonce = "1"
+		parentJobResponse.Transaction.TransactionType = entities.DynamicFeeTxType
+		parentJobResponse.Annotations.GasPricePolicy.RetryPolicy.Increment = 0.06
+		parentJobResponse.Annotations.GasPricePolicy.RetryPolicy.Limit = 0.05
+
+		mockClient.EXPECT().GetJob(gomock.Any(), parentJob.UUID).Return(parentJobResponse, nil)
+		mockClient.EXPECT().CreateJob(gomock.Any(), gomock.Any()).
+			DoAndReturn(func(timeoutCtx context.Context, req *types.CreateJobRequest) (*types.JobResponse, error) {
+				assert.Equal(t, "1050000000", req.Transaction.GasTipCap)
 				assert.Equal(t, parentJobResponse.Transaction.Nonce, req.Transaction.Nonce)
 				return childJobResponse, nil
 			})

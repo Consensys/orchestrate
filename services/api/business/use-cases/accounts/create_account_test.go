@@ -154,7 +154,7 @@ func TestCreateAccount_Execute(t *testing.T) {
 		}).Return(nil, expectedErr)
 
 		_, err := usecase.Execute(ctx, accEntity, nil, "", tenantID)
-		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createAccountComponent), err)
+		assert.True(t, errors.IsDependencyFailureError(err))
 	})
 
 	t.Run("should fail with same error if cannot findOneByAddress account", func(t *testing.T) {

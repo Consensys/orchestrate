@@ -55,6 +55,6 @@ func (sc *ScenarioContext) iRegisterTheFollowingContract(table *gherkin.PickleSt
 	return nil
 }
 
-func registerContractRegistrySteps(s *godog.ScenarioContext, sc *ScenarioContext) {
+func initContractRegistrySteps(s *godog.ScenarioContext, sc *ScenarioContext) {
 	s.Step(`^I register the following contracts$`, sc.preProcessTableStep(sc.iRegisterTheFollowingContract))
 }

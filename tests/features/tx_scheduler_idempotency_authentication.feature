@@ -12,10 +12,10 @@ Feature: Transaction Scheduler Idempotency
       | tenantDefault | _               |
     Then I register the following contracts
       | name        | artifacts        | Headers.Authorization          |
-      | SimpleToken | SimpleToken.json | Bearer {{tenantDefault.token}} |
+      | SimpleToken | SimpleToken.json | {{tenantDefault.token}} |
     And I have created the following accounts
       | alias    | ID              | Headers.Authorization          |
-      | account1 | {{random.uuid}} | Bearer {{tenantDefault.token}} |
+      | account1 | {{random.uuid}} | {{tenantDefault.token}} |
 
   Scenario: Send twice same transaction using same idempotency key and different tenant
     Given I register the following alias
@@ -29,7 +29,7 @@ Feature: Transaction Scheduler Idempotency
       | {{deployTxTwoID}} |
     Then  I set the headers
       | Key               | Value                    |
-      | Authorization     | Bearer {{tenant1.token}} |
+      | Authorization     | {{tenant1.token}} |
       | X-Idempotency-Key | {{idempotencykey}}       |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
@@ -48,7 +48,7 @@ Feature: Transaction Scheduler Idempotency
     Then the response code should be 202
     Then  I set the headers
       | Key               | Value                    |
-      | Authorization     | Bearer {{tenant2.token}} |
+      | Authorization     | {{tenant2.token}} |
       | X-Idempotency-Key | {{idempotencykey}}       |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
@@ -68,7 +68,7 @@ Feature: Transaction Scheduler Idempotency
     Then Envelopes should be in topic "tx.decoded"
     Then  I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     When I send "GET" request to "{{global.api}}/transactions?idempotency_keys={{idempotencykey}}"
     Then the response code should be 200
     And Response should have the following fields
@@ -76,7 +76,7 @@ Feature: Transaction Scheduler Idempotency
       | {{idempotencykey}} | MINED            | {{deployTxOneID}}   |
     Then  I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant2.token}} |
+      | Authorization | {{tenant2.token}} |
     When I send "GET" request to "{{global.api}}/transactions?idempotency_keys={{idempotencykey}}"
     Then the response code should be 200
     And Response should have the following fields

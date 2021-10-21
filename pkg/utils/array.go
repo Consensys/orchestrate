@@ -1,5 +1,9 @@
 package utils
 
+import (
+	"encoding/json"
+)
+
 func ArrayIndexOf(iarr, elem interface{}) int {
 	if arr, ok := iarr.([]interface{}); ok {
 		for idx, v := range arr {
@@ -32,4 +36,18 @@ func ArrayIntersection(iarr, jarr interface{}) interface{} {
 	}
 
 	return intersect
+}
+
+func CastInterfaceToObject(data, result interface{}) error {
+	dataB, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(dataB, result)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

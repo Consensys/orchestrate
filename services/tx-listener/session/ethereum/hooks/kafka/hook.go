@@ -9,9 +9,9 @@ import (
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	"github.com/consensys/orchestrate/pkg/toolkit/workerpool"
 	"github.com/consensys/orchestrate/pkg/types/api"
-
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/pkg/utils"
+	"github.com/consensys/quorum/common/hexutil"
 
 	"github.com/Shopify/sarama"
 	encoding "github.com/consensys/orchestrate/pkg/encoding/sarama"
@@ -73,15 +73,17 @@ func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *etht
 			JobUUID:       job.UUID,
 			ContextLabels: job.Labels,
 			Transaction: &types.Transaction{
-				From:     job.Transaction.From,
-				Nonce:    job.Transaction.Nonce,
-				To:       job.Transaction.To,
-				Value:    job.Transaction.Value,
-				Gas:      job.Transaction.Gas,
-				GasPrice: job.Transaction.GasPrice,
-				Data:     job.Transaction.Data,
-				Raw:      job.Transaction.Raw,
-				TxHash:   job.Transaction.Hash,
+				From:      job.Transaction.From,
+				Nonce:     job.Transaction.Nonce,
+				To:        job.Transaction.To,
+				Value:     job.Transaction.Value,
+				Gas:       job.Transaction.Gas,
+				GasPrice:  job.Transaction.GasPrice,
+				GasFeeCap: job.Transaction.GasFeeCap,
+				GasTipCap: job.Transaction.GasTipCap,
+				Data:      job.Transaction.Data,
+				Raw:       job.Transaction.Raw,
+				TxHash:    job.Transaction.Hash,
 			},
 			Receipt: job.Receipt,
 			Chain:   c.Name,
@@ -103,14 +105,24 @@ func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *etht
 			continue
 		}
 		txResponse := txResponse
+
+		updateReq := &api.UpdateJobRequest{
+			Status:  entities.StatusMined,
+			Message: fmt.Sprintf("transaction mined in block %v", block.NumberU64()),
+		}
+
+		if txResponse.Receipt.EffectiveGasPrice != "" {
+			effectiveGas, _ := hexutil.DecodeBig(txResponse.Receipt.EffectiveGasPrice)
+			updateReq.Transaction = &entities.ETHTransaction{
+				GasPrice: effectiveGas.String(),
+			}
+		}
+
 		wp.Submit(func() {
 			_, err := hk.client.UpdateJob(
 				ctx,
 				txResponse.GetJobUUID(),
-				&api.UpdateJobRequest{
-					Status:  entities.StatusMined,
-					Message: fmt.Sprintf("transaction mined in block %v", block.NumberU64()),
-				},
+				updateReq,
 			)
 			if err != nil {
 				logger.WithError(err).Warnf("failed to update status of %s to MINED", txResponse.Id)

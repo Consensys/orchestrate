@@ -3,15 +3,14 @@ package signer
 import (
 	"context"
 
+	pkgcryto "github.com/consensys/orchestrate/pkg/crypto/ethereum"
 	"github.com/consensys/orchestrate/pkg/encoding/rlp"
 	qkm "github.com/consensys/orchestrate/pkg/quorum-key-manager"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
-	"github.com/consensys/orchestrate/pkg/utils"
-	qkmtypes "github.com/consensys/quorum-key-manager/src/stores/api/types"
-
-	pkgcryto "github.com/consensys/orchestrate/pkg/crypto/ethereum"
 	"github.com/consensys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/pkg/utils"
 	"github.com/consensys/orchestrate/services/tx-sender/tx-sender/parsers"
+	qkmtypes "github.com/consensys/quorum-key-manager/src/stores/api/types"
 	"github.com/ethereum/go-ethereum/crypto"
 
 	usecases "github.com/consensys/orchestrate/services/tx-sender/tx-sender/use-cases"
@@ -43,7 +42,7 @@ func NewSignETHTransactionUseCase(keyManagerClient client.KeyManagerClient) usec
 func (uc *signETHTransactionUseCase) Execute(ctx context.Context, job *entities.Job) (signedRaw, txHash string, err error) {
 	logger := uc.logger.WithContext(ctx).WithField("one_time_key", job.InternalData.OneTimeKey)
 
-	transaction := parsers.ETHTransactionToTransaction(job.Transaction)
+	transaction := parsers.ETHTransactionToTransaction(job.Transaction, job.InternalData.ChainID)
 	if job.InternalData.OneTimeKey {
 		signedRaw, txHash, err = uc.signWithOneTimeKey(ctx, transaction, job.InternalData.ChainID)
 	} else {
@@ -100,7 +99,10 @@ func (uc *signETHTransactionUseCase) signWithAccount(ctx context.Context, job *e
 		Value:           hexutil.Big(*tx.Value()),
 		GasPrice:        hexutil.Big(*tx.GasPrice()),
 		GasLimit:        hexutil.Uint64(tx.Gas()),
-		TransactionType: qkmtypes.LegacyTxType,
+		GasFeeCap:       utils.ToPtr(hexutil.Big(*tx.GasFeeCap())).(*hexutil.Big),
+		GasTipCap:       utils.ToPtr(hexutil.Big(*tx.GasTipCap())).(*hexutil.Big),
+		AccessList:      job.Transaction.AccessList,
+		TransactionType: string(job.Transaction.TransactionType),
 	})
 	if err != nil {
 		errMsg := "failed to sign ethereum transaction using key manager"
@@ -108,7 +110,7 @@ func (uc *signETHTransactionUseCase) signWithAccount(ctx context.Context, job *e
 		return "", "", errors.DependencyFailureError(errMsg).AppendReason(err.Error())
 	}
 
-	err = rlp.Decode(hexutil.MustDecode(signedRaw), tx)
+	err = tx.UnmarshalBinary(hexutil.MustDecode(signedRaw))
 	if err != nil {
 		errMessage := "failed to decode signature"
 		logger.WithError(err).Error(errMessage)

@@ -132,7 +132,7 @@ func (ec *Client) PrivateTransactionReceipt(ctx context.Context, endpoint string
 	return r, nil
 }
 
-func processPrivateReceiptResult(receipt **privateReceipt) ProcessResultFunc {
+func processPrivateReceiptResult(receipt **privateReceipt) ParseResultFunc {
 	return func(result json.RawMessage) error {
 		err := utils.ProcessResult(&receipt)(result)
 		if err != nil {

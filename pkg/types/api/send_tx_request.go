@@ -1,9 +1,9 @@
 package api
 
 import (
-	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/pkg/utils"
+	"github.com/ethereum/go-ethereum/core/types"
 )
 
 type SendTransactionRequest struct {
@@ -18,6 +18,10 @@ type TransactionParams struct {
 	Value           string                        `json:"value,omitempty" validate:"omitempty,isBig" example:"71500000 (wei)"`
 	Gas             string                        `json:"gas,omitempty" example:"21000"`
 	GasPrice        string                        `json:"gasPrice,omitempty" validate:"omitempty,isBig" example:"71500000 (wei)"`
+	GasFeeCap       string                        `json:"maxFeePerGas,omitempty" example:"71500000 (wei)"`
+	GasTipCap       string                        `json:"maxPriorityFeePerGas,omitempty" example:"71500000 (wei)"`
+	AccessList      types.AccessList              `json:"accessList,omitempty" swaggertype:"array,object"`
+	TransactionType string                        `json:"transactionType,omitempty" validate:"omitempty,isTransactionType" example:"dynamic_fee" enums:"legacy,dynamic_fee"`
 	From            string                        `json:"from" validate:"omitempty,eth_addr" example:"0x1abae27a0cbfb02945720425d3b80c7e09728534"`
 	To              string                        `json:"to" validate:"required,eth_addr" example:"0x1abae27a0cbfb02945720425d3b80c7e09728534"`
 	MethodSignature string                        `json:"methodSignature" validate:"required,isValidMethodSig" example:"transfer(address,uint256)"`
@@ -39,12 +43,8 @@ func (params *TransactionParams) Validate() error {
 		return validatePrivateTxParams(params.Protocol, params.PrivacyGroupID, params.PrivateFor)
 	}
 
-	if params.From != "" && params.OneTimeKey {
-		return errors.InvalidParameterError("fields 'from' and 'oneTimeKey' are mutually exclusive")
-	}
-
-	if params.From == "" && !params.OneTimeKey {
-		return errors.InvalidParameterError("field 'from' is required")
+	if err := validateTxFromParams(params.From, params.OneTimeKey); err != nil {
+		return err
 	}
 
 	return params.GasPricePolicy.RetryPolicy.Validate()

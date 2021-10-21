@@ -147,9 +147,16 @@ func newChildJobRequest(parentJob *types.JobResponse, gasPriceMultiplier float64
 		Nonce:          parentJob.Transaction.Nonce,
 	}
 
-	gasPrice := new(big.Float)
-	gasPrice, _ = gasPrice.SetString(parentJob.Transaction.GasPrice)
-	newJobRequest.Transaction.GasPrice = gasPrice.Mul(gasPrice, big.NewFloat(1+gasPriceMultiplier)).String()
+	switch parentJob.Transaction.TransactionType {
+	case entities.LegacyTxType:
+		gasPrice := new(big.Float)
+		gasPrice, _ = gasPrice.SetString(parentJob.Transaction.GasPrice)
+		newJobRequest.Transaction.GasPrice = gasPrice.Mul(gasPrice, big.NewFloat(1+gasPriceMultiplier)).String()
+	case entities.DynamicFeeTxType:
+		gasTipCap := new(big.Float)
+		gasTipCap, _ = gasTipCap.SetString(parentJob.Transaction.GasTipCap)
+		newJobRequest.Transaction.GasTipCap = gasTipCap.Mul(gasTipCap, big.NewFloat(1+gasPriceMultiplier)).String()
+	}
 
 	return newJobRequest
 }

@@ -21,7 +21,7 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 )
 
-type ProcessResultFunc func(result json.RawMessage) error
+type ParseResultFunc func(result json.RawMessage) error
 
 // Client is a connector to Ethereum blockchains that uses Geth rpc client
 type Client struct {
@@ -94,7 +94,7 @@ func (ec *Client) callWithRetry(ctx context.Context, reqBuilder func(context.Con
 	)
 }
 
-func (ec *Client) call(req *http.Request, processResult ProcessResultFunc) error {
+func (ec *Client) call(req *http.Request, processResult ParseResultFunc) error {
 	resp, err := ec.do(req)
 	if err != nil {
 		return err
@@ -212,7 +212,7 @@ type Body struct {
 	UncleHashes  []ethcommon.Hash        `json:"uncles"`
 }
 
-func processBlockResult(header **ethtypes.Header, body **Body) ProcessResultFunc {
+func processBlockResult(header **ethtypes.Header, body **Body) ParseResultFunc {
 	return func(result json.RawMessage) error {
 		var raw json.RawMessage
 		err := utils.ProcessResult(&raw)(result)

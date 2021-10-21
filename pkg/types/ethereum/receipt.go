@@ -73,6 +73,7 @@ func (r *Receipt) UnmarshalJSON(input []byte) error {
 		PostState         *hexutil.Bytes     `json:"root"`
 		Status            *hexutil.Uint64    `json:"status"`
 		CumulativeGasUsed *hexutil.Uint64    `json:"cumulativeGasUsed" gencodec:"required"`
+		EffectiveGasPrice string             `json:"effectiveGasPrice,omitempty"`
 		Bloom             *ethtypes.Bloom    `json:"logsBloom"         gencodec:"required"`
 		Logs              []*ethtypes.Log    `json:"logs"              gencodec:"required"`
 		TxHash            *ethcommon.Hash    `json:"transactionHash" gencodec:"required"`
@@ -96,6 +97,11 @@ func (r *Receipt) UnmarshalJSON(input []byte) error {
 		return errors.New("missing required field 'cumulativeGasUsed' for Receipt")
 	}
 	r.CumulativeGasUsed = uint64(*dec.CumulativeGasUsed)
+
+	if dec.EffectiveGasPrice != "" {
+		r.EffectiveGasPrice = dec.EffectiveGasPrice
+	}
+
 	if dec.Bloom == nil {
 		return errors.New("missing required field 'logsBloom' for Receipt")
 	}

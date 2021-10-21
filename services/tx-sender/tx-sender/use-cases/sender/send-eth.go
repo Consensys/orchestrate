@@ -48,6 +48,7 @@ func (uc *sendETHTxUseCase) Execute(ctx context.Context, job *entities.Job) erro
 		log.Field("tenant_id", job.TenantID),
 		log.Field("schedule_uuid", job.ScheduleUUID),
 	), uc.logger)
+
 	logger := uc.logger.WithContext(ctx)
 	logger.Debug("processing ethereum transaction job")
 

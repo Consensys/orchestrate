@@ -9,11 +9,11 @@ Feature: Transaction Scheduler Idempotency
       | tenant1 | {{random.uuid}} |
     Then I register the following contracts
       | name        | artifacts        | Headers.Authorization    |
-      | SimpleToken | SimpleToken.json | Bearer {{tenant1.token}} |
+      | SimpleToken | SimpleToken.json | {{tenant1.token}} |
     And I have created the following accounts
       | alias    | ID              | Headers.Authorization    |
-      | account1 | {{random.uuid}} | Bearer {{tenant1.token}} |
-      | account2 | {{random.uuid}} | Bearer {{tenant1.token}} |
+      | account1 | {{random.uuid}} | {{tenant1.token}} |
+      | account2 | {{random.uuid}} | {{tenant1.token}} |
 
   Scenario: Send twice same transaction using same idempotency key
     Given I register the following alias
@@ -26,7 +26,7 @@ Feature: Transaction Scheduler Idempotency
       | {{deployTxOneID}} |
     Then  I set the headers
       | Key               | Value                    |
-      | Authorization     | Bearer {{tenant1.token}} |
+      | Authorization     | {{tenant1.token}} |
       | X-Idempotency-Key | {{idempotencykey}}       |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
@@ -45,7 +45,7 @@ Feature: Transaction Scheduler Idempotency
     Then the response code should be 202
     Then  I set the headers
       | Key               | Value                    |
-      | Authorization     | Bearer {{tenant1.token}} |
+      | Authorization     | {{tenant1.token}} |
       | X-Idempotency-Key | {{idempotencykey}}       |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
@@ -80,7 +80,7 @@ Feature: Transaction Scheduler Idempotency
       | {{deployTxOneID}} |
     Then  I set the headers
       | Key               | Value                    |
-      | Authorization     | Bearer {{tenant1.token}} |
+      | Authorization     | {{tenant1.token}} |
       | X-Idempotency-Key | {{idempotencykey}}       |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
@@ -99,7 +99,7 @@ Feature: Transaction Scheduler Idempotency
     Then the response code should be 202
     Then  I set the headers
       | Key               | Value                    |
-      | Authorization     | Bearer {{tenant1.token}} |
+      | Authorization     | {{tenant1.token}} |
       | X-Idempotency-Key | {{idempotencykey}}       |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """

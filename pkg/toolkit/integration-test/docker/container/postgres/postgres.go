@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/consensys/orchestrate/pkg/toolkit/database/postgres"
-	"github.com/consensys/quorum-key-manager/pkg/common"
+	"github.com/consensys/orchestrate/pkg/utils"
 	dockercontainer "github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/go-connections/nat"
@@ -62,8 +62,8 @@ func (g *Postgres) GenerateContainerConfig(ctx context.Context, configuration in
 
 	hostConfig := &dockercontainer.HostConfig{
 		Resources: dockercontainer.Resources{
-			OomKillDisable: common.ToPtr(true).(*bool),
-			PidsLimit:      common.ToPtr(int64(-1)).(*int64),
+			OomKillDisable: utils.ToPtr(true).(*bool),
+			PidsLimit:      utils.ToPtr(int64(-1)).(*int64),
 		},
 	}
 	if cfg.Port != "" {

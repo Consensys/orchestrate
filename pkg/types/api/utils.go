@@ -20,3 +20,15 @@ func validatePrivateTxParams(protocol entities.PrivateTxManagerType, privacyGrou
 
 	return nil
 }
+
+func validateTxFromParams(from string, oneTimeKey bool) error {
+	if from != "" && oneTimeKey {
+		return errors.InvalidParameterError("fields 'from' and 'oneTimeKey' are mutually exclusive")
+	}
+
+	if from == "" && !oneTimeKey {
+		return errors.InvalidParameterError("field 'from' is required")
+	}
+
+	return nil
+}

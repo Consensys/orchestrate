@@ -12,8 +12,8 @@ Feature: Chain-Proxy Authentication
       | bar      | bar      |
       | wildcard | *        |
     Given I set the headers
-      | Key           | Value                |
-      | Authorization | Bearer {{foo.token}} |
+      | Key           | Value         |
+      | Authorization | {{foo.token}} |
     When I send "POST" request to "{{global.api}}/chains" with json:
       """
       {
@@ -25,9 +25,9 @@ Feature: Chain-Proxy Authentication
     Then I store the UUID as "chainFoo"
 
     Given I set the headers
-      | Key           | Value                |
-      | Authorization | Bearer {{foo.token}} |
-      | X-Tenant-ID   | _                    |
+      | Key           | Value         |
+      | Authorization | {{foo.token}} |
+      | X-Tenant-ID   | _             |
     When I send "POST" request to "{{global.api}}/chains" with json:
       """
       {
@@ -103,9 +103,9 @@ Feature: Chain-Proxy Authentication
     Then the response code should be 401
 
     Given I set the headers
-      | Key           | Value                |
-      | Authorization | Bearer {{foo.token}} |
-      | Content-Type  | application/json     |
+      | Key           | Value            |
+      | Authorization | {{foo.token}}    |
+      | Content-Type  | application/json |
     When I send "POST" request to "{{global.api}}/proxy/chains/{{chainFoo}}" with json:
       """
       {
@@ -134,9 +134,9 @@ Feature: Chain-Proxy Authentication
     Then the response code should be 200
 
     Given I set the headers
-      | Key           | Value                |
-      | Authorization | Bearer {{bar.token}} |
-      | Content-Type  | application/json     |
+      | Key           | Value            |
+      | Authorization | {{bar.token}}    |
+      | Content-Type  | application/json |
     When I send "POST" request to "{{global.api}}/proxy/chains/{{chainFoo}}" with json:
       """
       {
@@ -165,9 +165,9 @@ Feature: Chain-Proxy Authentication
     Then the response code should be 200
 
     Given I set the headers
-      | Key           | Value                     |
-      | Authorization | Bearer {{wildcard.token}} |
-      | Content-Type  | application/json          |
+      | Key           | Value              |
+      | Authorization | {{wildcard.token}} |
+      | Content-Type  | application/json   |
     When I send "POST" request to "{{global.api}}/proxy/chains/{{chainFoo}}" with json:
       """
       {
@@ -196,9 +196,9 @@ Feature: Chain-Proxy Authentication
     Then the response code should be 200
 
     Given I set the headers
-      | Key           | Value                     |
-      | Authorization | Bearer {{wildcard.token}} |
-      | Content-Type  | application/json          |
+      | Key           | Value              |
+      | Authorization | {{wildcard.token}} |
+      | Content-Type  | application/json   |
     When I send "DELETE" request to "{{global.api}}/chains/{{chainFoo}}"
     Then the response code should be 204
     When I send "DELETE" request to "{{global.api}}/chains/{{chainDefault}}"

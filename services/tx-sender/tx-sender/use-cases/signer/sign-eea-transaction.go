@@ -45,7 +45,7 @@ func NewSignEEATransactionUseCase(keyManagerClient client.KeyManagerClient) usec
 func (uc *signEEATransactionUseCase) Execute(ctx context.Context, job *entities.Job) (signedRaw, txHash string, err error) {
 	logger := uc.logger.WithContext(ctx).WithField("one_time_key", job.InternalData.OneTimeKey)
 
-	transaction := parsers.ETHTransactionToTransaction(job.Transaction)
+	transaction := parsers.ETHTransactionToTransaction(job.Transaction, job.InternalData.ChainID)
 	privateArgs := &entities.PrivateETHTransactionParams{
 		PrivateFrom:    job.Transaction.PrivateFrom,
 		PrivateFor:     job.Transaction.PrivateFor,
@@ -84,8 +84,7 @@ func (uc *signEEATransactionUseCase) signWithOneTimeKey(ctx context.Context, tra
 		return "", err
 	}
 
-	signer := pkgcryto.GetEIP155Signer(chainID)
-	signedRaw, err := uc.getSignedRawEEATransaction(ctx, transaction, privateArgs, decodedSignature, signer)
+	signedRaw, err := uc.getSignedRawEEATransaction(ctx, transaction, privateArgs, decodedSignature, chainID)
 	if err != nil {
 		return "", errors.FromError(err).ExtendComponent(signEEATransactionComponent)
 	}
@@ -122,8 +121,17 @@ func (uc *signEEATransactionUseCase) signWithAccount(ctx context.Context, job *e
 }
 
 func (uc *signEEATransactionUseCase) getSignedRawEEATransaction(ctx context.Context, transaction *types.Transaction,
-	privateArgs *entities.PrivateETHTransactionParams, signature []byte, signer types.Signer) ([]byte, error) {
+	privateArgs *entities.PrivateETHTransactionParams, signature []byte, chainID string) ([]byte, error) {
 	logger := uc.logger.WithContext(ctx)
+
+	signedTx, err := transaction.WithSignature(pkgcryto.GetEIP155Signer(chainID), signature)
+	if err != nil {
+		errMessage := "failed to set eea transaction signature"
+		logger.WithError(err).Error(errMessage)
+		return nil, errors.InvalidParameterError(errMessage)
+	}
+	v, r, s := signedTx.RawSignatureValues()
+
 	privateFromEncoded, err := pkgcryto.GetEncodedPrivateFrom(privateArgs.PrivateFrom)
 	if err != nil {
 		return nil, err
@@ -133,14 +141,6 @@ func (uc *signEEATransactionUseCase) getSignedRawEEATransaction(ctx context.Cont
 	if err != nil {
 		return nil, err
 	}
-
-	signedTx, err := transaction.WithSignature(signer, signature)
-	if err != nil {
-		errMessage := "failed to set eea transaction signature"
-		logger.WithError(err).Error(errMessage)
-		return nil, errors.InvalidParameterError(errMessage)
-	}
-	v, r, s := signedTx.RawSignatureValues()
 
 	signedRaw, err := rlp.Encode([]interface{}{
 		transaction.Nonce(),

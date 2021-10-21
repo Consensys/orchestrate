@@ -242,11 +242,18 @@ func (sc *ScenarioContext) iHaveTheFollowingTenant(table *gherkin.PickleStepArgu
 		if tenantID == "" {
 			tenantID = uuid.Must(uuid.NewV4()).String()
 		}
-		token, err := sc.jwtGenerator.GenerateAccessTokenWithTenantID(tenantID, []string{"*:*"}, 24*time.Hour)
-		if err != nil {
-			return err
+
+		if sc.jwtGenerator == nil {
+			sc.logger.Debug("jwt generator is not initialized (multi-tenancy mode disabled)")
+			tenantMap["token"] = ""
+		} else {
+			token, err := sc.jwtGenerator.GenerateAccessTokenWithTenantID(tenantID, []string{"*:*"}, 24*time.Hour)
+			if err != nil {
+				return err
+			}
+			tenantMap["token"] = "Bearer " + token
 		}
-		tenantMap["token"] = token
+
 		tenantMap["tenantID"] = tenantID
 		sc.aliases.Set(tenantMap, sc.Pickle.Id, a)
 	}

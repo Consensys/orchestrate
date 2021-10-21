@@ -58,6 +58,7 @@ func TestSignEEATransaction_Execute(t *testing.T) {
 		job.InternalData.OneTimeKey = true
 		job.Transaction.PrivateFrom = "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="
 		job.Transaction.PrivateFor = []string{"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="}
+		job.Transaction.TransactionType = types.LegacyTxType
 
 		raw, txHash, err := usecase.Execute(ctx, job)
 

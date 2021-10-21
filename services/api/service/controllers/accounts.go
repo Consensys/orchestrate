@@ -231,7 +231,7 @@ func (c *AccountsController) update(rw http.ResponseWriter, request *http.Reques
 // @Produce text/plain
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Param request body api.SignMessageRequest true "Payload to sign"
+// @Param request body qkmtypes.SignMessageRequest true "Payload to sign"
 // @Param address path string true "selected account address"
 // @Success 200 {string} string "Signed payload"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
@@ -277,7 +277,7 @@ func (c *AccountsController) signMessage(rw http.ResponseWriter, request *http.R
 // @Tags Accounts
 // @Accept json
 // @Produce text/plain
-// @Param request body api.SignTypedDataRequest{domainSeparator=qkmtypes.DomainSeparator,types=map[string]qkmtypes.Type} true "Typed data to sign"
+// @Param request body qkmtypes.SignTypedDataRequest{domainSeparator=qkmtypes.DomainSeparator,types=map[string]qkmtypes.Type} true "Typed data to sign"
 // @Param address path string true "selected account address"
 // @Success 200 {string} string "Signed payload"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"

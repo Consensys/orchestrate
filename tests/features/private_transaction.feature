@@ -9,10 +9,10 @@ Feature: Private transactions
       | tenant1 | {{random.uuid}} |
     And I have created the following accounts
       | alias    | Headers.Authorization    |
-      | account1 | Bearer {{tenant1.token}} |
+      | account1 | {{tenant1.token}} |
     And I register the following contracts
       | name        | artifacts        | Headers.Authorization    |
-      | SimpleToken | SimpleToken.json | Bearer {{tenant1.token}} |
+      | SimpleToken | SimpleToken.json | {{tenant1.token}} |
 
   @quorum
   Scenario: Deploy private ERC20 contract with Quorum and Tessera
@@ -25,7 +25,7 @@ Feature: Private transactions
       | {{quorumDeployContractTxID}} |
     Given I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
@@ -74,7 +74,7 @@ Feature: Private transactions
       | {{quorumSentTxContractTxID}} |
     Given I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/transactions/send" with json:
       """
       {
@@ -106,7 +106,7 @@ Feature: Private transactions
   Scenario: Fail to deploy private ERC20 contract with unknown ChainName
     Given I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
@@ -134,7 +134,7 @@ Feature: Private transactions
   Scenario: Fail to deploy private ERC20 contract with invalid private from
     Given I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
@@ -173,7 +173,7 @@ Feature: Private transactions
       | {{publicQuorumDeployContractTxID}} |
     Given I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
@@ -223,7 +223,7 @@ Feature: Private transactions
   Scenario: Fail to deploy private ERC20 contract with unknown PrivateFor
     Given I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
@@ -248,7 +248,7 @@ Feature: Private transactions
   Scenario: Fail to deploy private ERC20 contract with not authorized chain
     Given I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
@@ -283,7 +283,7 @@ Feature: Private transactions
       | {{besuDeployContractTxID}} |
     Given I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
@@ -330,7 +330,7 @@ Feature: Private transactions
       | {{besuSentTxContractTxID}} |
     Given I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/transactions/send" with json:
       """
       {
@@ -371,9 +371,9 @@ Feature: Private transactions
       | besuDeployContractTxFourID  | {{random.uuid}} |
     And I have created the following accounts
       | alias    | Headers.Authorization    |
-      | account2 | Bearer {{tenant1.token}} |
-      | account3 | Bearer {{tenant1.token}} |
-      | account4 | Bearer {{tenant1.token}} |
+      | account2 | {{tenant1.token}} |
+      | account3 | {{tenant1.token}} |
+      | account4 | {{tenant1.token}} |
     Then I track the following envelopes
       | ID                              |
       | {{besuDeployContractTxOneID}}   |
@@ -382,7 +382,7 @@ Feature: Private transactions
       | {{besuDeployContractTxFourID}}  |
     Given I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
@@ -481,9 +481,9 @@ Feature: Private transactions
       | besuDeployContractTxFourID  | {{random.uuid}} |
     And I have created the following accounts
       | alias    | Headers.Authorization    |
-      | account2 | Bearer {{tenant1.token}} |
-      | account3 | Bearer {{tenant1.token}} |
-      | account4 | Bearer {{tenant1.token}} |
+      | account2 | {{tenant1.token}} |
+      | account3 | {{tenant1.token}} |
+      | account4 | {{tenant1.token}} |
     Then I track the following envelopes
       | ID                              |
       | {{besuDeployContractTxOneID}}   |
@@ -492,7 +492,7 @@ Feature: Private transactions
       | {{besuDeployContractTxFourID}}  |
     Given I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
@@ -585,7 +585,7 @@ Feature: Private transactions
   Scenario: Deploy private ERC20 for a privacy group
     Given I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     Given I sleep "2s"
     When I send "POST" request to "{{global.api}}/proxy/chains/{{chain.besu0.UUID}}" with json:
       """
@@ -647,7 +647,7 @@ Feature: Private transactions
       | privacyGroupNameOne | {{random.uuid}} |
     Then I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     Then I sleep "2s"
     When I send "POST" request to "{{global.api}}/proxy/chains/{{chain.besu0.UUID}}" with json:
       """
@@ -708,7 +708,7 @@ Feature: Private transactions
       | privacyGroupNameTwo | {{random.uuid}} |
     Then I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     Then I sleep "2s"
     When I send "POST" request to "{{global.api}}/proxy/chains/{{chain.besu0.UUID}}" with json:
       """
@@ -769,7 +769,7 @@ Feature: Private transactions
   Scenario: Deploy private ERC20 with one-time-key
     Given I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     Given I register the following alias
       | alias                     | value           |
       | besuDeployContractTxOTKID | {{random.uuid}} |
@@ -812,7 +812,7 @@ Feature: Private transactions
       | {{publicBesuDeployContractTxID}} |
     Given I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
@@ -868,7 +868,7 @@ Feature: Private transactions
       | to1   | {{random.account}} |
     Then I set the headers
       | Key           | Value                    |
-      | Authorization | Bearer {{tenant1.token}} |
+      | Authorization | {{tenant1.token}} |
     When I send "POST" request to "{{global.api}}/schedules" with json:
       """
       {}

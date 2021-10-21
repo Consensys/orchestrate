@@ -124,6 +124,7 @@ func (listener *MessageListener) processEnvelope(ctx context.Context, evlp *tx.E
 	logger := log.FromContext(ctx)
 	tenantID := evlp.GetHeadersValue(utils.TenantIDMetadata)
 	job := envelope.NewJobFromEnvelope(evlp, tenantID)
+
 	return backoff.RetryNotify(
 		func() error {
 			err := listener.executeSendJob(ctx, job)

@@ -8,6 +8,7 @@ import (
 	context "context"
 	json "encoding/json"
 	types "github.com/consensys/orchestrate/pkg/ethereum/types"
+	rpc "github.com/consensys/orchestrate/pkg/toolkit/ethclient/rpc"
 	ethereum "github.com/consensys/orchestrate/pkg/types/ethereum"
 	ethereum0 "github.com/ethereum/go-ethereum"
 	common "github.com/ethereum/go-ethereum/common"
@@ -751,6 +752,21 @@ func (mr *MockGasPricerMockRecorder) SuggestGasPrice(ctx, url interface{}) *gomo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SuggestGasPrice", reflect.TypeOf((*MockGasPricer)(nil).SuggestGasPrice), ctx, url)
 }
 
+// FeeHistory mocks base method
+func (m *MockGasPricer) FeeHistory(ctx context.Context, url string, blockCount int, newestBlock string) (*rpc.FeeHistory, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FeeHistory", ctx, url, blockCount, newestBlock)
+	ret0, _ := ret[0].(*rpc.FeeHistory)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FeeHistory indicates an expected call of FeeHistory
+func (mr *MockGasPricerMockRecorder) FeeHistory(ctx, url, blockCount, newestBlock interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FeeHistory", reflect.TypeOf((*MockGasPricer)(nil).FeeHistory), ctx, url, blockCount, newestBlock)
+}
+
 // MockChainSyncReader is a mock of ChainSyncReader interface
 type MockChainSyncReader struct {
 	ctrl     *gomock.Controller
@@ -1141,6 +1157,21 @@ func (m *MockMultiClient) SuggestGasPrice(ctx context.Context, url string) (*big
 func (mr *MockMultiClientMockRecorder) SuggestGasPrice(ctx, url interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SuggestGasPrice", reflect.TypeOf((*MockMultiClient)(nil).SuggestGasPrice), ctx, url)
+}
+
+// FeeHistory mocks base method
+func (m *MockMultiClient) FeeHistory(ctx context.Context, url string, blockCount int, newestBlock string) (*rpc.FeeHistory, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FeeHistory", ctx, url, blockCount, newestBlock)
+	ret0, _ := ret[0].(*rpc.FeeHistory)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FeeHistory indicates an expected call of FeeHistory
+func (mr *MockMultiClientMockRecorder) FeeHistory(ctx, url, blockCount, newestBlock interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FeeHistory", reflect.TypeOf((*MockMultiClient)(nil).FeeHistory), ctx, url, blockCount, newestBlock)
 }
 
 // Network mocks base method
@@ -1696,6 +1727,21 @@ func (mr *MockClientMockRecorder) SuggestGasPrice(ctx, url interface{}) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SuggestGasPrice", reflect.TypeOf((*MockClient)(nil).SuggestGasPrice), ctx, url)
 }
 
+// FeeHistory mocks base method
+func (m *MockClient) FeeHistory(ctx context.Context, url string, blockCount int, newestBlock string) (*rpc.FeeHistory, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FeeHistory", ctx, url, blockCount, newestBlock)
+	ret0, _ := ret[0].(*rpc.FeeHistory)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FeeHistory indicates an expected call of FeeHistory
+func (mr *MockClientMockRecorder) FeeHistory(ctx, url, blockCount, newestBlock interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FeeHistory", reflect.TypeOf((*MockClient)(nil).FeeHistory), ctx, url, blockCount, newestBlock)
+}
+
 // Network mocks base method
 func (m *MockClient) Network(ctx context.Context, url string) (*big.Int, error) {
 	m.ctrl.T.Helper()
@@ -1826,6 +1872,21 @@ func (m *MockEEAClient) SuggestGasPrice(ctx context.Context, url string) (*big.I
 func (mr *MockEEAClientMockRecorder) SuggestGasPrice(ctx, url interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SuggestGasPrice", reflect.TypeOf((*MockEEAClient)(nil).SuggestGasPrice), ctx, url)
+}
+
+// FeeHistory mocks base method
+func (m *MockEEAClient) FeeHistory(ctx context.Context, url string, blockCount int, newestBlock string) (*rpc.FeeHistory, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FeeHistory", ctx, url, blockCount, newestBlock)
+	ret0, _ := ret[0].(*rpc.FeeHistory)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FeeHistory indicates an expected call of FeeHistory
+func (mr *MockEEAClientMockRecorder) FeeHistory(ctx, url, blockCount, newestBlock interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FeeHistory", reflect.TypeOf((*MockEEAClient)(nil).FeeHistory), ctx, url, blockCount, newestBlock)
 }
 
 // Network mocks base method
@@ -2059,6 +2120,21 @@ func (m *MockQuorumClient) SuggestGasPrice(ctx context.Context, url string) (*bi
 func (mr *MockQuorumClientMockRecorder) SuggestGasPrice(ctx, url interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SuggestGasPrice", reflect.TypeOf((*MockQuorumClient)(nil).SuggestGasPrice), ctx, url)
+}
+
+// FeeHistory mocks base method
+func (m *MockQuorumClient) FeeHistory(ctx context.Context, url string, blockCount int, newestBlock string) (*rpc.FeeHistory, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FeeHistory", ctx, url, blockCount, newestBlock)
+	ret0, _ := ret[0].(*rpc.FeeHistory)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FeeHistory indicates an expected call of FeeHistory
+func (mr *MockQuorumClientMockRecorder) FeeHistory(ctx, url, blockCount, newestBlock interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FeeHistory", reflect.TypeOf((*MockQuorumClient)(nil).FeeHistory), ctx, url, blockCount, newestBlock)
 }
 
 // Network mocks base method

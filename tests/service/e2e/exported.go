@@ -170,7 +170,7 @@ func importTestIdentities(ctx context.Context, testData *utils3.TestData) error 
 			})
 
 			if err != nil {
-				if errors.IsAlreadyExistsError(err) || errors.IsConflictedError(err) {
+				if errors.IsAlreadyExistsError(err) || errors.IsConflictedError(err) || errors.IsDependencyFailureError(err) {
 					logger.WithError(err).WithField("priv_key", privKey.String()).Warn("imported account is duplicated")
 					continue
 				}

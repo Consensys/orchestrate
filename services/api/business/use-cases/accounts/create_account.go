@@ -82,7 +82,7 @@ func (uc *createAccountUseCase) Execute(ctx context.Context, account *entities.A
 	if err != nil {
 		errMsg := "failed to import/create ethereum account"
 		logger.WithError(err).Error(errMsg)
-		return nil, errors.FromError(err).ExtendComponent(createAccountComponent)
+		return nil, errors.DependencyFailureError(errMsg).ExtendComponent(createAccountComponent)
 	}
 
 	account.Address = resp.Address.String()

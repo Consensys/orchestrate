@@ -256,15 +256,19 @@ func (e *Envelope) GetContextLabels() map[string]string {
 }
 
 type Tx struct {
-	From     *ethcommon.Address
-	To       *ethcommon.Address
-	Gas      *uint64
-	GasPrice *big.Int
-	Value    *big.Int
-	Nonce    *uint64
-	Data     string          `validate:"omitempty,isHex"`
-	Raw      string          `validate:"omitempty,isHex,required_with_all=TxHash"`
-	TxHash   *ethcommon.Hash `validate:"omitempty,required_with_all=Raw"`
+	From            *ethcommon.Address
+	To              *ethcommon.Address
+	Gas             *uint64
+	GasPrice        *big.Int
+	GasFeeCap       *big.Int
+	GasTipCap       *big.Int
+	AccessList      []*ethereum.AccessTuple
+	TransactionType string
+	Value           *big.Int
+	Nonce           *uint64
+	Data            string          `validate:"omitempty,isHex"`
+	Raw             string          `validate:"omitempty,isHex,required_with_all=TxHash"`
+	TxHash          *ethcommon.Hash `validate:"omitempty,required_with_all=Raw"`
 }
 
 func (e *Envelope) GetTransaction() (*ethtypes.Transaction, error) {
@@ -525,6 +529,76 @@ func (e *Envelope) SetGasPriceString(gasPrice string) error {
 func (e *Envelope) SetGasPrice(gasPrice *big.Int) *Envelope {
 	e.GasPrice = gasPrice
 	return e
+}
+
+// GasFeeCap
+func (e *Envelope) SetGasFeeCapString(gasFeeCap string) error {
+	if gasFeeCap != "" {
+		g, ok := new(big.Int).SetString(gasFeeCap, 10)
+		if !ok {
+			return errors.DataError("invalid gasFeeCap - got %s", gasFeeCap)
+		}
+		_ = e.SetFeeCap(g)
+	}
+	return nil
+}
+
+func (e *Envelope) SetFeeCap(gasFeeCap *big.Int) *Envelope {
+	e.GasFeeCap = gasFeeCap
+	return e
+}
+
+func (e *Envelope) GetGasFeeCapString() string {
+	if e.GasFeeCap == nil {
+		return ""
+	}
+	return e.GasFeeCap.String()
+}
+
+// GasTipCap
+func (e *Envelope) SetGasTipCapString(gasTipCap string) error {
+	if gasTipCap != "" {
+		g, ok := new(big.Int).SetString(gasTipCap, 10)
+		if !ok {
+			return errors.DataError("invalid gasTipCap - got %s", gasTipCap)
+		}
+		_ = e.SetTipCap(g)
+	}
+	return nil
+}
+
+func (e *Envelope) SetTipCap(gasTipCap *big.Int) *Envelope {
+	e.GasTipCap = gasTipCap
+	return e
+}
+
+func (e *Envelope) GetGasTipCapString() string {
+	if e.GasTipCap == nil {
+		return ""
+	}
+	return e.GasTipCap.String()
+}
+
+// AccessList
+
+func (e *Envelope) SetAccessList(accessList []*ethereum.AccessTuple) *Envelope {
+	e.AccessList = accessList
+	return e
+}
+
+func (e *Envelope) GetAccessList() []*ethereum.AccessTuple {
+	return e.AccessList
+}
+
+// Transaction Type
+
+func (e *Envelope) SetTransactionType(txType string) *Envelope {
+	e.TransactionType = txType
+	return e
+}
+
+func (e *Envelope) GetTransactionType() string {
+	return e.TransactionType
 }
 
 // VALUE
@@ -902,6 +976,7 @@ func (e *Envelope) TxRequest() *TxRequest {
 			Nonce:           e.GetNonceString(),
 			Data:            e.GetData(),
 			Contract:        e.ShortContract(),
+			TransactionType: e.GetTransactionType(),
 			MethodSignature: e.GetMethodSignature(),
 			Args:            e.GetArgs(),
 			Raw:             e.GetRaw(),
@@ -976,15 +1051,19 @@ func (e *Envelope) TxResponse() *TxResponse {
 		JobUUID:       e.GetJobUUID(),
 		ContextLabels: e.ContextLabels,
 		Transaction: &ethereum.Transaction{
-			From:     e.GetFromString(),
-			Nonce:    e.GetNonceString(),
-			To:       e.GetToString(),
-			Value:    e.GetValueString(),
-			Gas:      e.GetGasString(),
-			GasPrice: e.GetGasPriceString(),
-			Data:     e.GetData(),
-			Raw:      e.GetRaw(),
-			TxHash:   e.GetTxHashString(),
+			From:       e.GetFromString(),
+			Nonce:      e.GetNonceString(),
+			To:         e.GetToString(),
+			Value:      e.GetValueString(),
+			Gas:        e.GetGasString(),
+			GasPrice:   e.GetGasPriceString(),
+			GasFeeCap:  e.GetGasFeeCapString(),
+			GasTipCap:  e.GetGasTipCapString(),
+			AccessList: e.GetAccessList(),
+			TxType:     e.GetTransactionType(),
+			Data:       e.GetData(),
+			Raw:        e.GetRaw(),
+			TxHash:     e.GetTxHashString(),
 		},
 		Chain:   e.GetChainName(),
 		Receipt: e.Receipt,
@@ -992,7 +1071,7 @@ func (e *Envelope) TxResponse() *TxResponse {
 	}
 }
 
-func (e *Envelope) loadPtrFields(gas, nonce, gasPrice, value, from, to string) []*error1.Error {
+func (e *Envelope) loadPtrFields(gas, nonce, gasPrice, gasFeeCap, gasTipCap, value, from, to string) []*error1.Error {
 	errs := make([]*error1.Error, 0)
 	if err := e.SetGasString(gas); err != nil {
 		errs = append(errs, errors.FromError(err))
@@ -1001,6 +1080,12 @@ func (e *Envelope) loadPtrFields(gas, nonce, gasPrice, value, from, to string) [
 		errs = append(errs, errors.FromError(err))
 	}
 	if err := e.SetGasPriceString(gasPrice); err != nil {
+		errs = append(errs, errors.FromError(err))
+	}
+	if err := e.SetGasFeeCapString(gasFeeCap); err != nil {
+		errs = append(errs, errors.FromError(err))
+	}
+	if err := e.SetGasTipCapString(gasTipCap); err != nil {
 		errs = append(errs, errors.FromError(err))
 	}
 	if err := e.SetValueString(value); err != nil {
