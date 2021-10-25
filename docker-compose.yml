@@ -56,8 +56,6 @@ services:
     restart: "no"
     cap_add:
       - IPC_LOCK
-    volumes:
-      - vault-token:/vault/token
     environment:
       VAULT_DEV_ROOT_TOKEN_ID: ${VAULT_TOKEN-DevVaultToken}
       VAULT_ADDR: http://vault:8200
@@ -180,7 +178,6 @@ services:
     restart: "on-failure"
     command: run
     volumes:
-      - vault-token:/vault/token
       - manifests:/manifests
 
   api-migration-init:
@@ -252,8 +249,6 @@ networks:
 
 volumes:
   db-data-api:
-    driver: local
-  vault-token:
     driver: local
   manifests:
     driver: local

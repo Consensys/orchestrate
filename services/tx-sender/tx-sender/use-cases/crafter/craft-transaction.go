@@ -216,7 +216,7 @@ func (uc *craftTxUseCase) craftDynamicFeePrice(ctx context.Context, job *entitie
 	logger := uc.logger.WithContext(ctx)
 
 	if string(job.Type) == tx.JobType_ETH_ORION_EEA_TX.String() {
-		logger.Debug("skip gas estimation for eea private transaction")
+		logger.Debug("skip gas dynamic fee estimation. EEA private transaction")
 		return nil
 	}
 
@@ -234,6 +234,7 @@ func (uc *craftTxUseCase) craftDynamicFeePrice(ctx context.Context, job *entitie
 
 	nextBlockBaseFeePerGas := feeHistory.BaseFeePerGas[len(feeHistory.BaseFeePerGas)-1].ToInt()
 	if nextBlockBaseFeePerGas.String() == "0" {
+		logger.Debug("skip gas dynamic fee. Zero gas network")
 		return uc.craftGasPrice(ctx, job)
 	}
 

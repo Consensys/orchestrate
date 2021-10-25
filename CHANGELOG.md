@@ -1,6 +1,6 @@
 # Orchestrate Release Notes
 
-## v21.9.0 (WIP)
+## v21.10.0 (WIP)
 ### 🆕 Features
 * Support Token Issuer Servers to validate JWTs. Environment variable `AUTH_JWT_ISSUER_URL`
 * Added environment variable to read JWT cert from filesystem, `AUTH_JWT_CERT`
