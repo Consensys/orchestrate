@@ -10,6 +10,9 @@ Feature: Deploy ERC20 contract
     And I have created the following accounts
       | alias    | ID              | Headers.Authorization |
       | account1 | {{random.uuid}} | {{tenant1.token}}     |
+    Given I register the following contracts
+      | name        | artifacts        | Headers.Authorization |
+      | SimpleToken | SimpleToken.json | {{tenant1.token}}     |
     Then I track the following envelopes
       | ID                  |
       | faucet-{{account1}} |
@@ -36,9 +39,6 @@ Feature: Deploy ERC20 contract
 
   @besu
   Scenario: Deploy ERC20 in Besu
-    Given I register the following contracts
-      | name        | artifacts        | Headers.Authorization |
-      | SimpleToken | SimpleToken.json | {{tenant1.token}}     |
     Given I register the following alias
       | alias            | value           |
       | besuContractTxID | {{random.uuid}} |
@@ -78,9 +78,6 @@ Feature: Deploy ERC20 contract
 
   @geth
   Scenario: Deploy ERC20 in Geth (dynamic_fee)
-    Given I register the following contracts
-      | name        | artifacts        | Headers.Authorization |
-      | SimpleToken | SimpleToken.json | {{tenant1.token}}     |
     Given I register the following alias
       | alias            | value           |
       | gethContractTxID | {{random.uuid}} |
@@ -106,7 +103,7 @@ Feature: Deploy ERC20 contract
       """
     Then the response code should be 202
     Then I register the following response fields
-      | alias      | path         |
+      | alias   | path         |
       | jobUUID | jobs[0].uuid |
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
@@ -120,9 +117,6 @@ Feature: Deploy ERC20 contract
 
   @geth
   Scenario: Deploy ERC20 in Geth (legacy)
-    Given I register the following contracts
-      | name        | artifacts        | Headers.Authorization |
-      | SimpleToken | SimpleToken.json | {{tenant1.token}}     |
     Given I register the following alias
       | alias            | value           |
       | gethContractTxID | {{random.uuid}} |
@@ -149,7 +143,7 @@ Feature: Deploy ERC20 contract
       """
     Then the response code should be 202
     Then I register the following response fields
-      | alias      | path         |
+      | alias   | path         |
       | jobUUID | jobs[0].uuid |
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields

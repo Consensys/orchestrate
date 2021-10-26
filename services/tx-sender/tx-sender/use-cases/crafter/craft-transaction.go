@@ -232,9 +232,10 @@ func (uc *craftTxUseCase) craftDynamicFeePrice(ctx context.Context, job *entitie
 		return uc.craftGasPrice(ctx, job)
 	}
 
+	logger.WithField("nextBlockBaseFeePerGas", fmt.Sprintf("%q", feeHistory.BaseFeePerGas)).Warn("feeHistory.BaseFeePerGas")
 	nextBlockBaseFeePerGas := feeHistory.BaseFeePerGas[len(feeHistory.BaseFeePerGas)-1].ToInt()
 	if nextBlockBaseFeePerGas.String() == "0" {
-		logger.Debug("skip gas dynamic fee. Zero gas network")
+		logger.Debug("skip gas dynamic fee. Zero base fee is not allowed")
 		return uc.craftGasPrice(ctx, job)
 	}
 

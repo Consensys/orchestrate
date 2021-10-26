@@ -73,7 +73,6 @@ Feature: Nonce manager
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
 
-  @test
   Scenario: Nonce recalibrating
     Given I register the following alias
       | alias | value              |

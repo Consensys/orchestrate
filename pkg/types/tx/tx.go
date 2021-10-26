@@ -156,6 +156,15 @@ func (m *TxEnvelope) SetChainID(chainID *big.Int) *TxEnvelope {
 	return m
 }
 
+func (m *TxEnvelope) SetPriority(priority string) *TxEnvelope {
+	m.InternalLabels[PriorityLabel] = priority
+	return m
+}
+
+func (m *TxEnvelope) GetPriority() string {
+	return m.InternalLabels[PriorityLabel]
+}
+
 func (m *TxEnvelope) GetScheduleUUID() string {
 	return m.InternalLabels[ScheduleUUIDLabel]
 }

@@ -16,6 +16,11 @@
 * Incorrect server name verification using Postgres in `verify-ca` mode 
 * Tx-sender exits sending Tessera private transaction with invalid 'from'
 
+## v21.1.10 (WIP)
+
+### 🛠 Bug fixes
+* Transaction `priority` is applied as expected
+
 ## v21.1.9 (2021-10-21)
 ### 🛠 Bug fixes
 * Incorrect server name verification using Postgres in `verify-ca` mode

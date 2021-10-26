@@ -916,6 +916,15 @@ func (e *Envelope) SetEnclaveKey(enclaveKey string) *Envelope {
 	return e
 }
 
+func (e *Envelope) GetPriority() string {
+	return e.InternalLabels[PriorityLabel]
+}
+
+func (e *Envelope) SetPriority(priority string) *Envelope {
+	e.InternalLabels[PriorityLabel] = priority
+	return e
+}
+
 func (e *Envelope) SetJobType(jobType JobType) *Envelope {
 	e.JobType = jobType
 	return e
@@ -1008,6 +1017,9 @@ func (e *Envelope) fieldsToInternal() {
 	if e.GetJobUUID() != "" {
 		e.InternalLabels[JobUUIDLabel] = e.GetJobUUID()
 	}
+	if e.GetPriority() != "" {
+		e.InternalLabels[PriorityLabel] = e.GetPriority()
+	}
 	if e.GetScheduleUUID() != "" {
 		e.InternalLabels[ScheduleUUIDLabel] = e.GetScheduleUUID()
 	}
@@ -1024,6 +1036,9 @@ func (e *Envelope) internalToFields() error {
 	}
 	_ = e.SetChainUUID(e.InternalLabels[ChainUUIDLabel])
 	_ = e.SetJobUUID(e.InternalLabels[JobUUIDLabel])
+	if priority, ok := e.InternalLabels[PriorityLabel]; ok && priority != "" {
+		_ = e.SetPriority(priority)
+	}
 	_ = e.SetScheduleUUID(e.InternalLabels[ScheduleUUIDLabel])
 	return nil
 }
