@@ -137,6 +137,7 @@ func (s *sendTxSuite) TestSendTx_Success() {
 
 	s.T().Run("should execute send successfully a raw tx", func(t *testing.T) {
 		txRequest := testutils3.FakeRawTxRequest()
+		txRequest.Params.Raw = "0xf85380839896808252088083989680808216b4a0d35c752d3498e6f5ca1630d264802a992a141ca4b6a3f439d673c75e944e5fb0a05278aaa5fabbeac362c321b54e298dedae2d31471e432c26ea36a8d49cf08f1e"
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
 
@@ -338,7 +339,7 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 		s.ScheduleDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(nil)
 		s.ScheduleDA.EXPECT().FindOneByUUID(gomock.Any(), txRequest.Schedule.UUID, tenants).Return(scheduleModel, nil)
 		s.TxRequestDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(nil)
-		s.GetFaucetCandidate.EXPECT().Execute(gomock.Any(), txRequest.Params.From, chains[0], allowedTenants).Return(nil, faucetNotFoundErr)
+		s.GetFaucetCandidate.EXPECT().Execute(gomock.Any(), txRequest.Schedule.Jobs[0].Transaction.From, chains[0], allowedTenants).Return(nil, faucetNotFoundErr)
 		s.CreateJobUC.EXPECT().Execute(gomock.Any(), gomock.Any(), allowedTenants).Return(txRequest.Schedule.Jobs[0], expectedErr)
 
 		response, err := s.usecase.Execute(ctx, txRequest, txData, tenantID)
@@ -362,7 +363,7 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 		s.ScheduleDA.EXPECT().FindOneByUUID(gomock.Any(), txRequest.Schedule.UUID, tenants).Return(scheduleModel, nil)
 		s.TxRequestDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(nil)
 		s.CreateJobUC.EXPECT().Execute(gomock.Any(), gomock.Any(), allowedTenants).Return(txRequest.Schedule.Jobs[0], nil)
-		s.GetFaucetCandidate.EXPECT().Execute(gomock.Any(), txRequest.Params.From, gomock.Any(), allowedTenants).Return(nil, expectedErr)
+		s.GetFaucetCandidate.EXPECT().Execute(gomock.Any(), txRequest.Schedule.Jobs[0].Transaction.From, gomock.Any(), allowedTenants).Return(nil, expectedErr)
 
 		response, err := s.usecase.Execute(ctx, txRequest, txData, tenantID)
 

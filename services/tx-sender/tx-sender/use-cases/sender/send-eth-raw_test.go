@@ -4,7 +4,6 @@ package sender
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	mock3 "github.com/consensys/orchestrate/pkg/sdk/client/mock"
@@ -14,9 +13,6 @@ import (
 	"github.com/consensys/orchestrate/pkg/types/testutils"
 	"github.com/consensys/orchestrate/pkg/utils"
 	ethcommon "github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
@@ -45,7 +41,6 @@ func TestSendETHRaw_Execute(t *testing.T) {
 
 		jobClient.EXPECT().UpdateJob(gomock.Any(), job.UUID, &txschedulertypes.UpdateJobRequest{
 			Status:      entities.StatusPending,
-			Transaction: decodeRaw(raw),
 		})
 
 		err := usecase.Execute(ctx, job)
@@ -67,7 +62,6 @@ func TestSendETHRaw_Execute(t *testing.T) {
 
 		jobClient.EXPECT().UpdateJob(gomock.Any(), job.UUID, &txschedulertypes.UpdateJobRequest{
 			Status:      entities.StatusResending,
-			Transaction: decodeRaw(raw),
 		})
 
 		err := usecase.Execute(ctx, job)
@@ -88,10 +82,8 @@ func TestSendETHRaw_Execute(t *testing.T) {
 		ec.EXPECT().SendRawTransaction(gomock.Any(), proxyURL, raw).
 			Return(ethcommon.HexToHash(hash), nil)
 
-		transaction := decodeRaw(raw)
 		jobClient.EXPECT().UpdateJob(gomock.Any(), job.UUID, &txschedulertypes.UpdateJobRequest{
 			Status:      entities.StatusPending,
-			Transaction: transaction,
 		})
 		jobClient.EXPECT().UpdateJob(gomock.Any(), job.UUID, gomock.Any())
 
@@ -99,22 +91,4 @@ func TestSendETHRaw_Execute(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, job.Transaction.Hash, hash)
 	})
-}
-
-func decodeRaw(raw string) *entities.ETHTransaction {
-	var tx *types.Transaction
-	rawb, _ := hexutil.Decode(raw)
-	_ = rlp.DecodeBytes(rawb, &tx)
-	msg, _ := tx.AsMessage(types.NewEIP155Signer(tx.ChainId()), nil)
-
-	return &entities.ETHTransaction{
-		From:     msg.From().String(),
-		Data:     "0x" + ethcommon.Bytes2Hex(tx.Data()),
-		Gas:      fmt.Sprintf("%d", tx.Gas()),
-		GasPrice: fmt.Sprintf("%d", tx.GasPrice()),
-		Value:    tx.Value().String(),
-		Nonce:    fmt.Sprintf("%d", tx.Nonce()),
-		Hash:     tx.Hash().String(),
-		Raw:      raw,
-	}
 }

@@ -23,7 +23,7 @@ func FakeSendRawTransactionRequest() *types.RawTransactionRequest {
 	return &types.RawTransactionRequest{
 		ChainName: "ganache",
 		Params: types.RawTransactionParams{
-			Raw: "0xabeabe",
+			Raw: "0xf85380839896808252088083989680808216b4a0d35c752d3498e6f5ca1630d264802a992a141ca4b6a3f439d673c75e944e5fb0a05278aaa5fabbeac362c321b54e298dedae2d31471e432c26ea36a8d49cf08f1e",
 		},
 	}
 }

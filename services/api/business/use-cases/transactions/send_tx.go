@@ -85,7 +85,7 @@ func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequ
 	job := txRequest.Schedule.Jobs[0]
 	if job.Status == entities.StatusCreated {
 		var fctJob *entities.Job
-		fctJob, err = uc.startFaucetJob(ctx, txRequest.Params.From, job.ScheduleUUID, tenantID, chain)
+		fctJob, err = uc.startFaucetJob(ctx, job.Transaction.From, job.ScheduleUUID, tenantID, chain)
 		if err != nil {
 			return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
 		}
@@ -171,7 +171,11 @@ func (uc *sendTxUsecase) insertNewTxRequest(
 		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
 	}
 
-	sendTxJobs := parsers.NewJobEntitiesFromTxRequest(txRequest, chainUUID, txData)
+	sendTxJobs, err := parsers.NewJobEntitiesFromTxRequest(txRequest, chainUUID, txData)
+	if err != nil {
+		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
+	}
+
 	txRequest.Schedule.Jobs = make([]*entities.Job, len(sendTxJobs))
 	err = database.ExecuteInDBTx(uc.db, func(dbtx database.Tx) error {
 		var nextJobUUID string

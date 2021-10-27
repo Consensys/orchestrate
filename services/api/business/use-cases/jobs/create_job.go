@@ -49,7 +49,7 @@ func (uc *createJobUseCase) Execute(ctx context.Context, job *entities.Job, allo
 	}
 	job.InternalData.ChainID = chainID
 
-	if job.Transaction.From != "" {
+	if job.Transaction.From != "" && job.Type != entities.EthereumRawTransaction {
 		err = uc.validateAccountAccess(ctx, job.Transaction.From, allowedTenants)
 		if err != nil {
 			return nil, errors.FromError(err).ExtendComponent(createJobComponent)

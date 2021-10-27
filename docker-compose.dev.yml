@@ -153,6 +153,7 @@ services:
       AUTH_JWT_CLAIMS_NAMESPACE: ${AUTH_JWT_CLAIMS_NAMESPACE-}
       AUTH_JWT_CERT: ${AUTH_JWT_CERT-}
       AUTH_JWT_KEY: ${AUTH_JWT_KEY-}
+      MULTI_TENANCY_ENABLED: ${MULTI_TENANCY_ENABLED-}
       TENANT_ID: ${TENANT_ID-}
     command: utils generate-jwt --tenant=${TENANT_ID-_} --expiration=${EXPIRATION-24h}
     restart: "no"

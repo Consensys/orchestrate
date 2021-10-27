@@ -1,8 +1,13 @@
 package parsers
 
 import (
+	"fmt"
+
+	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/services/api/store/models"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/core/types"
 )
 
 func NewTxRequestModelFromEntities(txRequest *entities.TxRequest, requestHash string, scheduleID int) *models.TransactionRequest {
@@ -16,7 +21,7 @@ func NewTxRequestModelFromEntities(txRequest *entities.TxRequest, requestHash st
 	}
 }
 
-func NewJobEntitiesFromTxRequest(txRequest *entities.TxRequest, chainUUID, txData string) []*entities.Job {
+func NewJobEntitiesFromTxRequest(txRequest *entities.TxRequest, chainUUID, txData string) ([]*entities.Job, error) {
 	var jobs []*entities.Job
 	switch {
 	case txRequest.Params.Protocol == entities.OrionChainType:
@@ -31,14 +36,17 @@ func NewJobEntitiesFromTxRequest(txRequest *entities.TxRequest, chainUUID, txDat
 			PrivateFor: txRequest.Params.PrivateFor}, entities.TesseraMarkingTransaction, chainUUID)
 		jobs = append(jobs, privTxJob, markingTxJob)
 	case txRequest.Params.Raw != "":
-		jobs = append(jobs, newJobEntityFromTxRequest(txRequest, newEthTransactionFromParams(txRequest.Params, txData, entities.TransactionType(txRequest.Params.TransactionType)),
-			entities.EthereumRawTransaction, chainUUID))
+		rawTx, err := newTransactionFromRaw(txRequest.Params.Raw)
+		if err != nil {
+			return nil, err
+		}
+		jobs = append(jobs, newJobEntityFromTxRequest(txRequest, rawTx, entities.EthereumRawTransaction, chainUUID))
 	default:
-		jobs = append(jobs, newJobEntityFromTxRequest(txRequest, newEthTransactionFromParams(txRequest.Params, txData, entities.TransactionType(txRequest.Params.TransactionType)),
-			entities.EthereumTransaction, chainUUID))
+		tx := newEthTransactionFromParams(txRequest.Params, txData, entities.TransactionType(txRequest.Params.TransactionType))
+		jobs = append(jobs, newJobEntityFromTxRequest(txRequest, tx, entities.EthereumTransaction, chainUUID))
 	}
 
-	return jobs
+	return jobs, nil
 }
 
 func newEthTransactionFromParams(params *entities.ETHTransactionParams, txData string, txType entities.TransactionType) *entities.ETHTransaction {
@@ -72,4 +80,41 @@ func newJobEntityFromTxRequest(txRequest *entities.TxRequest, ethTx *entities.ET
 		Transaction:  ethTx,
 		TenantID:     txRequest.Schedule.TenantID,
 	}
+}
+
+func newTransactionFromRaw(raw string) (*entities.ETHTransaction, error) {
+	tx := &types.Transaction{}
+
+	rawb, err := hexutil.Decode(raw)
+	if err != nil {
+		return nil, err
+	}
+
+	err = tx.UnmarshalBinary(rawb)
+	if err != nil {
+		return nil, errors.InvalidParameterError(err.Error())
+	}
+
+	from, err := types.Sender(types.NewEIP155Signer(tx.ChainId()), tx)
+	if err != nil {
+		return nil, errors.InvalidParameterError(err.Error())
+	}
+
+	jobTx := &entities.ETHTransaction{
+		From:     from.String(),
+		Data:     hexutil.Encode(tx.Data()),
+		Gas:      fmt.Sprintf("%d", tx.Gas()),
+		GasPrice: fmt.Sprintf("%d", tx.GasPrice()),
+		Value:    tx.Value().String(),
+		Nonce:    fmt.Sprintf("%d", tx.Nonce()),
+		Hash:     tx.Hash().String(),
+		Raw:      raw,
+	}
+
+	// If not contract creation
+	if tx.To() != nil {
+		jobTx.To = tx.To().String()
+	}
+
+	return jobTx, nil
 }

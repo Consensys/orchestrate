@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/pkg/types/testutils"
+	"github.com/stretchr/testify/require"
 )
 
 func TestParsersTxRequest_NewTxRequestModelFromEntities(t *testing.T) {
@@ -25,7 +26,7 @@ func TestParsersTxRequest_NewTxRequestModelFromEntities(t *testing.T) {
 func TestParsersTxRequest_NewJobEntityFromSendTx(t *testing.T) {
 	txReqEntity := testutils.FakeTxRequest()
 	chainUUID := "chainUUID"
-	jobs := NewJobEntitiesFromTxRequest(txReqEntity, chainUUID ,"0xDATA")
+	jobs, _ := NewJobEntitiesFromTxRequest(txReqEntity, chainUUID ,"0xDATA")
 	assert.Len(t, jobs, 1)
 	
 	job := jobs[0]
@@ -45,12 +46,26 @@ func TestParsersTxRequest_NewJobEntityFromSendTx(t *testing.T) {
 	assert.Equal(t, job.Transaction.PrivacyGroupID, txReqEntity.Params.PrivacyGroupID)
 }
 
+func TestParsersTxRequest_NewJobEntityFromSendRawTx(t *testing.T) {
+	txReqEntity := testutils.FakeTxRequest()
+	txReqEntity.Params.Raw = "0xf85380839896808252088083989680808216b4a0d35c752d3498e6f5ca1630d264802a992a141ca4b6a3f439d673c75e944e5fb0a05278aaa5fabbeac362c321b54e298dedae2d31471e432c26ea36a8d49cf08f1e"
+	jobs, err := NewJobEntitiesFromTxRequest(txReqEntity, "" ,"")
+	require.NoError(t, err)
+	require.Len(t, jobs, 1)
+	
+	job := jobs[0]
+	assert.Equal(t, job.ScheduleUUID, txReqEntity.Schedule.UUID)
+	assert.Equal(t, job.Type, entities.EthereumRawTransaction)
+	assert.Equal(t, job.Labels, txReqEntity.Labels)
+
+	assert.Equal(t, "0x7357589f8e367c2C31F51242fB77B350A11830F3", txReqEntity.Params.From)
+}
 
 func TestParsersTxRequest_NewOrionJobEntityFromSendTx(t *testing.T) {
 	txReqEntity := testutils.FakeTxRequest()
 	txReqEntity.Params.Protocol = entities.OrionChainType
 	chainUUID := "chainUUID"
-	jobs := NewJobEntitiesFromTxRequest(txReqEntity, chainUUID ,"0xDATA")
+	jobs, _ := NewJobEntitiesFromTxRequest(txReqEntity, chainUUID ,"0xDATA")
 	assert.Len(t, jobs, 2)
 
 	privJob := jobs[0]
@@ -71,7 +86,7 @@ func TestParsersTxRequest_NewTesseraJobEntityFromSendTx(t *testing.T) {
 	txReqEntity.Params.Protocol = entities.TesseraChainType
 	txReqEntity.Params.PrivateFor = []string{"0xPrivateFor"}
 	chainUUID := "chainUUID"
-	jobs := NewJobEntitiesFromTxRequest(txReqEntity, chainUUID ,"0xDATA")
+	jobs, _ := NewJobEntitiesFromTxRequest(txReqEntity, chainUUID ,"0xDATA")
 	assert.Len(t, jobs, 2)
 
 	privJob := jobs[0]

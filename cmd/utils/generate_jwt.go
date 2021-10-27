@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/consensys/orchestrate/pkg/toolkit/app/auth/jwt/generator"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -21,6 +22,7 @@ func newGenerateJWTCommand() *cobra.Command {
 	}
 
 	generator.PrivateKey(runCmd.Flags())
+	multitenancy.Flags(runCmd.Flags())
 	runCmd.Flags().StringVar(&tenant, "tenant", "_", "Tenant to create a token for")
 	runCmd.Flags().DurationVar(&expiration, "expiration", time.Hour, "Token expiration time")
 

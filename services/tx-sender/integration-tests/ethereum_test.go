@@ -413,6 +413,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Raw_Public() {
 		envelope := fakeEnvelope()
 		_ = envelope.SetJobType(tx.JobType_ETH_RAW_TX)
 		_ = envelope.SetRawString(raw)
+		_ = envelope.SetTxHashString(txHash)
 
 		gock.New(apiURL).
 			Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
@@ -441,6 +442,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Raw_Public() {
 		envelope := fakeEnvelope()
 		_ = envelope.SetJobType(tx.JobType_ETH_RAW_TX)
 		_ = envelope.SetRawString(raw)
+		_ = envelope.SetTxHashString(txHash)
 
 		gock.New(apiURL).
 			Patch(fmt.Sprintf("/jobs/%s", envelope.GetJobUUID())).
@@ -479,6 +481,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_Raw_Public() {
 		envelope := fakeEnvelope()
 		_ = envelope.SetJobType(tx.JobType_ETH_RAW_TX)
 		_ = envelope.SetRawString(raw)
+		_ = envelope.SetTxHashString(txHash)
 
 		gock.New(apiURL).
 			Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).

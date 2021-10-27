@@ -12,9 +12,6 @@ import (
 	"github.com/consensys/orchestrate/pkg/utils"
 	usecases "github.com/consensys/orchestrate/services/tx-sender/tx-sender/use-cases"
 	utils2 "github.com/consensys/orchestrate/services/tx-sender/tx-sender/utils"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/rlp"
 )
 
 const sendETHRawTxComponent = "use-cases.send-eth-raw-tx"
@@ -47,16 +44,10 @@ func (uc *sendETHRawTxUseCase) Execute(ctx context.Context, job *entities.Job) e
 	logger.Debug("processing ethereum raw transaction job")
 
 	var err error
-	job.Transaction, err = uc.rawTxDecoder(job.Transaction.Raw)
-	if err != nil {
-		logger.WithError(err).Error("failed to decode transaction")
-		return errors.FromError(err).ExtendComponent(sendETHRawTxComponent)
-	}
-
 	if job.InternalData.ParentJobUUID == job.UUID || job.Status == entities.StatusPending || job.Status == entities.StatusResending {
-		err = utils2.UpdateJobStatus(ctx, uc.jobClient, job, entities.StatusResending, "", job.Transaction)
+		err = utils2.UpdateJobStatus(ctx, uc.jobClient, job, entities.StatusResending, "", nil)
 	} else {
-		err = utils2.UpdateJobStatus(ctx, uc.jobClient, job, entities.StatusPending, "", job.Transaction)
+		err = utils2.UpdateJobStatus(ctx, uc.jobClient, job, entities.StatusPending, "", nil)
 	}
 
 	if err != nil {
@@ -91,41 +82,4 @@ func (uc *sendETHRawTxUseCase) sendTx(ctx context.Context, job *entities.Job) (s
 	}
 
 	return txHash.String(), nil
-}
-
-func (uc *sendETHRawTxUseCase) rawTxDecoder(raw string) (*entities.ETHTransaction, error) {
-	var tx *types.Transaction
-
-	rawb, err := hexutil.Decode(raw)
-	if err != nil {
-		return nil, err
-	}
-
-	err = rlp.DecodeBytes(rawb, &tx)
-	if err != nil {
-		return nil, err
-	}
-
-	msg, err := tx.AsMessage(types.NewEIP155Signer(tx.ChainId()), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	jobTx := &entities.ETHTransaction{
-		From:     msg.From().String(),
-		Data:     hexutil.Encode(tx.Data()),
-		Gas:      fmt.Sprintf("%d", tx.Gas()),
-		GasPrice: fmt.Sprintf("%d", tx.GasPrice()),
-		Value:    tx.Value().String(),
-		Nonce:    fmt.Sprintf("%d", tx.Nonce()),
-		Hash:     tx.Hash().String(),
-		Raw:      raw,
-	}
-
-	// If not contract creation
-	if tx.To() != nil {
-		jobTx.To = tx.To().String()
-	}
-
-	return jobTx, nil
 }

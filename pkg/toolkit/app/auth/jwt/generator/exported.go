@@ -23,6 +23,7 @@ func Init(ctx context.Context) {
 
 		vipr := viper.GetViper()
 		if !vipr.GetBool(multitenancy.EnabledViperKey) {
+			log.WithContext(ctx).Debug("jwt-generator: multi-tenancy is disabled")
 			return
 		}
 
