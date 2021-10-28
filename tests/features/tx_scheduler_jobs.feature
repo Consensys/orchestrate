@@ -126,7 +126,8 @@ Feature: Transaction Scheduler Jobs
         "chainUUID": "{{chain.besu0.UUID}}",
         "type": "eth://ethereum/rawTransaction",
         "transaction": {
-          "raw": "{{rawTx.Raw}}"
+          "raw": "{{rawTx.Raw}}",
+          "hash": "{{rawTx.TxHash}}"
         }
       }
       """

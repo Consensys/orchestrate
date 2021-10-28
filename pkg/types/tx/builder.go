@@ -1039,6 +1039,9 @@ func (e *Envelope) internalToFields() error {
 	if priority, ok := e.InternalLabels[PriorityLabel]; ok && priority != "" {
 		_ = e.SetPriority(priority)
 	}
+	if txHash, ok := e.InternalLabels[TxHashLabel]; ok && txHash != "" {
+		_ = e.SetTxHashString(txHash)
+	}
 	_ = e.SetScheduleUUID(e.InternalLabels[ScheduleUUIDLabel])
 	return nil
 }

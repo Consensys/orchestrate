@@ -67,6 +67,10 @@ func NewEnvelopeFromJob(job *entities.Job, headers map[string]string) *tx.TxEnve
 		txEnvelope.SetPriority(job.InternalData.Priority)
 	}
 
+	if job.Transaction.Hash != "" {
+		txEnvelope.SetTxHash(job.Transaction.Hash)
+	}
+
 	return txEnvelope
 }
 
