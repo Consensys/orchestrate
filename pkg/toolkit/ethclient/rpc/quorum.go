@@ -26,10 +26,17 @@ type StoreRawResponse struct {
 	Key string `json:"key" validate:"required"`
 }
 
-func (ec *Client) SendQuorumRawPrivateTransaction(ctx context.Context, endpoint, signedTxHash string, privateFor []string) (ethcommon.Hash, error) {
+func (ec *Client) SendQuorumRawPrivateTransaction(ctx context.Context, endpoint, signedTxHash string, privateFor,
+	mandatoryFor []string, privacyFlag int) (ethcommon.Hash, error) {
 	privateForParam := map[string]interface{}{
-		"privateFor": privateFor,
+		"privateFor":  privateFor,
+		"privacyFlag": privacyFlag,
 	}
+
+	if mandatoryFor != nil {
+		privateForParam["mandatoryFor"] = mandatoryFor
+	}
+
 	var hash string
 	err := ec.Call(ctx, endpoint, utils.ProcessResult(&hash), "eth_sendRawPrivateTransaction",
 		signedTxHash, privateForParam)
@@ -42,7 +49,9 @@ func (ec *Client) SendQuorumRawPrivateTransaction(ctx context.Context, endpoint,
 func (ec *Client) StoreRaw(ctx context.Context, endpoint string, data []byte, privateFrom string) (string, error) {
 	request := map[string]string{
 		"payload": base64.StdEncoding.EncodeToString(data),
-		"from":    privateFrom,
+	}
+	if privateFrom != "" {
+		request["from"] = privateFrom
 	}
 
 	storeRawResponse := &StoreRawResponse{}

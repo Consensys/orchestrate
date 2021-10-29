@@ -28,8 +28,10 @@ type DeployContractParams struct {
 	GasPricePolicy  GasPriceParams                `json:"gasPricePolicy,omitempty"`
 	Protocol        entities.PrivateTxManagerType `json:"protocol,omitempty" validate:"omitempty,isPrivateTxManagerType" example:"Tessera"`
 	PrivateFrom     string                        `json:"privateFrom,omitempty" validate:"omitempty,base64" example:"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="`
-	PrivateFor      []string                      `json:"privateFor,omitempty" validate:"omitempty,min=1,unique,dive,base64" example:"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=,B1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="`
+	PrivateFor      []string                      `json:"privateFor,omitempty" validate:"omitempty,min=1,unique,dive,base64" example:"[A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=,B1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=]"`
+	MandatoryFor    []string                      `json:"mandatoryFor,omitempty" validate:"omitempty,min=1,unique,dive,base64" example:"[A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=,B1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=]"`
 	PrivacyGroupID  string                        `json:"privacyGroupId,omitempty" validate:"omitempty,base64" example:"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="`
+	PrivacyFlag     int                           `json:"privacyFlag,omitempty" validate:"omitempty,isPrivacyFlag" example:"0 (PP)"`
 }
 
 func (params *DeployContractParams) Validate() error {
@@ -37,8 +39,8 @@ func (params *DeployContractParams) Validate() error {
 		return err
 	}
 
-	if params.PrivateFrom != "" {
-		return validatePrivateTxParams(params.Protocol, params.PrivacyGroupID, params.PrivateFor)
+	if params.Protocol != "" {
+		return validatePrivateTxParams(params.Protocol, params.PrivateFrom, params.PrivacyGroupID, params.PrivateFor)
 	}
 
 	if err := validateTxFromParams(params.From, params.OneTimeKey); err != nil {

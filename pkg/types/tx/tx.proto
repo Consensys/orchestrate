@@ -81,46 +81,56 @@ message Params {
     // e.g 0xaf23b
     string gas_price = 5;
 
+    string gas_fee_cap = 6;
+
+    string gas_tip_cap = 7;
+
     // Integer of the value sent with this transaction.
     // e.g 0xaf23
-    string value = 6;
+    string value = 8;
 
     // Integer of a nonce.
-    string nonce = 7;
+    string nonce = 9;
 
     // Hash of the method signature (4 bytes) followed by encoded parameters.
     // e.g 0xa9059cbb000000000000000000000000ff778b716fc07d98839f48ddb88d8be583beb684000000000000000000000000000000000000000000000000002386f26fc10000
-    string data = 8;
+    string data = 10;
 
+    string transaction_type = 11;
+
+    repeated ethereum.AccessTuple access_list = 12;
+
+    // The signed, RLP encoded transaction
+    string raw = 13;
+
+    //***********
+    // ADDITIONAL CONTRACT FIELD DATA
+    //***********
     // Contract identifier
     // e.g. "ERC20[v1.0.0]"
-    string contract = 9;
+    string contract = 14;
 
     // Signature of the method to call on contract
     // e.g "transfer(address,uint256)"
-    string method_signature = 10;
+    string method_signature = 15;
 
     // Arguments to feed on transaction call
-    repeated string args = 11;
+    repeated string args = 16;
 
-    // The signed, RLP encoded transaction
-    string raw = 12;
+    //***********
+    // PRIVATE ONLY FIELDS
+    //***********
+    repeated string private_for = 17;
 
-    repeated string private_for = 13;
+    string private_from = 18;
 
-    string private_from = 14;
+    string private_tx_type = 19;
 
-    string private_tx_type = 15;
+    string privacy_group_id = 20;
 
-    string privacy_group_id = 16;
-    
-    string gas_fee_cap = 17;
+    repeated string mandatory_for = 21;
 
-    string gas_tip_cap = 18;
-
-    repeated ethereum.AccessTuple access_list = 19;
-    
-    string transaction_type = 20;
+    int32 privacy_flag = 22;
 }
 
 message TxResponse {
@@ -130,7 +140,7 @@ message TxResponse {
     // ID of the Response in UUID RFC 4122, ISO/IEC 9834-8:2005 format
     // e.g a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11
     string id = 2;
-    
+
     // ID of the Job created as part of transaction request
     // e.g 15276759-bbc6-4ead-ad51-ddfecf79cf09
     string jobUUID = 8;

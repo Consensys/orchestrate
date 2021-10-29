@@ -32,6 +32,8 @@ func FormatSendTxRequest(sendTxRequest *types.SendTransactionRequest, idempotenc
 			Protocol:        sendTxRequest.Params.Protocol,
 			PrivateFrom:     sendTxRequest.Params.PrivateFrom,
 			PrivateFor:      sendTxRequest.Params.PrivateFor,
+			MandatoryFor:    sendTxRequest.Params.MandatoryFor,
+			PrivacyFlag:     entities.PrivacyFlag(sendTxRequest.Params.PrivacyFlag),
 			PrivacyGroupID:  sendTxRequest.Params.PrivacyGroupID,
 		},
 		InternalData: buildInternalData(
@@ -66,6 +68,8 @@ func FormatDeployContractRequest(deployRequest *types.DeployContractRequest, ide
 			Protocol:        deployRequest.Params.Protocol,
 			PrivateFrom:     deployRequest.Params.PrivateFrom,
 			PrivateFor:      deployRequest.Params.PrivateFor,
+			MandatoryFor:    deployRequest.Params.MandatoryFor,
+			PrivacyFlag:     entities.PrivacyFlag(deployRequest.Params.PrivacyFlag),
 			PrivacyGroupID:  deployRequest.Params.PrivacyGroupID,
 		},
 		InternalData: buildInternalData(

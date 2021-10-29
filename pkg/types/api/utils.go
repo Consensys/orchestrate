@@ -5,9 +5,13 @@ import (
 	"github.com/consensys/orchestrate/pkg/types/entities"
 )
 
-func validatePrivateTxParams(protocol entities.PrivateTxManagerType, privacyGroupID string, privateFor []string) error {
+func validatePrivateTxParams(protocol entities.PrivateTxManagerType, privateFrom, privacyGroupID string, privateFor []string) error {
 	if protocol == "" {
 		return errors.InvalidParameterError("field 'protocol' cannot be empty")
+	}
+
+	if protocol != entities.TesseraChainType && privateFrom == "" {
+		return errors.InvalidParameterError("fields 'privateFrom' cannot be empty")
 	}
 
 	if privacyGroupID == "" && len(privateFor) == 0 {

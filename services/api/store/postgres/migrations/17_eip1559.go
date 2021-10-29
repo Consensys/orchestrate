@@ -17,7 +17,7 @@ ALTER TABLE transactions
 	if err != nil {
 		return err
 	}
-	log.Info("Apply adding chain labels")
+	log.Info("Applied eip-1559 support")
 
 	return nil
 }

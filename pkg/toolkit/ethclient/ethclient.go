@@ -38,7 +38,7 @@ type QuorumTransactionSender interface {
 	// SendQuorumRawPrivateTransaction sends a raw signed transaction to a Quorum node
 	// signedTxHash - is a hash returned by Quorum and then signed by a client
 	// privateFor - is a list of public keys of Quorum nodes that can receive a private transaction
-	SendQuorumRawPrivateTransaction(ctx context.Context, url string, signedTxHash string, privateFor []string) (ethcommon.Hash, error)
+	SendQuorumRawPrivateTransaction(ctx context.Context, url string, signedTxHash string, privateFor []string, mandatoryFor []string, privacyFlag int) (ethcommon.Hash, error)
 
 	// StoreRaw stores "data" field of a transaction in Tessera privacy enclave
 	// It returns a hash of a stored transaction that should be used instead of transaction data

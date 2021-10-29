@@ -102,7 +102,8 @@ func (uc *sendTesseraMarkingTxUseCase) Execute(ctx context.Context, job *entitie
 
 func (uc *sendTesseraMarkingTxUseCase) sendTx(ctx context.Context, job *entities.Job) (string, error) {
 	proxyURL := utils.GetProxyURL(uc.chainRegistryURL, job.ChainUUID)
-	txHash, err := uc.ec.SendQuorumRawPrivateTransaction(ctx, proxyURL, job.Transaction.Raw, job.Transaction.PrivateFor)
+	txHash, err := uc.ec.SendQuorumRawPrivateTransaction(ctx, proxyURL, job.Transaction.Raw, job.Transaction.PrivateFor,
+		job.Transaction.MandatoryFor, int(job.Transaction.PrivacyFlag))
 	if err != nil {
 		uc.logger.WithContext(ctx).WithError(err).Error("cannot send tessera marking transaction")
 		return "", err

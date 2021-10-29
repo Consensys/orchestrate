@@ -15,6 +15,7 @@
     },
     "txnSizeLimit": 64,
     "maxCodeSize": 0,
+    "privacyEnhancementsBlock": 0,
     "isQuorum": true
   },
   "nonce": "0x0",

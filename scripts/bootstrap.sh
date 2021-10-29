@@ -3,7 +3,7 @@
 # Exit on error
 set -Eeu
 
-CONTAINERS=(geth_geth_1 quorum_quorum1_1)
+CONTAINERS=(geth_geth_1 go-quorum_quorum1_1)
 
 RETRY=20
 

@@ -19,7 +19,7 @@ endif
 
 networks:
 	@docker network create --driver=bridge --subnet=172.16.239.0/24 orchestrate_besu || true
-	@docker network create --driver=bridge --subnet=172.16.238.0/24 orchestrate_quorum || true
+	@docker network create --driver=bridge --subnet=172.16.238.0/24 orchestrate_go_quorum || true
 	@docker network create orchestrate_geth || true
 
 # Linters
@@ -180,14 +180,14 @@ stop-geth:
 down-geth:
 	@docker-compose -f scripts/geth/docker-compose.yml down  --volumes --timeout 0
 
-quorum:
-	@docker-compose -f scripts/quorum/docker-compose.yml up -d
+go-quorum:
+	@docker-compose -f scripts/go-quorum/docker-compose.yml up -d
 
-stop-quorum:
-	@docker-compose -f scripts/quorum/docker-compose.yml stop
+stop-go-quorum:
+	@docker-compose -f scripts/go-quorum/docker-compose.yml stop
 
-down-quorum:
-	@docker-compose -f scripts/quorum/docker-compose.yml down --volumes --timeout 0
+down-go-quorum:
+	@docker-compose -f scripts/go-quorum/docker-compose.yml down --volumes --timeout 0
 
 besu:
 	@docker-compose -f scripts/besu/docker-compose.yml up -d
@@ -204,7 +204,7 @@ postgres:
 down-postgres:
 	@docker-compose -f scripts/deps/docker-compose.yml rm --force -s -v postgres-unit
 
-up: networks deps-persistent quorum besu geth deps-kafka quorum-key-manager bootstrap-deps orchestrate ## Start Orchestrate and deps
+up: networks deps-persistent go-quorum besu geth deps-kafka quorum-key-manager bootstrap-deps orchestrate ## Start Orchestrate and deps
 
 dev: deps orchestrate ## Start Orchestrate and light deps
 
@@ -212,15 +212,15 @@ geth-dev: deps geth orchestrate ## Start Orchestrate and light deps
 
 besu-dev: deps besu orchestrate ## Start Orchestrate and light besu deps
 
-quorum-dev: deps quorum orchestrate ## Start Orchestrate and light quorum deps
+go-quorum-dev: deps go-quorum orchestrate ## Start Orchestrate and light go-quorum deps
 
 remote-dev: deps-persistent orchestrate
 
-down: down-orchestrate down-quorum down-geth down-besu down-deps  ## Down Orchestrate and deps
+down: down-orchestrate down-go-quorum down-geth down-besu down-deps  ## Down Orchestrate and deps
 
-up-ci: deps-persistent quorum geth besu deps-kafka bootstrap-deps topics ci-orchestrate ## Start Orchestrate and deps
+up-ci: deps-persistent go-quorum geth besu deps-kafka bootstrap-deps topics ci-orchestrate ## Start Orchestrate and deps
 
-up-azure: deps-persistent quorum geth besu bootstrap orchestrate ## Start Blockchain and Orchestrate to be connect to Azure Event Hub
+up-azure: deps-persistent go-quorum geth besu bootstrap orchestrate ## Start Blockchain and Orchestrate to be connect to Azure Event Hub
 
 hashicorp-accounts:
 	@bash scripts/deps/hashicorp/vault.sh kv list secret/default

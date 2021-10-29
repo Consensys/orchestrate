@@ -56,6 +56,19 @@ func isTransactionType(fl validator.FieldLevel) bool {
 	return true
 }
 
+func isPrivacyFlag(fl validator.FieldLevel) bool {
+	if fl.Field().String() != "" {
+		switch entities.PrivacyFlag(fl.Field().Int()) {
+		case entities.PrivacyFlagSP, entities.PrivacyFlagPP, entities.PrivacyFlagMPP, entities.PrivacyFlagPSV:
+			return true
+		default:
+			return false
+		}
+	}
+
+	return true
+}
+
 func isHash(fl validator.FieldLevel) bool {
 	if fl.Field().String() != "" {
 		return IsHash(fl.Field().String())
@@ -231,6 +244,7 @@ func init() {
 	_ = validate.RegisterValidation("isGasIncrementLevel", isGasIncrementLevel)
 	_ = validate.RegisterValidation("isKeyType", isKeyType)
 	_ = validate.RegisterValidation("isTransactionType", isTransactionType)
+	_ = validate.RegisterValidation("isPrivacyFlag", isPrivacyFlag)
 }
 
 func GetValidator() *validator.Validate {

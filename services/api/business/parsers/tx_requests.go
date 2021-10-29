@@ -32,8 +32,13 @@ func NewJobEntitiesFromTxRequest(txRequest *entities.TxRequest, chainUUID, txDat
 	case txRequest.Params.Protocol == entities.TesseraChainType:
 		privTxJob := newJobEntityFromTxRequest(txRequest, newEthTransactionFromParams(txRequest.Params, txData, entities.LegacyTxType),
 			entities.TesseraPrivateTransaction, chainUUID)
-		markingTxJob := newJobEntityFromTxRequest(txRequest, &entities.ETHTransaction{From: txRequest.Params.From,
-			PrivateFor: txRequest.Params.PrivateFor}, entities.TesseraMarkingTransaction, chainUUID)
+		markingTx := &entities.ETHTransaction{
+			From:         txRequest.Params.From,
+			PrivateFor:   txRequest.Params.PrivateFor,
+			MandatoryFor: txRequest.Params.MandatoryFor,
+			PrivacyFlag:  txRequest.Params.PrivacyFlag,
+		}
+		markingTxJob := newJobEntityFromTxRequest(txRequest, markingTx, entities.TesseraMarkingTransaction, chainUUID)
 		jobs = append(jobs, privTxJob, markingTxJob)
 	case txRequest.Params.Raw != "":
 		rawTx, err := newTransactionFromRaw(txRequest.Params.Raw)
@@ -65,6 +70,8 @@ func newEthTransactionFromParams(params *entities.ETHTransactionParams, txData s
 		Data:            txData,
 		PrivateFrom:     params.PrivateFrom,
 		PrivateFor:      params.PrivateFor,
+		MandatoryFor:    params.MandatoryFor,
+		PrivacyFlag:     params.PrivacyFlag,
 		PrivacyGroupID:  params.PrivacyGroupID,
 	}
 }

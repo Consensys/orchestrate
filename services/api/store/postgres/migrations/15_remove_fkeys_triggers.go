@@ -30,7 +30,7 @@ DROP FUNCTION updated;
 	if err != nil {
 		return err
 	}
-	log.Info("Applying removing fkeys and triggers successfully")
+	log.Info("Applied removing fkeys and triggers successfully")
 
 	return nil
 }

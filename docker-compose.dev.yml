@@ -58,7 +58,7 @@ x-container-common: &container-common
   tty: true
   networks:
     - orchestrate
-    - quorum
+    - go_quorum
     - besu
     - geth
   volumes:
@@ -162,9 +162,9 @@ networks:
   orchestrate:
     external:
       name: orchestrate
-  quorum:
+  go_quorum:
     external:
-      name: orchestrate_quorum
+      name: orchestrate_go_quorum
   besu:
     external:
       name: orchestrate_besu

@@ -128,6 +128,10 @@ x-tessera-def:
                 }
               ]
             },
+            "features": {
+              "enableRemoteKeyValidation": false,
+              "enablePrivacyEnhancements": true
+            },
             "alwaysSendTo": []
           }
       EOF
@@ -146,10 +150,10 @@ services:
       - TESSERA_CLIENT=172.16.238.21:9000
       - QUORUM_CONSENSUS=${QUORUM_CONS_ALGO:-istanbul}
     volumes:
-      - ./config/quorum/passwords.txt:/config/passwords.txt
-      - ./config/quorum/${QUORUM_CONS_ALGO:-istanbul}Genesis.json:/config/genesis.json
-      - ./config/quorum/support:/quorum
-      - ./config/quorum/networkFiles/validator1:/config/keys
+      - ./config/passwords.txt:/config/passwords.txt
+      - ./config/${QUORUM_CONS_ALGO:-istanbul}Genesis.json:/config/genesis.json
+      - ./config/support:/quorum
+      - ./config/networkFiles/validator1:/config/keys
       - vol1:/data
     depends_on:
       - tessera1
@@ -165,7 +169,7 @@ services:
       - PRIVATE_CONFIG=${PRIVATE_CONFIG:-/data/tm/tm.ipc}
       - TESSERA_CONFIG_TYPE="-09"
     volumes:
-      - ./config/quorum/networkFiles/tessera1:/config/keys
+      - ./config/networkFiles/tessera1:/config/keys
       - vol1:/data
     networks:
       quorum:
@@ -182,10 +186,10 @@ services:
       - QUORUM_CONSENSUS=${QUORUM_CONS_ALGO:-istanbul}
       - TESSERA_CLIENT=172.16.238.22:9000
     volumes:
-      - ./config/quorum/passwords.txt:/config/passwords.txt
-      - ./config/quorum/${QUORUM_CONS_ALGO:-istanbul}Genesis.json:/config/genesis.json
-      - ./config/quorum/support:/quorum
-      - ./config/quorum/networkFiles/validator2:/config/keys
+      - ./config/passwords.txt:/config/passwords.txt
+      - ./config/${QUORUM_CONS_ALGO:-istanbul}Genesis.json:/config/genesis.json
+      - ./config/support:/quorum
+      - ./config/networkFiles/validator2:/config/keys
       - vol2:/data
     depends_on:
       - tessera2
@@ -201,7 +205,7 @@ services:
       - PRIVATE_CONFIG=${PRIVATE_CONFIG:-/data/tm/tm.ipc}
       - TESSERA_CONFIG_TYPE="-09"
     volumes:
-      - ./config/quorum/networkFiles/tessera2:/config/keys
+      - ./config/networkFiles/tessera2:/config/keys
       - vol2:/data
     networks:
       quorum:
@@ -218,10 +222,10 @@ services:
       - QUORUM_CONSENSUS=${QUORUM_CONS_ALGO:-istanbul}
       - TESSERA_CLIENT=172.16.238.23:9000
     volumes:
-      - ./config/quorum/passwords.txt:/config/passwords.txt
-      - ./config/quorum/${QUORUM_CONS_ALGO:-istanbul}Genesis.json:/config/genesis.json
-      - ./config/quorum/support:/quorum
-      - ./config/quorum/networkFiles/validator3:/config/keys
+      - ./config/passwords.txt:/config/passwords.txt
+      - ./config/${QUORUM_CONS_ALGO:-istanbul}Genesis.json:/config/genesis.json
+      - ./config/support:/quorum
+      - ./config/networkFiles/validator3:/config/keys
       - vol3:/data
     depends_on:
       - tessera3
@@ -238,7 +242,7 @@ services:
       - TESSERA_CONFIG_TYPE="-09"
       - NODE_ID=8
     volumes:
-      - ./config/quorum/networkFiles/tessera3:/config/keys
+      - ./config/networkFiles/tessera3:/config/keys
       - vol3:/data
     networks:
       quorum:
@@ -254,10 +258,10 @@ services:
       - PRIVATE_CONFIG=ignore
       - QUORUM_CONSENSUS=${QUORUM_CONS_ALGO:-istanbul}
     volumes:
-      - ./config/quorum/passwords.txt:/config/passwords.txt
-      - ./config/quorum/${QUORUM_CONS_ALGO:-istanbul}Genesis.json:/config/genesis.json
-      - ./config/quorum/support:/quorum
-      - ./config/quorum/networkFiles/validator4:/config/keys
+      - ./config/passwords.txt:/config/passwords.txt
+      - ./config/${QUORUM_CONS_ALGO:-istanbul}Genesis.json:/config/genesis.json
+      - ./config/support:/quorum
+      - ./config/networkFiles/validator4:/config/keys
     networks:
       quorum:
         ipv4_address: 172.16.238.14
@@ -265,7 +269,7 @@ services:
 networks:
   quorum:
     driver: bridge
-    name: orchestrate_quorum
+    name: orchestrate_go_quorum
     ipam:
       config:
         - subnet: 172.16.238.0/24

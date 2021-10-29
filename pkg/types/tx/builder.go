@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/types/entities"
 	error1 "github.com/consensys/orchestrate/pkg/types/error"
 	"github.com/consensys/orchestrate/pkg/types/ethereum"
 	"github.com/consensys/orchestrate/pkg/utils"
@@ -867,10 +868,12 @@ func (e *Envelope) ShortContract() string {
 }
 
 type Private struct {
-	PrivateFor     []string `validate:"dive,base64"`
-	PrivateFrom    string   `validate:"omitempty,base64"`
-	PrivateTxType  string   `validate:"omitempty,oneof=restricted unrestricted"`
-	PrivacyGroupID string   `validate:"omitempty,base64"`
+	PrivateFor     []string             `validate:"dive,base64"`
+	MandatoryFor   []string             `validate:"dive,base64"`
+	PrivateFrom    string               `validate:"omitempty,base64"`
+	PrivateTxType  string               `validate:"omitempty,oneof=restricted unrestricted"`
+	PrivacyGroupID string               `validate:"omitempty,base64"`
+	PrivacyFlag    entities.PrivacyFlag `validate:"omitempty,isPrivacyFlag"`
 }
 
 func (e *Envelope) GetPrivateFor() []string {
@@ -878,6 +881,24 @@ func (e *Envelope) GetPrivateFor() []string {
 }
 func (e *Envelope) SetPrivateFor(privateFor []string) *Envelope {
 	e.PrivateFor = privateFor
+	return e
+}
+
+func (e *Envelope) GetMandatoryFor() []string {
+	return e.MandatoryFor
+}
+
+func (e *Envelope) SetMandatoryFor(mandatoryFor []string) *Envelope {
+	e.MandatoryFor = mandatoryFor
+	return e
+}
+
+func (e *Envelope) GetPrivacyFlag() entities.PrivacyFlag {
+	return e.PrivacyFlag
+}
+
+func (e *Envelope) SetPrivacyFlag(privacyFlag int32) *Envelope {
+	e.PrivacyFlag = entities.PrivacyFlag(privacyFlag)
 	return e
 }
 

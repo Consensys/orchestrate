@@ -24,7 +24,9 @@ type Transaction struct {
 	AccessList     interface{} `pg:",json"`
 	PrivateFrom    string
 	PrivateFor     []string `pg:",array"`
+	MandatoryFor   []string `pg:",array"`
 	PrivacyGroupID string
+	PrivacyFlag    int
 	EnclaveKey     string    `pg:"alias:enclave_key"`
 	CreatedAt      time.Time `pg:"default:now()"`
 	UpdatedAt      time.Time `pg:"default:now()"`

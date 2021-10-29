@@ -10,10 +10,10 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/cenkalti/backoff/v4"
 	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/pkg/toolkit/ethclient/testutils"
 	pkgUtils "github.com/consensys/orchestrate/pkg/utils"
-	"github.com/cenkalti/backoff/v4"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -108,6 +108,6 @@ func TestSendQuorumRawPrivateTransaction(t *testing.T) {
 
 	// Test 1 with Error
 	ctx := testutils.NewContext(fmt.Errorf("test-error"), 0, nil)
-	_, err := ec.SendQuorumRawPrivateTransaction(ctx, "test-endpoint", "", nil)
+	_, err := ec.SendQuorumRawPrivateTransaction(ctx, "test-endpoint", "", nil, nil, 0)
 	assert.Error(t, err, "#1 SendQuorumRawPrivateTransaction should  error")
 }

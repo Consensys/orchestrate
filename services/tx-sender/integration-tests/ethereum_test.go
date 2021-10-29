@@ -677,7 +677,8 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Tessera_Marking() {
 		gock.New(apiURL).
 			Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
 			AddMatcher(ethCallMatcher(wg, "eth_sendRawPrivateTransaction", signedTxRaw, map[string]interface{}{
-				"privateFor": envelope.PrivateFor,
+				"privateFor":  envelope.PrivateFor,
+				"privacyFlag": entities.PrivacyFlagSP,
 			})).
 			Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"" + txHash + "\"}")
 
@@ -732,6 +733,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Tessera_Marking() {
 			Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
 			AddMatcher(ethCallMatcher(wg, "eth_sendRawPrivateTransaction", signedTxRaw, map[string]interface{}{
 				"privateFor": envelope.PrivateFor,
+				"privacyFlag": entities.PrivacyFlagSP,
 			})).
 			Reply(429).BodyString("")
 
@@ -744,6 +746,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Tessera_Marking() {
 			Post(fmt.Sprintf("/proxy/chains/%s", envelope.GetChainUUID())).
 			AddMatcher(ethCallMatcher(wg, "eth_sendRawPrivateTransaction", signedTxRaw, map[string]interface{}{
 				"privateFor": envelope.PrivateFor,
+				"privacyFlag": entities.PrivacyFlagSP,
 			})).
 			Reply(200).BodyString("{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"" + txHash + "\"}")
 

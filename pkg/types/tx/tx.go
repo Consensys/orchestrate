@@ -57,7 +57,9 @@ func (m *TxRequest) Envelope() (*Envelope, error) {
 			SetMethodSignature(m.GetParams().GetMethodSignature()).
 			SetArgs(m.GetParams().GetArgs()).
 			SetPrivateFor(m.GetParams().GetPrivateFor()).
+			SetMandatoryFor(m.GetParams().GetMandatoryFor()).
 			SetPrivateFrom(m.GetParams().GetPrivateFrom()).
+			SetPrivacyFlag(m.GetParams().GetPrivacyFlag()).
 			SetPrivateTxType(m.GetParams().GetPrivateTxType()).
 			SetPrivacyGroupID(m.GetParams().GetPrivacyGroupId()).
 			SetAccessList(m.GetParams().GetAccessList()).

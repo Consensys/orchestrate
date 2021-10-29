@@ -5,6 +5,8 @@
 * Support Token Issuer Servers to validate JWTs. Environment variable `AUTH_JWT_ISSUER_URL`
 * Added environment variable to read JWT cert from filesystem, `AUTH_JWT_CERT`
 * Support for new transaction pricing mechanism (eip-1559)
+* Support for go-quorum privacy privacy enhancements: `privacyFlags`, `mandatoryFor` 
+* Support for go-quorum private transaction with optional `privateFrom`. 
 
 ### ⚠ BREAKING CHANGES
 * Integration of Quorum Key Manager as replacement of Orchestrate Key Manager service
@@ -16,7 +18,8 @@
 * Incorrect server name verification using Postgres in `verify-ca` mode 
 * Tx-sender exits sending Tessera private transaction with invalid 'from'
 
-## v21.1.10 (WIP)
+
+## v21.1.10 (2021-10-28)
 
 ### 🛠 Bug fixes
 * Transaction `priority` is applied as expected

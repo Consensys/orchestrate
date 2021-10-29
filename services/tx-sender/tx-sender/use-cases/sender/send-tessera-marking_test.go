@@ -47,7 +47,7 @@ func TestSendTesseraMarking_Execute(t *testing.T) {
 		job.Transaction.Hash = txHash
 
 		proxyURL := utils.GetProxyURL(chainRegistryURL, job.ChainUUID)
-		ec.EXPECT().SendQuorumRawPrivateTransaction(gomock.Any(), proxyURL, job.Transaction.Raw, job.Transaction.PrivateFor).
+		ec.EXPECT().SendQuorumRawPrivateTransaction(gomock.Any(), proxyURL, job.Transaction.Raw, job.Transaction.PrivateFor, nil, 0).
 			Return(ethcommon.HexToHash(txHash), nil)
 		nonceChecker.EXPECT().IncrementNonce(gomock.Any(), job).Return(nil)
 		jobClient.EXPECT().UpdateJob(gomock.Any(), job.UUID, &api.UpdateJobRequest{
@@ -72,7 +72,7 @@ func TestSendTesseraMarking_Execute(t *testing.T) {
 		job.Transaction.Hash = txHash
 
 		proxyURL := utils.GetProxyURL(chainRegistryURL, job.ChainUUID)
-		ec.EXPECT().SendQuorumRawPrivateTransaction(gomock.Any(), proxyURL, job.Transaction.Raw, job.Transaction.PrivateFor).
+		ec.EXPECT().SendQuorumRawPrivateTransaction(gomock.Any(), proxyURL, job.Transaction.Raw, job.Transaction.PrivateFor, nil, 0).
 			Return(ethcommon.HexToHash(txHash), nil)
 		nonceChecker.EXPECT().IncrementNonce(gomock.Any(), job).Return(nil)
 		jobClient.EXPECT().UpdateJob(gomock.Any(), job.UUID, &api.UpdateJobRequest{
@@ -97,7 +97,7 @@ func TestSendTesseraMarking_Execute(t *testing.T) {
 		job.Transaction.Hash = txHash
 
 		proxyURL := utils.GetProxyURL(chainRegistryURL, job.ChainUUID)
-		ec.EXPECT().SendQuorumRawPrivateTransaction(gomock.Any(), proxyURL, job.Transaction.Raw, job.Transaction.PrivateFor).
+		ec.EXPECT().SendQuorumRawPrivateTransaction(gomock.Any(), proxyURL, job.Transaction.Raw, job.Transaction.PrivateFor, nil, 0).
 			Return(ethcommon.HexToHash(txHash2), nil)
 		nonceChecker.EXPECT().IncrementNonce(gomock.Any(), job).Return(nil)
 		jobClient.EXPECT().UpdateJob(gomock.Any(), job.UUID, &api.UpdateJobRequest{
@@ -172,7 +172,7 @@ func TestSendTesseraMarking_Execute(t *testing.T) {
 			Status:      entities.StatusPending,
 			Transaction: job.Transaction,
 		})
-		ec.EXPECT().SendQuorumRawPrivateTransaction(gomock.Any(), proxyURL, job.Transaction.Raw, job.Transaction.PrivateFor).
+		ec.EXPECT().SendQuorumRawPrivateTransaction(gomock.Any(), proxyURL, job.Transaction.Raw, job.Transaction.PrivateFor, nil, 0).
 			Return(ethcommon.HexToHash(txHash), expectedErr)
 		nonceChecker.EXPECT().CleanNonce(gomock.Any(), job, expectedErr).Return(nil)
 
