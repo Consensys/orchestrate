@@ -41,7 +41,7 @@ func NewEnvelopeFromJob(job *entities.Job, headers map[string]string) *tx.TxEnve
 				PrivacyGroupId:  job.Transaction.PrivacyGroupID,
 				PrivacyFlag:     int32(job.Transaction.PrivacyFlag),
 				TransactionType: string(job.Transaction.TransactionType),
-				AccessList:      convertFromAccessList(job.Transaction.AccessList),
+				AccessList:      ConvertFromAccessList(job.Transaction.AccessList),
 			},
 			ContextLabels: contextLabels,
 			JobType:       tx.JobTypeMap[job.Type],
@@ -100,7 +100,7 @@ func NewJobFromEnvelope(envelope *tx.Envelope, tenantID string) *entities.Job {
 			Gas:             envelope.GetGasString(),
 			GasFeeCap:       envelope.GetGasFeeCapString(),
 			GasTipCap:       envelope.GetGasTipCapString(),
-			AccessList:      convertToAccessList(envelope.GetAccessList()),
+			AccessList:      ConvertToAccessList(envelope.GetAccessList()),
 			TransactionType: entities.TransactionType(envelope.GetTransactionType()),
 			Data:            envelope.GetData(),
 			Raw:             envelope.GetRaw(),
@@ -114,7 +114,7 @@ func NewJobFromEnvelope(envelope *tx.Envelope, tenantID string) *entities.Job {
 	}
 }
 
-func convertFromAccessList(accessList types.AccessList) []*ethereum.AccessTuple {
+func ConvertFromAccessList(accessList types.AccessList) []*ethereum.AccessTuple {
 	result := []*ethereum.AccessTuple{}
 	for _, t := range accessList {
 		tupl := &ethereum.AccessTuple{
@@ -132,7 +132,7 @@ func convertFromAccessList(accessList types.AccessList) []*ethereum.AccessTuple 
 	return result
 }
 
-func convertToAccessList(accessList []*ethereum.AccessTuple) types.AccessList {
+func ConvertToAccessList(accessList []*ethereum.AccessTuple) types.AccessList {
 	result := types.AccessList{}
 	for _, item := range accessList {
 		storageKeys := []ethcommon.Hash{}

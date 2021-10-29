@@ -11,6 +11,7 @@ import (
 	"github.com/consensys/orchestrate/pkg/types/api"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/pkg/utils"
+	"github.com/consensys/orchestrate/pkg/utils/envelope"
 	"github.com/consensys/quorum/common/hexutil"
 
 	"github.com/Shopify/sarama"
@@ -73,17 +74,19 @@ func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *etht
 			JobUUID:       job.UUID,
 			ContextLabels: job.Labels,
 			Transaction: &types.Transaction{
-				From:      job.Transaction.From,
-				Nonce:     job.Transaction.Nonce,
-				To:        job.Transaction.To,
-				Value:     job.Transaction.Value,
-				Gas:       job.Transaction.Gas,
-				GasPrice:  job.Transaction.GasPrice,
-				GasFeeCap: job.Transaction.GasFeeCap,
-				GasTipCap: job.Transaction.GasTipCap,
-				Data:      job.Transaction.Data,
-				Raw:       job.Transaction.Raw,
-				TxHash:    job.Transaction.Hash,
+				From:       job.Transaction.From,
+				Nonce:      job.Transaction.Nonce,
+				To:         job.Transaction.To,
+				Value:      job.Transaction.Value,
+				Gas:        job.Transaction.Gas,
+				GasPrice:   job.Transaction.GasPrice,
+				GasFeeCap:  job.Transaction.GasFeeCap,
+				GasTipCap:  job.Transaction.GasTipCap,
+				Data:       job.Transaction.Data,
+				Raw:        job.Transaction.Raw,
+				TxHash:     job.Transaction.Hash,
+				AccessList: envelope.ConvertFromAccessList(job.Transaction.AccessList),
+				TxType:     string(job.Transaction.TransactionType),
 			},
 			Receipt: job.Receipt,
 			Chain:   c.Name,
