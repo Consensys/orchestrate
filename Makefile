@@ -122,7 +122,7 @@ topics: ## Create kafka topics
 	@bash scripts/deps/kafka/initTopics.sh
 
 gobuild: ## Build Orchestrate Go binary
-	@GOOS=linux GOARCH=amd64 go build -o ./build/bin/orchestrate
+	@CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ./build/bin/orchestrate
 
 docker-build: ## Build Orchestrate Docker image
 	@DOCKER_BUILDKIT=1 docker build -t orchestrate .
@@ -134,7 +134,7 @@ bootstrap-deps: bootstrap ## Wait for dependencies to be ready
 	@bash scripts/bootstrap-deps.sh
 
 gobuild-e2e: ## Build Orchestrate e2e Docker image
-	@GOOS=linux GOARCH=amd64 go build -o ./build/bin/test ./tests/cmd
+	@CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ./build/bin/test ./tests/cmd
 
 orchestrate: gobuild ## Start Orchestrate
 	@docker-compose -f docker-compose.dev.yml up --force-recreate --build -d $(ORCH_SERVICES)

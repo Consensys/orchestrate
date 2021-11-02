@@ -195,7 +195,7 @@ jobs:
   integration:
     machine:
       image: ubuntu-2004:202010-01
-    resource_class: 2xlarge
+    resource_class: xlarge
     steps:
       - run:
           name: Uninstall Go

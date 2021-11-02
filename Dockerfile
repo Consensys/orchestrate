@@ -3,7 +3,7 @@ ARG VERSION=nonroot
 ############################
 # STEP 1 build executable Orchestrate binary
 ############################
-FROM golang:1.16-buster AS builder
+FROM golang:1.16.9 AS builder
 
 RUN apt-get update && \
 	apt-get install --no-install-recommends -y \
@@ -20,7 +20,7 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o /bin/main -a -tags netgo -ldflags '-w -s -extldflags "-static"' .
+RUN GOOS=linux GOARCH=amd64 go build -o /bin/main -a -tags netgo -ldflags '-w -s -extldflags "-static"' .
 RUN upx /bin/main
 
 ############################
