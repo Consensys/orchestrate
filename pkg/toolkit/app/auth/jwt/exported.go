@@ -4,6 +4,8 @@ import (
 	"context"
 	"sync"
 
+	"github.com/consensys/orchestrate/pkg/toolkit/app/auth/jwt/jose"
+
 	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -23,23 +25,17 @@ func Init(ctx context.Context) {
 		}
 
 		logger := log.WithContext(ctx)
-		if checker != nil {
-			return
+		cfg := jose.NewConfig(vipr)
+		if cfg == nil {
+			logger.Fatalf("jwt: no identity provider issuer url provided")
 		}
 
-		conf, err := NewConfig(vipr)
+		validator, err := jose.NewValidator(cfg)
 		if err != nil {
-			logger.WithError(err).Fatalf("jwt: failed to init")
+			logger.WithError(err).Fatalf("jwt: could not create jwt validator")
 		}
 
-		if len(conf.Certificates) == 0 {
-			logger.Fatalf("jwt: no certificate provided")
-		}
-
-		checker, err = New(conf)
-		if err != nil {
-			logger.WithError(err).Fatalf("jwt: could not create checker")
-		}
+		checker = New(validator)
 	})
 }
 
@@ -48,7 +44,7 @@ func GlobalChecker() *JWT {
 	return checker
 }
 
-// SetGlobalAuth sets global Authentication Manager
+// SetGlobalChecker sets global Authentication Manager
 func SetGlobalChecker(c *JWT) {
 	checker = c
 }

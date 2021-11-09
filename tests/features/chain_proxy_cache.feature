@@ -10,8 +10,9 @@ Feature: Chain-Proxy Cache
 
   Scenario: Chain registry should cache "eth_getBlockByNumber" request for same chainUUID
     Given I set the headers
-      | Key           | Value                    |
-      | Authorization | {{tenant1.token}} |
+      | Key         | Value                |
+      | X-API-KEY   | {{global.api-key}}   |
+      | X-TENANT-ID | {{tenant1.tenantID}} |
     When I send "POST" request to "{{global.api}}/proxy/chains/{{chain.besu1.UUID}}" with json:
       """
       {
@@ -29,8 +30,9 @@ Feature: Chain-Proxy Cache
       | X-Cache-Control | Content-Type     |
       | -               | application/json |
     Given I set the headers
-      | Key           | Value                    |
-      | Authorization | {{tenant1.token}} |
+      | Key         | Value                |
+      | X-API-KEY   | {{global.api-key}}   |
+      | X-TENANT-ID | {{tenant1.tenantID}} |
     When I send "POST" request to "{{global.api}}/proxy/chains/{{chain.besu1.UUID}}" with json:
       """
       {
@@ -67,8 +69,9 @@ Feature: Chain-Proxy Cache
 
   Scenario: Chain registry should ignore cache when user indicate it
     Given I set the headers
-      | Key           | Value                    |
-      | Authorization | {{tenant1.token}} |
+      | Key         | Value                |
+      | X-API-KEY   | {{global.api-key}}   |
+      | X-TENANT-ID | {{tenant1.tenantID}} |
     When I send "POST" request to "{{global.api}}/proxy/chains/{{chain.besu1.UUID}}" with json:
       """
       {
@@ -86,9 +89,10 @@ Feature: Chain-Proxy Cache
       | X-Cache-Control | Content-Type     |
       | -               | application/json |
     Given I set the headers
-      | Key             | Value                    |
-      | X-Cache-Control | no-cache                 |
-      | Authorization   | {{tenant1.token}} |
+      | Key             | Value                |
+      | X-Cache-Control | no-cache             |
+      | X-API-KEY       | {{global.api-key}}   |
+      | X-TENANT-ID     | {{tenant1.tenantID}} |
     When I send "POST" request to "{{global.api}}/proxy/chains/{{chain.besu1.UUID}}" with json:
       """
       {

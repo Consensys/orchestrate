@@ -1,36 +1,42 @@
 package auth
 
 import (
-	"crypto/x509"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/consensys/orchestrate/pkg/toolkit/app/auth/jwt/mock"
+	"github.com/consensys/orchestrate/pkg/types/entities"
+	"github.com/golang/mock/gomock"
+
 	authjwt "github.com/consensys/orchestrate/pkg/toolkit/app/auth/jwt"
 	authkey "github.com/consensys/orchestrate/pkg/toolkit/app/auth/key"
-	"github.com/consensys/orchestrate/pkg/toolkit/tls/certificate"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 type MockHandler struct {
 	served bool
 }
 
-func (h *MockHandler) ServeHTTP(_ http.ResponseWriter, req *http.Request) {
+func (h *MockHandler) ServeHTTP(_ http.ResponseWriter, _ *http.Request) {
 	h.served = true
 }
 
-var (
+const (
 	APIKey              = "test-key"
 	bearer              = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsiaHR0cHM6Ly9hdXRoMC5jb20vYXBpL3YyLyJdLCJleHAiOjE1NzkxNjc0MTQsImh0dHA6Ly9vcmNoZXN0cmF0ZS5pbmZvIjp7InRlbmFudF9pZCI6ImI0OWVlMWJjLWYwZmEtNDMwZC04OWIyLWE0ZmQwZGM5ODkwNiIsInJvbGUiOiJ0ZXN0LXJvbGUifSwiaWF0IjoxNTc5MTYzODE0LCJpc3MiOiJPcmNoZXN0cmF0ZSIsImp0aSI6IjZlZmY3MzI0LTVkZTEtNDA2NS05NGNmLWU3ZWYzZTliYjg1MCIsIm5iZiI6MTU3OTE2MzgxNCwic2NwIjpbInJlYWQ6dXNlcnMiLCJ1cGRhdGU6dXNlcnMiLCJjcmVhdGU6dXNlcnMiXSwic3ViIjoiZTJlLXRlc3QifQ.fvlJcrCwbvj-W1VrfSzcn5F7LpsZ0xbOQTcCqVwwmyq8EOv5VwoV-geoX6tj4d0T2pew-6EK8DR-GrwXVjlo2LQQhYY_TRpnVHl1wDE1IvahExnh_0oPwpH3oKjsxbLPyM94bG-eIJGyInA3w-llCXR5WhOwccO4lKW4GaAXsj6TKGiowh_9HEw9jSN2y9OXGvUiE9_8n_5rp1Shp_vBMHJ-5usOozoaJdgl13Dln1YTqSl422CKb1UndBGRXayCfMpqnzLuURTYYspWOn3c6QTbjjMAm8ifZIl8rDrI8zl8j2FM1kHZt-5ZZe5zJv7rCGwPQviLnWQBqIVElJv6Tg"
-	rawCert             = "MIIDYjCCAkoCCQC9pJWk7qdipjANBgkqhkiG9w0BAQsFADBzMQswCQYDVQQGEwJGUjEOMAwGA1UEBwwFUGFyaXMxEjAQBgNVBAoMCUNvbnNlblN5czEQMA4GA1UECwwHUGVnYVN5czEuMCwGA1UEAwwlZTJlLXRlc3RzLm9yY2hlc3RyYXRlLmNvbnNlbnN5cy5wYXJpczAeFw0xOTEyMjcxNjI5MTdaFw0yMDEyMjYxNjI5MTdaMHMxCzAJBgNVBAYTAkZSMQ4wDAYDVQQHDAVQYXJpczESMBAGA1UECgwJQ29uc2VuU3lzMRAwDgYDVQQLDAdQZWdhU3lzMS4wLAYDVQQDDCVlMmUtdGVzdHMub3JjaGVzdHJhdGUuY29uc2Vuc3lzLnBhcmlzMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAo0NqWqI3TSi1uOBvCUquclWo4LcsYT21tNUXQ8YyqVYRSsiBv+ZKZBCjD8XklLPih40kFSe+r6DNca5/LH/okQIdc8nsQg+BLCkXeH2NFv+QYtPczAw4YhS6GVxJk3u9sfp8NavWBcQbD3MMDpehMOvhSl0zoP/ZlH6ErKHNtoQgUpPNVQGysNU21KpClmIDD/L1drsbq+rFiDrcVWaOLwGxr8SBd/0b4ngtcwH16RJaxcIXXT5AVia1CNdzmU5/AIg3OfgzvKn5AGrMZBsmGAiCyn4/P3PnuF81/WHukk5ETLnzOH+vC2elSmZ8y80HCGeqOiQ1rs66L936wX8cDwIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQCNcTs3n/Ps+yIZDH7utxTOaqpDTCB10MzPmb22UAal89couIT6R0fAu14p/LTkxdb2STDySsQY2/Lv6rPdFToHGUI9ZYOTYW1GOWkt1EAao9BzdsoJVwmTON6QnOBKy/9RxlhWP+XSWVsY0te6KYzS7rQyzQoJQeeBNMpUnjiQji9kKi5j9rbVMdjIb4HlmYrcE95ps+oFkyJoA1HLVytAeOjJPXGToNlv3k2UPJzOFUM0ujWWeBTyHMCmZ4RhlrfzDNffY5dlW82USjc5dBlzRyZalXSjhcVhK4asUodomVntrvCShp/8C9LpbQZ+ugFNE8J6neStWrhpRU9/sBJx"
 	apikeyHeader        = "X-API-Key"
 	authorizationHeader = "Authorization"
 )
 
 func TestAuth(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockValidator := mock.NewMockValidator(ctrl)
+
+	mockValidator.EXPECT().ValidateToken(gomock.Any(), bearer).Return(&entities.UserClaims{TenantID: "tenant"}, nil)
+
 	testCases := []struct {
 		desc                string
 		path                string
@@ -69,22 +75,13 @@ func TestAuth(t *testing.T) {
 		t.Run(test.desc, func(t *testing.T) {
 			// Create HTTP handler
 			nextH := &MockHandler{}
-			jwtChecker, err := authjwt.New(&authjwt.Config{
-				SkipClaimsValidation: true,
-				Certificates:         certificates([]byte(rawCert)),
-			})
-			require.NoError(t, err)
 
-			auth := New(
-				jwtChecker,
-				authkey.New(APIKey),
-				true,
-			)
+			auth := New(authjwt.New(mockValidator), authkey.New(APIKey), true)
 
 			handler := mux.NewRouter()
 			handler.PathPrefix("/").Handler(auth.Handler(nextH))
 
-			req := httptest.NewRequest("GET", "http://example.com"+test.path, nil)
+			req := httptest.NewRequest("GET", "https://example.com"+test.path, nil)
 			if test.authorizationHeader == authorizationHeader {
 				req.Header.Set(authorizationHeader, test.authorizationToken)
 			}
@@ -100,10 +97,4 @@ func TestAuth(t *testing.T) {
 			assert.Equal(t, test.expectedServed, nextH.served, "Given handler should have been called or ignored")
 		})
 	}
-}
-
-func certificates(content []byte) []*x509.Certificate {
-	bCert, _ := certificate.Decode(content, "CERTIFICATE")
-	cert, _ := x509.ParseCertificate(bCert[0])
-	return []*x509.Certificate{cert}
 }

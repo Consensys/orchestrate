@@ -8,12 +8,12 @@ Feature: Transaction Scheduler Idempotency
       | alias   | tenantID        |
       | tenant1 | {{random.uuid}} |
     Then I register the following contracts
-      | name        | artifacts        | Headers.Authorization    |
-      | SimpleToken | SimpleToken.json | {{tenant1.token}} |
+      | name        | artifacts        | API-KEY            | Tenant               |
+      | SimpleToken | SimpleToken.json | {{global.api-key}} | {{tenant1.tenantID}} |
     And I have created the following accounts
-      | alias    | ID              | Headers.Authorization    |
-      | account1 | {{random.uuid}} | {{tenant1.token}} |
-      | account2 | {{random.uuid}} | {{tenant1.token}} |
+      | alias    | ID              | API-KEY            | Tenant               |
+      | account1 | {{random.uuid}} | {{global.api-key}} | {{tenant1.tenantID}} |
+      | account2 | {{random.uuid}} | {{global.api-key}} | {{tenant1.tenantID}} |
 
   Scenario: Send twice same transaction using same idempotency key
     Given I register the following alias
@@ -25,9 +25,10 @@ Feature: Transaction Scheduler Idempotency
       | ID                |
       | {{deployTxOneID}} |
     Then  I set the headers
-      | Key               | Value                    |
-      | Authorization     | {{tenant1.token}} |
-      | X-Idempotency-Key | {{idempotencykey}}       |
+      | Key               | Value                |
+      | X-API-KEY         | {{global.api-key}}   |
+      | X-TENANT-ID       | {{tenant1.tenantID}} |
+      | X-Idempotency-Key | {{idempotencykey}}   |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
@@ -44,9 +45,10 @@ Feature: Transaction Scheduler Idempotency
       """
     Then the response code should be 202
     Then  I set the headers
-      | Key               | Value                    |
-      | Authorization     | {{tenant1.token}} |
-      | X-Idempotency-Key | {{idempotencykey}}       |
+      | Key               | Value                |
+      | X-API-KEY         | {{global.api-key}}   |
+      | X-TENANT-ID       | {{tenant1.tenantID}} |
+      | X-Idempotency-Key | {{idempotencykey}}   |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
@@ -79,9 +81,10 @@ Feature: Transaction Scheduler Idempotency
       | ID                |
       | {{deployTxOneID}} |
     Then  I set the headers
-      | Key               | Value                    |
-      | Authorization     | {{tenant1.token}} |
-      | X-Idempotency-Key | {{idempotencykey}}       |
+      | Key               | Value                |
+      | X-API-KEY         | {{global.api-key}}   |
+      | X-TENANT-ID       | {{tenant1.tenantID}} |
+      | X-Idempotency-Key | {{idempotencykey}}   |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
@@ -98,9 +101,10 @@ Feature: Transaction Scheduler Idempotency
       """
     Then the response code should be 202
     Then  I set the headers
-      | Key               | Value                    |
-      | Authorization     | {{tenant1.token}} |
-      | X-Idempotency-Key | {{idempotencykey}}       |
+      | Key               | Value                |
+      | X-API-KEY         | {{global.api-key}}   |
+      | X-TENANT-ID       | {{tenant1.tenantID}} |
+      | X-Idempotency-Key | {{idempotencykey}}   |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
@@ -117,7 +121,7 @@ Feature: Transaction Scheduler Idempotency
       """
     Then the response code should be 409
     And Response should have the following fields
-      | message                                                                                                          |
+      | message                                                                                                        |
       | DB101@use-cases.send-tx: transaction request with the same idempotency key and different params already exists |
     Then Envelopes should be in topic "tx.decoded"
     When I send "GET" request to "{{global.api}}/transactions?idempotency_keys={{idempotencykey}}"

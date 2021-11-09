@@ -6,13 +6,12 @@ import (
 	"context"
 	"testing"
 
-	"github.com/golang-jwt/jwt"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestContext(t *testing.T) {
-	token := &jwt.Token{}
+	token := "myToken"
 	ctx := With(context.Background(), token)
 	tokenFrom := FromContext(ctx)
-	assert.Equal(t, token, tokenFrom, "JWT Token should have been properly injected and extracted")
+	assert.Equal(t, token, tokenFrom)
 }

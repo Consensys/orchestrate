@@ -11,20 +11,20 @@ Feature: Transaction Scheduler Jobs
       | tenantBar     | bar      |
       | tenantDefault | _        |
     Then I register the following contracts
-      | name        | artifacts        | Headers.Authorization          |
-      | SimpleToken | SimpleToken.json | {{tenantDefault.token}} |
+      | name        | artifacts        | API-KEY            |
+      | SimpleToken | SimpleToken.json | {{global.api-key}} |
     Then I register the following chains
-      | alias | Name                | URLs                         | Headers.Authorization          |
-      | besu  | besu-{{scenarioID}} | {{global.nodes.besu[0].URLs}} | {{tenantDefault.token}} |
+      | alias | Name                | URLs                          | API-KEY            |
+      | besu  | besu-{{scenarioID}} | {{global.nodes.besu[0].URLs}} | {{global.api-key}} |
     And I have created the following accounts
-      | alias    | ID              | Headers.Authorization          |
-      | account1 | {{random.uuid}} | {{tenantDefault.token}} |
+      | alias    | ID              | API-KEY            |
+      | account1 | {{random.uuid}} | {{global.api-key}} |
     Then I track the following envelopes
       | ID                  |
       | faucet-{{account1}} |
     Given I set the headers
-      | Key           | Value                          |
-      | Authorization | {{tenantDefault.token}} |
+      | Key       | Value              |
+      | X-API-KEY | {{global.api-key}} |
     When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
       """
       {
@@ -49,8 +49,9 @@ Feature: Transaction Scheduler Jobs
       | alias | value              |
       | to1   | {{random.account}} |
     Then  I set the headers
-      | Key           | Value                      |
-      | Authorization | {{tenantFoo.token}} |
+      | Key         | Value                  |
+      | X-API-KEY   | {{global.api-key}}     |
+      | X-TENANT-ID | {{tenantFoo.tenantID}} |
     When I send "POST" request to "{{global.api}}/schedules" with json:
       """
       {}
@@ -80,8 +81,9 @@ Feature: Transaction Scheduler Jobs
       | ID                  |
       | {{scheduleOneUUID}} |
     Then  I set the headers
-      | Key           | Value                      |
-      | Authorization | {{tenantBar.token}} |
+      | Key         | Value                  |
+      | X-API-KEY   | {{global.api-key}}     |
+      | X-TENANT-ID | {{tenantBar.tenantID}} |
     When I send "PATCH" request to "{{global.api}}/jobs/{{txJobUUID}}" with json:
       """
       {
@@ -101,8 +103,9 @@ Feature: Transaction Scheduler Jobs
     When I send "GET" request to "{{global.api}}/jobs/{{txJobUUID}}"
     Then the response code should be 404
     Then  I set the headers
-      | Key           | Value                      |
-      | Authorization | {{tenantFoo.token}} |
+      | Key         | Value                  |
+      | X-API-KEY   | {{global.api-key}}     |
+      | X-TENANT-ID | {{tenantFoo.tenantID}} |
     When I send "GET" request to "{{global.api}}/jobs/{{txJobUUID}}"
     Then the response code should be 200
     And Response should have the following fields

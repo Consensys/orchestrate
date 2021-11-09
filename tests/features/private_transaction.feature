@@ -8,11 +8,11 @@ Feature: Private transactions
       | alias   | tenantID        |
       | tenant1 | {{random.uuid}} |
     And I have created the following accounts
-      | alias    | Headers.Authorization |
-      | account1 | {{tenant1.token}}     |
+      | alias    | API-KEY            | Tenant               |
+      | account1 | {{global.api-key}} | {{tenant1.tenantID}} |
     And I register the following contracts
-      | name        | artifacts        | Headers.Authorization |
-      | SimpleToken | SimpleToken.json | {{tenant1.token}}     |
+      | name        | artifacts        | API-KEY            | Tenant               |
+      | SimpleToken | SimpleToken.json | {{global.api-key}} | {{tenant1.tenantID}} |
 
   @go-quorum
   Scenario: Deploy private ERC20 contract and send transaction to it with Quorum and Tessera
@@ -24,8 +24,9 @@ Feature: Private transactions
       | ID                           |
       | {{quorumDeployContractTxID}} |
     Given I set the headers
-      | Key           | Value             |
-      | Authorization | {{tenant1.token}} |
+      | Key         | Value                |
+      | X-API-KEY   | {{global.api-key}}   |
+      | X-TENANT-ID | {{tenant1.tenantID}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
@@ -72,8 +73,9 @@ Feature: Private transactions
       | ID                           |
       | {{quorumSentTxContractTxID}} |
     Given I set the headers
-      | Key           | Value             |
-      | Authorization | {{tenant1.token}} |
+      | Key         | Value                |
+      | X-API-KEY   | {{global.api-key}}   |
+      | X-TENANT-ID | {{tenant1.tenantID}} |
     When I send "POST" request to "{{global.api}}/transactions/send" with json:
       """
       {
@@ -104,14 +106,15 @@ Feature: Private transactions
   @go-quorum
   Scenario: Deploy private ERC20 contract with Quorum and Tessera using privacy enhancement
     Given I register the following alias
-      | alias                    | value           |
+      | alias                       | value           |
       | quorumDeployContractTxIDTwo | {{random.uuid}} |
     Then I track the following envelopes
-      | ID                           |
+      | ID                              |
       | {{quorumDeployContractTxIDTwo}} |
     Given I set the headers
-      | Key           | Value             |
-      | Authorization | {{tenant1.token}} |
+      | Key         | Value                |
+      | X-API-KEY   | {{global.api-key}}   |
+      | X-TENANT-ID | {{tenant1.tenantID}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
@@ -146,12 +149,13 @@ Feature: Private transactions
     And Envelopes should have the following fields
       | Receipt.Status | Receipt.ContractAddress |
       | 1              | ~                       |
-      
+
   @go-quorum
   Scenario: Fail to deploy private ERC20 contract with unknown ChainName
     Given I set the headers
-      | Key           | Value             |
-      | Authorization | {{tenant1.token}} |
+      | Key         | Value                |
+      | X-API-KEY   | {{global.api-key}}   |
+      | X-TENANT-ID | {{tenant1.tenantID}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
@@ -178,8 +182,9 @@ Feature: Private transactions
   @go-quorum
   Scenario: Fail to deploy private ERC20 contract with invalid private from
     Given I set the headers
-      | Key           | Value             |
-      | Authorization | {{tenant1.token}} |
+      | Key         | Value                |
+      | X-API-KEY   | {{global.api-key}}   |
+      | X-TENANT-ID | {{tenant1.tenantID}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
@@ -217,8 +222,9 @@ Feature: Private transactions
       | ID                                 |
       | {{publicQuorumDeployContractTxID}} |
     Given I set the headers
-      | Key           | Value             |
-      | Authorization | {{tenant1.token}} |
+      | Key         | Value                |
+      | X-API-KEY   | {{global.api-key}}   |
+      | X-TENANT-ID | {{tenant1.tenantID}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
@@ -267,8 +273,9 @@ Feature: Private transactions
   @go-quorum
   Scenario: Fail to deploy private ERC20 contract with unknown PrivateFor
     Given I set the headers
-      | Key           | Value             |
-      | Authorization | {{tenant1.token}} |
+      | Key         | Value                |
+      | X-API-KEY   | {{global.api-key}}   |
+      | X-TENANT-ID | {{tenant1.tenantID}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
@@ -292,8 +299,9 @@ Feature: Private transactions
   @go-quorum
   Scenario: Fail to deploy private ERC20 contract with not authorized chain
     Given I set the headers
-      | Key           | Value             |
-      | Authorization | {{tenant1.token}} |
+      | Key         | Value                |
+      | X-API-KEY   | {{global.api-key}}   |
+      | X-TENANT-ID | {{tenant1.tenantID}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
@@ -327,8 +335,9 @@ Feature: Private transactions
       | ID                         |
       | {{besuDeployContractTxID}} |
     Given I set the headers
-      | Key           | Value             |
-      | Authorization | {{tenant1.token}} |
+      | Key         | Value                |
+      | X-API-KEY   | {{global.api-key}}   |
+      | X-TENANT-ID | {{tenant1.tenantID}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
@@ -374,8 +383,9 @@ Feature: Private transactions
       | ID                         |
       | {{besuSentTxContractTxID}} |
     Given I set the headers
-      | Key           | Value             |
-      | Authorization | {{tenant1.token}} |
+      | Key         | Value                |
+      | X-API-KEY   | {{global.api-key}}   |
+      | X-TENANT-ID | {{tenant1.tenantID}} |
     When I send "POST" request to "{{global.api}}/transactions/send" with json:
       """
       {
@@ -415,10 +425,10 @@ Feature: Private transactions
       | besuDeployContractTxThreeID | {{random.uuid}} |
       | besuDeployContractTxFourID  | {{random.uuid}} |
     And I have created the following accounts
-      | alias    | Headers.Authorization |
-      | account2 | {{tenant1.token}}     |
-      | account3 | {{tenant1.token}}     |
-      | account4 | {{tenant1.token}}     |
+      | alias    | API-KEY            | Tenant               |
+      | account2 | {{global.api-key}} | {{tenant1.tenantID}} |
+      | account3 | {{global.api-key}} | {{tenant1.tenantID}} |
+      | account4 | {{global.api-key}} | {{tenant1.tenantID}} |
     Then I track the following envelopes
       | ID                              |
       | {{besuDeployContractTxOneID}}   |
@@ -426,8 +436,9 @@ Feature: Private transactions
       | {{besuDeployContractTxThreeID}} |
       | {{besuDeployContractTxFourID}}  |
     Given I set the headers
-      | Key           | Value             |
-      | Authorization | {{tenant1.token}} |
+      | Key         | Value                |
+      | X-API-KEY   | {{global.api-key}}   |
+      | X-TENANT-ID | {{tenant1.tenantID}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
@@ -525,10 +536,10 @@ Feature: Private transactions
       | besuDeployContractTxThreeID | {{random.uuid}} |
       | besuDeployContractTxFourID  | {{random.uuid}} |
     And I have created the following accounts
-      | alias    | Headers.Authorization |
-      | account2 | {{tenant1.token}}     |
-      | account3 | {{tenant1.token}}     |
-      | account4 | {{tenant1.token}}     |
+      | alias    | API-KEY            | Tenant               |
+      | account2 | {{global.api-key}} | {{tenant1.tenantID}} |
+      | account3 | {{global.api-key}} | {{tenant1.tenantID}} |
+      | account4 | {{global.api-key}} | {{tenant1.tenantID}} |
     Then I track the following envelopes
       | ID                              |
       | {{besuDeployContractTxOneID}}   |
@@ -536,8 +547,9 @@ Feature: Private transactions
       | {{besuDeployContractTxThreeID}} |
       | {{besuDeployContractTxFourID}}  |
     Given I set the headers
-      | Key           | Value             |
-      | Authorization | {{tenant1.token}} |
+      | Key         | Value                |
+      | X-API-KEY   | {{global.api-key}}   |
+      | X-TENANT-ID | {{tenant1.tenantID}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
@@ -629,8 +641,9 @@ Feature: Private transactions
   @besu
   Scenario: Deploy private ERC20 for a privacy group
     Given I set the headers
-      | Key           | Value             |
-      | Authorization | {{tenant1.token}} |
+      | Key         | Value                |
+      | X-API-KEY   | {{global.api-key}}   |
+      | X-TENANT-ID | {{tenant1.tenantID}} |
     Given I sleep "2s"
     When I send "POST" request to "{{global.api}}/proxy/chains/{{chain.besu0.UUID}}" with json:
       """
@@ -691,8 +704,9 @@ Feature: Private transactions
       | alias               | value           |
       | privacyGroupNameOne | {{random.uuid}} |
     Then I set the headers
-      | Key           | Value             |
-      | Authorization | {{tenant1.token}} |
+      | Key         | Value                |
+      | X-API-KEY   | {{global.api-key}}   |
+      | X-TENANT-ID | {{tenant1.tenantID}} |
     Then I sleep "2s"
     When I send "POST" request to "{{global.api}}/proxy/chains/{{chain.besu0.UUID}}" with json:
       """
@@ -752,8 +766,9 @@ Feature: Private transactions
       | alias               | value           |
       | privacyGroupNameTwo | {{random.uuid}} |
     Then I set the headers
-      | Key           | Value             |
-      | Authorization | {{tenant1.token}} |
+      | Key         | Value                |
+      | X-API-KEY   | {{global.api-key}}   |
+      | X-TENANT-ID | {{tenant1.tenantID}} |
     Then I sleep "2s"
     When I send "POST" request to "{{global.api}}/proxy/chains/{{chain.besu0.UUID}}" with json:
       """
@@ -813,8 +828,9 @@ Feature: Private transactions
   @oneTimeKey
   Scenario: Deploy private ERC20 with one-time-key
     Given I set the headers
-      | Key           | Value             |
-      | Authorization | {{tenant1.token}} |
+      | Key         | Value                |
+      | X-API-KEY   | {{global.api-key}}   |
+      | X-TENANT-ID | {{tenant1.tenantID}} |
     Given I register the following alias
       | alias                     | value           |
       | besuDeployContractTxOTKID | {{random.uuid}} |
@@ -856,8 +872,9 @@ Feature: Private transactions
       | ID                               |
       | {{publicBesuDeployContractTxID}} |
     Given I set the headers
-      | Key           | Value             |
-      | Authorization | {{tenant1.token}} |
+      | Key         | Value                |
+      | X-API-KEY   | {{global.api-key}}   |
+      | X-TENANT-ID | {{tenant1.tenantID}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
@@ -912,8 +929,9 @@ Feature: Private transactions
       | alias | value              |
       | to1   | {{random.account}} |
     Then I set the headers
-      | Key           | Value             |
-      | Authorization | {{tenant1.token}} |
+      | Key         | Value                |
+      | X-API-KEY   | {{global.api-key}}   |
+      | X-TENANT-ID | {{tenant1.tenantID}} |
     When I send "POST" request to "{{global.api}}/schedules" with json:
       """
       {}

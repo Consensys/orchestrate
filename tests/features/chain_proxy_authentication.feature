@@ -12,8 +12,9 @@ Feature: Chain-Proxy Authentication
       | bar      | bar      |
       | wildcard | *        |
     Given I set the headers
-      | Key           | Value         |
-      | Authorization | {{foo.token}} |
+      | Key         | Value              |
+      | X-API-KEY   | {{global.api-key}} |
+      | X-TENANT-ID | {{foo.tenantID}}   |
     When I send "POST" request to "{{global.api}}/chains" with json:
       """
       {
@@ -25,9 +26,8 @@ Feature: Chain-Proxy Authentication
     Then I store the UUID as "chainFoo"
 
     Given I set the headers
-      | Key           | Value         |
-      | Authorization | {{foo.token}} |
-      | X-Tenant-ID   | _             |
+      | Key       | Value              |
+      | X-API-KEY | {{global.api-key}} |
     When I send "POST" request to "{{global.api}}/chains" with json:
       """
       {
@@ -103,9 +103,10 @@ Feature: Chain-Proxy Authentication
     Then the response code should be 401
 
     Given I set the headers
-      | Key           | Value            |
-      | Authorization | {{foo.token}}    |
-      | Content-Type  | application/json |
+      | Key          | Value              |
+      | X-API-KEY    | {{global.api-key}} |
+      | X-TENANT-ID  | {{foo.tenantID}}   |
+      | Content-Type | application/json   |
     When I send "POST" request to "{{global.api}}/proxy/chains/{{chainFoo}}" with json:
       """
       {
@@ -134,9 +135,10 @@ Feature: Chain-Proxy Authentication
     Then the response code should be 200
 
     Given I set the headers
-      | Key           | Value            |
-      | Authorization | {{bar.token}}    |
-      | Content-Type  | application/json |
+      | Key          | Value              |
+      | X-API-KEY    | {{global.api-key}} |
+      | X-TENANT-ID  | {{bar.tenantID}}   |
+      | Content-Type | application/json   |
     When I send "POST" request to "{{global.api}}/proxy/chains/{{chainFoo}}" with json:
       """
       {
@@ -165,9 +167,9 @@ Feature: Chain-Proxy Authentication
     Then the response code should be 200
 
     Given I set the headers
-      | Key           | Value              |
-      | Authorization | {{wildcard.token}} |
-      | Content-Type  | application/json   |
+      | Key          | Value              |
+      | X-API-KEY    | {{global.api-key}} |
+      | Content-Type | application/json   |
     When I send "POST" request to "{{global.api}}/proxy/chains/{{chainFoo}}" with json:
       """
       {
@@ -196,9 +198,9 @@ Feature: Chain-Proxy Authentication
     Then the response code should be 200
 
     Given I set the headers
-      | Key           | Value              |
-      | Authorization | {{wildcard.token}} |
-      | Content-Type  | application/json   |
+      | Key          | Value              |
+      | X-API-KEY    | {{global.api-key}} |
+      | Content-Type | application/json   |
     When I send "DELETE" request to "{{global.api}}/chains/{{chainFoo}}"
     Then the response code should be 204
     When I send "DELETE" request to "{{global.api}}/chains/{{chainDefault}}"

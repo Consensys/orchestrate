@@ -11,8 +11,8 @@ Feature: Account management
       | tenantBar | bar      |
       | wildcard  | *        |
     Given I register the following contracts
-      | name        | artifacts        | Headers.Authorization     |
-      | SimpleToken | SimpleToken.json | {{wildcard.token}} |
+      | name        | artifacts        | API-KEY            | Tenant                |
+      | SimpleToken | SimpleToken.json | {{global.api-key}} | {{wildcard.tenantID}} |
 
   Scenario: Accounts own by default tenant can be used by other authorized tenants
     Given I register the following alias
@@ -22,8 +22,8 @@ Feature: Account management
       | fooSendTxID      | {{random.uuid}} |
       | wildcardSendTxID | {{random.uuid}} |
     Given I set the headers
-      | Key           | Value                     |
-      | Authorization | {{wildcard.token}} |
+      | Key       | Value              |
+      | X-API-KEY | {{global.api-key}} |
     When I send "POST" request to "{{global.api}}/accounts" with json:
   """
 {
@@ -44,8 +44,9 @@ Feature: Account management
       | ID              |
       | {{fooSendTxID}} |
     Given I set the headers
-      | Key           | Value                      |
-      | Authorization | {{tenantFoo.token}} |
+      | Key         | Value                  |
+      | X-API-KEY   | {{global.api-key}}     |
+      | X-TENANT-ID | {{tenantFoo.tenantID}} |
     When I send "PATCH" request to "{{global.api}}/accounts/{{generatedAccAddr}}" with json:
   """
 {
@@ -78,8 +79,9 @@ Feature: Account management
       | ID              |
       | {{fooSendTxID}} |
     Given I set the headers
-      | Key           | Value                      |
-      | Authorization | {{tenantFoo.token}} |
+      | Key         | Value                  |
+      | X-API-KEY   | {{global.api-key}}     |
+      | X-TENANT-ID | {{tenantFoo.tenantID}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
   """
 {
@@ -100,8 +102,9 @@ Feature: Account management
       | ID                   |
       | {{wildcardSendTxID}} |
     Given I set the headers
-      | Key           | Value                     |
-      | Authorization | {{wildcard.token}} |
+      | Key         | Value                 |
+      | X-API-KEY   | {{global.api-key}}    |
+      | X-TENANT-ID | {{wildcard.tenantID}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
   """
 {
@@ -128,8 +131,9 @@ Feature: Account management
       | barSendTxID      | {{random.uuid}} |
       | wildcardSendTxID | {{random.uuid}} |
     Given I set the headers
-      | Key           | Value                      |
-      | Authorization | {{tenantFoo.token}} |
+      | Key         | Value                  |
+      | X-API-KEY   | {{global.api-key}}     |
+      | X-TENANT-ID | {{tenantFoo.tenantID}} |
     When I send "POST" request to "{{global.api}}/accounts" with json:
   """
 {
@@ -150,8 +154,9 @@ Feature: Account management
       | ID              |
       | {{fooSendTxID}} |
     Given I set the headers
-      | Key           | Value                      |
-      | Authorization | {{tenantFoo.token}} |
+      | Key         | Value                  |
+      | X-API-KEY   | {{global.api-key}}     |
+      | X-TENANT-ID | {{tenantFoo.tenantID}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
   """
 {
@@ -172,8 +177,9 @@ Feature: Account management
       | ID              |
       | {{barSendTxID}} |
     Given I set the headers
-      | Key           | Value                      |
-      | Authorization | {{tenantBar.token}} |
+      | Key         | Value                  |
+      | X-API-KEY   | {{global.api-key}}     |
+      | X-TENANT-ID | {{tenantBar.tenantID}} |
     When I send "PATCH" request to "{{global.api}}/accounts/{{generatedAccAddr}}" with json:
   """
 {
@@ -200,9 +206,9 @@ Feature: Account management
       | ID                   |
       | {{wildcardSendTxID}} |
     Given I set the headers
-      | Key           | Value                     |
-      | Authorization | {{wildcard.token}} |
-      | X-Tenant-ID   | foo                       |
+      | Key         | Value                  |
+      | X-API-KEY   | {{global.api-key}}     |
+      | X-TENANT-ID | {{tenantFoo.tenantID}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
   """
 {

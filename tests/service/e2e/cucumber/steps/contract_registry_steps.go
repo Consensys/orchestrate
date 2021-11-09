@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"github.com/consensys/orchestrate/pkg/encoding/json"
-	authutils "github.com/consensys/orchestrate/pkg/toolkit/app/auth/utils"
 	"github.com/consensys/orchestrate/pkg/types/api"
 	"github.com/consensys/orchestrate/tests/service/e2e/utils"
+	"github.com/consensys/quorum-key-manager/pkg/client"
 	"github.com/cucumber/godog"
 	gherkin "github.com/cucumber/messages-go/v10"
 	"github.com/traefik/traefik/v2/pkg/log"
@@ -29,8 +29,9 @@ func (sc *ScenarioContext) iRegisterTheFollowingContract(table *gherkin.PickleSt
 			return err
 		}
 
+		headers := utils.GetHeaders(parseContract.APIKey, parseContract.Tenant, parseContract.JWTToken)
 		_, err = sc.client.RegisterContract(
-			authutils.WithAuthorization(ctx, parseContract.JWTToken),
+			context.WithValue(ctx, client.RequestHeaderKey, headers),
 			&api.RegisterContractRequest{
 				Name:             parseContract.Contract.Name,
 				Tag:              parseContract.Contract.Tag,

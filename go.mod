@@ -6,11 +6,12 @@ require (
 	github.com/Shopify/sarama v1.27.2
 	github.com/alicebob/gopher-json v0.0.0-20180125190556-5a6b3ba71ee6 // indirect
 	github.com/alicebob/miniredis v2.5.0+incompatible
+	github.com/auth0/go-jwt-middleware v1.0.1-0.20210716212939-b4ac45bdac0c
 	github.com/c0va23/go-proxyprotocol v0.9.1
 	github.com/cenkalti/backoff/v4 v4.1.0
 	github.com/consensys/gnark-crypto v0.5.0
 	github.com/consensys/quorum v2.7.0+incompatible
-	github.com/consensys/quorum-key-manager v0.0.0-20211005102807-643afad3d0af
+	github.com/consensys/quorum-key-manager v0.0.0-20211103134644-ead58bb213bc
 	github.com/cucumber/godog v0.11.0
 	github.com/cucumber/messages-go/v10 v10.0.3
 	github.com/dgraph-io/ristretto v0.0.3
@@ -24,8 +25,7 @@ require (
 	github.com/go-pg/migrations/v7 v7.1.9
 	github.com/go-pg/pg/v9 v9.1.5
 	github.com/go-playground/validator/v10 v10.5.0
-	github.com/gofrs/uuid v3.3.0+incompatible
-	github.com/golang-jwt/jwt v3.2.2+incompatible
+	github.com/gofrs/uuid v4.0.0+incompatible
 	github.com/golang/mock v1.6.0
 	github.com/golang/protobuf v1.5.2
 	github.com/gomodule/redigo v1.8.2
@@ -39,7 +39,6 @@ require (
 	github.com/mitchellh/mapstructure v1.4.1
 	github.com/nmvalera/striped-mutex v0.1.0
 	github.com/opentracing/opentracing-go v1.1.0
-	github.com/ory/fosite v0.34.1
 	github.com/oxtoacart/bpool v0.0.0-20190530202638-03653db5a59c
 	github.com/prometheus/client_golang v1.7.1
 	github.com/prometheus/client_model v0.2.0

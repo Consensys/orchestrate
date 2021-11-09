@@ -3,26 +3,16 @@ Feature: Chain registry
   As as external developer
   I want to register new chains
 
-  Scenario: get chain data with API key
+  Scenario: get chain data
     Given I set the headers
-      | Key       | Value       |
+      | Key       | Value              |
       | X-API-Key | {{global.api-key}} |
     When I send "GET" request to "{{global.api}}/chains"
     Then the response code should be 200
 
-  Scenario: get chain data with JWT
-    Given I have the following tenants
-      | alias   |
-      | tenant1 |
+  Scenario: Add and remove a chain
     Given I set the headers
-      | Key           | Value                    |
-      | Authorization | {{tenant1.token}} |
-    When I send "GET" request to "{{global.api}}/chains"
-    Then the response code should be 200
-
-  Scenario: Add and remove a chain with API key
-    Given I set the headers
-      | Key       | Value       |
+      | Key       | Value              |
       | X-API-Key | {{global.api-key}} |
     When I send "POST" request to "{{global.api}}/chains" with json:
       """
@@ -63,55 +53,9 @@ Feature: Chain registry
     When I send "GET" request to "{{global.api}}/chains/{{gethTempUUID}}"
     Then the response code should be 404
 
-  Scenario: Add and remove a chain with JWT token
-    Given I have the following tenants
-      | alias   |
-      | tenant1 |
+  Scenario: Register chain
     Given I set the headers
-      | Key           | Value                    |
-      | Authorization | {{tenant1.token}} |
-    When I send "POST" request to "{{global.api}}/chains" with json:
-      """
-      {
-        "name": "gethTemp-{{scenarioID}}",
-        "urls": {{global.nodes.geth[0].URLs}},
-        "listener": {
-          "depth": 1,
-          "fromBlock": "1",
-          "backOffDuration": "1s",
-          "externalTxEnabled": true
-        }
-      }
-      """
-    Then the response code should be 200
-    Then I store the UUID as "gethTempUUID"
-
-    When I send "GET" request to "{{global.api}}/chains/{{gethTempUUID}}"
-    Then the response code should be 200
-
-    When I send "POST" request to "{{global.api}}/chains" with json:
-      """
-      {
-        "name": "gethTemp-{{scenarioID}}",
-        "urls": {{global.nodes.geth[0].URLs}},
-        "listener": {
-          "depth": 1,
-          "fromBlock": "1",
-          "backOffDuration": "1s"
-        }
-      }
-      """
-    Then the response code should be 409
-
-    When I send "DELETE" request to "{{global.api}}/chains/{{gethTempUUID}}"
-    Then the response code should be 204
-
-    When I send "GET" request to "{{global.api}}/chains/{{gethTempUUID}}"
-    Then the response code should be 404
-
-  Scenario: Register chain with API key
-    Given I set the headers
-      | Key       | Value       |
+      | Key       | Value              |
       | X-API-Key | {{global.api-key}} |
     When I send "POST" request to "{{global.api}}/chains" with json:
       """
@@ -162,13 +106,13 @@ Feature: Chain registry
     When I send "DELETE" request to "{{global.api}}/chains/{{gethTemp2UUID}}"
     Then the response code should be 204
 
-  Scenario: Update chain with JWT
+  Scenario: Update chain
     Given I have the following tenants
       | alias   |
       | tenant1 |
     Given I set the headers
-      | Key           | Value                    |
-      | Authorization | {{tenant1.token}} |
+      | Key       | Value              |
+      | X-API-Key | {{global.api-key}} |
     When I send "POST" request to "{{global.api}}/chains" with json:
       """
       {
@@ -203,8 +147,8 @@ Feature: Chain registry
       | alias   |
       | tenant1 |
     Given I set the headers
-      | Key           | Value                    |
-      | Authorization | {{tenant1.token}} |
+      | Key       | Value              |
+      | X-API-Key | {{global.api-key}} |
     When I send "POST" request to "{{global.api}}/chains" with json:
       """
       {

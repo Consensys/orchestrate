@@ -10,16 +10,17 @@ Feature: Faucet funding
 
   Scenario: Generate account with faucet
     And I register the following faucets
-      | Name                  | ChainRule            | CreditorAccount                              | MaxBalance       | Amount           | Cooldown | Headers.Authorization    |
-      | faucet-{{scenarioID}} | {{chain.besu0.UUID}} | {{global.nodes.besu[0].fundedPublicKeys[0]}} | 1000000000000000 | 1000000000000000 | 1m       | {{tenant1.token}} |
+      | Name                  | ChainRule            | CreditorAccount                              | MaxBalance       | Amount           | Cooldown | API-KEY            | Tenant               |
+      | faucet-{{scenarioID}} | {{chain.besu0.UUID}} | {{global.nodes.besu[0].fundedPublicKeys[0]}} | 1000000000000000 | 1000000000000000 | 1m       | {{global.api-key}} | {{tenant1.tenantID}} |
     And I have created the following accounts
-      | alias    | ID              | ChainName            | Headers.Authorization    |
-      | account1 | {{random.uuid}} | {{chain.besu0.Name}} | {{tenant1.token}} |
+      | alias    | ID              | ChainName            | API-KEY            | Tenant               |
+      | account1 | {{random.uuid}} | {{chain.besu0.Name}} | {{global.api-key}} | {{tenant1.tenantID}} |
     Given I sleep "11s"
     Given I set the headers
-      | Key             | Value                    |
-      | Authorization   | {{tenant1.token}} |
-      | X-Cache-Control | no-cache                 |
+      | Key             | Value                |
+      | X-API-KEY       | {{global.api-key}}   |
+      | X-TENANT-ID     | {{tenant1.tenantID}} |
+      | X-Cache-Control | no-cache             |
     When I send "POST" request to "{{global.api}}/proxy/chains/{{chain.besu0.UUID}}" with json:
       """
       {
@@ -43,17 +44,18 @@ Feature: Faucet funding
       | toAddr        | {{random.account}} |
       | transferOneID | {{random.uuid}}    |
     And I have created the following accounts
-      | alias    | ID              | ChainName            | Headers.Authorization    |
-      | account1 | {{random.uuid}} | {{chain.besu1.Name}} | {{tenant1.token}} |
+      | alias    | ID              | ChainName            | API-KEY            | Tenant               |
+      | account1 | {{random.uuid}} | {{chain.besu1.Name}} | {{global.api-key}} | {{tenant1.tenantID}} |
     And I register the following faucets
-      | Name                  | ChainRule            | CreditorAccount                              | MaxBalance       | Amount           | Cooldown | Headers.Authorization    |
-      | faucet-{{scenarioID}} | {{chain.besu1.UUID}} | {{global.nodes.besu[0].fundedPublicKeys[0]}} | 1000000000000000 | 1000000000000000 | 1m       | {{tenant1.token}} |
+      | Name                  | ChainRule            | CreditorAccount                              | MaxBalance       | Amount           | Cooldown | API-KEY            | Tenant               |
+      | faucet-{{scenarioID}} | {{chain.besu1.UUID}} | {{global.nodes.besu[0].fundedPublicKeys[0]}} | 1000000000000000 | 1000000000000000 | 1m       | {{global.api-key}} | {{tenant1.tenantID}} |
     Then I track the following envelopes
       | ID                |
       | {{transferOneID}} |
     Given I set the headers
-      | Key           | Value                    |
-      | Authorization | {{tenant1.token}} |
+      | Key         | Value                |
+      | X-API-KEY   | {{global.api-key}}   |
+      | X-TENANT-ID | {{tenant1.tenantID}} |
     When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
       """
       {
@@ -88,9 +90,10 @@ Feature: Faucet funding
       | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status |
       | MINED  | CREATED        | STARTED        | PENDING        | MINED          |
     Given I set the headers
-      | Key             | Value                    |
-      | Authorization   | {{tenant1.token}} |
-      | X-Cache-Control | no-cache                 |
+      | Key             | Value                |
+      | X-API-KEY       | {{global.api-key}}   |
+      | X-TENANT-ID     | {{tenant1.tenantID}} |
+      | X-Cache-Control | no-cache             |
     When I send "POST" request to "{{global.api}}/proxy/chains/{{chain.besu1.UUID}}" with json:
       """
       {

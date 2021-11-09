@@ -7,6 +7,7 @@ import (
 const (
 	AuthorizationHeader = "Authorization"
 	APIKeyHeader        = "X-API-Key"
+	TenantIDHeader      = "X-Tenant-ID"
 )
 
 func AddXAPIKeyHeaderValue(req *http.Request, apiKey string) {

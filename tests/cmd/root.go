@@ -3,7 +3,6 @@ package main
 import (
 	broker "github.com/consensys/orchestrate/pkg/broker/sarama"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/auth"
-	"github.com/consensys/orchestrate/pkg/toolkit/app/auth/jwt/generator"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/sirupsen/logrus"
@@ -31,7 +30,6 @@ func main() {
 	// Register Multi-Tenancy flags
 	multitenancy.Flags(command.Flags())
 	auth.Flags(command.Flags())
-	generator.PrivateKey(command.Flags())
 
 	if err := command.Execute(); err != nil {
 		logrus.WithError(err).Fatalf("test: execution failed")

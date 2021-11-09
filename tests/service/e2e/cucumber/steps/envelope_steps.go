@@ -1,14 +1,22 @@
 package steps
 
 import (
+	"bytes"
 	"context"
+	json2 "encoding/json"
 	"fmt"
+	"io/ioutil"
 	"math/rand"
+	"net/http"
 	"reflect"
 	"regexp"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/go-kit/kit/transport/http/jsonrpc"
+
+	clientutils "github.com/consensys/orchestrate/pkg/toolkit/app/http/client-utils"
 
 	"github.com/cenkalti/backoff/v4"
 	pkgcryto "github.com/consensys/orchestrate/pkg/crypto/ethereum"
@@ -22,7 +30,6 @@ import (
 	encoding "github.com/consensys/orchestrate/pkg/encoding/sarama"
 	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/pkg/ethereum/account"
-	authutils "github.com/consensys/orchestrate/pkg/toolkit/app/auth/utils"
 	utils2 "github.com/consensys/orchestrate/pkg/toolkit/ethclient/utils"
 	"github.com/consensys/orchestrate/pkg/types/tx"
 	"github.com/consensys/orchestrate/tests/service/e2e/cucumber/alias"
@@ -243,17 +250,6 @@ func (sc *ScenarioContext) iHaveTheFollowingTenant(table *gherkin.PickleStepArgu
 			tenantID = uuid.Must(uuid.NewV4()).String()
 		}
 
-		if sc.jwtGenerator == nil {
-			sc.logger.Debug("jwt generator is not initialized (multi-tenancy mode disabled)")
-			tenantMap["token"] = ""
-		} else {
-			token, err := sc.jwtGenerator.GenerateAccessTokenWithTenantID(tenantID, []string{"*:*"}, 24*time.Hour)
-			if err != nil {
-				return err
-			}
-			tenantMap["token"] = "Bearer " + token
-		}
-
 		tenantMap["tenantID"] = tenantID
 		sc.aliases.Set(tenantMap, sc.Pickle.Id, a)
 	}
@@ -292,7 +288,8 @@ func (sc *ScenarioContext) iHaveTheFollowingAccount(table *gherkin.PickleStepArg
 }
 
 func (sc *ScenarioContext) iHaveCreatedTheFollowingAccounts(table *gherkin.PickleStepArgument_PickleTable) error {
-	tokenCol := utils.ExtractColumns(table, []string{"Headers.Authorization"})
+	tenantCol := utils.ExtractColumns(table, []string{"Tenant"})
+	apiKeyCol := utils.ExtractColumns(table, []string{"API-KEY"})
 	accIDCol := utils.ExtractColumns(table, []string{"ID"})
 	accChainCol := utils.ExtractColumns(table, []string{"ChainName"})
 	aliasCol := utils.ExtractColumns(table, []string{aliasHeaderValue})
@@ -300,13 +297,7 @@ func (sc *ScenarioContext) iHaveCreatedTheFollowingAccounts(table *gherkin.Pickl
 		return errors.DataError("alias column is mandatory")
 	}
 
-	for idx := range tokenCol.Rows[1:] {
-		ctx := context.Background()
-		token := tokenCol.Rows[idx+1].Cells[0].Value
-		if token != "" {
-			ctx = authutils.WithAuthorization(ctx, token)
-		}
-
+	for idx := range apiKeyCol.Rows[1:] {
 		req := &api.CreateAccountRequest{}
 
 		if accIDCol != nil {
@@ -317,7 +308,12 @@ func (sc *ScenarioContext) iHaveCreatedTheFollowingAccounts(table *gherkin.Pickl
 			req.Chain = accChainCol.Rows[idx+1].Cells[0].Value
 		}
 
-		accRes, err := sc.client.CreateAccount(ctx, req)
+		tenant := ""
+		if tenantCol != nil {
+			tenant = tenantCol.Rows[idx+1].Cells[0].Value
+		}
+		headers := utils.GetHeaders(apiKeyCol.Rows[idx+1].Cells[0].Value, tenant, "")
+		accRes, err := sc.client.CreateAccount(context.WithValue(context.Background(), clientutils.RequestHeaderKey, headers), req)
 
 		if err != nil {
 			return err
@@ -330,30 +326,36 @@ func (sc *ScenarioContext) iHaveCreatedTheFollowingAccounts(table *gherkin.Pickl
 }
 
 func (sc *ScenarioContext) iRegisterTheFollowingChains(table *gherkin.PickleStepArgument_PickleTable) error {
-	utilsCols := utils.ExtractColumns(table, []string{aliasHeaderValue, "Headers.Authorization"})
-	if utilsCols == nil {
-		return errors.DataError("One of the following columns is missing %q", utilsCols)
-	}
+	aliasCol := utils.ExtractColumns(table, []string{"alias"})
+	tenantCol := utils.ExtractColumns(table, []string{"Tenant"})
+	apiKeyCol := utils.ExtractColumns(table, []string{"API-KEY"})
+
 	interfaceSlices, err := utils.ParseTable(api.RegisterChainRequest{}, table)
 	if err != nil {
 		return err
 	}
 
-	onTearDown := func(uuid, token string) func() {
+	onTearDown := func(uuid string, headers map[string]string) func() {
 		return func() {
-			_ = sc.client.DeleteChain(authutils.WithAuthorization(context.Background(), token), uuid)
+			_ = sc.client.DeleteChain(context.WithValue(context.Background(), clientutils.RequestHeaderKey, headers), uuid)
 		}
 	}
 
 	ctx := context.Background()
 	for i, chain := range interfaceSlices {
-		token := utilsCols.Rows[i+1].Cells[1].Value
+		apiKey := apiKeyCol.Rows[i+1].Cells[0].Value
 
-		res, err := sc.client.RegisterChain(authutils.WithAuthorization(ctx, token), chain.(*api.RegisterChainRequest))
+		tenant := ""
+		if tenantCol != nil {
+			tenant = tenantCol.Rows[i+1].Cells[0].Value
+		}
+
+		headers := utils.GetHeaders(apiKey, tenant, "")
+		res, err := sc.client.RegisterChain(context.WithValue(context.Background(), clientutils.RequestHeaderKey, headers), chain.(*api.RegisterChainRequest))
 		if err != nil {
 			return err
 		}
-		sc.TearDownFunc = append(sc.TearDownFunc, onTearDown(res.UUID, token))
+		sc.TearDownFunc = append(sc.TearDownFunc, onTearDown(res.UUID, headers))
 
 		apiURL, _ := sc.aliases.Get(alias.GlobalAka, "api")
 		proxyURL := utils4.GetProxyURL(apiURL.(string), res.UUID)
@@ -375,34 +377,39 @@ func (sc *ScenarioContext) iRegisterTheFollowingChains(table *gherkin.PickleStep
 		}
 
 		// set aliases
-		sc.aliases.Set(res, sc.Pickle.Id, utilsCols.Rows[i+1].Cells[0].Value)
+		sc.aliases.Set(res, sc.Pickle.Id, aliasCol.Rows[i+1].Cells[0].Value)
 	}
 
 	return nil
 }
 
 func (sc *ScenarioContext) iRegisterTheFollowingFaucets(table *gherkin.PickleStepArgument_PickleTable) error {
-	tokenTable := utils.ExtractColumns(table, []string{"Headers.Authorization"})
-	interfaceSlices, err := utils.ParseTable(api.RegisterFaucetRequest{}, table)
+	tenantCol := utils.ExtractColumns(table, []string{"Tenant"})
+	apiKeyCol := utils.ExtractColumns(table, []string{"API-KEY"})
 
+	interfaceSlices, err := utils.ParseTable(api.RegisterFaucetRequest{}, table)
 	if err != nil {
 		return err
 	}
 
-	f := func(uuid, token string) func() {
-		return func() {
-			_ = sc.client.DeleteFaucet(authutils.WithAuthorization(context.Background(), token), uuid)
-		}
+	f := func(ctx context.Context, uuid string) func() {
+		return func() { _ = sc.client.DeleteFaucet(ctx, uuid) }
 	}
 
 	for i, faucet := range interfaceSlices {
-		token := tokenTable.Rows[i+1].Cells[0].Value
+		apiKey := apiKeyCol.Rows[i+1].Cells[0].Value
 
-		res, err := sc.client.RegisterFaucet(authutils.WithAuthorization(context.Background(), token), faucet.(*api.RegisterFaucetRequest))
+		tenant := ""
+		if tenantCol != nil {
+			tenant = tenantCol.Rows[i+1].Cells[0].Value
+		}
+
+		ctx := context.WithValue(context.Background(), clientutils.RequestHeaderKey, utils.GetHeaders(apiKey, tenant, ""))
+		res, err := sc.client.RegisterFaucet(ctx, faucet.(*api.RegisterFaucetRequest))
 		if err != nil {
 			return err
 		}
-		sc.TearDownFunc = append(sc.TearDownFunc, f(res.UUID, token))
+		sc.TearDownFunc = append(sc.TearDownFunc, f(ctx, res.UUID))
 	}
 
 	return nil
@@ -501,7 +508,10 @@ func (sc *ScenarioContext) iTrackTheFollowingEnvelopes(table *gherkin.PickleStep
 }
 
 func (sc *ScenarioContext) iSignTheFollowingTransactions(table *gherkin.PickleStepArgument_PickleTable) error {
-	helpersColumns := []string{aliasHeaderValue, "privateKey", "Headers.Authorization"}
+	tenantCol := utils.ExtractColumns(table, []string{"Tenant"})
+	apiKeyCol := utils.ExtractColumns(table, []string{"API-KEY"})
+
+	helpersColumns := []string{aliasHeaderValue, "privateKey"}
 	helpersTable := utils.ExtractColumns(table, helpersColumns)
 	if helpersTable == nil {
 		return errors.DataError("One of the following columns is missing %q", helpersColumns)
@@ -512,11 +522,19 @@ func (sc *ScenarioContext) iSignTheFollowingTransactions(table *gherkin.PickleSt
 		return err
 	}
 
-	// Sign tx for each envelopes
+	// Sign tx for each envelope
 	ctx := utils2.RetryConnectionError(context.Background(), true)
 	for i, e := range envelopes {
-		err := sc.craftAndSignEnvelope(
-			authutils.WithAuthorization(ctx, helpersTable.Rows[i+1].Cells[2].Value),
+		apiKey := apiKeyCol.Rows[i+1].Cells[0].Value
+
+		tenant := ""
+		if tenantCol != nil {
+			tenant = tenantCol.Rows[i+1].Cells[0].Value
+		}
+
+		headers := utils.GetHeaders(apiKey, tenant, "")
+		err = sc.craftAndSignEnvelope(
+			context.WithValue(ctx, clientutils.RequestHeaderKey, headers),
 			e,
 			helpersTable.Rows[i+1].Cells[1].Value,
 		)
@@ -527,6 +545,95 @@ func (sc *ScenarioContext) iSignTheFollowingTransactions(table *gherkin.PickleSt
 	}
 
 	return nil
+}
+
+func (sc *ScenarioContext) iHaveTheFollowingJWTTokens(table *gherkin.PickleStepArgument_PickleTable) error {
+	headers := table.Rows[0]
+	for _, row := range table.Rows[1:] {
+		tenantMap := make(map[string]interface{})
+		var a string
+		var audience string
+
+		for i, cell := range row.Cells {
+			switch v := headers.Cells[i].Value; {
+			case v == aliasHeaderValue:
+				a = cell.Value
+			case v == "audience":
+				audience = cell.Value
+			default:
+				tenantMap[v] = cell.Value
+			}
+		}
+		if a == "" {
+			return errors.DataError("need an alias")
+		}
+		if audience == "" {
+			return errors.DataError("need an audience")
+		}
+
+		jwtToken, err := sc.getJWT(audience)
+		if err != nil {
+			return err
+		}
+
+		tenantMap["token"] = fmt.Sprintf("Bearer %s", jwtToken)
+		sc.aliases.Set(tenantMap, sc.Pickle.Id, a)
+	}
+
+	return nil
+}
+
+type accessTokenResponse struct {
+	AccessToken string `json:"access_token"`
+}
+
+func (sc *ScenarioContext) getJWT(audience string) (string, error) {
+	clientID, ok := sc.aliases.Get(alias.GlobalAka, "oidcClientID")
+	if !ok {
+		return "", errors.DataError("Could not find oidc client ID")
+	}
+
+	clientSecret, ok := sc.aliases.Get(alias.GlobalAka, "oidcClientSecret")
+	if !ok {
+		return "", errors.DataError("Could not find oidc client secret")
+	}
+
+	idpURL, ok := sc.aliases.Get(alias.GlobalAka, "oidcTokenURL")
+	if !ok {
+		return "", errors.DataError("Could not find token url")
+	}
+
+	body := new(bytes.Buffer)
+	_ = json2.NewEncoder(body).Encode(map[string]interface{}{
+		"client_id":     clientID,
+		"client_secret": clientSecret,
+		"audience":      audience,
+		"grant_type":    "client_credentials",
+	})
+
+	resp, err := http.DefaultClient.Post(idpURL.(string), jsonrpc.ContentType, body)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	acessToken := &accessTokenResponse{}
+	if resp.StatusCode == http.StatusOK {
+		err = json2.NewDecoder(resp.Body).Decode(acessToken)
+		if err != nil {
+			return "", err
+		}
+
+		return acessToken.AccessToken, nil
+	}
+
+	// Read body
+	respMsg, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	return "", fmt.Errorf(string(respMsg))
 }
 
 func (sc *ScenarioContext) craftAndSignEnvelope(ctx context.Context, e *tx.Envelope, privKey string) error {
@@ -603,4 +710,5 @@ func initEnvelopeSteps(s *godog.ScenarioContext, sc *ScenarioContext) {
 	s.Step(`^Envelopes should have the following fields$`, sc.preProcessTableStep(sc.envelopesShouldHaveTheFollowingValues))
 	s.Step(`^I register the following envelope fields$`, sc.preProcessTableStep(sc.iRegisterTheFollowingEnvelopeFields))
 	s.Step(`^I sign the following transactions$`, sc.preProcessTableStep(sc.iSignTheFollowingTransactions))
+	s.Step(`^I have the following jwt tokens$`, sc.preProcessTableStep(sc.iHaveTheFollowingJWTTokens))
 }

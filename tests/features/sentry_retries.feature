@@ -8,15 +8,16 @@ Feature: Send transactions using tx-sentry
       | alias   | tenantID        |
       | tenant1 | {{random.uuid}} |
     And I have created the following accounts
-      | alias    | ID              | Headers.Authorization    |
-      | account1 | {{random.uuid}} | {{tenant1.token}} |
-      | account2 | {{random.uuid}} | {{tenant1.token}} |
+      | alias    | ID              | API-KEY            | Tenant               |
+      | account1 | {{random.uuid}} | {{global.api-key}} | {{tenant1.tenantID}} |
+      | account2 | {{random.uuid}} | {{global.api-key}} | {{tenant1.tenantID}} |
     Then I register the following contracts
-      | name        | artifacts        | Headers.Authorization    |
-      | SimpleToken | SimpleToken.json | {{tenant1.token}} |
+      | name        | artifacts        | API-KEY            | Tenant               |
+      | SimpleToken | SimpleToken.json | {{global.api-key}} | {{tenant1.tenantID}} |
     Given I set the headers
-      | Key           | Value                    |
-      | Authorization | {{tenant1.token}} |
+      | Key         | Value                |
+      | X-API-KEY   | {{global.api-key}}   |
+      | X-TENANT-ID | {{tenant1.tenantID}} |
     Then I track the following envelopes
       | ID                  |
       | faucet-{{account1}} |
@@ -44,8 +45,9 @@ Feature: Send transactions using tx-sentry
       | txOneID | {{random.uuid}} |
       | txTwoID | {{random.uuid}} |
     Given I set the headers
-      | Key           | Value                    |
-      | Authorization | {{tenant1.token}} |
+      | Key         | Value                |
+      | X-API-KEY   | {{global.api-key}}   |
+      | X-TENANT-ID | {{tenant1.tenantID}} |
     When I send "POST" request to "{{global.api}}/schedules" with json:
       """
       {}
@@ -129,8 +131,9 @@ Feature: Send transactions using tx-sentry
       | txOneID | {{random.uuid}} |
       | txTwoID | {{random.uuid}} |
     Given I set the headers
-      | Key           | Value                    |
-      | Authorization | {{tenant1.token}} |
+      | Key         | Value                |
+      | X-API-KEY   | {{global.api-key}}   |
+      | X-TENANT-ID | {{tenant1.tenantID}} |
     When I send "POST" request to "{{global.api}}/schedules" with json:
       """
       {}
@@ -219,8 +222,9 @@ Feature: Send transactions using tx-sentry
       | alias   | value           |
       | txOneID | {{random.uuid}} |
     Given I set the headers
-      | Key           | Value                    |
-      | Authorization | {{tenant1.token}} |
+      | Key         | Value                |
+      | X-API-KEY   | {{global.api-key}}   |
+      | X-TENANT-ID | {{tenant1.tenantID}} |
     When I send "POST" request to "{{global.api}}/schedules" with json:
       """
       {}

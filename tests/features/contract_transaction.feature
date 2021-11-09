@@ -8,20 +8,21 @@ Feature: Send contract transactions
       | alias   | tenantID        |
       | tenant1 | {{random.uuid}} |
     And I register the following contracts
-      | name        | artifacts        | Headers.Authorization |
-      | SimpleToken | SimpleToken.json | {{tenant1.token}}     |
-      | Counter     | Counter.json     | {{tenant1.token}}     |
+      | name        | artifacts        | API-KEY            | Tenant               |
+      | SimpleToken | SimpleToken.json | {{global.api-key}} | {{tenant1.tenantID}} |
+      | Counter     | Counter.json     | {{global.api-key}} | {{tenant1.tenantID}} |
     And I have created the following accounts
-      | alias    | ID              | Headers.Authorization |
-      | account1 | {{random.uuid}} | {{tenant1.token}}     |
-      | account2 | {{random.uuid}} | {{tenant1.token}}     |
+      | alias    | ID              | API-KEY            | Tenant               |
+      | account1 | {{random.uuid}} | {{global.api-key}} | {{tenant1.tenantID}} |
+      | account2 | {{random.uuid}} | {{global.api-key}} | {{tenant1.tenantID}} |
     Then I track the following envelopes
       | ID                  |
       | faucet-{{account1}} |
       | faucet-{{account2}} |
     Given I set the headers
-      | Key           | Value             |
-      | Authorization | {{tenant1.token}} |
+      | Key         | Value                |
+      | X-API-KEY   | {{global.api-key}}   |
+      | X-TENANT-ID | {{tenant1.tenantID}} |
     When I send "POST" request to "{{global.api}}/transactions/transfer" with json:
       """
       {
@@ -122,8 +123,9 @@ Feature: Send contract transactions
       | {{gethSendTxTwoID}}   |
       | {{gethSendTxThreeID}} |
     Given I set the headers
-      | Key           | Value             |
-      | Authorization | {{tenant1.token}} |
+      | Key         | Value                |
+      | X-API-KEY   | {{global.api-key}}   |
+      | X-TENANT-ID | {{tenant1.tenantID}} |
     When I send "POST" request to "{{global.api}}/transactions/send" with json:
       """
       {
@@ -265,8 +267,9 @@ Feature: Send contract transactions
       | ID                    |
       | {{counterDeployTxID}} |
     Given I set the headers
-      | Key           | Value             |
-      | Authorization | {{tenant1.token}} |
+      | Key         | Value                |
+      | X-API-KEY   | {{global.api-key}}   |
+      | X-TENANT-ID | {{tenant1.tenantID}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
@@ -333,8 +336,9 @@ Feature: Send contract transactions
       | ID                    |
       | {{counterDeployTxID}} |
     Given I set the headers
-      | Key           | Value             |
-      | Authorization | {{tenant1.token}} |
+      | Key         | Value                |
+      | X-API-KEY   | {{global.api-key}}   |
+      | X-TENANT-ID | {{tenant1.tenantID}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {
@@ -391,8 +395,9 @@ Feature: Send contract transactions
       | ID                    |
       | {{counterDeployTxID}} |
     Given I set the headers
-      | Key           | Value             |
-      | Authorization | {{tenant1.token}} |
+      | Key         | Value                |
+      | X-API-KEY   | {{global.api-key}}   |
+      | X-TENANT-ID | {{tenant1.tenantID}} |
     When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
       """
       {

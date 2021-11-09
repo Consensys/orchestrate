@@ -4,7 +4,6 @@ import (
 	"github.com/consensys/orchestrate/cmd/api"
 	txlistener "github.com/consensys/orchestrate/cmd/tx-listener"
 	txsender "github.com/consensys/orchestrate/cmd/tx-sender"
-	"github.com/consensys/orchestrate/cmd/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -20,7 +19,6 @@ func NewCommand() *cobra.Command {
 	rootCmd.AddCommand(txsender.NewRootCommand())
 	rootCmd.AddCommand(txlistener.NewRootCommand())
 	rootCmd.AddCommand(api.NewRootCommand())
-	rootCmd.AddCommand(utils.NewRootCommand())
 
 	return rootCmd
 }

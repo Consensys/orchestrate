@@ -8,7 +8,6 @@ import (
 
 	broker "github.com/consensys/orchestrate/pkg/broker/sarama"
 	"github.com/consensys/orchestrate/pkg/sdk/client"
-	"github.com/consensys/orchestrate/pkg/toolkit/app/auth/jwt/generator"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	ethclient "github.com/consensys/orchestrate/pkg/toolkit/ethclient/rpc"
@@ -33,7 +32,6 @@ func Init(ctx context.Context, rawTestData string) {
 
 		// Initialize Steps
 		broker.InitSyncProducer(ctx)
-		generator.Init(ctx)
 		alias.Init(rawTestData)
 		client.Init()
 		ethclient.Init(ctx)
@@ -87,7 +85,7 @@ func SetGlobalOptions(o *godog.Options) {
 	options = o
 }
 
-// GlobalHandler returns global Cucumber handler
+// GlobalOptions returns global Cucumber handler
 func GlobalOptions() *godog.Options {
 	return options
 }

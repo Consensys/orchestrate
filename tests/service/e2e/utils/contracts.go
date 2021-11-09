@@ -22,6 +22,8 @@ type Artifact struct {
 type ContractSpec struct {
 	Contract *entities.Contract
 	JWTToken string
+	APIKey   string
+	Tenant   string
 }
 
 func ParseContracts(table *gherkin.PickleStepArgument_PickleTable) ([]*ContractSpec, error) {
@@ -72,8 +74,10 @@ func ParseContractCell(header, cell string, contractSpec *ContractSpec) error {
 		contractSpec.Contract.Name = cell
 	case "tag":
 		contractSpec.Contract.Tag = cell
-	case "Headers.Authorization":
-		contractSpec.JWTToken = cell
+	case "API-KEY":
+		contractSpec.APIKey = cell
+	case "Tenant":
+		contractSpec.Tenant = cell
 	default:
 		return fmt.Errorf("unknown field %q", header)
 	}

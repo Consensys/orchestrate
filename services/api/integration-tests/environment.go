@@ -8,10 +8,11 @@ import (
 	"strconv"
 	"time"
 
+	authjwt "github.com/consensys/orchestrate/pkg/toolkit/app/auth/jwt"
+
 	"github.com/consensys/orchestrate/pkg/broker/sarama"
 	qkm "github.com/consensys/orchestrate/pkg/quorum-key-manager"
 	"github.com/consensys/orchestrate/pkg/toolkit/app"
-	authjwt "github.com/consensys/orchestrate/pkg/toolkit/app/auth/jwt"
 	authkey "github.com/consensys/orchestrate/pkg/toolkit/app/auth/key"
 	httputils "github.com/consensys/orchestrate/pkg/toolkit/app/http"
 	"github.com/consensys/orchestrate/pkg/toolkit/database/postgres"

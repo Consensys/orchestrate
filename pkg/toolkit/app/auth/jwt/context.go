@@ -2,24 +2,20 @@ package jwt
 
 import (
 	"context"
-
-	"github.com/golang-jwt/jwt"
 )
 
-type authCtxKey string
-
-const jwtTokenKey authCtxKey = "token"
+type contextKey struct{}
 
 // With injects Access Token in context
-func With(ctx context.Context, token *jwt.Token) context.Context {
-	return context.WithValue(ctx, jwtTokenKey, token)
+func With(ctx context.Context, token string) context.Context {
+	return context.WithValue(ctx, contextKey{}, token)
 }
 
 // FromContext extracts Access Token from context
-func FromContext(ctx context.Context) *jwt.Token {
-	token, ok := ctx.Value(jwtTokenKey).(*jwt.Token)
-	if !ok {
-		return nil
+func FromContext(ctx context.Context) string {
+	if token, ok := ctx.Value(contextKey{}).(string); ok {
+		return token
 	}
-	return token
+
+	return ""
 }
