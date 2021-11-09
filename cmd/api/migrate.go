@@ -39,27 +39,18 @@ func newMigrateCmd() *cobra.Command {
 	// Postgres flags
 	postgres.PGFlags(migrateCmd.Flags())
 
-	// Register Init command
-	initCmd := &cobra.Command{
-		Use:   "init",
-		Short: "Initialize database",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			_, _, err := migrations.Run(db, "init")
-			if err != nil {
-				return err
-			}
-			log.Infof("Database initialized")
-			return nil
-		},
-	}
-	migrateCmd.AddCommand(initCmd)
-
 	// Register Up command
 	upCmd := &cobra.Command{
 		Use:   "up [target]",
 		Short: "Upgrade database",
 		Long:  "Runs all available migrations or up to [target] if argument is provided",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			_, _, err := migrations.Run(db, "init")
+			if err != nil {
+				log.WithError(err).Error("Database initialization failed")
+				return err
+			}
+
 			return migrate(db, append([]string{"up"}, args...)...)
 		},
 	}
@@ -123,7 +114,7 @@ func newMigrateCmd() *cobra.Command {
 func migrate(db *pg.DB, a ...string) error {
 	oldVersion, newVersion, err := migrations.Run(db, a...)
 	if err != nil {
-		log.WithError(err).Errorf("Migration failed")
+		log.WithError(err).Error("Migration failed")
 		return err
 	}
 

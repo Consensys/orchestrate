@@ -74,22 +74,12 @@ x-api-common: &api-common
   DB_HOST: postgres
 
 services:
-  api-migration-init:
-    <<: *container-common
-    environment:
-      <<: *default-variables
-      <<: *api-common
-    restart: "no"
-    command: api migrate init
-
   api-migration:
     <<: *container-common
     environment:
       <<: *default-variables
       <<: *api-common
     restart: "no"
-    depends_on:
-      - api-migration-init
     command: api migrate up
 
   account-import:
