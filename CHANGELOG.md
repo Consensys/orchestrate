@@ -11,13 +11,12 @@
 ### ⚠ BREAKING CHANGES
 * Integration of Quorum Key Manager as replacement of Orchestrate Key Manager service
 * Removed endpoints `/accounts/{address}/sign` and `/accounts/{address}/verify-signature` in favor of `/accounts/{address}/sign-message` and `/accounts/verify-message` accordingly to EIP-191 standards
-* Deprecate usage of `AUTH_JWT_CERTIFICATE` in favor of `AUTH_JWT_CERT`
+* Deprecate usage of `AUTH_JWT_CERTIFICATE` in favor of `AUTH_JWT_ISSUER_URL` and `AUTH_JWT_AUDIENCE`
 * Deprecate usage of `AUTH_JWT_CLAIMS_NAMESPACE` in favor of standard claims using token `sub`
 
 ### 🛠 Bug fixes
 * Incorrect server name verification using Postgres in `verify-ca` mode 
 * Tx-sender exits sending Tessera private transaction with invalid 'from'
-
 
 ## v21.1.10 (2021-10-28)
 
