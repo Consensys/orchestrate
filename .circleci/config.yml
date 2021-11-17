@@ -97,9 +97,7 @@ commands:
             echo 'export TOPIC_TX_DECODED=${ORCHESTRATE_NAMESPACE}-tx-decoded' >> $BASH_ENV
             echo 'export MULTI_TENANCY_ENABLED=true' >> $BASH_ENV
             echo 'export AUTH_API_KEY=${QA_AUTH_API_KEY}' >> $BASH_ENV
-            echo 'export AUTH_JWT_CLAIMS_NAMESPACE=orchestrate.namespace' >> $BASH_ENV 
-            echo 'export AUTH_JWT_CERTIFICATE=${QA_AUTH_JWT_CERTIFICATE}' >> $BASH_ENV
-            echo 'export AUTH_JWT_PRIVATE_KEY=${QA_AUTH_JWT_PRIVATE_KEY}' >> $BASH_ENV
+            echo 'export AUTH_JWT_ISSUER_URL=${QA_AUTH_JWT_ISSUER_URL}' >> $BASH_ENV
             echo 'export TEST_GLOBAL_DATA=${QA_TEST_GLOBAL_DATA}' >> $BASH_ENV
 
   docker_build_e2e_dev:
@@ -260,7 +258,7 @@ jobs:
   run-e2e-local:
     machine:
       image: ubuntu-2004:202010-01
-    resource_class: 2xlarge
+    resource_class: xlarge
     steps:
       - run:
           name: Uninstall Go
