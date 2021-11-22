@@ -157,7 +157,7 @@ func (hk *Hook) decodeReceipt(ctx context.Context, c *dynamic.Chain, receipt *ty
 	for _, l := range receipt.GetLogs() {
 		if len(l.GetTopics()) == 0 {
 			// This scenario is not supposed to happen
-			return errors.InternalError("invalid receipt (no topics in log)")
+			return errors.DependencyFailureError("invalid receipt (no topics in log)")
 		}
 
 		logger := hk.logger.WithContext(ctx).WithField("sig_hash", utils.ShortString(l.Topics[0], 5)).

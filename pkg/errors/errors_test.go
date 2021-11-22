@@ -14,37 +14,12 @@ func TestWarningf(t *testing.T) {
 	assert.Equal(t, "01000", e.Hex(), "Hex representation should be correct")
 }
 
-func TestRetryWarning(t *testing.T) {
-	e := RetryWarning("test")
-	assert.Equal(t, uint64(4352), e.GetCode(), "RetryWarning code should be correct")
-	assert.True(t, IsWarning(e), "RetryWarning should be a connection error")
-	assert.Equal(t, "01100", e.Hex(), "RetryWarning Hex representation should be correct")
-}
-
 func TestFaucetWarning(t *testing.T) {
 	e := FaucetWarning("test")
 	assert.Equal(t, uint64(4608), e.GetCode(), "FaucetWarning code should be correct")
 	assert.True(t, IsWarning(e), "FaucetWarning should be a connection error")
 	assert.True(t, IsFaucetWarning(e), "FaucetWarning should be a connection error")
 	assert.Equal(t, "01200", e.Hex(), "FaucetWarning Hex representation should be correct")
-}
-
-func TestFaucetNotConfiguredWarning(t *testing.T) {
-	e := FaucetNotConfiguredWarning("test")
-	assert.Equal(t, uint64(4609), e.GetCode(), "FaucetNotConfiguredWarning code should be correct")
-	assert.True(t, IsWarning(e), "FaucetNotConfiguredWarning should be a connection error")
-	assert.True(t, IsFaucetWarning(e), "FaucetNotConfiguredWarning should be a connection error")
-	assert.True(t, IsFaucetNotConfiguredWarning(e), "FaucetNotConfiguredWarning should be a connection error")
-	assert.Equal(t, "01201", e.Hex(), "FaucetNotConfiguredWarning Hex representation should be correct")
-}
-
-func TestFaucetSelfCreditWarning(t *testing.T) {
-	e := FaucetSelfCreditWarning("test")
-	assert.Equal(t, uint64(4610), e.GetCode(), "FaucetSelfCreditWarning code should be correct")
-	assert.True(t, IsWarning(e), "FaucetSelfCreditWarning should be a connection error")
-	assert.True(t, IsFaucetWarning(e), "FaucetSelfCreditWarning should be a connection error")
-	assert.True(t, IsFaucetSelfCreditWarning(e), "FaucetSelfCreditWarning should be a connection error")
-	assert.Equal(t, "01202", e.Hex(), "FaucetSelfCreditWarning Hex representation should be correct")
 }
 
 func TestInvalidNonceWarning(t *testing.T) {
@@ -143,13 +118,6 @@ func TestInvalidStateError(t *testing.T) {
 	assert.Equal(t, "24000", e.Hex(), "Hex representation should be correct")
 }
 
-func TestFailedPreconditionError(t *testing.T) {
-	e := FailedPreconditionError("test")
-	assert.Equal(t, uint64(147712), e.GetCode(), "FailedPreconditionError code should be correct")
-	assert.True(t, IsInvalidStateError(e), "FailedPreconditionError should be InvalidStateError")
-	assert.Equal(t, "24100", e.Hex(), "FailedPreconditionError Hex representation should be correct")
-}
-
 func TestConflictedError(t *testing.T) {
 	e := ConflictedError("test")
 	assert.Equal(t, uint64(147968), e.GetCode(), "ConflictedError code should be correct")
@@ -161,12 +129,6 @@ func TestDataError(t *testing.T) {
 	e := DataError("test")
 	assert.Equal(t, uint64(270336), e.GetCode(), "DataError code should be correct")
 	assert.Equal(t, "42000", e.Hex(), "Hex representation should be correct")
-}
-
-func TestOutOfRange(t *testing.T) {
-	e := OutOfRangeError("test")
-	assert.Equal(t, uint64(270337), e.GetCode(), "OutOfRangeError code should be correct")
-	assert.Equal(t, "42001", e.Hex(), "Hex representation should be correct")
 }
 
 func TestEncodingError(t *testing.T) {
@@ -236,32 +198,6 @@ func TestInvalidParameterError(t *testing.T) {
 	assert.True(t, IsDataError(e), "InvalidParameterError should be a data error")
 	assert.True(t, IsInvalidParameterError(e), "InvalidParameterError should be a InvalidParameterError")
 	assert.Equal(t, "42400", e.Hex(), "Hex representation should be correct")
-}
-
-func TestInsufficientResourcesError(t *testing.T) {
-	e := InsufficientResourcesError("test")
-	assert.Equal(t, uint64(339968), e.GetCode(), "InsufficientResourcesError code should be correct")
-	assert.Equal(t, "53000", e.Hex(), "Hex representation should be correct")
-}
-
-func TestOperatorInterventionError(t *testing.T) {
-	e := OperatorInterventionError("test")
-	assert.Equal(t, uint64(356352), e.GetCode(), "OperatorInterventionError code should be correct")
-	assert.Equal(t, "57000", e.Hex(), "Hex representation should be correct")
-}
-
-func TestCancelledError(t *testing.T) {
-	e := CancelledError("test")
-	assert.Equal(t, uint64(356353), e.GetCode(), "CancelledError code should be correct")
-	assert.True(t, IsOperatorInterventionError(e), "CancelledError should be a OperatorInterventionError")
-	assert.Equal(t, "57001", e.Hex(), "Hex representation should be correct")
-}
-
-func TestDeadlineExceededError(t *testing.T) {
-	e := DeadlineExceededError("test")
-	assert.Equal(t, uint64(356354), e.GetCode(), "DeadlineExceededError code should be correct")
-	assert.True(t, IsOperatorInterventionError(e), "DeadlineExceededError should be a OperatorInterventionError")
-	assert.Equal(t, "57002", e.Hex(), "Hex representation should be correct")
 }
 
 func TestEthereumError(t *testing.T) {

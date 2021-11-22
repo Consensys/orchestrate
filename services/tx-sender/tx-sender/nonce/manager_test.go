@@ -58,7 +58,7 @@ func TestNonceManager(t *testing.T) {
 		ctx := context.Background()
 		job := testutils.FakeJob()
 
-		expectedErr := errors.InternalError("invalid error")
+		expectedErr := errors.InvalidNonceWarning("invalid error")
 		ns.EXPECT().GetLastSent(partitionKey(job)).Return(uint64(0), false, expectedErr)
 
 		_, err := manager.GetNonce(ctx, job)
@@ -145,7 +145,7 @@ func TestNonceManager(t *testing.T) {
 		expectedNonce := uint64(1)
 		job.Transaction.Nonce = fmt.Sprintf("%d", expectedNonce)
 
-		jobErr := errors.InternalError("internal error")
+		jobErr := errors.InvalidNonceWarning("internal error")
 
 		err := manager.CleanNonce(ctx, job, jobErr)
 		assert.NoError(t, err)

@@ -23,7 +23,7 @@ func NewAccount() Account {
 func (w *account) Generate() error {
 	prv, err := crypto.GenerateKey()
 	if err != nil {
-		return errors.InternalError(err.Error()).SetComponent(component)
+		return errors.CryptoOperationError(err.Error()).SetComponent(component)
 	}
 	w.priv = prv
 	pub := prv.PublicKey

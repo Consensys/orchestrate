@@ -101,7 +101,7 @@ func (nc *nonceManager) CleanNonce(ctx context.Context, job *entities.Job, jobEr
 	nonceKey := partitionKey(job)
 	logger.Warn("chain responded with invalid nonce error")
 	if nc.recovery.Recovering(job.UUID) >= nc.maxRecovery {
-		err := errors.InternalError("reached max nonce recovery max")
+		err := errors.InvalidNonceError("reached max nonce recovery max")
 		logger.WithError(err).Error("cannot recover from nonce error")
 		return err
 	}
