@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"strings"
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
@@ -21,7 +20,10 @@ import (
 	usecases "github.com/consensys/orchestrate/services/tx-sender/tx-sender/use-cases"
 )
 
-const messageListenerComponent = "service.kafka-consumer"
+const (
+	messageListenerComponent = "service.kafka-consumer"
+	errorProcessingMessage   = "error processing message"
+)
 
 type MessageListener struct {
 	useCases     usecases.UseCases
@@ -108,23 +110,44 @@ func (listener *MessageListener) consumeClaimLoop(ctx context.Context, session s
 				Debug("message consumed")
 
 			jlogger := logger.WithField("job", evlp.GetJobUUID()).WithField("schedule", evlp.GetScheduleUUID())
-			err = listener.processEnvelope(log.With(ctx, jlogger), evlp)
-			if err != nil {
-				jlogger.WithError(err).Error("error processing message")
-				return err
+			tenantID := evlp.GetHeadersValue(utils.TenantIDMetadata)
+			job := envelope.NewJobFromEnvelope(evlp, tenantID)
+
+			err = listener.processEnvelope(log.With(ctx, jlogger), evlp, job)
+			switch {
+			// If job exceeded number of retries, we must Notify, Update job to FAILED and Continue
+			case err != nil && errors.IsConnectionError(err):
+				txResponse := evlp.AppendError(errors.FromError(err)).TxResponse()
+				serr := listener.sendEnvelope(ctx, evlp.ID, txResponse, listener.recoverTopic, evlp.PartitionKey())
+				if serr == nil {
+					serr = utils2.UpdateJobStatus(ctx, listener.jobClient, job,
+						entities.StatusFailed, err.Error(), nil)
+				}
+
+				if serr != nil {
+					jlogger.WithError(serr).Error(errorProcessingMessage)
+					return serr
+				}
+			case err != nil:
+				curJob, serr := listener.jobClient.GetJob(ctx, job.UUID)
+				// IMPORTANT: Jobs can be updated in parallel to NEVER_MINED, MINED or FAILED, so that we should
+				// warning and ignore it in case job is in a final status
+				if serr == nil && entities.IsFinalJobStatus(curJob.Status) {
+					jlogger.WithError(err).Warn(errorProcessingMessage)
+				} else {
+					jlogger.WithError(err).Error(errorProcessingMessage)
+					return err
+				}
 			}
 
-			jlogger.Debug("job processed successfully")
+			jlogger.Debug("job message has been processed")
 			session.MarkMessage(msg, "")
 		}
 	}
 }
 
-func (listener *MessageListener) processEnvelope(ctx context.Context, evlp *tx.Envelope) error {
+func (listener *MessageListener) processEnvelope(ctx context.Context, evlp *tx.Envelope, job *entities.Job) error {
 	logger := log.FromContext(ctx)
-	tenantID := evlp.GetHeadersValue(utils.TenantIDMetadata)
-	job := envelope.NewJobFromEnvelope(evlp, tenantID)
-
 	return backoff.RetryNotify(
 		func() error {
 			err := listener.executeSendJob(ctx, job)
@@ -164,27 +187,16 @@ func (listener *MessageListener) processEnvelope(ctx context.Context, evlp *tx.E
 				}
 			}
 
-			if serr != nil {
-				// IMPORTANT: Jobs can be updated in parallel to NEVER_MINED or MINED, so that we should
-				// ignore it in this case
-				if strings.Contains(err.Error(), "42400@") {
-					logger.WithError(err).Warn("ignored error")
-					return nil
-				}
-
-				if ctx.Err() != nil {
-					return backoff.Permanent(ctx.Err())
-				}
-
-				// Retry on IsConnectionError and not context canceled
-				if errors.IsConnectionError(serr) {
-					return serr
-				}
-
+			switch {
+			case serr != nil && ctx.Err() != nil: // If context has been cancel, exits
+				return backoff.Permanent(ctx.Err())
+			case serr != nil && errors.IsConnectionError(serr): // Retry on connection error
+				return serr
+			case serr != nil: // Other kind of error, we exit
 				return backoff.Permanent(serr)
+			default:
+				return nil
 			}
-
-			return nil
 		},
 		listener.retryBackOff,
 		func(err error, duration time.Duration) {

@@ -157,6 +157,6 @@ func NewConfig(vipr *viper.Viper) *Config {
 func retryMessageBackOff() backoff.BackOff {
 	bckOff := backoff.NewExponentialBackOff()
 	bckOff.MaxInterval = time.Second * 15
-	bckOff.MaxElapsedTime = time.Minute * 5
+	bckOff.MaxElapsedTime = time.Minute
 	return bckOff
 }

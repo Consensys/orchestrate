@@ -51,8 +51,8 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/traefik/paerser v0.1.4
 	github.com/traefik/traefik/v2 v2.5.3
-	github.com/uber/jaeger-client-go v2.29.1+incompatible
-	github.com/uber/jaeger-lib v2.2.0+incompatible
+	github.com/uber/jaeger-client-go v2.29.1+incompatible // indirect
+	github.com/uber/jaeger-lib v2.2.0+incompatible // indirect
 	github.com/unrolled/secure v1.0.9
 	github.com/vulcand/oxy v1.3.0
 	github.com/yuin/gopher-lua v0.0.0-20191220021717-ab39c6098bdb // indirect

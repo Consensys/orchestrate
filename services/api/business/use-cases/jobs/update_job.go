@@ -2,6 +2,7 @@ package jobs
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/consensys/orchestrate/pkg/errors"
@@ -51,7 +52,7 @@ func (uc *updateJobUseCase) Execute(ctx context.Context, job *entities.Job, next
 	}
 
 	if entities.IsFinalJobStatus(jobModel.Status) {
-		errMessage := "job status is final, cannot be updated"
+		errMessage := fmt.Sprintf("job status %s is final, cannot be updated", jobModel.Status)
 		logger.WithField("status", jobModel.Status).Error(errMessage)
 		return nil, errors.InvalidParameterError(errMessage).ExtendComponent(updateJobComponent)
 	}
@@ -206,7 +207,7 @@ func canUpdateStatus(nextStatus, status entities.JobStatus) bool {
 	case entities.StatusStored:
 		return status == entities.StatusStarted || status == entities.StatusRecovering
 	case entities.StatusFailed:
-		return status == entities.StatusStarted || status == entities.StatusRecovering || status == entities.StatusPending
+		return status == entities.StatusStarted || status == entities.StatusRecovering || status == entities.StatusPending || status == entities.StatusWarning || status == entities.StatusResending
 	default: // For warning, they can be added at any time
 		return true
 	}
