@@ -3,6 +3,7 @@ package schedules
 import (
 	"context"
 
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
 
@@ -34,12 +35,13 @@ func (uc createScheduleUseCase) WithDBTransaction(dbtx store.Tx) usecases.Create
 }
 
 // Execute validates and creates a new transaction schedule
-func (uc *createScheduleUseCase) Execute(ctx context.Context, schedule *entities.Schedule) (*entities.Schedule, error) {
+func (uc *createScheduleUseCase) Execute(ctx context.Context, schedule *entities.Schedule, userInfo *multitenancy.UserInfo) (*entities.Schedule, error) {
 	logger := uc.logger.WithContext(ctx)
 	logger.Debug("creating new schedule")
 
 	scheduleModel := parsers.NewScheduleModelFromEntities(schedule)
-
+	scheduleModel.TenantID = userInfo.TenantID
+	scheduleModel.OwnerID = userInfo.Username
 	if err := uc.db.Schedule().Insert(ctx, scheduleModel); err != nil {
 		return nil, errors.FromError(err).ExtendComponent(createScheduleComponent)
 	}

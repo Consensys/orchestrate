@@ -37,6 +37,7 @@ type Job struct {
 	ChainUUID    string
 	ScheduleUUID string
 	TenantID     string
+	OwnerID      string
 	Type         JobType
 	Status       JobStatus
 	Labels       map[string]string

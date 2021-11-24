@@ -4,6 +4,7 @@ package accounts
 
 import (
 	"context"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	parsers2 "github.com/consensys/orchestrate/services/api/business/parsers"
 	"testing"
 
@@ -23,17 +24,15 @@ func TestGetAccount_Execute(t *testing.T) {
 	accountAgent := mocks.NewMockAccountAgent(ctrl)
 	mockDB.EXPECT().Account().Return(accountAgent).AnyTimes()
 
+	userInfo := multitenancy.NewUserInfo("tenantOne", "username")
 	usecase := NewGetAccountUseCase(mockDB)
-
-	tenantID := "tenantID"
-	tenants := []string{tenantID}
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		iden := testutils.FakeAccountModel()
 
-		accountAgent.EXPECT().FindOneByAddress(gomock.Any(), iden.Address, tenants).Return(iden, nil)
+		accountAgent.EXPECT().FindOneByAddress(gomock.Any(), iden.Address, userInfo.AllowedTenants, userInfo.Username).Return(iden, nil)
 
-		resp, err := usecase.Execute(ctx, iden.Address, tenants)
+		resp, err := usecase.Execute(ctx, iden.Address, userInfo)
 
 		assert.NoError(t, err)
 		assert.Equal(t, parsers2.NewAccountEntityFromModels(iden), resp)
@@ -43,9 +42,9 @@ func TestGetAccount_Execute(t *testing.T) {
 		expectedErr := errors.NotFoundError("error")
 		acc := testutils.FakeAccountModel()
 
-		accountAgent.EXPECT().FindOneByAddress(gomock.Any(), acc.Address, tenants).Return(nil, expectedErr)
+		accountAgent.EXPECT().FindOneByAddress(gomock.Any(), acc.Address, userInfo.AllowedTenants, userInfo.Username).Return(nil, expectedErr)
 
-		_, err := usecase.Execute(ctx, acc.Address, tenants)
+		_, err := usecase.Execute(ctx, acc.Address, userInfo)
 
 		assert.Error(t, err)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(getAccountComponent), err)

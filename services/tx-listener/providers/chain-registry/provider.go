@@ -78,13 +78,17 @@ func (p *Provider) buildConfiguration(ctx context.Context, chains []*api.ChainRe
 	for _, chain := range chains {
 		duration, err := time.ParseDuration(chain.ListenerBackOffDuration)
 		if err != nil {
-			log.FromContext(ctx).WithField("tenant_id", chain.TenantID).WithField("chain", chain.UUID).
+			log.FromContext(ctx).
+				WithField("tenant_id", chain.TenantID).
+				WithField("owner_id", chain.OwnerID).
+				WithField("chain", chain.UUID).
 				Errorf("cannot parse duration: %s", chain.ListenerBackOffDuration)
 		}
 
 		msg.Configuration.Chains[chain.UUID] = &dynamic.Chain{
 			UUID:     chain.UUID,
 			TenantID: chain.TenantID,
+			OwnerID:  chain.OwnerID,
 			Name:     chain.Name,
 			URL:      utils.GetProxyURL(p.conf.ProxyURL, chain.UUID),
 			ChainID:  chain.ChainID,

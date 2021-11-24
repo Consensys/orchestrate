@@ -3,6 +3,7 @@ package jobs
 import (
 	"context"
 
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
 
@@ -38,25 +39,25 @@ func (uc createJobUseCase) WithDBTransaction(dbtx store.Tx) usecases.CreateJobUs
 }
 
 // Execute validates and creates a new transaction job
-func (uc *createJobUseCase) Execute(ctx context.Context, job *entities.Job, allowedTenants []string) (*entities.Job, error) {
+func (uc *createJobUseCase) Execute(ctx context.Context, job *entities.Job, userInfo *multitenancy.UserInfo) (*entities.Job, error) {
 	ctx = log.WithFields(ctx, log.Field("chain", job.ChainUUID), log.Field("schedule", job.ScheduleUUID))
 	logger := uc.logger.WithContext(ctx)
 	logger.Debug("creating new job")
 
-	chainID, err := uc.getChainID(ctx, job.ChainUUID, allowedTenants)
+	chainID, err := uc.getChainID(ctx, job.ChainUUID, userInfo)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(createJobComponent)
 	}
 	job.InternalData.ChainID = chainID
 
 	if job.Transaction.From != "" && job.Type != entities.EthereumRawTransaction {
-		err = uc.validateAccountAccess(ctx, job.Transaction.From, allowedTenants)
+		err = uc.validateAccountAccess(ctx, job.Transaction.From, userInfo)
 		if err != nil {
 			return nil, errors.FromError(err).ExtendComponent(createJobComponent)
 		}
 	}
 
-	schedule, err := uc.db.Schedule().FindOneByUUID(ctx, job.ScheduleUUID, allowedTenants)
+	schedule, err := uc.db.Schedule().FindOneByUUID(ctx, job.ScheduleUUID, userInfo.AllowedTenants, userInfo.Username)
 	if errors.IsNotFoundError(err) {
 		return nil, errors.InvalidParameterError("schedule does not exist").ExtendComponent(createJobComponent)
 	} else if err != nil {
@@ -83,7 +84,7 @@ func (uc *createJobUseCase) Execute(ctx context.Context, job *entities.Job, allo
 				return der
 			}
 
-			parentJobModel, der := tx.(store.Tx).Job().FindOneByUUID(ctx, parentJobUUID, allowedTenants, false)
+			parentJobModel, der := tx.(store.Tx).Job().FindOneByUUID(ctx, parentJobUUID, userInfo.AllowedTenants, userInfo.Username, false)
 			if der != nil {
 				return der
 			}
@@ -117,8 +118,8 @@ func (uc *createJobUseCase) Execute(ctx context.Context, job *entities.Job, allo
 	return parsers.NewJobEntityFromModels(jobModel), nil
 }
 
-func (uc *createJobUseCase) validateAccountAccess(ctx context.Context, address string, tenants []string) error {
-	_, err := uc.db.Account().FindOneByAddress(ctx, address, tenants)
+func (uc *createJobUseCase) validateAccountAccess(ctx context.Context, address string, userInfo *multitenancy.UserInfo) error {
+	_, err := uc.db.Account().FindOneByAddress(ctx, address, userInfo.AllowedTenants, userInfo.Username)
 	if errors.IsNotFoundError(err) {
 		return errors.InvalidParameterError("failed to get account")
 	}
@@ -129,8 +130,8 @@ func (uc *createJobUseCase) validateAccountAccess(ctx context.Context, address s
 	return nil
 }
 
-func (uc *createJobUseCase) getChainID(ctx context.Context, chainUUID string, tenants []string) (string, error) {
-	chain, err := uc.getChainUC.Execute(ctx, chainUUID, tenants)
+func (uc *createJobUseCase) getChainID(ctx context.Context, chainUUID string, userInfo *multitenancy.UserInfo) (string, error) {
+	chain, err := uc.getChainUC.Execute(ctx, chainUUID, userInfo)
 	if errors.IsNotFoundError(err) {
 		return "", errors.InvalidParameterError("failed to get chain")
 	}

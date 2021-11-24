@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/toolkit/database"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/pkg/utils/envelope"
@@ -47,11 +48,11 @@ func NewStartJobUseCase(
 }
 
 // Execute sends a job to the Kafka topic
-func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID string, allowedTenants []string) error {
+func (uc *startJobUseCase) Execute(ctx context.Context, jobUUID string, userInfo *multitenancy.UserInfo) error {
 	logger := uc.logger.WithContext(ctx).WithField("job", jobUUID)
 	logger.Debug("starting job")
 
-	jobModel, err := uc.db.Job().FindOneByUUID(ctx, jobUUID, allowedTenants, false)
+	jobModel, err := uc.db.Job().FindOneByUUID(ctx, jobUUID, userInfo.AllowedTenants, userInfo.Username, false)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(startJobComponent)
 	}

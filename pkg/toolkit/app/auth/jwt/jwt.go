@@ -8,10 +8,6 @@ import (
 	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 )
 
-const (
-	authPrefix = "Bearer "
-)
-
 type JWT struct {
 	validator Validator
 }
@@ -23,31 +19,32 @@ func New(validator Validator) *JWT {
 }
 
 // Check verifies the jwt token is valid and injects it in the context
-func (checker *JWT) Check(ctx context.Context) (context.Context, error) {
+func (checker *JWT) Check(ctx context.Context) (*multitenancy.UserInfo, error) {
 	// Extract Access Token from context
-	bearerToken, ok := authutils.ParseAuth(authPrefix, authutils.AuthorizationFromContext(ctx))
+	bearerToken, ok := authutils.ParseBearerToken(authutils.AuthorizationFromContext(ctx))
 	if !ok {
 		return nil, nil
 	}
 
 	// Parse and validate token injected in context
-	userClaims, err := checker.validator.ValidateToken(ctx, bearerToken)
+	claims, err := checker.validator.ValidateToken(ctx, bearerToken)
 	if err != nil {
-		return ctx, errors.UnauthorizedError(err.Error())
+		return nil, errors.UnauthorizedError(err.Error())
 	}
 
-	ctx = With(ctx, bearerToken)
+	userInfo := multitenancy.NewJWTUserInfo(claims, authutils.AuthorizationFromContext(ctx))
 
-	// Manage multitenancy
-	tenantID, err := multitenancy.TenantID(userClaims.TenantID, multitenancy.TenantIDFromContext(ctx))
+	// Impersonate tenant
+	err = userInfo.ImpersonateTenant(authutils.TenantIDFromContext(ctx))
 	if err != nil {
-		return ctx, err
+		return nil, err
 	}
 
-	allowedTenants := multitenancy.AllowedTenants(userClaims.TenantID, multitenancy.TenantIDFromContext(ctx))
+	// Impersonate username
+	err = userInfo.ImpersonateUsername(authutils.UsernameFromContext(ctx))
+	if err != nil {
+		return nil, err
+	}
 
-	ctx = multitenancy.WithTenantID(ctx, tenantID)
-	ctx = multitenancy.WithAllowedTenants(ctx, allowedTenants)
-
-	return ctx, nil
+	return userInfo, nil
 }

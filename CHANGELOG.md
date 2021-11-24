@@ -7,12 +7,18 @@
 * Support for new transaction pricing mechanism (eip-1559)
 * Support for go-quorum privacy privacy enhancements: `privacyFlags`, `mandatoryFor` 
 * Support for go-quorum private transaction with optional `privateFrom`. 
+* Support for `username` as additional constraint to control access over resources. Impersonation
+would be allowed only via API-KEY.
+* Support for nested tenants in custom claims, for example tenant `tenantOne:groupOne:subGroupOne` will have
+access to resources owned by `tenantOne` and `tenantOne:groupOne` and `tenantOne:groupOne:subGroupOne` would be 
+able to impersonate same tenants.
 
 ### ⚠ BREAKING CHANGES
 * Integration of Quorum Key Manager as replacement of Orchestrate Key Manager service
 * Removed endpoints `/accounts/{address}/sign` and `/accounts/{address}/verify-signature` in favor of `/accounts/{address}/sign-message` and `/accounts/verify-message` accordingly to EIP-191 standards
-* Deprecate usage of `AUTH_JWT_CERTIFICATE` in favor of `AUTH_JWT_ISSUER_URL` and `AUTH_JWT_AUDIENCE`
-* Deprecate usage of `AUTH_JWT_CLAIMS_NAMESPACE` in favor of standard claims using token `sub`
+* Removed usage of `AUTH_JWT_CERTIFICATE` in favor of `AUTH_JWT_ISSUER_URL` and `AUTH_JWT_AUDIENCE`
+* Removed usage of `AUTH_JWT_CLAIMS_NAMESPACE` in favor `AUTH_JWT_ORCHESTRATE_CLAIMS`.
+* In case of empty Orchestrate claims token subject, `sub`, is retrieved and used as tenantID.
 
 ### 🛠 Bug fixes
 * Incorrect server name verification using Postgres in `verify-ca` mode 

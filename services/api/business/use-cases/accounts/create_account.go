@@ -8,6 +8,7 @@ import (
 	"github.com/consensys/orchestrate/pkg/errors"
 	qkm "github.com/consensys/orchestrate/pkg/quorum-key-manager"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/pkg/utils"
 	"github.com/consensys/orchestrate/services/api/business/parsers"
@@ -43,13 +44,16 @@ func NewCreateAccountUseCase(db store.DB, searchUC usecases.SearchAccountsUseCas
 	}
 }
 
-func (uc *createAccountUseCase) Execute(ctx context.Context, account *entities.Account, privateKey hexutil.Bytes, chainName, tenantID string) (*entities.Account, error) {
+func (uc *createAccountUseCase) Execute(ctx context.Context, account *entities.Account, privateKey hexutil.Bytes, chainName string,
+	userInfo *multitenancy.UserInfo) (*entities.Account, error) {
 	ctx = log.WithFields(ctx, log.Field("alias", account.Alias))
 	logger := uc.logger.WithContext(ctx)
 
 	logger.Debug("creating new ethereum account")
 
-	accounts, err := uc.searchUC.Execute(ctx, &entities.AccountFilters{Aliases: []string{account.Alias}}, []string{tenantID})
+	accounts, err := uc.searchUC.Execute(ctx,
+		&entities.AccountFilters{Aliases: []string{account.Alias}, TenantID: userInfo.TenantID},
+		userInfo)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(createAccountComponent)
 	}
@@ -60,21 +64,23 @@ func (uc *createAccountUseCase) Execute(ctx context.Context, account *entities.A
 		return nil, errors.AlreadyExistsError(errMsg).ExtendComponent(createAccountComponent)
 	}
 
-	var accountID = generateKeyID(tenantID, account.Alias)
+	var accountID = generateKeyID(userInfo.TenantID, account.Alias)
 	var resp *qkmtypes.EthAccountResponse
 	if privateKey != nil {
 		resp, err = uc.keyManagerClient.ImportEthAccount(ctx, uc.storeName, &qkmtypes.ImportEthAccountRequest{
 			KeyID:      accountID,
 			PrivateKey: privateKey,
 			Tags: map[string]string{
-				qkm.TagIDAllowedTenants: tenantID,
+				qkm.TagIDAllowedTenants:  userInfo.TenantID,
+				qkm.TagIDAllowedUsername: userInfo.Username,
 			},
 		})
 	} else {
 		resp, err = uc.keyManagerClient.CreateEthAccount(ctx, uc.storeName, &qkmtypes.CreateEthAccountRequest{
 			KeyID: accountID,
 			Tags: map[string]string{
-				qkm.TagIDAllowedTenants: tenantID,
+				qkm.TagIDAllowedTenants:  userInfo.TenantID,
+				qkm.TagIDAllowedUsername: userInfo.Username,
 			},
 		})
 	}
@@ -88,10 +94,11 @@ func (uc *createAccountUseCase) Execute(ctx context.Context, account *entities.A
 	account.Address = resp.Address.String()
 	account.PublicKey = resp.PublicKey.String()
 	account.CompressedPublicKey = resp.CompressedPublicKey.String()
-	account.TenantID = tenantID
+	account.TenantID = userInfo.TenantID
+	account.OwnerID = userInfo.Username
 
 	// TODO Discuss decision made on allowing same account imported over different tenants
-	_, err = uc.db.Account().FindOneByAddress(ctx, account.Address, []string{tenantID})
+	_, err = uc.db.Account().FindOneByAddress(ctx, account.Address, userInfo.AllowedTenants, userInfo.Username)
 	if err == nil {
 		errMsg := "account already exists"
 		logger.Error(errMsg)
@@ -107,7 +114,7 @@ func (uc *createAccountUseCase) Execute(ctx context.Context, account *entities.A
 	}
 
 	if chainName != "" {
-		err = uc.fundAccountUC.Execute(ctx, account, chainName, tenantID)
+		err = uc.fundAccountUC.Execute(ctx, account, chainName, userInfo)
 		if err != nil {
 			return nil, errors.FromError(err).ExtendComponent(createAccountComponent)
 		}

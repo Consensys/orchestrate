@@ -25,6 +25,7 @@ func FormatJobResponse(job *entities.Job) *types.JobResponse {
 		Logs:          job.Logs,
 		Labels:        job.Labels,
 		TenantID:      job.TenantID,
+		OwnerID:       job.OwnerID,
 		Annotations:   types.FormatInternalDataToAnnotations(job.InternalData),
 		Type:          job.Type,
 		Status:        job.Status,

@@ -10,6 +10,7 @@ type Account struct {
 	PublicKey           string
 	CompressedPublicKey string
 	TenantID            string
+	OwnerID             string
 	Attributes          map[string]string
 	CreatedAt           time.Time
 	UpdatedAt           time.Time

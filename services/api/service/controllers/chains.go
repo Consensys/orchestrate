@@ -53,7 +53,7 @@ func (c *ChainsController) search(rw http.ResponseWriter, request *http.Request)
 		return
 	}
 
-	chains, err := c.ucs.SearchChains().Execute(ctx, filters, multitenancy.AllowedTenantsFromContext(ctx))
+	chains, err := c.ucs.SearchChains().Execute(ctx, filters, multitenancy.UserInfoValue(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -82,7 +82,7 @@ func (c *ChainsController) getOne(rw http.ResponseWriter, request *http.Request)
 	rw.Header().Set("Content-Type", "application/json")
 	ctx := request.Context()
 
-	chain, err := c.ucs.GetChain().Execute(ctx, mux.Vars(request)["uuid"], multitenancy.AllowedTenantsFromContext(ctx))
+	chain, err := c.ucs.GetChain().Execute(ctx, mux.Vars(request)["uuid"], multitenancy.UserInfoValue(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -116,8 +116,7 @@ func (c *ChainsController) update(rw http.ResponseWriter, request *http.Request)
 	}
 
 	uuid := mux.Vars(request)["uuid"]
-	allowedTenants := multitenancy.AllowedTenantsFromContext(ctx)
-	chain, err := c.ucs.UpdateChain().Execute(ctx, formatters.FormatUpdateChainRequest(chainRequest, uuid), allowedTenants)
+	chain, err := c.ucs.UpdateChain().Execute(ctx, formatters.FormatUpdateChainRequest(chainRequest, uuid), multitenancy.UserInfoValue(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -149,14 +148,13 @@ func (c *ChainsController) register(rw http.ResponseWriter, request *http.Reques
 	}
 
 	fromLatest := chainRequest.Listener.FromBlock == "" || chainRequest.Listener.FromBlock == "latest"
-	tenantID := multitenancy.TenantIDFromContext(ctx)
-	chain, err := formatters.FormatRegisterChainRequest(chainRequest, tenantID, fromLatest)
+	chain, err := formatters.FormatRegisterChainRequest(chainRequest, fromLatest)
 	if err != nil {
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	chain, err = c.ucs.RegisterChain().Execute(ctx, chain, fromLatest)
+	chain, err = c.ucs.RegisterChain().Execute(ctx, chain, fromLatest, multitenancy.UserInfoValue(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -180,9 +178,7 @@ func (c *ChainsController) delete(rw http.ResponseWriter, request *http.Request)
 	ctx := request.Context()
 
 	uuid := mux.Vars(request)["uuid"]
-	tenants := multitenancy.AllowedTenantsFromContext(ctx)
-
-	err := c.ucs.DeleteChain().Execute(ctx, uuid, tenants)
+	err := c.ucs.DeleteChain().Execute(ctx, uuid, multitenancy.UserInfoValue(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return

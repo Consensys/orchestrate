@@ -10,6 +10,7 @@ type ChainResponse struct {
 	UUID                      string                     `json:"uuid" example:"b4374e6f-b28a-4bad-b4fe-bda36eaf849c"`
 	Name                      string                     `json:"name" example:"mainnet"`
 	TenantID                  string                     `json:"tenantID" example:"tenant"`
+	OwnerID                   string                     `json:"ownerID,omitempty" example:"foo"`
 	URLs                      []string                   `json:"urls" example:"https://mainnet.infura.io/v3/a73136601e6f4924a0baa4ed880b535e"`
 	ChainID                   string                     `json:"chainID" example:"1"`
 	ListenerDepth             uint64                     `json:"listenerDepth" example:"0"`

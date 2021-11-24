@@ -12,7 +12,8 @@ type JobResponse struct {
 	ScheduleUUID  string                  `json:"scheduleUUID" example:"b4374e6f-b28a-4bad-b4fe-bda36eaf849c"`
 	NextJobUUID   string                  `json:"nextJobUUID,omitempty" example:"b4374e6f-b28a-4bad-b4fe-bda36eaf849c"`
 	ParentJobUUID string                  `json:"parentJobUUID,omitempty" example:"b4374e6f-b28a-4bad-b4fe-bda36eaf849c"`
-	TenantID      string                  `json:"tenantID,omitempty" example:"foo"`
+	TenantID      string                  `json:"tenantID" example:"foo"`
+	OwnerID       string                  `json:"ownerID,omitempty" example:"foo"`
 	Transaction   entities.ETHTransaction `json:"transaction"`
 	Logs          []*entities.Log         `json:"logs,omitempty"`
 	Labels        map[string]string       `json:"labels,omitempty"`

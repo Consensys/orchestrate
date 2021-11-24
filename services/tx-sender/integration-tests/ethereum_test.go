@@ -16,6 +16,7 @@ import (
 	"github.com/consensys/orchestrate/pkg/encoding/json"
 	encoding "github.com/consensys/orchestrate/pkg/encoding/proto"
 	quorumkeymanager "github.com/consensys/orchestrate/pkg/quorum-key-manager"
+	utils3 "github.com/consensys/orchestrate/pkg/toolkit/app/auth/utils"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/httputil"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
@@ -1324,7 +1325,7 @@ func fakeEnvelope() *tx.Envelope {
 	_ = envelope.SetDataString("0x")
 	_ = envelope.SetChainIDString("2888")
 	_ = envelope.SetChainUUID(chainUUID)
-	_ = envelope.SetHeadersValue(utils.TenantIDMetadata, "tenantID")
+	_ = envelope.SetHeadersValue(utils3.TenantIDHeader, "tenantID")
 	_ = envelope.SetPrivateFrom("A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=")
 	_ = envelope.SetPrivateFor([]string{"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=", "B1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="})
 

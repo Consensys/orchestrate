@@ -42,7 +42,7 @@ func (agent *PGSchedule) Insert(ctx context.Context, schedule *models.Schedule) 
 }
 
 // FindOneByUUID Finds a schedule in DB
-func (agent *PGSchedule) FindOneByUUID(ctx context.Context, scheduleUUID string, tenants []string) (*models.Schedule, error) {
+func (agent *PGSchedule) FindOneByUUID(ctx context.Context, scheduleUUID string, tenants []string, ownerID string) (*models.Schedule, error) {
 	schedule := &models.Schedule{}
 
 	query := agent.db.ModelContext(ctx, schedule).
@@ -51,7 +51,14 @@ func (agent *PGSchedule) FindOneByUUID(ctx context.Context, scheduleUUID string,
 		}).
 		Where("schedule.uuid = ?", scheduleUUID)
 
+	if ownerID != "" {
+		query = query.Where("owner_id = ? OR owner_id IS NULL", ownerID)
+	} else {
+		query = query.Where("owner_id IS NULL")
+	}
+
 	query = pg.WhereAllowedTenants(query, "schedule.tenant_id", tenants)
+	query = pg.WhereAllowedOwner(query, "owner_id", ownerID)
 
 	if err := pg.SelectOne(ctx, query); err != nil {
 		if !errors.IsNotFoundError(err) {
@@ -64,7 +71,7 @@ func (agent *PGSchedule) FindOneByUUID(ctx context.Context, scheduleUUID string,
 }
 
 // Search Finds schedules in DB
-func (agent *PGSchedule) FindAll(ctx context.Context, tenants []string) ([]*models.Schedule, error) {
+func (agent *PGSchedule) FindAll(ctx context.Context, tenants []string, ownerID string) ([]*models.Schedule, error) {
 	var schedules []*models.Schedule
 
 	query := agent.db.ModelContext(ctx, &schedules).
@@ -73,6 +80,7 @@ func (agent *PGSchedule) FindAll(ctx context.Context, tenants []string) ([]*mode
 		})
 
 	query = pg.WhereAllowedTenants(query, "schedule.tenant_id", tenants)
+	query = pg.WhereAllowedOwner(query, "owner_id", ownerID)
 
 	err := pg.Select(ctx, query)
 	if err != nil {

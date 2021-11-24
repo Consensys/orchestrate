@@ -6,6 +6,7 @@ package mock
 
 import (
 	context "context"
+	multitenancy "github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )
@@ -34,10 +35,10 @@ func (m *MockChecker) EXPECT() *MockCheckerMockRecorder {
 }
 
 // Check mocks base method
-func (m *MockChecker) Check(ctx context.Context) (context.Context, error) {
+func (m *MockChecker) Check(ctx context.Context) (*multitenancy.UserInfo, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Check", ctx)
-	ret0, _ := ret[0].(context.Context)
+	ret0, _ := ret[0].(*multitenancy.UserInfo)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

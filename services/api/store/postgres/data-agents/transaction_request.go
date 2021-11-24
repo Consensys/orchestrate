@@ -42,13 +42,14 @@ func (agent *PGTransactionRequest) Insert(ctx context.Context, txRequest *models
 	return nil
 }
 
-func (agent *PGTransactionRequest) FindOneByIdempotencyKey(ctx context.Context, idempotencyKey, tenantID string) (*models.TransactionRequest, error) {
+func (agent *PGTransactionRequest) FindOneByIdempotencyKey(ctx context.Context, idempotencyKey, tenantID, ownerID string) (*models.TransactionRequest, error) {
 	txRequest := &models.TransactionRequest{}
 	query := agent.db.ModelContext(ctx, txRequest).
 		Where("idempotency_key = ?", idempotencyKey).
 		Relation("Schedule")
 
 	query = query.Where("schedule.tenant_id = ?", tenantID)
+	query = pg.WhereAllowedOwner(query, "schedule.owner_id", ownerID)
 
 	err := pg.SelectOne(ctx, query)
 	if err != nil {
@@ -61,13 +62,14 @@ func (agent *PGTransactionRequest) FindOneByIdempotencyKey(ctx context.Context, 
 	return txRequest, nil
 }
 
-func (agent *PGTransactionRequest) FindOneByUUID(ctx context.Context, scheduleUUID string, tenants []string) (*models.TransactionRequest, error) {
+func (agent *PGTransactionRequest) FindOneByUUID(ctx context.Context, scheduleUUID string, tenants []string, ownerID string) (*models.TransactionRequest, error) {
 	txRequest := &models.TransactionRequest{}
 	query := agent.db.ModelContext(ctx, txRequest).
 		Where("schedule.uuid = ?", scheduleUUID).
 		Relation("Schedule")
 
 	query = pg.WhereAllowedTenants(query, "schedule.tenant_id", tenants)
+	query = pg.WhereAllowedOwner(query, "schedule.owner_id", ownerID)
 
 	err := pg.SelectOne(ctx, query)
 	if err != nil {
@@ -80,7 +82,7 @@ func (agent *PGTransactionRequest) FindOneByUUID(ctx context.Context, scheduleUU
 	return txRequest, nil
 }
 
-func (agent *PGTransactionRequest) Search(ctx context.Context, filters *entities.TransactionRequestFilters, tenants []string) ([]*models.TransactionRequest, error) {
+func (agent *PGTransactionRequest) Search(ctx context.Context, filters *entities.TransactionRequestFilters, tenants []string, ownerID string) ([]*models.TransactionRequest, error) {
 	var txRequests []*models.TransactionRequest
 
 	query := agent.db.ModelContext(ctx, &txRequests).Relation("Schedule")
@@ -90,6 +92,7 @@ func (agent *PGTransactionRequest) Search(ctx context.Context, filters *entities
 	}
 
 	query = pg.WhereAllowedTenants(query, "schedule.tenant_id", tenants)
+	query = pg.WhereAllowedOwner(query, "schedule.owner_id", ownerID)
 
 	err := pg.Select(ctx, query)
 	if err != nil {

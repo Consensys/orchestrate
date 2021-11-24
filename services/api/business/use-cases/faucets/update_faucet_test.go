@@ -24,18 +24,16 @@ func TestUpdateFaucet_Execute(t *testing.T) {
 	faucetAgent := mocks.NewMockFaucetAgent(ctrl)
 	mockDB.EXPECT().Faucet().Return(faucetAgent).AnyTimes()
 	faucet := testutils2.FakeFaucet()
-	tenantID := multitenancy.DefaultTenant
-	tenants := []string{tenantID}
-
+	userInfo := multitenancy.NewUserInfo("tenantOne", "username")
 	usecase := NewUpdateFaucetUseCase(mockDB)
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		faucetModel := parsers.NewFaucetModelFromEntity(faucet)
+		faucetModel.TenantID = userInfo.TenantID
+		faucetAgent.EXPECT().Update(gomock.Any(), faucetModel, userInfo.AllowedTenants).Return(nil)
+		faucetAgent.EXPECT().FindOneByUUID(gomock.Any(), faucet.UUID, userInfo.AllowedTenants).Return(faucetModel, nil)
 
-		faucetAgent.EXPECT().Update(gomock.Any(), faucetModel, tenants).Return(nil)
-		faucetAgent.EXPECT().FindOneByUUID(gomock.Any(), faucet.UUID, tenants).Return(faucetModel, nil)
-
-		resp, err := usecase.Execute(ctx, faucet, tenants)
+		resp, err := usecase.Execute(ctx, faucet, userInfo)
 
 		assert.NoError(t, err)
 		assert.Equal(t, parsers.NewFaucetFromModel(faucetModel), resp)
@@ -44,9 +42,9 @@ func TestUpdateFaucet_Execute(t *testing.T) {
 	t.Run("should fail with same error if update faucet fails", func(t *testing.T) {
 		expectedErr := errors.NotFoundError("error")
 
-		faucetAgent.EXPECT().Update(gomock.Any(), gomock.Any(), tenants).Return(expectedErr)
+		faucetAgent.EXPECT().Update(gomock.Any(), gomock.Any(), userInfo.AllowedTenants).Return(expectedErr)
 
-		resp, err := usecase.Execute(ctx, faucet, tenants)
+		resp, err := usecase.Execute(ctx, faucet, userInfo)
 
 		assert.Nil(t, resp)
 		assert.Error(t, err)
@@ -55,12 +53,13 @@ func TestUpdateFaucet_Execute(t *testing.T) {
 
 	t.Run("should fail with same error if findOne faucet fails", func(t *testing.T) {
 		faucetModel := parsers.NewFaucetModelFromEntity(faucet)
+		faucetModel.TenantID = userInfo.TenantID
 		expectedErr := errors.NotFoundError("error")
 
-		faucetAgent.EXPECT().Update(gomock.Any(), faucetModel, tenants).Return(nil)
-		faucetAgent.EXPECT().FindOneByUUID(gomock.Any(), faucet.UUID, tenants).Return(nil, expectedErr)
+		faucetAgent.EXPECT().Update(gomock.Any(), faucetModel, userInfo.AllowedTenants).Return(nil)
+		faucetAgent.EXPECT().FindOneByUUID(gomock.Any(), faucet.UUID, userInfo.AllowedTenants).Return(nil, expectedErr)
 
-		resp, err := usecase.Execute(ctx, faucet, tenants)
+		resp, err := usecase.Execute(ctx, faucet, userInfo)
 
 		assert.Nil(t, resp)
 		assert.Error(t, err)

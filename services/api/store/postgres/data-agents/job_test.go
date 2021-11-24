@@ -9,11 +9,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/services/api/store/models"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gofrs/uuid"
+	"github.com/stretchr/testify/require"
 
 	"github.com/consensys/orchestrate/pkg/errors"
 	pgTestUtils "github.com/consensys/orchestrate/pkg/toolkit/database/postgres/testutils"
@@ -25,19 +25,23 @@ import (
 
 type jobTestSuite struct {
 	suite.Suite
-	agents   *PGAgents
-	pg       *pgTestUtils.PGTestHelper
-	tenantID string
+	agents         *PGAgents
+	pg             *pgTestUtils.PGTestHelper
+	allowedTenants []string
+	tenantID       string
+	username       string
 }
 
 func TestPGJob(t *testing.T) {
 	s := new(jobTestSuite)
+	s.tenantID = "tenant"
+	s.allowedTenants = []string{s.tenantID, "_"}
+	s.username = "username"
 	suite.Run(t, s)
 }
 
 func (s *jobTestSuite) SetupSuite() {
 	s.pg, _ = pgTestUtils.NewPGTestHelper(nil, migrations.Collection)
-	s.tenantID = "tenantID"
 	s.pg.InitTestDB(s.T())
 }
 
@@ -59,8 +63,8 @@ func (s *jobTestSuite) TestPGJob_Insert() {
 
 	s.T().Run("should insert model successfully", func(t *testing.T) {
 		job := testutils.FakeJobModel(0)
-		err := insertJob(ctx, s.agents, job)
-		assert.NoError(s.T(), err)
+		err := s.insertJob(ctx, s.agents, job)
+		require.NoError(s.T(), err)
 
 		assert.NoError(t, err)
 		assert.NotEmpty(t, job.ID)
@@ -71,8 +75,8 @@ func (s *jobTestSuite) TestPGJob_Insert() {
 	s.T().Run("should insert model without UUID successfully", func(t *testing.T) {
 		job := testutils.FakeJobModel(0)
 		job.UUID = ""
-		err := insertJob(ctx, s.agents, job)
-		assert.NoError(s.T(), err)
+		err := s.insertJob(ctx, s.agents, job)
+		require.NoError(s.T(), err)
 
 		assert.NoError(t, err)
 		assert.NotEmpty(t, job.ID)
@@ -82,7 +86,7 @@ func (s *jobTestSuite) TestPGJob_Insert() {
 
 	s.T().Run("should update model successfully", func(t *testing.T) {
 		job := testutils.FakeJobModel(0)
-		err := insertJob(ctx, s.agents, job)
+		err := s.insertJob(ctx, s.agents, job)
 		assert.NoError(s.T(), err)
 
 		assert.NoError(t, err)
@@ -95,12 +99,12 @@ func (s *jobTestSuite) TestPGJob_Insert() {
 func (s *jobTestSuite) TestPGJob_Update() {
 	ctx := context.Background()
 	job := testutils.FakeJobModel(0)
-	err := insertJob(ctx, s.agents, job)
-	assert.NoError(s.T(), err)
+	err := s.insertJob(ctx, s.agents, job)
+	require.NoError(s.T(), err)
 
 	s.T().Run("should update model successfully", func(t *testing.T) {
 		newTx := testutils.FakeTransaction()
-		newSchedule := testutils.FakeSchedule("_")
+		newSchedule := testutils.FakeSchedule("", "")
 		err = s.agents.Transaction().Insert(ctx, newTx)
 		assert.NoError(t, err)
 		err = s.agents.Schedule().Insert(ctx, newSchedule)
@@ -125,14 +129,16 @@ func (s *jobTestSuite) TestPGJob_FindOneByUUID() {
 	ctx := context.Background()
 	job := testutils.FakeJobModel(0)
 	job.NextJobUUID = uuid.Must(uuid.NewV4()).String()
-	job.Logs = append(job.Logs, &models.Log{UUID: uuid.Must(uuid.NewV4()).String(), Status: entities.StatusStarted, Message: "created message"})
+	job.Logs = append(job.Logs, &models.Log{UUID: uuid.Must(uuid.NewV4()).String(), Status: entities.StatusStarted, 
+		Message: "created message"})
 	job.Schedule.TenantID = s.tenantID
+	job.Schedule.OwnerID = s.username
 
-	err := insertJob(ctx, s.agents, job)
-	assert.NoError(s.T(), err)
+	err := s.insertJob(ctx, s.agents, job)
+	require.NoError(s.T(), err)
 
 	s.T().Run("should get model successfully with sorted logs", func(t *testing.T) {
-		jobRetrieved, err := s.agents.Job().FindOneByUUID(ctx, job.UUID, []string{multitenancy.Wildcard}, true)
+		jobRetrieved, err := s.agents.Job().FindOneByUUID(ctx, job.UUID, s.allowedTenants, s.username, true)
 
 		assert.NoError(t, err)
 		assert.NotEmpty(t, jobRetrieved.ID)
@@ -149,14 +155,14 @@ func (s *jobTestSuite) TestPGJob_FindOneByUUID() {
 	})
 
 	s.T().Run("should get model successfully as tenant", func(t *testing.T) {
-		jobRetrieved, err := s.agents.Job().FindOneByUUID(ctx, job.UUID, []string{s.tenantID}, false)
+		jobRetrieved, err := s.agents.Job().FindOneByUUID(ctx, job.UUID, s.allowedTenants, s.username, false)
 
 		assert.NoError(t, err)
 		assert.NotEmpty(t, jobRetrieved.ID)
 	})
 
 	s.T().Run("should return NotFoundError if select fails", func(t *testing.T) {
-		_, err := s.agents.Job().FindOneByUUID(ctx, "b6fe7a2a-1a4d-49ca-99d8-8a34aa495ef0", []string{s.tenantID}, false)
+		_, err := s.agents.Job().FindOneByUUID(ctx, "b6fe7a2a-1a4d-49ca-99d8-8a34aa495ef0", s.allowedTenants, s.username, false)
 		assert.True(t, errors.IsNotFoundError(err))
 	})
 }
@@ -166,8 +172,9 @@ func (s *jobTestSuite) TestPGJob_LockOneByUUID() {
 	job := testutils.FakeJobModel(0)
 	job.Logs = append(job.Logs, &models.Log{UUID: uuid.Must(uuid.NewV4()).String(), Status: entities.StatusStarted, Message: "created message"})
 	job.Schedule.TenantID = s.tenantID
-	err := insertJob(ctx, s.agents, job)
-	assert.NoError(s.T(), err)
+	job.Schedule.OwnerID = s.username
+	err := s.insertJob(ctx, s.agents, job)
+	require.NoError(s.T(), err)
 
 	s.T().Run("should lock successfully", func(t *testing.T) {
 		dbtx0, err := s.pg.DB.Begin()
@@ -215,8 +222,9 @@ func (s *jobTestSuite) TestPGJob_Search() {
 	txHashOne := common.HexToHash("0x1")
 	job0.Transaction.Hash = txHashOne.String()
 	job0.Schedule.TenantID = s.tenantID
+	job0.Schedule.OwnerID = s.username
 	job0.IsParent = true
-	err := insertJob(ctx, s.agents, job0)
+	err := s.insertJob(ctx, s.agents, job0)
 	assert.NoError(s.T(), err)
 
 	// Job1 is the child of job0
@@ -225,20 +233,21 @@ func (s *jobTestSuite) TestPGJob_Search() {
 	job1.ChainUUID = job0.ChainUUID
 	job1.Transaction.Hash = txHashTwo.String()
 	job1.Schedule.TenantID = s.tenantID
+	job1.Schedule.OwnerID = s.username
 	job1.InternalData.ParentJobUUID = job0.UUID
 	job1.Logs[0].Status = entities.StatusPending
-	err = insertJob(ctx, s.agents, job1)
+	err = s.insertJob(ctx, s.agents, job1)
 	assert.NoError(s.T(), err)
 
 	s.T().Run("should find model successfully", func(t *testing.T) {
 		filters := &entities.JobFilters{
 			TxHashes:  []string{txHashOne.String()},
 			ChainUUID: job0.ChainUUID,
-			WithLogs: true,
+			WithLogs:  true,
 		}
-	
-		retrievedJobs, err := s.agents.Job().Search(ctx, filters, []string{s.tenantID})
-	
+
+		retrievedJobs, err := s.agents.Job().Search(ctx, filters, s.allowedTenants, s.username)
+
 		assert.NoError(t, err)
 		assert.NotEmpty(t, retrievedJobs[0].ID)
 		assert.Equal(t, job0.UUID, retrievedJobs[0].UUID)
@@ -249,39 +258,39 @@ func (s *jobTestSuite) TestPGJob_Search() {
 		assert.Equal(t, job0.Logs[0].UUID, retrievedJobs[0].Logs[0].UUID)
 		assert.Equal(t, job0.Logs[1].UUID, retrievedJobs[0].Logs[1].UUID)
 	})
-	
+
 	s.T().Run("should not find any model by txHashes", func(t *testing.T) {
 		filters := &entities.JobFilters{
 			TxHashes:  []string{"0x3"},
 			ChainUUID: job0.ChainUUID,
 		}
-	
-		retrievedJobs, err := s.agents.Job().Search(ctx, filters, []string{s.tenantID})
+
+		retrievedJobs, err := s.agents.Job().Search(ctx, filters, s.allowedTenants, s.username)
 		assert.NoError(t, err)
 		assert.Empty(t, retrievedJobs)
 	})
-	
+
 	s.T().Run("should not find any model by chainUUID", func(t *testing.T) {
 		filters := &entities.JobFilters{
 			TxHashes:  []string{txHashOne.String()},
 			ChainUUID: uuid.Must(uuid.NewV4()).String(),
 		}
-	
-		retrievedJobs, err := s.agents.Job().Search(ctx, filters, []string{s.tenantID})
+
+		retrievedJobs, err := s.agents.Job().Search(ctx, filters, s.allowedTenants, s.username)
 		assert.NoError(t, err)
 		assert.Empty(t, retrievedJobs)
 	})
-	
+
 	s.T().Run("should find models successfully by parentJobUUID", func(t *testing.T) {
 		// job0 is the parent so we retrieve the parent and all the children
 		filters := &entities.JobFilters{
 			ParentJobUUID: job0.UUID,
 		}
-	
-		retrievedJobs, err := s.agents.Job().Search(ctx, filters, []string{s.tenantID})
+
+		retrievedJobs, err := s.agents.Job().Search(ctx, filters, s.allowedTenants, s.username)
 		assert.NoError(t, err)
 		assert.Len(t, retrievedJobs, 2)
-	
+
 		assert.Equal(t, retrievedJobs[0].UUID, job0.UUID)
 		assert.Equal(t, retrievedJobs[1].InternalData.ParentJobUUID, job0.UUID)
 		assert.Equal(t, retrievedJobs[1].UUID, job1.UUID)
@@ -293,7 +302,7 @@ func (s *jobTestSuite) TestPGJob_Search() {
 			OnlyParents: true,
 		}
 
-		retrievedJobs, err := s.agents.Job().Search(ctx, filters, []string{s.tenantID})
+		retrievedJobs, err := s.agents.Job().Search(ctx, filters, s.allowedTenants, s.username)
 
 		assert.NoError(t, err)
 		assert.Len(t, retrievedJobs, 1)
@@ -302,8 +311,8 @@ func (s *jobTestSuite) TestPGJob_Search() {
 
 	s.T().Run("should find every inserted model successfully", func(t *testing.T) {
 		filters := &entities.JobFilters{}
-		retrievedJobs, err := s.agents.Job().Search(ctx, filters, []string{s.tenantID})
-	
+		retrievedJobs, err := s.agents.Job().Search(ctx, filters, s.allowedTenants, s.username)
+
 		assert.NoError(t, err)
 		assert.Equal(t, len(retrievedJobs), 2)
 	})
@@ -327,7 +336,7 @@ func (s *jobTestSuite) TestPGJob_ConnectionErr() {
 	})
 
 	s.T().Run("should return PostgresConnectionError if update fails", func(t *testing.T) {
-		_, err := s.agents.Job().FindOneByUUID(ctx, job.UUID, []string{job.Schedule.TenantID}, false)
+		_, err := s.agents.Job().FindOneByUUID(ctx, job.UUID, s.allowedTenants, s.username, false)
 		assert.True(t, errors.IsInternalError(err))
 	})
 
@@ -338,9 +347,10 @@ func (s *jobTestSuite) TestPGJob_ConnectionErr() {
 /**
 Persist Job entity and its related entities
 */
-func insertJob(ctx context.Context, agents *PGAgents, job *models.Job) error {
-	if _, err := agents.Chain().FindOneByUUID(ctx, job.ChainUUID, []string{}); errors.IsNotFoundError(err) {
+func (s *jobTestSuite) insertJob(ctx context.Context, agents *PGAgents, job *models.Job) error {
+	if _, err := agents.Chain().FindOneByUUID(ctx, job.ChainUUID, s.allowedTenants, s.username); errors.IsNotFoundError(err) {
 		chain := testutils.FakeChainModel()
+		chain.TenantID = s.tenantID
 		chain.UUID = job.ChainUUID
 		if err := agents.Chain().Insert(ctx, chain); err != nil {
 			return err

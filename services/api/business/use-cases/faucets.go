@@ -3,6 +3,7 @@ package usecases
 import (
 	"context"
 
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 )
 
@@ -17,25 +18,25 @@ type FaucetUseCases interface {
 }
 
 type RegisterFaucetUseCase interface {
-	Execute(ctx context.Context, faucet *entities.Faucet) (*entities.Faucet, error)
+	Execute(ctx context.Context, faucet *entities.Faucet, userInfo *multitenancy.UserInfo) (*entities.Faucet, error)
 }
 
 type UpdateFaucetUseCase interface {
-	Execute(ctx context.Context, faucet *entities.Faucet, tenants []string) (*entities.Faucet, error)
+	Execute(ctx context.Context, faucet *entities.Faucet, userInfo *multitenancy.UserInfo) (*entities.Faucet, error)
 }
 
 type GetFaucetUseCase interface {
-	Execute(ctx context.Context, uuid string, tenants []string) (*entities.Faucet, error)
+	Execute(ctx context.Context, uuid string, userInfo *multitenancy.UserInfo) (*entities.Faucet, error)
 }
 
 type SearchFaucetsUseCase interface {
-	Execute(ctx context.Context, filters *entities.FaucetFilters, tenants []string) ([]*entities.Faucet, error)
+	Execute(ctx context.Context, filters *entities.FaucetFilters, userInfo *multitenancy.UserInfo) ([]*entities.Faucet, error)
 }
 
 type DeleteFaucetUseCase interface {
-	Execute(ctx context.Context, uuid string, tenants []string) error
+	Execute(ctx context.Context, uuid string, userInfo *multitenancy.UserInfo) error
 }
 
 type GetFaucetCandidateUseCase interface {
-	Execute(ctx context.Context, account string, chain *entities.Chain, tenants []string) (*entities.Faucet, error)
+	Execute(ctx context.Context, account string, chain *entities.Chain, userInfo *multitenancy.UserInfo) (*entities.Faucet, error)
 }

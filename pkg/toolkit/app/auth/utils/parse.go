@@ -2,10 +2,15 @@ package utils
 
 import "strings"
 
-func ParseAuth(prefix, auth string) (string, bool) {
-	if len(auth) < len(prefix) || !strings.EqualFold(auth[:len(prefix)], prefix) {
+const (
+	AuthSeparator = ":"
+	BearerPrefix  = "Bearer "
+)
+
+func ParseBearerToken(auth string) (string, bool) {
+	if len(auth) < len(BearerPrefix) || !strings.EqualFold(auth[:len(BearerPrefix)], BearerPrefix) {
 		return "", false
 	}
 
-	return auth[len(prefix):], true
+	return auth[len(BearerPrefix):], true
 }

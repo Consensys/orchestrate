@@ -64,6 +64,7 @@ func NewJobEntityFromModels(jobModel *models.Job) *entities.Job {
 	if jobModel.Schedule != nil {
 		job.ScheduleUUID = jobModel.Schedule.UUID
 		job.TenantID = jobModel.Schedule.TenantID
+		job.OwnerID = jobModel.Schedule.OwnerID
 	}
 
 	if jobModel.Transaction != nil {

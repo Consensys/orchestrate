@@ -8,7 +8,6 @@ import (
 	"github.com/consensys/orchestrate/pkg/sdk/client"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	"github.com/consensys/orchestrate/pkg/types/entities"
-	"github.com/consensys/orchestrate/pkg/utils"
 	"github.com/consensys/orchestrate/pkg/utils/envelope"
 	utils2 "github.com/consensys/orchestrate/services/tx-sender/tx-sender/utils"
 	"google.golang.org/protobuf/proto"
@@ -110,10 +109,9 @@ func (listener *MessageListener) consumeClaimLoop(ctx context.Context, session s
 				Debug("message consumed")
 
 			jlogger := logger.WithField("job", evlp.GetJobUUID()).WithField("schedule", evlp.GetScheduleUUID())
-			tenantID := evlp.GetHeadersValue(utils.TenantIDMetadata)
-			job := envelope.NewJobFromEnvelope(evlp, tenantID)
+			job := envelope.NewJobFromEnvelope(evlp)
+			err = listener.processEnvelope(envelope.NewContextFromEnvelope(log.With(ctx, jlogger), evlp), evlp, job)
 
-			err = listener.processEnvelope(log.With(ctx, jlogger), evlp, job)
 			switch {
 			// If job exceeded number of retries, we must Notify, Update job to FAILED and Continue
 			case err != nil && errors.IsConnectionError(err):

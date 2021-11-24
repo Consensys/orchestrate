@@ -28,9 +28,7 @@ func TestSearchChains_Execute(t *testing.T) {
 	mockDB.EXPECT().Chain().Return(chainAgent).AnyTimes()
 
 	usecase := NewSearchChainsUseCase(mockDB)
-
-	tenantID := multitenancy.DefaultTenant
-	tenants := []string{tenantID}
+	userInfo := multitenancy.NewUserInfo("tenantOne", "username")
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		filters := &entities.ChainFilters{
@@ -38,9 +36,9 @@ func TestSearchChains_Execute(t *testing.T) {
 		}
 		chainModel := testutils.FakeChainModel()
 
-		chainAgent.EXPECT().Search(gomock.Any(), filters, tenants).Return([]*models.Chain{chainModel}, nil)
+		chainAgent.EXPECT().Search(gomock.Any(), filters, userInfo.AllowedTenants, userInfo.Username).Return([]*models.Chain{chainModel}, nil)
 
-		resp, err := usecase.Execute(ctx, filters, tenants)
+		resp, err := usecase.Execute(ctx, filters, userInfo)
 
 		assert.NoError(t, err)
 		assert.Equal(t, []*entities.Chain{parsers.NewChainFromModel(chainModel)}, resp)
@@ -49,9 +47,9 @@ func TestSearchChains_Execute(t *testing.T) {
 	t.Run("should fail with same error if search chains fails", func(t *testing.T) {
 		expectedErr := errors.PostgresConnectionError("error")
 
-		chainAgent.EXPECT().Search(gomock.Any(), nil, tenants).Return(nil, expectedErr)
+		chainAgent.EXPECT().Search(gomock.Any(), nil, userInfo.AllowedTenants, userInfo.Username).Return(nil, expectedErr)
 
-		resp, err := usecase.Execute(ctx, nil, tenants)
+		resp, err := usecase.Execute(ctx, nil, userInfo)
 
 		assert.Nil(t, resp)
 		assert.Error(t, err)

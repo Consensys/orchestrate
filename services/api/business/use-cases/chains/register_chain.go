@@ -5,6 +5,7 @@ import (
 
 	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/toolkit/database"
 	"github.com/consensys/orchestrate/pkg/toolkit/ethclient"
 	"github.com/consensys/orchestrate/pkg/types/entities"
@@ -34,12 +35,14 @@ func NewRegisterChainUseCase(db store.DB, searchChainsUC usecases.SearchChainsUs
 }
 
 // Execute registers a new chain
-func (uc *registerChainUseCase) Execute(ctx context.Context, chain *entities.Chain, fromLatest bool) (*entities.Chain, error) {
+func (uc *registerChainUseCase) Execute(ctx context.Context, chain *entities.Chain, fromLatest bool, userInfo *multitenancy.UserInfo) (*entities.Chain, error) {
 	ctx = log.WithFields(ctx, log.Field("chain_name", chain.Name))
 	logger := uc.logger.WithContext(ctx)
 	logger.Debug("registering new chain")
 
-	chains, err := uc.searchChainsUC.Execute(ctx, &entities.ChainFilters{Names: []string{chain.Name}}, []string{chain.TenantID})
+	chains, err := uc.searchChainsUC.Execute(ctx,
+		&entities.ChainFilters{Names: []string{chain.Name}, TenantID: userInfo.TenantID},
+		userInfo)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(registerChainComponent)
 	}
@@ -67,6 +70,8 @@ func (uc *registerChainUseCase) Execute(ctx context.Context, chain *entities.Cha
 	}
 
 	chainModel := parsers.NewChainModelFromEntity(chain)
+	chainModel.TenantID = userInfo.TenantID
+	chainModel.OwnerID = userInfo.Username
 	err = database.ExecuteInDBTx(uc.db, func(tx database.Tx) error {
 		der := tx.(store.Tx).Chain().Insert(ctx, chainModel)
 		if der != nil {

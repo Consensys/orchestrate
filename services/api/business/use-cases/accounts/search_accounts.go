@@ -3,6 +3,7 @@ package accounts
 import (
 	"context"
 
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	parsers2 "github.com/consensys/orchestrate/services/api/business/parsers"
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
 
@@ -26,8 +27,8 @@ func NewSearchAccountsUseCase(db store.DB) usecases.SearchAccountsUseCase {
 	}
 }
 
-func (uc *searchAccountsUseCase) Execute(ctx context.Context, filters *entities.AccountFilters, tenants []string) ([]*entities.Account, error) {
-	models, err := uc.db.Account().Search(ctx, filters, tenants)
+func (uc *searchAccountsUseCase) Execute(ctx context.Context, filters *entities.AccountFilters, userInfo *multitenancy.UserInfo) ([]*entities.Account, error) {
+	models, err := uc.db.Account().Search(ctx, filters, userInfo.AllowedTenants, userInfo.Username)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(searchAccountsComponent)
 	}

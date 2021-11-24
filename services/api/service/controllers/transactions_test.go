@@ -14,17 +14,17 @@ import (
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/services/api/business/use-cases"
 
+	"github.com/consensys/orchestrate/pkg/encoding/json"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
+	txschedulertypes "github.com/consensys/orchestrate/pkg/types/api"
+	"github.com/consensys/orchestrate/pkg/types/testutils"
+	"github.com/consensys/orchestrate/services/api/business/use-cases/mocks"
+	"github.com/consensys/orchestrate/services/api/service/formatters"
 	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"github.com/consensys/orchestrate/pkg/encoding/json"
-	"github.com/consensys/orchestrate/pkg/errors"
-	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
-	"github.com/consensys/orchestrate/pkg/types/testutils"
-	txschedulertypes "github.com/consensys/orchestrate/pkg/types/api"
-	"github.com/consensys/orchestrate/services/api/business/use-cases/mocks"
-	"github.com/consensys/orchestrate/services/api/service/formatters"
 )
 
 type transactionsControllerTestSuite struct {
@@ -37,7 +37,7 @@ type transactionsControllerTestSuite struct {
 	getTxUseCase          *mocks.MockGetTxUseCase
 	searchTxsUsecase      *mocks.MockSearchTransactionsUseCase
 	ctx                   context.Context
-	tenantID              string
+	userInfo              *multitenancy.UserInfo
 	defaultRetryInterval  time.Duration
 }
 
@@ -77,10 +77,9 @@ func (s *transactionsControllerTestSuite) SetupTest() {
 	s.sendTxUseCase = mocks.NewMockSendTxUseCase(ctrl)
 	s.getTxUseCase = mocks.NewMockGetTxUseCase(ctrl)
 	s.searchTxsUsecase = mocks.NewMockSearchTransactionsUseCase(ctrl)
-	s.tenantID = "tenantId"
 	s.defaultRetryInterval = time.Second * 2
-	s.ctx = context.WithValue(context.Background(), multitenancy.TenantIDKey, s.tenantID)
-	s.ctx = context.WithValue(s.ctx, multitenancy.AllowedTenantsKey, []string{s.tenantID})
+	s.userInfo = multitenancy.NewUserInfo("tenantOne", "username")
+	s.ctx = multitenancy.WithUserInfo(context.Background(), s.userInfo)
 
 	s.router = mux.NewRouter()
 	s.controller = NewTransactionsController(s)
@@ -107,7 +106,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_send() {
 		txRequestEntityResp := testutils.FakeTxRequest()
 
 		txRequestEntity := formatters.FormatSendTxRequest(txRequest, idempotencyKey)
-		s.sendContractTxUseCase.EXPECT().Execute(gomock.Any(), txRequestEntity, s.tenantID).Return(txRequestEntityResp, nil)
+		s.sendContractTxUseCase.EXPECT().Execute(gomock.Any(), txRequestEntity, s.userInfo).Return(txRequestEntityResp, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -132,8 +131,8 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_send() {
 		txRequestEntityResp := testutils.FakeTxRequest()
 
 		s.sendContractTxUseCase.EXPECT().
-			Execute(gomock.Any(), gomock.Any(), s.tenantID).
-			DoAndReturn(func(ctx context.Context, txReq *entities.TxRequest, tenantID string) (*entities.TxRequest, error) {
+			Execute(gomock.Any(), gomock.Any(), s.userInfo).
+			DoAndReturn(func(ctx context.Context, txReq *entities.TxRequest, userInfo *multitenancy.UserInfo) (*entities.TxRequest, error) {
 				txRequestEntityResp.IdempotencyKey = txReq.IdempotencyKey
 				return txRequestEntityResp, nil
 			})
@@ -155,7 +154,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_send() {
 			WithContext(s.ctx)
 
 		s.sendContractTxUseCase.EXPECT().
-			Execute(gomock.Any(), gomock.Any(), s.tenantID).
+			Execute(gomock.Any(), gomock.Any(), s.userInfo).
 			Return(nil, errors.InvalidParameterError("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -192,7 +191,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_deploy() {
 		txRequestEntityResp := testutils.FakeTxRequest()
 
 		txRequestEntity := formatters.FormatDeployContractRequest(txRequest, idempotencyKey)
-		s.sendDeployTxUseCase.EXPECT().Execute(gomock.Any(), txRequestEntity, s.tenantID).Return(txRequestEntityResp, nil)
+		s.sendDeployTxUseCase.EXPECT().Execute(gomock.Any(), txRequestEntity, s.userInfo).Return(txRequestEntityResp, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -211,7 +210,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_deploy() {
 		httpRequest := httptest.NewRequest(http.MethodPost, urlPath, bytes.NewReader(requestBytes)).WithContext(s.ctx)
 
 		s.sendDeployTxUseCase.EXPECT().
-			Execute(gomock.Any(), gomock.Any(), s.tenantID).
+			Execute(gomock.Any(), gomock.Any(), s.userInfo).
 			Return(nil, errors.InvalidParameterError("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -251,7 +250,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_sendRaw() {
 		txRequestEntityResp := testutils.FakeTxRequest()
 
 		txRequestEntity := formatters.FormatSendRawRequest(txRequest, idempotencyKey)
-		s.sendTxUseCase.EXPECT().Execute(gomock.Any(), txRequestEntity, "", s.tenantID).Return(txRequestEntityResp, nil)
+		s.sendTxUseCase.EXPECT().Execute(gomock.Any(), txRequestEntity, "", s.userInfo).Return(txRequestEntityResp, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -272,7 +271,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_sendRaw() {
 			WithContext(s.ctx)
 
 		s.sendTxUseCase.EXPECT().
-			Execute(gomock.Any(), gomock.Any(), "", s.tenantID).
+			Execute(gomock.Any(), gomock.Any(), "", s.userInfo).
 			Return(nil, errors.InvalidParameterError("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -312,7 +311,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_transfer() 
 		txRequestEntityResp := testutils.FakeTransferTxRequest()
 
 		txRequestEntity := formatters.FormatTransferRequest(txRequest, idempotencyKey)
-		s.sendTxUseCase.EXPECT().Execute(gomock.Any(), txRequestEntity, "", s.tenantID).Return(txRequestEntityResp, nil)
+		s.sendTxUseCase.EXPECT().Execute(gomock.Any(), txRequestEntity, "", s.userInfo).Return(txRequestEntityResp, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -333,7 +332,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_transfer() 
 			WithContext(s.ctx)
 
 		s.sendTxUseCase.EXPECT().
-			Execute(gomock.Any(), gomock.Any(), "", s.tenantID).
+			Execute(gomock.Any(), gomock.Any(), "", s.userInfo).
 			Return(nil, errors.InvalidParameterError("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -362,7 +361,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_getOne() {
 		httpRequest := httptest.NewRequest(http.MethodGet, urlPath, nil).WithContext(s.ctx)
 		txRequest := testutils.FakeTransferTxRequest()
 
-		s.getTxUseCase.EXPECT().Execute(gomock.Any(), uuid, []string{s.tenantID}).
+		s.getTxUseCase.EXPECT().Execute(gomock.Any(), uuid, s.userInfo).
 			Return(txRequest, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -377,7 +376,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_getOne() {
 		rw := httptest.NewRecorder()
 		httpRequest := httptest.NewRequest(http.MethodGet, urlPath, nil).WithContext(s.ctx)
 
-		s.getTxUseCase.EXPECT().Execute(gomock.Any(), uuid, []string{s.tenantID}).
+		s.getTxUseCase.EXPECT().Execute(gomock.Any(), uuid, s.userInfo).
 			Return(nil, errors.NotFoundError(""))
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -396,7 +395,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_search() {
 			IdempotencyKeys: []string{"mykey", "mykey1"},
 		}
 
-		s.searchTxsUsecase.EXPECT().Execute(gomock.Any(), expectedFilers, []string{s.tenantID}).
+		s.searchTxsUsecase.EXPECT().Execute(gomock.Any(), expectedFilers, s.userInfo).
 			Return([]*entities.TxRequest{txRequest}, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -422,7 +421,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_search() {
 			IdempotencyKeys: []string{"mykey", "mykey1"},
 		}
 
-		s.searchTxsUsecase.EXPECT().Execute(gomock.Any(), expectedFilers, []string{s.tenantID}).
+		s.searchTxsUsecase.EXPECT().Execute(gomock.Any(), expectedFilers, s.userInfo).
 			Return(nil, fmt.Errorf(""))
 
 		s.router.ServeHTTP(rw, httpRequest)

@@ -10,6 +10,7 @@ import (
 
 	authutils "github.com/consensys/orchestrate/pkg/toolkit/app/auth/utils"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/transport"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -33,14 +34,19 @@ func TestAuthHeadersTransport(t *testing.T) {
 	authorization := req.Header.Get("Authorization")
 	assert.Equal(t, "", authorization, "Authorization header shuld be empty")
 
+	authToken := "test-auth"
 	// Test setting authorization in context
-	ctxOne := authutils.WithAuthorization(context.Background(), "test-auth")
+	userInfo := &multitenancy.UserInfo{
+		AuthMode: multitenancy.AuthMethodJWT,
+		AuthValue: authToken,
+	}
+	ctxOne := multitenancy.WithUserInfo(context.Background(), userInfo)
 	req, _ = http.NewRequestWithContext(ctxOne, http.MethodGet, "", nil)
 	
 	_, _ = tt.RoundTrip(req)
 	assert.Equal(t, 2, mockTransport.roundTrips, "Mock transport should have been called")
 	authorization = req.Header.Get("Authorization")
-	assert.Equal(t, "test-auth", authorization, "Authorization header should be empty")
+	assert.Equal(t, authToken, authorization, "Authorization header should be empty")
 }
 
 func TestAuthAPIKeyHeadersTransport(t *testing.T) {
@@ -52,7 +58,7 @@ func TestAuthAPIKeyHeadersTransport(t *testing.T) {
 	req, _ := http.NewRequestWithContext(ctxTwo, http.MethodGet, "", nil)
 	_, _ = tt.RoundTrip(req)
 	assert.Equal(t, 1, mockTransport.roundTrips, "Mock transport should have been called")
-	authorization := req.Header.Get(authutils.APIKeyHeader)
+	authorization := authutils.GetAPIKeyHeaderValue(req)
 	assert.Equal(t, "test-auth", authorization, "Authorization header should be empty")
 }
 

@@ -98,11 +98,25 @@ func WhereAllowedTenants(query *orm.Query, field string, tenants []string) *orm.
 		return query
 	}
 
-	if utils.ContainsString(tenants, multitenancy.Wildcard) {
+	if utils.ContainsString(tenants, multitenancy.WildcardTenant) {
 		return query
 	}
 
 	return query.Where(fmt.Sprintf("%s IN (?)", field), pg.In(tenants))
+}
+
+func WhereAllowedOwner(query *orm.Query, field, ownerID string) *orm.Query {
+	if ownerID == multitenancy.WildcardOwner {
+		return query
+	}
+
+	if ownerID != "" {
+		query = query.Where(fmt.Sprintf("%s = ? OR %s IS NULL", field, field), ownerID)
+	} else {
+		query = query.Where(fmt.Sprintf("%s is NULL", field))
+	}
+
+	return query
 }
 
 func Checker(db orm.DB) healthz.Check {

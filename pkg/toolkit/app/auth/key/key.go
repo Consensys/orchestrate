@@ -20,7 +20,7 @@ func New(key string) *Key {
 }
 
 // Parse and verify the validity of the Token (UUID or Access) and return a struct for a JWT (JSON Web Token)
-func (checker *Key) Check(ctx context.Context) (context.Context, error) {
+func (checker *Key) Check(ctx context.Context) (*multitenancy.UserInfo, error) {
 	if checker == nil || checker.key == "" {
 		return nil, nil
 	}
@@ -32,24 +32,20 @@ func (checker *Key) Check(ctx context.Context) (context.Context, error) {
 	}
 
 	if apiKey != checker.key {
-		return ctx, errors.UnauthorizedError("invalid API key")
+		return nil, errors.UnauthorizedError("invalid API key")
 	}
 
-	// Manage multitenancy
-	tenantID, err := multitenancy.TenantID(
-		multitenancy.Wildcard,
-		multitenancy.TenantIDFromContext(ctx),
-	)
+	userInfo := multitenancy.NewAPIKeyUserInfo(apiKey)
+	err := userInfo.ImpersonateTenant(authutils.TenantIDFromContext(ctx))
 	if err != nil {
-		return ctx, err
+		return nil, err
 	}
 
-	allowedTenants := multitenancy.AllowedTenants(
-		multitenancy.Wildcard,
-		multitenancy.TenantIDFromContextNoFallback(ctx),
-	)
+	// Impersonate username
+	err = userInfo.ImpersonateUsername(authutils.UsernameFromContext(ctx))
+	if err != nil {
+		return nil, err
+	}
 
-	ctx = multitenancy.WithTenantID(ctx, tenantID)
-	ctx = multitenancy.WithAllowedTenants(ctx, allowedTenants)
-	return ctx, nil
+	return userInfo, nil
 }

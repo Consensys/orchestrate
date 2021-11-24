@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
 
 	"github.com/consensys/orchestrate/pkg/errors"
@@ -36,7 +37,8 @@ func (uc updateChildrenUseCase) WithDBTransaction(dbtx store.Tx) usecases.Update
 	return &uc
 }
 
-func (uc *updateChildrenUseCase) Execute(ctx context.Context, jobUUID, parentJobUUID string, nextStatus entities.JobStatus, allowedTenants []string) error {
+func (uc *updateChildrenUseCase) Execute(ctx context.Context, jobUUID, parentJobUUID string,
+	nextStatus entities.JobStatus, userInfo *multitenancy.UserInfo) error {
 	ctx = log.WithFields(ctx, log.Field("job", jobUUID), log.Field("parent_job", parentJobUUID),
 		log.Field("next_status", nextStatus))
 	logger := uc.logger.WithContext(ctx)
@@ -52,7 +54,7 @@ func (uc *updateChildrenUseCase) Execute(ctx context.Context, jobUUID, parentJob
 	jobsToUpdate, err := uc.db.Job().Search(ctx, &entities.JobFilters{
 		ParentJobUUID: parentJobUUID,
 		Status:        entities.StatusPending,
-	}, allowedTenants)
+	}, userInfo.AllowedTenants, userInfo.Username)
 
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(updateChildrenComponent)

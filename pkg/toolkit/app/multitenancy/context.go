@@ -4,49 +4,20 @@ import (
 	"context"
 )
 
-type tenancyCtxKey string
+type multitenancyCtxKey string
 
 const (
-	TenantIDKey       tenancyCtxKey = "tenant_id"
-	AllowedTenantsKey tenancyCtxKey = "allowed_tenants"
-	DefaultTenant                   = "_"
+	UserInfoKey multitenancyCtxKey = "user_info"
 )
 
-func WithTenantID(ctx context.Context, tenantID string) context.Context {
-	return context.WithValue(ctx, TenantIDKey, tenantID)
+func WithUserInfo(ctx context.Context, userInfo *UserInfo) context.Context {
+	return context.WithValue(ctx, UserInfoKey, userInfo)
 }
 
-func TenantIDValue(ctx context.Context) (string, bool) {
-	tenantID, ok := ctx.Value(TenantIDKey).(string)
-	return tenantID, ok
-}
-
-func TenantIDFromContext(ctx context.Context) string {
-	tenantID, ok := TenantIDValue(ctx)
-	if ok {
-		return tenantID
+func UserInfoValue(ctx context.Context) *UserInfo {
+	userInfo, ok := ctx.Value(UserInfoKey).(*UserInfo)
+	if !ok {
+		return nil
 	}
-
-	return DefaultTenant
-}
-
-func TenantIDFromContextNoFallback(ctx context.Context) string {
-	tenantID, ok := TenantIDValue(ctx)
-	if ok {
-		return tenantID
-	}
-
-	return ""
-}
-
-func WithAllowedTenants(ctx context.Context, tenants []string) context.Context {
-	return context.WithValue(ctx, AllowedTenantsKey, tenants)
-}
-
-func AllowedTenantsFromContext(ctx context.Context) []string {
-	tenants, ok := ctx.Value(AllowedTenantsKey).([]string)
-	if ok {
-		return tenants
-	}
-	return []string{DefaultTenant}
+	return userInfo
 }

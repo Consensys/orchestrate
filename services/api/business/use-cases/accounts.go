@@ -3,6 +3,7 @@ package usecases
 import (
 	"context"
 
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 )
@@ -17,21 +18,21 @@ type AccountUseCases interface {
 }
 
 type GetAccountUseCase interface {
-	Execute(ctx context.Context, address string, tenants []string) (*entities.Account, error)
+	Execute(ctx context.Context, address string, userInfo *multitenancy.UserInfo) (*entities.Account, error)
 }
 
 type CreateAccountUseCase interface {
-	Execute(ctx context.Context, identity *entities.Account, privateKey hexutil.Bytes, chainName, tenantID string) (*entities.Account, error)
+	Execute(ctx context.Context, identity *entities.Account, privateKey hexutil.Bytes, chainName string, userInfo *multitenancy.UserInfo) (*entities.Account, error)
 }
 
 type SearchAccountsUseCase interface {
-	Execute(ctx context.Context, filters *entities.AccountFilters, tenants []string) ([]*entities.Account, error)
+	Execute(ctx context.Context, filters *entities.AccountFilters, userInfo *multitenancy.UserInfo) ([]*entities.Account, error)
 }
 
 type UpdateAccountUseCase interface {
-	Execute(ctx context.Context, identity *entities.Account, tenants []string) (*entities.Account, error)
+	Execute(ctx context.Context, identity *entities.Account, userInfo *multitenancy.UserInfo) (*entities.Account, error)
 }
 
 type FundAccountUseCase interface {
-	Execute(ctx context.Context, identity *entities.Account, chainName string, tenantID string) error
+	Execute(ctx context.Context, identity *entities.Account, chainName string, userInfo *multitenancy.UserInfo) error
 }

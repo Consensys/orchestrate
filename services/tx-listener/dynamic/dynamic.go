@@ -26,6 +26,7 @@ type Listener struct {
 type Chain struct {
 	UUID     string
 	TenantID string
+	OwnerID  string
 	Name     string
 	URL      string
 	ChainID  string

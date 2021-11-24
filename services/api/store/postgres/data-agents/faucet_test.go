@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	"github.com/consensys/orchestrate/pkg/errors"
-	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/services/api/store/models/testutils"
 	"github.com/gofrs/uuid"
@@ -22,9 +21,10 @@ import (
 
 type faucetTestSuite struct {
 	suite.Suite
-	agents   *PGAgents
-	pg       *pgTestUtils.PGTestHelper
-	tenantID string
+	agents         *PGAgents
+	pg             *pgTestUtils.PGTestHelper
+	tenantID       string
+	allowedTenants []string
 }
 
 func TestPGFaucet(t *testing.T) {
@@ -35,6 +35,7 @@ func TestPGFaucet(t *testing.T) {
 func (s *faucetTestSuite) SetupSuite() {
 	s.pg, _ = pgTestUtils.NewPGTestHelper(nil, migrations.Collection)
 	s.tenantID = "tenantID"
+	s.allowedTenants = []string{s.tenantID, "_"}
 	s.pg.InitTestDB(s.T())
 }
 
@@ -56,6 +57,7 @@ func (s *faucetTestSuite) TestPGFaucet_Insert() {
 
 	s.T().Run("should insert model successfully", func(t *testing.T) {
 		faucet := testutils.FakeFaucetModel()
+		faucet.TenantID = s.tenantID
 		err := s.agents.Faucet().Insert(ctx, faucet)
 		assert.NoError(s.T(), err)
 
@@ -65,6 +67,7 @@ func (s *faucetTestSuite) TestPGFaucet_Insert() {
 
 	s.T().Run("should insert model without UUID successfully", func(t *testing.T) {
 		faucet := testutils.FakeFaucetModel()
+		faucet.TenantID = s.tenantID
 		faucet.Name = "faucet-insert-2"
 		faucet.UUID = ""
 		err := s.agents.Faucet().Insert(ctx, faucet)
@@ -78,17 +81,19 @@ func (s *faucetTestSuite) TestPGFaucet_Insert() {
 func (s *faucetTestSuite) TestPGFaucet_Update() {
 	ctx := context.Background()
 	faucet := testutils.FakeFaucetModel()
+	faucet.TenantID = s.tenantID
 	err := s.agents.Faucet().Insert(ctx, faucet)
 	assert.NoError(s.T(), err)
 
 	s.T().Run("should update model successfully", func(t *testing.T) {
 		newFaucet := testutils.FakeFaucetModel()
+		newFaucet.TenantID = s.tenantID
 		newFaucet.UUID = faucet.UUID
 
-		err = s.agents.Faucet().Update(ctx, newFaucet, []string{multitenancy.Wildcard})
+		err = s.agents.Faucet().Update(ctx, newFaucet, s.allowedTenants)
 		assert.NoError(t, err)
 
-		faucetRetrieved, _ := s.agents.Faucet().FindOneByUUID(ctx, faucet.UUID, []string{multitenancy.Wildcard})
+		faucetRetrieved, _ := s.agents.Faucet().FindOneByUUID(ctx, faucet.UUID, s.allowedTenants)
 		assert.Equal(t, newFaucet.ChainRule, faucetRetrieved.ChainRule)
 	})
 
@@ -100,7 +105,7 @@ func (s *faucetTestSuite) TestPGFaucet_Update() {
 
 		assert.NoError(t, err)
 
-		faucetRetrieved, _ := s.agents.Faucet().FindOneByUUID(ctx, faucet.UUID, []string{multitenancy.Wildcard})
+		faucetRetrieved, _ := s.agents.Faucet().FindOneByUUID(ctx, faucet.UUID, s.allowedTenants)
 		assert.Equal(t, newFaucet.ChainRule, faucetRetrieved.ChainRule)
 	})
 }
@@ -108,25 +113,26 @@ func (s *faucetTestSuite) TestPGFaucet_Update() {
 func (s *faucetTestSuite) TestPGFaucet_FindOneByUUID() {
 	ctx := context.Background()
 	faucet := testutils.FakeFaucetModel()
+	faucet.TenantID = s.tenantID
 	err := s.agents.Faucet().Insert(ctx, faucet)
 	assert.NoError(s.T(), err)
 
 	s.T().Run("should get model successfully", func(t *testing.T) {
-		faucetRetrieved, err := s.agents.Faucet().FindOneByUUID(ctx, faucet.UUID, []string{multitenancy.Wildcard})
+		faucetRetrieved, err := s.agents.Faucet().FindOneByUUID(ctx, faucet.UUID, s.allowedTenants)
 
 		assert.NoError(t, err)
 		assert.Equal(t, faucet.UUID, faucetRetrieved.UUID)
 	})
 
 	s.T().Run("should get model successfully as tenant", func(t *testing.T) {
-		faucetRetrieved, err := s.agents.Faucet().FindOneByUUID(ctx, faucet.UUID, []string{s.tenantID})
+		faucetRetrieved, err := s.agents.Faucet().FindOneByUUID(ctx, faucet.UUID, s.allowedTenants)
 
 		assert.NoError(t, err)
 		assert.NotEmpty(t, faucetRetrieved.UUID)
 	})
 
 	s.T().Run("should return NotFoundError if select fails", func(t *testing.T) {
-		_, err := s.agents.Faucet().FindOneByUUID(ctx, "b6fe7a2a-1a4d-49ca-99d8-8a34aa495ef0", []string{s.tenantID})
+		_, err := s.agents.Faucet().FindOneByUUID(ctx, "b6fe7a2a-1a4d-49ca-99d8-8a34aa495ef0", s.allowedTenants)
 		assert.True(t, errors.IsNotFoundError(err))
 	})
 }
@@ -135,10 +141,12 @@ func (s *faucetTestSuite) TestPGFaucet_Search() {
 	ctx := context.Background()
 
 	faucet0 := testutils.FakeFaucetModel()
+	faucet0.TenantID = s.tenantID
 	err := s.agents.Faucet().Insert(ctx, faucet0)
 	assert.NoError(s.T(), err)
 
 	faucet1 := testutils.FakeFaucetModel()
+	faucet1.TenantID = s.tenantID
 	faucet1.Name = "faucet-mainnet-2"
 	err = s.agents.Faucet().Insert(ctx, faucet1)
 	assert.NoError(s.T(), err)
@@ -149,7 +157,7 @@ func (s *faucetTestSuite) TestPGFaucet_Search() {
 			ChainRule: faucet0.ChainRule,
 		}
 
-		retrievedFaucets, err := s.agents.Faucet().Search(ctx, filters, []string{s.tenantID})
+		retrievedFaucets, err := s.agents.Faucet().Search(ctx, filters, s.allowedTenants)
 
 		assert.NoError(t, err)
 		assert.Equal(t, faucet0.UUID, retrievedFaucets[0].UUID)
@@ -162,7 +170,7 @@ func (s *faucetTestSuite) TestPGFaucet_Search() {
 			ChainRule: faucet0.ChainRule,
 		}
 
-		retrievedJobs, err := s.agents.Faucet().Search(ctx, filters, []string{s.tenantID})
+		retrievedJobs, err := s.agents.Faucet().Search(ctx, filters, s.allowedTenants)
 
 		assert.NoError(t, err)
 		assert.Empty(t, retrievedJobs)
@@ -174,7 +182,7 @@ func (s *faucetTestSuite) TestPGFaucet_Search() {
 			ChainRule: uuid.Must(uuid.NewV4()).String(),
 		}
 
-		retrievedJobs, err := s.agents.Faucet().Search(ctx, filters, []string{s.tenantID})
+		retrievedJobs, err := s.agents.Faucet().Search(ctx, filters, s.allowedTenants)
 
 		assert.NoError(t, err)
 		assert.Empty(t, retrievedJobs)
@@ -182,7 +190,7 @@ func (s *faucetTestSuite) TestPGFaucet_Search() {
 
 	s.T().Run("should find every inserted model successfully", func(t *testing.T) {
 		filters := &entities.FaucetFilters{}
-		retrievedJobs, err := s.agents.Faucet().Search(ctx, filters, []string{s.tenantID})
+		retrievedJobs, err := s.agents.Faucet().Search(ctx, filters, s.allowedTenants)
 
 		assert.NoError(t, err)
 		assert.Equal(t, len(retrievedJobs), 2)
@@ -195,18 +203,19 @@ func (s *faucetTestSuite) TestPGFaucet_ConnectionErr() {
 	// We drop the DB to make the test fail
 	s.pg.DropTestDB(s.T())
 	faucet := testutils.FakeFaucetModel()
+	faucet.TenantID = s.tenantID
 	s.T().Run("should return PostgresConnectionError if insert fails", func(t *testing.T) {
 		err := s.agents.Faucet().Insert(ctx, faucet)
 		assert.True(t, errors.IsInternalError(err))
 	})
 
 	s.T().Run("should return PostgresConnectionError if update fails", func(t *testing.T) {
-		err := s.agents.Faucet().Update(ctx, faucet, []string{faucet.TenantID})
+		err := s.agents.Faucet().Update(ctx, faucet, s.allowedTenants)
 		assert.True(t, errors.IsInternalError(err))
 	})
 
 	s.T().Run("should return PostgresConnectionError if findOne fails", func(t *testing.T) {
-		_, err := s.agents.Faucet().FindOneByUUID(ctx, faucet.UUID, []string{faucet.TenantID})
+		_, err := s.agents.Faucet().FindOneByUUID(ctx, faucet.UUID, s.allowedTenants)
 		assert.True(t, errors.IsInternalError(err))
 	})
 

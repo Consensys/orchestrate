@@ -3,6 +3,7 @@ package jobs
 import (
 	"context"
 
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
 
@@ -29,8 +30,8 @@ func NewSearchJobsUseCase(db store.DB) usecases.SearchJobsUseCase {
 }
 
 // Execute search jobs
-func (uc *searchJobsUseCase) Execute(ctx context.Context, filters *entities.JobFilters, tenants []string) ([]*entities.Job, error) {
-	jobModels, err := uc.db.Job().Search(ctx, filters, tenants)
+func (uc *searchJobsUseCase) Execute(ctx context.Context, filters *entities.JobFilters, userInfo *multitenancy.UserInfo) ([]*entities.Job, error) {
+	jobModels, err := uc.db.Job().Search(ctx, filters, userInfo.AllowedTenants, userInfo.Username)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(searchJobsComponent)
 	}

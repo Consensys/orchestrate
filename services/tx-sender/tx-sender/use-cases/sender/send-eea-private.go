@@ -45,6 +45,7 @@ func (uc *sendEEAPrivateTxUseCase) Execute(ctx context.Context, job *entities.Jo
 		ctx,
 		log.Field("job", job.UUID),
 		log.Field("tenant_id", job.TenantID),
+		log.Field("owner_id", job.OwnerID),
 		log.Field("schedule_uuid", job.ScheduleUUID),
 	), uc.logger)
 	logger := uc.logger.WithContext(ctx)

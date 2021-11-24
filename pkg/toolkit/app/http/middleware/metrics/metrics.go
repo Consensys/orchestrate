@@ -52,10 +52,22 @@ func (m *Metrics) Handler(h http.Handler) http.Handler {
 }
 
 func (m *Metrics) ServeHTTP(rw http.ResponseWriter, req *http.Request, next http.Handler) {
-	authLabels := append(
-		m.baseLabels,
-		"tenant_id", multitenancy.TenantIDFromContext(req.Context()),
-	)
+	authLabels := m.baseLabels
+
+	userInfo := multitenancy.UserInfoValue(req.Context())
+	if userInfo != nil {
+		authLabels = append(
+			authLabels,
+			"tenant_id", userInfo.TenantID,
+			"username", userInfo.Username,
+			"auth_method", userInfo.AuthMode,
+		)
+	} else {
+		authLabels = append(
+			authLabels,
+			"tenant_id", multitenancy.DefaultTenant,
+		)
+	}
 
 	// Increment Conn Gauge
 	connLabels := append(

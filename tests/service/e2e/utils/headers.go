@@ -2,7 +2,6 @@ package utils
 
 import (
 	authutils "github.com/consensys/orchestrate/pkg/toolkit/app/auth/utils"
-	"github.com/consensys/orchestrate/pkg/utils"
 )
 
 func GetHeaders(apiKey, tenant, jwtToken string) map[string]string {
@@ -12,11 +11,11 @@ func GetHeaders(apiKey, tenant, jwtToken string) map[string]string {
 	}
 
 	if tenant != "" {
-		headers[utils.TenantIDMetadata] = tenant
+		headers[authutils.TenantIDHeader] = tenant
 	}
 
 	if jwtToken != "" {
-		headers[utils.AuthorizationMetadata] = jwtToken
+		headers[authutils.AuthorizationHeader] = jwtToken
 	}
 
 	return headers

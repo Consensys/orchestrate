@@ -22,28 +22,30 @@ func (b *Builder) Build(_ context.Context, _ string, configuration interface{}) 
 		return nil, nil, fmt.Errorf("invalid configuration type (expected %T but got %T)", cfg, configuration)
 	}
 
-	m := New(cfg.Tenant)
+	m := New(cfg.Tenant, cfg.OwnerID)
 
 	return m.Handler, nil, nil
 }
 
 type MultiTenant struct {
 	tenantID string
+	ownerID  string
 }
 
-func New(tenantID string) *MultiTenant {
+func New(tenantID, ownerID string) *MultiTenant {
 	return &MultiTenant{
 		tenantID: tenantID,
+		ownerID:  ownerID,
 	}
 }
 
 func (m *MultiTenant) Handler(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-		tenants := multitenancy.AllowedTenantsFromContext(req.Context())
-		if !multitenancy.IsAllowed(m.tenantID, tenants) {
+		userInfo := multitenancy.UserInfoValue(req.Context())
+		if !userInfo.HasTenantAccess(m.tenantID) || !userInfo.HasUsernameAccess(m.ownerID) {
 			log.FromContext(req.Context()).
 				WithField("expected", m.tenantID).
-				WithField("received", tenants).
+				WithField("received", userInfo.AllowedTenants).
 				Debugf("invalid tenant id")
 			m.serveNotFound(rw)
 			return

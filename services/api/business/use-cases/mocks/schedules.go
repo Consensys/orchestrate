@@ -6,10 +6,11 @@ package mocks
 
 import (
 	context "context"
-	gomock "github.com/golang/mock/gomock"
+	multitenancy "github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	entities "github.com/consensys/orchestrate/pkg/types/entities"
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
 	store "github.com/consensys/orchestrate/services/api/store"
+	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )
 
@@ -102,18 +103,18 @@ func (m *MockCreateScheduleUseCase) EXPECT() *MockCreateScheduleUseCaseMockRecor
 }
 
 // Execute mocks base method
-func (m *MockCreateScheduleUseCase) Execute(ctx context.Context, schedule *entities.Schedule) (*entities.Schedule, error) {
+func (m *MockCreateScheduleUseCase) Execute(ctx context.Context, schedule *entities.Schedule, userInfo *multitenancy.UserInfo) (*entities.Schedule, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, schedule)
+	ret := m.ctrl.Call(m, "Execute", ctx, schedule, userInfo)
 	ret0, _ := ret[0].(*entities.Schedule)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Execute indicates an expected call of Execute
-func (mr *MockCreateScheduleUseCaseMockRecorder) Execute(ctx, schedule interface{}) *gomock.Call {
+func (mr *MockCreateScheduleUseCaseMockRecorder) Execute(ctx, schedule, userInfo interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockCreateScheduleUseCase)(nil).Execute), ctx, schedule)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockCreateScheduleUseCase)(nil).Execute), ctx, schedule, userInfo)
 }
 
 // WithDBTransaction mocks base method
@@ -154,18 +155,18 @@ func (m *MockGetScheduleUseCase) EXPECT() *MockGetScheduleUseCaseMockRecorder {
 }
 
 // Execute mocks base method
-func (m *MockGetScheduleUseCase) Execute(ctx context.Context, scheduleUUID string, tenants []string) (*entities.Schedule, error) {
+func (m *MockGetScheduleUseCase) Execute(ctx context.Context, scheduleUUID string, userInfo *multitenancy.UserInfo) (*entities.Schedule, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, scheduleUUID, tenants)
+	ret := m.ctrl.Call(m, "Execute", ctx, scheduleUUID, userInfo)
 	ret0, _ := ret[0].(*entities.Schedule)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Execute indicates an expected call of Execute
-func (mr *MockGetScheduleUseCaseMockRecorder) Execute(ctx, scheduleUUID, tenants interface{}) *gomock.Call {
+func (mr *MockGetScheduleUseCaseMockRecorder) Execute(ctx, scheduleUUID, userInfo interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockGetScheduleUseCase)(nil).Execute), ctx, scheduleUUID, tenants)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockGetScheduleUseCase)(nil).Execute), ctx, scheduleUUID, userInfo)
 }
 
 // MockSearchSchedulesUseCase is a mock of SearchSchedulesUseCase interface
@@ -192,16 +193,16 @@ func (m *MockSearchSchedulesUseCase) EXPECT() *MockSearchSchedulesUseCaseMockRec
 }
 
 // Execute mocks base method
-func (m *MockSearchSchedulesUseCase) Execute(ctx context.Context, tenants []string) ([]*entities.Schedule, error) {
+func (m *MockSearchSchedulesUseCase) Execute(ctx context.Context, userInfo *multitenancy.UserInfo) ([]*entities.Schedule, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, tenants)
+	ret := m.ctrl.Call(m, "Execute", ctx, userInfo)
 	ret0, _ := ret[0].([]*entities.Schedule)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Execute indicates an expected call of Execute
-func (mr *MockSearchSchedulesUseCaseMockRecorder) Execute(ctx, tenants interface{}) *gomock.Call {
+func (mr *MockSearchSchedulesUseCaseMockRecorder) Execute(ctx, userInfo interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSearchSchedulesUseCase)(nil).Execute), ctx, tenants)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSearchSchedulesUseCase)(nil).Execute), ctx, userInfo)
 }

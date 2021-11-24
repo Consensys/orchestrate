@@ -5,6 +5,7 @@ import (
 
 	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/services/api/business/parsers"
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
@@ -28,10 +29,10 @@ func NewSearchChainsUseCase(db store.DB) usecases.SearchChainsUseCase {
 }
 
 // Execute search faucets
-func (uc *searchChainsUseCase) Execute(ctx context.Context, filters *entities.ChainFilters, tenants []string) ([]*entities.Chain, error) {
+func (uc *searchChainsUseCase) Execute(ctx context.Context, filters *entities.ChainFilters, userInfo *multitenancy.UserInfo) ([]*entities.Chain, error) {
 	logger := uc.logger.WithContext(ctx)
 
-	chainModels, err := uc.db.Chain().Search(ctx, filters, tenants)
+	chainModels, err := uc.db.Chain().Search(ctx, filters, userInfo.AllowedTenants, userInfo.Username)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(searchChainsComponent)
 	}

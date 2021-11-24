@@ -56,7 +56,7 @@ func (c *SchedulesController) create(rw http.ResponseWriter, request *http.Reque
 		return
 	}
 
-	scheduleEntity, err := c.ucs.CreateSchedule().Execute(ctx, &entities.Schedule{TenantID: multitenancy.TenantIDFromContext(ctx)})
+	scheduleEntity, err := c.ucs.CreateSchedule().Execute(ctx, &entities.Schedule{}, multitenancy.UserInfoValue(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -83,7 +83,7 @@ func (c *SchedulesController) getOne(rw http.ResponseWriter, request *http.Reque
 
 	uuid := mux.Vars(request)["uuid"]
 
-	scheduleEntity, err := c.ucs.GetSchedule().Execute(ctx, uuid, multitenancy.AllowedTenantsFromContext(ctx))
+	scheduleEntity, err := c.ucs.GetSchedule().Execute(ctx, uuid, multitenancy.UserInfoValue(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -106,7 +106,7 @@ func (c *SchedulesController) getAll(rw http.ResponseWriter, request *http.Reque
 	rw.Header().Set("Content-Type", "application/json")
 	ctx := request.Context()
 
-	schedules, err := c.ucs.SearchSchedules().Execute(ctx, multitenancy.AllowedTenantsFromContext(ctx))
+	schedules, err := c.ucs.SearchSchedules().Execute(ctx, multitenancy.UserInfoValue(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return

@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	authutils "github.com/consensys/orchestrate/pkg/toolkit/app/auth/utils"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 )
 
 type ContextAuthHeadersTransport struct {
@@ -20,10 +21,10 @@ func NewContextAuthHeadersTransport() Middleware {
 }
 
 func (t *ContextAuthHeadersTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	if authutils.GetAuthorizationHeader(req) == "" {
-		authorization := authutils.AuthorizationFromContext(req.Context())
-		if authorization != "" {
-			authutils.AddAuthorizationHeaderValue(req, authorization)
+	userInfo := multitenancy.UserInfoValue(req.Context())
+	if userInfo != nil && userInfo.AuthMode == multitenancy.AuthMethodJWT {
+		if userInfo.AuthValue != "" {
+			authutils.AddAuthorizationHeaderValue(req, userInfo.AuthValue)
 		}
 	}
 

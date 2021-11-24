@@ -6,10 +6,11 @@ package mocks
 
 import (
 	context "context"
-	gomock "github.com/golang/mock/gomock"
+	multitenancy "github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	entities "github.com/consensys/orchestrate/pkg/types/entities"
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
 	store "github.com/consensys/orchestrate/services/api/store"
+	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )
 
@@ -144,18 +145,18 @@ func (m *MockCreateJobUseCase) EXPECT() *MockCreateJobUseCaseMockRecorder {
 }
 
 // Execute mocks base method
-func (m *MockCreateJobUseCase) Execute(ctx context.Context, job *entities.Job, tenants []string) (*entities.Job, error) {
+func (m *MockCreateJobUseCase) Execute(ctx context.Context, job *entities.Job, userInfo *multitenancy.UserInfo) (*entities.Job, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, job, tenants)
+	ret := m.ctrl.Call(m, "Execute", ctx, job, userInfo)
 	ret0, _ := ret[0].(*entities.Job)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Execute indicates an expected call of Execute
-func (mr *MockCreateJobUseCaseMockRecorder) Execute(ctx, job, tenants interface{}) *gomock.Call {
+func (mr *MockCreateJobUseCaseMockRecorder) Execute(ctx, job, userInfo interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockCreateJobUseCase)(nil).Execute), ctx, job, tenants)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockCreateJobUseCase)(nil).Execute), ctx, job, userInfo)
 }
 
 // WithDBTransaction mocks base method
@@ -196,18 +197,18 @@ func (m *MockGetJobUseCase) EXPECT() *MockGetJobUseCaseMockRecorder {
 }
 
 // Execute mocks base method
-func (m *MockGetJobUseCase) Execute(ctx context.Context, jobUUID string, tenants []string) (*entities.Job, error) {
+func (m *MockGetJobUseCase) Execute(ctx context.Context, jobUUID string, userInfo *multitenancy.UserInfo) (*entities.Job, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, jobUUID, tenants)
+	ret := m.ctrl.Call(m, "Execute", ctx, jobUUID, userInfo)
 	ret0, _ := ret[0].(*entities.Job)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Execute indicates an expected call of Execute
-func (mr *MockGetJobUseCaseMockRecorder) Execute(ctx, jobUUID, tenants interface{}) *gomock.Call {
+func (mr *MockGetJobUseCaseMockRecorder) Execute(ctx, jobUUID, userInfo interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockGetJobUseCase)(nil).Execute), ctx, jobUUID, tenants)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockGetJobUseCase)(nil).Execute), ctx, jobUUID, userInfo)
 }
 
 // MockSearchJobsUseCase is a mock of SearchJobsUseCase interface
@@ -234,18 +235,18 @@ func (m *MockSearchJobsUseCase) EXPECT() *MockSearchJobsUseCaseMockRecorder {
 }
 
 // Execute mocks base method
-func (m *MockSearchJobsUseCase) Execute(ctx context.Context, filters *entities.JobFilters, tenants []string) ([]*entities.Job, error) {
+func (m *MockSearchJobsUseCase) Execute(ctx context.Context, filters *entities.JobFilters, userInfo *multitenancy.UserInfo) ([]*entities.Job, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, filters, tenants)
+	ret := m.ctrl.Call(m, "Execute", ctx, filters, userInfo)
 	ret0, _ := ret[0].([]*entities.Job)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Execute indicates an expected call of Execute
-func (mr *MockSearchJobsUseCaseMockRecorder) Execute(ctx, filters, tenants interface{}) *gomock.Call {
+func (mr *MockSearchJobsUseCaseMockRecorder) Execute(ctx, filters, userInfo interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSearchJobsUseCase)(nil).Execute), ctx, filters, tenants)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSearchJobsUseCase)(nil).Execute), ctx, filters, userInfo)
 }
 
 // MockStartJobUseCase is a mock of StartJobUseCase interface
@@ -272,17 +273,17 @@ func (m *MockStartJobUseCase) EXPECT() *MockStartJobUseCaseMockRecorder {
 }
 
 // Execute mocks base method
-func (m *MockStartJobUseCase) Execute(ctx context.Context, jobUUID string, tenants []string) error {
+func (m *MockStartJobUseCase) Execute(ctx context.Context, jobUUID string, userInfo *multitenancy.UserInfo) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, jobUUID, tenants)
+	ret := m.ctrl.Call(m, "Execute", ctx, jobUUID, userInfo)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Execute indicates an expected call of Execute
-func (mr *MockStartJobUseCaseMockRecorder) Execute(ctx, jobUUID, tenants interface{}) *gomock.Call {
+func (mr *MockStartJobUseCaseMockRecorder) Execute(ctx, jobUUID, userInfo interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockStartJobUseCase)(nil).Execute), ctx, jobUUID, tenants)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockStartJobUseCase)(nil).Execute), ctx, jobUUID, userInfo)
 }
 
 // MockStartNextJobUseCase is a mock of StartNextJobUseCase interface
@@ -309,17 +310,17 @@ func (m *MockStartNextJobUseCase) EXPECT() *MockStartNextJobUseCaseMockRecorder 
 }
 
 // Execute mocks base method
-func (m *MockStartNextJobUseCase) Execute(ctx context.Context, prevJobUUID string, tenants []string) error {
+func (m *MockStartNextJobUseCase) Execute(ctx context.Context, prevJobUUID string, userInfo *multitenancy.UserInfo) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, prevJobUUID, tenants)
+	ret := m.ctrl.Call(m, "Execute", ctx, prevJobUUID, userInfo)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Execute indicates an expected call of Execute
-func (mr *MockStartNextJobUseCaseMockRecorder) Execute(ctx, prevJobUUID, tenants interface{}) *gomock.Call {
+func (mr *MockStartNextJobUseCaseMockRecorder) Execute(ctx, prevJobUUID, userInfo interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockStartNextJobUseCase)(nil).Execute), ctx, prevJobUUID, tenants)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockStartNextJobUseCase)(nil).Execute), ctx, prevJobUUID, userInfo)
 }
 
 // MockUpdateJobUseCase is a mock of UpdateJobUseCase interface
@@ -346,18 +347,18 @@ func (m *MockUpdateJobUseCase) EXPECT() *MockUpdateJobUseCaseMockRecorder {
 }
 
 // Execute mocks base method
-func (m *MockUpdateJobUseCase) Execute(ctx context.Context, jobEntity *entities.Job, nextStatus entities.JobStatus, logMessage string, tenants []string) (*entities.Job, error) {
+func (m *MockUpdateJobUseCase) Execute(ctx context.Context, jobEntity *entities.Job, nextStatus entities.JobStatus, logMessage string, userInfo *multitenancy.UserInfo) (*entities.Job, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, jobEntity, nextStatus, logMessage, tenants)
+	ret := m.ctrl.Call(m, "Execute", ctx, jobEntity, nextStatus, logMessage, userInfo)
 	ret0, _ := ret[0].(*entities.Job)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Execute indicates an expected call of Execute
-func (mr *MockUpdateJobUseCaseMockRecorder) Execute(ctx, jobEntity, nextStatus, logMessage, tenants interface{}) *gomock.Call {
+func (mr *MockUpdateJobUseCaseMockRecorder) Execute(ctx, jobEntity, nextStatus, logMessage, userInfo interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockUpdateJobUseCase)(nil).Execute), ctx, jobEntity, nextStatus, logMessage, tenants)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockUpdateJobUseCase)(nil).Execute), ctx, jobEntity, nextStatus, logMessage, userInfo)
 }
 
 // MockUpdateChildrenUseCase is a mock of UpdateChildrenUseCase interface
@@ -384,17 +385,17 @@ func (m *MockUpdateChildrenUseCase) EXPECT() *MockUpdateChildrenUseCaseMockRecor
 }
 
 // Execute mocks base method
-func (m *MockUpdateChildrenUseCase) Execute(ctx context.Context, jobUUID, parentJobUUID string, nextStatus entities.JobStatus, tenants []string) error {
+func (m *MockUpdateChildrenUseCase) Execute(ctx context.Context, jobUUID, parentJobUUID string, nextStatus entities.JobStatus, userInfo *multitenancy.UserInfo) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, jobUUID, parentJobUUID, nextStatus, tenants)
+	ret := m.ctrl.Call(m, "Execute", ctx, jobUUID, parentJobUUID, nextStatus, userInfo)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Execute indicates an expected call of Execute
-func (mr *MockUpdateChildrenUseCaseMockRecorder) Execute(ctx, jobUUID, parentJobUUID, nextStatus, tenants interface{}) *gomock.Call {
+func (mr *MockUpdateChildrenUseCaseMockRecorder) Execute(ctx, jobUUID, parentJobUUID, nextStatus, userInfo interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockUpdateChildrenUseCase)(nil).Execute), ctx, jobUUID, parentJobUUID, nextStatus, tenants)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockUpdateChildrenUseCase)(nil).Execute), ctx, jobUUID, parentJobUUID, nextStatus, userInfo)
 }
 
 // WithDBTransaction mocks base method
@@ -435,15 +436,15 @@ func (m *MockResendJobTxUseCase) EXPECT() *MockResendJobTxUseCaseMockRecorder {
 }
 
 // Execute mocks base method
-func (m *MockResendJobTxUseCase) Execute(ctx context.Context, jobUUID string, tenants []string) error {
+func (m *MockResendJobTxUseCase) Execute(ctx context.Context, jobUUID string, userInfo *multitenancy.UserInfo) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, jobUUID, tenants)
+	ret := m.ctrl.Call(m, "Execute", ctx, jobUUID, userInfo)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Execute indicates an expected call of Execute
-func (mr *MockResendJobTxUseCaseMockRecorder) Execute(ctx, jobUUID, tenants interface{}) *gomock.Call {
+func (mr *MockResendJobTxUseCaseMockRecorder) Execute(ctx, jobUUID, userInfo interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockResendJobTxUseCase)(nil).Execute), ctx, jobUUID, tenants)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockResendJobTxUseCase)(nil).Execute), ctx, jobUUID, userInfo)
 }

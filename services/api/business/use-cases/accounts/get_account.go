@@ -3,6 +3,7 @@ package accounts
 import (
 	"context"
 
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/services/api/business/parsers"
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
 
@@ -26,11 +27,11 @@ func NewGetAccountUseCase(db store.DB) usecases.GetAccountUseCase {
 	}
 }
 
-func (uc *getAccountUseCase) Execute(ctx context.Context, address string, tenants []string) (*entities.Account, error) {
+func (uc *getAccountUseCase) Execute(ctx context.Context, address string, userInfo *multitenancy.UserInfo) (*entities.Account, error) {
 	ctx = log.WithFields(ctx, log.Field("address", address))
 	logger := uc.logger.WithContext(ctx)
 
-	model, err := uc.db.Account().FindOneByAddress(ctx, address, tenants)
+	model, err := uc.db.Account().FindOneByAddress(ctx, address, userInfo.AllowedTenants, userInfo.Username)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(getAccountComponent)
 	}

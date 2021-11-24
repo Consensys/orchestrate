@@ -35,7 +35,7 @@ type chainsCtrlTestSuite struct {
 	updateChainUC   *mocks.MockUpdateChainUseCase
 	deleteChainUC   *mocks.MockDeleteChainUseCase
 	ctx             context.Context
-	tenants         []string
+	userInfo		 *multitenancy.UserInfo
 	router          *mux.Router
 }
 
@@ -70,16 +70,13 @@ func (s *chainsCtrlTestSuite) SetupTest() {
 	ctrl := gomock.NewController(s.T())
 	defer ctrl.Finish()
 
-	s.tenants = []string{"tenantID"}
 	s.registerChainUC = mocks.NewMockRegisterChainUseCase(ctrl)
 	s.getChainUC = mocks.NewMockGetChainUseCase(ctrl)
 	s.searchChainUC = mocks.NewMockSearchChainsUseCase(ctrl)
 	s.updateChainUC = mocks.NewMockUpdateChainUseCase(ctrl)
 	s.deleteChainUC = mocks.NewMockDeleteChainUseCase(ctrl)
-
-	s.ctx = context.Background()
-	s.ctx = context.WithValue(s.ctx, multitenancy.TenantIDKey, s.tenants[0])
-	s.ctx = context.WithValue(s.ctx, multitenancy.AllowedTenantsKey, s.tenants)
+	s.userInfo = multitenancy.NewUserInfo("tenantOne", "username")
+	s.ctx = multitenancy.WithUserInfo(context.Background(), s.userInfo)
 	s.router = mux.NewRouter()
 
 	controller := NewChainsController(s)
@@ -97,8 +94,8 @@ func (s *chainsCtrlTestSuite) TestRegister() {
 			NewRequest(http.MethodPost, chainsEndpoint, bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 
-		expectedChain, _ := formatters.FormatRegisterChainRequest(req, s.tenants[0], true)
-		s.registerChainUC.EXPECT().Execute(gomock.Any(), expectedChain, true).Return(chain, nil)
+		expectedChain, _ := formatters.FormatRegisterChainRequest(req, true)
+		s.registerChainUC.EXPECT().Execute(gomock.Any(), expectedChain, true, s.userInfo).Return(chain, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -119,8 +116,8 @@ func (s *chainsCtrlTestSuite) TestRegister() {
 			NewRequest(http.MethodPost, chainsEndpoint, bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 
-		expectedChain, _ := formatters.FormatRegisterChainRequest(req, s.tenants[0], false)
-		s.registerChainUC.EXPECT().Execute(gomock.Any(), expectedChain, false).Return(chain, nil)
+		expectedChain, _ := formatters.FormatRegisterChainRequest(req, false)
+		s.registerChainUC.EXPECT().Execute(gomock.Any(), expectedChain, false, s.userInfo).Return(chain, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -153,7 +150,7 @@ func (s *chainsCtrlTestSuite) TestRegister() {
 			NewRequest(http.MethodPost, chainsEndpoint, bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 
-		s.registerChainUC.EXPECT().Execute(gomock.Any(), gomock.Any(), true).Return(nil, fmt.Errorf("error"))
+		s.registerChainUC.EXPECT().Execute(gomock.Any(), gomock.Any(), true, s.userInfo).Return(nil, fmt.Errorf("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)
 		assert.Equal(t, http.StatusInternalServerError, rw.Code)
@@ -169,7 +166,7 @@ func (s *chainsCtrlTestSuite) TestGetOne() {
 			NewRequest(http.MethodGet, chainsEndpoint+"/chainUUID", nil).
 			WithContext(s.ctx)
 
-		s.getChainUC.EXPECT().Execute(gomock.Any(), "chainUUID", s.tenants).Return(chain, nil)
+		s.getChainUC.EXPECT().Execute(gomock.Any(), "chainUUID", s.userInfo).Return(chain, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -185,7 +182,7 @@ func (s *chainsCtrlTestSuite) TestGetOne() {
 			NewRequest(http.MethodGet, chainsEndpoint+"/chainUUID", nil).
 			WithContext(s.ctx)
 
-		s.getChainUC.EXPECT().Execute(gomock.Any(), "chainUUID", s.tenants).Return(nil, fmt.Errorf("error"))
+		s.getChainUC.EXPECT().Execute(gomock.Any(), "chainUUID", s.userInfo).Return(nil, fmt.Errorf("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)
 		assert.Equal(t, http.StatusInternalServerError, rw.Code)
@@ -204,7 +201,7 @@ func (s *chainsCtrlTestSuite) TestUpdate() {
 			WithContext(s.ctx)
 
 		s.updateChainUC.EXPECT().
-			Execute(gomock.Any(), formatters.FormatUpdateChainRequest(req, "chainUUID"), s.tenants).
+			Execute(gomock.Any(), formatters.FormatUpdateChainRequest(req, "chainUUID"), s.userInfo).
 			Return(chain, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -240,7 +237,7 @@ func (s *chainsCtrlTestSuite) TestUpdate() {
 			NewRequest(http.MethodPatch, chainsEndpoint+"/chainUUID", bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 
-		s.updateChainUC.EXPECT().Execute(gomock.Any(), gomock.Any(), s.tenants).Return(nil, fmt.Errorf("error"))
+		s.updateChainUC.EXPECT().Execute(gomock.Any(), gomock.Any(), s.userInfo).Return(nil, fmt.Errorf("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)
 		assert.Equal(t, http.StatusInternalServerError, rw.Code)
@@ -258,7 +255,7 @@ func (s *chainsCtrlTestSuite) TestSearch() {
 			WithContext(s.ctx)
 
 		expectedFilters := &entities.ChainFilters{Names: names}
-		s.searchChainUC.EXPECT().Execute(gomock.Any(), expectedFilters, s.tenants).Return([]*entities.Chain{chain}, nil)
+		s.searchChainUC.EXPECT().Execute(gomock.Any(), expectedFilters, s.userInfo).Return([]*entities.Chain{chain}, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -279,7 +276,7 @@ func (s *chainsCtrlTestSuite) TestDelete() {
 			NewRequest(http.MethodDelete, chainsEndpoint+"/chainUUID", nil).
 			WithContext(s.ctx)
 
-		s.deleteChainUC.EXPECT().Execute(gomock.Any(), "chainUUID", s.tenants).Return(nil)
+		s.deleteChainUC.EXPECT().Execute(gomock.Any(), "chainUUID", s.userInfo).Return(nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 

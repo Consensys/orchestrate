@@ -6,6 +6,7 @@ package mocks
 
 import (
 	context "context"
+	multitenancy "github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	entities "github.com/consensys/orchestrate/pkg/types/entities"
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
 	hexutil "github.com/ethereum/go-ethereum/common/hexutil"
@@ -116,18 +117,18 @@ func (m *MockGetAccountUseCase) EXPECT() *MockGetAccountUseCaseMockRecorder {
 }
 
 // Execute mocks base method
-func (m *MockGetAccountUseCase) Execute(ctx context.Context, address string, tenants []string) (*entities.Account, error) {
+func (m *MockGetAccountUseCase) Execute(ctx context.Context, address string, userInfo *multitenancy.UserInfo) (*entities.Account, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, address, tenants)
+	ret := m.ctrl.Call(m, "Execute", ctx, address, userInfo)
 	ret0, _ := ret[0].(*entities.Account)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Execute indicates an expected call of Execute
-func (mr *MockGetAccountUseCaseMockRecorder) Execute(ctx, address, tenants interface{}) *gomock.Call {
+func (mr *MockGetAccountUseCaseMockRecorder) Execute(ctx, address, userInfo interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockGetAccountUseCase)(nil).Execute), ctx, address, tenants)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockGetAccountUseCase)(nil).Execute), ctx, address, userInfo)
 }
 
 // MockCreateAccountUseCase is a mock of CreateAccountUseCase interface
@@ -154,18 +155,18 @@ func (m *MockCreateAccountUseCase) EXPECT() *MockCreateAccountUseCaseMockRecorde
 }
 
 // Execute mocks base method
-func (m *MockCreateAccountUseCase) Execute(ctx context.Context, identity *entities.Account, privateKey hexutil.Bytes, chainName, tenantID string) (*entities.Account, error) {
+func (m *MockCreateAccountUseCase) Execute(ctx context.Context, identity *entities.Account, privateKey hexutil.Bytes, chainName string, userInfo *multitenancy.UserInfo) (*entities.Account, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, identity, privateKey, chainName, tenantID)
+	ret := m.ctrl.Call(m, "Execute", ctx, identity, privateKey, chainName, userInfo)
 	ret0, _ := ret[0].(*entities.Account)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Execute indicates an expected call of Execute
-func (mr *MockCreateAccountUseCaseMockRecorder) Execute(ctx, identity, privateKey, chainName, tenantID interface{}) *gomock.Call {
+func (mr *MockCreateAccountUseCaseMockRecorder) Execute(ctx, identity, privateKey, chainName, userInfo interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockCreateAccountUseCase)(nil).Execute), ctx, identity, privateKey, chainName, tenantID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockCreateAccountUseCase)(nil).Execute), ctx, identity, privateKey, chainName, userInfo)
 }
 
 // MockSearchAccountsUseCase is a mock of SearchAccountsUseCase interface
@@ -192,18 +193,18 @@ func (m *MockSearchAccountsUseCase) EXPECT() *MockSearchAccountsUseCaseMockRecor
 }
 
 // Execute mocks base method
-func (m *MockSearchAccountsUseCase) Execute(ctx context.Context, filters *entities.AccountFilters, tenants []string) ([]*entities.Account, error) {
+func (m *MockSearchAccountsUseCase) Execute(ctx context.Context, filters *entities.AccountFilters, userInfo *multitenancy.UserInfo) ([]*entities.Account, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, filters, tenants)
+	ret := m.ctrl.Call(m, "Execute", ctx, filters, userInfo)
 	ret0, _ := ret[0].([]*entities.Account)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Execute indicates an expected call of Execute
-func (mr *MockSearchAccountsUseCaseMockRecorder) Execute(ctx, filters, tenants interface{}) *gomock.Call {
+func (mr *MockSearchAccountsUseCaseMockRecorder) Execute(ctx, filters, userInfo interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSearchAccountsUseCase)(nil).Execute), ctx, filters, tenants)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSearchAccountsUseCase)(nil).Execute), ctx, filters, userInfo)
 }
 
 // MockUpdateAccountUseCase is a mock of UpdateAccountUseCase interface
@@ -230,18 +231,18 @@ func (m *MockUpdateAccountUseCase) EXPECT() *MockUpdateAccountUseCaseMockRecorde
 }
 
 // Execute mocks base method
-func (m *MockUpdateAccountUseCase) Execute(ctx context.Context, identity *entities.Account, tenants []string) (*entities.Account, error) {
+func (m *MockUpdateAccountUseCase) Execute(ctx context.Context, identity *entities.Account, userInfo *multitenancy.UserInfo) (*entities.Account, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, identity, tenants)
+	ret := m.ctrl.Call(m, "Execute", ctx, identity, userInfo)
 	ret0, _ := ret[0].(*entities.Account)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Execute indicates an expected call of Execute
-func (mr *MockUpdateAccountUseCaseMockRecorder) Execute(ctx, identity, tenants interface{}) *gomock.Call {
+func (mr *MockUpdateAccountUseCaseMockRecorder) Execute(ctx, identity, userInfo interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockUpdateAccountUseCase)(nil).Execute), ctx, identity, tenants)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockUpdateAccountUseCase)(nil).Execute), ctx, identity, userInfo)
 }
 
 // MockFundAccountUseCase is a mock of FundAccountUseCase interface
@@ -268,15 +269,15 @@ func (m *MockFundAccountUseCase) EXPECT() *MockFundAccountUseCaseMockRecorder {
 }
 
 // Execute mocks base method
-func (m *MockFundAccountUseCase) Execute(ctx context.Context, identity *entities.Account, chainName, tenantID string) error {
+func (m *MockFundAccountUseCase) Execute(ctx context.Context, identity *entities.Account, chainName string, userInfo *multitenancy.UserInfo) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, identity, chainName, tenantID)
+	ret := m.ctrl.Call(m, "Execute", ctx, identity, chainName, userInfo)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Execute indicates an expected call of Execute
-func (mr *MockFundAccountUseCaseMockRecorder) Execute(ctx, identity, chainName, tenantID interface{}) *gomock.Call {
+func (mr *MockFundAccountUseCaseMockRecorder) Execute(ctx, identity, chainName, userInfo interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockFundAccountUseCase)(nil).Execute), ctx, identity, chainName, tenantID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockFundAccountUseCase)(nil).Execute), ctx, identity, chainName, userInfo)
 }

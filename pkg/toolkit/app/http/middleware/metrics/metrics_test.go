@@ -10,11 +10,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	mockhandler "github.com/consensys/orchestrate/pkg/toolkit/app/http/handler/mock"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/httputil"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/metrics/mock"
 	mockmetrics "github.com/consensys/orchestrate/pkg/toolkit/app/metrics/mock"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 )
@@ -73,22 +73,22 @@ func TestMetrics(t *testing.T) {
 	mockHTTP.EXPECT().OpenConnsGauge().Return(openConnsGauge)
 
 	reqsCounter.EXPECT().
-		With("entrypoint", "entrypoint-test", "service", "service-test", "tenant_id", "tenant-test", "method", "GET", "protocol", "http", "code", "200").
+		With("entrypoint", "entrypoint-test", "service", "service-test", "tenant_id", "tenant-test", "username", "username-test", "auth_method", "jwt", "method", "GET", "protocol", "http", "code", "200").
 		Return(reqsCounter)
 	reqsCounter.EXPECT().Add(float64(1))
 
 	tlsReqsCounter.EXPECT().
-		With("entrypoint", "entrypoint-test", "service", "service-test", "tenant_id", "tenant-test", "tls_version", "1.2", "tls_cipher", "TLS_RSA_WITH_AES_128_GCM_SHA256").
+		With("entrypoint", "entrypoint-test", "service", "service-test", "tenant_id", "tenant-test", "username", "username-test", "auth_method", "jwt", "tls_version", "1.2", "tls_cipher", "TLS_RSA_WITH_AES_128_GCM_SHA256").
 		Return(tlsReqsCounter)
 	tlsReqsCounter.EXPECT().Add(float64(1))
 
 	reqLatencyHistogram.EXPECT().
-		With("entrypoint", "entrypoint-test", "service", "service-test", "tenant_id", "tenant-test", "method", "GET", "protocol", "http", "code", "200").
+		With("entrypoint", "entrypoint-test", "service", "service-test", "tenant_id", "tenant-test", "username", "username-test", "auth_method", "jwt", "method", "GET", "protocol", "http", "code", "200").
 		Return(reqLatencyHistogram)
 	reqLatencyHistogram.EXPECT().Observe(gomock.Any())
 
 	openConnsGauge.EXPECT().
-		With("entrypoint", "entrypoint-test", "service", "service-test", "tenant_id", "tenant-test", "method", "GET", "protocol", "http").
+		With("entrypoint", "entrypoint-test", "service", "service-test", "tenant_id", "tenant-test", "username", "username-test", "auth_method", "jwt", "method", "GET", "protocol", "http").
 		Return(openConnsGauge)
 	openConnsGauge1 = openConnsGauge.EXPECT().Add(float64(1))
 	openConnsGauge.EXPECT().Add(float64(-1)).After(openConnsGauge1)
@@ -96,11 +96,15 @@ func TestMetrics(t *testing.T) {
 	mockHandler.EXPECT().ServeHTTP(gomock.Any(), gomock.Any())
 
 	req, _ = http.NewRequest(http.MethodGet, "http://test.com", nil)
-	req = req.WithContext(multitenancy.WithTenantID(req.Context(), "tenant-test"))
 	req.TLS = &tls.ConnectionState{
 		Version:     tls.VersionTLS12,
 		CipherSuite: tls.TLS_RSA_WITH_AES_128_GCM_SHA256,
 	}
 	rw = httptest.NewRecorder()
+	req = req.WithContext(multitenancy.WithUserInfo(context.Background(), &multitenancy.UserInfo{
+		TenantID: "tenant-test",
+		Username: "username-test",
+		AuthMode: "jwt",
+	}))
 	metrics(mockHandler).ServeHTTP(rw, req)
 }

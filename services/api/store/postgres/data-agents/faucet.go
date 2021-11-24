@@ -68,7 +68,9 @@ func (agent *PGFaucet) Search(ctx context.Context, filters *entities.FaucetFilte
 	if len(filters.Names) > 0 {
 		query = query.Where("name in (?)", gopg.In(filters.Names))
 	}
-
+	if filters.TenantID != "" {
+		query = query.Where("tenant_id = ?", filters.TenantID)
+	}
 	if filters.ChainRule != "" {
 		query = query.Where("chain_rule = ?", filters.ChainRule)
 	}

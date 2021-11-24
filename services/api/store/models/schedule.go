@@ -10,6 +10,7 @@ type Schedule struct {
 	ID        int `pg:"alias:id"`
 	UUID      string
 	TenantID  string `pg:"alias:tenant_id"`
+	OwnerID   string `pg:"alias:owner_id"`
 	Jobs      []*Job
 	CreatedAt time.Time `pg:"default:now()"`
 }

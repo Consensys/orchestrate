@@ -119,7 +119,10 @@ func (m *Manager) listenCommands(ctx context.Context) {
 }
 
 func (m *Manager) executeCommand(ctx context.Context, command *Command) {
-	ctx = log.WithFields(ctx, log.Field("chain", command.Chain.UUID), log.Field("tenant_id", command.Chain.TenantID))
+	ctx = log.WithFields(ctx,
+		log.Field("chain", command.Chain.UUID),
+		log.Field("tenant_id", command.Chain.TenantID),
+		log.Field("owner_id", command.Chain.OwnerID))
 	switch command.Type {
 	case START:
 		m.runSession(ethclientutils.RetryConnectionError(ctx, true), command.Chain)

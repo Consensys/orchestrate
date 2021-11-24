@@ -16,12 +16,13 @@ import (
 	"github.com/gofrs/uuid"
 )
 
-func FakeSchedule(tenantID string) *models.Schedule {
+func FakeSchedule(tenantID, username string) *models.Schedule {
 	if tenantID == "" {
 		tenantID = multitenancy.DefaultTenant
 	}
 	return &models.Schedule{
 		TenantID: tenantID,
+		OwnerID:  username,
 		UUID:     uuid.Must(uuid.NewV4()).String(),
 		Jobs: []*models.Job{{
 			UUID:        uuid.Must(uuid.NewV4()).String(),
@@ -34,7 +35,7 @@ func FakeSchedule(tenantID string) *models.Schedule {
 }
 
 func FakeTxRequest(scheduleID int) *models.TransactionRequest {
-	fakeSchedule := FakeSchedule("")
+	fakeSchedule := FakeSchedule("", "")
 	fakeSchedule.ID = scheduleID
 
 	return &models.TransactionRequest{
@@ -67,7 +68,7 @@ func FakeJobModel(scheduleID int) *models.Job {
 		Status:    entities.StatusCreated,
 		Schedule: &models.Schedule{
 			ID:       scheduleID,
-			TenantID: "_",
+			TenantID: multitenancy.DefaultTenant,
 			UUID:     uuid.Must(uuid.NewV4()).String(),
 		},
 		Transaction: FakeTransaction(),

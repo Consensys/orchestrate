@@ -39,7 +39,7 @@ type faucetsCtrlTestSuite struct {
 	deleteFaucetUC   *mocks.MockDeleteFaucetUseCase
 	keyManagerClient *mocks2.MockKeyManagerClient
 	ctx              context.Context
-	tenants          []string
+	userInfo		 *multitenancy.UserInfo
 	router           *mux.Router
 }
 
@@ -74,16 +74,14 @@ func (s *faucetsCtrlTestSuite) SetupTest() {
 	ctrl := gomock.NewController(s.T())
 	defer ctrl.Finish()
 
-	s.tenants = []string{"tenantID"}
 	s.registerFaucetUC = mocks.NewMockRegisterFaucetUseCase(ctrl)
 	s.getFaucetUC = mocks.NewMockGetFaucetUseCase(ctrl)
 	s.searchFaucetUC = mocks.NewMockSearchFaucetsUseCase(ctrl)
 	s.updateFaucetUC = mocks.NewMockUpdateFaucetUseCase(ctrl)
 	s.deleteFaucetUC = mocks.NewMockDeleteFaucetUseCase(ctrl)
 
-	s.ctx = context.Background()
-	s.ctx = context.WithValue(s.ctx, multitenancy.TenantIDKey, s.tenants[0])
-	s.ctx = context.WithValue(s.ctx, multitenancy.AllowedTenantsKey, s.tenants)
+	s.userInfo = multitenancy.NewUserInfo("tenantOne", "username")
+	s.ctx = multitenancy.WithUserInfo(context.Background(), s.userInfo)
 	s.router = mux.NewRouter()
 
 	controller := NewFaucetsController(s)
@@ -101,7 +99,7 @@ func (s *faucetsCtrlTestSuite) TestFaucetsController_Register() {
 			NewRequest(http.MethodPost, endpoint, bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 
-		s.registerFaucetUC.EXPECT().Execute(gomock.Any(), formatters.FormatRegisterFaucetRequest(req, s.tenants[0])).Return(faucet, nil)
+		s.registerFaucetUC.EXPECT().Execute(gomock.Any(), formatters.FormatRegisterFaucetRequest(req), s.userInfo).Return(faucet, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -134,7 +132,7 @@ func (s *faucetsCtrlTestSuite) TestFaucetsController_Register() {
 			NewRequest(http.MethodPost, endpoint, bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 
-		s.registerFaucetUC.EXPECT().Execute(gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error"))
+		s.registerFaucetUC.EXPECT().Execute(gomock.Any(), gomock.Any(), s.userInfo).Return(nil, fmt.Errorf("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)
 		assert.Equal(t, http.StatusInternalServerError, rw.Code)
@@ -150,7 +148,7 @@ func (s *faucetsCtrlTestSuite) TestFaucetsController_GetOne() {
 			NewRequest(http.MethodGet, endpoint+"/faucetUUID", nil).
 			WithContext(s.ctx)
 
-		s.getFaucetUC.EXPECT().Execute(gomock.Any(), "faucetUUID", s.tenants).Return(faucet, nil)
+		s.getFaucetUC.EXPECT().Execute(gomock.Any(), "faucetUUID", s.userInfo).Return(faucet, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -166,7 +164,7 @@ func (s *faucetsCtrlTestSuite) TestFaucetsController_GetOne() {
 			NewRequest(http.MethodGet, endpoint+"/faucetUUID", nil).
 			WithContext(s.ctx)
 
-		s.getFaucetUC.EXPECT().Execute(gomock.Any(), "faucetUUID", s.tenants).Return(nil, fmt.Errorf("error"))
+		s.getFaucetUC.EXPECT().Execute(gomock.Any(), "faucetUUID", s.userInfo).Return(nil, fmt.Errorf("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)
 		assert.Equal(t, http.StatusInternalServerError, rw.Code)
@@ -185,7 +183,7 @@ func (s *faucetsCtrlTestSuite) TestFaucetsController_Update() {
 			WithContext(s.ctx)
 
 		s.updateFaucetUC.EXPECT().
-			Execute(gomock.Any(), formatters.FormatUpdateFaucetRequest(req, "faucetUUID", s.tenants[0]), s.tenants).
+			Execute(gomock.Any(), formatters.FormatUpdateFaucetRequest(req, "faucetUUID"), s.userInfo).
 			Return(faucet, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -219,7 +217,7 @@ func (s *faucetsCtrlTestSuite) TestFaucetsController_Update() {
 			NewRequest(http.MethodPatch, endpoint+"/faucetUUID", bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 
-		s.updateFaucetUC.EXPECT().Execute(gomock.Any(), gomock.Any(), s.tenants).Return(nil, fmt.Errorf("error"))
+		s.updateFaucetUC.EXPECT().Execute(gomock.Any(), gomock.Any(), s.userInfo).Return(nil, fmt.Errorf("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)
 		assert.Equal(t, http.StatusInternalServerError, rw.Code)
@@ -241,7 +239,7 @@ func (s *faucetsCtrlTestSuite) TestFaucetsController_Search() {
 			Names:     names,
 			ChainRule: chainRule,
 		}
-		s.searchFaucetUC.EXPECT().Execute(gomock.Any(), expectedFilters, s.tenants).Return([]*entities.Faucet{faucet}, nil)
+		s.searchFaucetUC.EXPECT().Execute(gomock.Any(), expectedFilters, s.userInfo).Return([]*entities.Faucet{faucet}, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -264,7 +262,7 @@ func (s *faucetsCtrlTestSuite) TestFaucetsController_Delete() {
 			NewRequest(http.MethodDelete, endpoint+"/faucetUUID", bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 
-		s.deleteFaucetUC.EXPECT().Execute(gomock.Any(), "faucetUUID", s.tenants).Return(nil)
+		s.deleteFaucetUC.EXPECT().Execute(gomock.Any(), "faucetUUID", s.userInfo).Return(nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 

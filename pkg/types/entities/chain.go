@@ -6,6 +6,7 @@ type Chain struct {
 	UUID                      string
 	Name                      string
 	TenantID                  string
+	OwnerID                   string
 	URLs                      []string
 	ChainID                   string
 	ListenerDepth             uint64

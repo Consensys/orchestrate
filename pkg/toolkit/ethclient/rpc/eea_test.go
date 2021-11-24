@@ -80,7 +80,7 @@ func TestPrivateTransactionReceipt(t *testing.T) {
 		assert.Equal(t, uint64(0x1), receipt.Status, "TransactionReceipt receipt should have correct priv tx status")
 	})
 
-	//@TODO Following test only work running individually as there is context data leak on the way this test were implemented
+	// @TODO Following test only work running individually as there is context data leak on the way this test were implemented
 	// t.Run("should fetch receipts successfully ingoring private receipt", func(t *testing.T) {
 	// 	ctx := testutils.NewContext(nil, 200, testutils.MakeRespBody(nil, ""))
 	// 	// First tx receipt to fetch is the Public receipt

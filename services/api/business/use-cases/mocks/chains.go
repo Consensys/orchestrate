@@ -6,9 +6,10 @@ package mocks
 
 import (
 	context "context"
-	gomock "github.com/golang/mock/gomock"
+	multitenancy "github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	entities "github.com/consensys/orchestrate/pkg/types/entities"
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
+	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )
 
@@ -129,18 +130,18 @@ func (m *MockRegisterChainUseCase) EXPECT() *MockRegisterChainUseCaseMockRecorde
 }
 
 // Execute mocks base method
-func (m *MockRegisterChainUseCase) Execute(ctx context.Context, chain *entities.Chain, fromLatest bool) (*entities.Chain, error) {
+func (m *MockRegisterChainUseCase) Execute(ctx context.Context, chain *entities.Chain, fromLatest bool, userInfo *multitenancy.UserInfo) (*entities.Chain, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, chain, fromLatest)
+	ret := m.ctrl.Call(m, "Execute", ctx, chain, fromLatest, userInfo)
 	ret0, _ := ret[0].(*entities.Chain)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Execute indicates an expected call of Execute
-func (mr *MockRegisterChainUseCaseMockRecorder) Execute(ctx, chain, fromLatest interface{}) *gomock.Call {
+func (mr *MockRegisterChainUseCaseMockRecorder) Execute(ctx, chain, fromLatest, userInfo interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockRegisterChainUseCase)(nil).Execute), ctx, chain, fromLatest)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockRegisterChainUseCase)(nil).Execute), ctx, chain, fromLatest, userInfo)
 }
 
 // MockGetChainUseCase is a mock of GetChainUseCase interface
@@ -167,18 +168,18 @@ func (m *MockGetChainUseCase) EXPECT() *MockGetChainUseCaseMockRecorder {
 }
 
 // Execute mocks base method
-func (m *MockGetChainUseCase) Execute(ctx context.Context, uuid string, tenants []string) (*entities.Chain, error) {
+func (m *MockGetChainUseCase) Execute(ctx context.Context, uuid string, userInfo *multitenancy.UserInfo) (*entities.Chain, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, uuid, tenants)
+	ret := m.ctrl.Call(m, "Execute", ctx, uuid, userInfo)
 	ret0, _ := ret[0].(*entities.Chain)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Execute indicates an expected call of Execute
-func (mr *MockGetChainUseCaseMockRecorder) Execute(ctx, uuid, tenants interface{}) *gomock.Call {
+func (mr *MockGetChainUseCaseMockRecorder) Execute(ctx, uuid, userInfo interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockGetChainUseCase)(nil).Execute), ctx, uuid, tenants)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockGetChainUseCase)(nil).Execute), ctx, uuid, userInfo)
 }
 
 // MockSearchChainsUseCase is a mock of SearchChainsUseCase interface
@@ -205,18 +206,18 @@ func (m *MockSearchChainsUseCase) EXPECT() *MockSearchChainsUseCaseMockRecorder 
 }
 
 // Execute mocks base method
-func (m *MockSearchChainsUseCase) Execute(ctx context.Context, filters *entities.ChainFilters, tenants []string) ([]*entities.Chain, error) {
+func (m *MockSearchChainsUseCase) Execute(ctx context.Context, filters *entities.ChainFilters, userInfo *multitenancy.UserInfo) ([]*entities.Chain, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, filters, tenants)
+	ret := m.ctrl.Call(m, "Execute", ctx, filters, userInfo)
 	ret0, _ := ret[0].([]*entities.Chain)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Execute indicates an expected call of Execute
-func (mr *MockSearchChainsUseCaseMockRecorder) Execute(ctx, filters, tenants interface{}) *gomock.Call {
+func (mr *MockSearchChainsUseCaseMockRecorder) Execute(ctx, filters, userInfo interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSearchChainsUseCase)(nil).Execute), ctx, filters, tenants)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSearchChainsUseCase)(nil).Execute), ctx, filters, userInfo)
 }
 
 // MockUpdateChainUseCase is a mock of UpdateChainUseCase interface
@@ -243,18 +244,18 @@ func (m *MockUpdateChainUseCase) EXPECT() *MockUpdateChainUseCaseMockRecorder {
 }
 
 // Execute mocks base method
-func (m *MockUpdateChainUseCase) Execute(ctx context.Context, chain *entities.Chain, tenants []string) (*entities.Chain, error) {
+func (m *MockUpdateChainUseCase) Execute(ctx context.Context, chain *entities.Chain, userInfo *multitenancy.UserInfo) (*entities.Chain, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, chain, tenants)
+	ret := m.ctrl.Call(m, "Execute", ctx, chain, userInfo)
 	ret0, _ := ret[0].(*entities.Chain)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Execute indicates an expected call of Execute
-func (mr *MockUpdateChainUseCaseMockRecorder) Execute(ctx, chain, tenants interface{}) *gomock.Call {
+func (mr *MockUpdateChainUseCaseMockRecorder) Execute(ctx, chain, userInfo interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockUpdateChainUseCase)(nil).Execute), ctx, chain, tenants)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockUpdateChainUseCase)(nil).Execute), ctx, chain, userInfo)
 }
 
 // MockDeleteChainUseCase is a mock of DeleteChainUseCase interface
@@ -281,15 +282,15 @@ func (m *MockDeleteChainUseCase) EXPECT() *MockDeleteChainUseCaseMockRecorder {
 }
 
 // Execute mocks base method
-func (m *MockDeleteChainUseCase) Execute(ctx context.Context, uuid string, tenants []string) error {
+func (m *MockDeleteChainUseCase) Execute(ctx context.Context, uuid string, userInfo *multitenancy.UserInfo) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, uuid, tenants)
+	ret := m.ctrl.Call(m, "Execute", ctx, uuid, userInfo)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Execute indicates an expected call of Execute
-func (mr *MockDeleteChainUseCaseMockRecorder) Execute(ctx, uuid, tenants interface{}) *gomock.Call {
+func (mr *MockDeleteChainUseCaseMockRecorder) Execute(ctx, uuid, userInfo interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockDeleteChainUseCase)(nil).Execute), ctx, uuid, tenants)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockDeleteChainUseCase)(nil).Execute), ctx, uuid, userInfo)
 }

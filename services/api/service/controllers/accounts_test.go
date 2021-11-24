@@ -13,7 +13,6 @@ import (
 
 	qkm "github.com/consensys/orchestrate/pkg/quorum-key-manager"
 	"github.com/consensys/orchestrate/pkg/types/api"
-	"github.com/consensys/orchestrate/pkg/utils"
 	"github.com/consensys/orchestrate/services/api/business/use-cases"
 	"github.com/consensys/orchestrate/services/api/service/formatters"
 	qkmmock "github.com/consensys/quorum-key-manager/pkg/client/mock"
@@ -41,7 +40,7 @@ type accountsCtrlTestSuite struct {
 	fundAccountUC    *mocks.MockFundAccountUseCase
 	keyManagerClient *qkmmock.MockKeyManagerClient
 	ctx              context.Context
-	tenants          []string
+	userInfo		 *multitenancy.UserInfo
 	router           *mux.Router
 }
 
@@ -82,16 +81,14 @@ func (s *accountsCtrlTestSuite) SetupTest() {
 	ctrl := gomock.NewController(s.T())
 	defer ctrl.Finish()
 
-	s.tenants = []string{"tenantID"}
 	qkm.SetGlobalStoreName(globalStoreName)
 	s.createAccountUC = mocks.NewMockCreateAccountUseCase(ctrl)
 	s.getAccountUC = mocks.NewMockGetAccountUseCase(ctrl)
 	s.searchAccountUC = mocks.NewMockSearchAccountsUseCase(ctrl)
 	s.updateAccountUC = mocks.NewMockUpdateAccountUseCase(ctrl)
 	s.keyManagerClient = qkmmock.NewMockKeyManagerClient(ctrl)
-	s.ctx = context.Background()
-	s.ctx = context.WithValue(s.ctx, multitenancy.TenantIDKey, s.tenants[0])
-	s.ctx = context.WithValue(s.ctx, multitenancy.AllowedTenantsKey, s.tenants)
+	s.userInfo = multitenancy.NewUserInfo("tenantOne", "username")
+	s.ctx = multitenancy.WithUserInfo(context.Background(), s.userInfo)
 	s.router = mux.NewRouter()
 
 	controller := NewAccountsController(s, s.keyManagerClient)
@@ -110,7 +107,7 @@ func (s *accountsCtrlTestSuite) TestAccountController_Create() {
 			NewRequest(http.MethodPost, "/accounts", bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 
-		s.createAccountUC.EXPECT().Execute(gomock.Any(), gomock.Any(), nil, req.Chain, s.tenants[0]).Return(accResp, nil)
+		s.createAccountUC.EXPECT().Execute(gomock.Any(), gomock.Any(), nil, req.Chain, s.userInfo).Return(accResp, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -141,7 +138,7 @@ func (s *accountsCtrlTestSuite) TestAccountController_Create() {
 			NewRequest(http.MethodPost, "/accounts", bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 
-		s.createAccountUC.EXPECT().Execute(gomock.Any(), gomock.Any(), nil, "", s.tenants[0]).
+		s.createAccountUC.EXPECT().Execute(gomock.Any(), gomock.Any(), nil, "", s.userInfo).
 			Return(nil, fmt.Errorf("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -162,7 +159,7 @@ func (s *accountsCtrlTestSuite) TestAccountController_Import() {
 			WithContext(s.ctx)
 
 		// s.createAccountUC.EXPECT().Execute(gomock.Any(), gomock.Any(), hexutil.MustDecode("0x"+req.PrivateKey), req.Chain, s.tenants[0]).Return(accResp, nil)
-		s.createAccountUC.EXPECT().Execute(gomock.Any(), gomock.Any(), gomock.Any(), req.Chain, s.tenants[0]).Return(accResp, nil)
+		s.createAccountUC.EXPECT().Execute(gomock.Any(), gomock.Any(), gomock.Any(), req.Chain, s.userInfo).Return(accResp, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -182,7 +179,7 @@ func (s *accountsCtrlTestSuite) TestAccountController_GetOne() {
 			NewRequest(http.MethodGet, "/accounts/"+inputTestAddress, nil).
 			WithContext(s.ctx)
 
-		s.getAccountUC.EXPECT().Execute(gomock.Any(), mixedCaseTestAddress, s.tenants).Return(accResp, nil)
+		s.getAccountUC.EXPECT().Execute(gomock.Any(), mixedCaseTestAddress, s.userInfo).Return(accResp, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -200,7 +197,7 @@ func (s *accountsCtrlTestSuite) TestAccountController_GetOne() {
 			NewRequest(http.MethodGet, "/accounts/"+address, nil).
 			WithContext(s.ctx)
 
-		s.getAccountUC.EXPECT().Execute(gomock.Any(), address, s.tenants).Return(nil, fmt.Errorf("error"))
+		s.getAccountUC.EXPECT().Execute(gomock.Any(), address, s.userInfo).Return(nil, fmt.Errorf("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)
 		assert.Equal(t, http.StatusInternalServerError, rw.Code)
@@ -223,7 +220,7 @@ func (s *accountsCtrlTestSuite) TestAccountController_UpdateAccount() {
 			Address:    mixedCaseTestAddress,
 		}
 
-		s.updateAccountUC.EXPECT().Execute(gomock.Any(), acc, s.tenants).Return(acc, nil)
+		s.updateAccountUC.EXPECT().Execute(gomock.Any(), acc, s.userInfo).Return(acc, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -260,7 +257,7 @@ func (s *accountsCtrlTestSuite) TestAccountController_SearchIdentity() {
 			Aliases: aliases,
 		}
 
-		s.searchAccountUC.EXPECT().Execute(gomock.Any(), filter, s.tenants).Return([]*entities.Account{accResp}, nil)
+		s.searchAccountUC.EXPECT().Execute(gomock.Any(), filter, s.userInfo).Return([]*entities.Account{accResp}, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -284,8 +281,7 @@ func (s *accountsCtrlTestSuite) TestAccountController_SignPayload() {
 			NewRequest(http.MethodPost, fmt.Sprintf("/accounts/%v/sign-message", acc.Address), bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 
-		s.getAccountUC.EXPECT().Execute(gomock.Any(), mixedCaseTestAddress,
-			utils.AllowedTenants(s.tenants[0])).Return(acc, nil)
+		s.getAccountUC.EXPECT().Execute(gomock.Any(), mixedCaseTestAddress, s.userInfo).Return(acc, nil)
 		s.keyManagerClient.EXPECT().SignMessage(gomock.Any(), globalStoreName, mixedCaseTestAddress, &qkmtypes.SignMessageRequest{
 			Message: payload,
 		}).Return(signature, nil)

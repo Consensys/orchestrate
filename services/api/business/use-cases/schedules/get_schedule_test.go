@@ -4,6 +4,7 @@ package schedules
 
 import (
 	"context"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/testutils"
 	"testing"
 
@@ -23,8 +24,8 @@ func TestGetSchedule_Execute(t *testing.T) {
 	mockScheduleDA := mocks.NewMockScheduleAgent(ctrl)
 	mockJobDA := mocks.NewMockJobAgent(ctrl)
 
+	userInfo := multitenancy.NewUserInfo("tenantOne", "username")
 	usecase := NewGetScheduleUseCase(mockDB)
-	tenantID := "tenantID"
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		scheduleEntity := testutils.FakeSchedule()
@@ -35,14 +36,14 @@ func TestGetSchedule_Execute(t *testing.T) {
 		mockDB.EXPECT().Job().Return(mockJobDA).Times(1)
 
 		mockScheduleDA.EXPECT().
-			FindOneByUUID(gomock.Any(), scheduleEntity.UUID, []string{tenantID}).
+			FindOneByUUID(gomock.Any(), scheduleEntity.UUID, userInfo.AllowedTenants, userInfo.Username).
 			Return(scheduleModel, nil)
 
 		mockJobDA.EXPECT().
-			FindOneByUUID(gomock.Any(), scheduleModel.Jobs[0].UUID, []string{tenantID}, false).
+			FindOneByUUID(gomock.Any(), scheduleModel.Jobs[0].UUID, userInfo.AllowedTenants, userInfo.Username, false).
 			Return(scheduleModel.Jobs[0], nil)
 
-		scheduleResponse, err := usecase.Execute(ctx, scheduleEntity.UUID, []string{tenantID})
+		scheduleResponse, err := usecase.Execute(ctx, scheduleEntity.UUID, userInfo)
 
 		assert.NoError(t, err)
 		assert.Equal(t, expectedResponse, scheduleResponse)
@@ -54,9 +55,9 @@ func TestGetSchedule_Execute(t *testing.T) {
 
 		mockDB.EXPECT().Schedule().Return(mockScheduleDA)
 
-		mockScheduleDA.EXPECT().FindOneByUUID(gomock.Any(), scheduleEntity.UUID, []string{tenantID}).Return(nil, expectedErr)
+		mockScheduleDA.EXPECT().FindOneByUUID(gomock.Any(), scheduleEntity.UUID, userInfo.AllowedTenants, userInfo.Username).Return(nil, expectedErr)
 
-		scheduleResponse, err := usecase.Execute(ctx, scheduleEntity.UUID, []string{tenantID})
+		scheduleResponse, err := usecase.Execute(ctx, scheduleEntity.UUID, userInfo)
 
 		assert.Nil(t, scheduleResponse)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createScheduleComponent), err)
@@ -71,13 +72,13 @@ func TestGetSchedule_Execute(t *testing.T) {
 		mockDB.EXPECT().Job().Return(mockJobDA)
 
 		mockScheduleDA.EXPECT().
-			FindOneByUUID(gomock.Any(), scheduleEntity.UUID, []string{tenantID}).
+			FindOneByUUID(gomock.Any(), scheduleEntity.UUID, userInfo.AllowedTenants, userInfo.Username).
 			Return(scheduleModel, nil)
 		mockJobDA.EXPECT().
-			FindOneByUUID(gomock.Any(), scheduleModel.Jobs[0].UUID, []string{tenantID}, false).
+			FindOneByUUID(gomock.Any(), scheduleModel.Jobs[0].UUID, userInfo.AllowedTenants, userInfo.Username, false).
 			Return(nil, expectedErr)
 
-		scheduleResponse, err := usecase.Execute(ctx, scheduleEntity.UUID, []string{tenantID})
+		scheduleResponse, err := usecase.Execute(ctx, scheduleEntity.UUID, userInfo)
 
 		assert.Nil(t, scheduleResponse)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createScheduleComponent), err)

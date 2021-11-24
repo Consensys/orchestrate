@@ -46,6 +46,7 @@ func (uc *sendETHTxUseCase) Execute(ctx context.Context, job *entities.Job) erro
 		ctx,
 		log.Field("job", job.UUID),
 		log.Field("tenant_id", job.TenantID),
+		log.Field("owner_id", job.OwnerID),
 		log.Field("schedule_uuid", job.ScheduleUUID),
 	), uc.logger)
 

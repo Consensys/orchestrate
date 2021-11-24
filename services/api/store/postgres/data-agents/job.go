@@ -82,7 +82,7 @@ func (agent *PGJob) Update(ctx context.Context, job *models.Job) error {
 }
 
 // FindOneByUUID gets a job by UUID
-func (agent *PGJob) FindOneByUUID(ctx context.Context, jobUUID string, tenants []string, withLogs bool) (*models.Job, error) {
+func (agent *PGJob) FindOneByUUID(ctx context.Context, jobUUID string, tenants []string, ownerID string, withLogs bool) (*models.Job, error) {
 	job := &models.Job{}
 
 	query := agent.db.ModelContext(ctx, job).
@@ -97,6 +97,7 @@ func (agent *PGJob) FindOneByUUID(ctx context.Context, jobUUID string, tenants [
 	}
 
 	query = pg.WhereAllowedTenants(query, "schedule.tenant_id", tenants).Order("id ASC")
+	query = pg.WhereAllowedOwner(query, "schedule.owner_id", ownerID)
 
 	err := pg.Select(ctx, query)
 	if err != nil {
@@ -123,7 +124,7 @@ func (agent *PGJob) LockOneByUUID(ctx context.Context, jobUUID string) error {
 	return nil
 }
 
-func (agent *PGJob) Search(ctx context.Context, filters *entities.JobFilters, tenants []string) ([]*models.Job, error) {
+func (agent *PGJob) Search(ctx context.Context, filters *entities.JobFilters, tenants []string, ownerID string) ([]*models.Job, error) {
 	var jobs []*models.Job
 
 	query := agent.db.ModelContext(ctx, &jobs).
@@ -164,6 +165,7 @@ func (agent *PGJob) Search(ctx context.Context, filters *entities.JobFilters, te
 	}
 
 	query = pg.WhereAllowedTenants(query, "schedule.tenant_id", tenants).Order("id ASC")
+	query = pg.WhereAllowedOwner(query, "schedule.owner_id", ownerID)
 
 	err := pg.Select(ctx, query)
 	if err != nil {

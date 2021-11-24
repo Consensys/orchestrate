@@ -4,6 +4,7 @@ package schedules
 
 import (
 	"context"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/testutils"
 	"testing"
 
@@ -23,6 +24,7 @@ func TestCreateSchedule_Execute(t *testing.T) {
 
 	mockDB.EXPECT().Schedule().Return(mockScheduleDA).AnyTimes()
 
+	userInfo := multitenancy.NewUserInfo("tenantOne", "username")
 	usecase := NewCreateScheduleUseCase(mockDB)
 	ctx := context.Background()
 
@@ -37,7 +39,7 @@ func TestCreateSchedule_Execute(t *testing.T) {
 				return nil
 			})
 
-		scheduleResponse, err := usecase.Execute(ctx, scheduleEntity)
+		scheduleResponse, err := usecase.Execute(ctx, scheduleEntity, userInfo)
 
 		assert.NoError(t, err)
 		assert.Equal(t, scheduleEntity.UUID, scheduleResponse.UUID)
@@ -49,7 +51,7 @@ func TestCreateSchedule_Execute(t *testing.T) {
 
 		mockScheduleDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(expectedErr)
 
-		scheduleResponse, err := usecase.Execute(ctx, scheduleEntity)
+		scheduleResponse, err := usecase.Execute(ctx, scheduleEntity, userInfo)
 		assert.Nil(t, scheduleResponse)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createScheduleComponent), err)
 	})

@@ -25,16 +25,14 @@ func TestGetChain_Execute(t *testing.T) {
 	mockDB.EXPECT().Chain().Return(chainAgent).AnyTimes()
 
 	usecase := NewGetChainUseCase(mockDB)
-
-	tenantID := multitenancy.DefaultTenant
-	tenants := []string{tenantID}
+	userInfo := multitenancy.NewUserInfo("tenantOne", "username")
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		chainModel := testutils.FakeChainModel()
 
-		chainAgent.EXPECT().FindOneByUUID(gomock.Any(), chainModel.UUID, tenants).Return(chainModel, nil)
+		chainAgent.EXPECT().FindOneByUUID(gomock.Any(), chainModel.UUID, userInfo.AllowedTenants, userInfo.Username).Return(chainModel, nil)
 
-		resp, err := usecase.Execute(ctx, chainModel.UUID, tenants)
+		resp, err := usecase.Execute(ctx, chainModel.UUID, userInfo)
 
 		assert.NoError(t, err)
 		assert.Equal(t, parsers.NewChainFromModel(chainModel), resp)
@@ -43,9 +41,9 @@ func TestGetChain_Execute(t *testing.T) {
 	t.Run("should fail with same error if get chain fails", func(t *testing.T) {
 		expectedErr := errors.NotFoundError("error")
 
-		chainAgent.EXPECT().FindOneByUUID(gomock.Any(), "uuid", tenants).Return(nil, expectedErr)
+		chainAgent.EXPECT().FindOneByUUID(gomock.Any(), "uuid", userInfo.AllowedTenants, userInfo.Username).Return(nil, expectedErr)
 
-		resp, err := usecase.Execute(ctx, "uuid", tenants)
+		resp, err := usecase.Execute(ctx, "uuid", userInfo)
 
 		assert.Nil(t, resp)
 		assert.Error(t, err)

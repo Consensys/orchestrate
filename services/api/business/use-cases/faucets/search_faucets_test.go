@@ -26,10 +26,8 @@ func TestSearchFaucets_Execute(t *testing.T) {
 	faucetAgent := mocks.NewMockFaucetAgent(ctrl)
 	mockDB.EXPECT().Faucet().Return(faucetAgent).AnyTimes()
 
+	userInfo := multitenancy.NewUserInfo("tenantOne", "username")
 	usecase := NewSearchFaucets(mockDB)
-
-	tenantID := multitenancy.DefaultTenant
-	tenants := []string{tenantID}
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		filters := &entities.FaucetFilters{
@@ -37,9 +35,9 @@ func TestSearchFaucets_Execute(t *testing.T) {
 			ChainRule: "chainRule",
 		}
 		faucet := testutils.FakeFaucetModel()
-		faucetAgent.EXPECT().Search(gomock.Any(), filters, tenants).Return([]*models.Faucet{faucet}, nil)
+		faucetAgent.EXPECT().Search(gomock.Any(), filters, userInfo.AllowedTenants).Return([]*models.Faucet{faucet}, nil)
 
-		resp, err := usecase.Execute(ctx, filters, tenants)
+		resp, err := usecase.Execute(ctx, filters, userInfo)
 
 		assert.NoError(t, err)
 		assert.Equal(t, []*entities.Faucet{parsers.NewFaucetFromModel(faucet)}, resp)
@@ -48,9 +46,9 @@ func TestSearchFaucets_Execute(t *testing.T) {
 	t.Run("should fail with same error if search faucets fails", func(t *testing.T) {
 		expectedErr := errors.PostgresConnectionError("error")
 
-		faucetAgent.EXPECT().Search(gomock.Any(), nil, tenants).Return(nil, expectedErr)
+		faucetAgent.EXPECT().Search(gomock.Any(), nil, userInfo.AllowedTenants).Return(nil, expectedErr)
 
-		resp, err := usecase.Execute(ctx, nil, tenants)
+		resp, err := usecase.Execute(ctx, nil, userInfo)
 
 		assert.Nil(t, resp)
 		assert.Error(t, err)

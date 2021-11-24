@@ -3,6 +3,7 @@ package schedules
 import (
 	"context"
 
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
 
@@ -30,10 +31,10 @@ func NewGetScheduleUseCase(db store.DB) usecases.GetScheduleUseCase {
 }
 
 // Execute gets a schedule
-func (uc *getScheduleUseCase) Execute(ctx context.Context, scheduleUUID string, tenants []string) (*entities.Schedule, error) {
+func (uc *getScheduleUseCase) Execute(ctx context.Context, scheduleUUID string, userInfo *multitenancy.UserInfo) (*entities.Schedule, error) {
 	ctx = log.WithFields(ctx, log.Field("schedule", scheduleUUID))
 
-	scheduleModel, err := fetchScheduleByUUID(ctx, uc.db, scheduleUUID, tenants)
+	scheduleModel, err := fetchScheduleByUUID(ctx, uc.db, scheduleUUID, userInfo)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(getScheduleComponent)
 	}
@@ -42,14 +43,14 @@ func (uc *getScheduleUseCase) Execute(ctx context.Context, scheduleUUID string, 
 	return parsers.NewScheduleEntityFromModels(scheduleModel), nil
 }
 
-func fetchScheduleByUUID(ctx context.Context, db store.DB, scheduleUUID string, tenants []string) (*models.Schedule, error) {
-	schedule, err := db.Schedule().FindOneByUUID(ctx, scheduleUUID, tenants)
+func fetchScheduleByUUID(ctx context.Context, db store.DB, scheduleUUID string, userInfo *multitenancy.UserInfo) (*models.Schedule, error) {
+	schedule, err := db.Schedule().FindOneByUUID(ctx, scheduleUUID, userInfo.AllowedTenants, userInfo.Username)
 	if err != nil {
 		return nil, err
 	}
 
 	for idx, job := range schedule.Jobs {
-		schedule.Jobs[idx], err = db.Job().FindOneByUUID(ctx, job.UUID, tenants, false)
+		schedule.Jobs[idx], err = db.Job().FindOneByUUID(ctx, job.UUID, userInfo.AllowedTenants, userInfo.Username, false)
 		if err != nil {
 			return nil, err
 		}

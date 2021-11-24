@@ -6,9 +6,10 @@ package mocks
 
 import (
 	context "context"
-	gomock "github.com/golang/mock/gomock"
+	multitenancy "github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	entities "github.com/consensys/orchestrate/pkg/types/entities"
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
+	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )
 
@@ -129,18 +130,18 @@ func (m *MockGetTxUseCase) EXPECT() *MockGetTxUseCaseMockRecorder {
 }
 
 // Execute mocks base method
-func (m *MockGetTxUseCase) Execute(ctx context.Context, scheduleUUID string, tenants []string) (*entities.TxRequest, error) {
+func (m *MockGetTxUseCase) Execute(ctx context.Context, scheduleUUID string, userInfo *multitenancy.UserInfo) (*entities.TxRequest, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, scheduleUUID, tenants)
+	ret := m.ctrl.Call(m, "Execute", ctx, scheduleUUID, userInfo)
 	ret0, _ := ret[0].(*entities.TxRequest)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Execute indicates an expected call of Execute
-func (mr *MockGetTxUseCaseMockRecorder) Execute(ctx, scheduleUUID, tenants interface{}) *gomock.Call {
+func (mr *MockGetTxUseCaseMockRecorder) Execute(ctx, scheduleUUID, userInfo interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockGetTxUseCase)(nil).Execute), ctx, scheduleUUID, tenants)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockGetTxUseCase)(nil).Execute), ctx, scheduleUUID, userInfo)
 }
 
 // MockSearchTransactionsUseCase is a mock of SearchTransactionsUseCase interface
@@ -167,18 +168,18 @@ func (m *MockSearchTransactionsUseCase) EXPECT() *MockSearchTransactionsUseCaseM
 }
 
 // Execute mocks base method
-func (m *MockSearchTransactionsUseCase) Execute(ctx context.Context, filters *entities.TransactionRequestFilters, tenants []string) ([]*entities.TxRequest, error) {
+func (m *MockSearchTransactionsUseCase) Execute(ctx context.Context, filters *entities.TransactionRequestFilters, userInfo *multitenancy.UserInfo) ([]*entities.TxRequest, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, filters, tenants)
+	ret := m.ctrl.Call(m, "Execute", ctx, filters, userInfo)
 	ret0, _ := ret[0].([]*entities.TxRequest)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Execute indicates an expected call of Execute
-func (mr *MockSearchTransactionsUseCaseMockRecorder) Execute(ctx, filters, tenants interface{}) *gomock.Call {
+func (mr *MockSearchTransactionsUseCaseMockRecorder) Execute(ctx, filters, userInfo interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSearchTransactionsUseCase)(nil).Execute), ctx, filters, tenants)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSearchTransactionsUseCase)(nil).Execute), ctx, filters, userInfo)
 }
 
 // MockSendDeployTxUseCase is a mock of SendDeployTxUseCase interface
@@ -205,18 +206,18 @@ func (m *MockSendDeployTxUseCase) EXPECT() *MockSendDeployTxUseCaseMockRecorder 
 }
 
 // Execute mocks base method
-func (m *MockSendDeployTxUseCase) Execute(ctx context.Context, txRequest *entities.TxRequest, tenantID string) (*entities.TxRequest, error) {
+func (m *MockSendDeployTxUseCase) Execute(ctx context.Context, txRequest *entities.TxRequest, userInfo *multitenancy.UserInfo) (*entities.TxRequest, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, txRequest, tenantID)
+	ret := m.ctrl.Call(m, "Execute", ctx, txRequest, userInfo)
 	ret0, _ := ret[0].(*entities.TxRequest)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Execute indicates an expected call of Execute
-func (mr *MockSendDeployTxUseCaseMockRecorder) Execute(ctx, txRequest, tenantID interface{}) *gomock.Call {
+func (mr *MockSendDeployTxUseCaseMockRecorder) Execute(ctx, txRequest, userInfo interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSendDeployTxUseCase)(nil).Execute), ctx, txRequest, tenantID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSendDeployTxUseCase)(nil).Execute), ctx, txRequest, userInfo)
 }
 
 // MockSendContractTxUseCase is a mock of SendContractTxUseCase interface
@@ -243,18 +244,18 @@ func (m *MockSendContractTxUseCase) EXPECT() *MockSendContractTxUseCaseMockRecor
 }
 
 // Execute mocks base method
-func (m *MockSendContractTxUseCase) Execute(ctx context.Context, txRequest *entities.TxRequest, tenantID string) (*entities.TxRequest, error) {
+func (m *MockSendContractTxUseCase) Execute(ctx context.Context, txRequest *entities.TxRequest, userInfo *multitenancy.UserInfo) (*entities.TxRequest, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, txRequest, tenantID)
+	ret := m.ctrl.Call(m, "Execute", ctx, txRequest, userInfo)
 	ret0, _ := ret[0].(*entities.TxRequest)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Execute indicates an expected call of Execute
-func (mr *MockSendContractTxUseCaseMockRecorder) Execute(ctx, txRequest, tenantID interface{}) *gomock.Call {
+func (mr *MockSendContractTxUseCaseMockRecorder) Execute(ctx, txRequest, userInfo interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSendContractTxUseCase)(nil).Execute), ctx, txRequest, tenantID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSendContractTxUseCase)(nil).Execute), ctx, txRequest, userInfo)
 }
 
 // MockSendTxUseCase is a mock of SendTxUseCase interface
@@ -281,16 +282,16 @@ func (m *MockSendTxUseCase) EXPECT() *MockSendTxUseCaseMockRecorder {
 }
 
 // Execute mocks base method
-func (m *MockSendTxUseCase) Execute(ctx context.Context, txRequest *entities.TxRequest, txData, tenantID string) (*entities.TxRequest, error) {
+func (m *MockSendTxUseCase) Execute(ctx context.Context, txRequest *entities.TxRequest, txData string, userInfo *multitenancy.UserInfo) (*entities.TxRequest, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, txRequest, txData, tenantID)
+	ret := m.ctrl.Call(m, "Execute", ctx, txRequest, txData, userInfo)
 	ret0, _ := ret[0].(*entities.TxRequest)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Execute indicates an expected call of Execute
-func (mr *MockSendTxUseCaseMockRecorder) Execute(ctx, txRequest, txData, tenantID interface{}) *gomock.Call {
+func (mr *MockSendTxUseCaseMockRecorder) Execute(ctx, txRequest, txData, userInfo interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSendTxUseCase)(nil).Execute), ctx, txRequest, txData, tenantID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSendTxUseCase)(nil).Execute), ctx, txRequest, txData, userInfo)
 }

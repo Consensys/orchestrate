@@ -62,15 +62,19 @@ func (agent *PGAccount) Update(ctx context.Context, account *models.Account) err
 	return nil
 }
 
-func (agent *PGAccount) Search(ctx context.Context, filters *entities.AccountFilters, tenants []string) ([]*models.Account, error) {
+func (agent *PGAccount) Search(ctx context.Context, filters *entities.AccountFilters, tenants []string, ownerID string) ([]*models.Account, error) {
 	var accounts []*models.Account
 
 	query := agent.db.ModelContext(ctx, &accounts)
 	if len(filters.Aliases) > 0 {
 		query = query.Where("alias in (?)", gopg.In(filters.Aliases))
 	}
+	if filters.TenantID != "" {
+		query = query.Where("tenant_id = ?", filters.TenantID)
+	}
 
 	query = pg.WhereAllowedTenants(query, "tenant_id", tenants).Order("id ASC")
+	query = pg.WhereAllowedOwner(query, "owner_id", ownerID)
 
 	err := pg.Select(ctx, query)
 	if err != nil {
@@ -84,11 +88,13 @@ func (agent *PGAccount) Search(ctx context.Context, filters *entities.AccountFil
 	return accounts, nil
 }
 
-func (agent *PGAccount) FindOneByAddress(ctx context.Context, address string, tenants []string) (*models.Account, error) {
+func (agent *PGAccount) FindOneByAddress(ctx context.Context, address string, tenants []string, ownerID string) (*models.Account, error) {
 	account := &models.Account{}
 
 	query := agent.db.ModelContext(ctx, account).Where("address = ?", address)
+
 	query = pg.WhereAllowedTenants(query, "tenant_id", tenants)
+	query = pg.WhereAllowedOwner(query, "owner_id", ownerID)
 
 	err := pg.SelectOne(ctx, query)
 	if err != nil {

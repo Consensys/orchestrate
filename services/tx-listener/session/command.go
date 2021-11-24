@@ -54,6 +54,7 @@ func CompareConfiguration(oldConfig, newConfig *dynamic.Configuration) []*Comman
 
 func isEqualChain(chain1, chain2 *dynamic.Chain) bool {
 	return chain1.TenantID == chain2.TenantID &&
+		chain1.OwnerID == chain2.OwnerID &&
 		chain1.Name == chain2.Name &&
 		chain1.URL == chain2.URL &&
 		chain1.Listener.Depth == chain2.Listener.Depth &&

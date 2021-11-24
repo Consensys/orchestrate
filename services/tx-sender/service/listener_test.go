@@ -9,17 +9,17 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/cenkalti/backoff/v4"
-	"github.com/gofrs/uuid"
 	"github.com/consensys/orchestrate/pkg/broker/sarama/mock"
 	"github.com/consensys/orchestrate/pkg/encoding/proto"
 	"github.com/consensys/orchestrate/pkg/errors"
 	mock3 "github.com/consensys/orchestrate/pkg/sdk/client/mock"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/auth/utils"
 	"github.com/consensys/orchestrate/pkg/types/api"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/pkg/types/tx"
-	"github.com/consensys/orchestrate/pkg/utils"
 	usecases "github.com/consensys/orchestrate/services/tx-sender/tx-sender/use-cases"
 	"github.com/consensys/orchestrate/services/tx-sender/tx-sender/use-cases/mocks"
+	"github.com/gofrs/uuid"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -36,7 +36,8 @@ type messageListenerCtrlTestSuite struct {
 	sendTesseraMarking *mocks.MockSendTesseraMarkingTxUseCase
 	sendTesseraPrivate *mocks.MockSendTesseraPrivateTxUseCase
 	apiClient          *mock3.MockOrchestrateClient
-	tenants            []string
+	tenantID           string
+	allowedTenants     []string
 	senderTopic        string
 	recoverTopic       string
 }
@@ -72,7 +73,8 @@ func (s *messageListenerCtrlTestSuite) SetupTest() {
 	ctrl := gomock.NewController(s.T())
 	defer ctrl.Finish()
 
-	s.tenants = []string{"tenantID"}
+	s.tenantID = "tenantID"
+	s.allowedTenants = []string{s.tenantID, "_"}
 	s.sendETHRawUC = mocks.NewMockSendETHRawTxUseCase(ctrl)
 	s.sendETHUC = mocks.NewMockSendETHTxUseCase(ctrl)
 	s.sendEEAPrivateUC = mocks.NewMockSendEEAPrivateTxUseCase(ctrl)
@@ -83,18 +85,18 @@ func (s *messageListenerCtrlTestSuite) SetupTest() {
 	s.recoverTopic = "recover-topic"
 	s.producer = mock.NewMockSyncProducer()
 
-	bckoff := backoff.WithMaxRetries(backoff.NewConstantBackOff(time.Millisecond * 100), 2)
+	bckoff := backoff.WithMaxRetries(backoff.NewConstantBackOff(time.Millisecond*100), 2)
 	s.listener = NewMessageListener(s, s.apiClient, s.producer, s.recoverTopic, s.senderTopic, bckoff)
 }
 
 func (s *messageListenerCtrlTestSuite) TestMessageListener_PublicEthereum() {
 	s.T().Run("should execute use case for multiple public ethereum transactions", func(t *testing.T) {
 		var claims map[string][]int32
-		ctx, _ := context.WithTimeout(context.Background(), time.Millisecond * 500)
+		ctx, _ := context.WithTimeout(context.Background(), time.Millisecond*500)
 
 		mockSession := mock.NewConsumerGroupSession(ctx, "kafka-consumer-group", claims)
 		mockClaim := mock.NewConsumerGroupClaim("topic", 0, 0)
-		envelope := fakeEnvelope()
+		envelope := fakeEnvelope(s.tenantID)
 		msg := &sarama.ConsumerMessage{}
 		msg.Value, _ = proto.Marshal(envelope.TxEnvelopeAsRequest())
 
@@ -114,11 +116,11 @@ func (s *messageListenerCtrlTestSuite) TestMessageListener_PublicEthereum() {
 
 	s.T().Run("should execute use case for public raw ethereum transactions", func(t *testing.T) {
 		var claims map[string][]int32
-		ctx, _ := context.WithTimeout(context.Background(), time.Millisecond * 500)
+		ctx, _ := context.WithTimeout(context.Background(), time.Millisecond*500)
 
 		mockSession := mock.NewConsumerGroupSession(ctx, "kafka-consumer-group", claims)
 		mockClaim := mock.NewConsumerGroupClaim("topic", 0, 0)
-		envelope := fakeEnvelope()
+		envelope := fakeEnvelope(s.tenantID)
 		_ = envelope.SetJobType(tx.JobType_ETH_RAW_TX)
 		msg := &sarama.ConsumerMessage{}
 		msg.Value, _ = proto.Marshal(envelope.TxEnvelopeAsRequest())
@@ -138,11 +140,11 @@ func (s *messageListenerCtrlTestSuite) TestMessageListener_PublicEthereum() {
 
 	s.T().Run("should execute use case for eea transactions", func(t *testing.T) {
 		var claims map[string][]int32
-		ctx, _ := context.WithTimeout(context.Background(), time.Millisecond * 500)
+		ctx, _ := context.WithTimeout(context.Background(), time.Millisecond*500)
 
 		mockSession := mock.NewConsumerGroupSession(ctx, "kafka-consumer-group", claims)
 		mockClaim := mock.NewConsumerGroupClaim("topic", 0, 0)
-		envelope := fakeEnvelope()
+		envelope := fakeEnvelope(s.tenantID)
 		_ = envelope.SetJobType(tx.JobType_ETH_ORION_EEA_TX)
 		msg := &sarama.ConsumerMessage{}
 		msg.Value, _ = proto.Marshal(envelope.TxEnvelopeAsRequest())
@@ -162,11 +164,11 @@ func (s *messageListenerCtrlTestSuite) TestMessageListener_PublicEthereum() {
 
 	s.T().Run("should execute use case for tessera marking transactions", func(t *testing.T) {
 		var claims map[string][]int32
-		ctx, _ := context.WithTimeout(context.Background(), time.Millisecond * 500)
+		ctx, _ := context.WithTimeout(context.Background(), time.Millisecond*500)
 
 		mockSession := mock.NewConsumerGroupSession(ctx, "kafka-consumer-group", claims)
 		mockClaim := mock.NewConsumerGroupClaim("topic", 0, 0)
-		envelope := fakeEnvelope()
+		envelope := fakeEnvelope(s.tenantID)
 		_ = envelope.SetJobType(tx.JobType_ETH_TESSERA_MARKING_TX)
 		msg := &sarama.ConsumerMessage{}
 		msg.Value, _ = proto.Marshal(envelope.TxEnvelopeAsRequest())
@@ -186,11 +188,11 @@ func (s *messageListenerCtrlTestSuite) TestMessageListener_PublicEthereum() {
 
 	s.T().Run("should execute use case for multiple tessera private transactions", func(t *testing.T) {
 		var claims map[string][]int32
-		ctx, _ := context.WithTimeout(context.Background(), time.Millisecond * 500)
+		ctx, _ := context.WithTimeout(context.Background(), time.Millisecond*500)
 
 		mockSession := mock.NewConsumerGroupSession(ctx, "kafka-consumer-group", claims)
 		mockClaim := mock.NewConsumerGroupClaim("topic", 0, 0)
-		envelope := fakeEnvelope()
+		envelope := fakeEnvelope(s.tenantID)
 		_ = envelope.SetJobType(tx.JobType_ETH_TESSERA_PRIVATE_TX)
 		msg := &sarama.ConsumerMessage{}
 		msg.Value, _ = proto.Marshal(envelope.TxEnvelopeAsRequest())
@@ -215,13 +217,13 @@ func (s *messageListenerCtrlTestSuite) TestMessageListener_PublicEthereum_Errors
 		var claims map[string][]int32
 		ctx, _ := context.WithTimeout(context.Background(), time.Second)
 		s.producer.Clean()
-	
+
 		mockSession := mock.NewConsumerGroupSession(ctx, "kafka-consumer-group", claims)
 		mockClaim := mock.NewConsumerGroupClaim("topic", 0, 0)
-		evlp := fakeEnvelope()
+		evlp := fakeEnvelope(s.tenantID)
 		msg := &sarama.ConsumerMessage{}
 		msg.Value, _ = proto.Marshal(evlp.TxEnvelopeAsRequest())
-	
+
 		err := errors.InternalError("error")
 		s.sendETHUC.EXPECT().Execute(gomock.Any(), gomock.Any()).Return(err)
 		s.apiClient.EXPECT().UpdateJob(gomock.Any(), evlp.GetJobUUID(), &api.UpdateJobRequest{
@@ -229,14 +231,14 @@ func (s *messageListenerCtrlTestSuite) TestMessageListener_PublicEthereum_Errors
 			Message:     err.Error(),
 			Transaction: nil,
 		}).Return(&api.JobResponse{}, nil)
-	
+
 		cerr := make(chan error)
 		go func() {
 			cerr <- s.listener.ConsumeClaim(mockSession, mockClaim)
 		}()
-	
+
 		mockClaim.ExpectMessage(msg)
-	
+
 		assert.NoError(t, <-cerr)
 		assert.NotNil(t, s.producer.LastMessage())
 		assert.Equal(t, s.recoverTopic, s.producer.LastMessage().Topic)
@@ -244,11 +246,11 @@ func (s *messageListenerCtrlTestSuite) TestMessageListener_PublicEthereum_Errors
 
 	s.T().Run("should update transaction and retry job if sending fails by nonce error", func(t *testing.T) {
 		var claims map[string][]int32
-		ctx, _ := context.WithTimeout(context.Background(), time.Second * 2)
+		ctx, _ := context.WithTimeout(context.Background(), time.Second*2)
 
 		mockSession := mock.NewConsumerGroupSession(ctx, "kafka-consumer-group", claims)
 		mockClaim := mock.NewConsumerGroupClaim("topic", 0, 0)
-		evlp := fakeEnvelope()
+		evlp := fakeEnvelope(s.tenantID)
 		msg := &sarama.ConsumerMessage{}
 		msg.Value, _ = proto.Marshal(evlp.TxEnvelopeAsRequest())
 
@@ -275,7 +277,7 @@ func (s *messageListenerCtrlTestSuite) TestMessageListener_PublicEthereum_Errors
 	})
 }
 
-func fakeEnvelope() *tx.Envelope {
+func fakeEnvelope(tenantID string) *tx.Envelope {
 	jobUUID := uuid.Must(uuid.NewV4()).String()
 	scheduleUUID := uuid.Must(uuid.NewV4()).String()
 
@@ -290,7 +292,7 @@ func fakeEnvelope() *tx.Envelope {
 	_ = envelope.SetValueString("10000000")
 	_ = envelope.SetDataString("0x")
 	_ = envelope.SetChainIDString("1")
-	_ = envelope.SetHeadersValue(utils.TenantIDMetadata, "tenantID")
+	_ = envelope.SetHeadersValue(utils.TenantIDHeader, tenantID)
 	_ = envelope.SetPrivateFrom("A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=")
 	_ = envelope.SetPrivateFor([]string{"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=", "B1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="})
 

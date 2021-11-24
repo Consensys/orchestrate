@@ -23,8 +23,7 @@ func TestParsersSchedule_NewModelFromEntity(t *testing.T) {
 }
 
 func TestParsersSchedule_NewEntityFromModel(t *testing.T) {
-	tenantID := "_"
-	scheduleModel := testutils.FakeSchedule(tenantID)
+	scheduleModel := testutils.FakeSchedule("", "")
 	scheduleEntity := NewScheduleEntityFromModels(scheduleModel)
 	finalScheduleModel := NewScheduleModelFromEntities(scheduleEntity)
 

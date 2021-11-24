@@ -6,9 +6,10 @@ package mocks
 
 import (
 	context "context"
-	gomock "github.com/golang/mock/gomock"
+	multitenancy "github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	entities "github.com/consensys/orchestrate/pkg/types/entities"
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
+	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )
 
@@ -129,18 +130,18 @@ func (m *MockRegisterFaucetUseCase) EXPECT() *MockRegisterFaucetUseCaseMockRecor
 }
 
 // Execute mocks base method
-func (m *MockRegisterFaucetUseCase) Execute(ctx context.Context, faucet *entities.Faucet) (*entities.Faucet, error) {
+func (m *MockRegisterFaucetUseCase) Execute(ctx context.Context, faucet *entities.Faucet, userInfo *multitenancy.UserInfo) (*entities.Faucet, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, faucet)
+	ret := m.ctrl.Call(m, "Execute", ctx, faucet, userInfo)
 	ret0, _ := ret[0].(*entities.Faucet)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Execute indicates an expected call of Execute
-func (mr *MockRegisterFaucetUseCaseMockRecorder) Execute(ctx, faucet interface{}) *gomock.Call {
+func (mr *MockRegisterFaucetUseCaseMockRecorder) Execute(ctx, faucet, userInfo interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockRegisterFaucetUseCase)(nil).Execute), ctx, faucet)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockRegisterFaucetUseCase)(nil).Execute), ctx, faucet, userInfo)
 }
 
 // MockUpdateFaucetUseCase is a mock of UpdateFaucetUseCase interface
@@ -167,18 +168,18 @@ func (m *MockUpdateFaucetUseCase) EXPECT() *MockUpdateFaucetUseCaseMockRecorder 
 }
 
 // Execute mocks base method
-func (m *MockUpdateFaucetUseCase) Execute(ctx context.Context, faucet *entities.Faucet, tenants []string) (*entities.Faucet, error) {
+func (m *MockUpdateFaucetUseCase) Execute(ctx context.Context, faucet *entities.Faucet, userInfo *multitenancy.UserInfo) (*entities.Faucet, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, faucet, tenants)
+	ret := m.ctrl.Call(m, "Execute", ctx, faucet, userInfo)
 	ret0, _ := ret[0].(*entities.Faucet)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Execute indicates an expected call of Execute
-func (mr *MockUpdateFaucetUseCaseMockRecorder) Execute(ctx, faucet, tenants interface{}) *gomock.Call {
+func (mr *MockUpdateFaucetUseCaseMockRecorder) Execute(ctx, faucet, userInfo interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockUpdateFaucetUseCase)(nil).Execute), ctx, faucet, tenants)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockUpdateFaucetUseCase)(nil).Execute), ctx, faucet, userInfo)
 }
 
 // MockGetFaucetUseCase is a mock of GetFaucetUseCase interface
@@ -205,18 +206,18 @@ func (m *MockGetFaucetUseCase) EXPECT() *MockGetFaucetUseCaseMockRecorder {
 }
 
 // Execute mocks base method
-func (m *MockGetFaucetUseCase) Execute(ctx context.Context, uuid string, tenants []string) (*entities.Faucet, error) {
+func (m *MockGetFaucetUseCase) Execute(ctx context.Context, uuid string, userInfo *multitenancy.UserInfo) (*entities.Faucet, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, uuid, tenants)
+	ret := m.ctrl.Call(m, "Execute", ctx, uuid, userInfo)
 	ret0, _ := ret[0].(*entities.Faucet)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Execute indicates an expected call of Execute
-func (mr *MockGetFaucetUseCaseMockRecorder) Execute(ctx, uuid, tenants interface{}) *gomock.Call {
+func (mr *MockGetFaucetUseCaseMockRecorder) Execute(ctx, uuid, userInfo interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockGetFaucetUseCase)(nil).Execute), ctx, uuid, tenants)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockGetFaucetUseCase)(nil).Execute), ctx, uuid, userInfo)
 }
 
 // MockSearchFaucetsUseCase is a mock of SearchFaucetsUseCase interface
@@ -243,18 +244,18 @@ func (m *MockSearchFaucetsUseCase) EXPECT() *MockSearchFaucetsUseCaseMockRecorde
 }
 
 // Execute mocks base method
-func (m *MockSearchFaucetsUseCase) Execute(ctx context.Context, filters *entities.FaucetFilters, tenants []string) ([]*entities.Faucet, error) {
+func (m *MockSearchFaucetsUseCase) Execute(ctx context.Context, filters *entities.FaucetFilters, userInfo *multitenancy.UserInfo) ([]*entities.Faucet, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, filters, tenants)
+	ret := m.ctrl.Call(m, "Execute", ctx, filters, userInfo)
 	ret0, _ := ret[0].([]*entities.Faucet)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Execute indicates an expected call of Execute
-func (mr *MockSearchFaucetsUseCaseMockRecorder) Execute(ctx, filters, tenants interface{}) *gomock.Call {
+func (mr *MockSearchFaucetsUseCaseMockRecorder) Execute(ctx, filters, userInfo interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSearchFaucetsUseCase)(nil).Execute), ctx, filters, tenants)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSearchFaucetsUseCase)(nil).Execute), ctx, filters, userInfo)
 }
 
 // MockDeleteFaucetUseCase is a mock of DeleteFaucetUseCase interface
@@ -281,17 +282,17 @@ func (m *MockDeleteFaucetUseCase) EXPECT() *MockDeleteFaucetUseCaseMockRecorder 
 }
 
 // Execute mocks base method
-func (m *MockDeleteFaucetUseCase) Execute(ctx context.Context, uuid string, tenants []string) error {
+func (m *MockDeleteFaucetUseCase) Execute(ctx context.Context, uuid string, userInfo *multitenancy.UserInfo) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, uuid, tenants)
+	ret := m.ctrl.Call(m, "Execute", ctx, uuid, userInfo)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Execute indicates an expected call of Execute
-func (mr *MockDeleteFaucetUseCaseMockRecorder) Execute(ctx, uuid, tenants interface{}) *gomock.Call {
+func (mr *MockDeleteFaucetUseCaseMockRecorder) Execute(ctx, uuid, userInfo interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockDeleteFaucetUseCase)(nil).Execute), ctx, uuid, tenants)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockDeleteFaucetUseCase)(nil).Execute), ctx, uuid, userInfo)
 }
 
 // MockGetFaucetCandidateUseCase is a mock of GetFaucetCandidateUseCase interface
@@ -318,16 +319,16 @@ func (m *MockGetFaucetCandidateUseCase) EXPECT() *MockGetFaucetCandidateUseCaseM
 }
 
 // Execute mocks base method
-func (m *MockGetFaucetCandidateUseCase) Execute(ctx context.Context, account string, chain *entities.Chain, tenants []string) (*entities.Faucet, error) {
+func (m *MockGetFaucetCandidateUseCase) Execute(ctx context.Context, account string, chain *entities.Chain, userInfo *multitenancy.UserInfo) (*entities.Faucet, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, account, chain, tenants)
+	ret := m.ctrl.Call(m, "Execute", ctx, account, chain, userInfo)
 	ret0, _ := ret[0].(*entities.Faucet)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Execute indicates an expected call of Execute
-func (mr *MockGetFaucetCandidateUseCaseMockRecorder) Execute(ctx, account, chain, tenants interface{}) *gomock.Call {
+func (mr *MockGetFaucetCandidateUseCaseMockRecorder) Execute(ctx, account, chain, userInfo interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockGetFaucetCandidateUseCase)(nil).Execute), ctx, account, chain, tenants)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockGetFaucetCandidateUseCase)(nil).Execute), ctx, account, chain, userInfo)
 }

@@ -16,6 +16,7 @@ func NewHTTPClient(vipr *viper.Viper) (*http.Client, error) {
 	cfg.InsecureSkipVerify = vipr.GetBool(tlsSkipVerifyViperKey)
 	APIKey := vipr.GetString(AuthAPIKeyViperKey)
 	if APIKey != "" {
+		cfg.AuthHeaderForward = false
 		cfg.Authorization = "Basic " + APIKey
 	}
 

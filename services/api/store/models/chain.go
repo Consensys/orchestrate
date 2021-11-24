@@ -10,6 +10,7 @@ type Chain struct {
 	UUID                      string `pg:",pk"`
 	Name                      string
 	TenantID                  string
+	OwnerID                   string
 	URLs                      []string `pg:"urls,array"`
 	ChainID                   string
 	ListenerDepth             uint64

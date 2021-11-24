@@ -381,6 +381,7 @@ func (s *Session) fetchJobs(ctx context.Context, transactions ethtypes.Transacti
 				ChainUUID:    jobResponse.ChainUUID,
 				ScheduleUUID: jobResponse.ScheduleUUID,
 				TenantID:     jobResponse.TenantID,
+				OwnerID:      jobResponse.OwnerID,
 				Type:         jobResponse.Type,
 				Labels:       jobResponse.Labels,
 				Transaction:  &jobResponse.Transaction,

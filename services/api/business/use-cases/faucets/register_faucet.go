@@ -5,6 +5,7 @@ import (
 
 	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/services/api/business/parsers"
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
@@ -30,14 +31,15 @@ func NewRegisterFaucetUseCase(db store.DB, searchFaucetUC usecases.SearchFaucets
 }
 
 // Execute registers a new faucet
-func (uc *registerFaucetUseCase) Execute(ctx context.Context, faucet *entities.Faucet) (*entities.Faucet, error) {
+func (uc *registerFaucetUseCase) Execute(ctx context.Context, faucet *entities.Faucet, userInfo *multitenancy.UserInfo) (*entities.Faucet, error) {
 	ctx = log.WithFields(ctx, log.Field("faucet_name", faucet.Name), log.Field("chain", faucet.ChainRule))
 	logger := uc.logger.WithContext(ctx)
 	logger.Debug("registering new faucet")
 
 	faucetsRetrieved, err := uc.searchFaucetUC.Execute(ctx, &entities.FaucetFilters{
-		Names: []string{faucet.Name},
-	}, []string{faucet.TenantID})
+		Names:    []string{faucet.Name},
+		TenantID: userInfo.TenantID,
+	}, userInfo)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(registerFaucetComponent)
 	}
@@ -49,6 +51,7 @@ func (uc *registerFaucetUseCase) Execute(ctx context.Context, faucet *entities.F
 	}
 
 	faucetModel := parsers.NewFaucetModelFromEntity(faucet)
+	faucetModel.TenantID = userInfo.TenantID
 	err = uc.db.Faucet().Insert(ctx, faucetModel)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(registerFaucetComponent)

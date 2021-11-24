@@ -13,6 +13,7 @@ type Account struct {
 	PublicKey           string
 	CompressedPublicKey string
 	TenantID            string
+	OwnerID             string
 	Attributes          map[string]string
 	// TODO add internal labels to store accountID
 

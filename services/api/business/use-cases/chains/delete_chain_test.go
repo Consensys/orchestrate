@@ -37,19 +37,19 @@ func TestDeleteChain_Execute(t *testing.T) {
 	mockDBTX.EXPECT().Close().Return(nil).AnyTimes()
 
 	usecase := NewDeleteChainUseCase(mockDB, getChainUC)
-
-	tenantID := multitenancy.DefaultTenant
-	tenants := []string{tenantID}
+	userInfo := multitenancy.NewUserInfo("tenantOne", "username")
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		chain := testutils2.FakeChain()
 		chainModel := parsers.NewChainModelFromEntity(chain)
+		chainModel.TenantID = userInfo.TenantID
+		chainModel.OwnerID = userInfo.Username
 
-		getChainUC.EXPECT().Execute(gomock.Any(), "uuid", tenants).Return(chain, nil)
+		getChainUC.EXPECT().Execute(gomock.Any(), "uuid", userInfo).Return(chain, nil)
 		privateTxManagerAgent.EXPECT().Delete(gomock.Any(), chainModel.PrivateTxManagers[0]).Return(nil)
-		chainAgent.EXPECT().Delete(gomock.Any(), chainModel, tenants).Return(nil)
+		chainAgent.EXPECT().Delete(gomock.Any(), chainModel, userInfo.AllowedTenants).Return(nil)
 
-		err := usecase.Execute(ctx, "uuid", tenants)
+		err := usecase.Execute(ctx, "uuid", userInfo)
 
 		assert.NoError(t, err)
 	})
@@ -57,9 +57,9 @@ func TestDeleteChain_Execute(t *testing.T) {
 	t.Run("should fail with same error if get chain fails", func(t *testing.T) {
 		expectedErr := errors.NotFoundError("error")
 
-		getChainUC.EXPECT().Execute(gomock.Any(), "uuid", tenants).Return(nil, expectedErr)
+		getChainUC.EXPECT().Execute(gomock.Any(), "uuid", userInfo).Return(nil, expectedErr)
 
-		err := usecase.Execute(ctx, "uuid", tenants)
+		err := usecase.Execute(ctx, "uuid", userInfo)
 
 		assert.Error(t, err)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(deleteChainComponent), err)
@@ -70,10 +70,10 @@ func TestDeleteChain_Execute(t *testing.T) {
 		chain := testutils2.FakeChain()
 		chainModel := parsers.NewChainModelFromEntity(chain)
 
-		getChainUC.EXPECT().Execute(gomock.Any(), "uuid", tenants).Return(chain, nil)
+		getChainUC.EXPECT().Execute(gomock.Any(), "uuid", userInfo).Return(chain, nil)
 		privateTxManagerAgent.EXPECT().Delete(gomock.Any(), chainModel.PrivateTxManagers[0]).Return(expectedErr)
 
-		err := usecase.Execute(ctx, "uuid", tenants)
+		err := usecase.Execute(ctx, "uuid", userInfo)
 
 		assert.Error(t, err)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(deleteChainComponent), err)
@@ -82,12 +82,14 @@ func TestDeleteChain_Execute(t *testing.T) {
 	t.Run("should fail with same error if delete chain fails", func(t *testing.T) {
 		expectedErr := errors.NotFoundError("error")
 		chain := testutils2.FakeChain()
+		chain.TenantID = userInfo.TenantID
+		chain.OwnerID = userInfo.Username
 
-		getChainUC.EXPECT().Execute(gomock.Any(), "uuid", tenants).Return(chain, nil)
+		getChainUC.EXPECT().Execute(gomock.Any(), "uuid", userInfo).Return(chain, nil)
 		privateTxManagerAgent.EXPECT().Delete(gomock.Any(), gomock.Any()).Return(nil)
-		chainAgent.EXPECT().Delete(gomock.Any(), parsers.NewChainModelFromEntity(chain), tenants).Return(expectedErr)
+		chainAgent.EXPECT().Delete(gomock.Any(), parsers.NewChainModelFromEntity(chain), userInfo.AllowedTenants).Return(expectedErr)
 
-		err := usecase.Execute(ctx, "uuid", tenants)
+		err := usecase.Execute(ctx, "uuid", userInfo)
 
 		assert.Error(t, err)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(deleteChainComponent), err)

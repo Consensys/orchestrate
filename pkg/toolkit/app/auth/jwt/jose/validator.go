@@ -3,8 +3,10 @@ package jose
 import (
 	"context"
 	"net/url"
+	"strings"
 	"time"
 
+	authutils "github.com/consensys/orchestrate/pkg/toolkit/app/auth/utils"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 
 	"github.com/auth0/go-jwt-middleware/validate/josev2"
@@ -30,7 +32,7 @@ func NewValidator(cfg *Config) (*Validator, error) {
 	validator, err := josev2.New(
 		josev2.NewCachingJWKSProvider(*issuerURL, cfg.CacheTTL).KeyFunc,
 		jose.RS256,
-		josev2.WithCustomClaims(func() josev2.CustomClaims { return &CustomClaims{} }),
+		josev2.WithCustomClaims(func() josev2.CustomClaims { return NewCustomClaims(cfg.OrchestrateClaims) }),
 		josev2.WithExpectedClaims(func() jwt.Expected {
 			return expectedClaims.WithTime(time.Now())
 		}),
@@ -49,12 +51,20 @@ func (v *Validator) ValidateToken(ctx context.Context, token string) (*entities.
 		return nil, err
 	}
 
-	// The tenant ID is the "sub" field, if the "tenant_id" custom field is specified, then tenant ID is "tenant_id"
-	tenantID := userCtx.(*josev2.UserContext).Claims.Subject
-	tenantIDCustomClaim := userCtx.(*josev2.UserContext).CustomClaims.(*CustomClaims).TenantID
-	if tenantIDCustomClaim != "" {
-		tenantID = tenantIDCustomClaim
+	if orchestrateUserClaims := userCtx.(*josev2.UserContext).CustomClaims.(*CustomClaims).UserClaims; orchestrateUserClaims != nil {
+		return orchestrateUserClaims, nil
 	}
 
-	return &entities.UserClaims{TenantID: tenantID}, nil
+	// The tenant ID is the "sub" field, then is "tenant_id:username" or "tenant_id"
+	sub := userCtx.(*josev2.UserContext).Claims.Subject
+	pieces := strings.Split(sub, authutils.AuthSeparator)
+	claim := &entities.UserClaims{}
+	if len(pieces) == 0 {
+		claim.TenantID = pieces[0]
+	} else {
+		claim.Username = pieces[len(pieces)-1]
+		claim.TenantID = strings.Replace(sub, authutils.AuthSeparator+claim.Username, "", 1)
+	}
+
+	return claim, nil
 }

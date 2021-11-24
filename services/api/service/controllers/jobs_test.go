@@ -11,21 +11,21 @@ import (
 	"strings"
 	"testing"
 
+	txschedulertypes "github.com/consensys/orchestrate/pkg/types/api"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/pkg/types/testutils"
-	txschedulertypes "github.com/consensys/orchestrate/pkg/types/api"
 	"github.com/consensys/orchestrate/services/api/business/use-cases"
 	"github.com/consensys/orchestrate/services/api/business/use-cases/mocks"
 
+	"github.com/consensys/orchestrate/pkg/encoding/json"
+	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
+	"github.com/consensys/orchestrate/services/api/service/formatters"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"github.com/consensys/orchestrate/pkg/encoding/json"
-	"github.com/consensys/orchestrate/pkg/errors"
-	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
-	"github.com/consensys/orchestrate/services/api/service/formatters"
 )
 
 type jobsCtrlTestSuite struct {
@@ -38,7 +38,7 @@ type jobsCtrlTestSuite struct {
 	updateJobUC    *mocks.MockUpdateJobUseCase
 	searchJobUC    *mocks.MockSearchJobsUseCase
 	ctx            context.Context
-	tenants        []string
+	userInfo       *multitenancy.UserInfo
 	router         *mux.Router
 }
 
@@ -81,16 +81,14 @@ func (s *jobsCtrlTestSuite) SetupTest() {
 	ctrl := gomock.NewController(s.T())
 	defer ctrl.Finish()
 
-	s.tenants = []string{"tenantID"}
 	s.createJobUC = mocks.NewMockCreateJobUseCase(ctrl)
 	s.getJobUC = mocks.NewMockGetJobUseCase(ctrl)
 	s.startJobUC = mocks.NewMockStartJobUseCase(ctrl)
 	s.updateJobUC = mocks.NewMockUpdateJobUseCase(ctrl)
 	s.searchJobUC = mocks.NewMockSearchJobsUseCase(ctrl)
 	s.resentJobTxUC = mocks.NewMockResendJobTxUseCase(ctrl)
-	s.ctx = context.Background()
-	s.ctx = context.WithValue(s.ctx, multitenancy.TenantIDKey, s.tenants[0])
-	s.ctx = context.WithValue(s.ctx, multitenancy.AllowedTenantsKey, s.tenants)
+	s.userInfo = multitenancy.NewUserInfo("tenantOne", "username")
+	s.ctx = multitenancy.WithUserInfo(context.Background(), s.userInfo)
 	s.router = mux.NewRouter()
 
 	controller := NewJobsController(s)
@@ -111,7 +109,7 @@ func (s *jobsCtrlTestSuite) TestJobsController_Create() {
 			NewRequest(http.MethodPost, "/jobs", bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 
-		s.createJobUC.EXPECT().Execute(gomock.Any(), gomock.Any(), s.tenants).Return(jobEntityRes, nil)
+		s.createJobUC.EXPECT().Execute(gomock.Any(), gomock.Any(), s.userInfo).Return(jobEntityRes, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -166,7 +164,7 @@ func (s *jobsCtrlTestSuite) TestJobsController_Create() {
 			NewRequest(http.MethodPost, "/jobs", bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 
-		s.createJobUC.EXPECT().Execute(gomock.Any(), gomock.Any(), s.tenants).Return(nil, errors.InvalidParameterError("error"))
+		s.createJobUC.EXPECT().Execute(gomock.Any(), gomock.Any(), s.userInfo).Return(nil, errors.InvalidParameterError("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)
 		assert.Equal(t, http.StatusUnprocessableEntity, rw.Code)
@@ -181,7 +179,7 @@ func (s *jobsCtrlTestSuite) TestJobsController_GetOne() {
 			WithContext(s.ctx)
 		jobEntityRes := testutils.FakeJob()
 
-		s.getJobUC.EXPECT().Execute(gomock.Any(), "jobUUID", s.tenants).Return(jobEntityRes, nil)
+		s.getJobUC.EXPECT().Execute(gomock.Any(), "jobUUID", s.userInfo).Return(jobEntityRes, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -197,7 +195,7 @@ func (s *jobsCtrlTestSuite) TestJobsController_GetOne() {
 		httpRequest := httptest.
 			NewRequest(http.MethodGet, "/schedules/jobUUID", bytes.NewReader(nil)).
 			WithContext(s.ctx)
-		s.getJobUC.EXPECT().Execute(gomock.Any(), "jobUUID", s.tenants).Return(nil, errors.NotFoundError("error"))
+		s.getJobUC.EXPECT().Execute(gomock.Any(), "jobUUID", s.userInfo).Return(nil, errors.NotFoundError("error"))
 		s.router.ServeHTTP(rw, httpRequest)
 		assert.Equal(t, http.StatusNotFound, rw.Code)
 	})
@@ -210,7 +208,7 @@ func (s *jobsCtrlTestSuite) TestJobsController_Search() {
 		httpRequest := httptest.NewRequest(http.MethodGet, "/jobs", nil).WithContext(s.ctx)
 		jobEntities := []*entities.Job{testutils.FakeJob()}
 
-		s.searchJobUC.EXPECT().Execute(gomock.Any(), filters, s.tenants).Return(jobEntities, nil)
+		s.searchJobUC.EXPECT().Execute(gomock.Any(), filters, s.userInfo).Return(jobEntities, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -233,7 +231,7 @@ func (s *jobsCtrlTestSuite) TestJobsController_Search() {
 			WithContext(s.ctx)
 		jobEntities := []*entities.Job{testutils.FakeJob()}
 
-		s.searchJobUC.EXPECT().Execute(gomock.Any(), filters, s.tenants).Return(jobEntities, nil)
+		s.searchJobUC.EXPECT().Execute(gomock.Any(), filters, s.userInfo).Return(jobEntities, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -267,7 +265,7 @@ func (s *jobsCtrlTestSuite) TestJobsController_Search() {
 			NewRequest(http.MethodGet, "/jobs", bytes.NewReader(nil)).
 			WithContext(s.ctx)
 
-		s.searchJobUC.EXPECT().Execute(gomock.Any(), filters, s.tenants).Return(nil, errors.InvalidParameterError("error"))
+		s.searchJobUC.EXPECT().Execute(gomock.Any(), filters, s.userInfo).Return(nil, errors.InvalidParameterError("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)
 		assert.Equal(t, http.StatusUnprocessableEntity, rw.Code)
@@ -281,7 +279,7 @@ func (s *jobsCtrlTestSuite) TestJobsController_Start() {
 			NewRequest(http.MethodPut, "/jobs/jobUUID/start", nil).
 			WithContext(s.ctx)
 
-		s.startJobUC.EXPECT().Execute(gomock.Any(), "jobUUID", s.tenants).Return(nil)
+		s.startJobUC.EXPECT().Execute(gomock.Any(), "jobUUID", s.userInfo).Return(nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -295,7 +293,7 @@ func (s *jobsCtrlTestSuite) TestJobsController_Start() {
 			NewRequest(http.MethodPut, "/jobs/jobUUID/start", bytes.NewReader(nil)).
 			WithContext(s.ctx)
 
-		s.startJobUC.EXPECT().Execute(gomock.Any(), "jobUUID", s.tenants).Return(errors.NotFoundError("error"))
+		s.startJobUC.EXPECT().Execute(gomock.Any(), "jobUUID", s.userInfo).Return(errors.NotFoundError("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)
 		assert.Equal(t, http.StatusNotFound, rw.Code)
@@ -309,7 +307,7 @@ func (s *jobsCtrlTestSuite) TestJobsController_ResendTxJob() {
 			NewRequest(http.MethodPut, "/jobs/jobUUID/resend", nil).
 			WithContext(s.ctx)
 
-		s.resentJobTxUC.EXPECT().Execute(gomock.Any(), "jobUUID", s.tenants).Return(nil)
+		s.resentJobTxUC.EXPECT().Execute(gomock.Any(), "jobUUID", s.userInfo).Return(nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -323,7 +321,7 @@ func (s *jobsCtrlTestSuite) TestJobsController_ResendTxJob() {
 			NewRequest(http.MethodPut, "/jobs/jobUUID/resend", bytes.NewReader(nil)).
 			WithContext(s.ctx)
 
-		s.resentJobTxUC.EXPECT().Execute(gomock.Any(), "jobUUID", s.tenants).Return(errors.NotFoundError("error"))
+		s.resentJobTxUC.EXPECT().Execute(gomock.Any(), "jobUUID", s.userInfo).Return(errors.NotFoundError("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)
 		assert.Equal(t, http.StatusNotFound, rw.Code)
@@ -344,7 +342,7 @@ func (s *jobsCtrlTestSuite) TestJobsController_Update() {
 
 		jobEntityReq := formatters.FormatJobUpdateRequest(jobRequest)
 		jobEntityReq.UUID = jobEntityRes.UUID
-		s.updateJobUC.EXPECT().Execute(gomock.Any(), gomock.Any(), jobRequest.Status, "", s.tenants).Return(jobEntityRes, nil)
+		s.updateJobUC.EXPECT().Execute(gomock.Any(), gomock.Any(), jobRequest.Status, "", s.userInfo).Return(jobEntityRes, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -364,7 +362,7 @@ func (s *jobsCtrlTestSuite) TestJobsController_Update() {
 			NewRequest(http.MethodPatch, "/jobs/jobUUID", bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 
-		s.updateJobUC.EXPECT().Execute(gomock.Any(), gomock.Any(), gomock.Any(), "", s.tenants).Return(nil, errors.InvalidStateError("error"))
+		s.updateJobUC.EXPECT().Execute(gomock.Any(), gomock.Any(), gomock.Any(), "", s.userInfo).Return(nil, errors.InvalidStateError("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)
 		assert.Equal(t, http.StatusConflict, rw.Code)

@@ -5,6 +5,7 @@ package transactions
 import (
 	"context"
 	"fmt"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	testutils3 "github.com/consensys/orchestrate/pkg/types/testutils"
 	mocks2 "github.com/consensys/orchestrate/services/api/business/use-cases/mocks"
@@ -27,11 +28,11 @@ func TestSearchTxs_Execute(t *testing.T) {
 	mockDB := mocks.NewMockDB(ctrl)
 	mockTransactionRequestDA := mocks.NewMockTransactionRequestAgent(ctrl)
 	mockGetTxUC := mocks2.NewMockGetTxUseCase(ctrl)
-	tenantID := "tenantID"
 	filter := &entities.TransactionRequestFilters{}
 
 	mockDB.EXPECT().TransactionRequest().Return(mockTransactionRequestDA).AnyTimes()
 
+	userInfo := multitenancy.NewUserInfo("tenantOne", "username")
 	usecase := NewSearchTransactionsUseCase(mockDB, mockGetTxUC)
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
@@ -39,11 +40,11 @@ func TestSearchTxs_Execute(t *testing.T) {
 		txRequest0 := testutils3.FakeTxRequest()
 		txRequest1 := testutils3.FakeTxRequest()
 
-		mockTransactionRequestDA.EXPECT().Search(gomock.Any(), filter, []string{tenantID}).Return(txRequestModels, nil)
-		mockGetTxUC.EXPECT().Execute(gomock.Any(), txRequestModels[0].Schedule.UUID, []string{tenantID}).Return(txRequest0, nil)
-		mockGetTxUC.EXPECT().Execute(gomock.Any(), txRequestModels[1].Schedule.UUID, []string{tenantID}).Return(txRequest1, nil)
+		mockTransactionRequestDA.EXPECT().Search(gomock.Any(), filter, userInfo.AllowedTenants, userInfo.Username).Return(txRequestModels, nil)
+		mockGetTxUC.EXPECT().Execute(gomock.Any(), txRequestModels[0].Schedule.UUID, userInfo).Return(txRequest0, nil)
+		mockGetTxUC.EXPECT().Execute(gomock.Any(), txRequestModels[1].Schedule.UUID, userInfo).Return(txRequest1, nil)
 
-		result, err := usecase.Execute(ctx, filter, []string{tenantID})
+		result, err := usecase.Execute(ctx, filter, userInfo)
 
 		assert.Nil(t, err)
 
@@ -61,9 +62,9 @@ func TestSearchTxs_Execute(t *testing.T) {
 	t.Run("should fail with same error if Search fails", func(t *testing.T) {
 		expectedErr := errors.NotFoundError("error")
 
-		mockTransactionRequestDA.EXPECT().Search(gomock.Any(), filter, []string{tenantID}).Return(nil, expectedErr)
+		mockTransactionRequestDA.EXPECT().Search(gomock.Any(), filter, userInfo.AllowedTenants, userInfo.Username).Return(nil, expectedErr)
 
-		response, err := usecase.Execute(ctx, filter, []string{tenantID})
+		response, err := usecase.Execute(ctx, filter, userInfo)
 
 		assert.Nil(t, response)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(searchTxsComponent), err)
@@ -73,10 +74,10 @@ func TestSearchTxs_Execute(t *testing.T) {
 		txRequestModels := []*models.TransactionRequest{testutils.FakeTxRequest(0)}
 		expectedErr := fmt.Errorf("error")
 
-		mockTransactionRequestDA.EXPECT().Search(gomock.Any(), filter, []string{tenantID}).Return(txRequestModels, nil)
-		mockGetTxUC.EXPECT().Execute(gomock.Any(), txRequestModels[0].Schedule.UUID, []string{tenantID}).Return(nil, expectedErr)
+		mockTransactionRequestDA.EXPECT().Search(gomock.Any(), filter, userInfo.AllowedTenants, userInfo.Username).Return(txRequestModels, nil)
+		mockGetTxUC.EXPECT().Execute(gomock.Any(), txRequestModels[0].Schedule.UUID, userInfo).Return(nil, expectedErr)
 
-		response, err := usecase.Execute(ctx, filter, []string{tenantID})
+		response, err := usecase.Execute(ctx, filter, userInfo)
 
 		assert.Nil(t, response)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(searchTxsComponent), err)

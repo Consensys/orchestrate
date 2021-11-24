@@ -7,6 +7,7 @@ import (
 
 	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/toolkit/ethclient"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
@@ -45,11 +46,11 @@ func NewGetFaucetCandidateUseCase(
 	}
 }
 
-func (uc *faucetCandidate) Execute(ctx context.Context, account string, chain *entities.Chain, tenants []string) (*entities.Faucet, error) {
+func (uc *faucetCandidate) Execute(ctx context.Context, account string, chain *entities.Chain, userInfo *multitenancy.UserInfo) (*entities.Faucet, error) {
 	ctx = log.With(log.WithFields(ctx, log.Field("chain", chain.UUID), log.Field("account", account)), uc.logger)
 	logger := uc.logger.WithContext(ctx)
 
-	faucets, err := uc.searchFaucets.Execute(ctx, &entities.FaucetFilters{ChainRule: chain.UUID}, tenants)
+	faucets, err := uc.searchFaucets.Execute(ctx, &entities.FaucetFilters{ChainRule: chain.UUID}, userInfo)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(getFaucetCandidateComponent)
 	}

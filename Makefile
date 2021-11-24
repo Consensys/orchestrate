@@ -53,6 +53,9 @@ run-e2e: gobuild-e2e
 run-stress: gobuild-e2e
 	@docker-compose -f docker-compose.e2e.yml up -V stress
 
+e2e-ci: run-e2e 
+	@exit $(docker inspect orchestrategit_e2e_1 --format='{{.State.ExitCode}}')
+
 e2e: run-e2e
 	@docker-compose -f docker-compose.e2e.yml up --build report
 	@$(OPEN) build/report/report.html 2>/dev/null

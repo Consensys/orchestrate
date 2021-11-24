@@ -11,9 +11,8 @@ import (
 	"github.com/consensys/orchestrate/pkg/utils"
 )
 
-func FormatRegisterFaucetRequest(request *types.RegisterFaucetRequest, tenantID string) *entities.Faucet {
+func FormatRegisterFaucetRequest(request *types.RegisterFaucetRequest) *entities.Faucet {
 	return &entities.Faucet{
-		TenantID:        tenantID,
 		Name:            request.Name,
 		ChainRule:       request.ChainRule,
 		CreditorAccount: ethcommon.HexToAddress(request.CreditorAccount).Hex(),
@@ -23,10 +22,9 @@ func FormatRegisterFaucetRequest(request *types.RegisterFaucetRequest, tenantID 
 	}
 }
 
-func FormatUpdateFaucetRequest(request *types.UpdateFaucetRequest, uuid, tenantID string) *entities.Faucet {
+func FormatUpdateFaucetRequest(request *types.UpdateFaucetRequest, uuid string) *entities.Faucet {
 	return &entities.Faucet{
 		UUID:            uuid,
-		TenantID:        tenantID,
 		Name:            request.Name,
 		ChainRule:       request.ChainRule,
 		CreditorAccount: ethcommon.HexToAddress(request.CreditorAccount).Hex(),

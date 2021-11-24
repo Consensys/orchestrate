@@ -3,6 +3,7 @@ package jobs
 import (
 	"context"
 
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
 
@@ -29,9 +30,9 @@ func NewGetJobUseCase(db store.DB) usecases.GetJobUseCase {
 }
 
 // Execute gets a job
-func (uc *getJobUseCase) Execute(ctx context.Context, jobUUID string, tenants []string) (*entities.Job, error) {
+func (uc *getJobUseCase) Execute(ctx context.Context, jobUUID string, userInfo *multitenancy.UserInfo) (*entities.Job, error) {
 	ctx = log.WithFields(ctx, log.Field("job", jobUUID))
-	jobModel, err := uc.db.Job().FindOneByUUID(ctx, jobUUID, tenants, true)
+	jobModel, err := uc.db.Job().FindOneByUUID(ctx, jobUUID, userInfo.AllowedTenants, userInfo.Username, true)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(getJobComponent)
 	}

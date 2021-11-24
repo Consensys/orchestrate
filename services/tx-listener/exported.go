@@ -10,6 +10,7 @@ import (
 	"github.com/consensys/orchestrate/pkg/toolkit/app"
 	authkey "github.com/consensys/orchestrate/pkg/toolkit/app/auth/key"
 	authutils "github.com/consensys/orchestrate/pkg/toolkit/app/auth/utils"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	ethclient "github.com/consensys/orchestrate/pkg/toolkit/ethclient/rpc"
 	"github.com/consensys/orchestrate/pkg/utils"
 	registryprovider "github.com/consensys/orchestrate/services/tx-listener/providers/chain-registry"
@@ -61,10 +62,11 @@ func NewApp(ctx context.Context) (*app.App, error) {
 func Run(ctx context.Context) error {
 	var err error
 	startOnce.Do(func() {
-		apiKey := viper.GetString(authkey.APIKeyViperKey)
-		if apiKey != "" {
-			// Inject authorization header in context for later authentication
-			ctx = authutils.WithAPIKey(ctx, apiKey)
+		if viper.GetBool(multitenancy.EnabledViperKey) {
+			apiKey := viper.GetString(authkey.APIKeyViperKey)
+			ctx = multitenancy.WithUserInfo(
+				authutils.WithAPIKey(ctx, apiKey),
+				multitenancy.NewInternalAdminUser())
 		}
 
 		// Create appli

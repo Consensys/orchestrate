@@ -232,6 +232,7 @@ func (sc *ScenarioContext) iHaveTheFollowingTenant(table *gherkin.PickleStepArgu
 		tenantMap := make(map[string]interface{})
 		var a string
 		var tenantID string
+		var username string
 
 		for i, cell := range row.Cells {
 			switch v := headers.Cells[i].Value; {
@@ -239,6 +240,8 @@ func (sc *ScenarioContext) iHaveTheFollowingTenant(table *gherkin.PickleStepArgu
 				a = cell.Value
 			case v == "tenantID":
 				tenantID = cell.Value
+			case v == "username":
+				username = cell.Value
 			default:
 				tenantMap[v] = cell.Value
 			}
@@ -251,6 +254,9 @@ func (sc *ScenarioContext) iHaveTheFollowingTenant(table *gherkin.PickleStepArgu
 		}
 
 		tenantMap["tenantID"] = tenantID
+		if username != "" {
+			tenantMap["username"] = username
+		}
 		sc.aliases.Set(tenantMap, sc.Pickle.Id, a)
 	}
 
@@ -588,17 +594,17 @@ type accessTokenResponse struct {
 }
 
 func (sc *ScenarioContext) getJWT(audience string) (string, error) {
-	clientID, ok := sc.aliases.Get(alias.GlobalAka, "oidcClientID")
+	clientID, ok := sc.aliases.Get(alias.GlobalAka, "oidc.clientID")
 	if !ok {
 		return "", errors.DataError("Could not find oidc client ID")
 	}
 
-	clientSecret, ok := sc.aliases.Get(alias.GlobalAka, "oidcClientSecret")
+	clientSecret, ok := sc.aliases.Get(alias.GlobalAka, "oidc.clientSecret")
 	if !ok {
 		return "", errors.DataError("Could not find oidc client secret")
 	}
 
-	idpURL, ok := sc.aliases.Get(alias.GlobalAka, "oidcTokenURL")
+	idpURL, ok := sc.aliases.Get(alias.GlobalAka, "oidc.tokenURL")
 	if !ok {
 		return "", errors.DataError("Could not find token url")
 	}

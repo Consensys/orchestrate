@@ -4,6 +4,7 @@ package accounts
 
 import (
 	"context"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	parsers2 "github.com/consensys/orchestrate/services/api/business/parsers"
 	models2 "github.com/consensys/orchestrate/services/api/store/models"
 	"testing"
@@ -25,10 +26,8 @@ func TestSearchAccounts_Execute(t *testing.T) {
 	accountAgent := mocks.NewMockAccountAgent(ctrl)
 	mockDB.EXPECT().Account().Return(accountAgent).AnyTimes()
 
+	userInfo := multitenancy.NewUserInfo("tenantOne", "username")
 	usecase := NewSearchAccountsUseCase(mockDB)
-
-	tenantID := "tenantID"
-	tenants := []string{tenantID}
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		acc := testutils.FakeAccountModel()
@@ -37,9 +36,9 @@ func TestSearchAccounts_Execute(t *testing.T) {
 			Aliases: []string{"alias1"},
 		}
 
-		accountAgent.EXPECT().Search(gomock.Any(), filter, tenants).Return([]*models2.Account{acc}, nil)
+		accountAgent.EXPECT().Search(gomock.Any(), filter, userInfo.AllowedTenants, userInfo.Username).Return([]*models2.Account{acc}, nil)
 
-		resp, err := usecase.Execute(ctx, filter, tenants)
+		resp, err := usecase.Execute(ctx, filter, userInfo)
 
 		assert.NoError(t, err)
 		assert.Equal(t, parsers2.NewAccountEntityFromModels(acc), resp[0])
@@ -52,9 +51,9 @@ func TestSearchAccounts_Execute(t *testing.T) {
 			Aliases: []string{"alias1"},
 		}
 
-		accountAgent.EXPECT().Search(gomock.Any(), filter, tenants).Return(nil, expectedErr)
+		accountAgent.EXPECT().Search(gomock.Any(), filter, userInfo.AllowedTenants, userInfo.Username).Return(nil, expectedErr)
 
-		_, err := usecase.Execute(ctx, filter, tenants)
+		_, err := usecase.Execute(ctx, filter, userInfo)
 
 		assert.Error(t, err)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createAccountComponent), err)

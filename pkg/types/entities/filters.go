@@ -19,12 +19,15 @@ type TransactionRequestFilters struct {
 type FaucetFilters struct {
 	Names     []string `validate:"omitempty,unique"`
 	ChainRule string   `validate:"omitempty"`
+	TenantID  string   `validate:"omitempty"`
 }
 
 type AccountFilters struct {
-	Aliases []string `validate:"omitempty,unique"`
+	Aliases  []string `validate:"omitempty,unique"`
+	TenantID string   `validate:"omitempty"`
 }
 
 type ChainFilters struct {
-	Names []string `validate:"omitempty,unique"`
+	Names    []string `validate:"omitempty,unique"`
+	TenantID string   `validate:"omitempty"`
 }

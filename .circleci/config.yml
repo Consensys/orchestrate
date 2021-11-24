@@ -274,7 +274,7 @@ jobs:
             make up
             echo "Wait 20 seconds for services to boot up correctly..."
             sleep 20
-            make run-e2e
+            make e2e-ci
 
   run-e2e:
     docker:

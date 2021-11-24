@@ -104,7 +104,7 @@ func (sentry *TxSentry) createSessions(ctx context.Context, filters *entities.Jo
 	}
 
 	for _, jobResponse := range jobResponses {
-		jctx := multitenancy.WithTenantID(ctx, jobResponse.TenantID)
+		jctx := multitenancy.WithUserInfo(ctx, multitenancy.NewUserInfo(jobResponse.TenantID, jobResponse.OwnerID))
 		sentry.sessionManager.Start(jctx, parsers.JobResponseToEntity(jobResponse))
 	}
 

@@ -36,13 +36,11 @@ func NewFundAccountUseCase(
 	}
 }
 
-func (uc *fundAccountUseCase) Execute(ctx context.Context, account *entities.Account, chainName, tenantID string) error {
+func (uc *fundAccountUseCase) Execute(ctx context.Context, account *entities.Account, chainName string, userInfo *multitenancy.UserInfo) error {
 	ctx = log.WithFields(ctx, log.Field("address", account.Address))
 	logger := uc.logger.WithContext(ctx)
 
-	tenants := []string{tenantID, multitenancy.DefaultTenant}
-
-	chains, err := uc.searchChainsUC.Execute(ctx, &entities.ChainFilters{Names: []string{chainName}}, tenants)
+	chains, err := uc.searchChainsUC.Execute(ctx, &entities.ChainFilters{Names: []string{chainName}}, userInfo)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(fundAccountComponent)
 	}
@@ -53,7 +51,7 @@ func (uc *fundAccountUseCase) Execute(ctx context.Context, account *entities.Acc
 		return errors.InvalidParameterError(errMsg).ExtendComponent(fundAccountComponent)
 	}
 
-	faucet, err := uc.getFaucetCandidate.Execute(ctx, account.Address, chains[0], tenants)
+	faucet, err := uc.getFaucetCandidate.Execute(ctx, account.Address, chains[0], userInfo)
 	if err != nil {
 		if errors.IsNotFoundError(err) {
 			logger.Debug("unnecessary funding, skipping top-up")
@@ -76,7 +74,8 @@ func (uc *fundAccountUseCase) Execute(ctx context.Context, account *entities.Acc
 		},
 		InternalData: &entities.InternalData{},
 	}
-	_, err = uc.sendTxUseCase.Execute(ctx, txRequest, "", tenantID)
+
+	_, err = uc.sendTxUseCase.Execute(ctx, txRequest, "", userInfo)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(fundAccountComponent)
 	}

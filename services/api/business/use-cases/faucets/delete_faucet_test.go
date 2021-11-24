@@ -24,18 +24,16 @@ func TestDeleteFaucet_Execute(t *testing.T) {
 	faucetAgent := mocks.NewMockFaucetAgent(ctrl)
 	mockDB.EXPECT().Faucet().Return(faucetAgent).AnyTimes()
 
+	userInfo := multitenancy.NewUserInfo("tenantOne", "username")
 	usecase := NewDeleteFaucetUseCase(mockDB)
-
-	tenantID := multitenancy.DefaultTenant
-	tenants := []string{tenantID}
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		faucetModel := testutils.FakeFaucetModel()
 
-		faucetAgent.EXPECT().FindOneByUUID(gomock.Any(), "uuid", tenants).Return(faucetModel, nil)
-		faucetAgent.EXPECT().Delete(gomock.Any(), faucetModel, tenants).Return(nil)
+		faucetAgent.EXPECT().FindOneByUUID(gomock.Any(), "uuid", userInfo.AllowedTenants).Return(faucetModel, nil)
+		faucetAgent.EXPECT().Delete(gomock.Any(), faucetModel, userInfo.AllowedTenants).Return(nil)
 
-		err := usecase.Execute(ctx, "uuid", tenants)
+		err := usecase.Execute(ctx, "uuid", userInfo)
 
 		assert.NoError(t, err)
 	})
@@ -43,9 +41,9 @@ func TestDeleteFaucet_Execute(t *testing.T) {
 	t.Run("should fail with same error if findOne faucet fails", func(t *testing.T) {
 		expectedErr := errors.NotFoundError("error")
 
-		faucetAgent.EXPECT().FindOneByUUID(gomock.Any(), "uuid", tenants).Return(nil, expectedErr)
+		faucetAgent.EXPECT().FindOneByUUID(gomock.Any(), "uuid", userInfo.AllowedTenants).Return(nil, expectedErr)
 
-		err := usecase.Execute(ctx, "uuid", tenants)
+		err := usecase.Execute(ctx, "uuid", userInfo)
 
 		assert.Error(t, err)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(deleteFaucetComponent), err)
@@ -54,10 +52,10 @@ func TestDeleteFaucet_Execute(t *testing.T) {
 	t.Run("should fail with same error if delete faucet fails", func(t *testing.T) {
 		expectedErr := errors.NotFoundError("error")
 
-		faucetAgent.EXPECT().FindOneByUUID(gomock.Any(), "uuid", tenants).Return(testutils.FakeFaucetModel(), nil)
-		faucetAgent.EXPECT().Delete(gomock.Any(), gomock.Any(), tenants).Return(expectedErr)
+		faucetAgent.EXPECT().FindOneByUUID(gomock.Any(), "uuid", userInfo.AllowedTenants).Return(testutils.FakeFaucetModel(), nil)
+		faucetAgent.EXPECT().Delete(gomock.Any(), gomock.Any(), userInfo.AllowedTenants).Return(expectedErr)
 
-		err := usecase.Execute(ctx, "uuid", tenants)
+		err := usecase.Execute(ctx, "uuid", userInfo)
 
 		assert.Error(t, err)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(deleteFaucetComponent), err)

@@ -23,16 +23,14 @@ func TestGetFaucet_Execute(t *testing.T) {
 	faucetAgent := mocks.NewMockFaucetAgent(ctrl)
 	mockDB.EXPECT().Faucet().Return(faucetAgent).AnyTimes()
 
+	userInfo := multitenancy.NewUserInfo("tenantOne", "username")
 	usecase := NewGetFaucetUseCase(mockDB)
-
-	tenantID := multitenancy.DefaultTenant
-	tenants := []string{tenantID}
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		faucet := testutils.FakeFaucetModel()
-		faucetAgent.EXPECT().FindOneByUUID(gomock.Any(), faucet.UUID, tenants).Return(faucet, nil)
+		faucetAgent.EXPECT().FindOneByUUID(gomock.Any(), faucet.UUID, userInfo.AllowedTenants).Return(faucet, nil)
 
-		resp, err := usecase.Execute(ctx, faucet.UUID, tenants)
+		resp, err := usecase.Execute(ctx, faucet.UUID, userInfo)
 
 		assert.NoError(t, err)
 		assert.Equal(t, parsers.NewFaucetFromModel(faucet), resp)
@@ -41,9 +39,9 @@ func TestGetFaucet_Execute(t *testing.T) {
 	t.Run("should fail with same error if get faucet fails", func(t *testing.T) {
 		expectedErr := errors.NotFoundError("error")
 
-		faucetAgent.EXPECT().FindOneByUUID(gomock.Any(), "uuid", tenants).Return(nil, expectedErr)
+		faucetAgent.EXPECT().FindOneByUUID(gomock.Any(), "uuid", userInfo.AllowedTenants).Return(nil, expectedErr)
 
-		resp, err := usecase.Execute(ctx, "uuid", tenants)
+		resp, err := usecase.Execute(ctx, "uuid", userInfo)
 
 		assert.Nil(t, resp)
 		assert.Error(t, err)

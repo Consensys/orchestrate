@@ -3,6 +3,7 @@ package jobs
 import (
 	"context"
 
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/pkg/utils/envelope"
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
@@ -34,12 +35,12 @@ func NewResendJobTxUseCase(db store.DB, kafkaProducer sarama.SyncProducer, topic
 }
 
 // Execute sends a job to the Kafka topic
-func (uc *resendJobTxUseCase) Execute(ctx context.Context, jobUUID string, allowedTenants []string) error {
+func (uc *resendJobTxUseCase) Execute(ctx context.Context, jobUUID string, userInfo *multitenancy.UserInfo) error {
 	ctx = log.WithFields(ctx, log.Field("job", jobUUID))
 	logger := uc.logger.WithContext(ctx)
 	logger.Debug("resending job transaction")
 
-	jobModel, err := uc.db.Job().FindOneByUUID(ctx, jobUUID, allowedTenants, false)
+	jobModel, err := uc.db.Job().FindOneByUUID(ctx, jobUUID, userInfo.AllowedTenants, userInfo.Username, false)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(resendJobTxComponent)
 	}

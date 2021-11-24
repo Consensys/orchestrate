@@ -9,6 +9,7 @@ func NewScheduleEntityFromModels(scheduleModel *models.Schedule) *entities.Sched
 	schedule := &entities.Schedule{
 		UUID:      scheduleModel.UUID,
 		TenantID:  scheduleModel.TenantID,
+		OwnerID:   scheduleModel.OwnerID,
 		CreatedAt: scheduleModel.CreatedAt,
 	}
 

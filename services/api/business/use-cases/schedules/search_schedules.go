@@ -3,6 +3,7 @@ package schedules
 import (
 	"context"
 
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
 
@@ -29,15 +30,15 @@ func NewSearchSchedulesUseCase(db store.DB) usecases.SearchSchedulesUseCase {
 }
 
 // Execute search schedules
-func (uc *searchSchedulesUseCase) Execute(ctx context.Context, tenants []string) ([]*entities.Schedule, error) {
-	scheduleModels, err := uc.db.Schedule().FindAll(ctx, tenants)
+func (uc *searchSchedulesUseCase) Execute(ctx context.Context, userInfo *multitenancy.UserInfo) ([]*entities.Schedule, error) {
+	scheduleModels, err := uc.db.Schedule().FindAll(ctx, userInfo.AllowedTenants, userInfo.Username)
 	if err != nil {
 		return nil, err
 	}
 
 	for idx, scheduleModel := range scheduleModels {
 		for jdx, job := range scheduleModel.Jobs {
-			scheduleModels[idx].Jobs[jdx], err = uc.db.Job().FindOneByUUID(ctx, job.UUID, tenants, false)
+			scheduleModels[idx].Jobs[jdx], err = uc.db.Job().FindOneByUUID(ctx, job.UUID, userInfo.AllowedTenants, userInfo.Username, false)
 			if err != nil {
 				return nil, errors.FromError(err).ExtendComponent(searchSchedulesComponent)
 			}

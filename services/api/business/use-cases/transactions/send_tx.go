@@ -53,15 +53,13 @@ func NewSendTxUseCase(
 }
 
 // Execute validates, creates and starts a new transaction
-func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequest, txData, tenantID string) (*entities.TxRequest, error) {
+func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequest, txData string, userInfo *multitenancy.UserInfo) (*entities.TxRequest, error) {
 	ctx = log.WithFields(ctx, log.Field("idempotency-key", txRequest.IdempotencyKey))
 	logger := uc.logger.WithContext(ctx)
 	logger.Debug("creating new transaction")
 
-	allowedTenants := []string{tenantID, multitenancy.DefaultTenant}
-
 	// Step 1: Get chain from chain registry
-	chain, err := uc.getChain(ctx, txRequest.ChainName, allowedTenants)
+	chain, err := uc.getChain(ctx, txRequest.ChainName, userInfo)
 	if err != nil {
 		logger.WithError(err).WithField("chain_name", txRequest.ChainName).Error("failed to get chain")
 		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
@@ -75,7 +73,7 @@ func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequ
 	}
 
 	// Step 3: Insert Schedule + Job + Transaction + TxRequest atomically OR get tx request if it exists
-	txRequest, err = uc.selectOrInsertTxRequest(ctx, txRequest, txData, requestHash, chain.UUID, tenantID, allowedTenants)
+	txRequest, err = uc.selectOrInsertTxRequest(ctx, txRequest, txData, requestHash, chain.UUID, userInfo)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
 	}
@@ -85,7 +83,7 @@ func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequ
 	job := txRequest.Schedule.Jobs[0]
 	if job.Status == entities.StatusCreated {
 		var fctJob *entities.Job
-		fctJob, err = uc.startFaucetJob(ctx, job.Transaction.From, job.ScheduleUUID, tenantID, chain)
+		fctJob, err = uc.startFaucetJob(ctx, job.Transaction.From, job.ScheduleUUID, chain, userInfo)
 		if err != nil {
 			return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
 		}
@@ -93,11 +91,11 @@ func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequ
 			txRequest.Schedule.Jobs = append(txRequest.Schedule.Jobs, fctJob)
 		}
 
-		if err = uc.startJobUC.Execute(ctx, job.UUID, allowedTenants); err != nil {
+		if err = uc.startJobUC.Execute(ctx, job.UUID, userInfo); err != nil {
 			return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
 		}
 	} else { // Load latest Schedule status from DB
-		txRequest, err = uc.getTxUC.Execute(ctx, txRequest.Schedule.UUID, []string{tenantID})
+		txRequest, err = uc.getTxUC.Execute(ctx, txRequest.Schedule.UUID, userInfo)
 		if err != nil {
 			return nil, errors.FromError(err).ExtendComponent(sendTxComponent)
 		}
@@ -107,8 +105,8 @@ func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequ
 	return txRequest, nil
 }
 
-func (uc *sendTxUsecase) getChain(ctx context.Context, chainName string, tenants []string) (*entities.Chain, error) {
-	chains, err := uc.searchChainsUC.Execute(ctx, &entities.ChainFilters{Names: []string{chainName}}, tenants)
+func (uc *sendTxUsecase) getChain(ctx context.Context, chainName string, userInfo *multitenancy.UserInfo) (*entities.Chain, error) {
+	chains, err := uc.searchChainsUC.Execute(ctx, &entities.ChainFilters{Names: []string{chainName}}, userInfo)
 	if err != nil {
 		return nil, errors.FromError(err)
 	}
@@ -124,17 +122,17 @@ func (uc *sendTxUsecase) getChain(ctx context.Context, chainName string, tenants
 func (uc *sendTxUsecase) selectOrInsertTxRequest(
 	ctx context.Context,
 	txRequest *entities.TxRequest,
-	txData, requestHash, chainUUID, tenantID string,
-	allowedTenants []string,
+	txData, requestHash, chainUUID string,
+	userInfo *multitenancy.UserInfo,
 ) (*entities.TxRequest, error) {
 	if txRequest.IdempotencyKey == "" {
-		return uc.insertNewTxRequest(ctx, txRequest, txData, requestHash, chainUUID, tenantID, allowedTenants)
+		return uc.insertNewTxRequest(ctx, txRequest, txData, requestHash, chainUUID, userInfo.TenantID, userInfo)
 	}
 
-	txRequestModel, err := uc.db.TransactionRequest().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey, tenantID)
+	txRequestModel, err := uc.db.TransactionRequest().FindOneByIdempotencyKey(ctx, txRequest.IdempotencyKey, userInfo.TenantID, userInfo.Username)
 	switch {
 	case errors.IsNotFoundError(err):
-		return uc.insertNewTxRequest(ctx, txRequest, txData, requestHash, chainUUID, tenantID, allowedTenants)
+		return uc.insertNewTxRequest(ctx, txRequest, txData, requestHash, chainUUID, userInfo.TenantID, userInfo)
 	case err != nil:
 		return nil, err
 	case txRequestModel != nil && txRequestModel.RequestHash != requestHash:
@@ -142,7 +140,7 @@ func (uc *sendTxUsecase) selectOrInsertTxRequest(
 		uc.logger.Error(errMessage)
 		return nil, errors.AlreadyExistsError(errMessage)
 	default:
-		return uc.getTxUC.Execute(ctx, txRequestModel.Schedule.UUID, []string{tenantID})
+		return uc.getTxUC.Execute(ctx, txRequestModel.Schedule.UUID, userInfo)
 	}
 }
 
@@ -150,10 +148,10 @@ func (uc *sendTxUsecase) insertNewTxRequest(
 	ctx context.Context,
 	txRequest *entities.TxRequest,
 	txData, requestHash, chainUUID, tenantID string,
-	allowedTenants []string,
+	userInfo *multitenancy.UserInfo,
 ) (*entities.TxRequest, error) {
 	err := database.ExecuteInDBTx(uc.db, func(dbtx database.Tx) error {
-		schedule := &models.Schedule{TenantID: tenantID}
+		schedule := &models.Schedule{TenantID: tenantID, OwnerID: userInfo.Username}
 		if err := dbtx.(store.Tx).Schedule().Insert(ctx, schedule); err != nil {
 			return err
 		}
@@ -190,7 +188,7 @@ func (uc *sendTxUsecase) insertNewTxRequest(
 			}
 
 			var job *entities.Job
-			job, err = uc.createJobUC.WithDBTransaction(dbtx.(store.Tx)).Execute(ctx, txJob, allowedTenants)
+			job, err = uc.createJobUC.WithDBTransaction(dbtx.(store.Tx)).Execute(ctx, txJob, userInfo)
 			if err != nil {
 				return err
 			}
@@ -208,13 +206,13 @@ func (uc *sendTxUsecase) insertNewTxRequest(
 }
 
 // Execute validates, creates and starts a new transaction for pre funding users account
-func (uc *sendTxUsecase) startFaucetJob(ctx context.Context, account, scheduleUUID, tenantID string, chain *entities.Chain) (*entities.Job, error) {
+func (uc *sendTxUsecase) startFaucetJob(ctx context.Context, account, scheduleUUID string, chain *entities.Chain, userInfo *multitenancy.UserInfo) (*entities.Job, error) {
 	if account == "" {
 		return nil, nil
 	}
 
 	logger := uc.logger.WithContext(ctx).WithField("chain", chain.UUID)
-	faucet, err := uc.getFaucetCandidate.Execute(ctx, account, chain, []string{tenantID, multitenancy.DefaultTenant})
+	faucet, err := uc.getFaucetCandidate.Execute(ctx, account, chain, userInfo)
 	if err != nil {
 		if errors.IsNotFoundError(err) {
 			return nil, nil
@@ -237,12 +235,12 @@ func (uc *sendTxUsecase) startFaucetJob(ctx context.Context, account, scheduleUU
 			Value: faucet.Amount,
 		},
 	}
-	fctJob, err := uc.createJobUC.Execute(ctx, txJob, []string{tenantID, multitenancy.DefaultTenant})
+	fctJob, err := uc.createJobUC.Execute(ctx, txJob, userInfo)
 	if err != nil {
 		return nil, err
 	}
 
-	err = uc.startJobUC.Execute(ctx, fctJob.UUID, []string{tenantID, multitenancy.DefaultTenant})
+	err = uc.startJobUC.Execute(ctx, fctJob.UUID, userInfo)
 	if err != nil {
 		return fctJob, err
 	}

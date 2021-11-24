@@ -46,23 +46,23 @@ type Tx interface {
 // Interfaces data agents
 type TransactionRequestAgent interface {
 	Insert(ctx context.Context, txRequest *models.TransactionRequest) error
-	FindOneByIdempotencyKey(ctx context.Context, idempotencyKey string, tenantID string) (*models.TransactionRequest, error)
-	FindOneByUUID(ctx context.Context, scheduleUUID string, tenants []string) (*models.TransactionRequest, error)
-	Search(ctx context.Context, filters *entities.TransactionRequestFilters, tenants []string) ([]*models.TransactionRequest, error)
+	FindOneByIdempotencyKey(ctx context.Context, idempotencyKey string, tenantID string, ownerID string) (*models.TransactionRequest, error)
+	FindOneByUUID(ctx context.Context, scheduleUUID string, tenants []string, ownerID string) (*models.TransactionRequest, error)
+	Search(ctx context.Context, filters *entities.TransactionRequestFilters, tenants []string, ownerID string) ([]*models.TransactionRequest, error)
 }
 
 type ScheduleAgent interface {
 	Insert(ctx context.Context, schedule *models.Schedule) error
-	FindOneByUUID(ctx context.Context, uuid string, tenants []string) (*models.Schedule, error)
-	FindAll(ctx context.Context, tenants []string) ([]*models.Schedule, error)
+	FindOneByUUID(ctx context.Context, uuid string, tenants []string, ownerID string) (*models.Schedule, error)
+	FindAll(ctx context.Context, tenants []string, ownerID string) ([]*models.Schedule, error)
 }
 
 type JobAgent interface {
 	Insert(ctx context.Context, job *models.Job) error
 	Update(ctx context.Context, job *models.Job) error
-	FindOneByUUID(ctx context.Context, uuid string, tenants []string, withLogs bool) (*models.Job, error)
+	FindOneByUUID(ctx context.Context, uuid string, tenants []string, ownerID string, withLogs bool) (*models.Job, error)
 	LockOneByUUID(ctx context.Context, uuid string) error
-	Search(ctx context.Context, filters *entities.JobFilters, tenants []string) ([]*models.Job, error)
+	Search(ctx context.Context, filters *entities.JobFilters, tenants []string, ownerID string) ([]*models.Job, error)
 }
 
 type LogAgent interface {
@@ -77,8 +77,8 @@ type TransactionAgent interface {
 type AccountAgent interface {
 	Insert(ctx context.Context, account *models.Account) error
 	Update(ctx context.Context, account *models.Account) error
-	FindOneByAddress(ctx context.Context, address string, tenants []string) (*models.Account, error)
-	Search(ctx context.Context, filters *entities.AccountFilters, tenants []string) ([]*models.Account, error)
+	FindOneByAddress(ctx context.Context, address string, tenants []string, ownerID string) (*models.Account, error)
+	Search(ctx context.Context, filters *entities.AccountFilters, tenants []string, ownerID string) ([]*models.Account, error)
 }
 
 type FaucetAgent interface {
@@ -91,9 +91,10 @@ type FaucetAgent interface {
 
 type ChainAgent interface {
 	Insert(ctx context.Context, chain *models.Chain) error
-	Update(ctx context.Context, chain *models.Chain, tenants []string) error
-	Search(ctx context.Context, filters *entities.ChainFilters, tenants []string) ([]*models.Chain, error)
-	FindOneByUUID(ctx context.Context, uuid string, tenants []string) (*models.Chain, error)
+	Update(ctx context.Context, chain *models.Chain, tenants []string, ownerID string) error
+	Search(ctx context.Context, filters *entities.ChainFilters, tenants []string, ownerID string) ([]*models.Chain, error)
+	FindOneByUUID(ctx context.Context, uuid string, tenants []string, ownerID string) (*models.Chain, error)
+	FindOneByName(ctx context.Context, name string, tenants []string, ownerID string) (*models.Chain, error)
 	Delete(ctx context.Context, chain *models.Chain, tenants []string) error
 }
 

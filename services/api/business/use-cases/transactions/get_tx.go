@@ -3,6 +3,7 @@ package transactions
 import (
 	"context"
 
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
 
@@ -30,10 +31,10 @@ func NewGetTxUseCase(db store.DB, getScheduleUsecase usecases.GetScheduleUseCase
 }
 
 // Execute gets a transaction request
-func (uc *getTxUseCase) Execute(ctx context.Context, scheduleUUID string, tenants []string) (*entities.TxRequest, error) {
+func (uc *getTxUseCase) Execute(ctx context.Context, scheduleUUID string, userInfo *multitenancy.UserInfo) (*entities.TxRequest, error) {
 	ctx = log.WithFields(ctx, log.Field("schedule", scheduleUUID))
 
-	txRequestModel, err := uc.db.TransactionRequest().FindOneByUUID(ctx, scheduleUUID, tenants)
+	txRequestModel, err := uc.db.TransactionRequest().FindOneByUUID(ctx, scheduleUUID, userInfo.AllowedTenants, userInfo.Username)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(getTxComponent)
 	}
@@ -44,7 +45,7 @@ func (uc *getTxUseCase) Execute(ctx context.Context, scheduleUUID string, tenant
 		Params:         txRequestModel.Params,
 		CreatedAt:      txRequestModel.CreatedAt,
 	}
-	txRequest.Schedule, err = uc.getScheduleUsecase.Execute(ctx, txRequestModel.Schedule.UUID, tenants)
+	txRequest.Schedule, err = uc.getScheduleUsecase.Execute(ctx, txRequestModel.Schedule.UUID, userInfo)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(getTxComponent)
 	}

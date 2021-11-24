@@ -3,6 +3,7 @@ package usecases
 import (
 	"context"
 
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 )
 
@@ -17,21 +18,21 @@ type ChainUseCases interface {
 }
 
 type RegisterChainUseCase interface {
-	Execute(ctx context.Context, chain *entities.Chain, fromLatest bool) (*entities.Chain, error)
+	Execute(ctx context.Context, chain *entities.Chain, fromLatest bool, userInfo *multitenancy.UserInfo) (*entities.Chain, error)
 }
 
 type GetChainUseCase interface {
-	Execute(ctx context.Context, uuid string, tenants []string) (*entities.Chain, error)
+	Execute(ctx context.Context, uuid string, userInfo *multitenancy.UserInfo) (*entities.Chain, error)
 }
 
 type SearchChainsUseCase interface {
-	Execute(ctx context.Context, filters *entities.ChainFilters, tenants []string) ([]*entities.Chain, error)
+	Execute(ctx context.Context, filters *entities.ChainFilters, userInfo *multitenancy.UserInfo) ([]*entities.Chain, error)
 }
 
 type UpdateChainUseCase interface {
-	Execute(ctx context.Context, chain *entities.Chain, tenants []string) (*entities.Chain, error)
+	Execute(ctx context.Context, chain *entities.Chain, userInfo *multitenancy.UserInfo) (*entities.Chain, error)
 }
 
 type DeleteChainUseCase interface {
-	Execute(ctx context.Context, uuid string, tenants []string) error
+	Execute(ctx context.Context, uuid string, userInfo *multitenancy.UserInfo) error
 }

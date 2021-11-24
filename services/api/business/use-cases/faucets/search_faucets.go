@@ -5,6 +5,7 @@ import (
 
 	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/services/api/business/parsers"
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
@@ -28,8 +29,8 @@ func NewSearchFaucets(db store.DB) usecases.SearchFaucetsUseCase {
 }
 
 // Execute search faucets
-func (uc *searchFaucetsUseCase) Execute(ctx context.Context, filters *entities.FaucetFilters, tenants []string) ([]*entities.Faucet, error) {
-	faucetModels, err := uc.db.Faucet().Search(ctx, filters, tenants)
+func (uc *searchFaucetsUseCase) Execute(ctx context.Context, filters *entities.FaucetFilters, userInfo *multitenancy.UserInfo) ([]*entities.Faucet, error) {
+	faucetModels, err := uc.db.Faucet().Search(ctx, filters, userInfo.AllowedTenants)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(searchFaucetsComponent)
 	}

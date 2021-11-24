@@ -4,6 +4,7 @@ package schedules
 
 import (
 	"context"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/pkg/types/testutils"
 	"testing"
@@ -24,8 +25,8 @@ func TestSearchSchedules_Execute(t *testing.T) {
 	mockScheduleDA := mocks.NewMockScheduleAgent(ctrl)
 	mockJobDA := mocks.NewMockJobAgent(ctrl)
 
+	userInfo := multitenancy.NewUserInfo("tenantOne", "username")
 	usecase := NewSearchSchedulesUseCase(mockDB)
-	tenantID := "tenantID"
 	ctx := context.Background()
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
@@ -37,14 +38,14 @@ func TestSearchSchedules_Execute(t *testing.T) {
 		mockDB.EXPECT().Job().Return(mockJobDA).Times(1)
 
 		mockScheduleDA.EXPECT().
-			FindAll(gomock.Any(), []string{tenantID}).
+			FindAll(gomock.Any(), userInfo.AllowedTenants, userInfo.Username).
 			Return([]*models.Schedule{scheduleModel}, nil)
 
 		mockJobDA.EXPECT().
-			FindOneByUUID(gomock.Any(), scheduleModel.Jobs[0].UUID, []string{tenantID}, false).
+			FindOneByUUID(gomock.Any(), scheduleModel.Jobs[0].UUID, userInfo.AllowedTenants, userInfo.Username, false).
 			Return(scheduleModel.Jobs[0], nil)
 
-		schedulesResponse, err := usecase.Execute(ctx, []string{tenantID})
+		schedulesResponse, err := usecase.Execute(ctx, userInfo)
 
 		assert.NoError(t, err)
 		assert.Equal(t, expectedResponse, schedulesResponse)
@@ -56,10 +57,10 @@ func TestSearchSchedules_Execute(t *testing.T) {
 		mockDB.EXPECT().Schedule().Return(mockScheduleDA).Times(1)
 
 		mockScheduleDA.EXPECT().
-			FindAll(gomock.Any(), []string{tenantID}).
+			FindAll(gomock.Any(), userInfo.AllowedTenants, userInfo.Username).
 			Return(nil, expectedErr)
 
-		scheduleResponse, err := usecase.Execute(ctx, []string{tenantID})
+		scheduleResponse, err := usecase.Execute(ctx, userInfo)
 
 		assert.Nil(t, scheduleResponse)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createScheduleComponent), err)
@@ -74,14 +75,14 @@ func TestSearchSchedules_Execute(t *testing.T) {
 		mockDB.EXPECT().Job().Return(mockJobDA).Times(1)
 
 		mockScheduleDA.EXPECT().
-			FindAll(gomock.Any(), []string{tenantID}).
+			FindAll(gomock.Any(), userInfo.AllowedTenants, userInfo.Username).
 			Return([]*models.Schedule{scheduleModel}, nil)
 
 		mockJobDA.EXPECT().
-			FindOneByUUID(gomock.Any(), scheduleModel.Jobs[0].UUID, []string{tenantID}, false).
+			FindOneByUUID(gomock.Any(), scheduleModel.Jobs[0].UUID, userInfo.AllowedTenants, userInfo.Username, false).
 			Return(scheduleModel.Jobs[0], expectedErr)
 
-		scheduleResponse, err := usecase.Execute(ctx, []string{tenantID})
+		scheduleResponse, err := usecase.Execute(ctx, userInfo)
 
 		assert.Nil(t, scheduleResponse)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(createScheduleComponent), err)

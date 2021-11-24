@@ -4,6 +4,7 @@ import (
 	"context"
 	"strconv"
 
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/services/api/business/parsers"
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
@@ -31,9 +32,9 @@ func NewStartNextJobUseCase(db store.DB, startJobUC usecases.StartJobUseCase) us
 }
 
 // Execute gets a job
-func (uc *startNextJobUseCase) Execute(ctx context.Context, jobUUID string, allowedTenants []string) error {
+func (uc *startNextJobUseCase) Execute(ctx context.Context, jobUUID string, userInfo *multitenancy.UserInfo) error {
 	ctx = log.WithFields(ctx, log.Field("job", jobUUID))
-	jobModel, err := uc.db.Job().FindOneByUUID(ctx, jobUUID, allowedTenants, false)
+	jobModel, err := uc.db.Job().FindOneByUUID(ctx, jobUUID, userInfo.AllowedTenants, userInfo.Username, false)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(startNextJobComponent)
 	}
@@ -45,7 +46,7 @@ func (uc *startNextJobUseCase) Execute(ctx context.Context, jobUUID string, allo
 	logger := uc.logger.WithContext(ctx).WithField("next_job", jobModel.NextJobUUID)
 	logger.Debug("start next job use-case")
 
-	nextJobModel, err := uc.db.Job().FindOneByUUID(ctx, jobModel.NextJobUUID, allowedTenants, false)
+	nextJobModel, err := uc.db.Job().FindOneByUUID(ctx, jobModel.NextJobUUID, userInfo.AllowedTenants, userInfo.Username, false)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(startNextJobComponent)
 	}
@@ -62,7 +63,7 @@ func (uc *startNextJobUseCase) Execute(ctx context.Context, jobUUID string, allo
 		return errors.FromError(err).ExtendComponent(startNextJobComponent)
 	}
 
-	return uc.startJobUseCase.Execute(ctx, nextJobModel.UUID, allowedTenants)
+	return uc.startJobUseCase.Execute(ctx, nextJobModel.UUID, userInfo)
 }
 
 func (uc *startNextJobUseCase) handleOrionMarkingTx(ctx context.Context, prevJobModel, jobModel *models.Job) error {

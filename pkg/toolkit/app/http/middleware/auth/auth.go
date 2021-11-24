@@ -52,60 +52,53 @@ func New(jwt, key auth.Checker, multitenancyEnabled bool) *Auth {
 func (a *Auth) Handler(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		if !a.multitenancy {
-			a.serveNext(rw, req, h)
+			userInfo := multitenancy.DefaultUser()
+			a.serveNext(rw, req.WithContext(multitenancy.WithUserInfo(req.Context(), userInfo)), h)
 			return
 		}
 
 		// Extract Authorization credentials from HTTP headers
 		authCtx := authutils.WithAuthorization(
 			req.Context(),
-			req.Header.Get(authutils.AuthorizationHeader),
+			authutils.GetAuthorizationHeader(req),
 		)
 
 		// Extract API Key credentials from HTTP headers
 		authCtx = authutils.WithAPIKey(
 			authCtx,
-			req.Header.Get(authutils.APIKeyHeader),
+			authutils.GetAPIKeyHeaderValue(req),
 		)
 
 		// Extract TenantID from HTTP headers
-		authCtx = multitenancy.WithTenantID(
+		authCtx = authutils.WithTenantID(
 			authCtx,
-			req.Header.Get(multitenancy.TenantIDHeader),
+			authutils.GetTenantIDHeaderValue(req),
 		)
 
-		// Perform API Key Authentication
-		checkedCtx, err := a.key.Check(authCtx)
+		// Extract TenantID from HTTP headers
+		authCtx = authutils.WithUsername(
+			authCtx,
+			authutils.GetUsernameHeaderValue(req),
+		)
+
+		combChecker := auth.CombineCheckers(a.key, a.jwt)
+
+		userInfo, err := combChecker.Check(authCtx)
 		if err != nil {
 			log.FromContext(authCtx).WithError(err).Errorf("unauthorized request")
 			a.writeUnauthorized(rw, err)
 			return
 		}
-		if checkedCtx != nil {
+
+		if userInfo != nil {
 			// Bypass JWT authentication
-			log.FromContext(checkedCtx).
-				WithField("tenant_id", multitenancy.TenantIDFromContext(checkedCtx)).
-				WithField("allowed_tenants", multitenancy.AllowedTenantsFromContext(checkedCtx)).
-				Debugf("authentication succeeded (API-Key)")
-			a.serveNext(rw, req.WithContext(checkedCtx), h)
-			return
-		}
+			log.FromContext(authCtx).
+				WithField("tenant_id", userInfo.TenantID).
+				WithField("username", userInfo.Username).
+				WithField("allowed_tenants", userInfo.AllowedTenants).
+				Debugf("authentication succeeded (%s)", userInfo.AuthMode)
 
-		// Perform JWT Authentication
-		checkedCtx, err = a.jwt.Check(authCtx)
-		if err != nil {
-			log.FromContext(authCtx).WithError(err).Errorf("unauthorized request")
-			a.writeUnauthorized(rw, err)
-			return
-		}
-		if checkedCtx != nil {
-			// JWT Authentication succeeded
-			log.FromContext(checkedCtx).
-				WithField("tenant_id", multitenancy.TenantIDFromContext(checkedCtx)).
-				WithField("allowed_tenants", multitenancy.AllowedTenantsFromContext(checkedCtx)).
-				Debugf("authentication succeeded (JWT)")
-
-			a.serveNext(rw, req.WithContext(checkedCtx), h)
+			a.serveNext(rw, req.WithContext(multitenancy.WithUserInfo(authCtx, userInfo)), h)
 			return
 		}
 
@@ -124,8 +117,8 @@ func (a *Auth) writeUnauthorized(rw http.ResponseWriter, err error) {
 func (a *Auth) serveNext(rw http.ResponseWriter, req *http.Request, h http.Handler) {
 	// Remove authorization header
 	// So possibly another Authorization will be set by Proxy
-	req.Header.Del(authutils.AuthorizationHeader)
-	req.Header.Del(authutils.APIKeyHeader)
+	authutils.DeleteAuthorizationHeaderValue(req)
+	authutils.DeleteAPIKeyHeaderValue(req)
 
 	// Execute next handlers
 	h.ServeHTTP(rw, req)

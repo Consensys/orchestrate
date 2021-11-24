@@ -9,20 +9,20 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	txschedulertypes "github.com/consensys/orchestrate/pkg/types/api"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/pkg/types/testutils"
-	txschedulertypes "github.com/consensys/orchestrate/pkg/types/api"
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
 
-	"github.com/golang/mock/gomock"
-	"github.com/gorilla/mux"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/suite"
 	"github.com/consensys/orchestrate/pkg/encoding/json"
 	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/services/api/business/use-cases/mocks"
 	"github.com/consensys/orchestrate/services/api/service/formatters"
+	"github.com/golang/mock/gomock"
+	"github.com/gorilla/mux"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 )
 
 type schedulesCtrlTestSuite struct {
@@ -31,7 +31,7 @@ type schedulesCtrlTestSuite struct {
 	getScheduleUC     *mocks.MockGetScheduleUseCase
 	searchSchedulesUC *mocks.MockSearchSchedulesUseCase
 	ctx               context.Context
-	tenantID          string
+	userInfo          *multitenancy.UserInfo
 	router            *mux.Router
 }
 
@@ -58,12 +58,11 @@ func (s *schedulesCtrlTestSuite) SetupTest() {
 	ctrl := gomock.NewController(s.T())
 	defer ctrl.Finish()
 
-	s.tenantID = "tenantID"
 	s.createScheduleUC = mocks.NewMockCreateScheduleUseCase(ctrl)
 	s.getScheduleUC = mocks.NewMockGetScheduleUseCase(ctrl)
 	s.searchSchedulesUC = mocks.NewMockSearchSchedulesUseCase(ctrl)
-	s.ctx = context.WithValue(context.Background(), multitenancy.TenantIDKey, s.tenantID)
-	s.ctx = context.WithValue(s.ctx, multitenancy.AllowedTenantsKey, []string{s.tenantID})
+	s.userInfo = multitenancy.NewUserInfo("tenantOne", "username")
+	s.ctx = multitenancy.WithUserInfo(context.Background(), s.userInfo)
 	s.router = mux.NewRouter()
 
 	controller := NewSchedulesController(s)
@@ -83,7 +82,7 @@ func (s *schedulesCtrlTestSuite) TestScheduleController_Create() {
 		scheduleEntityResp := testutils.FakeSchedule()
 
 		s.createScheduleUC.EXPECT().
-			Execute(gomock.Any(), &entities.Schedule{TenantID: s.tenantID}).
+			Execute(gomock.Any(), &entities.Schedule{}, s.userInfo).
 			Return(scheduleEntityResp, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -102,7 +101,7 @@ func (s *schedulesCtrlTestSuite) TestScheduleController_Create() {
 			WithContext(s.ctx)
 
 		s.createScheduleUC.EXPECT().
-			Execute(gomock.Any(), &entities.Schedule{TenantID: s.tenantID}).
+			Execute(gomock.Any(), &entities.Schedule{}, s.userInfo).
 			Return(nil, errors.InvalidParameterError("error")).
 			Times(1)
 
@@ -118,7 +117,7 @@ func (s *schedulesCtrlTestSuite) TestScheduleController_GetOne() {
 		scheduleEntityResp := testutils.FakeSchedule()
 
 		s.getScheduleUC.EXPECT().
-			Execute(gomock.Any(), "scheduleUUID", []string{s.tenantID}).
+			Execute(gomock.Any(), "scheduleUUID", s.userInfo).
 			Return(scheduleEntityResp, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -136,7 +135,7 @@ func (s *schedulesCtrlTestSuite) TestScheduleController_GetOne() {
 			WithContext(s.ctx)
 
 		s.getScheduleUC.EXPECT().
-			Execute(gomock.Any(), "scheduleUUID", []string{s.tenantID}).
+			Execute(gomock.Any(), "scheduleUUID", s.userInfo).
 			Return(nil, errors.NotFoundError("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -150,7 +149,7 @@ func (s *schedulesCtrlTestSuite) TestScheduleController_GetAll() {
 		httpRequest := httptest.NewRequest(http.MethodGet, "/schedules", nil).WithContext(s.ctx)
 		schedulesEntities := []*entities.Schedule{testutils.FakeSchedule()}
 
-		s.searchSchedulesUC.EXPECT().Execute(gomock.Any(), []string{s.tenantID}).Return(schedulesEntities, nil)
+		s.searchSchedulesUC.EXPECT().Execute(gomock.Any(), s.userInfo).Return(schedulesEntities, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -167,7 +166,7 @@ func (s *schedulesCtrlTestSuite) TestScheduleController_GetAll() {
 			NewRequest(http.MethodGet, "/schedules/scheduleUUID", bytes.NewReader(nil)).
 			WithContext(s.ctx)
 		s.getScheduleUC.EXPECT().
-			Execute(gomock.Any(), "scheduleUUID", []string{s.tenantID}).
+			Execute(gomock.Any(), "scheduleUUID", s.userInfo).
 			Return(nil, errors.NotFoundError("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)

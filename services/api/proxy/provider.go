@@ -21,13 +21,15 @@ const ChainsProxyProvider = "chains-proxy"
 
 func NewChainsProxyProvider(searchChains usecases.SearchChainsUseCase, refresh time.Duration, proxyCacheTTL *time.Duration) provider.Provider {
 	poller := func(ctx context.Context) (provider.Message, error) {
-		chains, err := searchChains.Execute(ctx, &entities.ChainFilters{}, []string{multitenancy.Wildcard})
+		// Wildcard user including chains owned by individual users (Special rights)
+		chains, err := searchChains.Execute(ctx, &entities.ChainFilters{}, multitenancy.NewInternalAdminUser())
 		if err != nil {
 			return nil, err
 		}
 
 		return dynamic.NewMessage(ChainsProxyProvider, NewProxyConfig(chains, proxyCacheTTL)), nil
 	}
+
 	return poll.New(poller, refresh)
 }
 
@@ -35,7 +37,13 @@ func NewProxyConfig(chains []*entities.Chain, proxyCacheTTL *time.Duration) *dyn
 	cfg := dynamic.NewConfig()
 
 	for _, chain := range chains {
-		multitenancyMid := fmt.Sprintf("auth-%v@multitenancy", chain.TenantID)
+		var multitenancyMid string
+		if chain.OwnerID == "" {
+			multitenancyMid = fmt.Sprintf("auth-%v@multitenancy", chain.TenantID)
+		} else {
+			multitenancyMid = fmt.Sprintf("auth-%v:%s@multitenancy", chain.TenantID, chain.OwnerID)
+		}
+
 		middlewares := []string{
 			"chain-proxy-accesslog@internal",
 			"auth@multitenancy",
@@ -45,7 +53,8 @@ func NewProxyConfig(chains []*entities.Chain, proxyCacheTTL *time.Duration) *dyn
 
 		cfg.HTTP.Middlewares[multitenancyMid] = &dynamic.Middleware{
 			MultiTenancy: &dynamic.MultiTenancy{
-				Tenant: chain.TenantID,
+				Tenant:  chain.TenantID,
+				OwnerID: chain.OwnerID,
 			},
 		}
 

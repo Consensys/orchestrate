@@ -5,6 +5,7 @@ import (
 
 	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/services/api/business/parsers"
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
@@ -28,11 +29,11 @@ func NewGetFaucetUseCase(db store.DB) usecases.GetFaucetUseCase {
 }
 
 // Execute gets a faucet
-func (uc *getFaucetUseCase) Execute(ctx context.Context, uuid string, tenants []string) (*entities.Faucet, error) {
+func (uc *getFaucetUseCase) Execute(ctx context.Context, uuid string, userInfo *multitenancy.UserInfo) (*entities.Faucet, error) {
 	ctx = log.WithFields(ctx, log.Field("faucet", uuid))
 	logger := uc.logger.WithContext(ctx)
 
-	faucetModel, err := uc.db.Faucet().FindOneByUUID(ctx, uuid, tenants)
+	faucetModel, err := uc.db.Faucet().FindOneByUUID(ctx, uuid, userInfo.AllowedTenants)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(getFaucetComponent)
 	}

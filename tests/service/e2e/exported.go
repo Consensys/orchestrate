@@ -7,6 +7,7 @@ import (
 
 	"github.com/consensys/orchestrate/pkg/encoding/json"
 	"github.com/consensys/orchestrate/pkg/sdk/client"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/toolkit/ethclient/rpc"
 	"github.com/consensys/orchestrate/pkg/types/api"
 	"github.com/consensys/orchestrate/pkg/types/entities"
@@ -39,6 +40,7 @@ func Start(ctx context.Context) error {
 	cctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
+	cctx = multitenancy.WithUserInfo(cctx, multitenancy.DefaultUser())
 	var testData *utils3.TestData
 	rawTestData := viper.GetString(e2eDataViperKey)
 	logger.WithField("data", rawTestData).Info("Loaded test data")

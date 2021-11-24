@@ -4,6 +4,7 @@ package jobs
 
 import (
 	"context"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/gofrs/uuid"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"testing"
@@ -29,10 +30,8 @@ func TestSearchJobs_Execute(t *testing.T) {
 
 	mockDB.EXPECT().Job().Return(mockJobDA).AnyTimes()
 
+	userInfo := multitenancy.NewUserInfo("tenantOne", "username")
 	usecase := NewSearchJobsUseCase(mockDB)
-
-	tenantID := "tenantID"
-	tenants := []string{tenantID}
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		txHash := common.HexToHash("0x1")
@@ -44,9 +43,9 @@ func TestSearchJobs_Execute(t *testing.T) {
 		}
 
 		expectedResponse := []*entities.Job{parsers.NewJobEntityFromModels(jobs[0])}
-		mockJobDA.EXPECT().Search(gomock.Any(), filters, tenants).Return(jobs, nil)
+		mockJobDA.EXPECT().Search(gomock.Any(), filters, userInfo.AllowedTenants, userInfo.Username).Return(jobs, nil)
 
-		jobResponse, err := usecase.Execute(ctx, filters, tenants)
+		jobResponse, err := usecase.Execute(ctx, filters, userInfo)
 
 		assert.NoError(t, err)
 		assert.Equal(t, expectedResponse, jobResponse)
@@ -56,9 +55,9 @@ func TestSearchJobs_Execute(t *testing.T) {
 		filters := &entities.JobFilters{}
 		expectedErr := errors.NotFoundError("error")
 
-		mockJobDA.EXPECT().Search(gomock.Any(), filters, tenants).Return(nil, expectedErr)
+		mockJobDA.EXPECT().Search(gomock.Any(), filters, userInfo.AllowedTenants, userInfo.Username).Return(nil, expectedErr)
 
-		response, err := usecase.Execute(ctx, filters, tenants)
+		response, err := usecase.Execute(ctx, filters, userInfo)
 
 		assert.Nil(t, response)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(searchJobsComponent), err)

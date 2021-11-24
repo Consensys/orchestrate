@@ -861,48 +861,48 @@ func (mr *MockTransactionRequestAgentMockRecorder) Insert(ctx, txRequest interfa
 }
 
 // FindOneByIdempotencyKey mocks base method
-func (m *MockTransactionRequestAgent) FindOneByIdempotencyKey(ctx context.Context, idempotencyKey, tenantID string) (*models.TransactionRequest, error) {
+func (m *MockTransactionRequestAgent) FindOneByIdempotencyKey(ctx context.Context, idempotencyKey, tenantID, ownerID string) (*models.TransactionRequest, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindOneByIdempotencyKey", ctx, idempotencyKey, tenantID)
+	ret := m.ctrl.Call(m, "FindOneByIdempotencyKey", ctx, idempotencyKey, tenantID, ownerID)
 	ret0, _ := ret[0].(*models.TransactionRequest)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // FindOneByIdempotencyKey indicates an expected call of FindOneByIdempotencyKey
-func (mr *MockTransactionRequestAgentMockRecorder) FindOneByIdempotencyKey(ctx, idempotencyKey, tenantID interface{}) *gomock.Call {
+func (mr *MockTransactionRequestAgentMockRecorder) FindOneByIdempotencyKey(ctx, idempotencyKey, tenantID, ownerID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneByIdempotencyKey", reflect.TypeOf((*MockTransactionRequestAgent)(nil).FindOneByIdempotencyKey), ctx, idempotencyKey, tenantID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneByIdempotencyKey", reflect.TypeOf((*MockTransactionRequestAgent)(nil).FindOneByIdempotencyKey), ctx, idempotencyKey, tenantID, ownerID)
 }
 
 // FindOneByUUID mocks base method
-func (m *MockTransactionRequestAgent) FindOneByUUID(ctx context.Context, scheduleUUID string, tenants []string) (*models.TransactionRequest, error) {
+func (m *MockTransactionRequestAgent) FindOneByUUID(ctx context.Context, scheduleUUID string, tenants []string, ownerID string) (*models.TransactionRequest, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindOneByUUID", ctx, scheduleUUID, tenants)
+	ret := m.ctrl.Call(m, "FindOneByUUID", ctx, scheduleUUID, tenants, ownerID)
 	ret0, _ := ret[0].(*models.TransactionRequest)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // FindOneByUUID indicates an expected call of FindOneByUUID
-func (mr *MockTransactionRequestAgentMockRecorder) FindOneByUUID(ctx, scheduleUUID, tenants interface{}) *gomock.Call {
+func (mr *MockTransactionRequestAgentMockRecorder) FindOneByUUID(ctx, scheduleUUID, tenants, ownerID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneByUUID", reflect.TypeOf((*MockTransactionRequestAgent)(nil).FindOneByUUID), ctx, scheduleUUID, tenants)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneByUUID", reflect.TypeOf((*MockTransactionRequestAgent)(nil).FindOneByUUID), ctx, scheduleUUID, tenants, ownerID)
 }
 
 // Search mocks base method
-func (m *MockTransactionRequestAgent) Search(ctx context.Context, filters *entities.TransactionRequestFilters, tenants []string) ([]*models.TransactionRequest, error) {
+func (m *MockTransactionRequestAgent) Search(ctx context.Context, filters *entities.TransactionRequestFilters, tenants []string, ownerID string) ([]*models.TransactionRequest, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Search", ctx, filters, tenants)
+	ret := m.ctrl.Call(m, "Search", ctx, filters, tenants, ownerID)
 	ret0, _ := ret[0].([]*models.TransactionRequest)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Search indicates an expected call of Search
-func (mr *MockTransactionRequestAgentMockRecorder) Search(ctx, filters, tenants interface{}) *gomock.Call {
+func (mr *MockTransactionRequestAgentMockRecorder) Search(ctx, filters, tenants, ownerID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Search", reflect.TypeOf((*MockTransactionRequestAgent)(nil).Search), ctx, filters, tenants)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Search", reflect.TypeOf((*MockTransactionRequestAgent)(nil).Search), ctx, filters, tenants, ownerID)
 }
 
 // MockScheduleAgent is a mock of ScheduleAgent interface
@@ -943,33 +943,33 @@ func (mr *MockScheduleAgentMockRecorder) Insert(ctx, schedule interface{}) *gomo
 }
 
 // FindOneByUUID mocks base method
-func (m *MockScheduleAgent) FindOneByUUID(ctx context.Context, uuid string, tenants []string) (*models.Schedule, error) {
+func (m *MockScheduleAgent) FindOneByUUID(ctx context.Context, uuid string, tenants []string, ownerID string) (*models.Schedule, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindOneByUUID", ctx, uuid, tenants)
+	ret := m.ctrl.Call(m, "FindOneByUUID", ctx, uuid, tenants, ownerID)
 	ret0, _ := ret[0].(*models.Schedule)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // FindOneByUUID indicates an expected call of FindOneByUUID
-func (mr *MockScheduleAgentMockRecorder) FindOneByUUID(ctx, uuid, tenants interface{}) *gomock.Call {
+func (mr *MockScheduleAgentMockRecorder) FindOneByUUID(ctx, uuid, tenants, ownerID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneByUUID", reflect.TypeOf((*MockScheduleAgent)(nil).FindOneByUUID), ctx, uuid, tenants)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneByUUID", reflect.TypeOf((*MockScheduleAgent)(nil).FindOneByUUID), ctx, uuid, tenants, ownerID)
 }
 
 // FindAll mocks base method
-func (m *MockScheduleAgent) FindAll(ctx context.Context, tenants []string) ([]*models.Schedule, error) {
+func (m *MockScheduleAgent) FindAll(ctx context.Context, tenants []string, ownerID string) ([]*models.Schedule, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindAll", ctx, tenants)
+	ret := m.ctrl.Call(m, "FindAll", ctx, tenants, ownerID)
 	ret0, _ := ret[0].([]*models.Schedule)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // FindAll indicates an expected call of FindAll
-func (mr *MockScheduleAgentMockRecorder) FindAll(ctx, tenants interface{}) *gomock.Call {
+func (mr *MockScheduleAgentMockRecorder) FindAll(ctx, tenants, ownerID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockScheduleAgent)(nil).FindAll), ctx, tenants)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockScheduleAgent)(nil).FindAll), ctx, tenants, ownerID)
 }
 
 // MockJobAgent is a mock of JobAgent interface
@@ -1024,18 +1024,18 @@ func (mr *MockJobAgentMockRecorder) Update(ctx, job interface{}) *gomock.Call {
 }
 
 // FindOneByUUID mocks base method
-func (m *MockJobAgent) FindOneByUUID(ctx context.Context, uuid string, tenants []string, withLogs bool) (*models.Job, error) {
+func (m *MockJobAgent) FindOneByUUID(ctx context.Context, uuid string, tenants []string, ownerID string, withLogs bool) (*models.Job, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindOneByUUID", ctx, uuid, tenants, withLogs)
+	ret := m.ctrl.Call(m, "FindOneByUUID", ctx, uuid, tenants, ownerID, withLogs)
 	ret0, _ := ret[0].(*models.Job)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // FindOneByUUID indicates an expected call of FindOneByUUID
-func (mr *MockJobAgentMockRecorder) FindOneByUUID(ctx, uuid, tenants, withLogs interface{}) *gomock.Call {
+func (mr *MockJobAgentMockRecorder) FindOneByUUID(ctx, uuid, tenants, ownerID, withLogs interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneByUUID", reflect.TypeOf((*MockJobAgent)(nil).FindOneByUUID), ctx, uuid, tenants, withLogs)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneByUUID", reflect.TypeOf((*MockJobAgent)(nil).FindOneByUUID), ctx, uuid, tenants, ownerID, withLogs)
 }
 
 // LockOneByUUID mocks base method
@@ -1053,18 +1053,18 @@ func (mr *MockJobAgentMockRecorder) LockOneByUUID(ctx, uuid interface{}) *gomock
 }
 
 // Search mocks base method
-func (m *MockJobAgent) Search(ctx context.Context, filters *entities.JobFilters, tenants []string) ([]*models.Job, error) {
+func (m *MockJobAgent) Search(ctx context.Context, filters *entities.JobFilters, tenants []string, ownerID string) ([]*models.Job, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Search", ctx, filters, tenants)
+	ret := m.ctrl.Call(m, "Search", ctx, filters, tenants, ownerID)
 	ret0, _ := ret[0].([]*models.Job)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Search indicates an expected call of Search
-func (mr *MockJobAgentMockRecorder) Search(ctx, filters, tenants interface{}) *gomock.Call {
+func (mr *MockJobAgentMockRecorder) Search(ctx, filters, tenants, ownerID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Search", reflect.TypeOf((*MockJobAgent)(nil).Search), ctx, filters, tenants)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Search", reflect.TypeOf((*MockJobAgent)(nil).Search), ctx, filters, tenants, ownerID)
 }
 
 // MockLogAgent is a mock of LogAgent interface
@@ -1207,33 +1207,33 @@ func (mr *MockAccountAgentMockRecorder) Update(ctx, account interface{}) *gomock
 }
 
 // FindOneByAddress mocks base method
-func (m *MockAccountAgent) FindOneByAddress(ctx context.Context, address string, tenants []string) (*models.Account, error) {
+func (m *MockAccountAgent) FindOneByAddress(ctx context.Context, address string, tenants []string, ownerID string) (*models.Account, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindOneByAddress", ctx, address, tenants)
+	ret := m.ctrl.Call(m, "FindOneByAddress", ctx, address, tenants, ownerID)
 	ret0, _ := ret[0].(*models.Account)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // FindOneByAddress indicates an expected call of FindOneByAddress
-func (mr *MockAccountAgentMockRecorder) FindOneByAddress(ctx, address, tenants interface{}) *gomock.Call {
+func (mr *MockAccountAgentMockRecorder) FindOneByAddress(ctx, address, tenants, ownerID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneByAddress", reflect.TypeOf((*MockAccountAgent)(nil).FindOneByAddress), ctx, address, tenants)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneByAddress", reflect.TypeOf((*MockAccountAgent)(nil).FindOneByAddress), ctx, address, tenants, ownerID)
 }
 
 // Search mocks base method
-func (m *MockAccountAgent) Search(ctx context.Context, filters *entities.AccountFilters, tenants []string) ([]*models.Account, error) {
+func (m *MockAccountAgent) Search(ctx context.Context, filters *entities.AccountFilters, tenants []string, ownerID string) ([]*models.Account, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Search", ctx, filters, tenants)
+	ret := m.ctrl.Call(m, "Search", ctx, filters, tenants, ownerID)
 	ret0, _ := ret[0].([]*models.Account)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Search indicates an expected call of Search
-func (mr *MockAccountAgentMockRecorder) Search(ctx, filters, tenants interface{}) *gomock.Call {
+func (mr *MockAccountAgentMockRecorder) Search(ctx, filters, tenants, ownerID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Search", reflect.TypeOf((*MockAccountAgent)(nil).Search), ctx, filters, tenants)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Search", reflect.TypeOf((*MockAccountAgent)(nil).Search), ctx, filters, tenants, ownerID)
 }
 
 // MockFaucetAgent is a mock of FaucetAgent interface
@@ -1369,47 +1369,62 @@ func (mr *MockChainAgentMockRecorder) Insert(ctx, chain interface{}) *gomock.Cal
 }
 
 // Update mocks base method
-func (m *MockChainAgent) Update(ctx context.Context, chain *models.Chain, tenants []string) error {
+func (m *MockChainAgent) Update(ctx context.Context, chain *models.Chain, tenants []string, ownerID string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", ctx, chain, tenants)
+	ret := m.ctrl.Call(m, "Update", ctx, chain, tenants, ownerID)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Update indicates an expected call of Update
-func (mr *MockChainAgentMockRecorder) Update(ctx, chain, tenants interface{}) *gomock.Call {
+func (mr *MockChainAgentMockRecorder) Update(ctx, chain, tenants, ownerID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockChainAgent)(nil).Update), ctx, chain, tenants)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockChainAgent)(nil).Update), ctx, chain, tenants, ownerID)
 }
 
 // Search mocks base method
-func (m *MockChainAgent) Search(ctx context.Context, filters *entities.ChainFilters, tenants []string) ([]*models.Chain, error) {
+func (m *MockChainAgent) Search(ctx context.Context, filters *entities.ChainFilters, tenants []string, ownerID string) ([]*models.Chain, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Search", ctx, filters, tenants)
+	ret := m.ctrl.Call(m, "Search", ctx, filters, tenants, ownerID)
 	ret0, _ := ret[0].([]*models.Chain)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Search indicates an expected call of Search
-func (mr *MockChainAgentMockRecorder) Search(ctx, filters, tenants interface{}) *gomock.Call {
+func (mr *MockChainAgentMockRecorder) Search(ctx, filters, tenants, ownerID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Search", reflect.TypeOf((*MockChainAgent)(nil).Search), ctx, filters, tenants)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Search", reflect.TypeOf((*MockChainAgent)(nil).Search), ctx, filters, tenants, ownerID)
 }
 
 // FindOneByUUID mocks base method
-func (m *MockChainAgent) FindOneByUUID(ctx context.Context, uuid string, tenants []string) (*models.Chain, error) {
+func (m *MockChainAgent) FindOneByUUID(ctx context.Context, uuid string, tenants []string, ownerID string) (*models.Chain, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindOneByUUID", ctx, uuid, tenants)
+	ret := m.ctrl.Call(m, "FindOneByUUID", ctx, uuid, tenants, ownerID)
 	ret0, _ := ret[0].(*models.Chain)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // FindOneByUUID indicates an expected call of FindOneByUUID
-func (mr *MockChainAgentMockRecorder) FindOneByUUID(ctx, uuid, tenants interface{}) *gomock.Call {
+func (mr *MockChainAgentMockRecorder) FindOneByUUID(ctx, uuid, tenants, ownerID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneByUUID", reflect.TypeOf((*MockChainAgent)(nil).FindOneByUUID), ctx, uuid, tenants)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneByUUID", reflect.TypeOf((*MockChainAgent)(nil).FindOneByUUID), ctx, uuid, tenants, ownerID)
+}
+
+// FindOneByName mocks base method
+func (m *MockChainAgent) FindOneByName(ctx context.Context, name string, tenants []string, ownerID string) (*models.Chain, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindOneByName", ctx, name, tenants, ownerID)
+	ret0, _ := ret[0].(*models.Chain)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindOneByName indicates an expected call of FindOneByName
+func (mr *MockChainAgentMockRecorder) FindOneByName(ctx, name, tenants, ownerID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneByName", reflect.TypeOf((*MockChainAgent)(nil).FindOneByName), ctx, name, tenants, ownerID)
 }
 
 // Delete mocks base method

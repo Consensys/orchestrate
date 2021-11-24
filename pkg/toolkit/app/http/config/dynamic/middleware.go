@@ -55,7 +55,8 @@ type Auth struct{}
 // +k8s:deepcopy-gen=true
 
 type MultiTenancy struct {
-	Tenant string `json:"tenant,omitempty" toml:"tenant,omitempty" yaml:"tenant,omitempty"`
+	Tenant  string `json:"tenant,omitempty" toml:"tenant,omitempty" yaml:"tenant,omitempty"`
+	OwnerID string `json:"owner_id,omitempty" toml:"tenant,omitempty" yaml:"tenant,omitempty"`
 }
 
 // +k8s:deepcopy-gen=true

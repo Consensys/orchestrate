@@ -43,11 +43,12 @@ func (agent *PGChain) Insert(ctx context.Context, chain *models.Chain) error {
 }
 
 // FindOneByUUID Finds a chain in DB by UUID
-func (agent *PGChain) FindOneByUUID(ctx context.Context, chainUUID string, tenants []string) (*models.Chain, error) {
+func (agent *PGChain) FindOneByUUID(ctx context.Context, chainUUID string, tenants []string, ownerID string) (*models.Chain, error) {
 	chain := &models.Chain{}
 
 	query := agent.db.ModelContext(ctx, chain).Where("uuid = ?", chainUUID).Relation("PrivateTxManagers")
 	query = pg.WhereAllowedTenants(query, "tenant_id", tenants)
+	query = pg.WhereAllowedOwner(query, "owner_id", ownerID)
 
 	err := pg.SelectOne(ctx, query)
 	if err != nil {
@@ -61,11 +62,12 @@ func (agent *PGChain) FindOneByUUID(ctx context.Context, chainUUID string, tenan
 }
 
 // FindOneByName Finds a chain in DB by name
-func (agent *PGChain) FindOneByName(ctx context.Context, name string, tenants []string) (*models.Chain, error) {
+func (agent *PGChain) FindOneByName(ctx context.Context, name string, tenants []string, ownerID string) (*models.Chain, error) {
 	chain := &models.Chain{}
 
 	query := agent.db.ModelContext(ctx, chain).Where("name = ?", name)
 	query = pg.WhereAllowedTenants(query, "tenant_id", tenants)
+	query = pg.WhereAllowedOwner(query, "owner_id", ownerID)
 
 	err := pg.SelectOne(ctx, query)
 	if err != nil {
@@ -78,7 +80,7 @@ func (agent *PGChain) FindOneByName(ctx context.Context, name string, tenants []
 	return chain, nil
 }
 
-func (agent *PGChain) Search(ctx context.Context, filters *entities.ChainFilters, tenants []string) ([]*models.Chain, error) {
+func (agent *PGChain) Search(ctx context.Context, filters *entities.ChainFilters, tenants []string, ownerID string) ([]*models.Chain, error) {
 	var chains []*models.Chain
 
 	query := agent.db.ModelContext(ctx, &chains)
@@ -86,8 +88,12 @@ func (agent *PGChain) Search(ctx context.Context, filters *entities.ChainFilters
 	if len(filters.Names) > 0 {
 		query = query.Where("name in (?)", gopg.In(filters.Names))
 	}
+	if filters.TenantID != "" {
+		query = query.Where("tenant_id = ?", filters.TenantID)
+	}
 
 	query = pg.WhereAllowedTenants(query, "tenant_id", tenants).Order("created_at ASC")
+	query = pg.WhereAllowedOwner(query, "owner_id", ownerID)
 
 	if err := pg.Select(ctx, query); err != nil {
 		if !errors.IsNotFoundError(err) {
@@ -124,10 +130,11 @@ func (agent *PGChain) Search(ctx context.Context, filters *entities.ChainFilters
 	return chains, nil
 }
 
-func (agent *PGChain) Update(ctx context.Context, chain *models.Chain, tenants []string) error {
+func (agent *PGChain) Update(ctx context.Context, chain *models.Chain, tenants []string, ownerID string) error {
 	chain.UpdatedAt = time.Now().UTC()
 	query := agent.db.ModelContext(ctx, chain).Where("uuid = ?", chain.UUID)
 	query = pg.WhereAllowedTenantsDefault(query, tenants)
+	query = pg.WhereAllowedOwner(query, "owner_id", ownerID)
 
 	err := pg.UpdateNotZero(ctx, query)
 	if err != nil {

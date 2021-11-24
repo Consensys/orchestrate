@@ -25,13 +25,11 @@ func TestFundingAccount_Execute(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	tenantID := "tenantID"
-	allowedTenants := []string{tenantID, multitenancy.DefaultTenant}
-
 	mockSearchChainsUC := mocks.NewMockSearchChainsUseCase(ctrl)
 	mockGetFaucetCandidate := mocks.NewMockGetFaucetCandidateUseCase(ctrl)
 	mockSendTxUC := mocks.NewMockSendTxUseCase(ctrl)
 
+	userInfo := multitenancy.NewUserInfo("tenantOne", "username")
 	usecase := NewFundAccountUseCase(mockSearchChainsUC, mockSendTxUC, mockGetFaucetCandidate)
 
 	t.Run("should trigger funding identity successfully", func(t *testing.T) {
@@ -40,11 +38,12 @@ func TestFundingAccount_Execute(t *testing.T) {
 		faucet := testutils.FakeFaucet()
 		chainName := "besu"
 
-		mockSearchChainsUC.EXPECT().Execute(gomock.Any(), &entities.ChainFilters{Names: []string{chainName}}, allowedTenants).Return(chains, nil)
-		mockGetFaucetCandidate.EXPECT().Execute(gomock.Any(), account.Address, chains[0], allowedTenants).Return(faucet, nil)
-		mockSendTxUC.EXPECT().Execute(gomock.Any(), gomock.Any(), "", tenantID).Return(nil, nil)
+		mockSearchChainsUC.EXPECT().Execute(gomock.Any(), &entities.ChainFilters{Names: []string{chainName}}, userInfo).
+			Return(chains, nil)
+		mockGetFaucetCandidate.EXPECT().Execute(gomock.Any(), account.Address, chains[0], userInfo).Return(faucet, nil)
+		mockSendTxUC.EXPECT().Execute(gomock.Any(), gomock.Any(), "", userInfo).Return(nil, nil)
 
-		err := usecase.Execute(ctx, account, chainName, tenantID)
+		err := usecase.Execute(ctx, account, chainName, userInfo)
 
 		assert.NoError(t, err)
 	})
@@ -54,10 +53,10 @@ func TestFundingAccount_Execute(t *testing.T) {
 		chains := []*entities.Chain{testutils.FakeChain()}
 		chainName := "besu"
 
-		mockSearchChainsUC.EXPECT().Execute(gomock.Any(), &entities.ChainFilters{Names: []string{chainName}}, allowedTenants).Return(chains, nil)
-		mockGetFaucetCandidate.EXPECT().Execute(gomock.Any(), account.Address, chains[0], allowedTenants).Return(nil, faucetNotFoundErr)
+		mockSearchChainsUC.EXPECT().Execute(gomock.Any(), &entities.ChainFilters{Names: []string{chainName}}, userInfo).Return(chains, nil)
+		mockGetFaucetCandidate.EXPECT().Execute(gomock.Any(), account.Address, chains[0], userInfo).Return(nil, faucetNotFoundErr)
 
-		err := usecase.Execute(ctx, account, chainName, tenantID)
+		err := usecase.Execute(ctx, account, chainName, userInfo)
 
 		assert.NoError(t, err)
 	})
@@ -66,9 +65,9 @@ func TestFundingAccount_Execute(t *testing.T) {
 		account := testutils.FakeAccount()
 		chainName := "besu"
 
-		mockSearchChainsUC.EXPECT().Execute(gomock.Any(), &entities.ChainFilters{Names: []string{chainName}}, allowedTenants).Return([]*entities.Chain{}, nil)
+		mockSearchChainsUC.EXPECT().Execute(gomock.Any(), &entities.ChainFilters{Names: []string{chainName}}, userInfo).Return([]*entities.Chain{}, nil)
 
-		err := usecase.Execute(ctx, account, chainName, tenantID)
+		err := usecase.Execute(ctx, account, chainName, userInfo)
 
 		assert.Error(t, err)
 		assert.True(t, errors.IsInvalidParameterError(err))
@@ -79,9 +78,9 @@ func TestFundingAccount_Execute(t *testing.T) {
 		account := testutils.FakeAccount()
 		chainName := "besu"
 
-		mockSearchChainsUC.EXPECT().Execute(gomock.Any(), &entities.ChainFilters{Names: []string{chainName}}, allowedTenants).Return(nil, expectedErr)
+		mockSearchChainsUC.EXPECT().Execute(gomock.Any(), &entities.ChainFilters{Names: []string{chainName}}, userInfo).Return(nil, expectedErr)
 
-		err := usecase.Execute(ctx, account, chainName, tenantID)
+		err := usecase.Execute(ctx, account, chainName, userInfo)
 
 		assert.Error(t, err)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(fundAccountComponent), err)
@@ -93,12 +92,12 @@ func TestFundingAccount_Execute(t *testing.T) {
 		chains := []*entities.Chain{testutils.FakeChain()}
 		chainName := "besu"
 
-		mockSearchChainsUC.EXPECT().Execute(gomock.Any(), &entities.ChainFilters{Names: []string{chainName}}, allowedTenants).Return(chains, nil)
+		mockSearchChainsUC.EXPECT().Execute(gomock.Any(), &entities.ChainFilters{Names: []string{chainName}}, userInfo).Return(chains, nil)
 		mockGetFaucetCandidate.EXPECT().
-			Execute(gomock.Any(), account.Address, gomock.Any(), allowedTenants).
+			Execute(gomock.Any(), account.Address, gomock.Any(), userInfo).
 			Return(nil, expectedErr)
 
-		err := usecase.Execute(ctx, account, chainName, tenantID)
+		err := usecase.Execute(ctx, account, chainName, userInfo)
 
 		assert.Error(t, err)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(fundAccountComponent), err)
@@ -111,11 +110,11 @@ func TestFundingAccount_Execute(t *testing.T) {
 		faucet := testutils.FakeFaucet()
 		chainName := "besu"
 
-		mockSearchChainsUC.EXPECT().Execute(gomock.Any(), &entities.ChainFilters{Names: []string{chainName}}, allowedTenants).Return(chains, nil)
-		mockGetFaucetCandidate.EXPECT().Execute(gomock.Any(), account.Address, gomock.Any(), allowedTenants).Return(faucet, nil)
-		mockSendTxUC.EXPECT().Execute(gomock.Any(), gomock.Any(), "", tenantID).Return(nil, expectedErr)
+		mockSearchChainsUC.EXPECT().Execute(gomock.Any(), &entities.ChainFilters{Names: []string{chainName}}, userInfo).Return(chains, nil)
+		mockGetFaucetCandidate.EXPECT().Execute(gomock.Any(), account.Address, gomock.Any(), userInfo).Return(faucet, nil)
+		mockSendTxUC.EXPECT().Execute(gomock.Any(), gomock.Any(), "", userInfo).Return(nil, expectedErr)
 
-		err := usecase.Execute(ctx, account, chainName, tenantID)
+		err := usecase.Execute(ctx, account, chainName, userInfo)
 
 		assert.Error(t, err)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(fundAccountComponent), err)

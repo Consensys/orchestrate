@@ -5,6 +5,7 @@ import (
 
 	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
 	"github.com/consensys/orchestrate/services/api/store"
 )
@@ -23,17 +24,17 @@ func NewDeleteFaucetUseCase(db store.DB) usecases.DeleteFaucetUseCase {
 	}
 }
 
-func (uc *deleteFaucetUseCase) Execute(ctx context.Context, uuid string, tenants []string) error {
+func (uc *deleteFaucetUseCase) Execute(ctx context.Context, uuid string, userInfo *multitenancy.UserInfo) error {
 	ctx = log.WithFields(ctx, log.Field("faucet", uuid))
 	logger := uc.logger.WithContext(ctx)
 	logger.Debug("deleting faucet")
 
-	faucetModel, err := uc.db.Faucet().FindOneByUUID(ctx, uuid, tenants)
+	faucetModel, err := uc.db.Faucet().FindOneByUUID(ctx, uuid, userInfo.AllowedTenants)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(deleteFaucetComponent)
 	}
 
-	err = uc.db.Faucet().Delete(ctx, faucetModel, tenants)
+	err = uc.db.Faucet().Delete(ctx, faucetModel, userInfo.AllowedTenants)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(deleteFaucetComponent)
 	}

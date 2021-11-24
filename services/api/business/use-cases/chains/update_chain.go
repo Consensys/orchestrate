@@ -3,6 +3,7 @@ package chains
 import (
 	"context"
 
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/toolkit/database"
 
 	"github.com/consensys/orchestrate/pkg/errors"
@@ -32,12 +33,12 @@ func NewUpdateChainUseCase(db store.DB, getChainUC usecases.GetChainUseCase) use
 }
 
 // Execute updates a chain
-func (uc *updateChainUseCase) Execute(ctx context.Context, chain *entities.Chain, tenants []string) (*entities.Chain, error) {
+func (uc *updateChainUseCase) Execute(ctx context.Context, chain *entities.Chain, userInfo *multitenancy.UserInfo) (*entities.Chain, error) {
 	ctx = log.WithFields(ctx, log.Field("chain", chain.UUID))
 	logger := uc.logger.WithContext(ctx)
 	logger.Debug("updating chain")
 
-	chainRetrieved, err := uc.getChainUC.Execute(ctx, chain.UUID, tenants)
+	chainRetrieved, err := uc.getChainUC.Execute(ctx, chain.UUID, userInfo)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(updateChainComponent)
 	}
@@ -63,7 +64,7 @@ func (uc *updateChainUseCase) Execute(ctx context.Context, chain *entities.Chain
 			}
 		}
 
-		der := tx.(store.Tx).Chain().Update(ctx, chainModel, tenants)
+		der := tx.(store.Tx).Chain().Update(ctx, chainModel, userInfo.AllowedTenants, userInfo.Username)
 		if der != nil {
 			return der
 		}
@@ -74,7 +75,7 @@ func (uc *updateChainUseCase) Execute(ctx context.Context, chain *entities.Chain
 		return nil, errors.FromError(err).ExtendComponent(updateChainComponent)
 	}
 
-	chainUpdated, err := uc.getChainUC.Execute(ctx, chain.UUID, tenants)
+	chainUpdated, err := uc.getChainUC.Execute(ctx, chain.UUID, userInfo)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(updateChainComponent)
 	}

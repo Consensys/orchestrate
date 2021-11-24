@@ -3,6 +3,7 @@ package transactions
 import (
 	"context"
 
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
 
@@ -30,15 +31,15 @@ func NewSearchTransactionsUseCase(db store.DB, getTxUseCase usecases.GetTxUseCas
 }
 
 // Execute gets a transaction requests by filter (or all)
-func (uc *searchTransactionsUseCase) Execute(ctx context.Context, filters *entities.TransactionRequestFilters, tenants []string) ([]*entities.TxRequest, error) {
-	txRequestModels, err := uc.db.TransactionRequest().Search(ctx, filters, tenants)
+func (uc *searchTransactionsUseCase) Execute(ctx context.Context, filters *entities.TransactionRequestFilters, userInfo *multitenancy.UserInfo) ([]*entities.TxRequest, error) {
+	txRequestModels, err := uc.db.TransactionRequest().Search(ctx, filters, userInfo.AllowedTenants, userInfo.Username)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(searchTxsComponent)
 	}
 
 	var txRequests []*entities.TxRequest
 	for _, txRequestModel := range txRequestModels {
-		txRequest, err := uc.getTxUseCase.Execute(ctx, txRequestModel.Schedule.UUID, tenants)
+		txRequest, err := uc.getTxUseCase.Execute(ctx, txRequestModel.Schedule.UUID, userInfo)
 		if err != nil {
 			return nil, errors.FromError(err).ExtendComponent(searchTxsComponent)
 		}

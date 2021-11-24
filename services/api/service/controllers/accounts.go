@@ -69,7 +69,8 @@ func (c *AccountsController) create(rw http.ResponseWriter, request *http.Reques
 		return
 	}
 
-	acc, err := c.ucs.CreateAccount().Execute(ctx, formatters.FormatCreateAccountRequest(req), nil, req.Chain, multitenancy.TenantIDFromContext(ctx))
+	acc, err := c.ucs.CreateAccount().Execute(ctx, formatters.FormatCreateAccountRequest(req), nil, req.Chain,
+		multitenancy.UserInfoValue(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -100,7 +101,7 @@ func (c *AccountsController) getOne(rw http.ResponseWriter, request *http.Reques
 		return
 	}
 
-	acc, err := c.ucs.GetAccount().Execute(ctx, address, multitenancy.AllowedTenantsFromContext(ctx))
+	acc, err := c.ucs.GetAccount().Execute(ctx, address, multitenancy.UserInfoValue(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -132,7 +133,7 @@ func (c *AccountsController) search(rw http.ResponseWriter, request *http.Reques
 		return
 	}
 
-	accs, err := c.ucs.SearchAccounts().Execute(ctx, filters, multitenancy.AllowedTenantsFromContext(ctx))
+	accs, err := c.ucs.SearchAccounts().Execute(ctx, filters, multitenancy.UserInfoValue(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -172,7 +173,8 @@ func (c *AccountsController) importKey(rw http.ResponseWriter, request *http.Req
 		return
 	}
 
-	acc, err := c.ucs.CreateAccount().Execute(ctx, formatters.FormatImportAccountRequest(req), req.PrivateKey, req.Chain, multitenancy.TenantIDFromContext(ctx))
+	acc, err := c.ucs.CreateAccount().Execute(ctx, formatters.FormatImportAccountRequest(req), req.PrivateKey, req.Chain,
+		multitenancy.UserInfoValue(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -214,7 +216,7 @@ func (c *AccountsController) update(rw http.ResponseWriter, request *http.Reques
 		return
 	}
 
-	accRes, err := c.ucs.UpdateAccount().Execute(ctx, acc, multitenancy.AllowedTenantsFromContext(ctx))
+	accRes, err := c.ucs.UpdateAccount().Execute(ctx, acc, multitenancy.UserInfoValue(ctx))
 
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
@@ -254,8 +256,7 @@ func (c *AccountsController) signMessage(rw http.ResponseWriter, request *http.R
 		return
 	}
 
-	tenants := utils.AllowedTenants(multitenancy.TenantIDFromContext(ctx))
-	_, err = c.ucs.GetAccount().Execute(ctx, address, tenants)
+	_, err = c.ucs.GetAccount().Execute(ctx, address, multitenancy.UserInfoValue(ctx))
 	if err != nil {
 		httputil.WriteError(rw, fmt.Sprintf("account %s was not found", address), http.StatusBadRequest)
 		return
@@ -301,8 +302,7 @@ func (c *AccountsController) signTypedData(rw http.ResponseWriter, request *http
 		return
 	}
 
-	tenants := utils.AllowedTenants(multitenancy.TenantIDFromContext(ctx))
-	_, err = c.ucs.GetAccount().Execute(ctx, address, tenants)
+	_, err = c.ucs.GetAccount().Execute(ctx, address, multitenancy.UserInfoValue(ctx))
 	if err != nil {
 		httputil.WriteError(rw, fmt.Sprintf("account %s was not found", address), http.StatusBadRequest)
 		return

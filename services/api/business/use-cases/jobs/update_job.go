@@ -7,6 +7,7 @@ import (
 
 	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/toolkit/database"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/services/api/business/parsers"
@@ -41,12 +42,12 @@ func NewUpdateJobUseCase(db store.DB, updateChildrenUseCase usecases.UpdateChild
 
 // Execute validates and creates a new transaction job
 func (uc *updateJobUseCase) Execute(ctx context.Context, job *entities.Job, nextStatus entities.JobStatus,
-	logMessage string, tenants []string) (*entities.Job, error) {
+	logMessage string, userInfo *multitenancy.UserInfo) (*entities.Job, error) {
 	ctx = log.WithFields(ctx, log.Field("job", job.UUID), log.Field("next_status", nextStatus))
 	logger := uc.logger.WithContext(ctx)
 	logger.Debug("updating job")
 
-	jobModel, err := uc.db.Job().FindOneByUUID(ctx, job.UUID, tenants, true)
+	jobModel, err := uc.db.Job().FindOneByUUID(ctx, job.UUID, userInfo.AllowedTenants, userInfo.Username, true)
 	if err != nil {
 		return nil, err
 	}
@@ -87,13 +88,13 @@ func (uc *updateJobUseCase) Execute(ctx context.Context, job *entities.Job, next
 	}
 
 	// In case of status update
-	err = uc.updateJob(ctx, jobModel, jobLogModel)
+	err = uc.updateJob(ctx, jobModel, jobLogModel, userInfo)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(updateJobComponent)
 	}
 
 	if (nextStatus == entities.StatusMined || nextStatus == entities.StatusStored) && jobModel.NextJobUUID != "" {
-		err = uc.startNextJobUseCase.Execute(ctx, jobModel.UUID, tenants)
+		err = uc.startNextJobUseCase.Execute(ctx, jobModel.UUID, userInfo)
 		if err != nil {
 			return nil, errors.FromError(err).ExtendComponent(updateJobComponent)
 		}
@@ -103,7 +104,7 @@ func (uc *updateJobUseCase) Execute(ctx context.Context, job *entities.Job, next
 	return parsers.NewJobEntityFromModels(jobModel), nil
 }
 
-func (uc *updateJobUseCase) updateJob(ctx context.Context, jobModel *models.Job, jobLogModel *models.Log) error {
+func (uc *updateJobUseCase) updateJob(ctx context.Context, jobModel *models.Job, jobLogModel *models.Log, userInfo *multitenancy.UserInfo) error {
 	logger := uc.logger.WithContext(ctx)
 
 	// Does current job belong to a parent/children chains?
@@ -124,7 +125,8 @@ func (uc *updateJobUseCase) updateJob(ctx context.Context, jobModel *models.Job,
 			}
 
 			// Refresh jobModel after lock to ensure nothing was updated
-			refreshedJobModel, err := uc.db.Job().FindOneByUUID(ctx, jobModel.UUID, []string{}, false)
+			refreshedJobModel, err := uc.db.Job().FindOneByUUID(ctx, jobModel.UUID,
+				userInfo.AllowedTenants, userInfo.Username, false)
 			if err != nil {
 				return err
 			}
@@ -155,7 +157,7 @@ func (uc *updateJobUseCase) updateJob(ctx context.Context, jobModel *models.Job,
 		if parentJobUUID != "" && jobLogModel != nil && jobLogModel.Status == entities.StatusMined {
 			der := uc.updateChildrenUseCase.
 				WithDBTransaction(tx.(store.Tx)).
-				Execute(ctx, jobModel.UUID, parentJobUUID, entities.StatusNeverMined, []string{})
+				Execute(ctx, jobModel.UUID, parentJobUUID, entities.StatusNeverMined, userInfo)
 			if der != nil {
 				return der
 			}

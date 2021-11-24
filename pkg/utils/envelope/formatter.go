@@ -1,8 +1,11 @@
 package envelope
 
 import (
+	"context"
 	"math/big"
 
+	authutils "github.com/consensys/orchestrate/pkg/toolkit/app/auth/utils"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/pkg/types/ethereum"
 	"github.com/consensys/orchestrate/pkg/types/tx"
@@ -76,7 +79,14 @@ func NewEnvelopeFromJob(job *entities.Job, headers map[string]string) *tx.TxEnve
 	return txEnvelope
 }
 
-func NewJobFromEnvelope(envelope *tx.Envelope, tenantID string) *entities.Job {
+func NewContextFromEnvelope(ctx context.Context, envelope *tx.Envelope) context.Context {
+	return multitenancy.WithUserInfo(ctx, multitenancy.NewUserInfo(
+		envelope.GetHeadersValue(authutils.TenantIDHeader),
+		envelope.GetHeadersValue(authutils.UsernameHeader),
+	))
+}
+
+func NewJobFromEnvelope(envelope *tx.Envelope) *entities.Job {
 	return &entities.Job{
 		UUID:         envelope.GetJobUUID(),
 		NextJobUUID:  envelope.GetNextJobUUID(),
@@ -89,7 +99,8 @@ func NewJobFromEnvelope(envelope *tx.Envelope, tenantID string) *entities.Job {
 			ParentJobUUID: envelope.GetParentJobUUID(),
 			Priority:      envelope.GetPriority(),
 		},
-		TenantID: tenantID,
+		TenantID: envelope.GetHeadersValue(authutils.TenantIDHeader),
+		OwnerID:  envelope.GetHeadersValue(authutils.UsernameHeader),
 		Transaction: &entities.ETHTransaction{
 			Hash:            envelope.GetTxHashString(),
 			From:            envelope.GetFromString(),

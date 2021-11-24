@@ -22,7 +22,7 @@ CREATE TABLE chains (
 	listener_back_off_duration VARCHAR(66) NOT NULL,
 	listener_external_tx_enabled BOOLEAN DEFAULT false NOT NULL
 );
-CREATE UNIQUE INDEX ON chains (tenant_id, name);
+CREATE UNIQUE INDEX chains_tenant_id_name_idx ON chains (tenant_id, name);
 
 CREATE TABLE faucets (
 	uuid UUID PRIMARY KEY,
@@ -36,7 +36,7 @@ CREATE TABLE faucets (
 	created_at TIMESTAMPTZ DEFAULT (now() at time zone 'utc') NOT NULL, 
 	updated_at TIMESTAMPTZ DEFAULT (now() at time zone 'utc') NOT NULL
 );
-CREATE UNIQUE INDEX ON faucets (tenant_id, name);
+CREATE UNIQUE INDEX faucets_tenant_id_name_idx ON faucets (tenant_id, name);
 
 CREATE TRIGGER chain_trigger
 	BEFORE UPDATE ON chains

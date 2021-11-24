@@ -14,6 +14,7 @@ func JobResponseToEntity(jobResponse *types.JobResponse) *entities.Job {
 		Type:         jobResponse.Type,
 		Labels:       jobResponse.Labels,
 		TenantID:     jobResponse.TenantID,
+		OwnerID:      jobResponse.OwnerID,
 		InternalData: types.FormatAnnotationsToInternalData(jobResponse.Annotations),
 		Transaction:  &jobResponse.Transaction,
 		Logs:         jobResponse.Logs,

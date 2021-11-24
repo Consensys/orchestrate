@@ -121,8 +121,8 @@ Feature: Transaction Scheduler Idempotency
       """
     Then the response code should be 409
     And Response should have the following fields
-      | message                                                                                                        |
-      | DB101@use-cases.send-tx: transaction request with the same idempotency key and different params already exists |
+      | message                                                                                       |
+      | DB101@: transaction request with the same idempotency key and different params already exists |
     Then Envelopes should be in topic "tx.decoded"
     When I send "GET" request to "{{global.api}}/transactions?idempotency_keys={{idempotencykey}}"
     Then the response code should be 200

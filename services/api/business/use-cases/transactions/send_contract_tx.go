@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/consensys/orchestrate/pkg/ethereum/abi"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/pkg/utils"
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
@@ -29,7 +30,7 @@ func NewSendContractTxUseCase(sendTxUseCase usecases.SendTxUseCase) usecases.Sen
 }
 
 // Execute validates, creates and starts a new contract transaction
-func (uc *sendContractTxUseCase) Execute(ctx context.Context, txRequest *entities.TxRequest, tenantID string) (*entities.TxRequest, error) {
+func (uc *sendContractTxUseCase) Execute(ctx context.Context, txRequest *entities.TxRequest, userInfo *multitenancy.UserInfo) (*entities.TxRequest, error) {
 	ctx = log.WithFields(ctx, log.Field("idempotency-key", txRequest.IdempotencyKey))
 	logger := uc.logger.WithContext(ctx)
 	logger.Debug("creating new contract transaction")
@@ -39,7 +40,7 @@ func (uc *sendContractTxUseCase) Execute(ctx context.Context, txRequest *entitie
 		return nil, errors.FromError(err).ExtendComponent(sendContractTxComponent)
 	}
 
-	return uc.sendTxUseCase.Execute(ctx, txRequest, txData, tenantID)
+	return uc.sendTxUseCase.Execute(ctx, txRequest, txData, userInfo)
 }
 
 func (uc *sendContractTxUseCase) computeTxData(method string, args []interface{}) (string, error) {

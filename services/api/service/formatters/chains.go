@@ -18,6 +18,7 @@ func FormatChainResponse(chain *entities.Chain) *types.ChainResponse {
 		UUID:                      chain.UUID,
 		Name:                      chain.Name,
 		TenantID:                  chain.TenantID,
+		OwnerID:                   chain.OwnerID,
 		URLs:                      chain.URLs,
 		ChainID:                   chain.ChainID,
 		ListenerDepth:             chain.ListenerDepth,
@@ -32,10 +33,9 @@ func FormatChainResponse(chain *entities.Chain) *types.ChainResponse {
 	}
 }
 
-func FormatRegisterChainRequest(request *types.RegisterChainRequest, tenantID string, fromLatest bool) (*entities.Chain, error) {
+func FormatRegisterChainRequest(request *types.RegisterChainRequest, fromLatest bool) (*entities.Chain, error) {
 	chain := &entities.Chain{
 		Name:                      request.Name,
-		TenantID:                  tenantID,
 		URLs:                      request.URLs,
 		ListenerDepth:             request.Listener.Depth,
 		ListenerBackOffDuration:   request.Listener.BackOffDuration,

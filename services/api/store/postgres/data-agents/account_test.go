@@ -21,9 +21,11 @@ import (
 
 type accountTestSuite struct {
 	suite.Suite
-	agents   *PGAgents
-	pg       *pgTestUtils.PGTestHelper
-	tenantID string
+	agents         *PGAgents
+	pg             *pgTestUtils.PGTestHelper
+	allowedTenants []string
+	tenantID       string
+	username       string
 }
 
 func TestPGAccount(t *testing.T) {
@@ -34,6 +36,8 @@ func TestPGAccount(t *testing.T) {
 func (s *accountTestSuite) SetupSuite() {
 	s.pg, _ = pgTestUtils.NewPGTestHelper(nil, migrations.Collection)
 	s.tenantID = "tenantID"
+	s.allowedTenants = []string{s.tenantID, "_"}
+	s.username = "username"
 	s.pg.InitTestDB(s.T())
 }
 
@@ -86,20 +90,24 @@ func (s *accountTestSuite) TestPGAccount_FindOneByAddress() {
 
 	s.T().Run("should find one model by address successfully", func(t *testing.T) {
 		acc := testutils2.FakeAccountModel()
+		acc.TenantID = s.tenantID
+		acc.OwnerID = s.username
 		err := s.agents.Account().Insert(ctx, acc)
 		assert.NoError(s.T(), err)
 
-		iden2, err := s.agents.Account().FindOneByAddress(ctx, acc.Address, []string{acc.TenantID})
+		iden2, err := s.agents.Account().FindOneByAddress(ctx, acc.Address, s.allowedTenants, s.username)
 		assert.NoError(s.T(), err)
 		assert.Equal(s.T(), acc, iden2)
 	})
 
 	s.T().Run("should fail to find mode with different tenant", func(t *testing.T) {
 		acc := testutils2.FakeAccountModel()
+		acc.TenantID = s.tenantID
+		acc.OwnerID = s.username
 		err := s.agents.Account().Insert(ctx, acc)
 		assert.NoError(s.T(), err)
 
-		_, err = s.agents.Account().FindOneByAddress(ctx, acc.Address, []string{"Not tenant"})
+		_, err = s.agents.Account().FindOneByAddress(ctx, acc.Address, []string{"Not tenant"}, s.username)
 		assert.Error(s.T(), err)
 		assert.True(s.T(), errors.IsNotFoundError(err))
 	})
@@ -110,10 +118,13 @@ func (s *accountTestSuite) TestPGAccount_Search() {
 
 	s.T().Run("should search model successfully", func(t *testing.T) {
 		acc := testutils2.FakeAccountModel()
+		acc.TenantID = s.tenantID
+		acc.OwnerID = s.username
 		err := s.agents.Account().Insert(ctx, acc)
 		assert.NoError(s.T(), err)
 
-		accs, err := s.agents.Account().Search(ctx, &entities.AccountFilters{Aliases: []string{acc.Alias}}, []string{acc.TenantID})
+		accs, err := s.agents.Account().Search(ctx, &entities.AccountFilters{Aliases: []string{acc.Alias}},
+			s.allowedTenants, s.username)
 		assert.NoError(s.T(), err)
 		assert.Len(s.T(), accs, 1)
 
@@ -126,10 +137,13 @@ func (s *accountTestSuite) TestPGAccount_Search() {
 
 	s.T().Run("should search model successfully, filter by tenant", func(t *testing.T) {
 		acc := testutils2.FakeAccountModel()
+		acc.TenantID = s.tenantID
+		acc.OwnerID = s.username
 		err := s.agents.Account().Insert(ctx, acc)
 		assert.NoError(s.T(), err)
 
-		accs, err := s.agents.Account().Search(ctx, &entities.AccountFilters{Aliases: []string{acc.Alias}}, []string{"invalidTenant"})
+		accs, err := s.agents.Account().Search(ctx, &entities.AccountFilters{Aliases: []string{acc.Alias}},
+			[]string{"invalidTenant"}, s.username)
 		assert.NoError(s.T(), err)
 		assert.Len(s.T(), accs, 0)
 	})
@@ -140,6 +154,8 @@ func (s *accountTestSuite) TestPGAccount_Update() {
 
 	s.T().Run("should update model successfully", func(t *testing.T) {
 		acc := testutils2.FakeAccountModel()
+		acc.TenantID = s.tenantID
+		acc.OwnerID = s.username
 		err := s.agents.Account().Insert(ctx, acc)
 		assert.NoError(s.T(), err)
 
@@ -150,7 +166,7 @@ func (s *accountTestSuite) TestPGAccount_Update() {
 		err = s.agents.Account().Update(ctx, acc)
 		assert.NoError(s.T(), err)
 
-		iden2, err := s.agents.Account().FindOneByAddress(ctx, acc.Address, []string{acc.TenantID})
+		iden2, err := s.agents.Account().FindOneByAddress(ctx, acc.Address, s.allowedTenants, s.username)
 		assert.NoError(s.T(), err)
 
 		assert.Equal(s.T(), acc.Alias, iden2.Alias)

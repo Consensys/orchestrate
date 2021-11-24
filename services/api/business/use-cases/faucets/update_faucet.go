@@ -5,6 +5,7 @@ import (
 
 	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/services/api/business/parsers"
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
@@ -28,17 +29,19 @@ func NewUpdateFaucetUseCase(db store.DB) usecases.UpdateFaucetUseCase {
 }
 
 // Execute updates a faucet
-func (uc *updateFaucetUseCase) Execute(ctx context.Context, faucet *entities.Faucet, tenants []string) (*entities.Faucet, error) {
+func (uc *updateFaucetUseCase) Execute(ctx context.Context, faucet *entities.Faucet, userInfo *multitenancy.UserInfo) (*entities.Faucet, error) {
 	ctx = log.WithFields(ctx, log.Field("faucet", faucet.UUID))
 	logger := uc.logger.WithContext(ctx)
 	logger.Debug("updating faucet")
 
-	err := uc.db.Faucet().Update(ctx, parsers.NewFaucetModelFromEntity(faucet), tenants)
+	faucetModel := parsers.NewFaucetModelFromEntity(faucet)
+	faucetModel.TenantID = userInfo.TenantID
+	err := uc.db.Faucet().Update(ctx, faucetModel, userInfo.AllowedTenants)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(updateFaucetComponent)
 	}
 
-	faucetRetrieved, err := uc.db.Faucet().FindOneByUUID(ctx, faucet.UUID, tenants)
+	faucetRetrieved, err := uc.db.Faucet().FindOneByUUID(ctx, faucet.UUID, userInfo.AllowedTenants)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(updateFaucetComponent)
 	}
