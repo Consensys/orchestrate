@@ -54,18 +54,19 @@ run-stress: gobuild-e2e
 	@docker-compose -f docker-compose.e2e.yml up -V stress
 
 e2e-ci: run-e2e 
-	@exit $(docker inspect orchestrategit_e2e_1 --format='{{.State.ExitCode}}')
+	@docker-compose -f docker-compose.e2e.yml up --build report
+	@exit $(docker inspect project_e2e_1 --format='{{.State.ExitCode}}')
 
 e2e: run-e2e
 	@docker-compose -f docker-compose.e2e.yml up --build report
 	@$(OPEN) build/report/report.html 2>/dev/null
-	@exit $(docker inspect orchestrategit_e2e_1 --format='{{.State.ExitCode}}')
+	@exit $(docker inspect orchestrate_e2e_1 --format='{{.State.ExitCode}}')
 
 deploy-remote-env:
 	@bash ./scripts/deploy-remote-env.sh
 
 stress: run-stress
-	@exit $(docker inspect orchestrategit_stress_1 --format='{{.State.ExitCode}}')
+	@exit $(docker inspect orchestrate_stress_1 --format='{{.State.ExitCode}}')
 
 stress-ci:
 	@docker-compose -f docker-compose.dev.yml up stress
