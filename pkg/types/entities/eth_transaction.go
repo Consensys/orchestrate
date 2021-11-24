@@ -41,7 +41,7 @@ type ETHTransaction struct {
 	PrivateFor      []string         `json:"privateFor,omitempty" validate:"omitempty,min=1,unique,dive,base64" example:"[A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=,B1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=]"`
 	MandatoryFor    []string         `json:"mandatoryFor,omitempty" validate:"omitempty,min=1,unique,dive,base64" example:"[A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=,B1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=]"`
 	PrivacyGroupID  string           `json:"privacyGroupId,omitempty" validate:"omitempty,base64" example:"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="`
-	PrivacyFlag     PrivacyFlag      `json:"privacyFlag,omitempty" validate:"omitempty,isPrivacyFlag" example:"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="`
+	PrivacyFlag     PrivacyFlag      `json:"privacyFlag,omitempty" validate:"omitempty,isPrivacyFlag" example:"1"`
 	EnclaveKey      string           `json:"enclaveKey,omitempty" example:"0xd41551c714c8ec769d2edad9adc250ae955d263da161bf59142b7500eea6715eadc250ae955d263da161bf59142b7500eea6715e"`
 	CreatedAt       time.Time        `json:"createdAt,omitempty" example:"2020-07-09T12:35:42.115395Z"`
 	UpdatedAt       time.Time        `json:"updatedAt,omitempty" example:"2020-07-09T12:35:42.115395Z"`
