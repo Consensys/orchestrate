@@ -96,7 +96,7 @@ func TestCrafterTransaction_Execute(t *testing.T) {
 
 	t.Run("should execute use case for EEA marking transaction successfully", func(t *testing.T) {
 		job := testutils.FakeJob()
-		job.Type = entities.JobType(tx.JobType_ETH_ORION_MARKING_TX.String())
+		job.Type = entities.JobType(tx.JobType_ETH_EEA_MARKING_TX.String())
 		job.Transaction.Nonce = ""
 		job.Transaction.GasPrice = ""
 		job.Transaction.Gas = ""
@@ -118,7 +118,7 @@ func TestCrafterTransaction_Execute(t *testing.T) {
 
 	t.Run("should execute use case for EEA private transaction successfully", func(t *testing.T) {
 		job := testutils.FakeJob()
-		job.Type = entities.JobType(tx.JobType_ETH_ORION_EEA_TX.String())
+		job.Type = entities.JobType(tx.JobType_ETH_EEA_PRIVATE_TX.String())
 		job.Transaction.Nonce = ""
 		job.Transaction.GasPrice = ""
 		job.Transaction.Gas = ""

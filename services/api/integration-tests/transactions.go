@@ -178,8 +178,8 @@ func (s *transactionsTestSuite) TestSuccess() {
 		assert.Equal(t, tx.JobTypeMap[entities.TesseraPrivateTransaction].String(), privTxEvlp.GetJobTypeString())
 	})
 
-	s.T().Run("should send an orion transaction successfully", func(t *testing.T) {
-		txRequest := testutils.FakeSendOrionRequest()
+	s.T().Run("should send an EEA transaction successfully", func(t *testing.T) {
+		txRequest := testutils.FakeSendEEARequest()
 
 		txResponse, err := s.client.SendContractTransaction(ctx, txRequest)
 		if err != nil {
@@ -202,12 +202,12 @@ func (s *transactionsTestSuite) TestSuccess() {
 		assert.Equal(t, entities.StatusStarted, privTxJob.Status)
 		assert.Equal(t, txRequest.Params.From.Hex(), privTxJob.Transaction.From)
 		assert.Equal(t, txRequest.Params.To.Hex(), privTxJob.Transaction.To)
-		assert.Equal(t, entities.OrionEEATransaction, privTxJob.Type)
+		assert.Equal(t, entities.EEAPrivateTransaction, privTxJob.Type)
 
 		markingTxJob := txResponseGET.Jobs[1]
 		assert.NotEmpty(t, markingTxJob.UUID)
 		assert.Equal(t, entities.StatusCreated, markingTxJob.Status)
-		assert.Equal(t, entities.OrionMarkingTransaction, markingTxJob.Type)
+		assert.Equal(t, entities.EEAMarkingTransaction, markingTxJob.Type)
 
 		privTxEvlp, err := s.env.consumer.WaitForEnvelope(privTxJob.ScheduleUUID, s.env.kafkaTopicConfig.Sender, waitForEnvelopeTimeOut)
 		if err != nil {
@@ -217,7 +217,7 @@ func (s *transactionsTestSuite) TestSuccess() {
 
 		assert.Equal(t, privTxJob.ScheduleUUID, privTxEvlp.GetID())
 		assert.Equal(t, privTxJob.UUID, privTxEvlp.GetJobUUID())
-		assert.Equal(t, tx.JobTypeMap[entities.OrionEEATransaction].String(), privTxEvlp.GetJobTypeString())
+		assert.Equal(t, tx.JobTypeMap[entities.EEAPrivateTransaction].String(), privTxEvlp.GetJobTypeString())
 	})
 
 	s.T().Run("should send a deploy contract transaction successfully", func(t *testing.T) {

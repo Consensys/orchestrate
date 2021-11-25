@@ -12,8 +12,8 @@ type JobStatus string
 const (
 	EthereumTransaction       JobType = "eth://ethereum/transaction"       // Classic public Ethereum transaction
 	EthereumRawTransaction    JobType = "eth://ethereum/rawTransaction"    // Classic raw transaction
-	OrionMarkingTransaction   JobType = "eth://orion/markingTransaction"   // Besu public transaction
-	OrionEEATransaction       JobType = "eth://orion/eeaTransaction"       // Besu private tx for Orion
+	EEAMarkingTransaction     JobType = "eth://eea/markingTransaction"     // Besu marking transaction
+	EEAPrivateTransaction     JobType = "eth://eea/privateTransaction"     // Besu private EEA tx
 	TesseraMarkingTransaction JobType = "eth://tessera/markingTransaction" // Tessera public transaction
 	TesseraPrivateTransaction JobType = "eth://tessera/privateTransaction" // Tessera private transaction
 )

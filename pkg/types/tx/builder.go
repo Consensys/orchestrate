@@ -117,21 +117,21 @@ func (e *Envelope) IsEthSendTesseraPrivateTransaction() bool {
 	return e.JobType == JobType_ETH_TESSERA_PRIVATE_TX
 }
 
-// IsEthSendRawTransaction for Besu Orion
+// IsEthSendRawTransaction for Besu/EEA
 func (e *Envelope) IsEeaSendMarkingTransaction() bool {
-	return e.JobType == JobType_ETH_ORION_MARKING_TX
+	return e.JobType == JobType_ETH_EEA_MARKING_TX
 }
 
 func (e *Envelope) IsEeaSendPrivateTransaction() bool {
-	return e.JobType == JobType_ETH_ORION_EEA_TX
+	return e.JobType == JobType_ETH_EEA_PRIVATE_TX
 }
 
-// IsEthSendRawTransaction for Besu Orion with Privacy Group
+// IsEthSendRawTransaction for Besu/EEA with Privacy Group
 func (e *Envelope) IsEeaSendPrivateTransactionPrivacyGroup() bool {
 	return e.IsEeaSendPrivateTransaction() && e.PrivacyGroupID != ""
 }
 
-// IsEthSendRawTransaction for Besu Orion with PrivateFor
+// IsEthSendRawTransaction for Besu/EEA with PrivateFor
 func (e *Envelope) IsEeaSendPrivateTransactionPrivateFor() bool {
 	return e.IsEeaSendPrivateTransaction() && len(e.PrivateFor) > 0
 }
@@ -1142,8 +1142,8 @@ func (e *Envelope) loadPtrFields(gas, nonce, gasPrice, gasFeeCap, gasTipCap, val
 
 // Attribute kafka partition and redis keys to well attribute nonce
 // For a classic eth_sendRawTransaction transaction - <from>@<chainID>
-// For a eea_sendRawTransaction with a privacyGroupID - <from>@orion-<privacyGroupID>@<chainID>
-// For a eea_sendRawTransaction with a privateFor - <from>@orion-<hash(privateFor-privateFrom)>@<chainID>
+// For a eea_sendRawTransaction with a privacyGroupID - <from>@eea-<privacyGroupID>@<chainID>
+// For a eea_sendRawTransaction with a privateFor - <from>@eea-<hash(privateFor-privateFrom)>@<chainID>
 func (e *Envelope) PartitionKey() string {
 
 	// Return empty partition key for raw tx and one time key tx
@@ -1154,13 +1154,13 @@ func (e *Envelope) PartitionKey() string {
 
 	switch {
 	case e.IsEeaSendPrivateTransactionPrivacyGroup():
-		return fmt.Sprintf("%v@orion-%v@%v", e.GetFromString(), e.GetPrivacyGroupID(), e.GetChainID().String())
+		return fmt.Sprintf("%v@eea-%v@%v", e.GetFromString(), e.GetPrivacyGroupID(), e.GetChainID().String())
 	case e.IsEeaSendPrivateTransactionPrivateFor():
 		l := append(e.GetPrivateFor(), e.GetPrivateFrom())
 		sort.Strings(l)
 		h := md5.New()
 		_, _ = h.Write([]byte(strings.Join(l, "-")))
-		return fmt.Sprintf("%v@orion-%v@%v", e.GetFromString(), fmt.Sprintf("%x", h.Sum(nil)), e.GetChainID().String())
+		return fmt.Sprintf("%v@eea-%v@%v", e.GetFromString(), fmt.Sprintf("%x", h.Sum(nil)), e.GetChainID().String())
 	default:
 		return fmt.Sprintf("%v@%v", e.GetFromString(), e.GetChainID().String())
 	}

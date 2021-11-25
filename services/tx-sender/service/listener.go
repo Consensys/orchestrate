@@ -209,11 +209,11 @@ func (listener *MessageListener) executeSendJob(ctx context.Context, job *entiti
 		return listener.useCases.SendTesseraPrivateTx().Execute(ctx, job)
 	case tx.JobType_ETH_TESSERA_MARKING_TX.String():
 		return listener.useCases.SendTesseraMarkingTx().Execute(ctx, job)
-	case tx.JobType_ETH_ORION_EEA_TX.String():
+	case tx.JobType_ETH_EEA_PRIVATE_TX.String():
 		return listener.useCases.SendEEAPrivateTx().Execute(ctx, job)
 	case tx.JobType_ETH_RAW_TX.String():
 		return listener.useCases.SendETHRawTx().Execute(ctx, job)
-	case tx.JobType_ETH_ORION_MARKING_TX.String(), tx.JobType_ETH_TX.String():
+	case tx.JobType_ETH_EEA_MARKING_TX.String(), tx.JobType_ETH_TX.String():
 		return listener.useCases.SendETHTx().Execute(ctx, job)
 	default:
 		return errors.InvalidParameterError("job type %s is not supported", job.Type)

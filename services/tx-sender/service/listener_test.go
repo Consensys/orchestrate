@@ -145,7 +145,7 @@ func (s *messageListenerCtrlTestSuite) TestMessageListener_PublicEthereum() {
 		mockSession := mock.NewConsumerGroupSession(ctx, "kafka-consumer-group", claims)
 		mockClaim := mock.NewConsumerGroupClaim("topic", 0, 0)
 		envelope := fakeEnvelope(s.tenantID)
-		_ = envelope.SetJobType(tx.JobType_ETH_ORION_EEA_TX)
+		_ = envelope.SetJobType(tx.JobType_ETH_EEA_PRIVATE_TX)
 		msg := &sarama.ConsumerMessage{}
 		msg.Value, _ = proto.Marshal(envelope.TxEnvelopeAsRequest())
 

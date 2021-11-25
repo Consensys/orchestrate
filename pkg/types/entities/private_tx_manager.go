@@ -9,7 +9,7 @@ const (
 	PrivateTxTypeRestricted PrivateTxType = "restricted"
 
 	TesseraChainType PrivateTxManagerType = "Tessera"
-	OrionChainType   PrivateTxManagerType = "Orion"
+	EEAChainType     PrivateTxManagerType = "EEA"
 
 	// Minimum gas is calculated by the size of the enclaveKey
 	TesseraGasLimit = 60000

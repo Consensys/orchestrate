@@ -354,7 +354,7 @@ Feature: Nonce manager
 {
     "scheduleUUID": "{{scheduleOneUUID}}",
 	"chainUUID": "{{chain.besu0.UUID}}",
-    "type": "eth://orion/eeaTransaction",
+    "type": "eth://eea/privateTransaction",
     "transaction": {
         "from": "{{account1}}",
         "to": "{{to1}}",
@@ -376,7 +376,7 @@ Feature: Nonce manager
 {
     "scheduleUUID": "{{scheduleTwoUUID}}",
 	"chainUUID": "{{chain.besu0.UUID}}",
-    "type": "eth://orion/eeaTransaction",
+    "type": "eth://eea/privateTransaction",
     "transaction": {
         "from": "{{account1}}",
         "to": "{{to1}}",
@@ -397,7 +397,7 @@ Feature: Nonce manager
 {
     "scheduleUUID": "{{scheduleThreeUUID}}",
 	"chainUUID": "{{chain.besu0.UUID}}",
-    "type": "eth://orion/eeaTransaction",
+    "type": "eth://eea/privateTransaction",
     "transaction": {
         "from": "{{account1}}",
         "to": "{{to1}}",

@@ -61,21 +61,21 @@ func TestParsersTxRequest_NewJobEntityFromSendRawTx(t *testing.T) {
 	assert.Equal(t, "0x7357589f8e367c2C31F51242fB77B350A11830F3", txReqEntity.Params.From.Hex())
 }
 
-func TestParsersTxRequest_NewOrionJobEntityFromSendTx(t *testing.T) {
+func TestParsersTxRequest_NewEEAJobEntityFromSendTx(t *testing.T) {
 	txReqEntity := testutils.FakeTxRequest()
-	txReqEntity.Params.Protocol = entities.OrionChainType
+	txReqEntity.Params.Protocol = entities.EEAChainType
 	chainUUID := "chainUUID"
 	jobs, _ := NewJobEntitiesFromTxRequest(txReqEntity, chainUUID ,"0xDATA")
 	assert.Len(t, jobs, 2)
 
 	privJob := jobs[0]
-	assert.Equal(t, privJob.Type, entities.OrionEEATransaction)
+	assert.Equal(t, privJob.Type, entities.EEAPrivateTransaction)
 	assert.False(t, privJob.InternalData.OneTimeKey)
 	
 	markingJob := jobs[1]
 	assert.Equal(t, markingJob.ScheduleUUID, txReqEntity.Schedule.UUID)
 	assert.Equal(t, markingJob.ChainUUID, chainUUID)
-	assert.Equal(t, markingJob.Type, entities.OrionMarkingTransaction)
+	assert.Equal(t, markingJob.Type, entities.EEAMarkingTransaction)
 	assert.Equal(t, markingJob.Labels, txReqEntity.Labels)
 	assert.True(t, markingJob.InternalData.OneTimeKey)
 }

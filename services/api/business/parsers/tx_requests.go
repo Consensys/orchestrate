@@ -24,9 +24,9 @@ func NewTxRequestModelFromEntities(txRequest *entities.TxRequest, requestHash st
 func NewJobEntitiesFromTxRequest(txRequest *entities.TxRequest, chainUUID, txData string) ([]*entities.Job, error) {
 	var jobs []*entities.Job
 	switch {
-	case txRequest.Params.Protocol == entities.OrionChainType:
-		privTxJob := newJobEntityFromTxRequest(txRequest, newEthTransactionFromParams(txRequest.Params, txData, entities.LegacyTxType), entities.OrionEEATransaction, chainUUID)
-		markingTxJob := newJobEntityFromTxRequest(txRequest, &entities.ETHTransaction{}, entities.OrionMarkingTransaction, chainUUID)
+	case txRequest.Params.Protocol == entities.EEAChainType:
+		privTxJob := newJobEntityFromTxRequest(txRequest, newEthTransactionFromParams(txRequest.Params, txData, entities.LegacyTxType), entities.EEAPrivateTransaction, chainUUID)
+		markingTxJob := newJobEntityFromTxRequest(txRequest, &entities.ETHTransaction{}, entities.EEAMarkingTransaction, chainUUID)
 		markingTxJob.InternalData.OneTimeKey = true
 		jobs = append(jobs, privTxJob, markingTxJob)
 	case txRequest.Params.Protocol == entities.TesseraChainType:

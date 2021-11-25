@@ -151,10 +151,10 @@ func (nc *nonceManager) fetchNonceFromChain(ctx context.Context, job *entities.J
 	fromAddr := ethcommon.HexToAddress(job.Transaction.From)
 
 	switch {
-	case string(job.Type) == tx.JobType_ETH_ORION_EEA_TX.String() && job.Transaction.PrivacyGroupID != "":
+	case string(job.Type) == tx.JobType_ETH_EEA_PRIVATE_TX.String() && job.Transaction.PrivacyGroupID != "":
 		n, err = nc.ethClient.PrivNonce(ctx, url, fromAddr,
 			job.Transaction.PrivacyGroupID)
-	case string(job.Type) == tx.JobType_ETH_ORION_EEA_TX.String() && len(job.Transaction.PrivateFor) > 0:
+	case string(job.Type) == tx.JobType_ETH_EEA_PRIVATE_TX.String() && len(job.Transaction.PrivateFor) > 0:
 		n, err = nc.ethClient.PrivEEANonce(ctx, url, fromAddr,
 			job.Transaction.PrivateFrom, job.Transaction.PrivateFor)
 	default:
@@ -174,14 +174,14 @@ func partitionKey(job *entities.Job) string {
 	fromAddr := job.Transaction.From
 	chainID := job.InternalData.ChainID
 	switch {
-	case string(job.Type) == tx.JobType_ETH_ORION_EEA_TX.String() && job.Transaction.PrivacyGroupID != "":
-		return fmt.Sprintf("%v@orion-%v@%v", fromAddr, job.Transaction.PrivacyGroupID, chainID)
-	case string(job.Type) == tx.JobType_ETH_ORION_EEA_TX.String() && len(job.Transaction.PrivateFor) > 0:
+	case string(job.Type) == tx.JobType_ETH_EEA_PRIVATE_TX.String() && job.Transaction.PrivacyGroupID != "":
+		return fmt.Sprintf("%v@eea-%v@%v", fromAddr, job.Transaction.PrivacyGroupID, chainID)
+	case string(job.Type) == tx.JobType_ETH_EEA_PRIVATE_TX.String() && len(job.Transaction.PrivateFor) > 0:
 		l := append(job.Transaction.PrivateFor, job.Transaction.PrivateFrom)
 		sort.Strings(l)
 		h := md5.New()
 		_, _ = h.Write([]byte(strings.Join(l, "-")))
-		return fmt.Sprintf("%v@orion-%v@%v", fromAddr, fmt.Sprintf("%x", h.Sum(nil)), chainID)
+		return fmt.Sprintf("%v@eea-%v@%v", fromAddr, fmt.Sprintf("%x", h.Sum(nil)), chainID)
 	default:
 		return fmt.Sprintf("%v@%v", fromAddr, chainID)
 	}

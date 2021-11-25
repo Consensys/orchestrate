@@ -326,7 +326,7 @@ Feature: Private transactions
       | 271360 | ~       |
 
   @besu
-  Scenario: Deploy private ERC20 contract with Besu and Orion
+  Scenario: Deploy private ERC20 contract with Besu/EEA
     Given I register the following alias
       | alias                  | value           |
       | besuDeployContractTxID | {{random.uuid}} |
@@ -344,7 +344,7 @@ Feature: Private transactions
         "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{account1}}",
-          "protocol": "Orion",
+          "protocol": "EEA",
           "privateFrom": "{{global.nodes.besu[0].privateAddress[0]}}",
           "privateFor": [
             "{{global.nodes.besu[1].privateAddress[0]}}"
@@ -398,7 +398,7 @@ Feature: Private transactions
             "0x6009608A02a7A15fd6689D6DaD560C44E9ab61Ff",
             "0x2"
           ],
-          "protocol": "Orion",
+          "protocol": "EEA",
           "privateFrom": "{{global.nodes.besu[0].privateAddress[0]}}",
           "privateFor": [
             "{{global.nodes.besu[1].privateAddress[0]}}"
@@ -417,7 +417,7 @@ Feature: Private transactions
       | 1              |
 
   @besu
-  Scenario: Batch deploy private ERC20 contract with Besu and Orion with different PrivateFor
+  Scenario: Batch deploy private ERC20 contract with Besu/EEA with different PrivateFor
     Given I register the following alias
       | alias                       | value           |
       | besuDeployContractTxOneID   | {{random.uuid}} |
@@ -445,7 +445,7 @@ Feature: Private transactions
         "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{account1}}",
-          "protocol": "Orion",
+          "protocol": "EEA",
           "privateFrom": "{{global.nodes.besu[0].privateAddress[0]}}",
           "privateFor": [
             "{{global.nodes.besu[1].privateAddress[0]}}"
@@ -465,7 +465,7 @@ Feature: Private transactions
         "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{account2}}",
-          "protocol": "Orion",
+          "protocol": "EEA",
           "privateFrom": "{{global.nodes.besu[0].privateAddress[0]}}",
           "privateFor": [
             "{{global.nodes.besu[2].privateAddress[0]}}"
@@ -485,7 +485,7 @@ Feature: Private transactions
         "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{account3}}",
-          "protocol": "Orion",
+          "protocol": "EEA",
           "privateFrom": "{{global.nodes.besu[0].privateAddress[0]}}",
           "privateFor": [
             "{{global.nodes.besu[1].privateAddress[0]}}"
@@ -505,7 +505,7 @@ Feature: Private transactions
         "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{account4}}",
-          "protocol": "Orion",
+          "protocol": "EEA",
           "privateFrom": "{{global.nodes.besu[0].privateAddress[0]}}",
           "privateFor": [
             "{{global.nodes.besu[2].privateAddress[0]}}"
@@ -528,7 +528,7 @@ Feature: Private transactions
       | 1              | ~              | {{global.nodes.besu[0].privateAddress[0]}} | ["{{global.nodes.besu[2].privateAddress[0]}}"] |
 
   @besu
-  Scenario: Batch deploy private ERC20 contract with Besu and Orion with different PrivateFrom
+  Scenario: Batch deploy private ERC20 contract with Bes/EEA with different PrivateFrom
     Given I register the following alias
       | alias                       | value           |
       | besuDeployContractTxOneID   | {{random.uuid}} |
@@ -556,7 +556,7 @@ Feature: Private transactions
         "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{account1}}",
-          "protocol": "Orion",
+          "protocol": "EEA",
           "privateFrom": "{{global.nodes.besu[0].privateAddress[0]}}",
           "privateFor": [
             "{{global.nodes.besu[2].privateAddress[0]}}"
@@ -576,7 +576,7 @@ Feature: Private transactions
         "chain": "{{chain.besu1.Name}}",
         "params": {
           "from": "{{account2}}",
-          "protocol": "Orion",
+          "protocol": "EEA",
           "privateFrom": "{{global.nodes.besu[1].privateAddress[0]}}",
           "privateFor": [
             "{{global.nodes.besu[2].privateAddress[0]}}"
@@ -596,7 +596,7 @@ Feature: Private transactions
         "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{account3}}",
-          "protocol": "Orion",
+          "protocol": "EEA",
           "privateFrom": "{{global.nodes.besu[0].privateAddress[0]}}",
           "privateFor": [
             "{{global.nodes.besu[2].privateAddress[0]}}"
@@ -616,7 +616,7 @@ Feature: Private transactions
         "chain": "{{chain.besu1.Name}}",
         "params": {
           "from": "{{account4}}",
-          "protocol": "Orion",
+          "protocol": "EEA",
           "privateFrom": "{{global.nodes.besu[1].privateAddress[0]}}",
           "privateFor": [
             "{{global.nodes.besu[2].privateAddress[0]}}"
@@ -680,7 +680,7 @@ Feature: Private transactions
         "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{account1}}",
-          "protocol": "Orion",
+          "protocol": "EEA",
           "privateFrom": "{{global.nodes.besu[0].privateAddress[0]}}",
           "privacyGroupId": "{{privacyGroupId}}",
           "contractName": "SimpleToken"
@@ -743,7 +743,7 @@ Feature: Private transactions
         "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{account1}}",
-          "protocol": "Orion",
+          "protocol": "EEA",
           "privateFrom": "{{global.nodes.besu[0].privateAddress[0]}}",
           "privacyGroupId": "{{privacyGroupId}}",
           "contractName": "SimpleToken"
@@ -805,7 +805,7 @@ Feature: Private transactions
         "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{account1}}",
-          "protocol": "Orion",
+          "protocol": "EEA",
           "privateFrom": "{{global.nodes.besu[0].privateAddress[0]}}",
           "privacyGroupId": "{{privacyGroupId}}",
           "privateFor": [
@@ -843,7 +843,7 @@ Feature: Private transactions
         "chain": "{{chain.besu0.Name}}",
         "params": {
           "oneTimeKey": true,
-          "protocol": "Orion",
+          "protocol": "EEA",
           "privateFrom": "{{global.nodes.besu[0].privateAddress[0]}}",
           "privateFor": [
             "{{global.nodes.besu[2].privateAddress[0]}}"
@@ -903,7 +903,7 @@ Feature: Private transactions
         "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{account1}}",
-          "protocol": "Orion",
+          "protocol": "EEA",
           "privateFrom": "{{global.nodes.besu[0].privateAddress[0]}}",
           "privateFor": [
             "{{global.nodes.besu[1].privateAddress[0]}}",
@@ -945,7 +945,7 @@ Feature: Private transactions
       {
         "scheduleUUID": "{{scheduleUUID}}",
         "chainUUID": "{{chain.besu0.UUID}}",
-        "type": "eth://orion/markingTransaction",
+        "type": "eth://eea/markingTransaction",
         "transaction": {
           "from": "{{account1}}"
         },
@@ -964,7 +964,7 @@ Feature: Private transactions
         "scheduleUUID": "{{scheduleUUID}}",
         "chainUUID": "{{chain.besu0.UUID}}",
         "nextJobUUID": "{{txMarkingTxJobUUID}}",
-        "type": "eth://orion/eeaTransaction",
+        "type": "eth://eea/privateTransaction",
         "transaction": {
           "from": "{{account1}}",
           "to": "{{to1}}",

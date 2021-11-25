@@ -18,8 +18,8 @@ func FakeRegisterChainRequest() *api.RegisterChainRequest {
 			ExternalTxEnabled: false,
 		},
 		PrivateTxManager: &api.PrivateTxManagerRequest{
-			URL:  "http://orion:8545",
-			Type: entities.OrionChainType,
+			URL:  "http://tessera-eea:8545",
+			Type: entities.EEAChainType,
 		},
 		Labels: map[string]string{
 			"label1": "val1",

@@ -36,7 +36,7 @@ func TestStartNextJob_Execute(t *testing.T) {
 
 	ctx := context.Background()
 
-	t.Run("should execute use case for orion marking transaction successfully", func(t *testing.T) {
+	t.Run("should execute use case for EEA marking transaction successfully", func(t *testing.T) {
 		jobModel := testutils2.FakeJobModel(0)
 		nextJobModel := testutils2.FakeJobModel(0)
 		txHash := ethcommon.HexToHash("0x123")
@@ -49,8 +49,8 @@ func TestStartNextJob_Execute(t *testing.T) {
 			Status:    entities.StatusStored,
 			CreatedAt: time.Now(),
 		})
-		jobModel.Type = entities.OrionEEATransaction
-		nextJobModel.Type = entities.OrionMarkingTransaction
+		jobModel.Type = entities.EEAPrivateTransaction
+		nextJobModel.Type = entities.EEAMarkingTransaction
 
 		mockJobDA.EXPECT().FindOneByUUID(gomock.Any(), jobModel.UUID, userInfo.AllowedTenants, userInfo.Username, false).
 			Return(jobModel, nil)

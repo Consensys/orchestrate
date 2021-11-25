@@ -37,7 +37,7 @@ func BatchPrivateTxsTest(ctx context.Context, cfg *WorkloadConfig, client orches
 			ContractName: contractName,
 			Args:         constructorArgs(contractName),
 			PrivateFrom:  privateFrom,
-			Protocol:     entities.OrionChainType,
+			Protocol:     entities.EEAChainType,
 		},
 		Labels: map[string]string{
 			"id": idempotency,

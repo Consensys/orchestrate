@@ -12,8 +12,8 @@ import (
 var JobTypeMap = map[entities.JobType]JobType{
 	entities.EthereumTransaction:       JobType_ETH_TX,
 	entities.EthereumRawTransaction:    JobType_ETH_RAW_TX,
-	entities.OrionMarkingTransaction:   JobType_ETH_ORION_MARKING_TX,
-	entities.OrionEEATransaction:       JobType_ETH_ORION_EEA_TX,
+	entities.EEAMarkingTransaction:     JobType_ETH_EEA_MARKING_TX,
+	entities.EEAPrivateTransaction:     JobType_ETH_EEA_PRIVATE_TX,
 	entities.TesseraMarkingTransaction: JobType_ETH_TESSERA_MARKING_TX,
 	entities.TesseraPrivateTransaction: JobType_ETH_TESSERA_PRIVATE_TX,
 }

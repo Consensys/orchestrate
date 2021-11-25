@@ -52,8 +52,8 @@ func (uc *startNextJobUseCase) Execute(ctx context.Context, jobUUID string, user
 	}
 
 	switch nextJobModel.Type {
-	case entities.OrionMarkingTransaction:
-		err = uc.handleOrionMarkingTx(ctx, jobModel, nextJobModel)
+	case entities.EEAMarkingTransaction:
+		err = uc.handleEEAMarkingTx(ctx, jobModel, nextJobModel)
 	case entities.TesseraMarkingTransaction:
 		err = uc.handleTesseraMarkingTx(ctx, jobModel, nextJobModel)
 	}
@@ -66,9 +66,9 @@ func (uc *startNextJobUseCase) Execute(ctx context.Context, jobUUID string, user
 	return uc.startJobUseCase.Execute(ctx, nextJobModel.UUID, userInfo)
 }
 
-func (uc *startNextJobUseCase) handleOrionMarkingTx(ctx context.Context, prevJobModel, jobModel *models.Job) error {
-	if prevJobModel.Type != entities.OrionEEATransaction {
-		return errors.DataError("expected previous job as type: %s", entities.OrionEEATransaction)
+func (uc *startNextJobUseCase) handleEEAMarkingTx(ctx context.Context, prevJobModel, jobModel *models.Job) error {
+	if prevJobModel.Type != entities.EEAPrivateTransaction {
+		return errors.DataError("expected previous job as type: %s", entities.EEAPrivateTransaction)
 	}
 
 	prevJobEntity := parsers.NewJobEntityFromModels(prevJobModel)

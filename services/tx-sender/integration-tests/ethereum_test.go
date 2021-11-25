@@ -579,7 +579,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_EEA() {
 		signedRawTx := "0xf8be8080808083989680808216b4a0d35c752d3498e6f5ca1630d264802a992a141ca4b6a3f439d673c75e944e5fb0a05278aaa5fabbeac362c321b54e298dedae2d31471e432c26ea36a8d49cf08f1ea0035695b4cc4b0941e60551d7a19cf30603db5bfc23e5ac43a56f57f25f75486af842a0035695b4cc4b0941e60551d7a19cf30603db5bfc23e5ac43a56f57f25f75486aa0075695b4cc4b0941e60551d7a19cf30603db5bfc23e5ac43a56f57f25f75486a8a72657374726963746564"
 
 		envelope := fakeEnvelope()
-		_ = envelope.SetJobType(tx.JobType_ETH_ORION_EEA_TX)
+		_ = envelope.SetJobType(tx.JobType_ETH_EEA_PRIVATE_TX)
 		_ = envelope.SetTransactionType(string(entities.LegacyTxType))
 
 		gock.New(keyManagerURL).
@@ -629,7 +629,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_EEA() {
 		wg := &multierror.Group{}
 
 		envelope := fakeEnvelope()
-		_ = envelope.SetJobType(tx.JobType_ETH_ORION_EEA_TX)
+		_ = envelope.SetJobType(tx.JobType_ETH_EEA_PRIVATE_TX)
 		_ = envelope.SetTransactionType(string(entities.LegacyTxType))
 
 		gock.New(apiURL).
@@ -657,7 +657,7 @@ func (s *txSenderEthereumTestSuite) TestTxSender_Ethereum_EEA() {
 		wg := &multierror.Group{}
 
 		envelope := fakeEnvelope()
-		_ = envelope.SetJobType(tx.JobType_ETH_ORION_EEA_TX)
+		_ = envelope.SetJobType(tx.JobType_ETH_EEA_PRIVATE_TX)
 		_ = envelope.SetTransactionType(string(entities.LegacyTxType))
 
 		gock.New(apiURL).

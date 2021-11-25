@@ -66,14 +66,14 @@ func FakeSendTesseraRequest() *types.SendTransactionRequest {
 	}
 }
 
-func FakeSendOrionRequest() *types.SendTransactionRequest {
+func FakeSendEEARequest() *types.SendTransactionRequest {
 	return &types.SendTransactionRequest{
 		ChainName: "ganache",
 		Params: types.TransactionParams{
 			From:            &FromAddress,
 			MethodSignature: "transfer()",
 			To:              utils.ToPtr(ethcommon.HexToAddress("0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18")).(*ethcommon.Address),
-			Protocol:        entities.OrionChainType,
+			Protocol:        entities.EEAChainType,
 			PrivateFrom:     "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=",
 			PrivacyGroupID:  "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=",
 		},

@@ -134,7 +134,7 @@ func convDuration(fl validator.FieldLevel) (time.Duration, error) {
 func isPrivateTxManagerType(fl validator.FieldLevel) bool {
 	if fl.Field().String() != "" {
 		switch fl.Field().String() {
-		case string(entities.TesseraChainType), string(entities.OrionChainType):
+		case string(entities.TesseraChainType), string(entities.EEAChainType):
 			return true
 		default:
 			return false
@@ -163,8 +163,8 @@ func isJobType(fl validator.FieldLevel) bool {
 		case
 			entities.EthereumTransaction,
 			entities.EthereumRawTransaction,
-			entities.OrionEEATransaction,
-			entities.OrionMarkingTransaction,
+			entities.EEAPrivateTransaction,
+			entities.EEAMarkingTransaction,
 			entities.TesseraPrivateTransaction,
 			entities.TesseraMarkingTransaction:
 			return true

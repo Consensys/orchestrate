@@ -85,11 +85,11 @@ func FakeTesseraTransactionParams() *entities.ETHTransactionParams {
 	return tx
 }
 
-func FakeOrionTransactionParams() *entities.ETHTransactionParams {
+func FakeEEATransactionParams() *entities.ETHTransactionParams {
 	tx := FakeETHTransactionParams()
 	tx.PrivateFrom = "ROAZBWtSacxXQrOe3FGAqJDyJjFePR5ce4TSIzmJ0Be="
 	tx.PrivacyGroupID = "ROAZBWtSacxXQrOe3FGAqJDyJjFePR5ce4TSIzmJ0Bf="
-	tx.Protocol = entities.OrionChainType
+	tx.Protocol = entities.EEAChainType
 
 	return tx
 }

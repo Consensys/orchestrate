@@ -198,15 +198,15 @@ type Receipt struct {
 	EffectiveGasPrice string `protobuf:"bytes,14,opt,name=effective_gas_price,json=effectiveGasPrice,proto3" json:"effective_gas_price,omitempty"`
 	// DATA - Revert reason if the transaction failed
 	RevertReason string `protobuf:"bytes,15,opt,name=revert_reason,json=revertReason,proto3" json:"revert_reason,omitempty"`
-	// DATA - RLP-encoded return value of a contract call for Orion Priv Tx
+	// DATA - RLP-encoded return value of a contract call for EEA Priv Tx
 	// Provisional till we migrate to TransactionManager Jobs
 	Output string `protobuf:"bytes,16,opt,name=output,proto3" json:"output,omitempty"`
-	// DATA (32 bytes) - Orion public key of the sender.
+	// DATA (32 bytes) - EEA public key of the sender.
 	// e.g A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=
 	PrivateFrom string `protobuf:"bytes,17,opt,name=privateFrom,proto3" json:"privateFrom,omitempty"`
 	// e.g [Ko2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs=]
 	PrivateFor []string `protobuf:"bytes,18,rep,name=privateFor,proto3" json:"privateFor,omitempty"`
-	// DATA (32 bytes) - Orion public keys or privacy group ID of the recipients.
+	// DATA (32 bytes) - EEA public keys or privacy group ID of the recipients.
 	// e.g Ko2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs=
 	PrivacyGroupId string `protobuf:"bytes,19,opt,name=privacyGroupId,proto3" json:"privacyGroupId,omitempty"`
 }

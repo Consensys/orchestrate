@@ -111,14 +111,14 @@ func (s *sendTxSuite) TestSendTx_Success() {
 		assert.Equal(t, txRequest.Schedule.UUID, response.Schedule.UUID)
 	})
 
-	s.T().Run("should execute send successfully a orion tx", func(t *testing.T) {
-		txRequest := testutils3.FakeOrionTxRequest()
+	s.T().Run("should execute send successfully a EEA tx", func(t *testing.T) {
+		txRequest := testutils3.FakeEEATxRequest()
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
-		txRequest.Params.Protocol = entities.OrionChainType
+		txRequest.Params.Protocol = entities.EEAChainType
 
-		response, err := successfulTestExecution(s, txRequest, false, entities.OrionEEATransaction,
-			entities.OrionMarkingTransaction)
+		response, err := successfulTestExecution(s, txRequest, false, entities.EEAPrivateTransaction,
+			entities.EEAMarkingTransaction)
 		assert.NoError(t, err)
 		assert.Equal(t, txRequest.IdempotencyKey, response.IdempotencyKey)
 		assert.Equal(t, txRequest.Schedule.UUID, response.Schedule.UUID)

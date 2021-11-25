@@ -50,12 +50,12 @@ func FakeTesseraTxRequest() *entities.TxRequest {
 	}
 }
 
-func FakeOrionTxRequest() *entities.TxRequest {
+func FakeEEATxRequest() *entities.TxRequest {
 	return &entities.TxRequest{
 		Schedule:       FakeSchedule(),
 		IdempotencyKey: "IdempotencyKey",
 		ChainName:      "chain",
-		Params:         FakeOrionTransactionParams(),
+		Params:         FakeEEATransactionParams(),
 		CreatedAt:      time.Now(),
 		InternalData:   FakeInternalData(),
 	}

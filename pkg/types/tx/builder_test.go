@@ -607,7 +607,7 @@ func TestEnvelope_TxResponse(t *testing.T) {
 func TestPrivateValidation(t *testing.T) {
 	b := NewEnvelope().
 		SetID("9f8708ad-8019-4533-9690-6495cc79a03c").
-		SetJobType(JobType_ETH_ORION_EEA_TX).
+		SetJobType(JobType_ETH_EEA_PRIVATE_TX).
 		SetPrivateFor([]string{"kAbelwaVW7okoEn1+okO+AbA4Hhz/7DaCOWVQz9nx5M="}).
 		SetPrivacyGroupID("kAbelwaVW7okoEn1+okO+AbA4Hhz/7DaCOWVQz9nx5M=")
 
@@ -645,16 +645,16 @@ func TestPartitionKey(t *testing.T) {
 		SetChainName("testChain").
 		MustSetFromString("0x1").
 		SetID("9f8708ad-8019-4533-9690-6495cc79a03c").
-		SetJobType(JobType_ETH_ORION_EEA_TX).
+		SetJobType(JobType_ETH_EEA_PRIVATE_TX).
 		SetPrivacyGroupID("kAbelwaVW7okoEn1+okO+AbA4Hhz/7DaCOWVQz9nx5M=")
-	assert.Equal(t, "0x0000000000000000000000000000000000000001@orion-kAbelwaVW7okoEn1+okO+AbA4Hhz/7DaCOWVQz9nx5M=@11", b2.PartitionKey())
+	assert.Equal(t, "0x0000000000000000000000000000000000000001@eea-kAbelwaVW7okoEn1+okO+AbA4Hhz/7DaCOWVQz9nx5M=@11", b2.PartitionKey())
 
 	b3 := NewEnvelope().
 		SetChainID(big.NewInt(12)).
 		SetChainName("testChain").
 		MustSetFromString("0x1").
 		SetID("9f8708ad-8019-4533-9690-6495cc79a03c").
-		SetJobType(JobType_ETH_ORION_EEA_TX).
+		SetJobType(JobType_ETH_EEA_PRIVATE_TX).
 		SetPrivateFor([]string{"kAbelwaVW7okoEn1+okO+AbA4Hhz/7DaCOWVQz9nx5M="})
-	assert.Equal(t, "0x0000000000000000000000000000000000000001@orion-a3ce4ff3ac5af3264fd8ae06af53ed9e@12", b3.PartitionKey())
+	assert.Equal(t, "0x0000000000000000000000000000000000000001@eea-a3ce4ff3ac5af3264fd8ae06af53ed9e@12", b3.PartitionKey())
 }

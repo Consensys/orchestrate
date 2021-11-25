@@ -1,24 +1,37 @@
 # Orchestrate Release Notes
 
-## v21.10.0 (WIP)
+## v21.10.0 alpha.4 (WIP)
+### ⚠ BREAKING CHANGES
+* `Orion` was removed in favor of `EEA` as *PrivateTxManager* in chain APIs
+
+## v21.10.0 alpha.3 (2021-11-24)
 ### 🆕 Features
-* Support Token Issuer Servers to validate JWTs. Environment variable `AUTH_JWT_ISSUER_URL`
-* Added environment variable to read JWT cert from filesystem, `AUTH_JWT_CERT`
-* Support for new transaction pricing mechanism (eip-1559)
-* Support for go-quorum privacy privacy enhancements: `privacyFlags`, `mandatoryFor` 
-* Support for go-quorum private transaction with optional `privateFrom`. 
-* Support for `username` as additional constraint to control access over resources. Impersonation
-would be allowed only via API-KEY.
+* Support for `username` as additional constraint to control access over resources. Impersonation would be allowed only via API-KEY.
 * Support for nested tenants in custom claims, for example tenant `tenantOne:groupOne:subGroupOne` will have
 access to resources owned by `tenantOne` and `tenantOne:groupOne` and `tenantOne:groupOne:subGroupOne` would be 
 able to impersonate same tenants.
 
 ### ⚠ BREAKING CHANGES
-* Integration of Quorum Key Manager as replacement of Orchestrate Key Manager service
-* Removed endpoints `/accounts/{address}/sign` and `/accounts/{address}/verify-signature` in favor of `/accounts/{address}/sign-message` and `/accounts/verify-message` accordingly to EIP-191 standards
+* In case of empty Orchestrate custom claims, token subject `sub` is used as `tenant_id:username`.
+
+## v21.10.0 alpha.2 (2021-11-21)
+### 🆕 Features
+* Support Token Issuer Servers to validate JWTs. Environment variable `AUTH_JWT_ISSUER_URL`
+* Support for new transaction pricing mechanism (eip-1559)
+* Support for go-quorum privacy privacy enhancements: `privacyFlags`, `mandatoryFor` 
+* Support for go-quorum private transaction with optional `privateFrom`. 
+
+### ⚠ BREAKING CHANGES
 * Removed usage of `AUTH_JWT_CERTIFICATE` in favor of `AUTH_JWT_ISSUER_URL` and `AUTH_JWT_AUDIENCE`
-* Removed usage of `AUTH_JWT_CLAIMS_NAMESPACE` in favor `AUTH_JWT_ORCHESTRATE_CLAIMS`.
-* In case of empty Orchestrate claims token subject, `sub`, is retrieved and used as tenantID.
+* Renamed `AUTH_JWT_CLAIMS_NAMESPACE` by `AUTH_JWT_ORCHESTRATE_CLAIMS`.
+* In case of empty Orchestrate custom claims token subject, `sub` is used as `tenant_id`.
+
+## v21.10.0 alpha.1 (2021-10-11)
+### 🆕 Features
+* Integration of Quorum Key Manager as replacement of Orchestrate Key Manager service
+
+### ⚠ BREAKING CHANGES
+* Removed endpoints `/accounts/{address}/sign` and `/accounts/{address}/verify-signature` in favor of `/accounts/{address}/sign-message` and `/accounts/verify-message` accordingly to EIP-191 standards
 
 ### 🛠 Bug fixes
 * Incorrect server name verification using Postgres in `verify-ca` mode 

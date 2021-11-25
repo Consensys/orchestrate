@@ -52,15 +52,15 @@ enum Method {
     // Quorum Tessera
     ETH_SENDRAWPRIVATETRANSACTION = 2;
 
-    // Besu Orion
+    // Besu EEA
     EEA_SENDPRIVATETRANSACTION = 3;
 }
 
 enum JobType {
     ETH_TX = 0;
     ETH_RAW_TX = 1;
-    ETH_ORION_MARKING_TX = 2;
-    ETH_ORION_EEA_TX = 3;
+    ETH_EEA_MARKING_TX = 2;
+    ETH_EEA_PRIVATE_TX = 3;
     ETH_TESSERA_MARKING_TX = 4;
     ETH_TESSERA_PRIVATE_TX = 5;
 }

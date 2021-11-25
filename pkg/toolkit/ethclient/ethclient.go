@@ -30,7 +30,7 @@ type TransactionSender interface {
 type EEATransactionSender interface {
 	// PrivDistributeRawTransaction Returns the enclaveKey of sent private transaction
 	PrivDistributeRawTransaction(ctx context.Context, endpoint, raw string) (ethcommon.Hash, error)
-	// Creates a group of nodes, specified by their Orion public key.
+	// Creates a group of nodes, specified by their EEA public key.
 	PrivCreatePrivacyGroup(ctx context.Context, endpoint string, addresses []string) (string, error)
 }
 
@@ -116,7 +116,7 @@ type EEAChainStateReader interface {
 
 	PrivFindPrivacyGroup(ctx context.Context, endpoint string, members []string) ([]string, error)
 
-	// EEAPrivPrecompiledContractAddr Returns the private precompiled contract address of Besu/Orion
+	// EEAPrivPrecompiledContractAddr Returns the private precompiled contract address of Besu/EEA
 	EEAPrivPrecompiledContractAddr(ctx context.Context, endpoint string) (ethcommon.Address, error)
 }
 

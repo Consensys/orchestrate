@@ -49,7 +49,7 @@ func (c *TransactionsController) Append(router *mux.Router) {
 
 // @Summary Creates and sends a new contract transaction
 // @Description Creates and executes a new smart contract transaction request
-// @Description The transaction can be private (Tessera, Orion).
+// @Description The transaction can be private (Tessera, EEA).
 // @Description The transaction can be a One Time Key transaction in 0 gas private networks
 // @Tags Transactions
 // @Accept json
@@ -91,7 +91,7 @@ func (c *TransactionsController) send(rw http.ResponseWriter, request *http.Requ
 
 // @Summary Creates and sends a new contract deployment
 // @Description Creates and executes a new contract deployment request
-// @Description The transaction can be private (Tessera, Orion).
+// @Description The transaction can be private (Tessera, EEA).
 // @Description The transaction can be a One Time Key transaction in 0 gas private networks
 // @Tags Transactions
 // @Accept json

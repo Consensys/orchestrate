@@ -2341,7 +2341,7 @@
                         "JWTAuth": []
                     }
                 ],
-                "description": "Creates and executes a new contract deployment request\nThe transaction can be private (Tessera, Orion).\nThe transaction can be a One Time Key transaction in 0 gas private networks",
+                "description": "Creates and executes a new contract deployment request\nThe transaction can be private (Tessera, EEA).\nThe transaction can be a One Time Key transaction in 0 gas private networks",
                 "consumes": [
                     "application/json"
                 ],
@@ -2443,7 +2443,7 @@
                         "JWTAuth": []
                     }
                 ],
-                "description": "Creates and executes a new smart contract transaction request\nThe transaction can be private (Tessera, Orion).\nThe transaction can be a One Time Key transaction in 0 gas private networks",
+                "description": "Creates and executes a new smart contract transaction request\nThe transaction can be private (Tessera, EEA).\nThe transaction can be a One Time Key transaction in 0 gas private networks",
                 "consumes": [
                     "application/json"
                 ],
