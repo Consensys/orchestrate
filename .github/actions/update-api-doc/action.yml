@@ -15,7 +15,7 @@ inputs:
   dev-branch:
     description: 'development branch'
     required: true
-    default: 'main'
+    default: 'master'
   spec-target-prefix:
     description: 'target spec file prefix'
     required: true
