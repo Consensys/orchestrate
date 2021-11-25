@@ -11,9 +11,10 @@ import (
 	clientutils "github.com/consensys/orchestrate/pkg/toolkit/app/http/client-utils"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/httputil"
 	"github.com/consensys/orchestrate/pkg/types/entities"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 )
 
-func (c *HTTPClient) GetAccount(ctx context.Context, address string) (*api.AccountResponse, error) {
+func (c *HTTPClient) GetAccount(ctx context.Context, address ethcommon.Address) (*api.AccountResponse, error) {
 	reqURL := fmt.Sprintf("%v/accounts/%s", c.config.URL, address)
 	resp := &api.AccountResponse{}
 
@@ -64,7 +65,7 @@ func (c *HTTPClient) ImportAccount(ctx context.Context, req *api.ImportAccountRe
 	return resp, nil
 }
 
-func (c *HTTPClient) UpdateAccount(ctx context.Context, address string, req *api.UpdateAccountRequest) (*api.AccountResponse, error) {
+func (c *HTTPClient) UpdateAccount(ctx context.Context, address ethcommon.Address, req *api.UpdateAccountRequest) (*api.AccountResponse, error) {
 	reqURL := fmt.Sprintf("%v/accounts/%s", c.config.URL, address)
 	resp := &api.AccountResponse{}
 
@@ -107,7 +108,7 @@ func (c *HTTPClient) SearchAccounts(ctx context.Context, filters *entities.Accou
 	return resp, nil
 }
 
-func (c *HTTPClient) SignMessage(ctx context.Context, address string, req *qkmtypes.SignMessageRequest) (string, error) {
+func (c *HTTPClient) SignMessage(ctx context.Context, address ethcommon.Address, req *qkmtypes.SignMessageRequest) (string, error) {
 	reqURL := fmt.Sprintf("%v/accounts/%s/sign-message", c.config.URL, address)
 
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, req)
@@ -119,7 +120,7 @@ func (c *HTTPClient) SignMessage(ctx context.Context, address string, req *qkmty
 	return httputil.ParseStringResponse(ctx, response)
 }
 
-func (c *HTTPClient) SignTypedData(ctx context.Context, address string, request *qkmtypes.SignTypedDataRequest) (string, error) {
+func (c *HTTPClient) SignTypedData(ctx context.Context, address ethcommon.Address, request *qkmtypes.SignTypedDataRequest) (string, error) {
 	reqURL := fmt.Sprintf("%v/accounts/%s/sign-typed-data", c.config.URL, address)
 
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, request)

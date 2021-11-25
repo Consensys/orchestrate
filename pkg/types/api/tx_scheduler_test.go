@@ -4,13 +4,15 @@ import (
 	"testing"
 
 	"github.com/consensys/orchestrate/pkg/utils"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestTransactionParams_BasicSuccessful(t *testing.T) {
+	from := ethcommon.HexToAddress("0x88a5C2d9919e46F883EB62F7b8Dd9d0CC45bc290")
 	params := TransactionParams{
-		From:            "0x88a5C2d9919e46F883EB62F7b8Dd9d0CC45bc290",
-		To:              "0x88a5C2d9919e46F883EB62F7b8Dd9d0CC45bc290",
+		From:            &from,
+		To:              utils.ToPtr(ethcommon.HexToAddress("0x88a5C2d9919e46F883EB62F7b8Dd9d0CC45bc290")).(*ethcommon.Address),
 		MethodSignature: "Constructor()",
 	}
 
@@ -20,7 +22,7 @@ func TestTransactionParams_BasicSuccessful(t *testing.T) {
 
 func TestTransactionParams_SuccessfulOneTimeKeyWithoutFrom(t *testing.T) {
 	params := TransactionParams{
-		To:              "0x88a5C2d9919e46F883EB62F7b8Dd9d0CC45bc290",
+		To:              utils.ToPtr(ethcommon.HexToAddress("0x88a5C2d9919e46F883EB62F7b8Dd9d0CC45bc290")).(*ethcommon.Address),
 		MethodSignature: "Constructor()",
 		OneTimeKey:      true,
 	}
@@ -31,7 +33,7 @@ func TestTransactionParams_SuccessfulOneTimeKeyWithoutFrom(t *testing.T) {
 
 func TestTransactionParams_FailWithoutFrom(t *testing.T) {
 	params := TransactionParams{
-		To:              "0x88a5C2d9919e46F883EB62F7b8Dd9d0CC45bc291",
+		To:              utils.ToPtr(ethcommon.HexToAddress("0x88a5C2d9919e46F883EB62F7b8Dd9d0CC45bc291")).(*ethcommon.Address),
 		MethodSignature: "Constructor()",
 	}
 
@@ -180,8 +182,9 @@ func TestTransferParams_Validation(t *testing.T) {
 }
 
 func TestDeployContractParams_BasicSuccessful(t *testing.T) {
+	from := ethcommon.HexToAddress("0x88a5C2d9919e46F883EB62F7b8Dd9d0CC45bc290")
 	params := DeployContractParams{
-		From:         "0x88a5C2d9919e46F883EB62F7b8Dd9d0CC45bc290",
+		From:         &from,
 		ContractName: "SimpleContract",
 	}
 

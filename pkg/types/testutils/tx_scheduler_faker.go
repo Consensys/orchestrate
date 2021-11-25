@@ -3,18 +3,20 @@ package testutils
 import (
 	types "github.com/consensys/orchestrate/pkg/types/api"
 	"github.com/consensys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/pkg/utils"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/gofrs/uuid"
 )
 
-const FromAddress = "0x5Cc634233E4a454d47aACd9fC68801482Fb02610"
+var FromAddress = ethcommon.HexToAddress("0x5Cc634233E4a454d47aACd9fC68801482Fb02610")
 
 func FakeSendTransactionRequest() *types.SendTransactionRequest {
 	return &types.SendTransactionRequest{
 		ChainName: "ganache",
 		Params: types.TransactionParams{
-			From:            FromAddress,
+			From:            &FromAddress,
 			MethodSignature: "transfer()",
-			To:              "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18",
+			To:              utils.ToPtr(ethcommon.HexToAddress("0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18")).(*ethcommon.Address),
 		},
 	}
 }
@@ -34,7 +36,7 @@ func FakeSendTransferTransactionRequest() *types.TransferRequest {
 		Params: types.TransferParams{
 			From:  FromAddress,
 			Value: "1000000000000000000",
-			To:    "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18",
+			To:    ethcommon.HexToAddress("0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"),
 		},
 	}
 }
@@ -43,7 +45,7 @@ func FakeDeployContractRequest() *types.DeployContractRequest {
 	return &types.DeployContractRequest{
 		ChainName: "ganache",
 		Params: types.DeployContractParams{
-			From:         FromAddress,
+			From:         &FromAddress,
 			ContractName: "MyContract",
 			ContractTag:  "v1.0.0",
 		},
@@ -54,9 +56,9 @@ func FakeSendTesseraRequest() *types.SendTransactionRequest {
 	return &types.SendTransactionRequest{
 		ChainName: "ganache",
 		Params: types.TransactionParams{
-			From:            FromAddress,
+			From:            &FromAddress,
 			MethodSignature: "transfer()",
-			To:              "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18",
+			To:              utils.ToPtr(ethcommon.HexToAddress("0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18")).(*ethcommon.Address),
 			Protocol:        entities.TesseraChainType,
 			PrivateFrom:     "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=",
 			PrivateFor:      []string{"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="},
@@ -68,9 +70,9 @@ func FakeSendOrionRequest() *types.SendTransactionRequest {
 	return &types.SendTransactionRequest{
 		ChainName: "ganache",
 		Params: types.TransactionParams{
-			From:            FromAddress,
+			From:            &FromAddress,
 			MethodSignature: "transfer()",
-			To:              "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18",
+			To:              utils.ToPtr(ethcommon.HexToAddress("0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18")).(*ethcommon.Address),
 			Protocol:        entities.OrionChainType,
 			PrivateFrom:     "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=",
 			PrivacyGroupID:  "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=",

@@ -40,7 +40,7 @@ func TestFundingAccount_Execute(t *testing.T) {
 
 		mockSearchChainsUC.EXPECT().Execute(gomock.Any(), &entities.ChainFilters{Names: []string{chainName}}, userInfo).
 			Return(chains, nil)
-		mockGetFaucetCandidate.EXPECT().Execute(gomock.Any(), account.Address, chains[0], userInfo).Return(faucet, nil)
+		mockGetFaucetCandidate.EXPECT().Execute(gomock.Any(), account.Address.Hex(), chains[0], userInfo).Return(faucet, nil)
 		mockSendTxUC.EXPECT().Execute(gomock.Any(), gomock.Any(), "", userInfo).Return(nil, nil)
 
 		err := usecase.Execute(ctx, account, chainName, userInfo)
@@ -54,7 +54,7 @@ func TestFundingAccount_Execute(t *testing.T) {
 		chainName := "besu"
 
 		mockSearchChainsUC.EXPECT().Execute(gomock.Any(), &entities.ChainFilters{Names: []string{chainName}}, userInfo).Return(chains, nil)
-		mockGetFaucetCandidate.EXPECT().Execute(gomock.Any(), account.Address, chains[0], userInfo).Return(nil, faucetNotFoundErr)
+		mockGetFaucetCandidate.EXPECT().Execute(gomock.Any(), account.Address.Hex(), chains[0], userInfo).Return(nil, faucetNotFoundErr)
 
 		err := usecase.Execute(ctx, account, chainName, userInfo)
 
@@ -94,7 +94,7 @@ func TestFundingAccount_Execute(t *testing.T) {
 
 		mockSearchChainsUC.EXPECT().Execute(gomock.Any(), &entities.ChainFilters{Names: []string{chainName}}, userInfo).Return(chains, nil)
 		mockGetFaucetCandidate.EXPECT().
-			Execute(gomock.Any(), account.Address, gomock.Any(), userInfo).
+			Execute(gomock.Any(), account.Address.Hex(), gomock.Any(), userInfo).
 			Return(nil, expectedErr)
 
 		err := usecase.Execute(ctx, account, chainName, userInfo)
@@ -111,7 +111,7 @@ func TestFundingAccount_Execute(t *testing.T) {
 		chainName := "besu"
 
 		mockSearchChainsUC.EXPECT().Execute(gomock.Any(), &entities.ChainFilters{Names: []string{chainName}}, userInfo).Return(chains, nil)
-		mockGetFaucetCandidate.EXPECT().Execute(gomock.Any(), account.Address, gomock.Any(), userInfo).Return(faucet, nil)
+		mockGetFaucetCandidate.EXPECT().Execute(gomock.Any(), account.Address.Hex(), gomock.Any(), userInfo).Return(faucet, nil)
 		mockSendTxUC.EXPECT().Execute(gomock.Any(), gomock.Any(), "", userInfo).Return(nil, expectedErr)
 
 		err := usecase.Execute(ctx, account, chainName, userInfo)

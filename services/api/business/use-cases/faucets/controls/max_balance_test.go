@@ -6,7 +6,6 @@ import (
 	"context"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/pkg/types/testutils"
-	"github.com/consensys/quorum/common"
 	"math/big"
 	"testing"
 
@@ -14,6 +13,7 @@ import (
 	"github.com/consensys/orchestrate/pkg/toolkit/ethclient/mock"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 )
 
 func TestMaxBalanceControl_Execute(t *testing.T) {
@@ -30,12 +30,12 @@ func TestMaxBalanceControl_Execute(t *testing.T) {
 	faucet1 := testutils.FakeFaucet()
 	faucet1.Amount = "10"
 	faucet1.MaxBalance = "20"
-	faucet1.CreditorAccount = common.HexToAddress("0xcde").Hex()
+	faucet1.CreditorAccount = ethcommon.HexToAddress("0xcde")
 
 	faucet2 := testutils.FakeFaucet()
 	faucet2.Amount = "10"
 	faucet2.MaxBalance = "20"
-	faucet2.CreditorAccount = common.HexToAddress("0xeee").Hex()
+	faucet2.CreditorAccount = ethcommon.HexToAddress("0xeee")
 
 	t.Run("should choose first candidate successfully", func(t *testing.T) {
 		candidates := map[string]*entities.Faucet{

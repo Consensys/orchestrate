@@ -7,6 +7,7 @@ import (
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
 	"github.com/consensys/orchestrate/services/api/store"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 )
 
 const getMethodsComponent = "use-cases.get-methods"
@@ -23,11 +24,11 @@ func NewGetMethodsUseCase(agent store.MethodAgent) usecases.GetContractMethodsUs
 	}
 }
 
-func (uc *getMethodsUseCase) Execute(ctx context.Context, chainID, address string, selector []byte) (abi string, methodsABI []string, err error) {
+func (uc *getMethodsUseCase) Execute(ctx context.Context, chainID string, address ethcommon.Address, selector []byte) (abi string, methodsABI []string, err error) {
 	ctx = log.WithFields(ctx, log.Field("chain_id", chainID), log.Field("address", address))
 	logger := uc.logger.WithContext(ctx)
 
-	method, err := uc.agent.FindOneByAccountAndSelector(ctx, chainID, address, selector)
+	method, err := uc.agent.FindOneByAccountAndSelector(ctx, chainID, address.Hex(), selector)
 	if errors.IsConnectionError(err) {
 		return "", nil, errors.FromError(err).ExtendComponent(getMethodsComponent)
 	}

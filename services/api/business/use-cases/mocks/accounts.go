@@ -9,6 +9,7 @@ import (
 	multitenancy "github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	entities "github.com/consensys/orchestrate/pkg/types/entities"
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
+	common "github.com/ethereum/go-ethereum/common"
 	hexutil "github.com/ethereum/go-ethereum/common/hexutil"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
@@ -117,7 +118,7 @@ func (m *MockGetAccountUseCase) EXPECT() *MockGetAccountUseCaseMockRecorder {
 }
 
 // Execute mocks base method
-func (m *MockGetAccountUseCase) Execute(ctx context.Context, address string, userInfo *multitenancy.UserInfo) (*entities.Account, error) {
+func (m *MockGetAccountUseCase) Execute(ctx context.Context, address common.Address, userInfo *multitenancy.UserInfo) (*entities.Account, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Execute", ctx, address, userInfo)
 	ret0, _ := ret[0].(*entities.Account)

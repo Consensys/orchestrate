@@ -27,7 +27,7 @@ func BatchDeployContractTest(ctx context.Context, cfg *WorkloadConfig, client or
 	req := &api.DeployContractRequest{
 		ChainName: cfg.chains[nChain].Name,
 		Params: api.DeployContractParams{
-			From:         cfg.accounts[nAccount],
+			From:         &cfg.accounts[nAccount],
 			ContractName: cfg.artifacts[nArtifact],
 			Args:         constructorArgs(cfg.artifacts[nArtifact]),
 		},

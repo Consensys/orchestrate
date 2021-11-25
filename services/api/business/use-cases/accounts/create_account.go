@@ -91,14 +91,14 @@ func (uc *createAccountUseCase) Execute(ctx context.Context, account *entities.A
 		return nil, errors.DependencyFailureError(errMsg).ExtendComponent(createAccountComponent)
 	}
 
-	account.Address = resp.Address.String()
+	account.Address = resp.Address
 	account.PublicKey = resp.PublicKey.String()
 	account.CompressedPublicKey = resp.CompressedPublicKey.String()
 	account.TenantID = userInfo.TenantID
 	account.OwnerID = userInfo.Username
 
 	// TODO Discuss decision made on allowing same account imported over different tenants
-	_, err = uc.db.Account().FindOneByAddress(ctx, account.Address, userInfo.AllowedTenants, userInfo.Username)
+	_, err = uc.db.Account().FindOneByAddress(ctx, account.Address.Hex(), userInfo.AllowedTenants, userInfo.Username)
 	if err == nil {
 		errMsg := "account already exists"
 		logger.Error(errMsg)

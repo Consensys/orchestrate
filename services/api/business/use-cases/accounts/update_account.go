@@ -31,7 +31,7 @@ func (uc *updateAccountUseCase) Execute(ctx context.Context, account *entities.A
 	ctx = log.WithFields(ctx, log.Field("address", account.Address))
 	logger := uc.logger.WithContext(ctx)
 
-	model, err := uc.db.Account().FindOneByAddress(ctx, account.Address, userInfo.AllowedTenants, userInfo.Username)
+	model, err := uc.db.Account().FindOneByAddress(ctx, account.Address.Hex(), userInfo.AllowedTenants, userInfo.Username)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(updateAccountComponent)
 	}

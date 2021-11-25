@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/pkg/types/entities"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 )
 
 func validatePrivateTxParams(protocol entities.PrivateTxManagerType, privateFrom, privacyGroupID string, privateFor []string) error {
@@ -25,12 +26,12 @@ func validatePrivateTxParams(protocol entities.PrivateTxManagerType, privateFrom
 	return nil
 }
 
-func validateTxFromParams(from string, oneTimeKey bool) error {
-	if from != "" && oneTimeKey {
+func validateTxFromParams(from *ethcommon.Address, oneTimeKey bool) error {
+	if from != nil && oneTimeKey {
 		return errors.InvalidParameterError("fields 'from' and 'oneTimeKey' are mutually exclusive")
 	}
 
-	if from == "" && !oneTimeKey {
+	if from == nil && !oneTimeKey {
 		return errors.InvalidParameterError("field 'from' is required")
 	}
 

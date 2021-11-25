@@ -11,7 +11,6 @@ import (
 	"github.com/consensys/orchestrate/pkg/sdk/client"
 	"github.com/consensys/orchestrate/pkg/types/api"
 	qkmtypes "github.com/consensys/quorum-key-manager/src/stores/api/types"
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/stretchr/testify/require"
@@ -23,6 +22,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"github.com/traefik/traefik/v2/pkg/log"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 )
 
 type accountsTestSuite struct {
@@ -204,9 +204,7 @@ func (s *accountsTestSuite) TestSignMessageAndVerify() {
 	var signedPayload string
 
 	s.T().Run("should sign message successfully", func(t *testing.T) {
-		address := ethAccRes.Address
-
-		signedPayload, err = s.client.SignMessage(ctx, address, &qkmtypes.SignMessageRequest{
+		signedPayload, err = s.client.SignMessage(ctx, ethAccRes.Address, &qkmtypes.SignMessageRequest{
 			Message: message,
 		})
 		require.NoError(s.T(), err)
@@ -217,7 +215,7 @@ func (s *accountsTestSuite) TestSignMessageAndVerify() {
 		verifyRequest := &qkmtypes.VerifyRequest{
 			Data:      message,
 			Signature: hexutil.MustDecode(signedPayload),
-			Address:   common.HexToAddress(ethAccRes.Address),
+			Address:   ethAccRes.Address,
 		}
 		err := s.client.VerifyMessageSignature(ctx, verifyRequest)
 		assert.NoError(s.T(), err)
@@ -250,17 +248,18 @@ func (s *accountsTestSuite) TestSignTypedData() {
 		err := s.client.VerifyTypedDataSignature(ctx, &qkmtypes.VerifyTypedDataRequest{
 			TypedData: *typedDataRequest,
 			Signature: hexutil.MustDecode(signature),
-			Address:   common.HexToAddress(ethAccRes.Address),
+			Address:   ethAccRes.Address,
 		})
 		assert.NoError(s.T(), err)
 	})
 }
 
-func createNewKey() (privKey []byte, address string, err error) {
+func createNewKey() (privKey []byte, address ethcommon.Address, err error) {
 	faucetKey, err := crypto.GenerateKey()
 	if err != nil {
-		return nil, "", err
+		// Issue TBD
+		return nil, ethcommon.Address{}, err
 	}
 
-	return faucetKey.D.Bytes(), crypto.PubkeyToAddress(faucetKey.PublicKey).Hex(), nil
+	return faucetKey.D.Bytes(), crypto.PubkeyToAddress(faucetKey.PublicKey), nil
 }

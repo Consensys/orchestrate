@@ -142,7 +142,7 @@ func (c *ContractsController) setCodeHash(rw http.ResponseWriter, request *http.
 		return
 	}
 
-	err = c.ucs.SetContractCodeHash().Execute(ctx, chainID, ethcommon.HexToAddress(address).String(), req.CodeHash)
+	err = c.ucs.SetContractCodeHash().Execute(ctx, chainID, ethcommon.HexToAddress(address), req.CodeHash)
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -182,7 +182,7 @@ func (c *ContractsController) getEvents(rw http.ResponseWriter, request *http.Re
 		return
 	}
 
-	abi, abiEvents, err := c.ucs.GetContractEvents().Execute(ctx, chainID, ethcommon.HexToAddress(address).String(),
+	abi, abiEvents, err := c.ucs.GetContractEvents().Execute(ctx, chainID, ethcommon.HexToAddress(address),
 		req.SigHash, req.IndexedInputCount)
 
 	if err != nil {

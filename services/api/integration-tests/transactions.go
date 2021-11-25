@@ -19,6 +19,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"gopkg.in/h2non/gock.v1"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 )
 
 const (
@@ -80,7 +81,8 @@ func (s *transactionsTestSuite) TestValidation() {
 	s.T().Run("should fail with 422 if account does not exist", func(t *testing.T) {
 		// Create a txRequest with an inexisting account
 		txRequest := testutils.FakeSendTransactionRequest()
-		txRequest.Params.From = "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"
+		from := ethcommon.HexToAddress("0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18")
+		txRequest.Params.From = &from
 
 		_, err := s.client.SendContractTransaction(ctx, txRequest)
 
@@ -93,8 +95,8 @@ func (s *transactionsTestSuite) TestSuccess() {
 
 	s.T().Run("should send a contract transaction successfully", func(t *testing.T) {
 		txRequest := testutils.FakeSendTransactionRequest()
-
-		txRequest.Params.From = ""
+		
+		txRequest.Params.From = nil
 		txRequest.Params.OneTimeKey = true
 		IdempotencyKey := utils.RandString(16)
 		rctx := context.WithValue(ctx, clientutils.RequestHeaderKey, map[string]string{
@@ -119,8 +121,8 @@ func (s *transactionsTestSuite) TestSuccess() {
 		assert.NotEmpty(t, txResponseGET.UUID)
 		assert.NotEmpty(t, job.UUID)
 		assert.Equal(t, entities.StatusStarted, job.Status)
-		assert.Equal(t, txRequest.Params.From, job.Transaction.From)
-		assert.Equal(t, txRequest.Params.To, job.Transaction.To)
+		assert.Equal(t, "", job.Transaction.From)
+		assert.Equal(t, txRequest.Params.To.Hex(), job.Transaction.To)
 		assert.Equal(t, entities.EthereumTransaction, job.Type)
 
 		evlp, err := s.env.consumer.WaitForEnvelope(job.ScheduleUUID, s.env.kafkaTopicConfig.Sender, waitForEnvelopeTimeOut)
@@ -155,8 +157,8 @@ func (s *transactionsTestSuite) TestSuccess() {
 		privTxJob := txResponseGET.Jobs[0]
 		assert.NotEmpty(t, privTxJob.UUID)
 		assert.Equal(t, entities.StatusStarted, privTxJob.Status)
-		assert.Equal(t, txRequest.Params.From, privTxJob.Transaction.From)
-		assert.Equal(t, txRequest.Params.To, privTxJob.Transaction.To)
+		assert.Equal(t, txRequest.Params.From.Hex(), privTxJob.Transaction.From)
+		assert.Equal(t, txRequest.Params.To.Hex(), privTxJob.Transaction.To)
 		assert.Equal(t, entities.TesseraPrivateTransaction, privTxJob.Type)
 
 		markingTxJob := txResponseGET.Jobs[1]
@@ -198,8 +200,8 @@ func (s *transactionsTestSuite) TestSuccess() {
 		privTxJob := txResponseGET.Jobs[0]
 		assert.NotEmpty(t, privTxJob.UUID)
 		assert.Equal(t, entities.StatusStarted, privTxJob.Status)
-		assert.Equal(t, txRequest.Params.From, privTxJob.Transaction.From)
-		assert.Equal(t, txRequest.Params.To, privTxJob.Transaction.To)
+		assert.Equal(t, txRequest.Params.From.Hex(), privTxJob.Transaction.From)
+		assert.Equal(t, txRequest.Params.To.Hex(), privTxJob.Transaction.To)
 		assert.Equal(t, entities.OrionEEATransaction, privTxJob.Type)
 
 		markingTxJob := txResponseGET.Jobs[1]
@@ -246,7 +248,7 @@ func (s *transactionsTestSuite) TestSuccess() {
 		assert.NotEmpty(t, txResponseGET.UUID)
 		assert.NotEmpty(t, job.UUID)
 		assert.Equal(t, entities.StatusStarted, job.Status)
-		assert.Equal(t, txRequest.Params.From, job.Transaction.From)
+		assert.Equal(t, txRequest.Params.From.Hex(), job.Transaction.From)
 		assert.Equal(t, entities.EthereumTransaction, job.Type)
 
 		evlp, err := s.env.consumer.WaitForEnvelope(job.ScheduleUUID, s.env.kafkaTopicConfig.Sender, waitForEnvelopeTimeOut)
@@ -320,8 +322,8 @@ func (s *transactionsTestSuite) TestSuccess() {
 		assert.NotEmpty(t, job.UUID)
 		assert.Equal(t, entities.StatusStarted, job.Status)
 		assert.Equal(t, txRequest.Params.Value, job.Transaction.Value)
-		assert.Equal(t, txRequest.Params.To, job.Transaction.To)
-		assert.Equal(t, txRequest.Params.From, job.Transaction.From)
+		assert.Equal(t, txRequest.Params.To.Hex(), job.Transaction.To)
+		assert.Equal(t, txRequest.Params.From.Hex(), job.Transaction.From)
 		assert.Equal(t, entities.EthereumTransaction, job.Type)
 
 		evlp, err := s.env.consumer.WaitForEnvelope(job.ScheduleUUID, s.env.kafkaTopicConfig.Sender, waitForEnvelopeTimeOut)

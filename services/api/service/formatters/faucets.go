@@ -4,8 +4,6 @@ import (
 	"net/http"
 	"strings"
 
-	ethcommon "github.com/ethereum/go-ethereum/common"
-
 	types "github.com/consensys/orchestrate/pkg/types/api"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/pkg/utils"
@@ -15,7 +13,7 @@ func FormatRegisterFaucetRequest(request *types.RegisterFaucetRequest) *entities
 	return &entities.Faucet{
 		Name:            request.Name,
 		ChainRule:       request.ChainRule,
-		CreditorAccount: ethcommon.HexToAddress(request.CreditorAccount).Hex(),
+		CreditorAccount: request.CreditorAccount,
 		MaxBalance:      request.MaxBalance,
 		Amount:          request.Amount,
 		Cooldown:        request.Cooldown,
@@ -27,7 +25,7 @@ func FormatUpdateFaucetRequest(request *types.UpdateFaucetRequest, uuid string) 
 		UUID:            uuid,
 		Name:            request.Name,
 		ChainRule:       request.ChainRule,
-		CreditorAccount: ethcommon.HexToAddress(request.CreditorAccount).Hex(),
+		CreditorAccount: request.CreditorAccount,
 		MaxBalance:      request.MaxBalance,
 		Amount:          request.Amount,
 		Cooldown:        request.Cooldown,

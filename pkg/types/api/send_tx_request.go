@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/pkg/utils"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 )
 
@@ -22,8 +23,8 @@ type TransactionParams struct {
 	GasTipCap       string                        `json:"maxPriorityFeePerGas,omitempty" example:"71500000 (wei)"`
 	AccessList      types.AccessList              `json:"accessList,omitempty" swaggertype:"array,object"`
 	TransactionType string                        `json:"transactionType,omitempty" validate:"omitempty,isTransactionType" example:"dynamic_fee" enums:"legacy,dynamic_fee"`
-	From            string                        `json:"from" validate:"omitempty,eth_addr" example:"0x1abae27a0cbfb02945720425d3b80c7e09728534"`
-	To              string                        `json:"to" validate:"required,eth_addr" example:"0x1abae27a0cbfb02945720425d3b80c7e09728534"`
+	From            *ethcommon.Address            `json:"from" validate:"omitempty" example:"0x1abae27a0cbfb02945720425d3b80c7e097285534" swaggertype:"string"`
+	To              *ethcommon.Address            `json:"to" validate:"required" example:"0x1abae27a0cbfb02945720425d3b80c7e09728534" swaggertype:"string"`
 	MethodSignature string                        `json:"methodSignature" validate:"required,isValidMethodSig" example:"transfer(address,uint256)"`
 	Args            []interface{}                 `json:"args,omitempty"`
 	OneTimeKey      bool                          `json:"oneTimeKey,omitempty" example:"true"`

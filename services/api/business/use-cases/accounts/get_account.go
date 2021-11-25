@@ -11,6 +11,7 @@ import (
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/services/api/store"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 )
 
 const getAccountComponent = "use-cases.get-account"
@@ -27,11 +28,11 @@ func NewGetAccountUseCase(db store.DB) usecases.GetAccountUseCase {
 	}
 }
 
-func (uc *getAccountUseCase) Execute(ctx context.Context, address string, userInfo *multitenancy.UserInfo) (*entities.Account, error) {
+func (uc *getAccountUseCase) Execute(ctx context.Context, address ethcommon.Address, userInfo *multitenancy.UserInfo) (*entities.Account, error) {
 	ctx = log.WithFields(ctx, log.Field("address", address))
 	logger := uc.logger.WithContext(ctx)
 
-	model, err := uc.db.Account().FindOneByAddress(ctx, address, userInfo.AllowedTenants, userInfo.Username)
+	model, err := uc.db.Account().FindOneByAddress(ctx, address.Hex(), userInfo.AllowedTenants, userInfo.Username)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(getAccountComponent)
 	}

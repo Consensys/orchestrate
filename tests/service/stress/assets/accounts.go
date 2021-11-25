@@ -6,6 +6,7 @@ import (
 
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	"github.com/consensys/orchestrate/pkg/types/api"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 
 	orchestrateclient "github.com/consensys/orchestrate/pkg/sdk/client"
 )
@@ -26,13 +27,13 @@ func CreateNewAccount(ctx context.Context, client orchestrateclient.OrchestrateC
 	return contextWithAccounts(ctx, append(ContextAccounts(ctx), resp.Address)), nil
 }
 
-func contextWithAccounts(ctx context.Context, accounts []string) context.Context {
+func contextWithAccounts(ctx context.Context, accounts []ethcommon.Address) context.Context {
 	return context.WithValue(ctx, accountCtxKey, accounts)
 }
 
-func ContextAccounts(ctx context.Context) []string {
-	if v, ok := ctx.Value(accountCtxKey).([]string); ok {
+func ContextAccounts(ctx context.Context) []ethcommon.Address {
+	if v, ok := ctx.Value(accountCtxKey).([]ethcommon.Address); ok {
 		return v
 	}
-	return []string{}
+	return []ethcommon.Address{}
 }

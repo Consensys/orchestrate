@@ -51,7 +51,7 @@ func (uc *fundAccountUseCase) Execute(ctx context.Context, account *entities.Acc
 		return errors.InvalidParameterError(errMsg).ExtendComponent(fundAccountComponent)
 	}
 
-	faucet, err := uc.getFaucetCandidate.Execute(ctx, account.Address, chains[0], userInfo)
+	faucet, err := uc.getFaucetCandidate.Execute(ctx, account.Address.Hex(), chains[0], userInfo)
 	if err != nil {
 		if errors.IsNotFoundError(err) {
 			logger.Debug("unnecessary funding, skipping top-up")
@@ -65,8 +65,8 @@ func (uc *fundAccountUseCase) Execute(ctx context.Context, account *entities.Acc
 		IdempotencyKey: utils.RandString(16),
 		ChainName:      chains[0].Name,
 		Params: &entities.ETHTransactionParams{
-			From:  faucet.CreditorAccount,
-			To:    account.Address,
+			From:  &faucet.CreditorAccount,
+			To:    &account.Address,
 			Value: faucet.Amount,
 		},
 		Labels: map[string]string{

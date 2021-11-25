@@ -155,14 +155,14 @@ func (s *contractsCtrlTestSuite) TestContractsController_Register() {
 func (s *contractsCtrlTestSuite) TestContractsController_CodeHash() {
 	ctx := context.Background()
 	chainID := "2017"
-	address := testutils.FakeAddress().String()
+	address := testutils.FakeAddress()
 
 	s.T().Run("should execute set contract codeHash successfully", func(t *testing.T) {
 		rw := httptest.NewRecorder()
 		req := testutils.FakeSetContractCodeHashRequest()
 		requestBytes, _ := json.Marshal(req)
 		httpRequest := httptest.
-			NewRequest(http.MethodPost, fmt.Sprintf("/contracts/accounts/%s/%s", chainID, address), bytes.NewReader(requestBytes)).
+			NewRequest(http.MethodPost, fmt.Sprintf("/contracts/accounts/%s/%s", chainID, address.Hex()), bytes.NewReader(requestBytes)).
 			WithContext(ctx)
 
 		s.setContractCodeHash.EXPECT().
@@ -236,7 +236,7 @@ func (s *contractsCtrlTestSuite) TestContractsController_GetContract() {
 
 func (s *contractsCtrlTestSuite) TestContractsController_GetContractEvents() {
 	ctx := context.Background()
-	address := ethcommon.HexToAddress(utils.RandHexString(10)).String()
+	address := ethcommon.HexToAddress(utils.RandHexString(10))
 	sigHash := ethcommon.HexToHash(utils.RandHexString(10)).String()
 	indexInput := uint32(2)
 	chainID := "2017"
@@ -250,7 +250,7 @@ func (s *contractsCtrlTestSuite) TestContractsController_GetContractEvents() {
 		rw := httptest.NewRecorder()
 		httpRequest := httptest.
 			NewRequest(http.MethodGet, fmt.Sprintf("/contracts/accounts/%s/%s/events?sig_hash=%s&indexed_input_count=%d",
-				chainID, address, sigHash, indexInput), nil).
+				chainID, address.Hex(), sigHash, indexInput), nil).
 			WithContext(ctx)
 
 		s.getContractEvents.EXPECT().Execute(gomock.Any(), chainID, address, sigHash, indexInput).Return(string(rawEvent), []string{string(rawDefaultEvent)}, nil)

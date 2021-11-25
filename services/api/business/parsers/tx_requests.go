@@ -32,11 +32,15 @@ func NewJobEntitiesFromTxRequest(txRequest *entities.TxRequest, chainUUID, txDat
 	case txRequest.Params.Protocol == entities.TesseraChainType:
 		privTxJob := newJobEntityFromTxRequest(txRequest, newEthTransactionFromParams(txRequest.Params, txData, entities.LegacyTxType),
 			entities.TesseraPrivateTransaction, chainUUID)
+
 		markingTx := &entities.ETHTransaction{
-			From:         txRequest.Params.From,
+			From:         "",
 			PrivateFor:   txRequest.Params.PrivateFor,
 			MandatoryFor: txRequest.Params.MandatoryFor,
 			PrivacyFlag:  txRequest.Params.PrivacyFlag,
+		}
+		if txRequest.Params.From != nil {
+			markingTx.From = txRequest.Params.From.Hex()
 		}
 		markingTxJob := newJobEntityFromTxRequest(txRequest, markingTx, entities.TesseraMarkingTransaction, chainUUID)
 		jobs = append(jobs, privTxJob, markingTxJob)
@@ -55,9 +59,9 @@ func NewJobEntitiesFromTxRequest(txRequest *entities.TxRequest, chainUUID, txDat
 }
 
 func newEthTransactionFromParams(params *entities.ETHTransactionParams, txData string, txType entities.TransactionType) *entities.ETHTransaction {
-	return &entities.ETHTransaction{
-		From:            params.From,
-		To:              params.To,
+	tx := &entities.ETHTransaction{
+		From:            "",
+		To:              "",
 		Nonce:           params.Nonce,
 		Value:           params.Value,
 		GasPrice:        params.GasPrice,
@@ -74,6 +78,13 @@ func newEthTransactionFromParams(params *entities.ETHTransactionParams, txData s
 		PrivacyFlag:     params.PrivacyFlag,
 		PrivacyGroupID:  params.PrivacyGroupID,
 	}
+	if params.From != nil {
+		tx.From = params.From.Hex()
+	}
+	if params.To != nil {
+		tx.To = params.To.Hex()
+	}
+	return tx
 }
 
 func newJobEntityFromTxRequest(txRequest *entities.TxRequest, ethTx *entities.ETHTransaction, jobType entities.JobType, chainUUID string) *entities.Job {

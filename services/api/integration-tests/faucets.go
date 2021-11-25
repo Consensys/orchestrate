@@ -211,8 +211,8 @@ func (s *faucetsTestSuite) TestSuccess_TxsWithFaucet() {
 		assert.NotEmpty(t, txJob.UUID)
 		assert.Equal(t, txJob.ChainUUID, faucet.ChainRule)
 		assert.Equal(t, entities.StatusStarted, txJob.Status)
-		assert.Equal(t, txRequest.Params.From, txJob.Transaction.From)
-		assert.Equal(t, txRequest.Params.To, txJob.Transaction.To)
+		assert.Equal(t, txRequest.Params.From.Hex(), txJob.Transaction.From)
+		assert.Equal(t, txRequest.Params.To.Hex(), txJob.Transaction.To)
 		assert.Equal(t, entities.EthereumTransaction, txJob.Type)
 	
 		fctEvlp, err := s.env.consumer.WaitForEnvelope(faucetJob.ScheduleUUID, s.env.kafkaTopicConfig.Sender, waitForEnvelopeTimeOut)

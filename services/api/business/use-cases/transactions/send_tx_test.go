@@ -159,7 +159,7 @@ func (s *sendTxSuite) TestSendTx_Success() {
 		jobUUID := txRequest.Schedule.Jobs[0].UUID
 		txData := ""
 		txRequestModel := testutils2.FakeTxRequest(0)
-		txRequestModel.RequestHash = "8ba6ffc20366e5326fc7d4a3f4833306"
+		txRequestModel.RequestHash = "9813523dbe3d89fa4cb35b8d02b9597f"
 
 		s.SearchChainsUC.EXPECT().Execute(gomock.Any(), &entities.ChainFilters{Names: []string{txRequest.ChainName}},
 			s.userInfo).Return(chains, nil)
@@ -188,7 +188,7 @@ func (s *sendTxSuite) TestSendTx_Success() {
 		ctx := context.Background()
 		txData := ""
 		txRequestModel := testutils2.FakeTxRequest(0)
-		txRequestModel.RequestHash = "8ba6ffc20366e5326fc7d4a3f4833306"
+		txRequestModel.RequestHash = "9813523dbe3d89fa4cb35b8d02b9597f"
 		chains := []*entities.Chain{testutils3.FakeChain()}
 		chains[0].UUID = "myChainUUID"
 
@@ -210,7 +210,7 @@ func (s *sendTxSuite) TestSendTx_Success() {
 		txRequest := testutils3.FakeTxRequest()
 		txRequest.Schedule.UUID = scheduleUUID
 		txRequest.Schedule.Jobs[0].UUID = jobUUID
-		txRequest.Params.From = ""
+		txRequest.Params.From = nil
 		txRequest.InternalData.OneTimeKey = true
 
 		response, err := successfulTestExecution(s, txRequest, false, entities.EthereumTransaction)
@@ -401,7 +401,7 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 			Return(scheduleModel, nil)
 		s.TxRequestDA.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(nil)
 		s.CreateJobUC.EXPECT().Execute(gomock.Any(), gomock.Any(), s.userInfo).Return(txRequest.Schedule.Jobs[0], nil)
-		s.GetFaucetCandidate.EXPECT().Execute(gomock.Any(), txRequest.Params.From, gomock.Any(), s.userInfo).Return(nil, faucetNotFoundErr)
+		s.GetFaucetCandidate.EXPECT().Execute(gomock.Any(), txRequest.Params.From.Hex(), gomock.Any(), s.userInfo).Return(nil, faucetNotFoundErr)
 		s.StartJobUC.EXPECT().Execute(gomock.Any(), jobUUID, s.userInfo).Return(expectedErr)
 
 		response, err := s.usecase.Execute(ctx, txRequest, txData, s.userInfo)
@@ -441,6 +441,10 @@ func successfulTestExecution(s *sendTxSuite, txRequest *entities.TxRequest, with
 	txData := ""
 	scheduleModel := testutils2.FakeSchedule(s.userInfo.TenantID, s.userInfo.Username)
 	jobIdx := 0
+	from := ""
+	if txRequest.Params.From != nil {
+		from = txRequest.Params.From.Hex()
+	}
 
 	s.SearchChainsUC.EXPECT().Execute(gomock.Any(), &entities.ChainFilters{Names: []string{txRequest.ChainName}},
 		s.userInfo).Return(chains, nil)
@@ -457,7 +461,7 @@ func successfulTestExecution(s *sendTxSuite, txRequest *entities.TxRequest, with
 				return nil, fmt.Errorf("invalid job type. Got %s, expected %s", jobEntity.Type, jobTypes[jobIdx])
 			}
 
-			jobEntity.Transaction.From = txRequest.Params.From
+			jobEntity.Transaction.From = from
 			jobEntity.UUID = jobUUID
 			jobEntity.Status = entities.StatusCreated
 			jobIdx = jobIdx + 1
@@ -467,11 +471,11 @@ func successfulTestExecution(s *sendTxSuite, txRequest *entities.TxRequest, with
 	// We flag this "special" scenario as faucet funding tx flow
 	if withFaucet {
 		faucet := testutils3.FakeFaucet()
-		s.GetFaucetCandidate.EXPECT().Execute(gomock.Any(), txRequest.Params.From, chains[0], s.userInfo).Return(faucet, nil)
+		s.GetFaucetCandidate.EXPECT().Execute(gomock.Any(), from, chains[0], s.userInfo).Return(faucet, nil)
 
 		s.CreateJobUC.EXPECT().Execute(gomock.Any(), gomock.Any(), s.userInfo).
 			DoAndReturn(func(ctx context.Context, jobEntity *entities.Job, userInfo *multitenancy.UserInfo) (*entities.Job, error) {
-				if jobEntity.Transaction.From != faucet.CreditorAccount {
+				if jobEntity.Transaction.From != faucet.CreditorAccount.Hex() {
 					return nil, fmt.Errorf("invalid from account. Got %s, expected %s", jobEntity.Transaction.From, faucet.CreditorAccount)
 				}
 
@@ -480,7 +484,7 @@ func successfulTestExecution(s *sendTxSuite, txRequest *entities.TxRequest, with
 			})
 		s.StartJobUC.EXPECT().Execute(gomock.Any(), faucet.UUID, s.userInfo).Return(nil)
 	} else {
-		s.GetFaucetCandidate.EXPECT().Execute(gomock.Any(), txRequest.Params.From, chains[0], s.userInfo).Return(nil, faucetNotFoundErr)
+		s.GetFaucetCandidate.EXPECT().Execute(gomock.Any(), from, chains[0], s.userInfo).Return(nil, faucetNotFoundErr)
 	}
 
 	s.StartJobUC.EXPECT().Execute(gomock.Any(), jobUUID, s.userInfo).Return(nil)

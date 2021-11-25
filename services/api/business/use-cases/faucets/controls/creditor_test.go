@@ -4,13 +4,15 @@ package controls
 
 import (
 	"context"
-	"github.com/consensys/orchestrate/pkg/types/entities"
-	"github.com/consensys/orchestrate/pkg/types/testutils"
 	"math/big"
 	"testing"
 
+	"github.com/consensys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/pkg/types/testutils"
+
 	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/pkg/toolkit/ethclient/mock"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
@@ -28,9 +30,9 @@ func TestCreditorControl_SuccessfulCandidate(t *testing.T) {
 
 	t.Run("should choose first candidate successfully", func(t *testing.T) {
 		faucet1 := testutils.FakeFaucet()
-		faucet1.CreditorAccount = addresses[0]
+		faucet1.CreditorAccount = ethcommon.HexToAddress(addresses[0])
 		faucet2 := testutils.FakeFaucet()
-		faucet2.CreditorAccount = addresses[1]
+		faucet2.CreditorAccount = ethcommon.HexToAddress(addresses[1])
 
 		candidates := map[string]*entities.Faucet{
 			faucet1.UUID: faucet1,
@@ -63,15 +65,15 @@ func TestCreditorControl_SkipBeneficiaryAsCandidate(t *testing.T) {
 
 	t.Run("should skip candidate when beneficiary is same as creditor", func(t *testing.T) {
 		faucet1 := testutils.FakeFaucet()
-		faucet1.CreditorAccount = addresses[0]
+		faucet1.CreditorAccount = ethcommon.HexToAddress(addresses[0])
 		faucet2 := testutils.FakeFaucet()
-		faucet2.CreditorAccount = addresses[1]
+		faucet2.CreditorAccount = ethcommon.HexToAddress(addresses[1])
 
 		candidates := map[string]*entities.Faucet{
 			faucet1.UUID: faucet1,
 			faucet2.UUID: faucet2,
 		}
-		req := newFaucetReq(candidates, chains[0], chainURLs[0], faucet1.CreditorAccount)
+		req := newFaucetReq(candidates, chains[0], chainURLs[0], faucet1.CreditorAccount.Hex())
 		client.EXPECT().BalanceAt(gomock.Any(), gomock.Any(), gomock.Any(), nil).Return(big.NewInt(1000000), nil)
 		err := ctrl.Control(ctx, req)
 		assert.NoError(t, err)

@@ -8,6 +8,7 @@ import (
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
 	"github.com/consensys/orchestrate/services/api/store"
 	models2 "github.com/consensys/orchestrate/services/api/store/models"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 )
 
 const setCodeHashComponent = "use-cases.set-codehash"
@@ -24,14 +25,14 @@ func NewSetCodeHashUseCase(agent store.CodeHashAgent) usecases.SetContractCodeHa
 	}
 }
 
-func (uc *setCodeHashUseCase) Execute(ctx context.Context, chainID, address, codeHash string) error {
+func (uc *setCodeHashUseCase) Execute(ctx context.Context, chainID string, address ethcommon.Address, codeHash string) error {
 	ctx = log.WithFields(ctx, log.Field("chain_id", chainID), log.Field("address", chainID))
 	logger := uc.logger.WithContext(ctx)
 	logger.Debug("setting code-hash is starting ...")
 
 	codehash := &models2.CodehashModel{
 		ChainID:  chainID,
-		Address:  address,
+		Address:  address.Hex(),
 		Codehash: codeHash,
 	}
 

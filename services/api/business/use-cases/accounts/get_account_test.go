@@ -4,15 +4,17 @@ package accounts
 
 import (
 	"context"
-	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
-	parsers2 "github.com/consensys/orchestrate/services/api/business/parsers"
 	"testing"
 
-	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/assert"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
+	parsers2 "github.com/consensys/orchestrate/services/api/business/parsers"
+
 	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/services/api/store/mocks"
 	"github.com/consensys/orchestrate/services/api/store/models/testutils"
+	ethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGetAccount_Execute(t *testing.T) {
@@ -32,7 +34,7 @@ func TestGetAccount_Execute(t *testing.T) {
 
 		accountAgent.EXPECT().FindOneByAddress(gomock.Any(), iden.Address, userInfo.AllowedTenants, userInfo.Username).Return(iden, nil)
 
-		resp, err := usecase.Execute(ctx, iden.Address, userInfo)
+		resp, err := usecase.Execute(ctx, ethcommon.HexToAddress(iden.Address), userInfo)
 
 		assert.NoError(t, err)
 		assert.Equal(t, parsers2.NewAccountEntityFromModels(iden), resp)
@@ -44,7 +46,7 @@ func TestGetAccount_Execute(t *testing.T) {
 
 		accountAgent.EXPECT().FindOneByAddress(gomock.Any(), acc.Address, userInfo.AllowedTenants, userInfo.Username).Return(nil, expectedErr)
 
-		_, err := usecase.Execute(ctx, acc.Address, userInfo)
+		_, err := usecase.Execute(ctx, ethcommon.HexToAddress(acc.Address), userInfo)
 
 		assert.Error(t, err)
 		assert.Equal(t, errors.FromError(expectedErr).ExtendComponent(getAccountComponent), err)

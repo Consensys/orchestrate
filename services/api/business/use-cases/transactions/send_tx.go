@@ -230,7 +230,7 @@ func (uc *sendTxUsecase) startFaucetJob(ctx context.Context, account, scheduleUU
 		},
 		InternalData: &entities.InternalData{},
 		Transaction: &entities.ETHTransaction{
-			From:  faucet.CreditorAccount,
+			From:  faucet.CreditorAccount.Hex(),
 			To:    account,
 			Value: faucet.Amount,
 		},

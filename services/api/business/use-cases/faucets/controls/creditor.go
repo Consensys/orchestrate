@@ -31,7 +31,7 @@ func (ctrl *CreditorControl) Control(ctx context.Context, req *entities.FaucetRe
 	for key, candidate := range req.Candidates {
 		amountBigInt, _ := new(big.Int).SetString(candidate.Amount, 10)
 
-		if candidate.CreditorAccount == req.Beneficiary {
+		if candidate.CreditorAccount.Hex() == req.Beneficiary {
 			delete(req.Candidates, key)
 			continue
 		}

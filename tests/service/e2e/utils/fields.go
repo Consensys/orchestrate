@@ -182,7 +182,7 @@ func isEqual(s string, val reflect.Value) bool {
 			return false
 		}
 	case reflect.String:
-		if val.String() != s && fmt.Sprintf("%v", val) != s {
+		if !(strings.EqualFold(val.String(), s) || strings.EqualFold(fmt.Sprintf("%v", val), s)) {
 			return false
 		}
 	default:

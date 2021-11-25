@@ -179,7 +179,7 @@ func (s *accountsCtrlTestSuite) TestAccountController_GetOne() {
 			NewRequest(http.MethodGet, "/accounts/"+inputTestAddress, nil).
 			WithContext(s.ctx)
 
-		s.getAccountUC.EXPECT().Execute(gomock.Any(), mixedCaseTestAddress, s.userInfo).Return(accResp, nil)
+		s.getAccountUC.EXPECT().Execute(gomock.Any(), ethcommon.HexToAddress(mixedCaseTestAddress), s.userInfo).Return(accResp, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -190,11 +190,11 @@ func (s *accountsCtrlTestSuite) TestAccountController_GetOne() {
 	})
 
 	s.T().Run("should fail with Internal server error if use case fails", func(t *testing.T) {
-		address := ethcommon.HexToAddress("0x123").String()
+		address := ethcommon.HexToAddress("0x123")
 
 		rw := httptest.NewRecorder()
 		httpRequest := httptest.
-			NewRequest(http.MethodGet, "/accounts/"+address, nil).
+			NewRequest(http.MethodGet, "/accounts/"+address.Hex(), nil).
 			WithContext(s.ctx)
 
 		s.getAccountUC.EXPECT().Execute(gomock.Any(), address, s.userInfo).Return(nil, fmt.Errorf("error"))
@@ -217,7 +217,7 @@ func (s *accountsCtrlTestSuite) TestAccountController_UpdateAccount() {
 		acc := &entities.Account{
 			Attributes: req.Attributes,
 			Alias:      req.Alias,
-			Address:    mixedCaseTestAddress,
+			Address:    ethcommon.HexToAddress(mixedCaseTestAddress),
 		}
 
 		s.updateAccountUC.EXPECT().Execute(gomock.Any(), acc, s.userInfo).Return(acc, nil)
@@ -271,7 +271,7 @@ func (s *accountsCtrlTestSuite) TestAccountController_SearchIdentity() {
 func (s *accountsCtrlTestSuite) TestAccountController_SignPayload() {
 	s.T().Run("should execute sign payload request successfully", func(t *testing.T) {
 		acc := testutils.FakeAccount()
-		acc.Address = inputTestAddress
+		acc.Address = ethcommon.HexToAddress(inputTestAddress)
 		rw := httptest.NewRecorder()
 		payload := hexutil.MustDecode("0x1234")
 		signature := "0xsignature"
@@ -281,7 +281,7 @@ func (s *accountsCtrlTestSuite) TestAccountController_SignPayload() {
 			NewRequest(http.MethodPost, fmt.Sprintf("/accounts/%v/sign-message", acc.Address), bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 
-		s.getAccountUC.EXPECT().Execute(gomock.Any(), mixedCaseTestAddress, s.userInfo).Return(acc, nil)
+		s.getAccountUC.EXPECT().Execute(gomock.Any(), ethcommon.HexToAddress(mixedCaseTestAddress), s.userInfo).Return(acc, nil)
 		s.keyManagerClient.EXPECT().SignMessage(gomock.Any(), globalStoreName, mixedCaseTestAddress, &qkmtypes.SignMessageRequest{
 			Message: payload,
 		}).Return(signature, nil)
@@ -296,7 +296,7 @@ func (s *accountsCtrlTestSuite) TestAccountController_SignPayload() {
 func (s *accountsCtrlTestSuite) TestAccountController_VerifySignature() {
 	s.T().Run("should execute verify signature request successfully", func(t *testing.T) {
 		acc := testutils.FakeAccount()
-		acc.Address = inputTestAddress
+		acc.Address = ethcommon.HexToAddress(inputTestAddress)
 		rw := httptest.NewRecorder()
 		request := qkm.FakeVerifyPayloadRequest()
 		requestBytes, _ := json.Marshal(request)
@@ -316,7 +316,7 @@ func (s *accountsCtrlTestSuite) TestAccountController_VerifySignature() {
 func (s *accountsCtrlTestSuite) TestAccountController_VerifyTypedDataSignature() {
 	s.T().Run("should execute verify typed data signature request successfully", func(t *testing.T) {
 		acc := testutils.FakeAccount()
-		acc.Address = inputTestAddress
+		acc.Address = ethcommon.HexToAddress(inputTestAddress)
 		rw := httptest.NewRecorder()
 		request := qkm.FakeVerifyTypedDataPayloadRequest()
 		requestBytes, _ := json.Marshal(request)

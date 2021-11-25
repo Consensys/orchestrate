@@ -10,6 +10,7 @@ import (
 
 	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/pkg/toolkit/ethclient"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 )
 
 const maxBalanceComponent = "faucet.control.max-balance"
@@ -33,7 +34,7 @@ func (ctrl *MaxBalanceControl) Control(ctx context.Context, req *entities.Faucet
 	}
 
 	// Retrieve account balance
-	balance, err := getAddressBalance(ctx, ctrl.chainStateReader, req.Chain.URLs, req.Beneficiary)
+	balance, err := getAddressBalance(ctx, ctrl.chainStateReader, req.Chain.URLs, ethcommon.HexToAddress(req.Beneficiary))
 	if err != nil {
 		log.FromContext(ctx).WithError(err).Error("failed to get faucet balance")
 		return errors.FromError(err).ExtendComponent(maxBalanceComponent)

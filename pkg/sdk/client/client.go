@@ -7,6 +7,7 @@ import (
 
 	types "github.com/consensys/orchestrate/pkg/types/api"
 	"github.com/consensys/orchestrate/pkg/types/entities"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 	healthz "github.com/heptiolabs/healthcheck"
 	dto "github.com/prometheus/client_model/go"
 )
@@ -56,11 +57,11 @@ type MetricClient interface {
 type AccountClient interface {
 	CreateAccount(ctx context.Context, request *types.CreateAccountRequest) (*types.AccountResponse, error)
 	SearchAccounts(ctx context.Context, filters *entities.AccountFilters) ([]*types.AccountResponse, error)
-	GetAccount(ctx context.Context, address string) (*types.AccountResponse, error)
+	GetAccount(ctx context.Context, address ethcommon.Address) (*types.AccountResponse, error)
 	ImportAccount(ctx context.Context, request *types.ImportAccountRequest) (*types.AccountResponse, error)
-	UpdateAccount(ctx context.Context, address string, request *types.UpdateAccountRequest) (*types.AccountResponse, error)
-	SignMessage(ctx context.Context, address string, request *qkmtypes.SignMessageRequest) (string, error)
-	SignTypedData(ctx context.Context, address string, request *qkmtypes.SignTypedDataRequest) (string, error)
+	UpdateAccount(ctx context.Context, address ethcommon.Address, request *types.UpdateAccountRequest) (*types.AccountResponse, error)
+	SignMessage(ctx context.Context, address ethcommon.Address, request *qkmtypes.SignMessageRequest) (string, error)
+	SignTypedData(ctx context.Context, address ethcommon.Address, request *qkmtypes.SignTypedDataRequest) (string, error)
 	VerifyMessageSignature(ctx context.Context, request *qkmtypes.VerifyRequest) error
 	VerifyTypedDataSignature(ctx context.Context, request *qkmtypes.VerifyTypedDataRequest) error
 }

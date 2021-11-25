@@ -35,8 +35,8 @@ func TestParsersTxRequest_NewJobEntityFromSendTx(t *testing.T) {
 	assert.Equal(t, job.Type, entities.EthereumTransaction)
 	assert.Equal(t, job.Labels, txReqEntity.Labels)
 
-	assert.Equal(t, job.Transaction.From, txReqEntity.Params.From)
-	assert.Equal(t, job.Transaction.To, txReqEntity.Params.To)
+	assert.Equal(t, job.Transaction.From, txReqEntity.Params.From.Hex())
+	assert.Equal(t, job.Transaction.To, txReqEntity.Params.To.Hex())
 	assert.Equal(t, job.Transaction.Value, txReqEntity.Params.Value)
 	assert.Equal(t, job.Transaction.GasPrice, txReqEntity.Params.GasPrice)
 	assert.Equal(t, job.Transaction.Gas, txReqEntity.Params.Gas)
@@ -58,7 +58,7 @@ func TestParsersTxRequest_NewJobEntityFromSendRawTx(t *testing.T) {
 	assert.Equal(t, job.Type, entities.EthereumRawTransaction)
 	assert.Equal(t, job.Labels, txReqEntity.Labels)
 
-	assert.Equal(t, "0x7357589f8e367c2C31F51242fB77B350A11830F3", txReqEntity.Params.From)
+	assert.Equal(t, "0x7357589f8e367c2C31F51242fB77B350A11830F3", txReqEntity.Params.From.Hex())
 }
 
 func TestParsersTxRequest_NewOrionJobEntityFromSendTx(t *testing.T) {
@@ -100,5 +100,5 @@ func TestParsersTxRequest_NewTesseraJobEntityFromSendTx(t *testing.T) {
 	assert.Equal(t, markingJob.Transaction.PrivateFor, txReqEntity.Params.PrivateFor)
 	assert.Equal(t, markingJob.Labels, txReqEntity.Labels)
 	assert.Equal(t, markingJob.InternalData.OneTimeKey, txReqEntity.InternalData.OneTimeKey)
-	assert.Equal(t, markingJob.Transaction.From, txReqEntity.Params.From)
+	assert.Equal(t, markingJob.Transaction.From, txReqEntity.Params.From.Hex())
 }

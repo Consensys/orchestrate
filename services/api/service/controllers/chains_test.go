@@ -23,6 +23,8 @@ import (
 	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/testutils"
 	"github.com/consensys/orchestrate/services/api/business/use-cases/mocks"
+
+	ethcommon "github.com/ethereum/go-ethereum/common"
 )
 
 const chainsEndpoint = "/chains"
@@ -269,7 +271,7 @@ func (s *chainsCtrlTestSuite) TestSearch() {
 func (s *chainsCtrlTestSuite) TestDelete() {
 	s.T().Run("should execute verify signature request successfully", func(t *testing.T) {
 		acc := testutils.FakeAccount()
-		acc.Address = inputTestAddress
+		acc.Address = ethcommon.HexToAddress(inputTestAddress)
 		rw := httptest.NewRecorder()
 
 		httpRequest := httptest.

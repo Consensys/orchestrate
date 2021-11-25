@@ -29,7 +29,7 @@ func TestGetEvents_Execute(t *testing.T) {
 
 	t.Run("should execute use case successfully if event is found", func(t *testing.T) {
 		eventAgent.EXPECT().
-			FindOneByAccountAndSigHash(gomock.Any(), chainID, contractAddress, sigHash, indexedInputCount).
+			FindOneByAccountAndSigHash(gomock.Any(), chainID, contractAddress.Hex(), sigHash, indexedInputCount).
 			Return(eventModel, nil)
 
 		responseABI, eventsABI, err := usecase.Execute(ctx, chainID, contractAddress, sigHash, indexedInputCount)
@@ -42,7 +42,7 @@ func TestGetEvents_Execute(t *testing.T) {
 	t.Run("should fail if data agent returns connection error", func(t *testing.T) {
 		pgError := errors.PostgresConnectionError("error")
 		eventAgent.EXPECT().
-			FindOneByAccountAndSigHash(gomock.Any(), chainID, contractAddress, sigHash, indexedInputCount).
+			FindOneByAccountAndSigHash(gomock.Any(), chainID, contractAddress.Hex(), sigHash, indexedInputCount).
 			Return(nil, pgError)
 
 		responseABI, eventsABI, err := usecase.Execute(ctx, chainID, contractAddress, sigHash, indexedInputCount)
@@ -54,7 +54,7 @@ func TestGetEvents_Execute(t *testing.T) {
 
 	t.Run("should execute use case successfully if event is not found", func(t *testing.T) {
 		eventAgent.EXPECT().
-			FindOneByAccountAndSigHash(gomock.Any(), chainID, contractAddress, sigHash, indexedInputCount).
+			FindOneByAccountAndSigHash(gomock.Any(), chainID, contractAddress.Hex(), sigHash, indexedInputCount).
 			Return(nil, nil)
 
 		eventAgent.EXPECT().
@@ -71,7 +71,7 @@ func TestGetEvents_Execute(t *testing.T) {
 	t.Run("should fail if data agent returns error on find default", func(t *testing.T) {
 		pgError := errors.PostgresConnectionError("error")
 		eventAgent.EXPECT().
-			FindOneByAccountAndSigHash(gomock.Any(), chainID, contractAddress, sigHash, indexedInputCount).
+			FindOneByAccountAndSigHash(gomock.Any(), chainID, contractAddress.Hex(), sigHash, indexedInputCount).
 			Return(nil, nil)
 		eventAgent.EXPECT().FindDefaultBySigHash(gomock.Any(), sigHash, indexedInputCount).
 			Return(nil, pgError)

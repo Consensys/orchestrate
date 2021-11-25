@@ -20,7 +20,7 @@ func ParseIArray(args ...interface{}) (ret []interface{}) {
 
 func FakeETHTransaction() *entities.ETHTransaction {
 	return &entities.ETHTransaction{
-		From:        FromAddress,
+		From:        "0x5Cc634233E4a454d47aACd9fC68801482Fb02610",
 		To:          "0x4FED1fC4144c223aE3C1553be203cDFcbD38C581",
 		Nonce:       "1",
 		Value:       "50000",
@@ -37,8 +37,8 @@ func FakeETHTransaction() *entities.ETHTransaction {
 
 func FakeETHTransactionParams() *entities.ETHTransactionParams {
 	return &entities.ETHTransactionParams{
-		From:            "0x7357589f8e367c2C31F51242fB77B350A11830F3",
-		To:              "0x7357589f8e367c2C31F51242fB77B350A11830F2",
+		From:            utils.ToPtr(ethcommon.HexToAddress("0x7357589f8e367c2C31F51242fB77B350A11830F3")).(*ethcommon.Address),
+		To:              utils.ToPtr(ethcommon.HexToAddress("0x7357589f8e367c2C31F51242fB77B350A11830F2")).(*ethcommon.Address),
 		Value:           "1",
 		GasPrice:        "0",
 		Gas:             "0",
@@ -101,9 +101,10 @@ func FakeRawTransactionParams() *entities.ETHTransactionParams {
 }
 
 func FakeTransferTransactionParams() *entities.ETHTransactionParams {
+	from := ethcommon.HexToAddress("0x7357589f8e367c2C31F51242fB77B350A11830FA")
 	return &entities.ETHTransactionParams{
-		From:  "0x7357589f8e367c2C31F51242fB77B350A11830FA",
-		To:    "0x7357589f8e367c2C31F51242fB77B350A11830FB",
+		From:  &from,
+		To:    utils.ToPtr(ethcommon.HexToAddress("0x7357589f8e367c2C31F51242fB77B350A11830FB")).(*ethcommon.Address),
 		Value: "10000000000",
 	}
 }

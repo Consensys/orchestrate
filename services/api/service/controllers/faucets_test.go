@@ -12,16 +12,17 @@ import (
 	"testing"
 
 	qkm "github.com/consensys/orchestrate/pkg/quorum-key-manager"
-	mocks2 "github.com/consensys/quorum-key-manager/pkg/client/mock"
 	"github.com/consensys/orchestrate/pkg/types/api"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/services/api/business/use-cases"
 	"github.com/consensys/orchestrate/services/api/service/formatters"
+	mocks2 "github.com/consensys/quorum-key-manager/pkg/client/mock"
 
 	"github.com/consensys/orchestrate/pkg/encoding/json"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/testutils"
 	"github.com/consensys/orchestrate/services/api/business/use-cases/mocks"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
@@ -196,7 +197,7 @@ func (s *faucetsCtrlTestSuite) TestFaucetsController_Update() {
 
 	s.T().Run("should fail with Bad request if invalid format", func(t *testing.T) {
 		req := testutils.FakeUpdateFaucetRequest()
-		req.CreditorAccount = "notAnAddress"
+		req.Cooldown = "notADuration"
 		requestBytes, _ := json.Marshal(req)
 
 		rw := httptest.NewRecorder()
@@ -253,7 +254,7 @@ func (s *faucetsCtrlTestSuite) TestFaucetsController_Search() {
 func (s *faucetsCtrlTestSuite) TestFaucetsController_Delete() {
 	s.T().Run("should execute verify signature request successfully", func(t *testing.T) {
 		acc := testutils.FakeAccount()
-		acc.Address = inputTestAddress
+		acc.Address = ethcommon.HexToAddress(inputTestAddress)
 		rw := httptest.NewRecorder()
 		request := qkm.FakeVerifyPayloadRequest()
 		requestBytes, _ := json.Marshal(request)

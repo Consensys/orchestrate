@@ -6,11 +6,11 @@ import (
 	ethcommon "github.com/ethereum/go-ethereum/common"
 )
 
-func ParseHexToMixedCaseEthAddress(address string) (string, error) {
+func ParseHexToMixedCaseEthAddress(address string) (*ethcommon.Address, error) {
 	if !ethcommon.IsHexAddress(address) {
-		return "", fmt.Errorf("expected hex string")
+		return nil, fmt.Errorf("expected hex string")
 	}
 
 	addr := ethcommon.HexToAddress(address)
-	return addr.String(), nil
+	return &addr, nil
 }

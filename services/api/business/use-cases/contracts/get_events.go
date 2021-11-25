@@ -7,6 +7,7 @@ import (
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
 	"github.com/consensys/orchestrate/services/api/store"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 )
 
 const getEventsComponent = "use-cases.get-events"
@@ -24,11 +25,11 @@ func NewGetEventsUseCase(agent store.EventAgent) usecases.GetContractEventsUseCa
 }
 
 // Execute validates and registers a new contract in DB
-func (uc *getEventsUseCase) Execute(ctx context.Context, chainID, address, sighash string, indexedInputCount uint32) (abi string, eventsABI []string, err error) {
+func (uc *getEventsUseCase) Execute(ctx context.Context, chainID string, address ethcommon.Address, sighash string, indexedInputCount uint32) (abi string, eventsABI []string, err error) {
 	ctx = log.WithFields(ctx, log.Field("chain_id", chainID), log.Field("address", address))
 	logger := uc.logger.WithContext(ctx)
 
-	eventModel, err := uc.agent.FindOneByAccountAndSigHash(ctx, chainID, address, sighash, indexedInputCount)
+	eventModel, err := uc.agent.FindOneByAccountAndSigHash(ctx, chainID, address.Hex(), sighash, indexedInputCount)
 	if err != nil && !errors.IsNotFoundError(err) {
 		return "", nil, errors.FromError(err).ExtendComponent(getEventsComponent)
 	}

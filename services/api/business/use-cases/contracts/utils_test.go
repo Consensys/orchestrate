@@ -6,12 +6,13 @@ import (
 
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/pkg/utils"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/stretchr/testify/assert"
 )
 
 //nolint
-var contractAddress = "0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18"
+var contractAddress = ethcommon.HexToAddress("0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18")
 
 //nolint
 var chainID = "chainId"

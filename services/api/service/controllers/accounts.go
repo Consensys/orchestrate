@@ -101,7 +101,7 @@ func (c *AccountsController) getOne(rw http.ResponseWriter, request *http.Reques
 		return
 	}
 
-	acc, err := c.ucs.GetAccount().Execute(ctx, address, multitenancy.UserInfoValue(ctx))
+	acc, err := c.ucs.GetAccount().Execute(ctx, *address, multitenancy.UserInfoValue(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -210,7 +210,8 @@ func (c *AccountsController) update(rw http.ResponseWriter, request *http.Reques
 	}
 
 	acc := formatters.FormatUpdateAccountRequest(accRequest)
-	acc.Address, err = utils.ParseHexToMixedCaseEthAddress(mux.Vars(request)["address"])
+	address, err := utils.ParseHexToMixedCaseEthAddress(mux.Vars(request)["address"])
+	acc.Address = *address
 	if err != nil {
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
 		return
@@ -256,13 +257,13 @@ func (c *AccountsController) signMessage(rw http.ResponseWriter, request *http.R
 		return
 	}
 
-	_, err = c.ucs.GetAccount().Execute(ctx, address, multitenancy.UserInfoValue(ctx))
+	_, err = c.ucs.GetAccount().Execute(ctx, *address, multitenancy.UserInfoValue(ctx))
 	if err != nil {
 		httputil.WriteError(rw, fmt.Sprintf("account %s was not found", address), http.StatusBadRequest)
 		return
 	}
 
-	signature, err := c.keyManagerClient.SignMessage(request.Context(), c.storeName, address, &qkmtypes.SignMessageRequest{
+	signature, err := c.keyManagerClient.SignMessage(request.Context(), c.storeName, address.Hex(), &qkmtypes.SignMessageRequest{
 		Message: payloadRequest.Message,
 	})
 	if err != nil {
@@ -302,12 +303,12 @@ func (c *AccountsController) signTypedData(rw http.ResponseWriter, request *http
 		return
 	}
 
-	_, err = c.ucs.GetAccount().Execute(ctx, address, multitenancy.UserInfoValue(ctx))
+	_, err = c.ucs.GetAccount().Execute(ctx, *address, multitenancy.UserInfoValue(ctx))
 	if err != nil {
 		httputil.WriteError(rw, fmt.Sprintf("account %s was not found", address), http.StatusBadRequest)
 		return
 	}
-	signature, err := c.keyManagerClient.SignTypedData(ctx, c.storeName, address, &qkmtypes.SignTypedDataRequest{
+	signature, err := c.keyManagerClient.SignTypedData(ctx, c.storeName, address.Hex(), &qkmtypes.SignTypedDataRequest{
 		DomainSeparator: signRequest.DomainSeparator,
 		Types:           signRequest.Types,
 		Message:         signRequest.Message,

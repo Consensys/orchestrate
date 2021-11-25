@@ -33,7 +33,7 @@ func BatchPrivateTxsTest(ctx context.Context, cfg *WorkloadConfig, client orches
 	req := &api.DeployContractRequest{
 		ChainName: chain.Name,
 		Params: api.DeployContractParams{
-			From:         account,
+			From:         &account,
 			ContractName: contractName,
 			Args:         constructorArgs(contractName),
 			PrivateFrom:  privateFrom,

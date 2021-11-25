@@ -5,8 +5,6 @@ import (
 	"strings"
 	"time"
 
-	ethcommon "github.com/ethereum/go-ethereum/common"
-
 	types "github.com/consensys/orchestrate/pkg/types/api"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 
@@ -19,7 +17,8 @@ func FormatSendTxRequest(sendTxRequest *types.SendTransactionRequest, idempotenc
 		ChainName:      sendTxRequest.ChainName,
 		Labels:         sendTxRequest.Labels,
 		Params: &entities.ETHTransactionParams{
-			To:              ethcommon.HexToAddress(sendTxRequest.Params.To).Hex(),
+			From:            sendTxRequest.Params.From,
+			To:              sendTxRequest.Params.To,
 			Value:           sendTxRequest.Params.Value,
 			GasPrice:        sendTxRequest.Params.GasPrice,
 			Gas:             sendTxRequest.Params.Gas,
@@ -42,10 +41,6 @@ func FormatSendTxRequest(sendTxRequest *types.SendTransactionRequest, idempotenc
 		),
 	}
 
-	if sendTxRequest.Params.From != "" {
-		txRequest.Params.From = ethcommon.HexToAddress(sendTxRequest.Params.From).Hex()
-	}
-
 	return txRequest
 }
 
@@ -55,6 +50,7 @@ func FormatDeployContractRequest(deployRequest *types.DeployContractRequest, ide
 		ChainName:      deployRequest.ChainName,
 		Labels:         deployRequest.Labels,
 		Params: &entities.ETHTransactionParams{
+			From:            deployRequest.Params.From,
 			Value:           deployRequest.Params.Value,
 			GasPrice:        deployRequest.Params.GasPrice,
 			Gas:             deployRequest.Params.Gas,
@@ -76,10 +72,6 @@ func FormatDeployContractRequest(deployRequest *types.DeployContractRequest, ide
 			deployRequest.Params.OneTimeKey,
 			&deployRequest.Params.GasPricePolicy,
 		),
-	}
-
-	if deployRequest.Params.From != "" {
-		txRequest.Params.From = ethcommon.HexToAddress(deployRequest.Params.From).Hex()
 	}
 
 	return txRequest
@@ -110,8 +102,8 @@ func FormatTransferRequest(transferRequest *types.TransferRequest, idempotencyKe
 		ChainName:      transferRequest.ChainName,
 		Labels:         transferRequest.Labels,
 		Params: &entities.ETHTransactionParams{
-			From:            ethcommon.HexToAddress(transferRequest.Params.From).Hex(),
-			To:              ethcommon.HexToAddress(transferRequest.Params.To).Hex(),
+			From:            &transferRequest.Params.From,
+			To:              &transferRequest.Params.To,
 			GasFeeCap:       transferRequest.Params.GasFeeCap,
 			GasTipCap:       transferRequest.Params.GasTipCap,
 			AccessList:      transferRequest.Params.AccessList,

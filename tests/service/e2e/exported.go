@@ -43,7 +43,7 @@ func Start(ctx context.Context) error {
 	cctx = multitenancy.WithUserInfo(cctx, multitenancy.DefaultUser())
 	var testData *utils3.TestData
 	rawTestData := viper.GetString(e2eDataViperKey)
-	logger.WithField("data", rawTestData).Info("Loaded test data")
+	logger.WithField("data", rawTestData).Debug("test data")
 	err := json.Unmarshal([]byte(rawTestData), &testData)
 	if err != nil {
 		logger.WithError(err).Error("failed to ")

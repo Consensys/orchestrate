@@ -8,9 +8,9 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
-func FakeEthAccountResponse(addr string, tenants []string) *types.EthAccountResponse {
+func FakeEthAccountResponse(addr ethcommon.Address, tenants []string) *types.EthAccountResponse {
 	return &types.EthAccountResponse{
-		Address: ethcommon.HexToAddress(addr),
+		Address: addr,
 		Tags: map[string]string{
 			TagIDAllowedTenants: strings.Join(tenants, TagSeparatorAllowedTenants),
 		},

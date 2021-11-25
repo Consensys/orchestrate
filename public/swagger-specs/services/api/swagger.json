@@ -2783,7 +2783,7 @@
             "properties": {
                 "address": {
                     "type": "string",
-                    "example": "1abae27a0cbfb02945720425d3b80c7e09728534"
+                    "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
                 },
                 "alias": {
                     "type": "string",
@@ -3597,7 +3597,7 @@
                 },
                 "from": {
                     "type": "string",
-                    "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
+                    "example": "0x1abae27a0cbfb02945720425d3b80c7e097285534"
                 },
                 "gas": {
                     "type": "string",

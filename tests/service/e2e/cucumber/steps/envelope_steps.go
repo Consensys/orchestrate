@@ -285,7 +285,7 @@ func (sc *ScenarioContext) iHaveTheFollowingAccount(table *gherkin.PickleStepArg
 		w := account.NewAccount()
 		_ = w.Generate()
 		privBytes := crypto.FromECDSA(w.Priv())
-		accountMap["address"] = w.Address().Hex()
+		accountMap["address"] = w.Address().String()
 		accountMap["private_key"] = hexutil.Encode(privBytes)
 		sc.aliases.Set(accountMap, sc.Pickle.Id, aliass)
 	}
@@ -325,7 +325,7 @@ func (sc *ScenarioContext) iHaveCreatedTheFollowingAccounts(table *gherkin.Pickl
 			return err
 		}
 
-		sc.aliases.Set(accRes.Address, sc.Pickle.Id, aliasCol.Rows[idx+1].Cells[0].Value)
+		sc.aliases.Set(accRes.Address.String(), sc.Pickle.Id, aliasCol.Rows[idx+1].Cells[0].Value)
 	}
 
 	return nil

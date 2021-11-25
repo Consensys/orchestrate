@@ -8,6 +8,7 @@ import (
 	context "context"
 	entities "github.com/consensys/orchestrate/pkg/types/entities"
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
+	common "github.com/ethereum/go-ethereum/common"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )
@@ -247,7 +248,7 @@ func (m *MockGetContractEventsUseCase) EXPECT() *MockGetContractEventsUseCaseMoc
 }
 
 // Execute mocks base method
-func (m *MockGetContractEventsUseCase) Execute(ctx context.Context, chainID, address, sighash string, indexedInputCount uint32) (string, []string, error) {
+func (m *MockGetContractEventsUseCase) Execute(ctx context.Context, chainID string, address common.Address, sighash string, indexedInputCount uint32) (string, []string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Execute", ctx, chainID, address, sighash, indexedInputCount)
 	ret0, _ := ret[0].(string)
@@ -324,7 +325,7 @@ func (m *MockGetContractMethodsUseCase) EXPECT() *MockGetContractMethodsUseCaseM
 }
 
 // Execute mocks base method
-func (m *MockGetContractMethodsUseCase) Execute(ctx context.Context, chainID, address string, selector []byte) (string, []string, error) {
+func (m *MockGetContractMethodsUseCase) Execute(ctx context.Context, chainID string, address common.Address, selector []byte) (string, []string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Execute", ctx, chainID, address, selector)
 	ret0, _ := ret[0].(string)
@@ -438,7 +439,7 @@ func (m *MockSetContractCodeHashUseCase) EXPECT() *MockSetContractCodeHashUseCas
 }
 
 // Execute mocks base method
-func (m *MockSetContractCodeHashUseCase) Execute(ctx context.Context, chainID, address, hash string) error {
+func (m *MockSetContractCodeHashUseCase) Execute(ctx context.Context, chainID string, address common.Address, hash string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Execute", ctx, chainID, address, hash)
 	ret0, _ := ret[0].(error)

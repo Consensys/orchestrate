@@ -5,10 +5,11 @@ import (
 	"time"
 
 	"github.com/consensys/orchestrate/tests/service/stress/assets"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 )
 
 type WorkloadConfig struct {
-	accounts               []string
+	accounts               []ethcommon.Address
 	chains                 []assets.Chain
 	artifacts              []string
 	privacyGroups          []assets.PrivacyGroup

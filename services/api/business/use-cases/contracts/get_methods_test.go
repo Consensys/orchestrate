@@ -27,7 +27,7 @@ func TestGetMethods_Execute(t *testing.T) {
 	usecase := NewGetMethodsUseCase(methodAgent)
 
 	t.Run("should execute use case successfully if method is found", func(t *testing.T) {
-		methodAgent.EXPECT().FindOneByAccountAndSelector(gomock.Any(), chainID, contractAddress, selector).Return(method, nil)
+		methodAgent.EXPECT().FindOneByAccountAndSelector(gomock.Any(), chainID, contractAddress.Hex(), selector).Return(method, nil)
 
 		responseABI, eventsABI, err := usecase.Execute(ctx, chainID, contractAddress, selector)
 
@@ -38,7 +38,7 @@ func TestGetMethods_Execute(t *testing.T) {
 
 	t.Run("should fail if data agent returns connection error", func(t *testing.T) {
 		pgError := errors.PostgresConnectionError("error")
-		methodAgent.EXPECT().FindOneByAccountAndSelector(gomock.Any(), chainID, contractAddress, selector).Return(nil, pgError)
+		methodAgent.EXPECT().FindOneByAccountAndSelector(gomock.Any(), chainID, contractAddress.Hex(), selector).Return(nil, pgError)
 
 		responseABI, eventsABI, err := usecase.Execute(ctx, chainID, contractAddress, selector)
 
@@ -48,7 +48,7 @@ func TestGetMethods_Execute(t *testing.T) {
 	})
 
 	t.Run("should execute use case successfully if method is not found", func(t *testing.T) {
-		methodAgent.EXPECT().FindOneByAccountAndSelector(gomock.Any(), chainID, contractAddress, selector).Return(nil, nil)
+		methodAgent.EXPECT().FindOneByAccountAndSelector(gomock.Any(), chainID, contractAddress.Hex(), selector).Return(nil, nil)
 		methodAgent.EXPECT().FindDefaultBySelector(gomock.Any(), selector).Return([]*models.MethodModel{method, method}, nil)
 
 		responseABI, eventsABI, err := usecase.Execute(ctx, chainID, contractAddress, selector)
@@ -60,7 +60,7 @@ func TestGetMethods_Execute(t *testing.T) {
 
 	t.Run("should fail if data agent returns error on find default", func(t *testing.T) {
 		pgError := errors.PostgresConnectionError("error")
-		methodAgent.EXPECT().FindOneByAccountAndSelector(gomock.Any(), chainID, contractAddress, selector).Return(nil, nil)
+		methodAgent.EXPECT().FindOneByAccountAndSelector(gomock.Any(), chainID, contractAddress.Hex(), selector).Return(nil, nil)
 		methodAgent.EXPECT().FindDefaultBySelector(gomock.Any(), selector).Return(nil, pgError)
 
 		responseABI, eventsABI, err := usecase.Execute(ctx, chainID, contractAddress, selector)

@@ -1,12 +1,13 @@
 package entities
 
 import (
+	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 )
 
 type ETHTransactionParams struct {
-	From            string               `json:"from,omitempty"  example:"0x1abae27a0cbfb02945720425d3b80c7e09728534"`
-	To              string               `json:"to,omitempty" example:"0x1abae27a0cbfb02945720425d3b80c7e09728534"`
+	From            *ethcommon.Address   `json:"from,omitempty"  example:"0x1abae27a0cbfb02945720425d3b80c7e09728534" swaggertype:"string"`
+	To              *ethcommon.Address   `json:"to,omitempty" example:"0x1abae27a0cbfb02945720425d3b80c7e09728534" swaggertype:"string"`
 	Value           string               `json:"value,omitempty"  example:"71500000 (wei)"`
 	GasPrice        string               `json:"gasPrice,omitempty" example:"71500000 (wei)"`
 	Gas             string               `json:"gas,omitempty" example:"21000"`

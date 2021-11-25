@@ -5,6 +5,7 @@ import (
 
 	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/entities"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
@@ -18,7 +19,7 @@ type AccountUseCases interface {
 }
 
 type GetAccountUseCase interface {
-	Execute(ctx context.Context, address string, userInfo *multitenancy.UserInfo) (*entities.Account, error)
+	Execute(ctx context.Context, address ethcommon.Address, userInfo *multitenancy.UserInfo) (*entities.Account, error)
 }
 
 type CreateAccountUseCase interface {

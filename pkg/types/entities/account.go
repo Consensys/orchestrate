@@ -2,11 +2,13 @@ package entities
 
 import (
 	"time"
+
+	ethcommon "github.com/ethereum/go-ethereum/common"
 )
 
 type Account struct {
 	Alias               string
-	Address             string
+	Address             ethcommon.Address
 	PublicKey           string
 	CompressedPublicKey string
 	TenantID            string

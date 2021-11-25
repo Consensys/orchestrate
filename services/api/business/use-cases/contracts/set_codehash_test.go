@@ -22,7 +22,7 @@ func TestSetCodeHash_Execute(t *testing.T) {
 	codeHash := "codeHash"
 	codeHashModel := &models2.CodehashModel{
 		ChainID:  chainID,
-		Address:  contractAddress,
+		Address:  contractAddress.Hex(),
 		Codehash: codeHash,
 	}
 	codeHashAgent := mocks.NewMockCodeHashAgent(ctrl)

@@ -13,6 +13,7 @@ import (
 	healthcheck "github.com/heptiolabs/healthcheck"
 	io_prometheus_client "github.com/prometheus/client_model/go"
 	reflect "reflect"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 )
 
 // MockOrchestrateClient is a mock of OrchestrateClient interface
@@ -321,7 +322,7 @@ func (mr *MockOrchestrateClientMockRecorder) SearchAccounts(ctx, filters interfa
 }
 
 // GetAccount mocks base method
-func (m *MockOrchestrateClient) GetAccount(ctx context.Context, address string) (*api.AccountResponse, error) {
+func (m *MockOrchestrateClient) GetAccount(ctx context.Context, address ethcommon.Address) (*api.AccountResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAccount", ctx, address)
 	ret0, _ := ret[0].(*api.AccountResponse)
@@ -351,7 +352,7 @@ func (mr *MockOrchestrateClientMockRecorder) ImportAccount(ctx, request interfac
 }
 
 // UpdateAccount mocks base method
-func (m *MockOrchestrateClient) UpdateAccount(ctx context.Context, address string, request *api.UpdateAccountRequest) (*api.AccountResponse, error) {
+func (m *MockOrchestrateClient) UpdateAccount(ctx context.Context, address ethcommon.Address, request *api.UpdateAccountRequest) (*api.AccountResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateAccount", ctx, address, request)
 	ret0, _ := ret[0].(*api.AccountResponse)
@@ -366,7 +367,7 @@ func (mr *MockOrchestrateClientMockRecorder) UpdateAccount(ctx, address, request
 }
 
 // SignMessage mocks base method
-func (m *MockOrchestrateClient) SignMessage(ctx context.Context, address string, request *types.SignMessageRequest) (string, error) {
+func (m *MockOrchestrateClient) SignMessage(ctx context.Context, address ethcommon.Address, request *types.SignMessageRequest) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SignMessage", ctx, address, request)
 	ret0, _ := ret[0].(string)
@@ -381,7 +382,7 @@ func (mr *MockOrchestrateClientMockRecorder) SignMessage(ctx, address, request i
 }
 
 // SignTypedData mocks base method
-func (m *MockOrchestrateClient) SignTypedData(ctx context.Context, address string, request *types.SignTypedDataRequest) (string, error) {
+func (m *MockOrchestrateClient) SignTypedData(ctx context.Context, address ethcommon.Address, request *types.SignTypedDataRequest) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SignTypedData", ctx, address, request)
 	ret0, _ := ret[0].(string)
@@ -1117,7 +1118,7 @@ func (mr *MockAccountClientMockRecorder) ImportAccount(ctx, request interface{})
 }
 
 // UpdateAccount mocks base method
-func (m *MockAccountClient) UpdateAccount(ctx context.Context, address string, request *api.UpdateAccountRequest) (*api.AccountResponse, error) {
+func (m *MockAccountClient) UpdateAccount(ctx context.Context, address ethcommon.Address, request *api.UpdateAccountRequest) (*api.AccountResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateAccount", ctx, address, request)
 	ret0, _ := ret[0].(*api.AccountResponse)
