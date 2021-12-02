@@ -76,7 +76,7 @@ x-tessera-def:
 
           cat <<EOF > /data/tm/tessera-config-09.json
           {
-            "mode": "EEA",
+            "mode": "orion",
             "useWhiteList": false,
             "jdbc": {
               "username": "sa",

@@ -55,12 +55,10 @@ run-stress: gobuild-e2e
 
 e2e-ci: run-e2e 
 	@docker-compose -f docker-compose.e2e.yml up --build report
-	@exit $(docker inspect project_e2e_1 --format='{{.State.ExitCode}}')
 
 e2e: run-e2e
 	@docker-compose -f docker-compose.e2e.yml up --build report
 	@$(OPEN) build/report/report.html 2>/dev/null
-	@exit $(docker inspect orchestrate_e2e_1 --format='{{.State.ExitCode}}')
 
 deploy-remote-env:
 	@bash ./scripts/deploy-remote-env.sh

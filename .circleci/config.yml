@@ -270,12 +270,14 @@ jobs:
       - run:
           name: e2e local tests
           command: |
-            set +e
+            set -eo
             cp .env.multitenancy .env
             make up
             echo "Wait 20 seconds for services to boot up correctly..."
             sleep 20
             make e2e-ci
+            exitCode=$(docker inspect project_e2e_1 --format='{{.State.ExitCode}}')
+            exit $exitCode
       - store_artifacts:
           path: ./build/report/report.html
           destination: report.html
