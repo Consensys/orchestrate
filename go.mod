@@ -9,7 +9,7 @@ require (
 	github.com/auth0/go-jwt-middleware v1.0.1-0.20210716212939-b4ac45bdac0c
 	github.com/c0va23/go-proxyprotocol v0.9.1
 	github.com/cenkalti/backoff/v4 v4.1.0
-	github.com/consensys/gnark-crypto v0.5.0
+	github.com/consensys/gnark-crypto v0.5.0 // indirect
 	github.com/consensys/quorum v2.7.0+incompatible
 	github.com/consensys/quorum-key-manager v0.0.0-20211103134644-ead58bb213bc
 	github.com/cucumber/godog v0.11.0

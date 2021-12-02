@@ -5,9 +5,10 @@ package parsers
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/pkg/types/testutils"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -26,17 +27,17 @@ func TestParsersTxRequest_NewTxRequestModelFromEntities(t *testing.T) {
 func TestParsersTxRequest_NewJobEntityFromSendTx(t *testing.T) {
 	txReqEntity := testutils.FakeTxRequest()
 	chainUUID := "chainUUID"
-	jobs, _ := NewJobEntitiesFromTxRequest(txReqEntity, chainUUID ,"0xDATA")
+	jobs, _ := NewJobEntitiesFromTxRequest(txReqEntity, chainUUID, hexutil.MustDecode("0x0ABC"))
 	assert.Len(t, jobs, 1)
-	
+
 	job := jobs[0]
 	assert.Equal(t, job.ScheduleUUID, txReqEntity.Schedule.UUID)
 	assert.Equal(t, job.ChainUUID, chainUUID)
 	assert.Equal(t, job.Type, entities.EthereumTransaction)
 	assert.Equal(t, job.Labels, txReqEntity.Labels)
 
-	assert.Equal(t, job.Transaction.From, txReqEntity.Params.From.Hex())
-	assert.Equal(t, job.Transaction.To, txReqEntity.Params.To.Hex())
+	assert.Equal(t, job.Transaction.From.Hex(), txReqEntity.Params.From.Hex())
+	assert.Equal(t, job.Transaction.To.Hex(), txReqEntity.Params.To.Hex())
 	assert.Equal(t, job.Transaction.Value, txReqEntity.Params.Value)
 	assert.Equal(t, job.Transaction.GasPrice, txReqEntity.Params.GasPrice)
 	assert.Equal(t, job.Transaction.Gas, txReqEntity.Params.Gas)
@@ -48,11 +49,11 @@ func TestParsersTxRequest_NewJobEntityFromSendTx(t *testing.T) {
 
 func TestParsersTxRequest_NewJobEntityFromSendRawTx(t *testing.T) {
 	txReqEntity := testutils.FakeTxRequest()
-	txReqEntity.Params.Raw = "0xf85380839896808252088083989680808216b4a0d35c752d3498e6f5ca1630d264802a992a141ca4b6a3f439d673c75e944e5fb0a05278aaa5fabbeac362c321b54e298dedae2d31471e432c26ea36a8d49cf08f1e"
-	jobs, err := NewJobEntitiesFromTxRequest(txReqEntity, "" ,"")
+	txReqEntity.Params.Raw = hexutil.MustDecode("0xf85380839896808252088083989680808216b4a0d35c752d3498e6f5ca1630d264802a992a141ca4b6a3f439d673c75e944e5fb0a05278aaa5fabbeac362c321b54e298dedae2d31471e432c26ea36a8d49cf08f1e")
+	jobs, err := NewJobEntitiesFromTxRequest(txReqEntity, "", nil)
 	require.NoError(t, err)
 	require.Len(t, jobs, 1)
-	
+
 	job := jobs[0]
 	assert.Equal(t, job.ScheduleUUID, txReqEntity.Schedule.UUID)
 	assert.Equal(t, job.Type, entities.EthereumRawTransaction)
@@ -65,13 +66,13 @@ func TestParsersTxRequest_NewEEAJobEntityFromSendTx(t *testing.T) {
 	txReqEntity := testutils.FakeTxRequest()
 	txReqEntity.Params.Protocol = entities.EEAChainType
 	chainUUID := "chainUUID"
-	jobs, _ := NewJobEntitiesFromTxRequest(txReqEntity, chainUUID ,"0xDATA")
+	jobs, _ := NewJobEntitiesFromTxRequest(txReqEntity, chainUUID, hexutil.MustDecode("0x0ABC"))
 	assert.Len(t, jobs, 2)
 
 	privJob := jobs[0]
 	assert.Equal(t, privJob.Type, entities.EEAPrivateTransaction)
 	assert.False(t, privJob.InternalData.OneTimeKey)
-	
+
 	markingJob := jobs[1]
 	assert.Equal(t, markingJob.ScheduleUUID, txReqEntity.Schedule.UUID)
 	assert.Equal(t, markingJob.ChainUUID, chainUUID)
@@ -80,13 +81,12 @@ func TestParsersTxRequest_NewEEAJobEntityFromSendTx(t *testing.T) {
 	assert.True(t, markingJob.InternalData.OneTimeKey)
 }
 
-
 func TestParsersTxRequest_NewTesseraJobEntityFromSendTx(t *testing.T) {
 	txReqEntity := testutils.FakeTxRequest()
 	txReqEntity.Params.Protocol = entities.TesseraChainType
 	txReqEntity.Params.PrivateFor = []string{"0xPrivateFor"}
 	chainUUID := "chainUUID"
-	jobs, _ := NewJobEntitiesFromTxRequest(txReqEntity, chainUUID ,"0xDATA")
+	jobs, _ := NewJobEntitiesFromTxRequest(txReqEntity, chainUUID, hexutil.MustDecode("0x0ABC"))
 	assert.Len(t, jobs, 2)
 
 	privJob := jobs[0]
@@ -100,5 +100,5 @@ func TestParsersTxRequest_NewTesseraJobEntityFromSendTx(t *testing.T) {
 	assert.Equal(t, markingJob.Transaction.PrivateFor, txReqEntity.Params.PrivateFor)
 	assert.Equal(t, markingJob.Labels, txReqEntity.Labels)
 	assert.Equal(t, markingJob.InternalData.OneTimeKey, txReqEntity.InternalData.OneTimeKey)
-	assert.Equal(t, markingJob.Transaction.From, txReqEntity.Params.From.Hex())
+	assert.Equal(t, markingJob.Transaction.From.Hex(), txReqEntity.Params.From.Hex())
 }

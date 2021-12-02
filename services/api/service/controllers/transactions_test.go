@@ -250,7 +250,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_sendRaw() {
 		txRequestEntityResp := testutils.FakeTxRequest()
 
 		txRequestEntity := formatters.FormatSendRawRequest(txRequest, idempotencyKey)
-		s.sendTxUseCase.EXPECT().Execute(gomock.Any(), txRequestEntity, "", s.userInfo).Return(txRequestEntityResp, nil)
+		s.sendTxUseCase.EXPECT().Execute(gomock.Any(), txRequestEntity, nil, s.userInfo).Return(txRequestEntityResp, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -271,7 +271,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_sendRaw() {
 			WithContext(s.ctx)
 
 		s.sendTxUseCase.EXPECT().
-			Execute(gomock.Any(), gomock.Any(), "", s.userInfo).
+			Execute(gomock.Any(), gomock.Any(), nil, s.userInfo).
 			Return(nil, errors.InvalidParameterError("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -311,7 +311,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_transfer() 
 		txRequestEntityResp := testutils.FakeTransferTxRequest()
 
 		txRequestEntity := formatters.FormatTransferRequest(txRequest, idempotencyKey)
-		s.sendTxUseCase.EXPECT().Execute(gomock.Any(), txRequestEntity, "", s.userInfo).Return(txRequestEntityResp, nil)
+		s.sendTxUseCase.EXPECT().Execute(gomock.Any(), txRequestEntity, nil, s.userInfo).Return(txRequestEntityResp, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -332,7 +332,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_transfer() 
 			WithContext(s.ctx)
 
 		s.sendTxUseCase.EXPECT().
-			Execute(gomock.Any(), gomock.Any(), "", s.userInfo).
+			Execute(gomock.Any(), gomock.Any(), nil, s.userInfo).
 			Return(nil, errors.InvalidParameterError("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)

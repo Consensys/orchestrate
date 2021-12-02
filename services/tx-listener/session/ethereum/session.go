@@ -8,6 +8,7 @@ import (
 
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	"github.com/consensys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/pkg/utils"
 	"github.com/consensys/orchestrate/services/tx-listener/metrics"
 
 	"github.com/consensys/orchestrate/services/tx-listener/session"
@@ -376,7 +377,7 @@ func (s *Session) fetchJobs(ctx context.Context, transactions ethtypes.Transacti
 				WithField("job", jobResponse.UUID).Debug("transaction was matched to a job")
 
 			// Filter by the jobs belonging to same session CHAIN_UUID
-			jobMap[jobResponse.Transaction.Hash] = &entities.Job{
+			jobMap[jobResponse.Transaction.Hash.String()] = &entities.Job{
 				UUID:         jobResponse.UUID,
 				ChainUUID:    jobResponse.ChainUUID,
 				ScheduleUUID: jobResponse.ScheduleUUID,
@@ -405,11 +406,11 @@ func (s *Session) fetchReceipts(ctx context.Context, transactions ethtypes.Trans
 			futureJobs = append(futureJobs, s.fetchReceipt(ctx, jobMap[blckTx.Hash().String()], blckTx.Hash()))
 			continue
 		case isEEAPrivTx(blckTx, s.eeaPrivPrecompiledContractAddr) && s.Chain.Listener.ExternalTxEnabled:
-			job := &entities.Job{ChainUUID: s.Chain.UUID, Transaction: &entities.ETHTransaction{Hash: blckTx.Hash().Hex()}}
+			job := &entities.Job{ChainUUID: s.Chain.UUID, Transaction: &entities.ETHTransaction{Hash: utils.ToPtr(blckTx.Hash()).(*ethcommon.Hash)}}
 			futureJobs = append(futureJobs, s.fetchPrivateReceipt(ctx, job, blckTx.Hash()))
 			continue
 		case s.Chain.Listener.ExternalTxEnabled:
-			job := &entities.Job{ChainUUID: s.Chain.UUID, Transaction: &entities.ETHTransaction{Hash: blckTx.Hash().Hex()}}
+			job := &entities.Job{ChainUUID: s.Chain.UUID, Transaction: &entities.ETHTransaction{Hash: utils.ToPtr(blckTx.Hash()).(*ethcommon.Hash)}}
 			futureJobs = append(futureJobs, s.fetchReceipt(ctx, job, blckTx.Hash()))
 			continue
 		default:

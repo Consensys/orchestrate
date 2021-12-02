@@ -16,6 +16,7 @@ import (
 	mocks2 "github.com/consensys/orchestrate/services/tx-sender/tx-sender/nonce/mocks"
 	"github.com/consensys/orchestrate/services/tx-sender/tx-sender/use-cases/mocks"
 	ethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/golang/mock/gomock"
@@ -34,21 +35,21 @@ func TestSendTesseraMarking_Execute(t *testing.T) {
 	ctx := context.Background()
 
 	usecase := NewSendTesseraMarkingTxUseCase(signTx, crafter, ec, jobClient, chainRegistryURL, nonceChecker)
+	raw := hexutil.MustDecode("0x1234")
+	txHash := ethcommon.HexToHash("0x0000000000000000000000000000000000000000000000000000000000000abc")
 
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		job := testutils.FakeJob()
 		job.Transaction.PrivateFor = []string{"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="}
-		raw := "rawData"
-		txHash := "0x0000000000000000000000000000000000000000000000000000000000000abc"
 
 		crafter.EXPECT().Execute(gomock.Any(), job).Return(nil)
-		signTx.EXPECT().Execute(gomock.Any(), job).Return(raw, txHash, nil)
+		signTx.EXPECT().Execute(gomock.Any(), job).Return(raw, &txHash, nil)
 		job.Transaction.Raw = raw
-		job.Transaction.Hash = txHash
+		job.Transaction.Hash = &txHash
 
 		proxyURL := utils.GetProxyURL(chainRegistryURL, job.ChainUUID)
 		ec.EXPECT().SendQuorumRawPrivateTransaction(gomock.Any(), proxyURL, job.Transaction.Raw, job.Transaction.PrivateFor, nil, 0).
-			Return(ethcommon.HexToHash(txHash), nil)
+			Return(txHash, nil)
 		nonceChecker.EXPECT().IncrementNonce(gomock.Any(), job).Return(nil)
 		jobClient.EXPECT().UpdateJob(gomock.Any(), job.UUID, &api.UpdateJobRequest{
 			Status:      entities.StatusPending,
@@ -57,23 +58,21 @@ func TestSendTesseraMarking_Execute(t *testing.T) {
 
 		err := usecase.Execute(ctx, job)
 		assert.NoError(t, err)
-		assert.Equal(t, job.Transaction.Hash, txHash)
+		assert.Equal(t, job.Transaction.Hash.String(), txHash.String())
 	})
-	
+
 	t.Run("should execute use case, using resending, successfully", func(t *testing.T) {
 		job := testutils.FakeJob()
 		job.Status = entities.StatusPending
 		job.Transaction.PrivateFor = []string{"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="}
-		raw := "rawData"
-		txHash := "0x0000000000000000000000000000000000000000000000000000000000000abc"
 
 		crafter.EXPECT().Execute(gomock.Any(), job).Return(nil)
 		job.Transaction.Raw = raw
-		job.Transaction.Hash = txHash
+		job.Transaction.Hash = &txHash
 
 		proxyURL := utils.GetProxyURL(chainRegistryURL, job.ChainUUID)
 		ec.EXPECT().SendQuorumRawPrivateTransaction(gomock.Any(), proxyURL, job.Transaction.Raw, job.Transaction.PrivateFor, nil, 0).
-			Return(ethcommon.HexToHash(txHash), nil)
+			Return(txHash, nil)
 		nonceChecker.EXPECT().IncrementNonce(gomock.Any(), job).Return(nil)
 		jobClient.EXPECT().UpdateJob(gomock.Any(), job.UUID, &api.UpdateJobRequest{
 			Status:      entities.StatusResending,
@@ -82,23 +81,21 @@ func TestSendTesseraMarking_Execute(t *testing.T) {
 
 		err := usecase.Execute(ctx, job)
 		assert.NoError(t, err)
-		assert.Equal(t, job.Transaction.Hash, txHash)
+		assert.Equal(t, job.Transaction.Hash.String(), txHash.String())
 	})
 
 	t.Run("should execute use case, update warning, successfully", func(t *testing.T) {
 		job := testutils.FakeJob()
-		raw := "rawData"
-		txHash := "0x0000000000000000000000000000000000000000000000000000000000000abc"
-		txHash2 := "0x0000000000000000000000000000000000000000000000000000000000000aba"
+		txHash2 := ethcommon.HexToHash("0x0000000000000000000000000000000000000000000000000000000000000aba")
 
 		crafter.EXPECT().Execute(gomock.Any(), job).Return(nil)
-		signTx.EXPECT().Execute(gomock.Any(), job).Return(raw, txHash, nil)
+		signTx.EXPECT().Execute(gomock.Any(), job).Return(raw, &txHash, nil)
 		job.Transaction.Raw = raw
-		job.Transaction.Hash = txHash
+		job.Transaction.Hash = &txHash
 
 		proxyURL := utils.GetProxyURL(chainRegistryURL, job.ChainUUID)
 		ec.EXPECT().SendQuorumRawPrivateTransaction(gomock.Any(), proxyURL, job.Transaction.Raw, job.Transaction.PrivateFor, nil, 0).
-			Return(ethcommon.HexToHash(txHash2), nil)
+			Return(txHash2, nil)
 		nonceChecker.EXPECT().IncrementNonce(gomock.Any(), job).Return(nil)
 		jobClient.EXPECT().UpdateJob(gomock.Any(), job.UUID, &api.UpdateJobRequest{
 			Status:      entities.StatusPending,
@@ -109,7 +106,7 @@ func TestSendTesseraMarking_Execute(t *testing.T) {
 
 		err := usecase.Execute(ctx, job)
 		assert.NoError(t, err)
-		assert.Equal(t, job.Transaction.Hash, txHash2)
+		assert.Equal(t, job.Transaction.Hash.String(), txHash2.String())
 	})
 
 	t.Run("should fail to execute use case if nonce checker fails", func(t *testing.T) {
@@ -124,13 +121,11 @@ func TestSendTesseraMarking_Execute(t *testing.T) {
 
 	t.Run("should fail to execute use case if signer fails", func(t *testing.T) {
 		job := testutils.FakeJob()
-		raw := "rawData"
-		txHash := "0x0000000000000000000000000000000000000000000000000000000000000abc"
 
 		crafter.EXPECT().Execute(gomock.Any(), job).Return(nil)
 
 		expectedErr := errors.InternalError("internal error")
-		signTx.EXPECT().Execute(gomock.Any(), job).Return(raw, txHash, expectedErr)
+		signTx.EXPECT().Execute(gomock.Any(), job).Return(raw, &txHash, expectedErr)
 
 		err := usecase.Execute(ctx, job)
 		assert.Equal(t, err, expectedErr)
@@ -138,13 +133,11 @@ func TestSendTesseraMarking_Execute(t *testing.T) {
 
 	t.Run("should fail to execute use case if update job fails", func(t *testing.T) {
 		job := testutils.FakeJob()
-		raw := "rawData"
-		txHash := "0x0000000000000000000000000000000000000000000000000000000000000abc"
 
 		crafter.EXPECT().Execute(gomock.Any(), job).Return(nil)
-		signTx.EXPECT().Execute(gomock.Any(), job).Return(raw, txHash, nil)
+		signTx.EXPECT().Execute(gomock.Any(), job).Return(raw, &txHash, nil)
 		job.Transaction.Raw = raw
-		job.Transaction.Hash = txHash
+		job.Transaction.Hash = &txHash
 
 		expectedErr := errors.InternalError("internal error")
 		jobClient.EXPECT().UpdateJob(gomock.Any(), job.UUID, &api.UpdateJobRequest{
@@ -158,13 +151,11 @@ func TestSendTesseraMarking_Execute(t *testing.T) {
 
 	t.Run("should fail to execute use case if send transaction fails", func(t *testing.T) {
 		job := testutils.FakeJob()
-		raw := "rawData"
-		txHash := "0x0000000000000000000000000000000000000000000000000000000000000abc"
 
 		crafter.EXPECT().Execute(gomock.Any(), job).Return(nil)
-		signTx.EXPECT().Execute(gomock.Any(), job).Return(raw, txHash, nil)
+		signTx.EXPECT().Execute(gomock.Any(), job).Return(raw, &txHash, nil)
 		job.Transaction.Raw = raw
-		job.Transaction.Hash = txHash
+		job.Transaction.Hash = &txHash
 
 		expectedErr := errors.InternalError("internal error")
 		proxyURL := utils.GetProxyURL(chainRegistryURL, job.ChainUUID)
@@ -173,7 +164,7 @@ func TestSendTesseraMarking_Execute(t *testing.T) {
 			Transaction: job.Transaction,
 		})
 		ec.EXPECT().SendQuorumRawPrivateTransaction(gomock.Any(), proxyURL, job.Transaction.Raw, job.Transaction.PrivateFor, nil, 0).
-			Return(ethcommon.HexToHash(txHash), expectedErr)
+			Return(txHash, expectedErr)
 		nonceChecker.EXPECT().CleanNonce(gomock.Any(), job, expectedErr).Return(nil)
 
 		err := usecase.Execute(ctx, job)

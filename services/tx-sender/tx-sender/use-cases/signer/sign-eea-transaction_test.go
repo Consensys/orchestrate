@@ -9,6 +9,7 @@ import (
 	"github.com/consensys/orchestrate/pkg/errors"
 	qkm "github.com/consensys/orchestrate/pkg/quorum-key-manager"
 	"github.com/consensys/orchestrate/pkg/types/testutils"
+	"github.com/consensys/orchestrate/pkg/utils"
 	qkmmock "github.com/consensys/quorum-key-manager/pkg/client/mock"
 	"github.com/consensys/quorum-key-manager/src/stores/api/types"
 	"github.com/stretchr/testify/require"
@@ -28,28 +29,30 @@ func TestSignEEATransaction_Execute(t *testing.T) {
 
 	usecase := NewSignEEATransactionUseCase(mockKeyManagerClient)
 
+	signedRaw := utils.StringToHexBytes("0xf8d501822710825208944fed1fc4144c223ae3c1553be203cdfcbd38c58182c35080820713a09a0a890215ea6e79d06f9665297996ab967db117f36c2090d6d6ead5a2d32d52a065bc4bc766b5a833cb58b3319e44e952487559b9b939cb5268c0409398214c8ba0035695b4cc4b0941e60551d7a19cf30603db5bfc23e5ac43a56f57f25f75486af842a0035695b4cc4b0941e60551d7a19cf30603db5bfc23e5ac43a56f57f25f75486aa0075695b4cc4b0941e60551d7a19cf30603db5bfc23e5ac43a56f57f25f75486a8a72657374726963746564")
+	
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		job := testutils.FakeJob()
-		signedRaw := "0xf8d501822710825208944fed1fc4144c223ae3c1553be203cdfcbd38c58182c35080820713a09a0a890215ea6e79d06f9665297996ab967db117f36c2090d6d6ead5a2d32d52a065bc4bc766b5a833cb58b3319e44e952487559b9b939cb5268c0409398214c8ba0035695b4cc4b0941e60551d7a19cf30603db5bfc23e5ac43a56f57f25f75486af842a0035695b4cc4b0941e60551d7a19cf30603db5bfc23e5ac43a56f57f25f75486aa0075695b4cc4b0941e60551d7a19cf30603db5bfc23e5ac43a56f57f25f75486a8a72657374726963746564"
-		mockKeyManagerClient.EXPECT().SignEEATransaction(gomock.Any(), globalStoreName, job.Transaction.From, gomock.AssignableToTypeOf(&types.SignEEATransactionRequest{})).Return(signedRaw, nil)
+		mockKeyManagerClient.EXPECT().SignEEATransaction(gomock.Any(), globalStoreName, job.Transaction.From.String(), 
+			gomock.AssignableToTypeOf(&types.SignEEATransactionRequest{})).Return(signedRaw.String(), nil)
 
 		raw, txHash, err := usecase.Execute(ctx, job)
 
 		require.NoError(t, err)
-		assert.Equal(t, signedRaw, raw)
+		assert.Equal(t, signedRaw.String(), raw.String())
 		assert.Empty(t, txHash)
 	})
 
 	t.Run("should execute use case successfully for deployment transactions", func(t *testing.T) {
 		job := testutils.FakeJob()
-		job.Transaction.To = ""
-		signedRaw := "0xf8c1018227108252088082c35080820713a09a0a890215ea6e79d06f9665297996ab967db117f36c2090d6d6ead5a2d32d52a065bc4bc766b5a833cb58b3319e44e952487559b9b939cb5268c0409398214c8ba0035695b4cc4b0941e60551d7a19cf30603db5bfc23e5ac43a56f57f25f75486af842a0035695b4cc4b0941e60551d7a19cf30603db5bfc23e5ac43a56f57f25f75486aa0075695b4cc4b0941e60551d7a19cf30603db5bfc23e5ac43a56f57f25f75486a8a72657374726963746564"
-		mockKeyManagerClient.EXPECT().SignEEATransaction(gomock.Any(), globalStoreName, job.Transaction.From, gomock.AssignableToTypeOf(&types.SignEEATransactionRequest{})).Return(signedRaw, nil)
+		job.Transaction.To = nil
+		mockKeyManagerClient.EXPECT().SignEEATransaction(gomock.Any(), globalStoreName, job.Transaction.From.String(), 
+			gomock.AssignableToTypeOf(&types.SignEEATransactionRequest{})).Return(signedRaw.String(), nil)
 
 		raw, txHash, err := usecase.Execute(ctx, job)
 
 		assert.NoError(t, err)
-		assert.Equal(t, signedRaw, raw)
+		assert.Equal(t, signedRaw.String(), raw.String())
 		assert.Empty(t, txHash)
 	})
 
@@ -69,9 +72,10 @@ func TestSignEEATransaction_Execute(t *testing.T) {
 
 	t.Run("should fail with same error if ETHSignEEATransaction fails", func(t *testing.T) {
 		job := testutils.FakeJob()
-		mockKeyManagerClient.EXPECT().SignEEATransaction(gomock.Any(), globalStoreName, job.Transaction.From, gomock.Any()).Return("", errors.InvalidFormatError("error"))
+		mockKeyManagerClient.EXPECT().SignEEATransaction(gomock.Any(), globalStoreName, job.Transaction.From.String(), gomock.Any()).
+			Return("", errors.InvalidFormatError("error"))
 
-		raw, txHash, err := usecase.Execute(ctx, testutils.FakeJob())
+		raw, txHash, err := usecase.Execute(ctx, job)
 
 		assert.True(t, errors.IsDependencyFailureError(err))
 		assert.Empty(t, raw)

@@ -6,8 +6,10 @@ package mocks
 
 import (
 	context "context"
-	gomock "github.com/golang/mock/gomock"
 	entities "github.com/consensys/orchestrate/pkg/types/entities"
+	common "github.com/ethereum/go-ethereum/common"
+	hexutil "github.com/ethereum/go-ethereum/common/hexutil"
+	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )
 
@@ -35,11 +37,11 @@ func (m *MockSignETHTransactionUseCase) EXPECT() *MockSignETHTransactionUseCaseM
 }
 
 // Execute mocks base method
-func (m *MockSignETHTransactionUseCase) Execute(ctx context.Context, job *entities.Job) (string, string, error) {
+func (m *MockSignETHTransactionUseCase) Execute(ctx context.Context, job *entities.Job) (hexutil.Bytes, *common.Hash, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Execute", ctx, job)
-	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(string)
+	ret0, _ := ret[0].(hexutil.Bytes)
+	ret1, _ := ret[1].(*common.Hash)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
 }
@@ -74,11 +76,11 @@ func (m *MockSignEEATransactionUseCase) EXPECT() *MockSignEEATransactionUseCaseM
 }
 
 // Execute mocks base method
-func (m *MockSignEEATransactionUseCase) Execute(ctx context.Context, job *entities.Job) (string, string, error) {
+func (m *MockSignEEATransactionUseCase) Execute(ctx context.Context, job *entities.Job) (hexutil.Bytes, *common.Hash, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Execute", ctx, job)
-	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(string)
+	ret0, _ := ret[0].(hexutil.Bytes)
+	ret1, _ := ret[1].(*common.Hash)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
 }
@@ -113,11 +115,11 @@ func (m *MockSignQuorumPrivateTransactionUseCase) EXPECT() *MockSignQuorumPrivat
 }
 
 // Execute mocks base method
-func (m *MockSignQuorumPrivateTransactionUseCase) Execute(ctx context.Context, job *entities.Job) (string, string, error) {
+func (m *MockSignQuorumPrivateTransactionUseCase) Execute(ctx context.Context, job *entities.Job) (hexutil.Bytes, *common.Hash, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Execute", ctx, job)
-	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(string)
+	ret0, _ := ret[0].(hexutil.Bytes)
+	ret1, _ := ret[1].(*common.Hash)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
 }

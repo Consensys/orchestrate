@@ -33,7 +33,7 @@ func SignQuorumPrivateTransaction(tx *quorumtypes.Transaction, privKey *ecdsa.Pr
 	return decodedSignature, nil
 }
 
-func SignEEATransaction(tx *types.Transaction, privateArgs *entities.PrivateETHTransactionParams, chainID string, privKey *ecdsa.PrivateKey) ([]byte, error) {
+func SignEEATransaction(tx *types.Transaction, privateArgs *entities.PrivateETHTransactionParams, chainID *big.Int, privKey *ecdsa.PrivateKey) ([]byte, error) {
 	hash, err := EEATransactionPayload(tx, privateArgs, chainID)
 	if err != nil {
 		return nil, err
@@ -47,12 +47,7 @@ func SignEEATransaction(tx *types.Transaction, privateArgs *entities.PrivateETHT
 	return signature, err
 }
 
-func EEATransactionPayload(tx *types.Transaction, privateArgs *entities.PrivateETHTransactionParams, chainID string) ([]byte, error) {
-	chainIDBigInt, ok := new(big.Int).SetString(chainID, 10)
-	if !ok {
-		return nil, errors.InvalidParameterError("invalid chainID")
-	}
-
+func EEATransactionPayload(tx *types.Transaction, privateArgs *entities.PrivateETHTransactionParams, chainID *big.Int) ([]byte, error) {
 	privateFromEncoded, err := GetEncodedPrivateFrom(privateArgs.PrivateFrom)
 	if err != nil {
 		return nil, err
@@ -70,7 +65,7 @@ func EEATransactionPayload(tx *types.Transaction, privateArgs *entities.PrivateE
 		tx.To(),
 		tx.Value(),
 		tx.Data(),
-		chainIDBigInt,
+		chainID,
 		uint(0),
 		uint(0),
 		privateFromEncoded,

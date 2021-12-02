@@ -46,7 +46,7 @@ func WriteHTTPErrorResponse(rw http.ResponseWriter, err error) {
 		writeErrorResponse(rw, http.StatusBadRequest, err)
 	case errors.IsInvalidParameterError(err), errors.IsEncodingError(err):
 		writeErrorResponse(rw, http.StatusUnprocessableEntity, err)
-	case errors.IsPostgresConnectionError(err), errors.IsKafkaConnectionError(err):
+	case errors.IsPostgresConnectionError(err), errors.IsKafkaConnectionError(err), errors.IsDependencyFailureError(err):
 		writeErrorResponse(rw, http.StatusFailedDependency, errors.FromError(err).SetMessage(internalDepErrMsg))
 	case err != nil:
 		writeErrorResponse(rw, http.StatusInternalServerError, errors.FromError(err).SetMessage(internalErrMsg))

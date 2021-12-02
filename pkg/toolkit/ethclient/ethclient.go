@@ -10,6 +10,7 @@ import (
 	proto "github.com/consensys/orchestrate/pkg/types/ethereum"
 	eth "github.com/ethereum/go-ethereum"
 	ethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 )
 
@@ -21,15 +22,15 @@ type TransactionSender interface {
 	SendTransaction(ctx context.Context, url string, args *types.SendTxArgs) (ethcommon.Hash, error)
 
 	// SendRawTransaction allows to send a raw transaction
-	SendRawTransaction(ctx context.Context, url string, raw string) (ethcommon.Hash, error)
+	SendRawTransaction(ctx context.Context, url string, raw hexutil.Bytes) (ethcommon.Hash, error)
 
 	// SendRawPrivateTransaction send a raw transaction to a Ethereum node supporting privacy with EEA privacy extensions
-	SendRawPrivateTransaction(ctx context.Context, url string, raw string) (ethcommon.Hash, error)
+	SendRawPrivateTransaction(ctx context.Context, url string, raw hexutil.Bytes) (ethcommon.Hash, error)
 }
 
 type EEATransactionSender interface {
 	// PrivDistributeRawTransaction Returns the enclaveKey of sent private transaction
-	PrivDistributeRawTransaction(ctx context.Context, endpoint, raw string) (ethcommon.Hash, error)
+	PrivDistributeRawTransaction(ctx context.Context, endpoint string, raw hexutil.Bytes) (ethcommon.Hash, error)
 	// Creates a group of nodes, specified by their EEA public key.
 	PrivCreatePrivacyGroup(ctx context.Context, endpoint string, addresses []string) (string, error)
 }
@@ -38,11 +39,11 @@ type QuorumTransactionSender interface {
 	// SendQuorumRawPrivateTransaction sends a raw signed transaction to a Quorum node
 	// signedTxHash - is a hash returned by Quorum and then signed by a client
 	// privateFor - is a list of public keys of Quorum nodes that can receive a private transaction
-	SendQuorumRawPrivateTransaction(ctx context.Context, url string, signedTxHash string, privateFor []string, mandatoryFor []string, privacyFlag int) (ethcommon.Hash, error)
+	SendQuorumRawPrivateTransaction(ctx context.Context, url string, raw hexutil.Bytes, privateFor, mandatoryFor []string, privacyFlag int) (ethcommon.Hash, error)
 
 	// StoreRaw stores "data" field of a transaction in Tessera privacy enclave
 	// It returns a hash of a stored transaction that should be used instead of transaction data
-	StoreRaw(ctx context.Context, endpoint string, data []byte, privateFrom string) (string, error)
+	StoreRaw(ctx context.Context, endpoint string, data hexutil.Bytes, privateFrom string) ([]byte, error)
 }
 
 // ChainLedgerReader is a service to access a blockchain ledger information

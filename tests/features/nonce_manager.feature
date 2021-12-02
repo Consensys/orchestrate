@@ -31,7 +31,7 @@ Feature: Nonce manager
     "params": {
       "from": "{{global.nodes.besu[0].fundedPublicKeys[0]}}",
       "to": "{{account1}}",
-      "value": "100000000000000000"
+      "value": "0x16345785D8A0000"
     },
     "labels": {
     	"scenario.id": "{{scenarioID}}",
@@ -47,7 +47,7 @@ Feature: Nonce manager
     "params": {
       "from": "{{global.nodes.besu[0].fundedPublicKeys[0]}}",
       "to": "{{account2}}",
-      "value": "100000000000000000"
+      "value": "0x16345785D8A0000"
     },
     "labels": {
     	"scenario.id": "{{scenarioID}}",
@@ -63,7 +63,7 @@ Feature: Nonce manager
     "params": {
       "from": "{{global.nodes.besu[0].fundedPublicKeys[0]}}",
       "to": "{{account3}}",
-      "value": "100000000000000000"
+      "value": "0x16345785D8A0000"
     },
     "labels": {
     	"scenario.id": "{{scenarioID}}",
@@ -117,8 +117,8 @@ Feature: Nonce manager
     "transaction": {
         "from": "{{account1}}",
         "to": "{{to1}}",
-        "value": "140000",
-        "gas": "21000"
+        "value": "0x222E0",
+        "gas": 21000
     },
     "labels": {
     	"scenario.id": "{{scenarioID}}"
@@ -138,9 +138,9 @@ Feature: Nonce manager
     "transaction": {
         "from": "{{account1}}",
         "to": "{{to2}}",
-        "value": "130000",
-        "nonce": "2",
-        "gas": "21000"
+        "value": "0x1FBD0",
+        "nonce": 2,
+        "gas": 21000
     },
     "labels": {
     	"scenario.id": "{{scenarioID}}"
@@ -160,8 +160,8 @@ Feature: Nonce manager
     "transaction": {
         "from": "{{account1}}",
         "to": "{{to3}}",
-        "value": "109000",
-        "gas": "21000"
+        "value": "0x1A9C8",
+        "gas": 21000
     },
     "labels": {
     	"scenario.id": "{{scenarioID}}"
@@ -233,9 +233,9 @@ Feature: Nonce manager
     "transaction": {
         "from": "{{account3}}",
         "to": "{{to1}}",
-        "value": "100000",
-        "gasPrice": "1000000000",
-        "gas": "21000"
+        "value": "0x186A0",
+        "gasPrice": "0x3B9ACA00",
+        "gas": 21000
     },
     "labels": {
     	"scenario.id": "{{scenarioID}}"
@@ -255,10 +255,10 @@ Feature: Nonce manager
     "transaction": {
         "from": "{{account3}}",
         "to": "{{to2}}",
-        "value": "100000",
-        "nonce": "1",
-        "gasPrice": "1000000000",
-        "gas": "21000"
+        "value": "0x186A0",
+        "nonce": 1,
+        "gasPrice": "0x3B9ACA00",
+        "gas": 21000
     },
     "labels": {
     	"scenario.id": "{{scenarioID}}"
@@ -278,10 +278,10 @@ Feature: Nonce manager
     "transaction": {
         "from": "{{account3}}",
         "to": "{{to3}}",
-        "value": "100100",
-        "nonce": "0",
-        "gasPrice": "1000000000",
-        "gas": "21000"
+        "value": "0x186A0",
+        "nonce": 0,
+        "gasPrice": "0x3B9ACA00",
+        "gas": 21000
     },
     "labels": {
     	"scenario.id": "{{scenarioID}}"
@@ -358,7 +358,7 @@ Feature: Nonce manager
     "transaction": {
         "from": "{{account1}}",
         "to": "{{to1}}",
-        "nonce": "0",
+        "nonce": 0,
         "privateFrom": "{{global.nodes.besu[0].privateAddress[0]}}",
         "privateFor": ["{{global.nodes.besu[1].privateAddress[0]}}"]
     },

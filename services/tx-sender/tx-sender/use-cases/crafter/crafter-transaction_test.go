@@ -14,6 +14,7 @@ import (
 	"github.com/consensys/orchestrate/pkg/utils"
 	"github.com/consensys/orchestrate/services/tx-sender/tx-sender/nonce/mocks"
 	ethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
@@ -34,9 +35,9 @@ func TestCrafterTransaction_Execute(t *testing.T) {
 
 	t.Run("should execute use case for LegacyTx successfully", func(t *testing.T) {
 		job := testutils.FakeJob()
-		job.Transaction.Nonce = ""
-		job.Transaction.GasPrice = ""
-		job.Transaction.Gas = ""
+		job.Transaction.Nonce = nil
+		job.Transaction.GasPrice = nil
+		job.Transaction.Gas = nil
 		job.Transaction.TransactionType = entities.LegacyTxType
 
 		proxyURL := utils.GetProxyURL(chainRegistryURL, job.ChainUUID)
@@ -47,16 +48,16 @@ func TestCrafterTransaction_Execute(t *testing.T) {
 		err := usecase.Execute(ctx, job)
 
 		assert.NoError(t, err)
-		assert.Equal(t, expectedGasPrice.String(), job.Transaction.GasPrice)
-		assert.Equal(t, "1000", job.Transaction.Gas)
-		assert.Equal(t, "1", job.Transaction.Nonce)
+		assert.Equal(t, expectedGasPrice.String(), job.Transaction.GasPrice.ToInt().String())
+		assert.Equal(t, uint64(1000), *job.Transaction.Gas)
+		assert.Equal(t, uint64(1), *job.Transaction.Nonce)
 	})
 
 	t.Run("should execute use case for DynamicFeeTx successfully", func(t *testing.T) {
 		job := testutils.FakeJob()
-		job.Transaction.Nonce = ""
-		job.Transaction.Gas = ""
-		job.Transaction.GasPrice = ""
+		job.Transaction.Nonce = nil
+		job.Transaction.Gas = nil
+		job.Transaction.GasPrice = nil
 
 		proxyURL := utils.GetProxyURL(chainRegistryURL, job.ChainUUID)
 		expectedFeeHistory := testutils.FakeFeeHistory(nextBaseFee)
@@ -69,17 +70,17 @@ func TestCrafterTransaction_Execute(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.Equal(t, entities.DynamicFeeTxType, job.Transaction.TransactionType)
-		assert.Equal(t, expectedFeeCap.String(), job.Transaction.GasFeeCap)
-		assert.Equal(t, mediumPriority.String(), job.Transaction.GasTipCap)
-		assert.Equal(t, "1000", job.Transaction.Gas)
-		assert.Equal(t, "1", job.Transaction.Nonce)
+		assert.Equal(t, expectedFeeCap.String(), job.Transaction.GasFeeCap.ToInt().String())
+		assert.Equal(t, mediumPriority.String(), job.Transaction.GasTipCap.ToInt().String())
+		assert.Equal(t, uint64(1000), *job.Transaction.Gas)
+		assert.Equal(t, uint64(1), *job.Transaction.Nonce)
 	})
 
 	t.Run("should execute use case for OneTimeKey successfully", func(t *testing.T) {
 		job := testutils.FakeJob()
-		job.Transaction.Nonce = ""
-		job.Transaction.GasPrice = ""
-		job.Transaction.Gas = ""
+		job.Transaction.Nonce = nil
+		job.Transaction.GasPrice = nil
+		job.Transaction.Gas = nil
 		job.InternalData.OneTimeKey = true
 
 		proxyURL := utils.GetProxyURL(chainRegistryURL, job.ChainUUID)
@@ -89,17 +90,17 @@ func TestCrafterTransaction_Execute(t *testing.T) {
 		err := usecase.Execute(ctx, job)
 
 		assert.NoError(t, err)
-		assert.Equal(t, expectedGasPrice.String(), job.Transaction.GasPrice)
-		assert.Equal(t, "1000", job.Transaction.Gas)
-		assert.Equal(t, "0", job.Transaction.Nonce)
+		assert.Equal(t, expectedGasPrice.String(), job.Transaction.GasPrice.ToInt().String())
+		assert.Equal(t, uint64(1000), *job.Transaction.Gas)
+		assert.Equal(t, uint64(0), *job.Transaction.Nonce)
 	})
 
 	t.Run("should execute use case for EEA marking transaction successfully", func(t *testing.T) {
 		job := testutils.FakeJob()
 		job.Type = entities.JobType(tx.JobType_ETH_EEA_MARKING_TX.String())
-		job.Transaction.Nonce = ""
-		job.Transaction.GasPrice = ""
-		job.Transaction.Gas = ""
+		job.Transaction.Nonce = nil
+		job.Transaction.GasPrice = nil
+		job.Transaction.Gas = nil
 
 		proxyURL := utils.GetProxyURL(chainRegistryURL, job.ChainUUID)
 		expectedContractAddr := ethcommon.HexToAddress("0x1")
@@ -111,17 +112,17 @@ func TestCrafterTransaction_Execute(t *testing.T) {
 		err := usecase.Execute(ctx, job)
 
 		assert.NoError(t, err)
-		assert.Equal(t, "1000", job.Transaction.Gas)
-		assert.Equal(t, "1", job.Transaction.Nonce)
-		assert.Equal(t, expectedContractAddr.String(), job.Transaction.To)
+		assert.Equal(t, uint64(1000), *job.Transaction.Gas)
+		assert.Equal(t, uint64(1), *job.Transaction.Nonce)
+		assert.Equal(t, expectedContractAddr.String(), job.Transaction.To.String())
 	})
 
 	t.Run("should execute use case for EEA private transaction successfully", func(t *testing.T) {
 		job := testutils.FakeJob()
 		job.Type = entities.JobType(tx.JobType_ETH_EEA_PRIVATE_TX.String())
-		job.Transaction.Nonce = ""
-		job.Transaction.GasPrice = ""
-		job.Transaction.Gas = ""
+		job.Transaction.Nonce = nil
+		job.Transaction.GasPrice = nil
+		job.Transaction.Gas = nil
 
 		nm.EXPECT().GetNonce(gomock.Any(), gomock.Any()).Return(uint64(1), nil)
 		err := usecase.Execute(ctx, job)
@@ -129,12 +130,12 @@ func TestCrafterTransaction_Execute(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Empty(t, job.Transaction.GasPrice)
 		assert.Empty(t, job.Transaction.Gas)
-		assert.Equal(t, "1", job.Transaction.Nonce)
+		assert.Equal(t, uint64(1), *job.Transaction.Nonce)
 	})
 
 	t.Run("should execute use case for child job for DynamicTx successfully", func(t *testing.T) {
 		job := testutils.FakeJob()
-		job.Transaction.GasTipCap = "199999"
+		job.Transaction.GasTipCap = (*hexutil.Big)(hexutil.MustDecodeBig("0x30D3F"))
 		job.Transaction.TransactionType = entities.DynamicFeeTxType
 		job.InternalData.ParentJobUUID = job.UUID
 
@@ -143,10 +144,9 @@ func TestCrafterTransaction_Execute(t *testing.T) {
 		ec.EXPECT().FeeHistory(gomock.Any(), proxyURL, 1, "latest").Return(expectedFeeHistory, nil)
 
 		err := usecase.Execute(ctx, job)
-		priority, _ := new(big.Int).SetString(job.Transaction.GasTipCap, 10)
-		expectedFeeCap := new(big.Int).Add(priority, nextBaseFee)
+		expectedFeeCap := new(big.Int).Add(job.Transaction.GasTipCap.ToInt(), nextBaseFee)
 
 		assert.NoError(t, err)
-		assert.Equal(t, expectedFeeCap.String(), job.Transaction.GasFeeCap)
+		assert.Equal(t, expectedFeeCap.String(), job.Transaction.GasFeeCap.ToInt().String())
 	})
 }

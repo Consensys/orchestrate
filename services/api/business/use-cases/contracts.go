@@ -5,6 +5,7 @@ import (
 
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	ethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
 //go:generate mockgen -source=contracts.go -destination=mocks/contracts.go -package=mocks
@@ -29,7 +30,7 @@ type GetContractUseCase interface {
 }
 
 type GetContractEventsUseCase interface {
-	Execute(ctx context.Context, chainID string, address ethcommon.Address, sighash string, indexedInputCount uint32) (abi string, eventsABI []string, err error)
+	Execute(ctx context.Context, chainID string, address ethcommon.Address, sighash hexutil.Bytes, indexedInputCount uint32) (abi string, eventsABI []string, err error)
 }
 
 type GetContractMethodSignaturesUseCase interface {
@@ -49,5 +50,5 @@ type RegisterContractUseCase interface {
 }
 
 type SetContractCodeHashUseCase interface {
-	Execute(ctx context.Context, chainID string, address ethcommon.Address, hash string) error
+	Execute(ctx context.Context, chainID string, address ethcommon.Address, hash hexutil.Bytes) error
 }

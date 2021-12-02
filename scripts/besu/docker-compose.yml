@@ -6,7 +6,7 @@ x-default-variables: &default-variables
   JAVA_OPTS: -Xms512m -Xmx512m -XX:MaxMetaspaceSize=256m
 
 x-service-variables: &service-variables
-  OTEL_RESOURCE_ATTRIBUTES: service.name=validator1,service.version=${BESU_VERSION:-latest}
+  OTEL_RESOURCE_ATTRIBUTES: service.name=validator1,service.version=${BESU_VERSION:-21.7.4}
   
 x-besu-bootnode-def:
   &besu-bootnode-def
@@ -29,7 +29,7 @@ x-besu-bootnode-def:
 x-besu-def:
   &besu-def
   restart: "on-failure"
-  image: hyperledger/besu:${BESU_VERSION:-latest}
+  image: hyperledger/besu:${BESU_VERSION:-21.7.4}
   environment:
     - LOG4J_CONFIGURATION_FILE=/config/log-config.xml
   entrypoint:
@@ -54,7 +54,7 @@ x-besu-def:
 
 x-tessera-def:
   &tessera-def
-  image: quorumengineering/tessera:${QUORUM_TESSERA_VERSION:-21.7.0}
+  image: quorumengineering/tessera:${QUORUM_TESSERA_VERSION:-21.7.1}
   expose:
     - 9000
     - 9080
@@ -176,7 +176,7 @@ services:
   validator2:
     <<: *besu-def
     environment:
-      - OTEL_RESOURCE_ATTRIBUTES=service.name=validator2,service.version=${BESU_VERSION:-latest}
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=validator2,service.version=${BESU_VERSION:-21.7.4}
       - NODE_ID=6
       - TESSERA_URL=http://tessera2:9101
     volumes:
@@ -215,7 +215,7 @@ services:
   validator3:
     <<: *besu-def
     environment:
-      - OTEL_RESOURCE_ATTRIBUTES=service.name=validator3,service.version=${BESU_VERSION:-latest}
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=validator3,service.version=${BESU_VERSION:-21.7.4}
       - NODE_ID=7
       - TESSERA_URL=http://tessera3:9101
     volumes:
@@ -254,7 +254,7 @@ services:
   validator4:
     <<: *besu-def
     environment:
-      - OTEL_RESOURCE_ATTRIBUTES=service.name=validator4,service.version=${BESU_VERSION:-latest}
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=validator4,service.version=${BESU_VERSION:-21.7.4}
       - NODE_ID=8
       - TESSERA_URL=http://tessera4:9101
     volumes:

@@ -4,15 +4,13 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/pkg/ethereum/abi"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/pkg/utils"
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-
-	"github.com/consensys/orchestrate/pkg/errors"
-	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 )
 
 const sendDeployTxComponent = "use-cases.send-deploy-tx"
@@ -48,23 +46,17 @@ func (uc *sendDeployTxUsecase) Execute(ctx context.Context, txRequest *entities.
 	return uc.sendTxUseCase.Execute(ctx, txRequest, txData, userInfo)
 }
 
-func (uc *sendDeployTxUsecase) computeTxData(ctx context.Context, params *entities.ETHTransactionParams) (string, error) {
+func (uc *sendDeployTxUsecase) computeTxData(ctx context.Context, params *entities.ETHTransactionParams) ([]byte, error) {
 	if params.ContractTag == "" {
 		params.ContractTag = "latest"
 	}
 
 	contract, err := uc.getContractUseCase.Execute(ctx, params.ContractName, params.ContractTag)
 	if errors.IsNotFoundError(err) {
-		return "", errors.InvalidParameterError("contract not found")
+		return nil, errors.InvalidParameterError("contract not found")
 	}
 	if err != nil {
-		return "", errors.FromError(err)
-	}
-
-	// Craft bytecode
-	bytecode, err := hexutil.Decode(contract.Bytecode)
-	if err != nil {
-		return "", errors.EncodingError("failed to decode bytecode")
+		return nil, errors.FromError(err)
 	}
 
 	// Craft constructor method signature
@@ -72,13 +64,13 @@ func (uc *sendDeployTxUsecase) computeTxData(ctx context.Context, params *entiti
 	crafter := abi.BaseCrafter{}
 	args, err := utils.ParseIArrayToStringArray(params.Args)
 	if err != nil {
-		return "", errors.DataCorruptedError("failed to parse constructor method arguments")
+		return nil, errors.DataCorruptedError("failed to parse constructor method arguments")
 	}
 
-	txDataBytes, err := crafter.CraftConstructor(bytecode, constructorSignature, args...)
+	txData, err := crafter.CraftConstructor(contract.Bytecode, constructorSignature, args...)
 	if err != nil {
-		return "", errors.InvalidParameterError("invalid arguments for constructor method signature")
+		return nil, errors.InvalidParameterError("invalid arguments for constructor method signature")
 	}
 
-	return hexutil.Encode(txDataBytes), nil
+	return txData, nil
 }

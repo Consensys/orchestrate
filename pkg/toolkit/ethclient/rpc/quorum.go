@@ -26,7 +26,7 @@ type StoreRawResponse struct {
 	Key string `json:"key" validate:"required"`
 }
 
-func (ec *Client) SendQuorumRawPrivateTransaction(ctx context.Context, endpoint, signedTxHash string, privateFor,
+func (ec *Client) SendQuorumRawPrivateTransaction(ctx context.Context, endpoint string, raw hexutil.Bytes, privateFor,
 	mandatoryFor []string, privacyFlag int) (ethcommon.Hash, error) {
 	privateForParam := map[string]interface{}{
 		"privateFor":  privateFor,
@@ -39,14 +39,14 @@ func (ec *Client) SendQuorumRawPrivateTransaction(ctx context.Context, endpoint,
 
 	var hash string
 	err := ec.Call(ctx, endpoint, utils.ProcessResult(&hash), "eth_sendRawPrivateTransaction",
-		signedTxHash, privateForParam)
+		raw, privateForParam)
 	if err != nil {
 		return ethcommon.Hash{}, errors.FromError(err).ExtendComponent(component)
 	}
 	return ethcommon.HexToHash(hash), nil
 }
 
-func (ec *Client) StoreRaw(ctx context.Context, endpoint string, data []byte, privateFrom string) (string, error) {
+func (ec *Client) StoreRaw(ctx context.Context, endpoint string, data hexutil.Bytes, privateFrom string) ([]byte, error) {
 	request := map[string]string{
 		"payload": base64.StdEncoding.EncodeToString(data),
 	}
@@ -57,14 +57,14 @@ func (ec *Client) StoreRaw(ctx context.Context, endpoint string, data []byte, pr
 	storeRawResponse := &StoreRawResponse{}
 	err := ec.postRequest(ctx, endpoint, "storeraw", request, storeRawResponse)
 	if err != nil {
-		return "", errors.FromError(err).SetMessage("failed to send a request to Tessera enclave: %s", err)
+		return nil, errors.FromError(err).SetMessage("failed to send a request to Tessera enclave: %s", err)
 	}
 
 	enclaveKey, err := base64.StdEncoding.DecodeString(storeRawResponse.Key)
 	if err != nil {
-		return "", errors.DataCorruptedError("failed to decode base64 encoded string in the 'storeraw' response: %s", err)
+		return nil, errors.DataCorruptedError("failed to decode base64 encoded string in the 'storeraw' response: %s", err)
 	}
-	return hexutil.Encode(enclaveKey), nil
+	return enclaveKey, nil
 }
 
 func (ec *Client) GetStatus(ctx context.Context, endpoint string) (status string, err error) {

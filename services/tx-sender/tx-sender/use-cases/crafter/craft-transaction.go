@@ -2,7 +2,6 @@ package crafter
 
 import (
 	"context"
-	"fmt"
 	"math/big"
 
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
@@ -54,27 +53,27 @@ func (uc *craftTxUseCase) Execute(ctx context.Context, job *entities.Job) error 
 
 	switch job.Transaction.TransactionType {
 	case entities.LegacyTxType:
-		if job.Transaction.GasPrice == "" {
+		if job.Transaction.GasPrice == nil {
 			if err := uc.craftGasPrice(ctx, job); err != nil {
 				return err
 			}
 		}
 	default:
 		// We MUST recalculate gasFeeCap for child jobs
-		if job.Transaction.GasFeeCap == "" || job.InternalData.ParentJobUUID == job.UUID {
+		if job.Transaction.GasFeeCap == nil || job.InternalData.ParentJobUUID == job.UUID {
 			if err := uc.craftDynamicFeePrice(ctx, job); err != nil {
 				return err
 			}
 		}
 	}
 
-	if job.Transaction.Gas == "" {
+	if job.Transaction.Gas == nil {
 		if err := uc.craftGasEstimation(ctx, job); err != nil {
 			return err
 		}
 	}
 
-	if job.Transaction.Nonce == "" {
+	if job.Transaction.Nonce == nil {
 		if err := uc.craftNonce(ctx, job); err != nil {
 			return err
 		}
@@ -85,13 +84,13 @@ func (uc *craftTxUseCase) Execute(ctx context.Context, job *entities.Job) error 
 
 func (uc *craftTxUseCase) craftNonce(ctx context.Context, job *entities.Job) error {
 	if job.InternalData.OneTimeKey || string(job.Type) == tx.JobType_ETH_TESSERA_PRIVATE_TX.String() {
-		job.Transaction.Nonce = "0"
+		job.Transaction.Nonce = utils.ToPtr(uint64(0)).(*uint64)
 	} else {
 		n, err := uc.nonceManager.GetNonce(ctx, job)
 		if err != nil {
 			return err
 		}
-		job.Transaction.Nonce = fmt.Sprintf("%d", n)
+		job.Transaction.Nonce = &n
 	}
 
 	uc.logger.WithContext(ctx).WithField("value", job.Transaction.Nonce).Debug("crafted transaction nonce")
@@ -110,7 +109,7 @@ func (uc *craftTxUseCase) craftEEAMarkingTx(ctx context.Context, job *entities.J
 		return err
 	}
 
-	job.Transaction.To = privPContractAddr.String()
+	job.Transaction.To = &privPContractAddr
 	logger.WithField("value", privPContractAddr.String()).Debug("crafted EEA precompiled contract address to")
 	return nil
 }
@@ -127,25 +126,19 @@ func (uc *craftTxUseCase) craftGasEstimation(ctx context.Context, job *entities.
 	if job.InternalData.OneTimeKey {
 		call.From = ethcommon.HexToAddress("0x1")
 	} else {
-		call.From = ethcommon.HexToAddress(job.Transaction.From)
+		call.From = *job.Transaction.From
 	}
 
-	if job.Transaction.To != "" {
-		toAddr := ethcommon.HexToAddress(job.Transaction.To)
-		call.To = &toAddr
+	if job.Transaction.To != nil {
+		call.To = job.Transaction.To
 	}
 
-	if job.Transaction.Value != "" {
-		call.Value, _ = new(big.Int).SetString(job.Transaction.Value, 10)
+	if job.Transaction.Value != nil {
+		call.Value = job.Transaction.Value.ToInt()
 	}
 
-	if job.Transaction.Data != "" {
-		var err error
-		call.Data, err = hexutil.Decode(job.Transaction.Data)
-		if err != nil {
-			logger.WithError(err).Error(estimationGasError)
-			return err
-		}
+	if job.Transaction.Data != nil {
+		call.Data = job.Transaction.Data
 	}
 
 	// We update the data to an arbitrary hash
@@ -161,7 +154,7 @@ func (uc *craftTxUseCase) craftGasEstimation(ctx context.Context, job *entities.
 		return err
 	}
 
-	job.Transaction.Gas = fmt.Sprintf("%d", gasEstimated)
+	job.Transaction.Gas = &gasEstimated
 	logger.WithField("value", job.Transaction.Gas).Debug("crafted gas estimation")
 	return nil
 }
@@ -181,20 +174,23 @@ func (uc *craftTxUseCase) craftGasPrice(ctx context.Context, job *entities.Job) 
 		return err
 	}
 
+	var txGasPrice *big.Int
 	switch job.InternalData.Priority {
 	case utils.PriorityVeryLow:
-		job.Transaction.GasPrice = gasPrice.Mul(gasPrice, big.NewInt(6)).Div(gasPrice, big.NewInt(10)).String()
+		txGasPrice = gasPrice.Mul(gasPrice, big.NewInt(6)).Div(gasPrice, big.NewInt(10))
 	case utils.PriorityLow:
-		job.Transaction.GasPrice = gasPrice.Mul(gasPrice, big.NewInt(8)).Div(gasPrice, big.NewInt(10)).String()
+		txGasPrice = gasPrice.Mul(gasPrice, big.NewInt(8)).Div(gasPrice, big.NewInt(10))
 	case utils.PriorityMedium:
-		job.Transaction.GasPrice = gasPrice.String()
+		txGasPrice = gasPrice
 	case utils.PriorityHigh:
-		job.Transaction.GasPrice = gasPrice.Mul(gasPrice, big.NewInt(12)).Div(gasPrice, big.NewInt(10)).String()
+		txGasPrice = gasPrice.Mul(gasPrice, big.NewInt(12)).Div(gasPrice, big.NewInt(10))
 	case utils.PriorityVeryHigh:
-		job.Transaction.GasPrice = gasPrice.Mul(gasPrice, big.NewInt(14)).Div(gasPrice, big.NewInt(10)).String()
+		txGasPrice = gasPrice.Mul(gasPrice, big.NewInt(14)).Div(gasPrice, big.NewInt(10))
 	default:
-		job.Transaction.GasPrice = gasPrice.String()
+		txGasPrice = gasPrice
 	}
+
+	job.Transaction.GasPrice = utils.ToPtr(hexutil.Big(*txGasPrice)).(*hexutil.Big)
 
 	job.Transaction.TransactionType = entities.LegacyTxType
 	logger.WithField("value", job.Transaction.GasPrice).Debug("crafted gas price")
@@ -203,9 +199,9 @@ func (uc *craftTxUseCase) craftGasPrice(ctx context.Context, job *entities.Job) 
 
 func (uc *craftTxUseCase) craftTransactionType(_ context.Context, job *entities.Job) error {
 	switch {
-	case job.Transaction.GasPrice != "" || job.InternalData.OneTimeKey:
+	case job.Transaction.GasPrice != nil || job.InternalData.OneTimeKey:
 		job.Transaction.TransactionType = entities.LegacyTxType
-	case job.Transaction.GasTipCap != "" || job.Transaction.GasFeeCap != "":
+	case job.Transaction.GasTipCap != nil || job.Transaction.GasFeeCap != nil:
 		job.Transaction.TransactionType = entities.DynamicFeeTxType
 	}
 
@@ -239,7 +235,7 @@ func (uc *craftTxUseCase) craftDynamicFeePrice(ctx context.Context, job *entitie
 	}
 
 	var priorityFee *big.Int
-	if job.Transaction.GasTipCap == "" {
+	if job.Transaction.GasTipCap == nil {
 		mediumPriority, _ := new(big.Int).SetString(mediumPriorityString, 10) // 1.5 gwei
 		threshold, _ := new(big.Int).SetString(thresholdString, 10)           // 0.5 gwei
 
@@ -258,12 +254,13 @@ func (uc *craftTxUseCase) craftDynamicFeePrice(ctx context.Context, job *entitie
 			priorityFee = mediumPriority
 		}
 
-		job.Transaction.GasTipCap = priorityFee.String()
+		job.Transaction.GasTipCap = utils.ToPtr(hexutil.Big(*priorityFee)).(*hexutil.Big)
 	} else {
-		priorityFee, _ = new(big.Int).SetString(job.Transaction.GasTipCap, 10)
+		priorityFee = job.Transaction.GasTipCap.ToInt()
 	}
 
-	job.Transaction.GasFeeCap = new(big.Int).Add(nextBlockBaseFeePerGas, priorityFee).String()
+	gasFeeCap := new(big.Int).Add(nextBlockBaseFeePerGas, priorityFee)
+	job.Transaction.GasFeeCap = utils.ToPtr(hexutil.Big(*gasFeeCap)).(*hexutil.Big)
 	job.Transaction.TransactionType = entities.DynamicFeeTxType
 
 	logger.WithField("base", nextBlockBaseFeePerGas).WithField("tip", priorityFee).

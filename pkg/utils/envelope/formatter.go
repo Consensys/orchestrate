@@ -2,13 +2,13 @@ package envelope
 
 import (
 	"context"
-	"math/big"
 
 	authutils "github.com/consensys/orchestrate/pkg/toolkit/app/auth/utils"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/pkg/types/ethereum"
 	"github.com/consensys/orchestrate/pkg/types/tx"
+	"github.com/consensys/orchestrate/pkg/utils"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 )
@@ -28,16 +28,16 @@ func NewEnvelopeFromJob(job *entities.Job, headers map[string]string) *tx.TxEnve
 			Id:      job.ScheduleUUID,
 			Headers: headers,
 			Params: &tx.Params{
-				From:            job.Transaction.From,
-				To:              job.Transaction.To,
-				Gas:             job.Transaction.Gas,
-				GasPrice:        job.Transaction.GasPrice,
-				GasFeeCap:       job.Transaction.GasFeeCap,
-				GasTipCap:       job.Transaction.GasTipCap,
-				Value:           job.Transaction.Value,
-				Nonce:           job.Transaction.Nonce,
-				Data:            job.Transaction.Data,
-				Raw:             job.Transaction.Raw,
+				From:            utils.StringerToString(job.Transaction.From),
+				To:              utils.StringerToString(job.Transaction.To),
+				Gas:             utils.ValueToString(job.Transaction.Gas),
+				GasPrice:        utils.StringerToString(job.Transaction.GasPrice),
+				GasFeeCap:       utils.StringerToString(job.Transaction.GasFeeCap),
+				GasTipCap:       utils.StringerToString(job.Transaction.GasTipCap),
+				Value:           utils.StringerToString(job.Transaction.Value),
+				Nonce:           utils.ValueToString(job.Transaction.Nonce),
+				Data:            utils.StringerToString(job.Transaction.Data),
+				Raw:             utils.StringerToString(job.Transaction.Raw),
 				PrivateFrom:     job.Transaction.PrivateFrom,
 				PrivateFor:      job.Transaction.PrivateFor,
 				MandatoryFor:    job.Transaction.MandatoryFor,
@@ -54,9 +54,10 @@ func NewEnvelopeFromJob(job *entities.Job, headers map[string]string) *tx.TxEnve
 
 	txEnvelope.SetChainUUID(job.ChainUUID)
 
-	chainID := new(big.Int)
-	chainID.SetString(job.InternalData.ChainID, 10)
-	txEnvelope.SetChainID(chainID)
+	if job.InternalData.ChainID != nil {
+		txEnvelope.SetChainID(job.InternalData.ChainID)
+	}
+
 	txEnvelope.SetScheduleUUID(job.ScheduleUUID)
 	txEnvelope.SetJobUUID(job.UUID)
 
@@ -72,8 +73,8 @@ func NewEnvelopeFromJob(job *entities.Job, headers map[string]string) *tx.TxEnve
 		txEnvelope.SetPriority(job.InternalData.Priority)
 	}
 
-	if job.Transaction.Hash != "" {
-		txEnvelope.SetTxHash(job.Transaction.Hash)
+	if job.Transaction.Hash != nil {
+		txEnvelope.SetTxHash(job.Transaction.Hash.String())
 	}
 
 	return txEnvelope
@@ -95,22 +96,22 @@ func NewJobFromEnvelope(envelope *tx.Envelope) *entities.Job {
 		Type:         entities.JobType(envelope.GetJobTypeString()),
 		InternalData: &entities.InternalData{
 			OneTimeKey:    envelope.IsOneTimeKeySignature(),
-			ChainID:       envelope.GetChainIDString(),
+			ChainID:       envelope.GetChainID(),
 			ParentJobUUID: envelope.GetParentJobUUID(),
 			Priority:      envelope.GetPriority(),
 		},
 		TenantID: envelope.GetHeadersValue(authutils.TenantIDHeader),
 		OwnerID:  envelope.GetHeadersValue(authutils.UsernameHeader),
 		Transaction: &entities.ETHTransaction{
-			Hash:            envelope.GetTxHashString(),
-			From:            envelope.GetFromString(),
-			To:              envelope.GetToString(),
-			Nonce:           envelope.GetNonceString(),
-			Value:           envelope.GetValueString(),
-			GasPrice:        envelope.GetGasPriceString(),
-			Gas:             envelope.GetGasString(),
-			GasFeeCap:       envelope.GetGasFeeCapString(),
-			GasTipCap:       envelope.GetGasTipCapString(),
+			Hash:            envelope.GetTxHash(),
+			From:            envelope.GetFrom(),
+			To:              envelope.GetTo(),
+			Nonce:           envelope.GetNonce(),
+			Value:           envelope.GetValue(),
+			GasPrice:        envelope.GetGasPrice(),
+			Gas:             envelope.GetGas(),
+			GasFeeCap:       envelope.GetGasFeeCap(),
+			GasTipCap:       envelope.GetGasTipCap(),
 			AccessList:      ConvertToAccessList(envelope.GetAccessList()),
 			TransactionType: entities.TransactionType(envelope.GetTransactionType()),
 			Data:            envelope.GetData(),
@@ -120,7 +121,7 @@ func NewJobFromEnvelope(envelope *tx.Envelope) *entities.Job {
 			MandatoryFor:    envelope.GetMandatoryFor(),
 			PrivacyGroupID:  envelope.GetPrivacyGroupID(),
 			PrivacyFlag:     envelope.GetPrivacyFlag(),
-			EnclaveKey:      envelope.GetEnclaveKey(),
+			EnclaveKey:      utils.StringToHexBytes(envelope.GetEnclaveKey()),
 		},
 	}
 }

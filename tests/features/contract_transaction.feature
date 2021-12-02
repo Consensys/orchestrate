@@ -30,7 +30,7 @@ Feature: Send contract transactions
         "params": {
           "from": "{{global.nodes.besu[0].fundedPublicKeys[0]}}",
           "to": "{{account1}}",
-          "value": "100000000000000000"
+          "value": "0x16345785D8A0000"
         },
         "labels": {
           "scenario.id": "{{scenarioID}}",
@@ -46,7 +46,7 @@ Feature: Send contract transactions
         "params": {
           "from": "{{global.nodes.geth[0].fundedPublicKeys[0]}}",
           "to": "{{account2}}",
-          "value": "100000000000000000"
+          "value": "0x16345785D8A0000"
         },
         "labels": {
           "scenario.id": "{{scenarioID}}",
@@ -174,7 +174,7 @@ Feature: Send contract transactions
           "from": "{{account1}}",
           "to": "{{besuContractAddr}}",
           "methodSignature": "transfer(address,uint256)",
-          "gas": "100000",
+          "gas": 100000,
           "args": [
             "0x6009608A02a7A15fd6689D6DaD560C44E9ab61Ff",
             "0x8"
@@ -235,7 +235,7 @@ Feature: Send contract transactions
           "from": "{{account2}}",
           "to": "{{gethContractAddr}}",
           "methodSignature": "transfer(address,uint256)",
-          "gas": "100000",
+          "gas": 100000,
           "args": [
             "0x6009608A02a7A15fd6689D6DaD560C44E9ab61Ff",
             "2"

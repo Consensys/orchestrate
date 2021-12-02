@@ -14,6 +14,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/go-kit/kit/transport/http/jsonrpc"
 
 	clientutils "github.com/consensys/orchestrate/pkg/toolkit/app/http/client-utils"
@@ -48,6 +49,20 @@ const aliasHeaderValue = "alias"
 
 var aliasRegex = regexp.MustCompile("{{([^}]*)}}")
 var AddressPtrType = reflect.TypeOf(new(common.Address))
+
+// type SimpleEnvelope struct {
+// 	TxHash string
+// 	Raw    string
+// 	From   string
+// }
+//
+// func newSimpleEnvelope(e tx.Envelope) *SimpleEnvelope {
+// 	return &SimpleEnvelope{
+// 		TxHash: e.GetTxHashString(),
+// 		Raw:    e.GetRawString(),
+// 		From:   e.GetFromString(),
+// 	}
+// }
 
 func (sc *ScenarioContext) sendEnvelope(topic string, e *tx.Envelope) error {
 	// Prepare message to be sent
@@ -457,13 +472,27 @@ func (sc *ScenarioContext) replace(s string) (string, error) {
 		var str string
 		switch val.Kind() {
 		case reflect.Array, reflect.Slice:
-			strb, _ := json.Marshal(v)
-			str = string(strb)
+			switch reflect.TypeOf(v).String() {
+			case reflect.TypeOf(new(hexutil.Bytes)).String():
+				str = v.(*hexutil.Bytes).String()
+			case reflect.TypeOf(hexutil.Bytes{}).String():
+				str = v.(hexutil.Bytes).String()
+			default:
+				strb, _ := json.Marshal(v)
+				str = string(strb)
+			}
 		default:
-			str = fmt.Sprintf("%v", v)
+			switch reflect.TypeOf(v).String() {
+			case reflect.TypeOf(new(hexutil.Big)).String():
+				str = v.(*hexutil.Big).String()
+			default:
+				str = fmt.Sprintf("%v", v)
+			}
 		}
+
 		s = strings.Replace(s, matchedAlias[0], str, 1)
 	}
+
 	return s, nil
 }
 
@@ -547,6 +576,7 @@ func (sc *ScenarioContext) iSignTheFollowingTransactions(table *gherkin.PickleSt
 		if err != nil {
 			return err
 		}
+
 		sc.aliases.Set(e, sc.Pickle.Id, helpersTable.Rows[i+1].Cells[0].Value)
 	}
 
@@ -657,7 +687,7 @@ func (sc *ScenarioContext) craftAndSignEnvelope(ctx context.Context, e *tx.Envel
 		_ = e.SetChainID(chainID)
 	}
 
-	signer := pkgcryto.GetEIP155Signer(e.GetChainIDString())
+	signer := types.NewEIP155Signer(e.GetChainID())
 	acc, err := crypto.HexToECDSA(privKey)
 	if err != nil {
 		log.WithError(err).WithField("private_key", privKey).Error("failed to create account using private key")
@@ -671,7 +701,7 @@ func (sc *ScenarioContext) craftAndSignEnvelope(ctx context.Context, e *tx.Envel
 			log.WithError(errGasPrice).Error("failed to suggest gas price")
 			return errGasPrice
 		}
-		_ = e.SetGasPrice(gasPrice)
+		_ = e.SetGasPrice((*hexutil.Big)(gasPrice))
 	}
 
 	transaction, err := e.GetTransaction()

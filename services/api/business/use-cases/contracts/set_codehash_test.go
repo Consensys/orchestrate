@@ -7,11 +7,12 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/assert"
 	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/utils"
 	"github.com/consensys/orchestrate/services/api/store/mocks"
 	models2 "github.com/consensys/orchestrate/services/api/store/models"
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSetCodeHash_Execute(t *testing.T) {
@@ -19,11 +20,11 @@ func TestSetCodeHash_Execute(t *testing.T) {
 	defer ctrl.Finish()
 	ctx := context.Background()
 
-	codeHash := "codeHash"
+	codeHash := utils.StringToHexBytes("0xAB")
 	codeHashModel := &models2.CodehashModel{
 		ChainID:  chainID,
 		Address:  contractAddress.Hex(),
-		Codehash: codeHash,
+		Codehash: codeHash.String(),
 	}
 	codeHashAgent := mocks.NewMockCodeHashAgent(ctrl)
 	usecase := NewSetCodeHashUseCase(codeHashAgent)

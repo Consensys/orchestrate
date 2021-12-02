@@ -1,6 +1,9 @@
 package entities
 
-import "time"
+import (
+	"math/big"
+	"time"
+)
 
 type Chain struct {
 	UUID                      string
@@ -8,7 +11,7 @@ type Chain struct {
 	TenantID                  string
 	OwnerID                   string
 	URLs                      []string
-	ChainID                   string
+	ChainID                   *big.Int
 	ListenerDepth             uint64
 	ListenerCurrentBlock      uint64
 	ListenerStartingBlock     uint64

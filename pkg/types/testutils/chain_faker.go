@@ -1,6 +1,8 @@
 package testutils
 
 import (
+	"math/big"
+
 	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/gofrs/uuid"
@@ -12,7 +14,7 @@ func FakeChain() *entities.Chain {
 		Name:                      "ganache",
 		TenantID:                  multitenancy.DefaultTenant,
 		URLs:                      []string{"http://ethereum-node:8545"},
-		ChainID:                   "888",
+		ChainID:                   big.NewInt(888),
 		ListenerDepth:             0,
 		ListenerCurrentBlock:      0,
 		ListenerStartingBlock:     0,

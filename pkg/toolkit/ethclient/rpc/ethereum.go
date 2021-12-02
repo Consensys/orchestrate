@@ -343,9 +343,9 @@ func (ec *Client) SuggestGasPrice(ctx context.Context, endpoint string) (*big.In
 }
 
 type FeeHistory struct {
-	OldestBlock   *hexutil.Big
-	Reward        [][]*hexutil.Big
-	BaseFeePerGas []*hexutil.Big
+	OldestBlock   hexutil.Big
+	Reward        [][]hexutil.Big
+	BaseFeePerGas []hexutil.Big
 	GasUsedRatio  []float64
 }
 
@@ -409,7 +409,7 @@ func toCallArg(msg *eth.CallMsg) interface{} {
 }
 
 // SendRawTransaction allows to send a raw transaction
-func (ec *Client) SendRawTransaction(ctx context.Context, endpoint, raw string) (txHash ethcommon.Hash, err error) {
+func (ec *Client) SendRawTransaction(ctx context.Context, endpoint string, raw hexutil.Bytes) (txHash ethcommon.Hash, err error) {
 	err = ec.Call(ctx, endpoint, utils.ProcessResult(&txHash), "eth_sendRawTransaction", raw)
 	if err != nil {
 		return ethcommon.Hash{}, errors.FromError(err).ExtendComponent(component)
@@ -427,7 +427,7 @@ func (ec *Client) SendTransaction(ctx context.Context, endpoint string, args *ty
 }
 
 // SendRawPrivateTransaction send a raw transaction to an Ethereum node supporting EEA extension
-func (ec *Client) SendRawPrivateTransaction(ctx context.Context, endpoint, raw string) (ethcommon.Hash, error) {
+func (ec *Client) SendRawPrivateTransaction(ctx context.Context, endpoint string, raw hexutil.Bytes) (ethcommon.Hash, error) {
 	// Send a raw signed transactions using EEA extension method
 	// Method documentation here: https://besu.hyperledger.org/en/stable/Reference/API-Methods/#eea_sendrawtransaction
 	var hash string

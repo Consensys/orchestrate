@@ -2,6 +2,7 @@ package signer
 
 import (
 	"context"
+	"math/big"
 
 	pkgcryto "github.com/consensys/orchestrate/pkg/crypto/ethereum"
 	"github.com/consensys/orchestrate/pkg/encoding/rlp"
@@ -11,6 +12,7 @@ import (
 	"github.com/consensys/orchestrate/pkg/utils"
 	"github.com/consensys/orchestrate/services/tx-sender/tx-sender/parsers"
 	qkmtypes "github.com/consensys/quorum-key-manager/src/stores/api/types"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 
 	usecases "github.com/consensys/orchestrate/services/tx-sender/tx-sender/use-cases"
@@ -39,7 +41,7 @@ func NewSignETHTransactionUseCase(keyManagerClient client.KeyManagerClient) usec
 	}
 }
 
-func (uc *signETHTransactionUseCase) Execute(ctx context.Context, job *entities.Job) (signedRaw, txHash string, err error) {
+func (uc *signETHTransactionUseCase) Execute(ctx context.Context, job *entities.Job) (signedRaw hexutil.Bytes, txHash *ethcommon.Hash, err error) {
 	logger := uc.logger.WithContext(ctx).WithField("one_time_key", job.InternalData.OneTimeKey)
 
 	transaction := parsers.ETHTransactionToTransaction(job.Transaction, job.InternalData.ChainID)
@@ -49,53 +51,54 @@ func (uc *signETHTransactionUseCase) Execute(ctx context.Context, job *entities.
 		signedRaw, txHash, err = uc.signWithAccount(ctx, job, transaction, job.InternalData.ChainID)
 	}
 	if err != nil {
-		return "", "", errors.FromError(err).ExtendComponent(signTransactionComponent)
+		return nil, nil, errors.FromError(err).ExtendComponent(signTransactionComponent)
 	}
 
-	logger.WithField("tx_hash", txHash).Debug("ethereum transaction signed successfully")
+	logger.WithField("tx_hash", txHash.Hex()).Debug("ethereum transaction signed successfully")
 	return signedRaw, txHash, nil
 }
 
-func (uc *signETHTransactionUseCase) signWithOneTimeKey(ctx context.Context, transaction *types.Transaction, chainID string) (signedRaw, txHash string, err error) {
+func (uc *signETHTransactionUseCase) signWithOneTimeKey(ctx context.Context, transaction *types.Transaction, chainID *big.Int) (signedRaw hexutil.Bytes, txHash *ethcommon.Hash, err error) {
 	logger := uc.logger.WithContext(ctx)
 	privKey, err := crypto.GenerateKey()
 	if err != nil {
 		errMessage := "failed to generate Ethereum private one time key"
 		logger.WithError(err).Error(errMessage)
-		return "", "", errors.CryptoOperationError(errMessage)
+		return nil, nil, errors.CryptoOperationError(errMessage)
 	}
 
-	signer := pkgcryto.GetEIP155Signer(chainID)
+	signer := types.NewEIP155Signer(chainID)
 	decodedSignature, err := pkgcryto.SignTransaction(transaction, privKey, signer)
 	if err != nil {
 		logger.WithError(err).Error("failed to sign Ethereum transaction")
-		return "", "", err
+		return nil, nil, err
 	}
 
 	signedTx, err := transaction.WithSignature(signer, decodedSignature)
 	if err != nil {
 		errMessage := "failed to set transaction signature"
 		logger.WithError(err).Error(errMessage)
-		return "", "", errors.InvalidParameterError(errMessage).ExtendComponent(signTransactionComponent)
+		return nil, nil, errors.InvalidParameterError(errMessage).ExtendComponent(signTransactionComponent)
 	}
 
 	signedRawB, err := rlp.Encode(signedTx)
 	if err != nil {
 		errMessage := "failed to RLP encode signed transaction"
 		logger.WithError(err).Error(errMessage)
-		return "", "", errors.CryptoOperationError(errMessage).ExtendComponent(signTransactionComponent)
+		return nil, nil, errors.CryptoOperationError(errMessage).ExtendComponent(signTransactionComponent)
 	}
 
-	return hexutil.Encode(signedRawB), signedTx.Hash().Hex(), nil
+	return signedRawB, utils.ToPtr(signedTx.Hash()).(*ethcommon.Hash), nil
 }
 
-func (uc *signETHTransactionUseCase) signWithAccount(ctx context.Context, job *entities.Job, tx *types.Transaction, chainID string) (signedRaw, txHash string, err error) {
+func (uc *signETHTransactionUseCase) signWithAccount(ctx context.Context, job *entities.Job, tx *types.Transaction,
+	chainID *big.Int) (signedRaw hexutil.Bytes, txHash *ethcommon.Hash, err error) {
 	logger := uc.logger.WithContext(ctx)
-	signedRaw, err = uc.keyManagerClient.SignTransaction(ctx, uc.storeName, job.Transaction.From, &qkmtypes.SignETHTransactionRequest{
+	signedRawStr, err := uc.keyManagerClient.SignTransaction(ctx, uc.storeName, job.Transaction.From.Hex(), &qkmtypes.SignETHTransactionRequest{
 		Nonce:           hexutil.Uint64(tx.Nonce()),
 		To:              tx.To(),
 		Data:            tx.Data(),
-		ChainID:         hexutil.Big(*utils.MustEncodeBigInt(chainID)),
+		ChainID:         hexutil.Big(*chainID),
 		Value:           hexutil.Big(*tx.Value()),
 		GasPrice:        hexutil.Big(*tx.GasPrice()),
 		GasLimit:        hexutil.Uint64(tx.Gas()),
@@ -107,15 +110,22 @@ func (uc *signETHTransactionUseCase) signWithAccount(ctx context.Context, job *e
 	if err != nil {
 		errMsg := "failed to sign ethereum transaction using key manager"
 		logger.WithError(err).Error(errMsg)
-		return "", "", errors.DependencyFailureError(errMsg).AppendReason(err.Error())
+		return nil, nil, errors.DependencyFailureError(errMsg).AppendReason(err.Error())
 	}
 
-	err = tx.UnmarshalBinary(hexutil.MustDecode(signedRaw))
+	signedRaw, err = hexutil.Decode(signedRawStr)
 	if err != nil {
-		errMessage := "failed to decode signature"
+		errMessage := "failed to decode raw signature"
 		logger.WithError(err).Error(errMessage)
-		return "", "", errors.EncodingError(errMessage)
+		return nil, nil, errors.EncodingError(errMessage)
 	}
 
-	return signedRaw, tx.Hash().Hex(), nil
+	err = tx.UnmarshalBinary(signedRaw)
+	if err != nil {
+		errMessage := "failed to decode tx signature"
+		logger.WithError(err).Error(errMessage)
+		return nil, nil, errors.EncodingError(errMessage)
+	}
+
+	return signedRaw, utils.ToPtr(tx.Hash()).(*ethcommon.Hash), nil
 }

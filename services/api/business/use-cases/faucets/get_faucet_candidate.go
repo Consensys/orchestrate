@@ -2,7 +2,6 @@ package faucets
 
 import (
 	"context"
-	"math/big"
 	"reflect"
 
 	"github.com/consensys/orchestrate/pkg/errors"
@@ -12,13 +11,14 @@ import (
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
 	"github.com/consensys/orchestrate/services/api/business/use-cases/faucets/controls"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 )
 
 const getFaucetCandidateComponent = "use-cases.faucet-candidate"
 
 type FaucetControl interface {
 	Control(ctx context.Context, req *entities.FaucetRequest) error
-	OnSelectedCandidate(ctx context.Context, faucet *entities.Faucet, beneficiary string) error
+	OnSelectedCandidate(ctx context.Context, faucet *entities.Faucet, beneficiary ethcommon.Address) error
 }
 
 // RegisterContract is a use case to register a new contract
@@ -46,7 +46,7 @@ func NewGetFaucetCandidateUseCase(
 	}
 }
 
-func (uc *faucetCandidate) Execute(ctx context.Context, account string, chain *entities.Chain, userInfo *multitenancy.UserInfo) (*entities.Faucet, error) {
+func (uc *faucetCandidate) Execute(ctx context.Context, account ethcommon.Address, chain *entities.Chain, userInfo *multitenancy.UserInfo) (*entities.Faucet, error) {
 	ctx = log.With(log.WithFields(ctx, log.Field("chain", chain.UUID), log.Field("account", account)), uc.logger)
 	logger := uc.logger.WithContext(ctx)
 
@@ -99,12 +99,10 @@ func (uc *faucetCandidate) Execute(ctx context.Context, account string, chain *e
 // electFaucet is currently selecting the remaining faucet candidates with the highest amount
 func electFaucet(faucetsCandidates map[string]*entities.Faucet) string {
 	electedFaucet := reflect.ValueOf(faucetsCandidates).MapKeys()[0].String()
-	amountElectedFaucetBigInt, _ := new(big.Int).SetString(faucetsCandidates[electedFaucet].Amount, 10)
+	amountElectedFaucet := faucetsCandidates[electedFaucet].Amount.ToInt()
 
 	for key, candidate := range faucetsCandidates {
-		amountBigInt, _ := new(big.Int).SetString(candidate.Amount, 10)
-
-		if amountBigInt.Cmp(amountElectedFaucetBigInt) > 0 {
+		if candidate.Amount.ToInt().Cmp(amountElectedFaucet) > 0 {
 			electedFaucet = key
 		}
 	}

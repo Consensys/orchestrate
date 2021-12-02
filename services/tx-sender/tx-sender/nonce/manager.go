@@ -5,7 +5,6 @@ import (
 	"crypto/md5"
 	"fmt"
 	"sort"
-	"strconv"
 	"strings"
 
 	"github.com/consensys/orchestrate/pkg/errors"
@@ -15,7 +14,6 @@ import (
 	"github.com/consensys/orchestrate/pkg/types/tx"
 	"github.com/consensys/orchestrate/pkg/utils"
 	"github.com/consensys/orchestrate/services/tx-sender/store"
-	ethcommon "github.com/ethereum/go-ethereum/common"
 )
 
 const component = "nonce-manager"
@@ -106,7 +104,10 @@ func (nc *nonceManager) CleanNonce(ctx context.Context, job *entities.Job, jobEr
 		return err
 	}
 
-	txNonce, _ := strconv.ParseUint(job.Transaction.Nonce, 10, 64)
+	txNonce := uint64(0)
+	if job.Transaction.Nonce != nil {
+		txNonce = *job.Transaction.Nonce
+	}
 
 	// Clean nonce value only if it was used to set the txNonce
 	lastSentNonce, ok, _ := nc.nonce.GetLastSent(nonceKey)
@@ -120,7 +121,7 @@ func (nc *nonceManager) CleanNonce(ctx context.Context, job *entities.Job, jobEr
 
 	// In case of failing because "nonce too low" we reset tx nonce
 	nc.recovery.Recover(job.UUID)
-	job.Transaction.Nonce = ""
+	job.Transaction.Nonce = nil
 
 	return errors.InvalidNonceWarning(jobErr.Error())
 }
@@ -129,7 +130,10 @@ func (nc *nonceManager) IncrementNonce(ctx context.Context, job *entities.Job) e
 	logger := nc.logger.WithContext(ctx).WithField("job", job.UUID)
 
 	nonceKey := partitionKey(job)
-	txNonce, _ := strconv.ParseUint(job.Transaction.Nonce, 10, 64)
+	txNonce := uint64(0)
+	if job.Transaction.Nonce != nil {
+		txNonce = *job.Transaction.Nonce
+	}
 
 	// Set nonce value only if txNonce was using previous value
 	lastSentNonce, ok, _ := nc.nonce.GetLastSent(nonceKey)
@@ -141,24 +145,23 @@ func (nc *nonceManager) IncrementNonce(ctx context.Context, job *entities.Job) e
 		}
 	}
 
-	logger.WithField("last_sent", txNonce).Debug("increment account nonce value")
+	logger.WithField("last_sent", *job.Transaction.Nonce).Debug("increment account nonce value")
 	nc.recovery.Recovered(job.UUID)
 	return nil
 }
 
 func (nc *nonceManager) fetchNonceFromChain(ctx context.Context, job *entities.Job) (n uint64, err error) {
 	url := utils.GetProxyURL(nc.chainRegistryURL, job.ChainUUID)
-	fromAddr := ethcommon.HexToAddress(job.Transaction.From)
 
 	switch {
 	case string(job.Type) == tx.JobType_ETH_EEA_PRIVATE_TX.String() && job.Transaction.PrivacyGroupID != "":
-		n, err = nc.ethClient.PrivNonce(ctx, url, fromAddr,
+		n, err = nc.ethClient.PrivNonce(ctx, url, *job.Transaction.From,
 			job.Transaction.PrivacyGroupID)
-	case string(job.Type) == tx.JobType_ETH_EEA_PRIVATE_TX.String() && len(job.Transaction.PrivateFor) > 0:
-		n, err = nc.ethClient.PrivEEANonce(ctx, url, fromAddr,
+	case string(job.Type) == tx.JobType_ETH_EEA_PRIVATE_TX.String() && job.Transaction.PrivateFor != nil:
+		n, err = nc.ethClient.PrivEEANonce(ctx, url, *job.Transaction.From,
 			job.Transaction.PrivateFrom, job.Transaction.PrivateFor)
 	default:
-		n, err = nc.ethClient.PendingNonceAt(ctx, url, fromAddr)
+		n, err = nc.ethClient.PendingNonceAt(ctx, url, *job.Transaction.From)
 	}
 
 	return
@@ -167,7 +170,7 @@ func (nc *nonceManager) fetchNonceFromChain(ctx context.Context, job *entities.J
 func partitionKey(job *entities.Job) string {
 	// Return empty partition key for raw tx and one time key tx
 	// Not able to format a correct partition key if From or ChainID are not set. In that case return empty partition key
-	if job.Transaction.From == "" || job.InternalData.ChainID == "" {
+	if job.Transaction.From == nil || job.InternalData.ChainID == nil {
 		return ""
 	}
 

@@ -12,6 +12,7 @@ import (
 	"github.com/consensys/orchestrate/services/tx-sender/tx-sender/nonce"
 	usecases "github.com/consensys/orchestrate/services/tx-sender/tx-sender/use-cases"
 	utils2 "github.com/consensys/orchestrate/services/tx-sender/tx-sender/utils"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 )
 
 const sendEEAPrivateTxComponent = "use-cases.send-eea-private-tx"
@@ -84,14 +85,14 @@ func (uc *sendEEAPrivateTxUseCase) Execute(ctx context.Context, job *entities.Jo
 	return nil
 }
 
-func (uc *sendEEAPrivateTxUseCase) sendTx(ctx context.Context, job *entities.Job) (string, error) {
+func (uc *sendEEAPrivateTxUseCase) sendTx(ctx context.Context, job *entities.Job) (*ethcommon.Hash, error) {
 	proxyURL := utils.GetProxyURL(uc.chainRegistryURL, job.ChainUUID)
 	txHash, err := uc.ec.PrivDistributeRawTransaction(ctx, proxyURL, job.Transaction.Raw)
 	if err != nil {
 		errMsg := "cannot send EEA private transaction"
 		uc.logger.WithContext(ctx).WithError(err).Error(errMsg)
-		return "", err
+		return nil, err
 	}
 
-	return txHash.String(), nil
+	return &txHash, nil
 }

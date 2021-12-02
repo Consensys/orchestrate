@@ -4,6 +4,7 @@ import (
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/pkg/utils"
 	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
 const contractABI = ` [
@@ -284,9 +285,9 @@ func FakeContract() *entities.Contract {
 		Name:             utils.RandString(5),
 		Tag:              "v1.0.0",
 		ABI:              contractABI,
-		Bytecode:         bytecode,
+		Bytecode:         hexutil.MustDecode(bytecode),
 		Methods:          []entities.Method{},
-		DeployedBytecode: deployedBytecode,
+		DeployedBytecode: hexutil.MustDecode(deployedBytecode),
 		Constructor: entities.Method{
 			Signature: "()",
 		},

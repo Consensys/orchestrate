@@ -12,8 +12,8 @@ Feature: Faucet funding
 
   Scenario: Generate account with faucet and different tenant
     And I register the following faucets
-      | Name                  | ChainRule            | CreditorAccount                              | MaxBalance       | Amount           | Cooldown | API-KEY            | Tenant                 |
-      | faucet-{{scenarioID}} | {{chain.besu0.UUID}} | {{global.nodes.besu[0].fundedPublicKeys[0]}} | 1000000000000000 | 1000000000000000 | 1m       | {{global.api-key}} | {{tenantFoo.tenantID}} |
+      | Name                  | ChainRule            | CreditorAccount                              | MaxBalance      | Amount          | Cooldown | API-KEY            | Tenant                 |
+      | faucet-{{scenarioID}} | {{chain.besu0.UUID}} | {{global.nodes.besu[0].fundedPublicKeys[0]}} | 0x38D7EA4C68000 | 0x38D7EA4C68000 | 1m       | {{global.api-key}} | {{tenantFoo.tenantID}} |
     And I have created the following accounts
       | alias    | ID              | ChainName            | API-KEY            | Tenant                 |
       | account1 | {{random.uuid}} | {{chain.besu0.Name}} | {{global.api-key}} | {{tenantBar.tenantID}} |
@@ -49,8 +49,8 @@ Feature: Faucet funding
       | alias    | ID              | ChainName            | API-KEY            | Tenant                 |
       | account1 | {{random.uuid}} | {{chain.besu0.Name}} | {{global.api-key}} | {{tenantBar.tenantID}} |
     And I register the following faucets
-      | Name                  | ChainRule            | CreditorAccount                              | MaxBalance       | Amount           | Cooldown | API-KEY            | Tenant                 |
-      | faucet-{{scenarioID}} | {{chain.besu0.UUID}} | {{global.nodes.besu[0].fundedPublicKeys[0]}} | 1000000000000000 | 1000000000000000 | 1m       | {{global.api-key}} | {{tenantFoo.tenantID}} |
+      | Name                  | ChainRule            | CreditorAccount                              | MaxBalance      | Amount          | Cooldown | API-KEY            | Tenant                 |
+      | faucet-{{scenarioID}} | {{chain.besu0.UUID}} | {{global.nodes.besu[0].fundedPublicKeys[0]}} | 0x38D7EA4C68000 | 0x38D7EA4C68000 | 1m       | {{global.api-key}} | {{tenantFoo.tenantID}} |
     Then I track the following envelopes
       | ID                |
       | {{transferOneID}} |
@@ -65,7 +65,7 @@ Feature: Faucet funding
         "params": {
           "from": "{{account1}}",
           "to": "{{toAddr}}",
-          "value": "100000000000000"
+          "value": "0x16345785D8A0000"
         },
         "labels": {
           "scenario.id": "{{scenarioID}}",

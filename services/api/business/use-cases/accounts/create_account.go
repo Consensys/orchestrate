@@ -92,8 +92,8 @@ func (uc *createAccountUseCase) Execute(ctx context.Context, account *entities.A
 	}
 
 	account.Address = resp.Address
-	account.PublicKey = resp.PublicKey.String()
-	account.CompressedPublicKey = resp.CompressedPublicKey.String()
+	account.PublicKey = resp.PublicKey
+	account.CompressedPublicKey = resp.CompressedPublicKey
 	account.TenantID = userInfo.TenantID
 	account.OwnerID = userInfo.Username
 

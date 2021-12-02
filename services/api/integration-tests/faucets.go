@@ -10,7 +10,7 @@ import (
 	"github.com/consensys/orchestrate/pkg/sdk/client"
 	"github.com/consensys/orchestrate/pkg/types/api"
 	"github.com/consensys/orchestrate/pkg/types/entities"
-	"github.com/consensys/quorum/common/hexutil"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/h2non/gock.v1"
 
@@ -205,14 +205,14 @@ func (s *faucetsTestSuite) TestSuccess_TxsWithFaucet() {
 		assert.Equal(t, entities.StatusStarted, faucetJob.Status)
 		assert.Equal(t, entities.EthereumTransaction, faucetJob.Type)
 		assert.Equal(t, faucetJob.Transaction.To, txJob.Transaction.From)
-		assert.Equal(t, faucetJob.Transaction.Value, faucet.Amount)
+		assert.Equal(t, faucetJob.Transaction.Value.String(), faucet.Amount.String())
 	
 		assert.NotEmpty(t, txResponseGET.UUID)
 		assert.NotEmpty(t, txJob.UUID)
 		assert.Equal(t, txJob.ChainUUID, faucet.ChainRule)
 		assert.Equal(t, entities.StatusStarted, txJob.Status)
-		assert.Equal(t, txRequest.Params.From.Hex(), txJob.Transaction.From)
-		assert.Equal(t, txRequest.Params.To.Hex(), txJob.Transaction.To)
+		assert.Equal(t, txRequest.Params.From.Hex(), txJob.Transaction.From.Hex())
+		assert.Equal(t, txRequest.Params.To.Hex(), txJob.Transaction.To.Hex())
 		assert.Equal(t, entities.EthereumTransaction, txJob.Type)
 	
 		fctEvlp, err := s.env.consumer.WaitForEnvelope(faucetJob.ScheduleUUID, s.env.kafkaTopicConfig.Sender, waitForEnvelopeTimeOut)
@@ -245,13 +245,13 @@ func (s *faucetsTestSuite) TestSuccess_TxsWithFaucet() {
 		assert.Equal(t, entities.StatusStarted, faucetJob.Status)
 		assert.Equal(t, entities.EthereumTransaction, faucetJob.Type)
 		assert.Equal(t, faucetJob.Transaction.To, txJob.Transaction.From)
-		assert.Equal(t, faucetJob.Transaction.Value, faucet.Amount)
+		assert.Equal(t, faucetJob.Transaction.Value.String(), faucet.Amount.String())
 
 		assert.NotEmpty(t, txResponseGET.UUID)
 		assert.NotEmpty(t, txJob.UUID)
 		assert.Equal(t, txJob.ChainUUID, faucet.ChainRule)
 		assert.Equal(t, entities.StatusStarted, txJob.Status)
-		assert.Equal(t, "0x4c7aF4B315644848f400b7344A8e73Cf227812b4", txJob.Transaction.From)
+		assert.Equal(t, "0x4c7aF4B315644848f400b7344A8e73Cf227812b4", txJob.Transaction.From.String())
 		assert.Equal(t, entities.EthereumRawTransaction, txJob.Type)
 
 		fctEvlp, err := s.env.consumer.WaitForEnvelope(faucetJob.ScheduleUUID, s.env.kafkaTopicConfig.Sender, waitForEnvelopeTimeOut)

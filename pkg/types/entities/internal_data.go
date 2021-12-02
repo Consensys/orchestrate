@@ -1,11 +1,14 @@
 package entities
 
-import "time"
+import (
+	"math/big"
+	"time"
+)
 
 type InternalData struct {
 	OneTimeKey        bool          `json:"oneTimeKey,omitempty"`
 	HasBeenRetried    bool          `json:"hasBeenRetried,omitempty"`
-	ChainID           string        `json:"chainID"`
+	ChainID           *big.Int      `json:"chainID"`
 	Priority          string        `json:"priority"`
 	ParentJobUUID     string        `json:"parentJobUUID,omitempty"`
 	GasPriceIncrement float64       `json:"gasPriceIncrement,omitempty"`

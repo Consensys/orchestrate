@@ -41,13 +41,7 @@ func (uc *registerContractUseCase) Execute(ctx context.Context, contract *entiti
 		return errors.FromError(err).ExtendComponent(registerContractComponent)
 	}
 
-	dByteCode, err := hexutil.Decode(contract.DeployedBytecode)
-	if err != nil {
-		logger.WithError(err).Error("failed to decode deployedByteCode")
-		return errors.FromError(err).ExtendComponent(registerContractComponent)
-	}
-
-	codeHash := crypto.Keccak256Hash(dByteCode)
+	codeHash := crypto.Keccak256Hash(contract.DeployedBytecode)
 	contractAbi, err := contract.ToABI()
 	if err != nil {
 		logger.WithError(err).Error("invalid ABI value")
@@ -65,9 +59,9 @@ func (uc *registerContractUseCase) Execute(ctx context.Context, contract *entiti
 	}
 	artifact := &models.ArtifactModel{
 		ABI:              abiRaw,
-		Bytecode:         contract.Bytecode,
-		DeployedBytecode: contract.DeployedBytecode,
-		Codehash:         hexutil.Encode(crypto.Keccak256(dByteCode)),
+		Bytecode:         contract.Bytecode.String(),
+		DeployedBytecode: contract.DeployedBytecode.String(),
+		Codehash:         hexutil.Encode(crypto.Keccak256(contract.DeployedBytecode)),
 	}
 
 	err = database.ExecuteInDBTx(uc.db, func(tx database.Tx) error {
@@ -115,12 +109,12 @@ func (uc *registerContractUseCase) Execute(ctx context.Context, contract *entiti
 	return nil
 }
 
-func getMethods(contractAbi *ethabi.ABI, deployedBytecode string, codeHash common.Hash, methodJSONs map[string]string) []*models.MethodModel {
+func getMethods(contractAbi *ethabi.ABI, deployedBytecode hexutil.Bytes, codeHash common.Hash, methodJSONs map[string]string) []*models.MethodModel {
 	var methods []*models.MethodModel
 	// nolint
 	for _, m := range contractAbi.Methods {
 		sel := sigHashToSelector(m.ID)
-		if deployedBytecode != "" {
+		if deployedBytecode != nil {
 			methods = append(methods, &models.MethodModel{
 				Codehash: codeHash.Hex(),
 				Selector: sel,
@@ -132,12 +126,12 @@ func getMethods(contractAbi *ethabi.ABI, deployedBytecode string, codeHash commo
 	return methods
 }
 
-func getEvents(contractAbi *ethabi.ABI, deployedBytecode string, codeHash common.Hash, eventJSONs map[string]string) []*models.EventModel {
+func getEvents(contractAbi *ethabi.ABI, deployedBytecode hexutil.Bytes, codeHash common.Hash, eventJSONs map[string]string) []*models.EventModel {
 	var events []*models.EventModel
 	// nolint
 	for _, e := range contractAbi.Events {
 		indexedCount := getIndexedCount(&e)
-		if deployedBytecode != "" {
+		if deployedBytecode != nil {
 			events = append(events, &models.EventModel{
 				Codehash:          codeHash.Hex(),
 				SigHash:           e.ID.Hex(),

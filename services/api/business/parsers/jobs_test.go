@@ -3,6 +3,7 @@
 package parsers
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/consensys/orchestrate/pkg/types/entities"
@@ -50,17 +51,17 @@ func TestParsersJob_NewEnvelopeFromModel(t *testing.T) {
 	txRequest := txEnvelope.GetTxRequest()
 	assert.Equal(t, job.ChainUUID, txEnvelope.GetChainUUID())
 	assert.Equal(t, tx.JobTypeMap[job.Type], txRequest.GetJobType())
-	assert.Equal(t, job.Transaction.From, txRequest.Params.GetFrom())
-	assert.Equal(t, job.Transaction.To, txRequest.Params.GetTo())
-	assert.Equal(t, job.Transaction.Data, txRequest.Params.GetData())
-	assert.Equal(t, job.Transaction.Nonce, txRequest.Params.GetNonce())
-	assert.Equal(t, job.Transaction.Raw, txRequest.Params.GetRaw())
-	assert.Equal(t, job.Transaction.GasPrice, txRequest.Params.GetGasPrice())
-	assert.Equal(t, job.Transaction.Gas, txRequest.Params.GetGas())
+	assert.Equal(t, job.Transaction.From.String(), txRequest.Params.GetFrom())
+	assert.Equal(t, job.Transaction.To.String(), txRequest.Params.GetTo())
+	assert.Equal(t, job.Transaction.Data.String(), txRequest.Params.GetData())
+	assert.Equal(t, fmt.Sprintf("%d", *job.Transaction.Nonce), txRequest.Params.GetNonce())
+	assert.Equal(t, job.Transaction.Raw.String(), txRequest.Params.GetRaw())
+	assert.Equal(t, job.Transaction.GasPrice.String(), txRequest.Params.GetGasPrice())
+	assert.Equal(t, fmt.Sprintf("%d", *job.Transaction.Gas), txRequest.Params.GetGas())
 	assert.Equal(t, job.Transaction.PrivateFor, txRequest.Params.GetPrivateFor())
 	assert.Equal(t, job.Transaction.PrivateFrom, txRequest.Params.GetPrivateFrom())
 	assert.Equal(t, job.Transaction.PrivacyGroupID, txRequest.Params.GetPrivacyGroupId())
-	assert.Equal(t, job.InternalData.ChainID, txEnvelope.GetChainID())
+	assert.Equal(t, job.InternalData.ChainID.String(), txEnvelope.GetChainID())
 }
 
 func TestParsersJob_NewEnvelopeFromModelOneTimeKey(t *testing.T) {

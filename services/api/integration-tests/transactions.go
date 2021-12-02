@@ -121,8 +121,8 @@ func (s *transactionsTestSuite) TestSuccess() {
 		assert.NotEmpty(t, txResponseGET.UUID)
 		assert.NotEmpty(t, job.UUID)
 		assert.Equal(t, entities.StatusStarted, job.Status)
-		assert.Equal(t, "", job.Transaction.From)
-		assert.Equal(t, txRequest.Params.To.Hex(), job.Transaction.To)
+		assert.Empty(t, job.Transaction.From)
+		assert.Equal(t, txRequest.Params.To.Hex(), job.Transaction.To.Hex())
 		assert.Equal(t, entities.EthereumTransaction, job.Type)
 
 		evlp, err := s.env.consumer.WaitForEnvelope(job.ScheduleUUID, s.env.kafkaTopicConfig.Sender, waitForEnvelopeTimeOut)
@@ -157,8 +157,8 @@ func (s *transactionsTestSuite) TestSuccess() {
 		privTxJob := txResponseGET.Jobs[0]
 		assert.NotEmpty(t, privTxJob.UUID)
 		assert.Equal(t, entities.StatusStarted, privTxJob.Status)
-		assert.Equal(t, txRequest.Params.From.Hex(), privTxJob.Transaction.From)
-		assert.Equal(t, txRequest.Params.To.Hex(), privTxJob.Transaction.To)
+		assert.Equal(t, txRequest.Params.From.Hex(), privTxJob.Transaction.From.Hex())
+		assert.Equal(t, txRequest.Params.To.Hex(), privTxJob.Transaction.To.Hex())
 		assert.Equal(t, entities.TesseraPrivateTransaction, privTxJob.Type)
 
 		markingTxJob := txResponseGET.Jobs[1]
@@ -200,8 +200,8 @@ func (s *transactionsTestSuite) TestSuccess() {
 		privTxJob := txResponseGET.Jobs[0]
 		assert.NotEmpty(t, privTxJob.UUID)
 		assert.Equal(t, entities.StatusStarted, privTxJob.Status)
-		assert.Equal(t, txRequest.Params.From.Hex(), privTxJob.Transaction.From)
-		assert.Equal(t, txRequest.Params.To.Hex(), privTxJob.Transaction.To)
+		assert.Equal(t, txRequest.Params.From.Hex(), privTxJob.Transaction.From.Hex())
+		assert.Equal(t, txRequest.Params.To.Hex(), privTxJob.Transaction.To.Hex())
 		assert.Equal(t, entities.EEAPrivateTransaction, privTxJob.Type)
 
 		markingTxJob := txResponseGET.Jobs[1]
@@ -248,7 +248,7 @@ func (s *transactionsTestSuite) TestSuccess() {
 		assert.NotEmpty(t, txResponseGET.UUID)
 		assert.NotEmpty(t, job.UUID)
 		assert.Equal(t, entities.StatusStarted, job.Status)
-		assert.Equal(t, txRequest.Params.From.Hex(), job.Transaction.From)
+		assert.Equal(t, txRequest.Params.From.Hex(), job.Transaction.From.Hex())
 		assert.Equal(t, entities.EthereumTransaction, job.Type)
 
 		evlp, err := s.env.consumer.WaitForEnvelope(job.ScheduleUUID, s.env.kafkaTopicConfig.Sender, waitForEnvelopeTimeOut)
@@ -321,9 +321,9 @@ func (s *transactionsTestSuite) TestSuccess() {
 		assert.NotEmpty(t, txResponseGET.UUID)
 		assert.NotEmpty(t, job.UUID)
 		assert.Equal(t, entities.StatusStarted, job.Status)
-		assert.Equal(t, txRequest.Params.Value, job.Transaction.Value)
-		assert.Equal(t, txRequest.Params.To.Hex(), job.Transaction.To)
-		assert.Equal(t, txRequest.Params.From.Hex(), job.Transaction.From)
+		assert.Equal(t, txRequest.Params.Value.String(), job.Transaction.Value.String())
+		assert.Equal(t, txRequest.Params.To.Hex(), job.Transaction.To.Hex())
+		assert.Equal(t, txRequest.Params.From.Hex(), job.Transaction.From.Hex())
 		assert.Equal(t, entities.EthereumTransaction, job.Type)
 
 		evlp, err := s.env.consumer.WaitForEnvelope(job.ScheduleUUID, s.env.kafkaTopicConfig.Sender, waitForEnvelopeTimeOut)

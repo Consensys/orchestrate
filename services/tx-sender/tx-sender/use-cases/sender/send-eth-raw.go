@@ -12,6 +12,7 @@ import (
 	"github.com/consensys/orchestrate/pkg/utils"
 	usecases "github.com/consensys/orchestrate/services/tx-sender/tx-sender/use-cases"
 	utils2 "github.com/consensys/orchestrate/services/tx-sender/tx-sender/utils"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 )
 
 const sendETHRawTxComponent = "use-cases.send-eth-raw-tx"
@@ -60,8 +61,8 @@ func (uc *sendETHRawTxUseCase) Execute(ctx context.Context, job *entities.Job) e
 		return errors.FromError(err).ExtendComponent(sendETHRawTxComponent)
 	}
 
-	if txHash != job.Transaction.Hash {
-		warnMessage := fmt.Sprintf("expected transaction hash %s, but got %s. Overriding", job.Transaction.Hash, txHash)
+	if txHash.String() != job.Transaction.Hash.String() {
+		warnMessage := fmt.Sprintf("expected transaction hash %s, but got %s. Overriding", job.Transaction.Hash.String(), txHash.String())
 		job.Transaction.Hash = txHash
 		err = utils2.UpdateJobStatus(ctx, uc.jobClient, job, entities.StatusWarning, warnMessage, job.Transaction)
 		if err != nil {
@@ -73,14 +74,14 @@ func (uc *sendETHRawTxUseCase) Execute(ctx context.Context, job *entities.Job) e
 	return nil
 }
 
-func (uc *sendETHRawTxUseCase) sendTx(ctx context.Context, job *entities.Job) (string, error) {
+func (uc *sendETHRawTxUseCase) sendTx(ctx context.Context, job *entities.Job) (*ethcommon.Hash, error) {
 	proxyURL := utils.GetProxyURL(uc.chainRegistryURL, job.ChainUUID)
 	txHash, err := uc.ec.SendRawTransaction(ctx, proxyURL, job.Transaction.Raw)
 	if err != nil {
 		errMsg := "cannot send ethereum raw transaction"
 		uc.logger.WithContext(ctx).WithError(err).Error(errMsg)
-		return "", err
+		return nil, err
 	}
 
-	return txHash.String(), nil
+	return &txHash, nil
 }

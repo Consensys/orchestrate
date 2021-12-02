@@ -4,13 +4,14 @@ import (
 	"time"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
 type Account struct {
 	Alias               string
 	Address             ethcommon.Address
-	PublicKey           string
-	CompressedPublicKey string
+	PublicKey           hexutil.Bytes
+	CompressedPublicKey hexutil.Bytes
 	TenantID            string
 	OwnerID             string
 	Attributes          map[string]string

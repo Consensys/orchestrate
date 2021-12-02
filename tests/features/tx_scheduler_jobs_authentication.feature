@@ -32,7 +32,7 @@ Feature: Transaction Scheduler Jobs
         "params": {
           "from": "{{global.nodes.besu[0].fundedPublicKeys[0]}}",
           "to": "{{account1}}",
-          "value": "100000000000000000"
+          "value": "0x16345785D8A0000"
         },
         "labels": {
           "scenario.id": "{{scenarioID}}",
@@ -69,7 +69,7 @@ Feature: Transaction Scheduler Jobs
         "transaction": {
           "from": "{{account1}}",
           "to": "{{to1}}",
-          "value": "100000"
+          "value": "0x186A0"
         }
       }
       """
@@ -90,7 +90,7 @@ Feature: Transaction Scheduler Jobs
         "transaction": {
           "from": "{{account1}}",
           "to": "{{to1}}",
-          "value": "100000"
+          "value": "0x186A0"
         },
         "labels": {
           "scenario.id": "{{scenarioID}}"

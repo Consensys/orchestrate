@@ -4,11 +4,14 @@ package integrationtests
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	ethAbi "github.com/ethereum/go-ethereum/accounts/abi"
 	ethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"github.com/consensys/orchestrate/pkg/encoding/json"
 	"github.com/consensys/orchestrate/pkg/errors"
@@ -159,22 +162,21 @@ func (s *contractsTestSuite) TestContractRegistry_CodeHash() {
 	txRequest.Name = contractName
 	_, err := s.client.RegisterContract(ctx, txRequest)
 	if err != nil {
-		assert.Fail(s.T(), err.Error())
-		return
+		require.NoError(s.T(), err)
 	}
 
 	address := ethcommon.HexToAddress(utils.RandHexString(10))
 	address2 := ethcommon.HexToAddress(utils.RandHexString(10))
-	codeHash := ethcommon.HexToHash(utils.RandHexString(20))
-	codeHash2 := "0xd63259750ca3b56efab25f0646a4d1fb659b6b643474506e1be24d81f9e55fd8"
+	codeHash := hexutil.MustDecode("0x"+utils.RandHexString(20))
+	codeHash2 := hexutil.MustDecode("0xd63259750ca3b56efab25f0646a4d1fb659b6b643474506e1be24d81f9e55fd8")
 	chainID := "2017"
 
 	s.T().Run("should set contract code hashes successfully", func(t *testing.T) {
 		err := s.client.SetContractAddressCodeHash(ctx, address.String(), chainID, &api.SetContractCodeHashRequest{
-			CodeHash: codeHash.String(),
+			CodeHash: codeHash,
 		})
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		
 		err = s.client.SetContractAddressCodeHash(ctx, address2.String(), chainID, &api.SetContractCodeHashRequest{
 			CodeHash: codeHash2,
@@ -185,13 +187,13 @@ func (s *contractsTestSuite) TestContractRegistry_CodeHash() {
 
 	s.T().Run("should get default contract event by sigHash successfully", func(t *testing.T) {
 		resp, err := s.client.GetContractEvents(ctx, address.String(), chainID, &api.GetContractEventsRequest{
-			SigHash:           "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+			SigHash:           utils.StringToHexBytes("0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"),
 			IndexedInputCount: 2,
 		})
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		if len(resp.DefaultEvents) == 0 {
-			assert.Fail(t, "expected some default events")
+			require.NoError(t, fmt.Errorf("expected some default events"))
 		}
 
 		event := &ethAbi.Event{}
@@ -202,33 +204,24 @@ func (s *contractsTestSuite) TestContractRegistry_CodeHash() {
 
 	s.T().Run("should get contract event by sigHash successfully", func(t *testing.T) {
 		resp, err := s.client.GetContractEvents(ctx, address2.String(), chainID, &api.GetContractEventsRequest{
-			SigHash:           "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+			SigHash:           utils.StringToHexBytes("0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"),
 			IndexedInputCount: 2,
 		})
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		if resp.Event == "" {
-			assert.Fail(t, "expected contract events")
+			require.NoError(t, fmt.Errorf("expected contract events"))
 		}
 
 		event := &ethAbi.Event{}
 		err = json.Unmarshal([]byte(resp.Event), event)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, "Transfer", event.Name)
 	})
 
 	s.T().Run("should fail to set contract code hashes if invalid address", func(t *testing.T) {
 		err := s.client.SetContractAddressCodeHash(ctx, "InvalidAddress", chainID, &api.SetContractCodeHashRequest{
-			CodeHash: codeHash.String(),
-		})
-
-		assert.Error(t, err)
-		assert.True(t, errors.IsInvalidFormatError(err), "IsInvalidFormatError")
-	})
-
-	s.T().Run("should fail to set contract code hashes if invalid codeHash", func(t *testing.T) {
-		err := s.client.SetContractAddressCodeHash(ctx, address.String(), chainID, &api.SetContractCodeHashRequest{
-			CodeHash: "{invalidCodeHash}",
+			CodeHash: codeHash,
 		})
 
 		assert.Error(t, err)

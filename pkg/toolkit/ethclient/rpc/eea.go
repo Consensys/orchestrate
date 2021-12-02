@@ -28,8 +28,8 @@ type privateReceipt struct {
 
 // Distributes a signed, RLP encoded private transaction.
 // https://besu.hyperledger.org/en/stable/Reference/API-Methods/#priv_distributerawtransaction
-func (ec *Client) PrivDistributeRawTransaction(ctx context.Context, endpoint, raw string) (txHash ethcommon.Hash, err error) {
-	err = ec.Call(ctx, endpoint, utils.ProcessResult(&txHash), "priv_distributeRawTransaction", raw)
+func (ec *Client) PrivDistributeRawTransaction(ctx context.Context, endpoint string, raw hexutil.Bytes) (txHash ethcommon.Hash, err error) {
+	err = ec.Call(ctx, endpoint, utils.ProcessResult(&txHash), "priv_distributeRawTransaction", raw.String())
 	if err != nil {
 		return ethcommon.Hash{}, errors.FromError(err).ExtendComponent(component)
 	}

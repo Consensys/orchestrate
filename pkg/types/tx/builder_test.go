@@ -8,12 +8,13 @@ import (
 	"reflect"
 	"testing"
 
-	ethcommon "github.com/ethereum/go-ethereum/common"
-	"github.com/gofrs/uuid"
-	"github.com/stretchr/testify/assert"
 	"github.com/consensys/orchestrate/pkg/errors"
 	ierror "github.com/consensys/orchestrate/pkg/types/error"
 	"github.com/consensys/orchestrate/pkg/types/ethereum"
+	"github.com/consensys/orchestrate/pkg/utils"
+	ethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/gofrs/uuid"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewEnvelope(t *testing.T) {
@@ -108,8 +109,8 @@ func TestEnvelope_Validate(t *testing.T) {
 		SetJobType(JobType_ETH_TX).
 		MustSetToString("0x2").
 		SetGas(11).
-		SetGasPrice(big.NewInt(12)).
-		SetValue(big.NewInt(13)).
+		SetGasPrice(utils.BigIntStringToHex("12")).
+		SetValue(utils.BigIntStringToHex("13")).
 		SetNonce(14).
 		SetData([]byte{1}).
 		SetContractName("testContractName").
@@ -231,44 +232,42 @@ func TestEnvelope_Nonce(t *testing.T) {
 }
 
 func TestEnvelope_GasPrice(t *testing.T) {
-	b := NewEnvelope().SetGasPrice(big.NewInt(10))
-	assert.Equal(t, big.NewInt(10), b.GetGasPrice(), "Should be equal")
-	assert.Equal(t, "10", b.GetGasPriceString(), "Should be equal")
+	b := NewEnvelope().SetGasPrice(utils.BigIntStringToHex("10"))
+	assert.Equal(t, big.NewInt(10), b.GetGasPrice().ToInt(), "Should be equal")
+	assert.Equal(t, "0xa", b.GetGasPriceString(), "Should be equal")
 	gasPrice, err := b.GetGasPriceBig()
-	assert.Equal(t, big.NewInt(10), gasPrice, "Should be equal")
+	assert.Equal(t, big.NewInt(10), gasPrice.ToInt(), "Should be equal")
 	assert.NoError(t, err)
 
 	b.GasPrice = nil
 	var nilGasPrice *big.Int
 	gasPrice, err = b.GetGasPriceBig()
-	assert.Equal(t, nilGasPrice, gasPrice, "Should be equal")
+	assert.Equal(t, nilGasPrice, gasPrice.ToInt(), "Should be equal")
 	assert.Error(t, err, "Should be not nil")
 	assert.Equal(t, "", b.GetGasPriceString(), "Should be equal")
 
-	err = b.SetGasPriceString("12")
-	assert.Equal(t, "12", b.GetGasPriceString(), "Should be equal")
+	err = b.SetGasPriceString("0xc")
+	assert.Equal(t, "0xc", b.GetGasPriceString(), "Should be equal")
 	assert.NoError(t, err)
 	err = b.SetGasPriceString("@")
 	assert.Error(t, err)
 }
 
 func TestEnvelope_Value(t *testing.T) {
-	b := NewEnvelope().SetValue(big.NewInt(10))
-	assert.Equal(t, big.NewInt(10), b.GetValue(), "Should be equal")
-	assert.Equal(t, "10", b.GetValueString(), "Should be equal")
+	b := NewEnvelope().SetValue(utils.BigIntStringToHex("10"))
+	assert.Equal(t, big.NewInt(10), b.GetValue().ToInt(), "Should be equal")
+	assert.Equal(t, "0xa", b.GetValueString(), "Should be equal")
 	value, err := b.GetValueBig()
-	assert.Equal(t, big.NewInt(10), value, "Should be equal")
+	assert.Equal(t, big.NewInt(10), value.ToInt(), "Should be equal")
 	assert.NoError(t, err)
 
 	b.Value = nil
-	var nilValue *big.Int
 	value, err = b.GetValueBig()
-	assert.Equal(t, nilValue, value, "Should be equal")
 	assert.Error(t, err, "Should be not nil")
 	assert.Equal(t, "", b.GetValueString(), "Should be equal")
 
-	err = b.SetValueString("12")
-	assert.Equal(t, "12", b.GetValueString(), "Should be equal")
+	err = b.SetValueString("0xc")
+	assert.Equal(t, "0xc", b.GetValueString(), "Should be equal")
 	assert.NoError(t, err)
 	err = b.SetValueString("@")
 	assert.Error(t, err)
@@ -278,10 +277,10 @@ func TestEnvelope_Data(t *testing.T) {
 	b := NewEnvelope()
 	err := b.SetDataString("0x01")
 	assert.NoError(t, err)
-	assert.Equal(t, "0x01", b.GetData(), "Should be equal")
+	assert.Equal(t, "0x01", b.GetDataString(), "Should be equal")
 	assert.Equal(t, []byte{1}, b.MustGetDataBytes(), "Should be equal")
 
-	b.Data = ""
+	b.Data = []byte{}
 	assert.Equal(t, []byte{}, b.MustGetDataBytes(), "Should be equal")
 
 	_ = b.SetData([]byte{2})
@@ -297,20 +296,20 @@ func TestEnvelope_Raw(t *testing.T) {
 	b := NewEnvelope()
 	err := b.SetRawString("0x01")
 	assert.NoError(t, err)
-	assert.Equal(t, "0x01", b.GetRaw(), "Should be equal")
+	assert.Equal(t, "0x01", b.GetRawString(), "Should be equal")
 	assert.Equal(t, "0x01", b.GetShortRaw(), "Should be equal")
 	assert.Equal(t, []byte{1}, b.MustGetRawBytes(), "Should be equal")
 
-	b.Raw = ""
+	b.Raw = []byte{}
 	assert.Equal(t, []byte{}, b.MustGetRawBytes(), "Should be equal")
 
 	_ = b.SetRaw([]byte{2})
 	assert.Equal(t, []byte{2}, b.MustGetRawBytes(), "Should be equal")
 
-	err = b.SetRawString("@")
+	err = b.SetRawString("0xA")
 	assert.Error(t, err)
 
-	_ = b.MustSetRawString("@")
+	_ = b.MustSetRawString("0xAB")
 }
 
 func TestEnvelope_TxHash(t *testing.T) {
@@ -416,8 +415,8 @@ func TestEnvelope_TxRequest(t *testing.T) {
 		MustSetFromString("0x1").
 		MustSetToString("0x2").
 		SetGas(11).
-		SetGasPrice(big.NewInt(12)).
-		SetValue(big.NewInt(13)).
+		SetGasPrice(utils.BigIntStringToHex("12")).
+		SetValue(utils.BigIntStringToHex("13")).
 		SetNonce(14).
 		SetData([]byte{1}).
 		SetContractName("testContractName").
@@ -437,8 +436,8 @@ func TestEnvelope_TxRequest(t *testing.T) {
 			From:            "0x0000000000000000000000000000000000000001",
 			To:              "0x0000000000000000000000000000000000000002",
 			Gas:             "11",
-			GasPrice:        "12",
-			Value:           "13",
+			GasPrice:        "0xc",
+			Value:           "0xd",
 			Nonce:           "14",
 			Data:            "0x01",
 			Contract:        "testContractName[testContractTag]",
@@ -468,8 +467,8 @@ func TestEnvelope_TxEnvelopeAsRequest(t *testing.T) {
 		MustSetFromString("0x1").
 		MustSetToString("0x2").
 		SetGas(11).
-		SetGasPrice(big.NewInt(12)).
-		SetValue(big.NewInt(13)).
+		SetGasPrice(utils.BigIntStringToHex("12")).
+		SetValue(utils.BigIntStringToHex("13")).
 		SetNonce(14).
 		SetData([]byte{1}).
 		SetContractName("testContractName").
@@ -493,8 +492,8 @@ func TestEnvelope_TxEnvelopeAsRequest(t *testing.T) {
 					From:            "0x0000000000000000000000000000000000000001",
 					To:              "0x0000000000000000000000000000000000000002",
 					Gas:             "11",
-					GasPrice:        "12",
-					Value:           "13",
+					GasPrice:        "0xc",
+					Value:           "0xd",
 					Nonce:           "14",
 					Data:            "0x01",
 					Contract:        "testContractName[testContractTag]",
@@ -529,9 +528,9 @@ func TestEnvelope_TxEnvelopeAsRequest(t *testing.T) {
 					From:     "0x0000000000000000000000000000000000000001",
 					Nonce:    "14",
 					To:       "0x0000000000000000000000000000000000000002",
-					Value:    "13",
+					Value:    "0xd",
 					Gas:      "11",
-					GasPrice: "12",
+					GasPrice: "0xc",
 					Data:     "0x01",
 					Raw:      "0x02",
 					TxHash:   "0x2d6a7b0f6adeff38423d4c62cd8b6ccb708ddad85da5d3d06756ad4d8a04a6a2",
@@ -565,8 +564,8 @@ func TestEnvelope_TxResponse(t *testing.T) {
 		MustSetFromString("0x1").
 		MustSetToString("0x2").
 		SetGas(11).
-		SetGasPrice(big.NewInt(12)).
-		SetValue(big.NewInt(13)).
+		SetGasPrice(utils.BigIntStringToHex("12")).
+		SetValue(utils.BigIntStringToHex("13")).
 		SetNonce(14).
 		SetData([]byte{1}).
 		SetContractName("testContractName").
@@ -589,9 +588,9 @@ func TestEnvelope_TxResponse(t *testing.T) {
 			From:     "0x0000000000000000000000000000000000000001",
 			Nonce:    "14",
 			To:       "0x0000000000000000000000000000000000000002",
-			Value:    "13",
+			Value:    "0xd",
 			Gas:      "11",
-			GasPrice: "12",
+			GasPrice: "0xc",
 			Data:     "0x01",
 			Raw:      "0x02",
 			TxHash:   "0x2d6a7b0f6adeff38423d4c62cd8b6ccb708ddad85da5d3d06756ad4d8a04a6a2",

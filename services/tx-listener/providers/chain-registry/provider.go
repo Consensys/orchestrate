@@ -91,7 +91,7 @@ func (p *Provider) buildConfiguration(ctx context.Context, chains []*api.ChainRe
 			OwnerID:  chain.OwnerID,
 			Name:     chain.Name,
 			URL:      utils.GetProxyURL(p.conf.ProxyURL, chain.UUID),
-			ChainID:  chain.ChainID,
+			ChainID:  chain.ChainID.String(),
 			Listener: dynamic.Listener{
 				StartingBlock:     chain.ListenerStartingBlock,
 				CurrentBlock:      chain.ListenerCurrentBlock,

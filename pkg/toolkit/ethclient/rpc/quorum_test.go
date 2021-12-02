@@ -4,6 +4,7 @@ package rpc
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -14,6 +15,7 @@ import (
 	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/pkg/toolkit/ethclient/testutils"
 	pkgUtils "github.com/consensys/orchestrate/pkg/utils"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -35,7 +37,7 @@ func TestStoreRawTransaction(t *testing.T) {
 	}{
 		{
 			"success storeraw",
-			StoreRawResponse{Key: "test"},
+			StoreRawResponse{Key: base64.StdEncoding.EncodeToString(hexutil.MustDecode("0xb5eb2d"))},
 			200,
 			nil,
 			"0xb5eb2d",
@@ -46,7 +48,7 @@ func TestStoreRawTransaction(t *testing.T) {
 			StoreRawResponse{Key: "test"},
 			400,
 			fmt.Errorf("test"),
-			"",
+			"0x",
 			errors.HTTPConnectionError("failed to send a request to Tessera enclave: 08200@: failed to send a request to 'test/storeraw' - Post \"test/storeraw\": test"),
 		},
 	}
@@ -62,7 +64,7 @@ func TestStoreRawTransaction(t *testing.T) {
 
 			enclaveKey, err := ec.StoreRaw(ctx, "test", []byte{}, "testPrivateFrom")
 			assert.Equal(t, err, test.expectedError)
-			assert.Equal(t, test.expectedEnclaveKey, enclaveKey)
+			assert.Equal(t, test.expectedEnclaveKey, hexutil.Encode(enclaveKey))
 		})
 	}
 }
@@ -108,6 +110,6 @@ func TestSendQuorumRawPrivateTransaction(t *testing.T) {
 
 	// Test 1 with Error
 	ctx := testutils.NewContext(fmt.Errorf("test-error"), 0, nil)
-	_, err := ec.SendQuorumRawPrivateTransaction(ctx, "test-endpoint", "", nil, nil, 0)
+	_, err := ec.SendQuorumRawPrivateTransaction(ctx, "test-endpoint", nil, nil, nil, 0)
 	assert.Error(t, err, "#1 SendQuorumRawPrivateTransaction should  error")
 }

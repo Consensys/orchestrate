@@ -19,13 +19,13 @@ func init() {
 const (
 	urlFlag     = "api-url"
 	URLViperKey = "api.url"
-	urlDefault  = "localhost:8081"
+	urlDefault  = "http://localhost:8081"
 	urlEnv      = "API_URL"
 )
 
 const (
 	MetricsURLViperKey = "api.metrics.url"
-	metricsURLDefault  = "localhost:8082"
+	metricsURLDefault  = "http://localhost:8082"
 	metricsURLEnv      = "API_METRICS_URL"
 )
 

@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/consensys/orchestrate/pkg/utils"
 	ethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
 )
 
@@ -13,11 +14,11 @@ type TransferRequest struct {
 }
 
 type TransferParams struct {
-	Value           string            `json:"value" validate:"required,isBig" example:"71500000 (wei)"`
-	Gas             string            `json:"gas,omitempty" example:"21000"`
-	GasPrice        string            `json:"gasPrice,omitempty" validate:"omitempty,isBig" example:"71500000 (wei)"`
-	GasFeeCap       string            `json:"maxFeePerGas,omitempty" example:"71500000 (wei)"`
-	GasTipCap       string            `json:"maxPriorityFeePerGas,omitempty" example:"71500000 (wei)"`
+	Value           *hexutil.Big      `json:"value" validate:"required" example:"0x59682f00" swaggertype:"string"`
+	Gas             *uint64           `json:"gas,omitempty" example:"21000"`
+	GasPrice        *hexutil.Big      `json:"gasPrice,omitempty" example:"0x5208" swaggertype:"string"`
+	GasFeeCap       *hexutil.Big      `json:"maxFeePerGas,omitempty" example:"0x4c4b40" swaggertype:"string"`
+	GasTipCap       *hexutil.Big      `json:"maxPriorityFeePerGas,omitempty" example:"0x59682f00" swaggertype:"string"`
 	AccessList      types.AccessList  `json:"accessList,omitempty" swaggertype:"array,object"`
 	TransactionType string            `json:"transactionType,omitempty" validate:"omitempty,isTransactionType" example:"dynamic_fee" enums:"legacy,dynamic_fee"`
 	From            ethcommon.Address `json:"from" validate:"required" example:"0x1abae27a0cbfb02945720425d3b80c7e09728534" swaggertype:"string"`

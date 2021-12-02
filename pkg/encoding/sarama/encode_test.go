@@ -3,16 +3,16 @@
 package sarama
 
 import (
-	"math/big"
 	"sync"
 	"testing"
 
 	"github.com/consensys/orchestrate/pkg/types/tx"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 
 	"github.com/Shopify/sarama"
-	"google.golang.org/protobuf/proto"
 	err "github.com/consensys/orchestrate/pkg/types/error"
 	"github.com/consensys/orchestrate/pkg/types/ethereum"
+	"google.golang.org/protobuf/proto"
 )
 
 var PostState = "0xabcdef"
@@ -23,8 +23,8 @@ var envlp = tx.NewEnvelope().
 	MustSetFromString("0xdbb881a51CD4023E4400CEF3ef73046743f08da3").
 	SetNonce(10).
 	MustSetToString("0x6009608A02a7A15fd6689D6DaD560C44E9ab61Ff").
-	SetValue(big.NewInt(1000)).
-	SetGasPrice(big.NewInt(20)).
+	SetValue((*hexutil.Big)(hexutil.MustDecodeBig("0x3E8"))).
+	SetGasPrice((*hexutil.Big)(hexutil.MustDecodeBig("0x14"))).
 	SetGas(1234).
 	MustSetRawString("0xbeef").
 	MustSetTxHashString("0x24f5acae441335ad59220734d1ffd9cc1f6f525d39f2785859298048c25fb814").

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
 type Faucet struct {
@@ -12,8 +13,8 @@ type Faucet struct {
 	TenantID        string
 	ChainRule       string
 	CreditorAccount ethcommon.Address
-	MaxBalance      string
-	Amount          string
+	MaxBalance      hexutil.Big
+	Amount          hexutil.Big
 	Cooldown        string
 	CreatedAt       time.Time
 	UpdatedAt       time.Time

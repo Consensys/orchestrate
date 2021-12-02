@@ -16,6 +16,8 @@ import (
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
 	"github.com/consensys/orchestrate/services/api/store"
 	"github.com/consensys/orchestrate/services/api/store/models"
+	ethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/gofrs/uuid"
 )
 
@@ -53,7 +55,7 @@ func NewSendTxUseCase(
 }
 
 // Execute validates, creates and starts a new transaction
-func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequest, txData string, userInfo *multitenancy.UserInfo) (*entities.TxRequest, error) {
+func (uc *sendTxUsecase) Execute(ctx context.Context, txRequest *entities.TxRequest, txData hexutil.Bytes, userInfo *multitenancy.UserInfo) (*entities.TxRequest, error) {
 	ctx = log.WithFields(ctx, log.Field("idempotency-key", txRequest.IdempotencyKey))
 	logger := uc.logger.WithContext(ctx)
 	logger.Debug("creating new transaction")
@@ -122,7 +124,7 @@ func (uc *sendTxUsecase) getChain(ctx context.Context, chainName string, userInf
 func (uc *sendTxUsecase) selectOrInsertTxRequest(
 	ctx context.Context,
 	txRequest *entities.TxRequest,
-	txData, requestHash, chainUUID string,
+	txData []byte, requestHash, chainUUID string,
 	userInfo *multitenancy.UserInfo,
 ) (*entities.TxRequest, error) {
 	if txRequest.IdempotencyKey == "" {
@@ -147,7 +149,7 @@ func (uc *sendTxUsecase) selectOrInsertTxRequest(
 func (uc *sendTxUsecase) insertNewTxRequest(
 	ctx context.Context,
 	txRequest *entities.TxRequest,
-	txData, requestHash, chainUUID, tenantID string,
+	txData []byte, requestHash, chainUUID, tenantID string,
 	userInfo *multitenancy.UserInfo,
 ) (*entities.TxRequest, error) {
 	err := database.ExecuteInDBTx(uc.db, func(dbtx database.Tx) error {
@@ -206,13 +208,13 @@ func (uc *sendTxUsecase) insertNewTxRequest(
 }
 
 // Execute validates, creates and starts a new transaction for pre funding users account
-func (uc *sendTxUsecase) startFaucetJob(ctx context.Context, account, scheduleUUID string, chain *entities.Chain, userInfo *multitenancy.UserInfo) (*entities.Job, error) {
-	if account == "" {
+func (uc *sendTxUsecase) startFaucetJob(ctx context.Context, account *ethcommon.Address, scheduleUUID string, chain *entities.Chain, userInfo *multitenancy.UserInfo) (*entities.Job, error) {
+	if account == nil {
 		return nil, nil
 	}
 
 	logger := uc.logger.WithContext(ctx).WithField("chain", chain.UUID)
-	faucet, err := uc.getFaucetCandidate.Execute(ctx, account, chain, userInfo)
+	faucet, err := uc.getFaucetCandidate.Execute(ctx, *account, chain, userInfo)
 	if err != nil {
 		if errors.IsNotFoundError(err) {
 			return nil, nil
@@ -230,9 +232,9 @@ func (uc *sendTxUsecase) startFaucetJob(ctx context.Context, account, scheduleUU
 		},
 		InternalData: &entities.InternalData{},
 		Transaction: &entities.ETHTransaction{
-			From:  faucet.CreditorAccount.Hex(),
+			From:  &faucet.CreditorAccount,
 			To:    account,
-			Value: faucet.Amount,
+			Value: &faucet.Amount,
 		},
 	}
 	fctJob, err := uc.createJobUC.Execute(ctx, txJob, userInfo)

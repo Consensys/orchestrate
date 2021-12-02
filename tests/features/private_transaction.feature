@@ -968,7 +968,7 @@ Feature: Private transactions
         "transaction": {
           "from": "{{account1}}",
           "to": "{{to1}}",
-          "nonce": "1000001",
+          "nonce": 1000001,
           "privateFrom": "{{global.nodes.besu[0].privateAddress[0]}}",
           "privateFor": [
             "{{global.nodes.besu[1].privateAddress[0]}}"

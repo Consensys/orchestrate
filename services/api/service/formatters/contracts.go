@@ -8,7 +8,7 @@ import (
 	"github.com/consensys/orchestrate/pkg/errors"
 	types "github.com/consensys/orchestrate/pkg/types/api"
 	"github.com/consensys/orchestrate/pkg/types/entities"
-	"github.com/consensys/orchestrate/pkg/utils"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
 func FormatRegisterContractRequest(req *types.RegisterContractRequest) (*entities.Contract, error) {
@@ -36,7 +36,8 @@ func FormatGetContractEventsRequest(req *http.Request) (*types.GetContractEvents
 	if qSigHash == "" {
 		return nil, errors.InvalidParameterError("sig_hash cannot be empty")
 	}
-	if !utils.IsHexString(qSigHash) {
+	sigHash, err := hexutil.Decode(qSigHash)
+	if err != nil {
 		return nil, errors.InvalidParameterError("sig_hash is not hex value")
 	}
 
@@ -51,7 +52,7 @@ func FormatGetContractEventsRequest(req *http.Request) (*types.GetContractEvents
 	}
 
 	return &types.GetContractEventsRequest{
-		SigHash:           qSigHash,
+		SigHash:           sigHash,
 		IndexedInputCount: uint32(qIndexedInputCountInt),
 	}, nil
 }

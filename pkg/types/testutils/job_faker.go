@@ -1,6 +1,7 @@
 package testutils
 
 import (
+	"math/big"
 	"time"
 
 	"github.com/consensys/orchestrate/pkg/types/entities"
@@ -28,7 +29,7 @@ func FakeJob() *entities.Job {
 
 func FakeInternalData() *entities.InternalData {
 	return &entities.InternalData{
-		ChainID:  "888",
+		ChainID:  big.NewInt(888),
 		Priority: utils.PriorityMedium,
 	}
 }

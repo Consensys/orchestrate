@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/consensys/orchestrate/services/api/store"
+	"github.com/consensys/quorum/common/hexutil"
 
 	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
@@ -39,8 +40,8 @@ func (uc *getContractUseCase) Execute(ctx context.Context, name, tag string) (*e
 		Name:             name,
 		Tag:              tag,
 		ABI:              artifact.ABI,
-		Bytecode:         artifact.Bytecode,
-		DeployedBytecode: artifact.DeployedBytecode,
+		Bytecode:         hexutil.MustDecode(artifact.Bytecode),
+		DeployedBytecode: hexutil.MustDecode(artifact.DeployedBytecode),
 	}
 
 	contractABI, err := contract.ToABI()

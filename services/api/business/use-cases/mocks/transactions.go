@@ -9,6 +9,7 @@ import (
 	multitenancy "github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	entities "github.com/consensys/orchestrate/pkg/types/entities"
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
+	hexutil "github.com/ethereum/go-ethereum/common/hexutil"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )
@@ -282,7 +283,7 @@ func (m *MockSendTxUseCase) EXPECT() *MockSendTxUseCaseMockRecorder {
 }
 
 // Execute mocks base method
-func (m *MockSendTxUseCase) Execute(ctx context.Context, txRequest *entities.TxRequest, txData string, userInfo *multitenancy.UserInfo) (*entities.TxRequest, error) {
+func (m *MockSendTxUseCase) Execute(ctx context.Context, txRequest *entities.TxRequest, txData hexutil.Bytes, userInfo *multitenancy.UserInfo) (*entities.TxRequest, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Execute", ctx, txRequest, txData, userInfo)
 	ret0, _ := ret[0].(*entities.TxRequest)

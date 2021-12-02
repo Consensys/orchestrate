@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 
 	"github.com/consensys/orchestrate/pkg/types/entities"
 
@@ -38,10 +39,10 @@ func (ctrl *CooldownControl) Control(ctx context.Context, req *entities.FaucetRe
 
 	// If still cooling down we invalid credit
 	for key, candidate := range req.Candidates {
-		ctrl.lock(key, req.Beneficiary)
-		defer ctrl.unlock(key, req.Beneficiary)
+		ctrl.lock(key, req.Beneficiary.String())
+		defer ctrl.unlock(key, req.Beneficiary.String())
 
-		if ctrl.IsCoolingDown(key, req.Beneficiary, candidate.Cooldown) {
+		if ctrl.IsCoolingDown(key, req.Beneficiary.String(), candidate.Cooldown) {
 			log.FromContext(ctx).Debug("candidate removed due to CooldownControl")
 			delete(req.Candidates, key)
 		}
@@ -56,8 +57,9 @@ func (ctrl *CooldownControl) Control(ctx context.Context, req *entities.FaucetRe
 	return nil
 }
 
-func (ctrl *CooldownControl) OnSelectedCandidate(_ context.Context, faucet *entities.Faucet, beneficiary string) error {
-	ctrl.lastAuthorized.Store(mapKey(faucet.UUID, beneficiary), time.Now())
+//nolint
+func (ctrl *CooldownControl) OnSelectedCandidate(_ context.Context, faucet *entities.Faucet, beneficiary ethcommon.Address) error {
+	ctrl.lastAuthorized.Store(mapKey(faucet.UUID, beneficiary.String()), time.Now())
 	return nil
 }
 

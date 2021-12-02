@@ -6,6 +6,8 @@ import (
 	"context"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/pkg/types/testutils"
+	"github.com/consensys/orchestrate/pkg/utils"
+
 	"math/big"
 	"testing"
 
@@ -28,13 +30,13 @@ func TestMaxBalanceControl_Execute(t *testing.T) {
 	ctrl := NewMaxBalanceControl(client)
 
 	faucet1 := testutils.FakeFaucet()
-	faucet1.Amount = "10"
-	faucet1.MaxBalance = "20"
+	faucet1.Amount = *utils.BigIntStringToHex("10")
+	faucet1.MaxBalance = *utils.BigIntStringToHex("20")
 	faucet1.CreditorAccount = ethcommon.HexToAddress("0xcde")
 
 	faucet2 := testutils.FakeFaucet()
-	faucet2.Amount = "10"
-	faucet2.MaxBalance = "20"
+	faucet2.Amount = *utils.BigIntStringToHex("10")
+	faucet2.MaxBalance = *utils.BigIntStringToHex("20")
 	faucet2.CreditorAccount = ethcommon.HexToAddress("0xeee")
 
 	t.Run("should choose first candidate successfully", func(t *testing.T) {

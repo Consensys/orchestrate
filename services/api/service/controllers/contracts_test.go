@@ -166,7 +166,7 @@ func (s *contractsCtrlTestSuite) TestContractsController_CodeHash() {
 			WithContext(ctx)
 
 		s.setContractCodeHash.EXPECT().
-			Execute(gomock.Any(), chainID, address, req.CodeHash).
+			Execute(gomock.Any(), chainID, *address, req.CodeHash).
 			Return(nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -195,7 +195,7 @@ func (s *contractsCtrlTestSuite) TestContractsController_CodeHash() {
 			WithContext(ctx)
 
 		s.setContractCodeHash.EXPECT().
-			Execute(gomock.Any(), chainID, address, req.CodeHash).
+			Execute(gomock.Any(), chainID, *address, req.CodeHash).
 			Return(fmt.Errorf("error"))
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -237,7 +237,7 @@ func (s *contractsCtrlTestSuite) TestContractsController_GetContract() {
 func (s *contractsCtrlTestSuite) TestContractsController_GetContractEvents() {
 	ctx := context.Background()
 	address := ethcommon.HexToAddress(utils.RandHexString(10))
-	sigHash := ethcommon.HexToHash(utils.RandHexString(10)).String()
+	sigHash := utils.StringToHexBytes("0x" + utils.RandHexString(10))
 	indexInput := uint32(2)
 	chainID := "2017"
 

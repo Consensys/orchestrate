@@ -275,5 +275,5 @@ func (listener *MessageListener) sendEnvelope(ctx context.Context, msgID string,
 func resetEnvelopeTx(req *tx.Envelope) {
 	req.Nonce = nil
 	req.TxHash = nil
-	req.Raw = ""
+	req.Raw = nil
 }

@@ -12,7 +12,7 @@ import (
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/pkg/utils"
 	"github.com/consensys/orchestrate/pkg/utils/envelope"
-	"github.com/consensys/quorum/common/hexutil"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 
 	"github.com/Shopify/sarama"
 	encoding "github.com/consensys/orchestrate/pkg/encoding/sarama"
@@ -74,17 +74,17 @@ func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *etht
 			JobUUID:       job.UUID,
 			ContextLabels: job.Labels,
 			Transaction: &types.Transaction{
-				From:       job.Transaction.From,
-				Nonce:      job.Transaction.Nonce,
-				To:         job.Transaction.To,
-				Value:      job.Transaction.Value,
-				Gas:        job.Transaction.Gas,
-				GasPrice:   job.Transaction.GasPrice,
-				GasFeeCap:  job.Transaction.GasFeeCap,
-				GasTipCap:  job.Transaction.GasTipCap,
-				Data:       job.Transaction.Data,
-				Raw:        job.Transaction.Raw,
-				TxHash:     job.Transaction.Hash,
+				From:       utils.StringerToString(job.Transaction.From),
+				Nonce:      utils.ValueToString(job.Transaction.Nonce),
+				To:         utils.StringerToString(job.Transaction.To),
+				Value:      utils.StringerToString(job.Transaction.Value),
+				Gas:        utils.ValueToString(job.Transaction.Gas),
+				GasPrice:   utils.StringerToString(job.Transaction.GasPrice),
+				GasFeeCap:  utils.StringerToString(job.Transaction.GasFeeCap),
+				GasTipCap:  utils.StringerToString(job.Transaction.GasTipCap),
+				Data:       utils.StringerToString(job.Transaction.Data),
+				Raw:        utils.StringerToString(job.Transaction.Raw),
+				TxHash:     utils.StringerToString(job.Transaction.Hash),
 				AccessList: envelope.ConvertFromAccessList(job.Transaction.AccessList),
 				TxType:     string(job.Transaction.TransactionType),
 			},
@@ -117,7 +117,7 @@ func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *etht
 		if txResponse.Receipt.EffectiveGasPrice != "" {
 			effectiveGas, _ := hexutil.DecodeBig(txResponse.Receipt.EffectiveGasPrice)
 			updateReq.Transaction = &entities.ETHTransaction{
-				GasPrice: effectiveGas.String(),
+				GasPrice: (*hexutil.Big)(effectiveGas),
 			}
 		}
 
@@ -169,7 +169,7 @@ func (hk *Hook) decodeReceipt(ctx context.Context, c *dynamic.Chain, receipt *ty
 			l.GetAddress(),
 			c.ChainID,
 			&api.GetContractEventsRequest{
-				SigHash:           l.Topics[0],
+				SigHash:           hexutil.MustDecode(l.Topics[0]),
 				IndexedInputCount: uint32(len(l.Topics) - 1),
 			},
 		)
@@ -264,7 +264,7 @@ func (hk *Hook) registerDeployedContract(ctx context.Context, c *dynamic.Chain, 
 
 	err = hk.client.SetContractAddressCodeHash(ctx, receipt.ContractAddress, c.ChainID,
 		&api.SetContractCodeHashRequest{
-			CodeHash: crypto.Keccak256Hash(code).String(),
+			CodeHash: crypto.Keccak256Hash(code).Bytes(),
 		})
 	if err != nil {
 		logger.WithError(err).Error("failed to register contract")

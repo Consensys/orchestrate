@@ -13,6 +13,7 @@ import (
 	"github.com/consensys/orchestrate/services/tx-sender/tx-sender/nonce"
 	usecases "github.com/consensys/orchestrate/services/tx-sender/tx-sender/use-cases"
 	utils2 "github.com/consensys/orchestrate/services/tx-sender/tx-sender/utils"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 )
 
 const sendTesseraMarkingTxComponent = "use-cases.send-tessera-marking-tx"
@@ -88,7 +89,7 @@ func (uc *sendTesseraMarkingTxUseCase) Execute(ctx context.Context, job *entitie
 		return err
 	}
 
-	if txHash != job.Transaction.Hash {
+	if txHash.String() != job.Transaction.Hash.String() {
 		warnMessage := fmt.Sprintf("expected transaction hash %s, but got %s. Overriding", job.Transaction.Hash, txHash)
 		job.Transaction.Hash = txHash
 		err = utils2.UpdateJobStatus(ctx, uc.jobClient, job, entities.StatusWarning, warnMessage, job.Transaction)
@@ -101,14 +102,15 @@ func (uc *sendTesseraMarkingTxUseCase) Execute(ctx context.Context, job *entitie
 	return nil
 }
 
-func (uc *sendTesseraMarkingTxUseCase) sendTx(ctx context.Context, job *entities.Job) (string, error) {
+func (uc *sendTesseraMarkingTxUseCase) sendTx(ctx context.Context, job *entities.Job) (*ethcommon.Hash, error) {
 	proxyURL := utils.GetProxyURL(uc.chainRegistryURL, job.ChainUUID)
-	txHash, err := uc.ec.SendQuorumRawPrivateTransaction(ctx, proxyURL, job.Transaction.Raw, job.Transaction.PrivateFor,
-		job.Transaction.MandatoryFor, int(job.Transaction.PrivacyFlag))
+	txHash, err := uc.ec.SendQuorumRawPrivateTransaction(ctx, proxyURL, job.Transaction.Raw,
+		job.Transaction.PrivateFor, job.Transaction.MandatoryFor,
+		int(job.Transaction.PrivacyFlag))
 	if err != nil {
 		uc.logger.WithContext(ctx).WithError(err).Error("cannot send tessera marking transaction")
-		return "", err
+		return nil, err
 	}
 
-	return txHash.String(), nil
+	return &txHash, nil
 }

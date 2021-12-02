@@ -1,7 +1,10 @@
 package parsers
 
 import (
+	"math/big"
+
 	"github.com/consensys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/pkg/utils"
 	"github.com/consensys/orchestrate/services/api/store/models"
 )
 
@@ -12,7 +15,7 @@ func NewChainFromModel(chainModel *models.Chain) *entities.Chain {
 		TenantID:                  chainModel.TenantID,
 		OwnerID:                   chainModel.OwnerID,
 		URLs:                      chainModel.URLs,
-		ChainID:                   chainModel.ChainID,
+		ChainID:                   (*big.Int)(utils.BigIntStringToHex(chainModel.ChainID)),
 		ListenerDepth:             chainModel.ListenerDepth,
 		ListenerCurrentBlock:      chainModel.ListenerCurrentBlock,
 		ListenerStartingBlock:     chainModel.ListenerStartingBlock,
@@ -47,7 +50,6 @@ func NewChainModelFromEntity(chain *entities.Chain) *models.Chain {
 		TenantID:                  chain.TenantID,
 		OwnerID:                   chain.OwnerID,
 		URLs:                      chain.URLs,
-		ChainID:                   chain.ChainID,
 		ListenerDepth:             chain.ListenerDepth,
 		ListenerCurrentBlock:      chain.ListenerCurrentBlock,
 		ListenerStartingBlock:     chain.ListenerStartingBlock,
@@ -56,6 +58,10 @@ func NewChainModelFromEntity(chain *entities.Chain) *models.Chain {
 		Labels:                    chain.Labels,
 		CreatedAt:                 chain.CreatedAt,
 		UpdatedAt:                 chain.UpdatedAt,
+	}
+
+	if chain.ChainID != nil {
+		chainModel.ChainID = chain.ChainID.String()
 	}
 
 	if chain.PrivateTxManager != nil {

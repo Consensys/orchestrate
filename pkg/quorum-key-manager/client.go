@@ -17,23 +17,28 @@ var (
 )
 
 func Init() {
-	cfg := NewConfigFromViper(viper.GetViper())
 	initOnce.Do(func() {
-		vipr := viper.GetViper()
 		if client != nil {
 			return
 		}
+		vipr := viper.GetViper()
+
 		logger := log.NewLogger().SetComponent(component)
-		httpClient, err := NewHTTPClient(vipr)
-		if err != nil {
-			logger.WithError(err).Error("failed to initialize Key Manager Client")
-			return
+		cfg := NewConfigFromViper(vipr)
+		if cfg.URL != "" {
+			httpClient, err := NewHTTPClient(vipr)
+			if err != nil {
+				logger.WithError(err).Error("failed to initialize Key Manager Client")
+				return
+			}
+			client = qkm.NewHTTPClient(httpClient, &qkm.Config{
+				URL: cfg.URL,
+			})
+			storeNameID = vipr.GetString(StoreNameViperKey)
+			logger.WithField("url", cfg.URL).Info("client ready")
+		} else {
+			client = NewNonClient()
 		}
-		client = qkm.NewHTTPClient(httpClient, &qkm.Config{
-			URL: cfg.URL,
-		})
-		storeNameID = vipr.GetString(StoreNameViperKey)
-		logger.WithField("url", cfg.URL).Info("client ready")
 	})
 }
 

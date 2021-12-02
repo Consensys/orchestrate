@@ -2,6 +2,7 @@ package chains
 
 import (
 	"context"
+	"math/big"
 
 	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
@@ -98,27 +99,27 @@ func (uc *registerChainUseCase) Execute(ctx context.Context, chain *entities.Cha
 	return parsers.NewChainFromModel(chainModel), nil
 }
 
-func (uc *registerChainUseCase) getChainID(ctx context.Context, uris []string) (string, error) {
-	var prevChainID string
+func (uc *registerChainUseCase) getChainID(ctx context.Context, uris []string) (*big.Int, error) {
+	var prevChainID *big.Int
 	for i, uri := range uris {
 		chainID, err := uc.ethClient.Network(ctx, uri)
 		if err != nil {
 			errMessage := "failed to fetch chain id"
 			uc.logger.WithContext(ctx).WithField("url", uri).WithError(err).Error(errMessage)
-			return "", errors.InvalidParameterError(errMessage)
+			return nil, errors.InvalidParameterError(errMessage)
 		}
 
-		if i > 0 && chainID.String() != prevChainID {
+		if i > 0 && chainID.String() != prevChainID.String() {
 			errMessage := "URLs in the list point to different networks"
 			uc.logger.WithContext(ctx).
 				WithField("url", uri).
 				WithField("previous_chain_id", prevChainID).
 				WithField("chain_id", chainID.String()).
 				Error(errMessage)
-			return "", errors.InvalidParameterError(errMessage)
+			return nil, errors.InvalidParameterError(errMessage)
 		}
 
-		prevChainID = chainID.String()
+		prevChainID = chainID
 	}
 
 	return prevChainID, nil

@@ -30,8 +30,8 @@ func TestGetContract_Execute(t *testing.T) {
 			Return(&models.ArtifactModel{
 				ID:               1,
 				ABI:              contract.ABI,
-				Bytecode:         contract.Bytecode,
-				DeployedBytecode: contract.DeployedBytecode,
+				Bytecode:         contract.Bytecode.String(),
+				DeployedBytecode: contract.DeployedBytecode.String(),
 				Codehash:         "",
 			}, nil)
 

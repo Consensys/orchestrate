@@ -11,6 +11,7 @@ import (
 	"github.com/consensys/orchestrate/pkg/types/tx"
 	gherkin "github.com/cucumber/messages-go/v10"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -32,6 +33,10 @@ func toValue(structType reflect.Type, strValue string) (reflect.Value, error) {
 		v = reflect.ValueOf(common.HexToAddress(strValue))
 	case reflect.TypeOf(common.Hash{}):
 		v = reflect.ValueOf(common.HexToHash(strValue))
+	case reflect.TypeOf(hexutil.Big{}):
+		v = reflect.ValueOf((*hexutil.Big)(hexutil.MustDecodeBig(strValue)))
+	case reflect.TypeOf(hexutil.Bytes{}):
+		v = reflect.ValueOf(hexutil.MustDecode(strValue))
 	case reflect.TypeOf(big.Int{}):
 		b, ok := new(big.Int).SetString(strValue, 10)
 		if !ok {

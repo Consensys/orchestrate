@@ -3,15 +3,13 @@ package transactions
 import (
 	"context"
 
+	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/pkg/ethereum/abi"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/pkg/utils"
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-
-	"github.com/consensys/orchestrate/pkg/errors"
-	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 )
 
 const sendContractTxComponent = "use-cases.send-contract-tx"
@@ -43,21 +41,21 @@ func (uc *sendContractTxUseCase) Execute(ctx context.Context, txRequest *entitie
 	return uc.sendTxUseCase.Execute(ctx, txRequest, txData, userInfo)
 }
 
-func (uc *sendContractTxUseCase) computeTxData(method string, args []interface{}) (string, error) {
+func (uc *sendContractTxUseCase) computeTxData(method string, args []interface{}) ([]byte, error) {
 	crafter := abi.BaseCrafter{}
 	sArgs, err := utils.ParseIArrayToStringArray(args)
 	if err != nil {
 		errMessage := "failed to parse method arguments"
 		uc.logger.WithError(err).WithField("method", method).WithField("args", args).Error(errMessage)
-		return "", errors.DataCorruptedError(errMessage).ExtendComponent(sendContractTxComponent)
+		return nil, errors.DataCorruptedError(errMessage).ExtendComponent(sendContractTxComponent)
 	}
 
-	txDataBytes, err := crafter.CraftCall(method, sArgs...)
+	txData, err := crafter.CraftCall(method, sArgs...)
 	if err != nil {
 		errMessage := "invalid method signature"
 		uc.logger.WithError(err).WithField("method", method).WithField("args", args).Error(errMessage)
-		return "", errors.InvalidParameterError(errMessage)
+		return nil, errors.InvalidParameterError(errMessage)
 	}
 
-	return hexutil.Encode(txDataBytes), nil
+	return txData, nil
 }

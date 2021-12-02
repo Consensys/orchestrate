@@ -21,6 +21,6 @@ func FakeRegisterContractRequest() *api.RegisterContractRequest {
 
 func FakeSetContractCodeHashRequest() *api.SetContractCodeHashRequest {
 	return &api.SetContractCodeHashRequest{
-		CodeHash: FakeHash().String(),
+		CodeHash: FakeHash(),
 	}
 }

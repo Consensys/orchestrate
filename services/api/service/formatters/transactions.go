@@ -32,7 +32,7 @@ func FormatSendTxRequest(sendTxRequest *types.SendTransactionRequest, idempotenc
 			PrivateFrom:     sendTxRequest.Params.PrivateFrom,
 			PrivateFor:      sendTxRequest.Params.PrivateFor,
 			MandatoryFor:    sendTxRequest.Params.MandatoryFor,
-			PrivacyFlag:     entities.PrivacyFlag(sendTxRequest.Params.PrivacyFlag),
+			PrivacyFlag:     sendTxRequest.Params.PrivacyFlag,
 			PrivacyGroupID:  sendTxRequest.Params.PrivacyGroupID,
 		},
 		InternalData: buildInternalData(

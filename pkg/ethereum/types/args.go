@@ -3,9 +3,6 @@ package types
 import (
 	"math/big"
 
-	"github.com/consensys/orchestrate/pkg/types/entities"
-	"github.com/consensys/orchestrate/pkg/types/tx"
-
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 )
@@ -13,28 +10,10 @@ import (
 // PrivateArgs are transaction arguments to provide to an Ethereum client supporting privacy (such as Quorum)
 type PrivateArgs struct {
 	// Private Transaction Fields
-	PrivateFrom    string   `json:"privateFrom"`
-	PrivateFor     []string `json:"privateFor"`
-	PrivacyGroupID string   `json:"privacyGroupId"`
+	PrivateFrom    []byte   `json:"privateFrom"`
+	PrivateFor     [][]byte `json:"privateFor"`
+	PrivacyGroupID []byte   `json:"privacyGroupId"`
 	PrivateTxType  string   `json:"restriction"`
-}
-
-func Call2PrivateArgs(req *tx.Envelope) *PrivateArgs {
-	var privateArgs PrivateArgs
-	privateArgs.PrivateFrom = req.PrivateFrom
-	privateArgs.PrivateFor = req.PrivateFor
-	privateArgs.PrivacyGroupID = req.PrivacyGroupID
-	privateArgs.PrivateTxType = req.PrivateTxType
-	return &privateArgs
-}
-
-func CallTx2PrivateArgs(rtx *entities.ETHTransaction) *PrivateArgs {
-	var privateArgs PrivateArgs
-	privateArgs.PrivateFrom = rtx.PrivateFrom
-	privateArgs.PrivateFor = rtx.PrivateFor
-	privateArgs.PrivacyGroupID = rtx.PrivacyGroupID
-	privateArgs.PrivateTxType = "restricted"
-	return &privateArgs
 }
 
 // SendTxArgs are arguments to provide to jsonRPC call `eth_sendTransaction`

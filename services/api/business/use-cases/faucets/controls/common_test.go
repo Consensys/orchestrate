@@ -34,7 +34,7 @@ func newFaucetReq(candidates map[string]*entities.Faucet, chainUUID, chainURL, b
 			UUID: chainUUID,
 			URLs: []string{chainURL},
 		},
-		Beneficiary: beneficiary,
+		Beneficiary: ethcommon.HexToAddress(beneficiary),
 		Candidates:  candidates,
 	}
 }

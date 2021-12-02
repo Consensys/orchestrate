@@ -5,6 +5,7 @@ import (
 
 	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/entities"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
 //go:generate mockgen -source=transactions.go -destination=mocks/transactions.go -package=mocks
@@ -36,5 +37,5 @@ type SendContractTxUseCase interface {
 }
 
 type SendTxUseCase interface {
-	Execute(ctx context.Context, txRequest *entities.TxRequest, txData string, userInfo *multitenancy.UserInfo) (*entities.TxRequest, error)
+	Execute(ctx context.Context, txRequest *entities.TxRequest, txData hexutil.Bytes, userInfo *multitenancy.UserInfo) (*entities.TxRequest, error)
 }

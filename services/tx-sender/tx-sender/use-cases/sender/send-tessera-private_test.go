@@ -4,6 +4,7 @@ package sender
 
 import (
 	"context"
+	"encoding/base64"
 	"testing"
 
 	"github.com/consensys/orchestrate/pkg/errors"
@@ -34,14 +35,13 @@ func TestSendTesseraPrivate_Execute(t *testing.T) {
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		job := testutils.FakeJob()
 		job.Transaction.PrivateFrom = "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=" 
-		job.Transaction.Data = "0xfe378324abcde723"
-		enclaveKey := "0xenclaveKey"
+		job.Transaction.Data = hexutil.MustDecode("0xfe378324abcde723")
+		enclaveKey, _ := base64.StdEncoding.DecodeString("ZW5jbGF2ZUtleQ==")
 
 		proxyURL := utils.GetProxyTesseraURL(chainRegistryURL, job.ChainUUID)
 		
-		data, _ := hexutil.Decode(job.Transaction.Data)
 		crafter.EXPECT().Execute(gomock.Any(), job)
-		ec.EXPECT().StoreRaw(gomock.Any(), proxyURL, data, job.Transaction.PrivateFrom).Return(enclaveKey, nil)
+		ec.EXPECT().StoreRaw(gomock.Any(), proxyURL, job.Transaction.Data, job.Transaction.PrivateFrom).Return(enclaveKey, nil)
 
 		jobClient.EXPECT().UpdateJob(gomock.Any(), job.UUID, &api.UpdateJobRequest{
 			Status: entities.StatusStored,
@@ -50,20 +50,19 @@ func TestSendTesseraPrivate_Execute(t *testing.T) {
 
 		err := usecase.Execute(ctx, job)
 		assert.NoError(t, err)
-		assert.Equal(t, job.Transaction.EnclaveKey, enclaveKey)
+		assert.Equal(t, job.Transaction.EnclaveKey.String(), hexutil.Encode(enclaveKey))
 	})
 	
 	t.Run("should fail with same error executing use case if storeRaw fails", func(t *testing.T) {
 		job := testutils.FakeJob()
 		job.Transaction.PrivateFrom = "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=" 
-		job.Transaction.Data = "0xfe378324abcde723"
-		enclaveKey := "0xenclaveKey"
+		job.Transaction.Data = hexutil.MustDecode("0xfe378324abcde723")
+		enclaveKey, _ := base64.StdEncoding.DecodeString("ZW5jbGF2ZUtleQ==")
 
 		proxyURL := utils.GetProxyTesseraURL(chainRegistryURL, job.ChainUUID)
 		crafter.EXPECT().Execute(gomock.Any(), job)
 		expectedErr := errors.InternalError("internal_err")
-		data, _ := hexutil.Decode(job.Transaction.Data)
-		ec.EXPECT().StoreRaw(gomock.Any(), proxyURL, data, job.Transaction.PrivateFrom).Return(enclaveKey, expectedErr)
+		ec.EXPECT().StoreRaw(gomock.Any(), proxyURL, job.Transaction.Data, job.Transaction.PrivateFrom).Return(enclaveKey, expectedErr)
 
 		err := usecase.Execute(ctx, job)
 		assert.Equal(t, err, expectedErr)

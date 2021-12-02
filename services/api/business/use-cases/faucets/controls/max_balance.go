@@ -34,7 +34,7 @@ func (ctrl *MaxBalanceControl) Control(ctx context.Context, req *entities.Faucet
 	}
 
 	// Retrieve account balance
-	balance, err := getAddressBalance(ctx, ctrl.chainStateReader, req.Chain.URLs, ethcommon.HexToAddress(req.Beneficiary))
+	balance, err := getAddressBalance(ctx, ctrl.chainStateReader, req.Chain.URLs, req.Beneficiary)
 	if err != nil {
 		log.FromContext(ctx).WithError(err).Error("failed to get faucet balance")
 		return errors.FromError(err).ExtendComponent(maxBalanceComponent)
@@ -42,10 +42,7 @@ func (ctrl *MaxBalanceControl) Control(ctx context.Context, req *entities.Faucet
 
 	// Ensure MaxBalance is respected
 	for key, candidate := range req.Candidates {
-		amountBigInt, _ := new(big.Int).SetString(candidate.Amount, 10)
-		maxBalanceBigInt, _ := new(big.Int).SetString(candidate.MaxBalance, 10)
-
-		if new(big.Int).Add(amountBigInt, balance).Cmp(maxBalanceBigInt) > 0 {
+		if new(big.Int).Add(candidate.Amount.ToInt(), balance).Cmp(candidate.MaxBalance.ToInt()) > 0 {
 			delete(req.Candidates, key)
 		}
 	}
@@ -53,6 +50,6 @@ func (ctrl *MaxBalanceControl) Control(ctx context.Context, req *entities.Faucet
 	return nil
 }
 
-func (ctrl *MaxBalanceControl) OnSelectedCandidate(_ context.Context, _ *entities.Faucet, _ string) error {
+func (ctrl *MaxBalanceControl) OnSelectedCandidate(_ context.Context, _ *entities.Faucet, _ ethcommon.Address) error {
 	return nil
 }

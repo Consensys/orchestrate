@@ -8,6 +8,7 @@ import (
 
 	"github.com/consensys/orchestrate/pkg/errors"
 	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
 const DefaultTagValue = "latest"
@@ -17,8 +18,8 @@ type Contract struct {
 	Tag              string
 	Registry         string
 	ABI              string
-	Bytecode         string
-	DeployedBytecode string
+	Bytecode         hexutil.Bytes
+	DeployedBytecode hexutil.Bytes
 	Constructor      Method
 	Methods          []Method
 	Events           []Event

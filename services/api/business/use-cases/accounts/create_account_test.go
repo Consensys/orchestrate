@@ -14,7 +14,7 @@ import (
 	mocks2 "github.com/consensys/orchestrate/services/api/business/use-cases/mocks"
 	"github.com/consensys/orchestrate/services/api/store/mocks"
 	qkmtypes "github.com/consensys/quorum-key-manager/src/stores/api/types"
-	"github.com/consensys/quorum/common/hexutil"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 
@@ -61,7 +61,7 @@ func TestCreateAccount_Execute(t *testing.T) {
 		resp, err := usecase.Execute(ctx, accEntity, nil, "", userInfo)
 
 		assert.NoError(t, err)
-		assert.Equal(t, resp.PublicKey, accEntity.PublicKey)
+		assert.Equal(t, resp.PublicKey.String(), accEntity.PublicKey.String())
 		assert.Equal(t, resp.Address, accEntity.Address)
 	})
 
@@ -90,7 +90,7 @@ func TestCreateAccount_Execute(t *testing.T) {
 		resp, err := usecase.Execute(ctx, accEntity, bPrivKey, "", userInfo)
 
 		assert.NoError(t, err)
-		assert.Equal(t, resp.PublicKey, accEntity.PublicKey)
+		assert.Equal(t, resp.PublicKey.String(), accEntity.PublicKey.String())
 		assert.Equal(t, resp.Address, accEntity.Address)
 	})
 
@@ -118,7 +118,7 @@ func TestCreateAccount_Execute(t *testing.T) {
 		resp, err := usecase.Execute(ctx, accEntity, nil, chainName, userInfo)
 
 		assert.NoError(t, err)
-		assert.Equal(t, resp.PublicKey, accEntity.PublicKey)
+		assert.Equal(t, resp.PublicKey.String(), accEntity.PublicKey.String())
 		assert.Equal(t, resp.Address, accEntity.Address)
 	})
 

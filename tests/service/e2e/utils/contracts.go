@@ -8,6 +8,7 @@ import (
 	"path"
 
 	"github.com/consensys/orchestrate/pkg/types/entities"
+	"github.com/consensys/quorum/common/hexutil"
 	gherkin "github.com/cucumber/messages-go/v10"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -67,9 +68,9 @@ func ParseContractCell(header, cell string, contractSpec *ContractSpec) error {
 		// Abi is a UTF-8 encoded string. Therefore, we can make the straightforward transition
 		contractSpec.Contract.ABI = string(a.Abi)
 		// Bytecode is an hexstring encoded []byte
-		contractSpec.Contract.Bytecode = a.Bytecode
+		contractSpec.Contract.Bytecode = hexutil.MustDecode(a.Bytecode)
 		// Bytecode is an hexstring encoded []byte
-		contractSpec.Contract.DeployedBytecode = a.DeployedBytecode
+		contractSpec.Contract.DeployedBytecode = hexutil.MustDecode(a.DeployedBytecode)
 	case "name":
 		contractSpec.Contract.Name = cell
 	case "tag":

@@ -2,31 +2,32 @@ package parsers
 
 import (
 	"math/big"
-	"strconv"
 
-	"github.com/consensys/orchestrate/pkg/utils"
 	quorumtypes "github.com/consensys/quorum/core/types"
 
 	"github.com/consensys/orchestrate/pkg/types/entities"
-	"github.com/consensys/quorum/common/hexutil"
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 )
 
-func ETHTransactionToTransaction(tx *entities.ETHTransaction, chainIDStr string) *types.Transaction {
+func ETHTransactionToTransaction(tx *entities.ETHTransaction, chainID *big.Int) *types.Transaction {
 	var txData types.TxData
 
-	// No need to validate the data as we know that internally the values are correct
-	value, _ := new(big.Int).SetString(tx.Value, 10)
-	gasPrice, _ := new(big.Int).SetString(tx.GasPrice, 10)
-	data, _ := hexutil.Decode(tx.Data)
-	nonce, _ := strconv.ParseUint(tx.Nonce, 10, 64)
-	gasLimit, _ := strconv.ParseUint(tx.Gas, 10, 64)
-	chainID, _ := new(big.Int).SetString(chainIDStr, 10)
+	var value *big.Int
+	if tx.Value != nil {
+		value = tx.Value.ToInt()
+	}
 
-	var toAddr *common.Address
-	if tx.To != "" {
-		toAddr = utils.ToPtr(common.HexToAddress(tx.To)).(*common.Address)
+	var gasPrice *big.Int
+	if tx.GasPrice != nil {
+		gasPrice = tx.GasPrice.ToInt()
+	}
+	var nonce uint64
+	if tx.Nonce != nil {
+		nonce = *tx.Nonce
+	}
+	var gasLimit uint64
+	if tx.Gas != nil {
+		gasLimit = *tx.Gas
 	}
 
 	switch tx.TransactionType {
@@ -35,13 +36,20 @@ func ETHTransactionToTransaction(tx *entities.ETHTransaction, chainIDStr string)
 			Nonce:    nonce,
 			GasPrice: gasPrice,
 			Gas:      gasLimit,
-			To:       toAddr,
+			To:       tx.To,
 			Value:    value,
-			Data:     data,
+			Data:     tx.Data,
 		}
 	default:
-		gasTipCap, _ := new(big.Int).SetString(tx.GasTipCap, 10)
-		gasFeeCap, _ := new(big.Int).SetString(tx.GasFeeCap, 10)
+		var gasTipCap *big.Int
+		if tx.GasTipCap != nil {
+			gasTipCap = tx.GasTipCap.ToInt()
+		}
+
+		var gasFeeCap *big.Int
+		if tx.GasFeeCap != nil {
+			gasFeeCap = tx.GasFeeCap.ToInt()
+		}
 
 		txData = &types.DynamicFeeTx{
 			ChainID:    chainID,
@@ -49,9 +57,9 @@ func ETHTransactionToTransaction(tx *entities.ETHTransaction, chainIDStr string)
 			GasTipCap:  gasTipCap,
 			GasFeeCap:  gasFeeCap,
 			Gas:        gasLimit,
-			To:         toAddr,
+			To:         tx.To,
 			Value:      value,
-			Data:       data,
+			Data:       tx.Data,
 			AccessList: tx.AccessList,
 		}
 	}
@@ -60,19 +68,27 @@ func ETHTransactionToTransaction(tx *entities.ETHTransaction, chainIDStr string)
 }
 
 func ETHTransactionToQuorumTransaction(tx *entities.ETHTransaction) *quorumtypes.Transaction {
-	// No need to validate the data as we know that internally the values are correct
-	amount := new(big.Int)
-	amount, _ = amount.SetString(tx.Value, 10)
-	gasPrice := new(big.Int)
-	gasPrice, _ = gasPrice.SetString(tx.GasPrice, 10)
-	data, _ := hexutil.Decode(tx.Data)
-	nonce, _ := strconv.ParseUint(tx.Nonce, 10, 64)
-	gasLimit, _ := strconv.ParseUint(tx.Gas, 10, 64)
-
-	if tx.To == "" {
-		return quorumtypes.NewContractCreation(nonce, amount, gasLimit, gasPrice, data)
+	var value *big.Int
+	if tx.Value != nil {
+		value = tx.Value.ToInt()
 	}
 
-	to, _ := common.NewMixedcaseAddressFromString(tx.To)
-	return quorumtypes.NewTransaction(nonce, to.Address(), amount, gasLimit, gasPrice, data)
+	var gasPrice *big.Int
+	if tx.GasPrice != nil {
+		gasPrice = tx.GasPrice.ToInt()
+	}
+	var nonce uint64
+	if tx.Nonce != nil {
+		nonce = *tx.Nonce
+	}
+	var gasLimit uint64
+	if tx.Gas != nil {
+		gasLimit = *tx.Gas
+	}
+
+	if tx.To == nil {
+		return quorumtypes.NewContractCreation(nonce, value, gasLimit, gasPrice, tx.Data)
+	}
+
+	return quorumtypes.NewTransaction(nonce, *tx.To, value, gasLimit, gasPrice, tx.Data)
 }

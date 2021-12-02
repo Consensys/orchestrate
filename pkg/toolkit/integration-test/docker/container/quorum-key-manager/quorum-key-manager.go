@@ -19,7 +19,7 @@ import (
 	"github.com/docker/go-connections/nat"
 )
 
-const defaultHashicorpVaultImage = "consensys/quorum-key-manager:v21.9.2"
+const defaultHashicorpVaultImage = "consensys/quorum-key-manager:v21.9.3"
 const defaultHostPort = "8080"
 const defaultHost = "localhost"
 

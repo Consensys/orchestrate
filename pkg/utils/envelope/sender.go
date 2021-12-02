@@ -16,7 +16,7 @@ func SendJobMessage(job *entities.Job, kafkaProducer sarama.SyncProducer, topic 
 
 	evlp, err := txEnvelope.Envelope()
 	if err != nil {
-		return 0, 0, errors.InvalidParameterError("failed to craft envelope")
+		return 0, 0, errors.InvalidParameterError("failed to craft envelope (%s)", err.Error())
 	}
 
 	msg := &sarama.ProducerMessage{

@@ -28,7 +28,7 @@ Feature: Send transactions using tx-sentry
         "params": {
           "from": "{{global.nodes.geth[0].fundedPublicKeys[0]}}",
           "to": "{{account1}}",
-          "value": "100000000000000000"
+          "value": "0x16345785D8A0000"
         },
         "labels": {
           "scenario.id": "{{scenarioID}}",
@@ -69,8 +69,8 @@ Feature: Send transactions using tx-sentry
           "from": "{{account1}}",
           "to": "{{random.account}}",
           "data": "0x",
-          "gas": "21000",
-          "nonce": "1"
+          "gas": 21000,
+          "nonce": 1
         },
         "labels": {
           "scenario.id": "{{scenarioID}}",
@@ -102,8 +102,8 @@ Feature: Send transactions using tx-sentry
           "from": "{{account1}}",
           "to": "{{random.account}}",
           "data": "0x",
-          "gas": "21000",
-          "nonce": "0"
+          "gas": 21000,
+          "nonce": 0
         },
         "labels": {
           "scenario.id": "{{scenarioID}}",
@@ -155,8 +155,8 @@ Feature: Send transactions using tx-sentry
           "from": "{{account1}}",
           "to": "{{random.account}}",
           "data": "0x",
-          "gas": "21000",
-          "nonce": "1"
+          "gas": 21000,
+          "nonce": 1
         },
         "labels": {
           "scenario.id": "{{scenarioID}}",
@@ -195,8 +195,8 @@ Feature: Send transactions using tx-sentry
           "from": "{{account1}}",
           "to": "{{random.account}}",
           "data": "0x",
-          "gas": "21000",
-          "nonce": "0"
+          "gas": 21000,
+          "nonce": 0
         },
         "labels": {
           "scenario.id": "{{scenarioID}}",
@@ -246,8 +246,8 @@ Feature: Send transactions using tx-sentry
           "from": "{{account2}}",
           "to": "{{random.account}}",
           "data": "0x",
-          "gas": "21000",
-          "nonce": "1"
+          "gas": 21000,
+          "nonce": 1
         },
         "labels": {
           "scenario.id": "{{scenarioID}}",

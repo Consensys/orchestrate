@@ -2,9 +2,9 @@ package controls
 
 import (
 	"context"
-	"math/big"
 
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 
 	"github.com/consensys/orchestrate/pkg/types/entities"
 
@@ -29,9 +29,7 @@ func NewCreditorControl(chainStateReader ethclient.ChainStateReader) *CreditorCo
 // Control apply BlackList controller on a credit function
 func (ctrl *CreditorControl) Control(ctx context.Context, req *entities.FaucetRequest) error {
 	for key, candidate := range req.Candidates {
-		amountBigInt, _ := new(big.Int).SetString(candidate.Amount, 10)
-
-		if candidate.CreditorAccount.Hex() == req.Beneficiary {
+		if candidate.CreditorAccount.String() == req.Beneficiary.String() {
 			delete(req.Candidates, key)
 			continue
 		}
@@ -43,7 +41,7 @@ func (ctrl *CreditorControl) Control(ctx context.Context, req *entities.FaucetRe
 		}
 
 		// In case balance is lower, remove candidate
-		if balance.Cmp(amountBigInt) == -1 {
+		if balance.Cmp(candidate.Amount.ToInt()) == -1 {
 			log.FromContext(ctx).WithField("creditor_account", candidate.CreditorAccount).
 				Warn("faucet candidate discarded due to insufficient balance")
 
@@ -54,6 +52,6 @@ func (ctrl *CreditorControl) Control(ctx context.Context, req *entities.FaucetRe
 	return nil
 }
 
-func (ctrl *CreditorControl) OnSelectedCandidate(_ context.Context, _ *entities.Faucet, _ string) error {
+func (ctrl *CreditorControl) OnSelectedCandidate(_ context.Context, _ *entities.Faucet, _ ethcommon.Address) error {
 	return nil
 }

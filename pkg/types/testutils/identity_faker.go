@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
+	"github.com/consensys/quorum/common/hexutil"
 
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/pkg/utils"
@@ -16,8 +17,8 @@ func FakeAccount() *entities.Account {
 		TenantID:            multitenancy.DefaultTenant,
 		Attributes:          make(map[string]string),
 		Address:             ethcommon.HexToAddress("0x5Cc634233E4a454d47aACd9fC68801482Fb02610"),
-		PublicKey:           ethcommon.HexToHash(utils.RandHexString(12)).String(),
-		CompressedPublicKey: ethcommon.HexToHash(utils.RandHexString(12)).String(),
+		PublicKey:           hexutil.MustDecode("0x" + utils.RandHexString(12)),
+		CompressedPublicKey: hexutil.MustDecode("0x" + utils.RandHexString(24)),
 		CreatedAt:           time.Now(),
 		UpdatedAt:           time.Now(),
 	}

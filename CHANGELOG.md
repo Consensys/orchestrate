@@ -3,6 +3,14 @@
 ## v21.10.0 alpha.4 (WIP)
 ### ⚠ BREAKING CHANGES
 * `Orion` was removed in favor of `EEA` as *PrivateTxManager* in chain APIs
+* Following ETH transaction properties types has been BigInt updated:
+    - `value` expects an HEX value prefix by "0x" instead of BigInt string.
+    - `gasPrice` expects an HEX value prefix by "0x" instead of BigInt string.
+    - `nonce` expects an uint64 instead of Integer string.
+    - `gas` expects an uint64.
+* Following Faucet request params has been modified:
+    - `amount` expects an HEX value prefix by "0x" instead of BigInt string.
+    - `maxBalance` expects an HEX value prefix by "0x" instead of BigInt string.
 
 ## v21.10.0 alpha.3 (2021-11-24)
 ### 🆕 Features
@@ -13,6 +21,7 @@ able to impersonate same tenants.
 
 ### ⚠ BREAKING CHANGES
 * In case of empty Orchestrate custom claims, token subject `sub` is used as `tenant_id:username`.
+* Command `migration init` is merged into `migration up`.
 
 ## v21.10.0 alpha.2 (2021-11-21)
 ### 🆕 Features
@@ -32,10 +41,7 @@ able to impersonate same tenants.
 
 ### ⚠ BREAKING CHANGES
 * Removed endpoints `/accounts/{address}/sign` and `/accounts/{address}/verify-signature` in favor of `/accounts/{address}/sign-message` and `/accounts/verify-message` accordingly to EIP-191 standards
-
-### 🛠 Bug fixes
-* Incorrect server name verification using Postgres in `verify-ca` mode 
-* Tx-sender exits sending Tessera private transaction with invalid 'from'
+* Removed support of zk-snarks account in favor of Quorum Key Manager implementation
 
 ## v21.1.11 (2021-11-23)
 

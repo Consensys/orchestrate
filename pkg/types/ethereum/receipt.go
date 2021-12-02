@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	ethcommon "github.com/ethereum/go-ethereum/common"
@@ -73,14 +72,14 @@ func (r *Receipt) UnmarshalJSON(input []byte) error {
 		PostState         *hexutil.Bytes     `json:"root"`
 		Status            *hexutil.Uint64    `json:"status"`
 		CumulativeGasUsed *hexutil.Uint64    `json:"cumulativeGasUsed" gencodec:"required"`
-		EffectiveGasPrice string             `json:"effectiveGasPrice,omitempty"`
+		EffectiveGasPrice *hexutil.Big       `json:"effectiveGasPrice,omitempty"`
 		Bloom             *ethtypes.Bloom    `json:"logsBloom"         gencodec:"required"`
 		Logs              []*ethtypes.Log    `json:"logs"              gencodec:"required"`
 		TxHash            *ethcommon.Hash    `json:"transactionHash" gencodec:"required"`
 		ContractAddress   *ethcommon.Address `json:"contractAddress"`
 		GasUsed           *hexutil.Uint64    `json:"gasUsed" gencodec:"required"`
 		BlockHash         *ethcommon.Hash    `json:"blockHash,omitempty"`
-		BlockNumber       *hexutil.Big       `json:"blockNumber,omitempty"`
+		BlockNumber       *hexutil.Uint64    `json:"blockNumber,omitempty"`
 		TransactionIndex  *hexutil.Uint      `json:"transactionIndex"`
 		RevertReason      string             `json:"revertReason"`
 	}
@@ -88,7 +87,7 @@ func (r *Receipt) UnmarshalJSON(input []byte) error {
 		return err
 	}
 	if dec.PostState != nil {
-		r.PostState = hexutil.Encode(*dec.PostState)
+		r.PostState = dec.PostState.String()
 	}
 	if dec.Status != nil {
 		r.Status = uint64(*dec.Status)
@@ -98,8 +97,8 @@ func (r *Receipt) UnmarshalJSON(input []byte) error {
 	}
 	r.CumulativeGasUsed = uint64(*dec.CumulativeGasUsed)
 
-	if dec.EffectiveGasPrice != "" {
-		r.EffectiveGasPrice = dec.EffectiveGasPrice
+	if dec.EffectiveGasPrice != nil {
+		r.EffectiveGasPrice = dec.EffectiveGasPrice.String()
 	}
 
 	if dec.Bloom == nil {
@@ -116,18 +115,21 @@ func (r *Receipt) UnmarshalJSON(input []byte) error {
 		return errors.New("missing required field 'transactionHash' for Receipt")
 	}
 	r.TxHash = dec.TxHash.String()
+
 	if dec.ContractAddress != nil {
 		r.ContractAddress = dec.ContractAddress.String()
 	}
+
 	if dec.GasUsed == nil {
 		return errors.New("missing required field 'gasUsed' for Receipt")
 	}
 	r.GasUsed = uint64(*dec.GasUsed)
+
 	if dec.BlockHash != nil {
 		r.BlockHash = dec.BlockHash.String()
 	}
 	if dec.BlockNumber != nil {
-		r.BlockNumber = (*big.Int)(dec.BlockNumber).Uint64()
+		r.BlockNumber = uint64(*dec.BlockNumber)
 	}
 	if dec.TransactionIndex != nil {
 		r.TxIndex = uint64(*dec.TransactionIndex)

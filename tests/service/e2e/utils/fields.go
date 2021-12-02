@@ -12,6 +12,7 @@ import (
 	"github.com/consensys/orchestrate/pkg/errors"
 	gherkin "github.com/cucumber/messages-go/v10"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
 // TODO: improve Regex to capture sub values instead of doing 2
@@ -197,6 +198,10 @@ func isEqual(s string, val reflect.Value) bool {
 			}
 		case reflect.TypeOf(common.Hash{}):
 			if val.Interface().(common.Hash).Hex() != s {
+				return false
+			}
+		case reflect.TypeOf(&hexutil.Big{}):
+			if val.Interface().(*hexutil.Big).String() != s {
 				return false
 			}
 		}

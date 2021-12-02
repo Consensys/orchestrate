@@ -50,7 +50,7 @@ func TestTransactionParams_Validation(t *testing.T) {
 		{
 			"Validator error",
 			&TransactionParams{
-				Value: "error",
+				Value: nil,
 			},
 			true,
 		},
@@ -99,7 +99,7 @@ func TestDeployContractParams_Validation(t *testing.T) {
 		{
 			"Validator error",
 			&DeployContractParams{
-				Value: "error",
+				Value: nil,
 			},
 			true,
 		},
@@ -148,7 +148,7 @@ func TestTransferParams_Validation(t *testing.T) {
 		{
 			"Validator error",
 			&TransferParams{
-				Value: "error",
+				Value: nil,
 			},
 			true,
 		},

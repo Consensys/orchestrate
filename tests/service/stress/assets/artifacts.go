@@ -13,6 +13,7 @@ import (
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	"github.com/consensys/orchestrate/pkg/types/api"
 	"github.com/consensys/orchestrate/pkg/types/entities"
+	"github.com/consensys/quorum/common/hexutil"
 )
 
 var artifactsCtxKey ctxKey = "artifacts"
@@ -83,9 +84,9 @@ func readContract(ctx context.Context, artifactsPath, fileName string) (*entitie
 	var contract = &entities.Contract{}
 	contract.ABI = string(art.Abi)
 	// Bytecode is an hexstring encoded []byte
-	contract.Bytecode = art.Bytecode
+	contract.Bytecode = hexutil.MustDecode(art.Bytecode)
 	// Bytecode is an hexstring encoded []byte
-	contract.DeployedBytecode = art.DeployedBytecode
+	contract.DeployedBytecode = hexutil.MustDecode(art.DeployedBytecode)
 
 	return contract, nil
 }

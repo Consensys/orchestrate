@@ -10,6 +10,7 @@ import (
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	types "github.com/consensys/orchestrate/pkg/types/api"
 	"github.com/consensys/orchestrate/pkg/types/entities"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
 //go:generate mockgen -source=retry_session_job.go -destination=mocks/retry_session_job.go -package=mocks
@@ -149,13 +150,17 @@ func newChildJobRequest(parentJob *types.JobResponse, gasPriceMultiplier float64
 
 	switch parentJob.Transaction.TransactionType {
 	case entities.LegacyTxType:
-		gasPrice := new(big.Float)
-		gasPrice, _ = gasPrice.SetString(parentJob.Transaction.GasPrice)
-		newJobRequest.Transaction.GasPrice = gasPrice.Mul(gasPrice, big.NewFloat(1+gasPriceMultiplier)).String()
+		curGasPriceF := new(big.Float).SetInt(parentJob.Transaction.GasPrice.ToInt())
+		nextGasPriceF := new(big.Float).Mul(curGasPriceF, big.NewFloat(1+gasPriceMultiplier))
+		nextGasPrice := new(big.Int)
+		nextGasPriceF.Int(nextGasPrice)
+		newJobRequest.Transaction.GasPrice = (*hexutil.Big)(nextGasPrice)
 	case entities.DynamicFeeTxType:
-		gasTipCap := new(big.Float)
-		gasTipCap, _ = gasTipCap.SetString(parentJob.Transaction.GasTipCap)
-		newJobRequest.Transaction.GasTipCap = gasTipCap.Mul(gasTipCap, big.NewFloat(1+gasPriceMultiplier)).String()
+		curGasTipCapF := new(big.Float).SetInt(parentJob.Transaction.GasTipCap.ToInt())
+		nextGasTipCapF := new(big.Float).Mul(curGasTipCapF, big.NewFloat(1+gasPriceMultiplier))
+		nextGasTipCap := new(big.Int)
+		nextGasTipCapF.Int(nextGasTipCap)
+		newJobRequest.Transaction.GasTipCap = (*hexutil.Big)(nextGasTipCap)
 	}
 
 	return newJobRequest

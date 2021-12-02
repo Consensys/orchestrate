@@ -9,6 +9,7 @@ import (
 	multitenancy "github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	entities "github.com/consensys/orchestrate/pkg/types/entities"
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
+	common "github.com/ethereum/go-ethereum/common"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )
@@ -319,7 +320,7 @@ func (m *MockGetFaucetCandidateUseCase) EXPECT() *MockGetFaucetCandidateUseCaseM
 }
 
 // Execute mocks base method
-func (m *MockGetFaucetCandidateUseCase) Execute(ctx context.Context, account string, chain *entities.Chain, userInfo *multitenancy.UserInfo) (*entities.Faucet, error) {
+func (m *MockGetFaucetCandidateUseCase) Execute(ctx context.Context, account common.Address, chain *entities.Chain, userInfo *multitenancy.UserInfo) (*entities.Faucet, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Execute", ctx, account, chain, userInfo)
 	ret0, _ := ret[0].(*entities.Faucet)

@@ -1,6 +1,7 @@
 package testutils
 
 import (
+	"math/big"
 	"time"
 
 	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
@@ -46,7 +47,7 @@ func FakeChainResponse() *api.ChainResponse {
 		Name:                      "ganache",
 		TenantID:                  multitenancy.DefaultTenant,
 		URLs:                      []string{"http://ethereum-node:8545"},
-		ChainID:                   "888",
+		ChainID:                   big.NewInt(888),
 		ListenerDepth:             0,
 		ListenerCurrentBlock:      0,
 		ListenerStartingBlock:     0,

@@ -157,7 +157,7 @@ func (c *TransactionsController) sendRaw(rw http.ResponseWriter, request *http.R
 	}
 
 	txReq := formatters.FormatSendRawRequest(txRequest, request.Header.Get(IdempotencyKeyHeader))
-	txResponse, err := c.ucs.SendTransaction().Execute(ctx, txReq, "", multitenancy.UserInfoValue(ctx))
+	txResponse, err := c.ucs.SendTransaction().Execute(ctx, txReq, nil, multitenancy.UserInfoValue(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
@@ -198,7 +198,7 @@ func (c *TransactionsController) transfer(rw http.ResponseWriter, request *http.
 	}
 
 	txReq := formatters.FormatTransferRequest(txRequest, request.Header.Get(IdempotencyKeyHeader))
-	txResponse, err := c.ucs.SendTransaction().Execute(ctx, txReq, "", multitenancy.UserInfoValue(ctx))
+	txResponse, err := c.ucs.SendTransaction().Execute(ctx, txReq, nil, multitenancy.UserInfoValue(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return

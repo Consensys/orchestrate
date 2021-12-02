@@ -46,7 +46,7 @@ func (uc *sendTesseraPrivateTxUseCase) Execute(ctx context.Context, job *entitie
 	logger := uc.logger.WithContext(ctx)
 	logger.Debug("processing tessera private transaction job")
 
-	job.Transaction.Nonce = "0"
+	job.Transaction.Nonce = utils.ToPtr(uint64(0)).(*uint64)
 	err := uc.crafter.Execute(ctx, job)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(sendTesseraMarkingTxComponent)
@@ -66,21 +66,15 @@ func (uc *sendTesseraPrivateTxUseCase) Execute(ctx context.Context, job *entitie
 	return nil
 }
 
-func (uc *sendTesseraPrivateTxUseCase) sendTx(ctx context.Context, job *entities.Job) (string, error) {
+func (uc *sendTesseraPrivateTxUseCase) sendTx(ctx context.Context, job *entities.Job) (hexutil.Bytes, error) {
 	logger := uc.logger.WithContext(ctx)
 	proxyTessera := utils.GetProxyTesseraURL(uc.chainRegistryURL, job.ChainUUID)
-	data, err := hexutil.Decode(job.Transaction.Data)
-	if err != nil {
-		errMsg := "cannot decode transaction data"
-		logger.WithError(err).Errorf(errMsg)
-		return "", err
-	}
 
-	enclaveKey, err := uc.ec.StoreRaw(ctx, proxyTessera, data, job.Transaction.PrivateFrom)
+	enclaveKey, err := uc.ec.StoreRaw(ctx, proxyTessera, job.Transaction.Data, job.Transaction.PrivateFrom)
 	if err != nil {
 		errMsg := "cannot send tessera private transaction"
 		logger.WithError(err).Error(errMsg)
-		return "", err
+		return nil, err
 	}
 
 	return enclaveKey, nil

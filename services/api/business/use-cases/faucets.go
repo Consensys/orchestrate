@@ -5,6 +5,7 @@ import (
 
 	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/entities"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 )
 
 //go:generate mockgen -source=faucets.go -destination=mocks/faucets.go -package=mocks
@@ -38,5 +39,5 @@ type DeleteFaucetUseCase interface {
 }
 
 type GetFaucetCandidateUseCase interface {
-	Execute(ctx context.Context, account string, chain *entities.Chain, userInfo *multitenancy.UserInfo) (*entities.Faucet, error)
+	Execute(ctx context.Context, account ethcommon.Address, chain *entities.Chain, userInfo *multitenancy.UserInfo) (*entities.Faucet, error)
 }

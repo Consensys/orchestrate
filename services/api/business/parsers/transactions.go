@@ -9,17 +9,17 @@ import (
 
 func NewTransactionModelFromEntities(tx *entities.ETHTransaction) *models.Transaction {
 	return &models.Transaction{
-		Hash:           tx.Hash,
-		Sender:         tx.From,
-		Recipient:      tx.To,
-		Nonce:          tx.Nonce,
-		Value:          tx.Value,
-		GasPrice:       tx.GasPrice,
-		GasFeeCap:      tx.GasFeeCap,
-		GasTipCap:      tx.GasTipCap,
-		Gas:            tx.Gas,
-		Data:           tx.Data,
-		Raw:            tx.Raw,
+		Hash:           utils.StringerToString(tx.Hash),
+		Sender:         utils.StringerToString(tx.From),
+		Recipient:      utils.StringerToString(tx.To),
+		Nonce:          utils.ValueToString(tx.Nonce),
+		Value:          utils.HexToBigIntString(tx.Value),
+		GasPrice:       utils.HexToBigIntString(tx.GasPrice),
+		GasFeeCap:      utils.HexToBigIntString(tx.GasFeeCap),
+		GasTipCap:      utils.HexToBigIntString(tx.GasTipCap),
+		Gas:            utils.ValueToString(tx.Gas),
+		Data:           utils.StringerToString(tx.Data),
+		Raw:            utils.StringerToString(tx.Raw),
 		TxType:         string(tx.TransactionType),
 		AccessList:     tx.AccessList,
 		PrivateFrom:    tx.PrivateFrom,
@@ -27,7 +27,7 @@ func NewTransactionModelFromEntities(tx *entities.ETHTransaction) *models.Transa
 		MandatoryFor:   tx.MandatoryFor,
 		PrivacyGroupID: tx.PrivacyGroupID,
 		PrivacyFlag:    int(tx.PrivacyFlag),
-		EnclaveKey:     tx.EnclaveKey,
+		EnclaveKey:     utils.StringerToString(tx.EnclaveKey),
 		CreatedAt:      tx.CreatedAt,
 		UpdatedAt:      tx.UpdatedAt,
 	}
@@ -38,16 +38,16 @@ func NewTransactionEntityFromModels(tx *models.Transaction) *entities.ETHTransac
 	_ = utils.CastInterfaceToObject(tx.AccessList, &accessList)
 
 	return &entities.ETHTransaction{
-		Hash:            tx.Hash,
-		From:            tx.Sender,
-		To:              tx.Recipient,
-		Nonce:           tx.Nonce,
-		Value:           tx.Value,
-		GasPrice:        tx.GasPrice,
-		Gas:             tx.Gas,
-		GasTipCap:       tx.GasTipCap,
-		GasFeeCap:       tx.GasFeeCap,
-		Data:            tx.Data,
+		Hash:            utils.StringToEthHash(tx.Hash),
+		From:            utils.ToEthAddr(tx.Sender),
+		To:              utils.ToEthAddr(tx.Recipient),
+		Nonce:           utils.StringToUint64(tx.Nonce),
+		Value:           utils.BigIntStringToHex(tx.Value),
+		GasPrice:        utils.BigIntStringToHex(tx.GasPrice),
+		Gas:             utils.StringToUint64(tx.Gas),
+		GasTipCap:       utils.BigIntStringToHex(tx.GasTipCap),
+		GasFeeCap:       utils.BigIntStringToHex(tx.GasFeeCap),
+		Data:            utils.StringToHexBytes(tx.Data),
 		TransactionType: entities.TransactionType(tx.TxType),
 		AccessList:      accessList,
 		PrivateFrom:     tx.PrivateFrom,
@@ -55,66 +55,30 @@ func NewTransactionEntityFromModels(tx *models.Transaction) *entities.ETHTransac
 		MandatoryFor:    tx.MandatoryFor,
 		PrivacyGroupID:  tx.PrivacyGroupID,
 		PrivacyFlag:     entities.PrivacyFlag(tx.PrivacyFlag),
-		EnclaveKey:      tx.EnclaveKey,
-		Raw:             tx.Raw,
+		EnclaveKey:      utils.StringToHexBytes(tx.EnclaveKey),
+		Raw:             utils.StringToHexBytes(tx.Raw),
 		CreatedAt:       tx.CreatedAt,
 		UpdatedAt:       tx.UpdatedAt,
 	}
 }
 
 func UpdateTransactionModelFromEntities(txModel *models.Transaction, tx *entities.ETHTransaction) {
-	if tx.Hash != "" {
-		txModel.Hash = tx.Hash
-	}
-	if tx.From != "" {
-		txModel.Sender = tx.From
-	}
-	if tx.To != "" {
-		txModel.Recipient = tx.To
-	}
-	if tx.Nonce != "" {
-		txModel.Nonce = tx.Nonce
-	}
-	if tx.Value != "" {
-		txModel.Value = tx.Value
-	}
-	if tx.GasPrice != "" {
-		txModel.GasPrice = tx.GasPrice
-	}
-	if tx.GasFeeCap != "" {
-		txModel.GasFeeCap = tx.GasFeeCap
-	}
-	if tx.GasTipCap != "" {
-		txModel.GasTipCap = tx.GasTipCap
-	}
-	if tx.Gas != "" {
-		txModel.Gas = tx.Gas
-	}
-	if tx.Data != "" {
-		txModel.Data = tx.Data
-	}
-	if tx.TransactionType != "" {
-		txModel.TxType = string(tx.TransactionType)
-	}
-	if len(tx.AccessList) > 0 {
-		txModel.AccessList = tx.AccessList
-	}
-	if tx.PrivateFrom != "" {
-		txModel.PrivateFrom = tx.PrivateFrom
-	}
-	if len(tx.PrivateFor) > 0 {
-		txModel.PrivateFor = tx.PrivateFor
-	}
-	if tx.PrivateFrom != "" {
-		txModel.PrivateFrom = tx.PrivateFrom
-	}
-	if tx.PrivacyGroupID != "" {
-		txModel.PrivacyGroupID = tx.PrivacyGroupID
-	}
-	if tx.EnclaveKey != "" {
-		txModel.EnclaveKey = tx.EnclaveKey
-	}
-	if tx.Raw != "" {
-		txModel.Raw = tx.Raw
-	}
+	txModel.Hash = utils.StringerToString(tx.Hash)
+	txModel.Sender = utils.StringerToString(tx.From)
+	txModel.Recipient = utils.StringerToString(tx.To)
+	txModel.Nonce = utils.ValueToString(tx.Nonce)
+	txModel.Value = utils.HexToBigIntString(tx.Value)
+	txModel.GasPrice = utils.HexToBigIntString(tx.GasPrice)
+	txModel.GasFeeCap = utils.HexToBigIntString(tx.GasFeeCap)
+	txModel.GasTipCap = utils.HexToBigIntString(tx.GasTipCap)
+	txModel.Gas = utils.ValueToString(tx.Gas)
+	txModel.Data = utils.StringerToString(tx.Data)
+	txModel.Raw = utils.StringerToString(tx.Raw)
+	txModel.TxType = string(tx.TransactionType)
+	txModel.AccessList = tx.AccessList
+	txModel.PrivateFrom = tx.PrivateFrom
+	txModel.PrivateFor = tx.PrivateFor
+	txModel.MandatoryFor = tx.MandatoryFor
+	txModel.PrivacyGroupID = tx.PrivacyGroupID
+	txModel.EnclaveKey = utils.StringerToString(tx.EnclaveKey)
 }

@@ -40,8 +40,8 @@ func TestGetIndexedCount(t *testing.T) {
 		Name:             "ERC20",
 		Tag:              "v1.0.0",
 		ABI:              ERC20,
-		Bytecode:         hexutil.Encode([]byte{1, 2}),
-		DeployedBytecode: hexutil.Encode([]byte{1, 2, 3}),
+		Bytecode:         hexutil.MustDecode(hexutil.Encode([]byte{1, 2})),
+		DeployedBytecode: hexutil.MustDecode(hexutil.Encode([]byte{1, 2, 3})),
 	}
 	erc20ABI, err := ERC20Contract.ToABI()
 	assert.NoError(t, err, "should not error on toABI()")

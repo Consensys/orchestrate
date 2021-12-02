@@ -26,7 +26,7 @@ Feature: Send transfer transaction
         "params": {
           "from": "{{global.nodes.besu[0].fundedPublicKeys[0]}}",
           "to": "{{account1}}",
-          "value": "100000000000000000"
+          "value": "0x16345785D8A0000"
         },
         "labels": {
           "scenario.id": "{{scenarioID}}",
@@ -42,7 +42,7 @@ Feature: Send transfer transaction
         "params": {
           "from": "{{global.nodes.geth[0].fundedPublicKeys[0]}}",
           "to": "{{account2}}",
-          "value": "100000000000000000"
+          "value": "0x16345785D8A0000"
         },
         "labels": {
           "scenario.id": "{{scenarioID}}",
@@ -76,7 +76,7 @@ Feature: Send transfer transaction
         "params": {
           "from": "{{account1}}",
           "to": "{{to1}}",
-          "value": "500000000"
+          "value": "0x1dcd6500"
         },
         "labels": {
           "scenario.id": "{{scenarioID}}",
@@ -95,7 +95,7 @@ Feature: Send transfer transaction
         "params": {
           "from": "{{account2}}",
           "to": "{{to2}}",
-          "value": "400000000",
+          "value": "0x400000000",
           "transactionType": "legacy"
         },
         "labels": {
@@ -159,7 +159,7 @@ Feature: Send transfer transaction
     Then the response code should be 200
     And Response should have the following fields
       | result     |
-      | 0x17d78400 |
+      | 0x400000000 |
 
   Scenario: Fail to send transfer transaction with missing value
     Given I register the following alias
@@ -201,7 +201,7 @@ Feature: Send transfer transaction
         "chain": "{{chain.besu0.Name}}",
         "params": {
           "from": "{{account1}}",
-          "value": "400000000"
+          "value": "0x17D78400"
         },
         "labels": {
           "scenario.id": "{{scenarioID}}"
@@ -233,7 +233,7 @@ Feature: Send transfer transaction
         "params": {
           "from": "{{account3}}",
           "to": "{{to1}}",
-          "value": "0"
+          "value": "0x0"
         },
         "labels": {
           "scenario.id": "{{scenarioID}}",
