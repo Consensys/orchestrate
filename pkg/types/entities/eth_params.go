@@ -18,7 +18,7 @@ type ETHTransactionParams struct {
 	TransactionType string               `json:"transactionType,omitempty" example:"dynamic_fee" enums:"legacy,dynamic_fee"`
 	MethodSignature string               `json:"methodSignature,omitempty" example:"transfer(address,uint256)"`
 	Args            []interface{}        `json:"args,omitempty"`
-	Raw             hexutil.Bytes        `json:"raw,omitempty" example:"0xfe378324abcde723"`
+	Raw             hexutil.Bytes        `json:"raw,omitempty" example:"0xfe378324abcde723" swaggertype:"string"`
 	ContractName    string               `json:"contractName,omitempty" example:"MyContract"`
 	ContractTag     string               `json:"contractTag,omitempty" example:"v1.1.0"`
 	Nonce           *uint64              `json:"nonce,omitempty" example:"1"`

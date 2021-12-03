@@ -2796,7 +2796,8 @@
                     }
                 },
                 "compressedPublicKey": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "0x048e66b3e549818ea2cb354fb70749f6c8de8fa484f7530fc447"
                 },
                 "createdAt": {
                     "type": "string",
@@ -2808,7 +2809,7 @@
                 },
                 "publicKey": {
                     "type": "string",
-                    "example": "048e66b3e549818ea2cb354fb70749f6c8de8fa484f7530fc447d5fe80a1c424e4f5ae648d648c980ae7095d1efad87161d83886ca4b6c498ac22a93da5099014a"
+                    "example": "0x048e66b3e549818ea2cb354fb70749f6c8de8fa484f7530fc447d5fe80a1c424e4f5ae648d648c980ae7095d1efad87161d83886ca4b6c498ac22a93da5099014a"
                 },
                 "tenantID": {
                     "type": "string",
@@ -2841,7 +2842,7 @@
             "properties": {
                 "chainID": {
                     "type": "string",
-                    "example": "1"
+                    "example": "2445"
                 },
                 "createdAt": {
                     "type": "string",
@@ -3047,12 +3048,12 @@
                     "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
                 },
                 "gas": {
-                    "type": "string",
-                    "example": "21000"
+                    "type": "integer",
+                    "example": 300000
                 },
                 "gasPrice": {
                     "type": "string",
-                    "example": "71500000 (wei)"
+                    "example": "0x5208"
                 },
                 "gasPricePolicy": {
                     "$ref": "#/definitions/api.GasPriceParams"
@@ -3069,11 +3070,11 @@
                 },
                 "maxFeePerGas": {
                     "type": "string",
-                    "example": "71500000 (wei)"
+                    "example": "0x4c4b40"
                 },
                 "maxPriorityFeePerGas": {
                     "type": "string",
-                    "example": "71500000 (wei)"
+                    "example": "0x59682f00"
                 },
                 "oneTimeKey": {
                     "type": "boolean",
@@ -3115,7 +3116,7 @@
                 },
                 "value": {
                     "type": "string",
-                    "example": "71500000 (wei)"
+                    "example": "0x59682f00"
                 }
             }
         },
@@ -3152,7 +3153,7 @@
             "properties": {
                 "amount": {
                     "type": "string",
-                    "example": "60000000000000000 (wei)"
+                    "example": "0xD529AE9E860000"
                 },
                 "chainRule": {
                     "type": "string",
@@ -3172,7 +3173,7 @@
                 },
                 "maxBalance": {
                     "type": "string",
-                    "example": "100000000000000000 (wei)"
+                    "example": "0x16345785D8A0000"
                 },
                 "name": {
                     "type": "string",
@@ -3361,7 +3362,7 @@
             "properties": {
                 "raw": {
                     "type": "string",
-                    "example": "0xfe378324abcde723..."
+                    "example": "0xfe378324abcde723"
                 },
                 "retryPolicy": {
                     "$ref": "#/definitions/api.IntervalRetryParams"
@@ -3436,11 +3437,11 @@
                 },
                 "bytecode": {
                     "type": "string",
-                    "example": "0x6080604052348015600f57600080f..."
+                    "example": "0x6080604052348015600f57600080f"
                 },
                 "deployedBytecode": {
                     "type": "string",
-                    "example": "0x6080604052348015600f57600080f..."
+                    "example": "0x6080604052348015600f57600080f"
                 },
                 "name": {
                     "type": "string",
@@ -3465,7 +3466,7 @@
             "properties": {
                 "amount": {
                     "type": "string",
-                    "example": "60000000000000000 (wei)"
+                    "example": "0xF4240"
                 },
                 "chainRule": {
                     "type": "string",
@@ -3481,7 +3482,7 @@
                 },
                 "maxBalance": {
                     "type": "string",
-                    "example": "100000000000000000 (wei)"
+                    "example": "0x254582f40"
                 },
                 "name": {
                     "type": "string",
@@ -3600,12 +3601,12 @@
                     "example": "0x1abae27a0cbfb02945720425d3b80c7e097285534"
                 },
                 "gas": {
-                    "type": "string",
-                    "example": "21000"
+                    "type": "integer",
+                    "example": 50000
                 },
                 "gasPrice": {
                     "type": "string",
-                    "example": "71500000 (wei)"
+                    "example": "0xAB208"
                 },
                 "gasPricePolicy": {
                     "$ref": "#/definitions/api.GasPriceParams"
@@ -3622,11 +3623,11 @@
                 },
                 "maxFeePerGas": {
                     "type": "string",
-                    "example": "71500000 (wei)"
+                    "example": "0x4c4b40"
                 },
                 "maxPriorityFeePerGas": {
                     "type": "string",
-                    "example": "71500000 (wei)"
+                    "example": "0x59682f00"
                 },
                 "methodSignature": {
                     "type": "string",
@@ -3676,7 +3677,7 @@
                 },
                 "value": {
                     "type": "string",
-                    "example": "71500000 (wei)"
+                    "example": "0x44300E0"
                 }
             }
         },
@@ -3729,23 +3730,23 @@
                     "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
                 },
                 "gas": {
-                    "type": "string",
-                    "example": "21000"
+                    "type": "integer",
+                    "example": 21000
                 },
                 "gasPrice": {
                     "type": "string",
-                    "example": "71500000 (wei)"
+                    "example": "0x5208"
                 },
                 "gasPricePolicy": {
                     "$ref": "#/definitions/api.GasPriceParams"
                 },
                 "maxFeePerGas": {
                     "type": "string",
-                    "example": "71500000 (wei)"
+                    "example": "0x4c4b40"
                 },
                 "maxPriorityFeePerGas": {
                     "type": "string",
-                    "example": "71500000 (wei)"
+                    "example": "0x59682f00"
                 },
                 "to": {
                     "type": "string",
@@ -3761,7 +3762,7 @@
                 },
                 "value": {
                     "type": "string",
-                    "example": "71500000 (wei)"
+                    "example": "0x59682f00"
                 }
             }
         },
@@ -3828,7 +3829,7 @@
             "properties": {
                 "amount": {
                     "type": "string",
-                    "example": "60000000000000000 (wei)"
+                    "example": "0x254582f40"
                 },
                 "chainRule": {
                     "type": "string",
@@ -3844,7 +3845,7 @@
                 },
                 "maxBalance": {
                     "type": "string",
-                    "example": "100000000000000000 (wei)"
+                    "example": "0x254582f40"
                 },
                 "name": {
                     "type": "string",
@@ -3924,12 +3925,12 @@
                     "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
                 },
                 "gas": {
-                    "type": "string",
-                    "example": "21000"
+                    "type": "integer",
+                    "example": 21000
                 },
                 "gasPrice": {
                     "type": "string",
-                    "example": "71500000 (wei)"
+                    "example": "0x5208"
                 },
                 "hash": {
                     "type": "string",
@@ -3947,15 +3948,15 @@
                 },
                 "maxFeePerGas": {
                     "type": "string",
-                    "example": "71500000 (wei)"
+                    "example": "0x4c4b40"
                 },
                 "maxPriorityFeePerGas": {
                     "type": "string",
-                    "example": "71500000 (wei)"
+                    "example": "0x59682f00"
                 },
                 "nonce": {
-                    "type": "string",
-                    "example": "1"
+                    "type": "integer",
+                    "example": 1
                 },
                 "privacyFlag": {
                     "type": "integer",
@@ -4001,7 +4002,7 @@
                 },
                 "value": {
                     "type": "string",
-                    "example": "71500000 (wei)"
+                    "example": "0x59682f00"
                 }
             }
         },
@@ -4033,12 +4034,12 @@
                     "example": "0x1abae27a0cbfb02945720425d3b80c7e09728534"
                 },
                 "gas": {
-                    "type": "string",
-                    "example": "21000"
+                    "type": "integer",
+                    "example": 21000
                 },
                 "gasPrice": {
                     "type": "string",
-                    "example": "71500000 (wei)"
+                    "example": "0x5208"
                 },
                 "mandatoryFor": {
                     "type": "array",
@@ -4052,19 +4053,19 @@
                 },
                 "maxFeePerGas": {
                     "type": "string",
-                    "example": "71500000 (wei)"
+                    "example": "0x4c4b40"
                 },
                 "maxPriorityFeePerGas": {
                     "type": "string",
-                    "example": "71500000 (wei)"
+                    "example": "0x59682f00"
                 },
                 "methodSignature": {
                     "type": "string",
                     "example": "transfer(address,uint256)"
                 },
                 "nonce": {
-                    "type": "string",
-                    "example": "1"
+                    "type": "integer",
+                    "example": 1
                 },
                 "privacyFlag": {
                     "type": "integer",
@@ -4110,7 +4111,7 @@
                 },
                 "value": {
                     "type": "string",
-                    "example": "71500000 (wei)"
+                    "example": "0x59682f00"
                 }
             }
         },
