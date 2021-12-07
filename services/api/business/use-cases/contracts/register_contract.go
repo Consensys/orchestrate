@@ -3,6 +3,8 @@ package contracts
 import (
 	"context"
 
+	"github.com/consensys/quorum/accounts/abi"
+
 	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	"github.com/consensys/orchestrate/pkg/toolkit/database"
@@ -11,7 +13,6 @@ import (
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
 	"github.com/consensys/orchestrate/services/api/store"
 	"github.com/consensys/orchestrate/services/api/store/models"
-	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -109,16 +110,16 @@ func (uc *registerContractUseCase) Execute(ctx context.Context, contract *entiti
 	return nil
 }
 
-func getMethods(contractAbi *ethabi.ABI, deployedBytecode hexutil.Bytes, codeHash common.Hash, methodJSONs map[string]string) []*models.MethodModel {
+func getMethods(contractAbi *abi.ABI, deployedBytecode hexutil.Bytes, codeHash common.Hash, methodJSONs map[string]string) []*models.MethodModel {
 	var methods []*models.MethodModel
 	// nolint
 	for _, m := range contractAbi.Methods {
-		sel := sigHashToSelector(m.ID)
+		sel := sigHashToSelector(m.ID())
 		if deployedBytecode != nil {
 			methods = append(methods, &models.MethodModel{
 				Codehash: codeHash.Hex(),
 				Selector: sel,
-				ABI:      methodJSONs[m.Sig],
+				ABI:      methodJSONs[m.Sig()],
 			})
 		}
 	}
@@ -126,7 +127,7 @@ func getMethods(contractAbi *ethabi.ABI, deployedBytecode hexutil.Bytes, codeHas
 	return methods
 }
 
-func getEvents(contractAbi *ethabi.ABI, deployedBytecode hexutil.Bytes, codeHash common.Hash, eventJSONs map[string]string) []*models.EventModel {
+func getEvents(contractAbi *abi.ABI, deployedBytecode hexutil.Bytes, codeHash common.Hash, eventJSONs map[string]string) []*models.EventModel {
 	var events []*models.EventModel
 	// nolint
 	for _, e := range contractAbi.Events {
@@ -134,9 +135,9 @@ func getEvents(contractAbi *ethabi.ABI, deployedBytecode hexutil.Bytes, codeHash
 		if deployedBytecode != nil {
 			events = append(events, &models.EventModel{
 				Codehash:          codeHash.Hex(),
-				SigHash:           e.ID.Hex(),
+				SigHash:           e.ID().Hex(),
 				IndexedInputCount: indexedCount,
-				ABI:               eventJSONs[e.Sig],
+				ABI:               eventJSONs[e.Sig()],
 			})
 		}
 	}

@@ -54,21 +54,21 @@ func (uc *getContractUseCase) Execute(ctx context.Context, name, tag string) (*e
 	// nolint
 	for _, method := range contractABI.Methods {
 		contract.Methods = append(contract.Methods, entities.Method{
-			Signature: method.Sig,
+			Signature: method.Sig(),
 		})
 	}
 
 	// nolint
 	for _, event := range contractABI.Events {
 		contract.Events = append(contract.Events, entities.Event{
-			Signature: event.Sig,
+			Signature: event.Sig(),
 		})
 	}
 
-	if contractABI.Constructor.Sig == "" {
+	if contractABI.Constructor.Sig() == "" {
 		contract.Constructor = entities.Method{Signature: "()"}
 	} else {
-		contract.Constructor = entities.Method{Signature: contractABI.Constructor.Sig}
+		contract.Constructor = entities.Method{Signature: contractABI.Constructor.Sig()}
 	}
 
 	logger.Debug("contract found successfully")

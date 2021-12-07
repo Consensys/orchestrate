@@ -184,7 +184,7 @@ func (hk *Hook) decodeReceipt(ctx context.Context, c *dynamic.Chain, receipt *ty
 		}
 
 		if eventResp.Event == "" && len(eventResp.DefaultEvents) == 0 {
-			logger.WithError(err).Warn("could not retrieve event ABI")
+			logger.WithError(err).Trace("could not retrieve event ABI")
 			continue
 		}
 

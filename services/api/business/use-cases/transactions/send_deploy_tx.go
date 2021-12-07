@@ -47,6 +47,8 @@ func (uc *sendDeployTxUsecase) Execute(ctx context.Context, txRequest *entities.
 }
 
 func (uc *sendDeployTxUsecase) computeTxData(ctx context.Context, params *entities.ETHTransactionParams) ([]byte, error) {
+	logger := uc.logger.WithContext(ctx)
+
 	if params.ContractTag == "" {
 		params.ContractTag = "latest"
 	}
@@ -64,12 +66,16 @@ func (uc *sendDeployTxUsecase) computeTxData(ctx context.Context, params *entiti
 	crafter := abi.BaseCrafter{}
 	args, err := utils.ParseIArrayToStringArray(params.Args)
 	if err != nil {
-		return nil, errors.DataCorruptedError("failed to parse constructor method arguments")
+		errMessage := "failed to parse constructor method arguments"
+		logger.WithError(err).WithField("args", params.Args).Error(errMessage)
+		return nil, errors.DataCorruptedError(errMessage)
 	}
 
 	txData, err := crafter.CraftConstructor(contract.Bytecode, constructorSignature, args...)
 	if err != nil {
-		return nil, errors.InvalidParameterError("invalid arguments for constructor method signature")
+		errMessage := "invalid arguments for constructor method signature"
+		logger.WithError(err).WithField("signature", constructorSignature).WithField("args", args).Error(errMessage)
+		return nil, errors.InvalidParameterError(errMessage)
 	}
 
 	return txData, nil

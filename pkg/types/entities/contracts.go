@@ -6,8 +6,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/consensys/quorum/accounts/abi"
+
 	"github.com/consensys/orchestrate/pkg/errors"
-	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
@@ -99,8 +100,8 @@ func (m *Method) IsConstructor() bool {
 }
 
 // ToABI returns a Geth ABI object built from a contract ABI
-func (c *Contract) ToABI() (*ethabi.ABI, error) {
-	a := &ethabi.ABI{}
+func (c *Contract) ToABI() (*abi.ABI, error) {
+	a := &abi.ABI{}
 
 	if c.ABI != "" {
 		err := a.UnmarshalJSON([]byte(c.ABI))

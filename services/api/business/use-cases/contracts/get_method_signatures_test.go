@@ -7,11 +7,11 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/assert"
 	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/pkg/types/testutils"
 	mocks2 "github.com/consensys/orchestrate/services/api/business/use-cases/mocks"
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGetMethodSignatures_Execute(t *testing.T) {
@@ -42,7 +42,7 @@ func TestGetMethodSignatures_Execute(t *testing.T) {
 		signatures, err := usecase.Execute(ctx, contract.Name, contract.Tag, constructorMethodName)
 
 		assert.NoError(t, err)
-		assert.Equal(t, signatures[0], "constructor")
+		assert.Equal(t, "constructor()", signatures[0])
 	})
 
 	t.Run("should execute use case successfully and return an empty array if nothing is found", func(t *testing.T) {

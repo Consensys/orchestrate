@@ -45,12 +45,12 @@ func (uc *getMethodSignaturesUseCase) Execute(ctx context.Context, name, tag, me
 	var signatures []string
 
 	if methodName == constructorMethodName {
-		signatures = append(signatures, fmt.Sprintf("%s%s", constructorMethodName, contractABI.Constructor.Sig))
+		signatures = append(signatures, fmt.Sprintf("%s%s", constructorMethodName, contractABI.Constructor.Sig()))
 	} else {
 		// nolint
 		for _, method := range contractABI.Methods {
 			if methodName == "" || method.Name == methodName {
-				signatures = append(signatures, method.Sig)
+				signatures = append(signatures, method.Sig())
 			}
 		}
 	}

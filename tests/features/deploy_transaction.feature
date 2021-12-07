@@ -1,5 +1,5 @@
 @deploy-contract
-Feature: Deploy ERC20 contract
+Feature: Deploy contracts
   As an external developer
   I want to deploy a contract using transaction scheduler API
 
@@ -13,6 +13,7 @@ Feature: Deploy ERC20 contract
     Given I register the following contracts
       | name        | artifacts        | API-KEY            | Tenant               |
       | SimpleToken | SimpleToken.json | {{global.api-key}} | {{tenant1.tenantID}} |
+      | ERC20       | ERC20.json       | {{global.api-key}} | {{tenant1.tenantID}} |
     Then I track the following envelopes
       | ID                  |
       | faucet-{{account1}} |
@@ -39,7 +40,7 @@ Feature: Deploy ERC20 contract
     Then Envelopes should be in topic "tx.decoded"
 
   @besu
-  Scenario: Deploy ERC20 in Besu
+  Scenario: Deploy SimpleToken in Besu
     Given I register the following alias
       | alias            | value           |
       | besuContractTxID | {{random.uuid}} |
@@ -78,8 +79,49 @@ Feature: Deploy ERC20 contract
       | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status |
       | MINED  | CREATED        | STARTED        | PENDING        | MINED          |
 
+  @besu
+  Scenario: Deploy ERC20 in Besu
+    Given I register the following alias
+      | alias     | value           |
+      | erc20TxID | {{random.uuid}} |
+    Then I track the following envelopes
+      | ID            |
+      | {{erc20TxID}} |
+    Given I set the headers
+      | Key         | Value                |
+      | X-API-KEY   | {{global.api-key}}   |
+      | X-TENANT-ID | {{tenant1.tenantID}} |
+    When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
+      """
+      {
+        "chain": "{{chain.besu0.Name}}",
+        "params": {
+          "contractName": "ERC20",
+          "from": "{{account1}}",
+          "args":["WindToken", "WIND"]
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{erc20TxID}}"
+        }
+      }
+      """
+    Then the response code should be 202
+    Then I register the following response fields
+      | alias      | path         |
+      | jobOneUUID | jobs[0].uuid |
+    Then Envelopes should be in topic "tx.decoded"
+    And Envelopes should have the following fields
+      | Receipt.Status | Receipt.ContractAddress |
+      | 1              | ~                       |
+    When I send "GET" request to "{{global.api}}/jobs/{{jobOneUUID}}"
+    Then the response code should be 200
+    And Response should have the following fields
+      | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status |
+      | MINED  | CREATED        | STARTED        | PENDING        | MINED          |
+
   @geth
-  Scenario: Deploy ERC20 in Geth (dynamic_fee)
+  Scenario: Deploy SimpleToken in Geth (dynamic_fee)
     Given I register the following alias
       | alias            | value           |
       | gethContractTxID | {{random.uuid}} |
@@ -119,7 +161,7 @@ Feature: Deploy ERC20 contract
       | MINED  | CREATED        | STARTED        | PENDING        | MINED          |
 
   @geth
-  Scenario: Deploy ERC20 in Geth (legacy)
+  Scenario: Deploy SimpleToken in Geth (legacy)
     Given I register the following alias
       | alias            | value           |
       | gethContractTxID | {{random.uuid}} |
@@ -160,7 +202,7 @@ Feature: Deploy ERC20 contract
       | MINED  | CREATED        | STARTED        | PENDING        | MINED          |
 
   @oneTimeKey @besu
-  Scenario: Deploy ERC20 with one-time-key
+  Scenario: Deploy SimpleToken with one-time-key
     Given I register the following contracts
       | name        | artifacts        | API-KEY            | Tenant               |
       | SimpleToken | SimpleToken.json | {{global.api-key}} | {{tenant1.tenantID}} |
@@ -203,7 +245,7 @@ Feature: Deploy ERC20 contract
       | MINED  | CREATED        | STARTED        | PENDING        | MINED          |
 
   @besu
-  Scenario: Fail to deploy ERC20 with too low gas
+  Scenario: Fail to deploy SimpleToken with too low gas
     Given I register the following contracts
       | name        | artifacts        | API-KEY            | Tenant               |
       | SimpleToken | SimpleToken.json | {{global.api-key}} | {{tenant1.tenantID}} |
@@ -247,7 +289,7 @@ Feature: Deploy ERC20 contract
       | FAILED | CREATED        | STARTED        | PENDING        | FAILED         |
 
   @besu
-  Scenario: Fail to deploy ERC20 with invalid contract tag
+  Scenario: Fail to deploy SimpleToken with invalid contract tag
     Given I register the following contracts
       | name        | artifacts        | API-KEY            | Tenant               |
       | SimpleToken | SimpleToken.json | {{global.api-key}} | {{tenant1.tenantID}} |
@@ -282,7 +324,7 @@ Feature: Deploy ERC20 contract
       | 271360 | ~       |
 
   @besu
-  Scenario: Fail to deploy ERC20 with missing contractName
+  Scenario: Fail to deploy SimpleToken with missing contractName
     Given I register the following contracts
       | name        | artifacts        | API-KEY            | Tenant               |
       | SimpleToken | SimpleToken.json | {{global.api-key}} | {{tenant1.tenantID}} |
