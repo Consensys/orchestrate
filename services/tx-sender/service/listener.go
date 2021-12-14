@@ -140,6 +140,7 @@ func (listener *MessageListener) consumeClaimLoop(ctx context.Context, session s
 
 			jlogger.Debug("job message has been processed")
 			session.MarkMessage(msg, "")
+			session.Commit()
 		}
 	}
 }
