@@ -29,6 +29,7 @@ type Agents interface {
 	Method() MethodAgent
 	Repository() RepositoryAgent
 	Tag() TagAgent
+	Contract() ContractAgent
 	Chain() ChainAgent
 	PrivateTxManager() PrivateTxManagerAgent
 }
@@ -110,6 +111,11 @@ type ArtifactAgent interface {
 	SelectOrInsert(ctx context.Context, artifact *models.ArtifactModel) error
 	Insert(ctx context.Context, artifact *models.ArtifactModel) error
 	FindOneByNameAndTag(ctx context.Context, name, tag string) (*models.ArtifactModel, error)
+}
+
+type ContractAgent interface {
+	FindOneByCodeHash(ctx context.Context, codeHash string) (*entities.Contract, error)
+	FindOneByAddress(ctx context.Context, address string) (*entities.Contract, error)
 }
 
 type CodeHashAgent interface {

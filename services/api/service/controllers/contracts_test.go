@@ -32,6 +32,7 @@ type contractsCtrlTestSuite struct {
 	getContractTags             *mocks.MockGetContractTagsUseCase
 	setContractCodeHash         *mocks.MockSetContractCodeHashUseCase
 	registerContract            *mocks.MockRegisterContractUseCase
+	searchContract              *mocks.MockSearchContractUseCase
 	router                      *mux.Router
 }
 
@@ -61,6 +62,9 @@ func (s *contractsCtrlTestSuite) SetContractCodeHash() usecases.SetContractCodeH
 func (s *contractsCtrlTestSuite) RegisterContract() usecases.RegisterContractUseCase {
 	return s.registerContract
 }
+func (s *contractsCtrlTestSuite) SearchContract() usecases.SearchContractUseCase {
+	return s.searchContract
+}
 
 func TestContractController(t *testing.T) {
 	s := new(contractsCtrlTestSuite)
@@ -79,6 +83,7 @@ func (s *contractsCtrlTestSuite) SetupTest() {
 	s.getContractTags = mocks.NewMockGetContractTagsUseCase(ctrl)
 	s.setContractCodeHash = mocks.NewMockSetContractCodeHashUseCase(ctrl)
 	s.registerContract = mocks.NewMockRegisterContractUseCase(ctrl)
+	s.searchContract = mocks.NewMockSearchContractUseCase(ctrl)
 	s.router = mux.NewRouter()
 
 	controller := NewContractsController(s)
@@ -231,6 +236,40 @@ func (s *contractsCtrlTestSuite) TestContractsController_GetContract() {
 
 		s.router.ServeHTTP(rw, httpRequest)
 		assert.Equal(t, http.StatusInternalServerError, rw.Code)
+	})
+}
+
+func (s *contractsCtrlTestSuite) TestContractsController_SearchContract() {
+	ctx := context.Background()
+
+	req := testutils.FakeSearchContractRequest()
+
+	s.T().Run("should execute search contract by code_hash successfully", func(t *testing.T) {
+		rw := httptest.NewRecorder()
+		contract := testutils.FakeContract()
+		httpRequest := httptest.
+			NewRequest(http.MethodGet, fmt.Sprintf("/contracts/search?code_hash=%s", req.CodeHash.String()), nil).
+			WithContext(ctx)
+
+		s.searchContract.EXPECT().Execute(gomock.Any(), req.CodeHash, nil).Return(contract, nil)
+
+		s.router.ServeHTTP(rw, httpRequest)
+		expectedBody, _ := json.Marshal(formatters.FormatContractResponse(contract))
+		assert.Equal(t, string(expectedBody)+"\n", rw.Body.String())
+	})
+
+	s.T().Run("should execute search contract by address successfully", func(t *testing.T) {
+		rw := httptest.NewRecorder()
+		contract := testutils.FakeContract()
+		httpRequest := httptest.
+			NewRequest(http.MethodGet, fmt.Sprintf("/contracts/search?address=%s", req.Address.String()), nil).
+			WithContext(ctx)
+
+		s.searchContract.EXPECT().Execute(gomock.Any(), nil, req.Address).Return(contract, nil)
+
+		s.router.ServeHTTP(rw, httpRequest)
+		expectedBody, _ := json.Marshal(formatters.FormatContractResponse(contract))
+		assert.Equal(t, string(expectedBody)+"\n", rw.Body.String())
 	})
 }
 

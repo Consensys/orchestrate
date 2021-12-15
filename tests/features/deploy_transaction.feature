@@ -152,8 +152,8 @@ Feature: Deploy contracts
       | jobUUID | jobs[0].uuid |
     Then Envelopes should be in topic "tx.decoded"
     And Envelopes should have the following fields
-      | Receipt.Status | Receipt.ContractAddress |
-      | 1              | ~                       |
+      | Receipt.Status | Receipt.ContractAddress | Receipt.ContractName | Receipt.ContractTag |
+      | 1              | ~                       | SimpleToken          | latest              |
     When I send "GET" request to "{{global.api}}/jobs/{{jobUUID}}"
     Then the response code should be 200
     And Response should have the following fields

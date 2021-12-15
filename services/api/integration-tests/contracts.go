@@ -10,6 +10,7 @@ import (
 	ethAbi "github.com/ethereum/go-ethereum/accounts/abi"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -152,6 +153,36 @@ func (s *contractsTestSuite) TestContractRegistry_Get() {
 
 		assert.Len(t, resp2, 1)
 		assert.Contains(t, resp2, "balanceOf(address)")
+	})
+}
+
+func (s *contractsTestSuite) TestContractRegistry_Search() {
+	contractName := "contract_" + utils.RandString(5)
+	contractTag := "contract_tag_" + utils.RandString(5)
+	ctx := context.Background()
+	txRequest := testutils.FakeRegisterContractRequest()
+	txRequest.Name = contractName
+	txRequest.Tag = contractTag
+	_, err := s.client.RegisterContract(ctx, txRequest)
+	if err != nil {
+		assert.Fail(s.T(), err.Error())
+		return
+	}
+	
+	codeHash := crypto.Keccak256(txRequest.DeployedBytecode)
+	abiStr, _ := json.Marshal(txRequest.ABI)
+
+	s.T().Run("should find a contract by code hash", func(t *testing.T) {
+		resp, err := s.client.SearchContract(ctx, &api.SearchContractRequest{
+			CodeHash: codeHash,
+		})
+		if err != nil {
+			assert.Fail(t, err.Error())
+			return
+		}
+
+		assert.Equal(t, string(abiStr), resp.ABI)
+		assert.Equal(t, contractTag, resp.Tag)
 	})
 }
 

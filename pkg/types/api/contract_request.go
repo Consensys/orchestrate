@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/consensys/orchestrate/pkg/types/entities"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
@@ -37,4 +38,9 @@ type GetContractEventsBySignHashResponse struct {
 
 type SetContractCodeHashRequest struct {
 	CodeHash hexutil.Bytes `json:"code_hash" validate:"required" example:"0x6080604052348015600f57600080f" swaggertype:"string"`
+}
+
+type SearchContractRequest struct {
+	CodeHash hexutil.Bytes      `json:"code_hash" validate:"required" example:"0x6080604052348015600f57600080f" swaggertype:"string"`
+	Address  *ethcommon.Address `json:"address" validate:"required" example:"0x1abae27a0cbfb02945720425d3b80c7e09728534" swaggertype:"string"`
 }

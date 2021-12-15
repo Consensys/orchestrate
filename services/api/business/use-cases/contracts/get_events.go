@@ -26,11 +26,11 @@ func NewGetEventsUseCase(agent store.EventAgent) usecases.GetContractEventsUseCa
 }
 
 // Execute validates and registers a new contract in DB
-func (uc *getEventsUseCase) Execute(ctx context.Context, chainID string, address ethcommon.Address, sighash hexutil.Bytes, indexedInputCount uint32) (abi string, eventsABI []string, err error) {
+func (uc *getEventsUseCase) Execute(ctx context.Context, chainID string, address ethcommon.Address, sigHash hexutil.Bytes, indexedInputCount uint32) (abi string, eventsABI []string, err error) {
 	ctx = log.WithFields(ctx, log.Field("chain_id", chainID), log.Field("address", address))
 	logger := uc.logger.WithContext(ctx)
 
-	eventModel, err := uc.agent.FindOneByAccountAndSigHash(ctx, chainID, address.Hex(), sighash.String(), indexedInputCount)
+	eventModel, err := uc.agent.FindOneByAccountAndSigHash(ctx, chainID, address.Hex(), sigHash.String(), indexedInputCount)
 	if err != nil && !errors.IsNotFoundError(err) {
 		return "", nil, errors.FromError(err).ExtendComponent(getEventsComponent)
 	}
@@ -40,7 +40,7 @@ func (uc *getEventsUseCase) Execute(ctx context.Context, chainID string, address
 		return eventModel.ABI, nil, nil
 	}
 
-	defaultEventModels, err := uc.agent.FindDefaultBySigHash(ctx, sighash.String(), indexedInputCount)
+	defaultEventModels, err := uc.agent.FindDefaultBySigHash(ctx, sigHash.String(), indexedInputCount)
 	if err != nil {
 		return "", nil, errors.FromError(err).ExtendComponent(getEventsComponent)
 	}

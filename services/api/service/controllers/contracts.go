@@ -33,6 +33,7 @@ func NewContractsController(contractUCs usecases.ContractUseCases) *ContractsCon
 func (c *ContractsController) Append(router *mux.Router) {
 	router.Methods(http.MethodGet).Path("/contracts").HandlerFunc(c.getCatalog)
 	router.Methods(http.MethodPost).Path("/contracts").HandlerFunc(c.register)
+	router.Methods(http.MethodGet).Path("/contracts/search").HandlerFunc(c.search)
 	router.Methods(http.MethodPost).Path("/contracts/accounts/{chain_id}/{address}").HandlerFunc(c.setCodeHash)
 	router.Methods(http.MethodGet).Path("/contracts/accounts/{chain_id}/{address}/events").HandlerFunc(c.getEvents)
 	router.Methods(http.MethodGet).Path("/contracts/{name}").HandlerFunc(c.getTags)
@@ -111,12 +112,46 @@ func (c *ContractsController) register(rw http.ResponseWriter, request *http.Req
 	_ = json.NewEncoder(rw).Encode(formatters.FormatContractResponse(contract))
 }
 
+// @Summary Search contract
+// @Description Search contract by codeHash or signHash
+// @Tags Contracts
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Security JWTAuth
+// @Param code_hash query string true "contract code hash"
+// @Param address query string true "contract address"
+// @Success 200 {object} api.ContractResponse{} "Contract object"
+// @Failure 400 {object} httputil.ErrorResponse "Invalid request"
+// @Failure 401 {object} httputil.ErrorResponse "Unauthorized"
+// @Failure 500 {object} httputil.ErrorResponse "Internal server error"
+// @Router /contracts/search [get]
+func (c *ContractsController) search(rw http.ResponseWriter, request *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	ctx := request.Context()
+
+	req, err := formatters.FormatSearchContractRequest(request)
+	if err != nil {
+		httputil.WriteHTTPErrorResponse(rw, err)
+		return
+	}
+
+	contract, err := c.ucs.SearchContract().Execute(ctx, req.CodeHash, req.Address)
+	if err != nil {
+		httputil.WriteHTTPErrorResponse(rw, err)
+		return
+	}
+
+	_ = json.NewEncoder(rw).Encode(formatters.FormatContractResponse(contract))
+}
+
 // @Summary Set the codeHash of the given contract address
 // @Description Retrieve events using hash of signature
 // @Tags Contracts
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
+// @Param request body api.SetContractCodeHashRequest true "Contract code hash request"
 // @Param address path string true "contract deployed address"
 // @Param chain_id path string true "network chain id"
 // @Success 200 {array} string "List of events"
@@ -159,6 +194,7 @@ func (c *ContractsController) setCodeHash(rw http.ResponseWriter, request *http.
 // @Security JWTAuth
 // @Param address path string true "contract deployed address"
 // @Param chain_id path string true "network chain id"
+// @Param sign_hash query string true "event sigh hash value"
 // @Success 200 {object} api.GetContractEventsBySignHashResponse{} "List of events"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 404 {object} httputil.ErrorResponse "Events not found"

@@ -154,6 +154,7 @@ func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *etht
 
 func (hk *Hook) decodeReceipt(ctx context.Context, c *dynamic.Chain, receipt *types.Receipt) error {
 	hk.logger.WithContext(ctx).Debug("decoding receipt...")
+	var contractAddress *ethcommon.Address
 	for _, l := range receipt.GetLogs() {
 		if len(l.GetTopics()) == 0 {
 			// This scenario is not supposed to happen
@@ -164,12 +165,13 @@ func (hk *Hook) decodeReceipt(ctx context.Context, c *dynamic.Chain, receipt *ty
 			WithField("address", l.GetAddress()).WithField("indexed", uint32(len(l.Topics)-1))
 
 		logger.Debug("decoding receipt logs")
+		sigHash := hexutil.MustDecode(l.Topics[0])
 		eventResp, err := hk.client.GetContractEvents(
 			ctx,
 			l.GetAddress(),
 			c.ChainID,
 			&api.GetContractEventsRequest{
-				SigHash:           hexutil.MustDecode(l.Topics[0]),
+				SigHash:           sigHash,
 				IndexedInputCount: uint32(len(l.Topics) - 1),
 			},
 		)
@@ -224,12 +226,41 @@ func (hk *Hook) decodeReceipt(ctx context.Context, c *dynamic.Chain, receipt *ty
 			continue
 		}
 
+		if contractAddress == nil {
+			addr := ethcommon.HexToAddress(l.GetAddress())
+			contractAddress = &addr
+		}
+
 		// Set decoded data on log
 		l.DecodedData = mapping
 		l.Event = GetAbi(event)
 
-		logger.WithField("receipt_log", fmt.Sprintf("%v", mapping)).Debug("log decoded")
+		logger.WithField("receipt_log", fmt.Sprintf("%v", mapping)).
+			Debug("log decoded")
 	}
+
+	if receipt.ContractName == "" && contractAddress != nil {
+		logger := hk.logger.WithContext(ctx)
+		eventContract, err := hk.client.SearchContract(ctx, &api.SearchContractRequest{
+			Address: contractAddress,
+		})
+
+		if err != nil && !errors.IsNotFoundError(err) {
+			logger.WithError(err).Error("failed to search contract by sign hash")
+			return err
+		}
+
+		if err == nil {
+			receipt.ContractName = eventContract.Name
+			receipt.ContractTag = eventContract.Tag
+
+			logger.WithField("contract_address", contractAddress).
+				WithField("contract_name", eventContract.Name).
+				WithField("contract_tag", eventContract.Tag).
+				Debug("source contract has been identified")
+		}
+	}
+
 	return nil
 }
 
@@ -271,7 +302,21 @@ func (hk *Hook) registerDeployedContract(ctx context.Context, c *dynamic.Chain, 
 		return err
 	}
 
-	logger.Info("contract has been registered successfully")
+	contract, err := hk.client.SearchContract(ctx, &api.SearchContractRequest{
+		CodeHash: crypto.Keccak256Hash(code).Bytes(),
+	})
+	if err != nil && !errors.IsNotFoundError(err) {
+		logger.WithError(err).Error("failed to search contract by code hash")
+		return err
+	}
+	if contract != nil {
+		receipt.ContractName = contract.Name
+		receipt.ContractTag = contract.Tag
+	}
+
+	logger.WithField("name", receipt.ContractName).
+		WithField("tag", receipt.ContractTag).
+		Info("contract has been registered successfully")
 	return nil
 }
 

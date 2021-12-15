@@ -8,6 +8,7 @@ import (
 	"github.com/consensys/orchestrate/pkg/errors"
 	types "github.com/consensys/orchestrate/pkg/types/api"
 	"github.com/consensys/orchestrate/pkg/types/entities"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
@@ -29,6 +30,31 @@ func FormatRegisterContractRequest(req *types.RegisterContractRequest) (*entitie
 		DeployedBytecode: req.DeployedBytecode,
 		ABI:              string(rawABI),
 	}, nil
+}
+
+func FormatSearchContractRequest(req *http.Request) (*types.SearchContractRequest, error) {
+	res := &types.SearchContractRequest{}
+	var err error
+
+	qAddress := req.URL.Query().Get("address")
+	if qAddress != "" {
+		addr := ethcommon.HexToAddress(qAddress)
+		res.Address = &addr
+	}
+
+	qCodeHash := req.URL.Query().Get("code_hash")
+	if qCodeHash != "" {
+		res.CodeHash, err = hexutil.Decode(qCodeHash)
+		if err != nil {
+			return nil, errors.InvalidParameterError("code_hash is not hex value")
+		}
+	}
+
+	if res.CodeHash == nil && res.Address == nil {
+		return nil, errors.InvalidParameterError("invalid search contract request")
+	}
+
+	return res, nil
 }
 
 func FormatGetContractEventsRequest(req *http.Request) (*types.GetContractEventsRequest, error) {

@@ -9,11 +9,11 @@ import (
 	api "github.com/consensys/orchestrate/pkg/types/api"
 	entities "github.com/consensys/orchestrate/pkg/types/entities"
 	types "github.com/consensys/quorum-key-manager/src/stores/api/types"
+	common "github.com/ethereum/go-ethereum/common"
 	gomock "github.com/golang/mock/gomock"
 	healthcheck "github.com/heptiolabs/healthcheck"
 	io_prometheus_client "github.com/prometheus/client_model/go"
 	reflect "reflect"
-	ethcommon "github.com/ethereum/go-ethereum/common"
 )
 
 // MockOrchestrateClient is a mock of OrchestrateClient interface
@@ -322,7 +322,7 @@ func (mr *MockOrchestrateClientMockRecorder) SearchAccounts(ctx, filters interfa
 }
 
 // GetAccount mocks base method
-func (m *MockOrchestrateClient) GetAccount(ctx context.Context, address ethcommon.Address) (*api.AccountResponse, error) {
+func (m *MockOrchestrateClient) GetAccount(ctx context.Context, address common.Address) (*api.AccountResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAccount", ctx, address)
 	ret0, _ := ret[0].(*api.AccountResponse)
@@ -352,7 +352,7 @@ func (mr *MockOrchestrateClientMockRecorder) ImportAccount(ctx, request interfac
 }
 
 // UpdateAccount mocks base method
-func (m *MockOrchestrateClient) UpdateAccount(ctx context.Context, address ethcommon.Address, request *api.UpdateAccountRequest) (*api.AccountResponse, error) {
+func (m *MockOrchestrateClient) UpdateAccount(ctx context.Context, address common.Address, request *api.UpdateAccountRequest) (*api.AccountResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateAccount", ctx, address, request)
 	ret0, _ := ret[0].(*api.AccountResponse)
@@ -367,7 +367,7 @@ func (mr *MockOrchestrateClientMockRecorder) UpdateAccount(ctx, address, request
 }
 
 // SignMessage mocks base method
-func (m *MockOrchestrateClient) SignMessage(ctx context.Context, address ethcommon.Address, request *types.SignMessageRequest) (string, error) {
+func (m *MockOrchestrateClient) SignMessage(ctx context.Context, address common.Address, request *types.SignMessageRequest) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SignMessage", ctx, address, request)
 	ret0, _ := ret[0].(string)
@@ -382,7 +382,7 @@ func (mr *MockOrchestrateClientMockRecorder) SignMessage(ctx, address, request i
 }
 
 // SignTypedData mocks base method
-func (m *MockOrchestrateClient) SignTypedData(ctx context.Context, address ethcommon.Address, request *types.SignTypedDataRequest) (string, error) {
+func (m *MockOrchestrateClient) SignTypedData(ctx context.Context, address common.Address, request *types.SignTypedDataRequest) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SignTypedData", ctx, address, request)
 	ret0, _ := ret[0].(string)
@@ -614,6 +614,21 @@ func (m *MockOrchestrateClient) GetContract(ctx context.Context, name, tag strin
 func (mr *MockOrchestrateClientMockRecorder) GetContract(ctx, name, tag interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetContract", reflect.TypeOf((*MockOrchestrateClient)(nil).GetContract), ctx, name, tag)
+}
+
+// SearchContract mocks base method
+func (m *MockOrchestrateClient) SearchContract(ctx context.Context, req *api.SearchContractRequest) (*api.ContractResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SearchContract", ctx, req)
+	ret0, _ := ret[0].(*api.ContractResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SearchContract indicates an expected call of SearchContract
+func (mr *MockOrchestrateClientMockRecorder) SearchContract(ctx, req interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchContract", reflect.TypeOf((*MockOrchestrateClient)(nil).SearchContract), ctx, req)
 }
 
 // GetContractsCatalog mocks base method
@@ -1088,7 +1103,7 @@ func (mr *MockAccountClientMockRecorder) SearchAccounts(ctx, filters interface{}
 }
 
 // GetAccount mocks base method
-func (m *MockAccountClient) GetAccount(ctx context.Context, address string) (*api.AccountResponse, error) {
+func (m *MockAccountClient) GetAccount(ctx context.Context, address common.Address) (*api.AccountResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAccount", ctx, address)
 	ret0, _ := ret[0].(*api.AccountResponse)
@@ -1118,7 +1133,7 @@ func (mr *MockAccountClientMockRecorder) ImportAccount(ctx, request interface{})
 }
 
 // UpdateAccount mocks base method
-func (m *MockAccountClient) UpdateAccount(ctx context.Context, address ethcommon.Address, request *api.UpdateAccountRequest) (*api.AccountResponse, error) {
+func (m *MockAccountClient) UpdateAccount(ctx context.Context, address common.Address, request *api.UpdateAccountRequest) (*api.AccountResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateAccount", ctx, address, request)
 	ret0, _ := ret[0].(*api.AccountResponse)
@@ -1133,7 +1148,7 @@ func (mr *MockAccountClientMockRecorder) UpdateAccount(ctx, address, request int
 }
 
 // SignMessage mocks base method
-func (m *MockAccountClient) SignMessage(ctx context.Context, address string, request *types.SignMessageRequest) (string, error) {
+func (m *MockAccountClient) SignMessage(ctx context.Context, address common.Address, request *types.SignMessageRequest) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SignMessage", ctx, address, request)
 	ret0, _ := ret[0].(string)
@@ -1148,7 +1163,7 @@ func (mr *MockAccountClientMockRecorder) SignMessage(ctx, address, request inter
 }
 
 // SignTypedData mocks base method
-func (m *MockAccountClient) SignTypedData(ctx context.Context, address string, request *types.SignTypedDataRequest) (string, error) {
+func (m *MockAccountClient) SignTypedData(ctx context.Context, address common.Address, request *types.SignTypedDataRequest) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SignTypedData", ctx, address, request)
 	ret0, _ := ret[0].(string)
@@ -1449,6 +1464,21 @@ func (m *MockContractClient) GetContract(ctx context.Context, name, tag string) 
 func (mr *MockContractClientMockRecorder) GetContract(ctx, name, tag interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetContract", reflect.TypeOf((*MockContractClient)(nil).GetContract), ctx, name, tag)
+}
+
+// SearchContract mocks base method
+func (m *MockContractClient) SearchContract(ctx context.Context, req *api.SearchContractRequest) (*api.ContractResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SearchContract", ctx, req)
+	ret0, _ := ret[0].(*api.ContractResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SearchContract indicates an expected call of SearchContract
+func (mr *MockContractClientMockRecorder) SearchContract(ctx, req interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchContract", reflect.TypeOf((*MockContractClient)(nil).SearchContract), ctx, req)
 }
 
 // GetContractsCatalog mocks base method

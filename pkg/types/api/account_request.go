@@ -5,7 +5,7 @@ import (
 )
 
 type CreateAccountRequest struct {
-	Alias      string            `json:"alias" validate:"omitempty" example:"personal-account"`
+	Alias      string            `json:"alias" validate:"omitempty" example:"personal-account" `
 	Chain      string            `json:"chain" validate:"omitempty" example:"besu"`
 	Attributes map[string]string `json:"attributes,omitempty"`
 }

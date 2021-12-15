@@ -1090,6 +1090,15 @@
                 "summary": "Set the codeHash of the given contract address",
                 "parameters": [
                     {
+                        "description": "Contract code hash request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.SetContractCodeHashRequest"
+                        }
+                    },
+                    {
                         "type": "string",
                         "description": "contract deployed address",
                         "name": "address",
@@ -1161,6 +1170,13 @@
                         "name": "chain_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "event sigh hash value",
+                        "name": "sign_hash",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -1178,6 +1194,71 @@
                     },
                     "404": {
                         "description": "Events not found",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/contracts/search": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "description": "Search contract by codeHash or signHash",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Contracts"
+                ],
+                "summary": "Search contract",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "contract code hash",
+                        "name": "code_hash",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "contract address",
+                        "name": "address",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Contract object",
+                        "schema": {
+                            "$ref": "#/definitions/api.ContractResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/httputil.ErrorResponse"
                         }
@@ -3574,6 +3655,18 @@
                 },
                 "params": {
                     "$ref": "#/definitions/api.TransactionParams"
+                }
+            }
+        },
+        "api.SetContractCodeHashRequest": {
+            "type": "object",
+            "required": [
+                "code_hash"
+            ],
+            "properties": {
+                "code_hash": {
+                    "type": "string",
+                    "example": "0x6080604052348015600f57600080f"
                 }
             }
         },

@@ -116,89 +116,27 @@ func (s *apiTestSuite) TestAPI_Accounts() {
 	suite.Run(s.T(), testSuite)
 }
 
-func (s *apiTestSuite) TestAPI_Contracts() {
-	if s.err != nil {
-		s.env.logger.Warn("skipping test...")
-		return
-	}
+// func (s *apiTestSuite) TestAPI_Jobs() {
+// 	if s.err != nil {
+// 		s.env.logger.Warn("skipping test...")
+// 		return
+// 	}
+// 
+// 	testSuite := new(jobsTestSuite)
+// 	testSuite.env = s.env
+// 	testSuite.client = s.client
+// 	testSuite.chainUUID = s.chainUUID
+// 	suite.Run(s.T(), testSuite)
+// }
 
-	testSuite := new(contractsTestSuite)
-	testSuite.env = s.env
-	testSuite.client = s.client
-	suite.Run(s.T(), testSuite)
-}
-
-func (s *apiTestSuite) TestAPI_Faucets() {
-	if s.err != nil {
-		s.env.logger.Warn("skipping test...")
-		return
-	}
-
-	testSuite := new(faucetsTestSuite)
-	testSuite.env = s.env
-	testSuite.client = s.client
-	suite.Run(s.T(), testSuite)
-}
-
-func (s *apiTestSuite) TestAPI_Chains() {
-	if s.err != nil {
-		s.env.logger.Warn("skipping test...")
-		return
-	}
-
-	testSuite := new(chainsTestSuite)
-	testSuite.env = s.env
-	testSuite.client = s.client
-	suite.Run(s.T(), testSuite)
-}
-
-func (s *apiTestSuite) TestAPI_Schedules() {
-	if s.err != nil {
-		s.env.logger.Warn("skipping test...")
-		return
-	}
-
-	testSuite := new(schedulesTestSuite)
-	testSuite.env = s.env
-	testSuite.client = s.client
-	suite.Run(s.T(), testSuite)
-}
-
-func (s *apiTestSuite) TestAPI_Proxy() {
-	if s.err != nil {
-		s.env.logger.Warn("skipping test...")
-		return
-	}
-
-	testSuite := new(proxyTestSuite)
-	testSuite.env = s.env
-	testSuite.client = s.client
-	suite.Run(s.T(), testSuite)
-}
-
-/*
-func (s *apiTestSuite) TestAPI_Jobs() {
-	if s.err != nil {
-		s.env.logger.Warn("skipping test...")
-		return
-	}
-
-	testSuite := new(jobsTestSuite)
-	testSuite.env = s.env
-	testSuite.client = s.client
-	testSuite.chainUUID = s.chainUUID
-	suite.Run(s.T(), testSuite)
-}
-
-func (s *apiTestSuite) TestAPI_Metrics() {
-	if s.err != nil {
-		s.env.logger.Warn("skipping test...")
-		return
-	}
-
-	testSuite := new(metricsTestSuite)
-	testSuite.env = s.env
-	testSuite.client = s.client
-	suite.Run(s.T(), testSuite)
-}
-*/
+// func (s *apiTestSuite) TestAPI_Metrics() {
+// 	if s.err != nil {
+// 		s.env.logger.Warn("skipping test...")
+// 		return
+// 	}
+// 
+// 	testSuite := new(metricsTestSuite)
+// 	testSuite.env = s.env
+// 	testSuite.client = s.client
+// 	suite.Run(s.T(), testSuite)
+// }

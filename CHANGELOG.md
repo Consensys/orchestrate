@@ -1,15 +1,19 @@
 # Orchestrate Release Notes
 
-## v21.11.0-alpha.2 (2021-12-14)
-### 🛠 Bug fixes
-* Commit the offset to Kafka broker every time a message is processed
+## v21.11.0 alpha.2 (WIP)
+### 🆕 Features
+<<<<<<< HEAD
+* Attach contract name and tag into transaction receipts when bytecode matches to one of the registered contracts.
+* Commit the offset to Kafka broker every time a message is processed 
+=======
+- Attach contract information into transaction receipts on every new contract deployment and contract events.
+>>>>>>> #767 search contract by event sig hash
 
-## v21.11.0-alpha.1 (2021-12-8)
+## v21.11.0 alpha.1 (2021-12-03)
 ### 🛠 Bug fixes
-* Removed `warning` log removed when the events of the receipt are not found in the contract registry
-* Fix contract deployment bug where arguments of the constructor are not parsed correctly
+* Fail to deploy contract with arguments in the constructor
 
-## v21.10.0 alpha.4 (2021-11-24)
+## v21.10.0 alpha.4 (2021-12-03)
 ### ⚠ BREAKING CHANGES
 * `Orion` was removed in favor of `EEA` as *PrivateTxManager* in chain APIs
 * Following ETH transaction properties types has been BigInt updated:
@@ -52,21 +56,14 @@ able to impersonate same tenants.
 * Removed endpoints `/accounts/{address}/sign` and `/accounts/{address}/verify-signature` in favor of `/accounts/{address}/sign-message` and `/accounts/verify-message` accordingly to EIP-191 standards
 * Removed support of zk-snarks account in favor of Quorum Key Manager implementation
 
-## v21.11.13 (2021-12-14)
-### 🛠 Bug fixes
-* Commit the offset to Kafka broker every time a message is processed
-
-## v21.11.12 (2021-11-23)
-### 🛠 Bug fixes
-* Migrations fail when key-manager is disabled
-* Key Manager fails with incorrect error code when key-manager is disabled
-
 ## v21.1.11 (2021-11-23)
+
 ### 🛠 Bug fixes
 * Tx-sender exits updating jobs already in final status
 * Tx-sender does not send message on `tx-recover` topic when there are persistent connectivity issues with RPC nodes
 
 ## v21.1.10 (2021-10-28)
+
 ### 🛠 Bug fixes
 * Transaction `priority` is applied as expected
 * Sender is not funded in raw transactions

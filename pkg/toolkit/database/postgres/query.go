@@ -14,7 +14,7 @@ import (
 func Insert(ctx context.Context, db DB, models ...interface{}) error {
 	_, err := db.ModelContext(ctx, models...).Insert()
 	if err != nil {
-		return handleError(err)
+		return ParsePGError(err)
 	}
 
 	return nil
@@ -32,7 +32,7 @@ func InsertQuery(_ context.Context, q *orm.Query) error {
 func Update(ctx context.Context, db DB, models ...interface{}) error {
 	_, err := db.ModelContext(ctx, models...).WherePK().Update()
 	if err != nil {
-		return handleError(err)
+		return ParsePGError(err)
 	}
 	return nil
 }
@@ -40,7 +40,7 @@ func Update(ctx context.Context, db DB, models ...interface{}) error {
 func UpdateNotZero(ctx context.Context, q *orm.Query) error {
 	_, err := q.Context(ctx).UpdateNotZero()
 	if err != nil {
-		return handleError(err)
+		return ParsePGError(err)
 	}
 	return nil
 }
@@ -48,7 +48,7 @@ func UpdateNotZero(ctx context.Context, q *orm.Query) error {
 func Delete(ctx context.Context, q *orm.Query) error {
 	_, err := q.Context(ctx).Delete()
 	if err != nil {
-		return handleError(err)
+		return ParsePGError(err)
 	}
 
 	return nil
@@ -57,7 +57,7 @@ func Delete(ctx context.Context, q *orm.Query) error {
 func Select(ctx context.Context, q *orm.Query) error {
 	err := q.Context(ctx).Select()
 	if err != nil {
-		return handleError(err)
+		return ParsePGError(err)
 	}
 
 	return nil
@@ -66,7 +66,7 @@ func Select(ctx context.Context, q *orm.Query) error {
 func SelectColumn(ctx context.Context, q *orm.Query, result interface{}) error {
 	err := q.Context(ctx).Select(result)
 	if err != nil {
-		return handleError(err)
+		return ParsePGError(err)
 	}
 
 	return nil
@@ -75,7 +75,7 @@ func SelectColumn(ctx context.Context, q *orm.Query, result interface{}) error {
 func SelectOrInsert(ctx context.Context, q *orm.Query) error {
 	_, err := q.Context(ctx).SelectOrInsert()
 	if err != nil {
-		return handleError(err)
+		return ParsePGError(err)
 	}
 
 	return nil
@@ -84,7 +84,7 @@ func SelectOrInsert(ctx context.Context, q *orm.Query) error {
 func SelectOne(ctx context.Context, q *orm.Query) error {
 	err := q.Context(ctx).First()
 	if err != nil {
-		return handleError(err)
+		return ParsePGError(err)
 	}
 	return nil
 }

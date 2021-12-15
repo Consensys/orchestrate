@@ -9,13 +9,13 @@ import (
 
 	"github.com/consensys/orchestrate/pkg/types/entities"
 
+	"github.com/Shopify/sarama/mocks"
 	mock2 "github.com/consensys/orchestrate/pkg/sdk/client/mock"
 	"github.com/consensys/orchestrate/pkg/toolkit/ethclient/mock"
 	txschedulertypes "github.com/consensys/orchestrate/pkg/types/api"
 	types "github.com/consensys/orchestrate/pkg/types/ethereum"
 	"github.com/consensys/orchestrate/pkg/types/testutils"
 	"github.com/consensys/orchestrate/services/tx-listener/dynamic"
-	"github.com/Shopify/sarama/mocks"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
@@ -72,9 +72,12 @@ func Test_AfterNewBlock(t *testing.T) {
 		OutTopic: "test-topic-decoded",
 	}
 
+	contract := testutils.FakeContractResponse()
+
 	t.Run("should process after new block successfully", func(t *testing.T) {
 		ec.EXPECT().CodeAt(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(ethcommon.Hex2Bytes("0xabcd"), nil)
 		client.EXPECT().SetContractAddressCodeHash(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+		client.EXPECT().SearchContract(gomock.Any(), gomock.Any()).Return(contract, nil)
 		client.EXPECT().GetContractEvents(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(&txschedulertypes.GetContractEventsBySignHashResponse{
 			Event: "{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"tokens\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"}",
 		}, nil)
@@ -85,9 +88,9 @@ func Test_AfterNewBlock(t *testing.T) {
 		producer.ExpectSendMessageAndSucceed()
 
 		expectedDecodedData := map[string]string{
-			"tokens": "30000000000000000000",
-			"from":   "0xBA826fEc90CEFdf6706858E5FbaFcb27A290Fbe0",
-			"to":     "0x4aEE792A88eDDA29932254099b9d1e06D537883f",
+			"tokens":       "30000000000000000000",
+			"from":         "0xBA826fEc90CEFdf6706858E5FbaFcb27A290Fbe0",
+			"to":           "0x4aEE792A88eDDA29932254099b9d1e06D537883f",
 		}
 
 		hk := NewHook(conf, ec, producer, client)
@@ -142,6 +145,7 @@ func Test_AfterNewBlock(t *testing.T) {
 		ec.EXPECT().CodeAt(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(ethcommon.Hex2Bytes("0xabcd"), nil)
 		client.EXPECT().SetContractAddressCodeHash(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 		client.EXPECT().GetContractEvents(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error GetEventsBySigHash"))
+		client.EXPECT().SearchContract(gomock.Any(), gomock.Any()).Return(contract, nil)
 		client.EXPECT().UpdateJob(gomock.Any(), gomock.Any(), &txschedulertypes.UpdateJobRequest{
 			Status:  entities.StatusMined,
 			Message: fmt.Sprintf("transaction mined in block %v", block.NumberU64()),
@@ -160,6 +164,7 @@ func Test_AfterNewBlock(t *testing.T) {
 		client.EXPECT().GetContractEvents(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(&txschedulertypes.GetContractEventsBySignHashResponse{
 			Event: "{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"tokens\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"}",
 		}, nil)
+		client.EXPECT().SearchContract(gomock.Any(), gomock.Any()).Return(contract, nil)
 		client.EXPECT().UpdateJob(gomock.Any(), gomock.Any(), &txschedulertypes.UpdateJobRequest{
 			Status:  entities.StatusMined,
 			Message: fmt.Sprintf("transaction mined in block %v", block.NumberU64()),
@@ -180,6 +185,7 @@ func Test_AfterNewBlock(t *testing.T) {
 		client.EXPECT().GetContractEvents(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(&txschedulertypes.GetContractEventsBySignHashResponse{
 			Event: "{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"tokens\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"}",
 		}, nil)
+		client.EXPECT().SearchContract(gomock.Any(), gomock.Any()).Return(contract, nil)
 		client.EXPECT().UpdateJob(gomock.Any(), gomock.Any(), &txschedulertypes.UpdateJobRequest{
 			Status:  entities.StatusMined,
 			Message: fmt.Sprintf("transaction mined in block %v", block.NumberU64()),
@@ -193,7 +199,7 @@ func Test_AfterNewBlock(t *testing.T) {
 		assert.Equal(t, expectedErr, err)
 	})
 }
-
+ 
 func Test_AfterNewBlock_Priv(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -233,12 +239,15 @@ func Test_AfterNewBlock_Priv(t *testing.T) {
 		OutTopic: "test-topic-decoded",
 	}
 
+	contract := testutils.FakeContractResponse()
+
 	t.Run("should process after new block successfully", func(t *testing.T) {
-		ec.EXPECT().PrivCodeAt(gomock.Any(), gomock.Any(), gomock.Any(),gomock.Any(), gomock.Any()).Return(ethcommon.Hex2Bytes("0xabcd"), nil)
+		ec.EXPECT().PrivCodeAt(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(ethcommon.Hex2Bytes("0xabcd"), nil)
 		client.EXPECT().SetContractAddressCodeHash(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 		client.EXPECT().GetContractEvents(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(&txschedulertypes.GetContractEventsBySignHashResponse{
 			Event: "{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"tokens\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"}",
 		}, nil)
+		client.EXPECT().SearchContract(gomock.Any(), gomock.Any()).Return(contract, nil)
 		client.EXPECT().UpdateJob(gomock.Any(), gomock.Any(), &txschedulertypes.UpdateJobRequest{
 			Status:  entities.StatusMined,
 			Message: fmt.Sprintf("transaction mined in block %v", block.NumberU64()),
@@ -278,11 +287,14 @@ func Test_DecodeReceipt(t *testing.T) {
 	producer := mocks.NewSyncProducer(t, nil)
 	client := mock2.NewMockOrchestrateClient(ctrl)
 
+	contract := testutils.FakeContractResponse()
+	
 	t.Run("should decode receipt successfully", func(t *testing.T) {
 		client.EXPECT().GetContractEvents(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(&txschedulertypes.GetContractEventsBySignHashResponse{
 			Event: "{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"tokens\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"}",
 		}, nil)
 
+		client.EXPECT().SearchContract(gomock.Any(), gomock.Any()).Return(contract, nil)
 		hk := NewHook(conf, ec, producer, client)
 
 		r := &types.Receipt{
@@ -322,9 +334,9 @@ func Test_DecodeReceipt(t *testing.T) {
 		client.EXPECT().GetContractEvents(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(&txschedulertypes.GetContractEventsBySignHashResponse{
 			Event: "not json event",
 		}, nil)
-
+	
 		hk := NewHook(conf, ec, producer, client)
-
+	
 		r := &types.Receipt{
 			TxHash:          "0xf2beaddb2dc4e4c9055148a808365edbadd5f418c31631dcba9ad99af34ae66b",
 			ContractAddress: "0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C",
@@ -350,7 +362,7 @@ func Test_DecodeReceipt(t *testing.T) {
 		err := hk.decodeReceipt(context.Background(), c, r)
 		assert.NoError(t, err)
 	})
-
+	
 	t.Run("should decode receipt successfully with DefaultEvents", func(t *testing.T) {
 		client.EXPECT().GetContractEvents(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(&txschedulertypes.GetContractEventsBySignHashResponse{
 			DefaultEvents: []string{
@@ -358,9 +370,11 @@ func Test_DecodeReceipt(t *testing.T) {
 				"{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"tokens\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"}",
 			},
 		}, nil)
-
+		
+		client.EXPECT().SearchContract(gomock.Any(), gomock.Any()).Return(contract, nil)
+	
 		hk := NewHook(conf, ec, producer, client)
-
+	
 		r := &types.Receipt{
 			TxHash:          "0xf2beaddb2dc4e4c9055148a808365edbadd5f418c31631dcba9ad99af34ae66b",
 			ContractAddress: "0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C",
@@ -393,7 +407,7 @@ func Test_DecodeReceipt(t *testing.T) {
 		}
 		assert.Equal(t, expectedDecodedData, r.Logs[0].DecodedData)
 	})
-
+	
 	t.Run("should not fail if not finding event in DefaultEvents", func(t *testing.T) {
 		client.EXPECT().GetContractEvents(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(&txschedulertypes.GetContractEventsBySignHashResponse{
 			DefaultEvents: []string{
@@ -401,9 +415,9 @@ func Test_DecodeReceipt(t *testing.T) {
 				"{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"from\",\"type\":\"address\"},{\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"tokens\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"}",
 			},
 		}, nil)
-
+		
 		hk := NewHook(conf, ec, producer, client)
-
+	
 		r := &types.Receipt{
 			TxHash:          "0xf2beaddb2dc4e4c9055148a808365edbadd5f418c31631dcba9ad99af34ae66b",
 			ContractAddress: "0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C",
@@ -429,7 +443,7 @@ func Test_DecodeReceipt(t *testing.T) {
 		err := hk.decodeReceipt(context.Background(), c, r)
 		assert.NoError(t, err)
 	})
-
+	
 	t.Run("should not fail if could not unmarshal event in DefaultEvents", func(t *testing.T) {
 		client.EXPECT().GetContractEvents(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(&txschedulertypes.GetContractEventsBySignHashResponse{
 			DefaultEvents: []string{
@@ -437,9 +451,9 @@ func Test_DecodeReceipt(t *testing.T) {
 				"{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"from\",\"type\":\"address\"},{\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"tokens\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"}",
 			},
 		}, nil)
-
+		
 		hk := NewHook(conf, ec, producer, client)
-
+	
 		r := &types.Receipt{
 			TxHash:          "0xf2beaddb2dc4e4c9055148a808365edbadd5f418c31631dcba9ad99af34ae66b",
 			ContractAddress: "0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C",
@@ -465,10 +479,10 @@ func Test_DecodeReceipt(t *testing.T) {
 		err := hk.decodeReceipt(context.Background(), c, r)
 		assert.NoError(t, err)
 	})
-
+	
 	t.Run("should get an error when there are no topics", func(t *testing.T) {
 		hk := NewHook(conf, ec, producer, client)
-
+	
 		r := &types.Receipt{
 			TxHash:          "0xf2beaddb2dc4e4c9055148a808365edbadd5f418c31631dcba9ad99af34ae66b",
 			ContractAddress: "0xAf84242d70aE9D268E2bE3616ED497BA28A7b62C",

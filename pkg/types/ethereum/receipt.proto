@@ -105,4 +105,12 @@ message Receipt {
     // DATA (32 bytes) - EEA public keys or privacy group ID of the recipients.
     // e.g Ko2bVqD+nNlNYL5EE7y3IdOnviftjiizpjRt+HTuFBs=
     string privacyGroupId = 19;
+    
+    ///////////////////////
+    // CONTRACT ADDON //
+    ///////////////////////
+    
+    string contract_name = 20;
+    
+    string contract_tag = 21;
 }

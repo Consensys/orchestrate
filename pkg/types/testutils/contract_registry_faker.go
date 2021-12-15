@@ -24,3 +24,21 @@ func FakeSetContractCodeHashRequest() *api.SetContractCodeHashRequest {
 		CodeHash: FakeHash(),
 	}
 }
+
+func FakeSearchContractRequest() *api.SearchContractRequest {
+	return &api.SearchContractRequest{
+		CodeHash: FakeHash(),
+		Address:  FakeAddress(),
+	}
+}
+
+func FakeContractResponse() *api.ContractResponse {
+	c := FakeContract()
+	return &api.ContractResponse{
+		Name:             c.Name,
+		Tag:              c.Tag,
+		ABI:              c.ABI,
+		Bytecode:         c.Bytecode,
+		DeployedBytecode: c.DeployedBytecode,
+	}
+}

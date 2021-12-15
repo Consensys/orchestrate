@@ -9,7 +9,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func handleError(err error) error {
+func ParsePGError(err error) error {
 	if pg.ErrNoRows == err {
 		return errors.NotFoundError("data cannot be found")
 	}
@@ -42,7 +42,7 @@ func (h hook) BeforeQuery(ctx context.Context, q *pg.QueryEvent) (context.Contex
 func (h hook) AfterQuery(ctx context.Context, q *pg.QueryEvent) error {
 	log.WithContext(ctx).Trace(q.FormattedQuery())
 	if q.Err != nil {
-		q.Err = handleError(q.Err)
+		q.Err = ParsePGError(q.Err)
 		return q.Err
 	}
 	return nil

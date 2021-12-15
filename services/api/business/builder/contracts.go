@@ -15,6 +15,7 @@ type contractUseCases struct {
 	setContractCodeHash         usecases.SetContractCodeHashUseCase
 	registerContractUC          usecases.RegisterContractUseCase
 	getContractUC               usecases.GetContractUseCase
+	searchContractUC            usecases.SearchContractUseCase
 }
 
 func newContractUseCases(db store.DB) *contractUseCases {
@@ -29,6 +30,7 @@ func newContractUseCases(db store.DB) *contractUseCases {
 		getContractMethods:          contracts.NewGetMethodsUseCase(db.Method()),
 		getContractTags:             contracts.NewGetTagsUseCase(db.Tag()),
 		setContractCodeHash:         contracts.NewSetCodeHashUseCase(db.CodeHash()),
+		searchContractUC:            contracts.NewSearchContractUseCase(db.Contract()),
 	}
 }
 
@@ -62,4 +64,8 @@ func (u *contractUseCases) GetContractTags() usecases.GetContractTagsUseCase {
 
 func (u *contractUseCases) SetContractCodeHash() usecases.SetContractCodeHashUseCase {
 	return u.setContractCodeHash
+}
+
+func (u *contractUseCases) SearchContract() usecases.SearchContractUseCase {
+	return u.searchContractUC
 }

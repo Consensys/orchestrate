@@ -257,6 +257,20 @@ func (mr *MockAgentsMockRecorder) Tag() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Tag", reflect.TypeOf((*MockAgents)(nil).Tag))
 }
 
+// Contract mocks base method
+func (m *MockAgents) Contract() store.ContractAgent {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Contract")
+	ret0, _ := ret[0].(store.ContractAgent)
+	return ret0
+}
+
+// Contract indicates an expected call of Contract
+func (mr *MockAgentsMockRecorder) Contract() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Contract", reflect.TypeOf((*MockAgents)(nil).Contract))
+}
+
 // Chain mocks base method
 func (m *MockAgents) Chain() store.ChainAgent {
 	m.ctrl.T.Helper()
@@ -503,6 +517,20 @@ func (m *MockDB) Tag() store.TagAgent {
 func (mr *MockDBMockRecorder) Tag() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Tag", reflect.TypeOf((*MockDB)(nil).Tag))
+}
+
+// Contract mocks base method
+func (m *MockDB) Contract() store.ContractAgent {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Contract")
+	ret0, _ := ret[0].(store.ContractAgent)
+	return ret0
+}
+
+// Contract indicates an expected call of Contract
+func (mr *MockDBMockRecorder) Contract() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Contract", reflect.TypeOf((*MockDB)(nil).Contract))
 }
 
 // Chain mocks base method
@@ -793,6 +821,20 @@ func (m *MockTx) Tag() store.TagAgent {
 func (mr *MockTxMockRecorder) Tag() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Tag", reflect.TypeOf((*MockTx)(nil).Tag))
+}
+
+// Contract mocks base method
+func (m *MockTx) Contract() store.ContractAgent {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Contract")
+	ret0, _ := ret[0].(store.ContractAgent)
+	return ret0
+}
+
+// Contract indicates an expected call of Contract
+func (mr *MockTxMockRecorder) Contract() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Contract", reflect.TypeOf((*MockTx)(nil).Contract))
 }
 
 // Chain mocks base method
@@ -1600,6 +1642,59 @@ func (m *MockArtifactAgent) FindOneByNameAndTag(ctx context.Context, name, tag s
 func (mr *MockArtifactAgentMockRecorder) FindOneByNameAndTag(ctx, name, tag interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneByNameAndTag", reflect.TypeOf((*MockArtifactAgent)(nil).FindOneByNameAndTag), ctx, name, tag)
+}
+
+// MockContractAgent is a mock of ContractAgent interface
+type MockContractAgent struct {
+	ctrl     *gomock.Controller
+	recorder *MockContractAgentMockRecorder
+}
+
+// MockContractAgentMockRecorder is the mock recorder for MockContractAgent
+type MockContractAgentMockRecorder struct {
+	mock *MockContractAgent
+}
+
+// NewMockContractAgent creates a new mock instance
+func NewMockContractAgent(ctrl *gomock.Controller) *MockContractAgent {
+	mock := &MockContractAgent{ctrl: ctrl}
+	mock.recorder = &MockContractAgentMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockContractAgent) EXPECT() *MockContractAgentMockRecorder {
+	return m.recorder
+}
+
+// FindOneByCodeHash mocks base method
+func (m *MockContractAgent) FindOneByCodeHash(ctx context.Context, codeHash string) (*entities.Contract, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindOneByCodeHash", ctx, codeHash)
+	ret0, _ := ret[0].(*entities.Contract)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindOneByCodeHash indicates an expected call of FindOneByCodeHash
+func (mr *MockContractAgentMockRecorder) FindOneByCodeHash(ctx, codeHash interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneByCodeHash", reflect.TypeOf((*MockContractAgent)(nil).FindOneByCodeHash), ctx, codeHash)
+}
+
+// FindOneByAddress mocks base method
+func (m *MockContractAgent) FindOneByAddress(ctx context.Context, address string) (*entities.Contract, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindOneByAddress", ctx, address)
+	ret0, _ := ret[0].(*entities.Contract)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindOneByAddress indicates an expected call of FindOneByAddress
+func (mr *MockContractAgentMockRecorder) FindOneByAddress(ctx, address interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneByAddress", reflect.TypeOf((*MockContractAgent)(nil).FindOneByAddress), ctx, address)
 }
 
 // MockCodeHashAgent is a mock of CodeHashAgent interface

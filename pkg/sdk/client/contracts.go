@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"fmt"
+	"net/url"
 
 	"github.com/consensys/orchestrate/pkg/errors"
 	clientutils "github.com/consensys/orchestrate/pkg/toolkit/app/http/client-utils"
@@ -72,6 +73,30 @@ func (c *HTTPClient) GetContractTags(ctx context.Context, name string) ([]string
 
 		defer clientutils.CloseResponse(response)
 		return httputil.ParseResponse(ctx, response, &resp)
+	})
+
+	return resp, err
+}
+
+func (c *HTTPClient) SearchContract(ctx context.Context, req *types.SearchContractRequest) (*types.ContractResponse, error) {
+	qV := url.Values{}
+	if req.CodeHash != nil {
+		qV.Set("code_hash", req.CodeHash.String())
+	}
+	if req.Address != nil {
+		qV.Set("address", req.Address.String())
+	}
+
+	reqURL := fmt.Sprintf("%v/contracts/search?%v", c.config.URL, qV.Encode())
+	resp := &types.ContractResponse{}
+	err := callWithBackOff(ctx, c.config.backOff, func() error {
+		response, err := clientutils.GetRequest(ctx, c.client, reqURL)
+		if err != nil {
+			return err
+		}
+
+		defer clientutils.CloseResponse(response)
+		return httputil.ParseResponse(ctx, response, resp)
 	})
 
 	return resp, err

@@ -19,6 +19,7 @@ type PGAgents struct {
 	method           store.MethodAgent
 	repository       store.RepositoryAgent
 	tag              store.TagAgent
+	contract         store.ContractAgent
 	chain            store.ChainAgent
 	privateTxManager store.PrivateTxManagerAgent
 }
@@ -38,6 +39,7 @@ func New(db pg.DB) *PGAgents {
 		method:           NewPGMethod(db),
 		repository:       NewPGRepository(db),
 		tag:              NewPGTag(db),
+		contract:         NewPGContract(db),
 		chain:            NewPGChain(db),
 		privateTxManager: NewPGPrivateTxManager(db),
 	}
@@ -93,6 +95,10 @@ func (a *PGAgents) Repository() store.RepositoryAgent {
 
 func (a *PGAgents) Tag() store.TagAgent {
 	return a.tag
+}
+
+func (a *PGAgents) Contract() store.ContractAgent {
+	return a.contract
 }
 
 func (a *PGAgents) Chain() store.ChainAgent {

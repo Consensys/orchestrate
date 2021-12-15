@@ -30,11 +30,15 @@ func (s *jobsTestSuite) TestCreate() {
 	ctx := s.env.ctx
 	schedule, err := s.client.CreateSchedule(ctx, &api.CreateScheduleRequest{})
 	require.NoError(s.T(), err)
-
+	
 	s.T().Run("should create a new job successfully", func(t *testing.T) {
 		req := testutils.FakeCreateJobRequest()
 		req.ScheduleUUID = schedule.UUID
 		req.ChainUUID = s.chainUUID
+		req.Transaction.From = nil
+		req.Annotations = api.Annotations{
+			OneTimeKey: true,
+		}
 
 		job, err := s.client.CreateJob(ctx, req)
 		require.NoError(t, err)
@@ -94,11 +98,15 @@ func (s *jobsTestSuite) TestStart() {
 	ctx := s.env.ctx
 	schedule, err := s.client.CreateSchedule(ctx, &api.CreateScheduleRequest{})
 	require.NoError(s.T(), err)
-
+	
 	s.T().Run("should start a new job successfully", func(t *testing.T) {
 		req := testutils.FakeCreateJobRequest()
 		req.ScheduleUUID = schedule.UUID
 		req.ChainUUID = s.chainUUID
+		req.Transaction.From = nil
+		req.Annotations = api.Annotations{
+			OneTimeKey: true,
+		}
 
 		job, err := s.client.CreateJob(ctx, req)
 		require.NoError(t, err)
@@ -116,6 +124,10 @@ func (s *jobsTestSuite) TestStart() {
 		req := testutils.FakeCreateJobRequest()
 		req.ScheduleUUID = schedule.UUID
 		req.ChainUUID = s.chainUUID
+		req.Transaction.From = nil
+		req.Annotations = api.Annotations{
+			OneTimeKey: true,
+		}
 
 		job, err := s.client.CreateJob(ctx, req)
 		require.NoError(t, err)

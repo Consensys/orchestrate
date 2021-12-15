@@ -86,6 +86,7 @@ type ContractClient interface {
 	RegisterContract(ctx context.Context, req *types.RegisterContractRequest) (*types.ContractResponse, error)
 	DeregisterContract(ctx context.Context, name, tag string) error
 	GetContract(ctx context.Context, name, tag string) (*types.ContractResponse, error)
+	SearchContract(ctx context.Context, req *types.SearchContractRequest) (*types.ContractResponse, error)
 	GetContractsCatalog(ctx context.Context) ([]string, error)
 	GetContractTags(ctx context.Context, name string) ([]string, error)
 	SetContractAddressCodeHash(ctx context.Context, address, chainID string, req *types.SetContractCodeHashRequest) error

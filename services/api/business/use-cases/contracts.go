@@ -19,6 +19,7 @@ type ContractUseCases interface {
 	GetContractTags() GetContractTagsUseCase
 	SetContractCodeHash() SetContractCodeHashUseCase
 	RegisterContract() RegisterContractUseCase
+	SearchContract() SearchContractUseCase
 }
 
 type GetContractsCatalogUseCase interface {
@@ -29,8 +30,12 @@ type GetContractUseCase interface {
 	Execute(ctx context.Context, name, tag string) (*entities.Contract, error)
 }
 
+type SearchContractUseCase interface {
+	Execute(ctx context.Context, codehash hexutil.Bytes, address *ethcommon.Address) (*entities.Contract, error)
+}
+
 type GetContractEventsUseCase interface {
-	Execute(ctx context.Context, chainID string, address ethcommon.Address, sighash hexutil.Bytes, indexedInputCount uint32) (abi string, eventsABI []string, err error)
+	Execute(ctx context.Context, chainID string, address ethcommon.Address, codeHash hexutil.Bytes, indexedInputCount uint32) (abi string, eventsABI []string, err error)
 }
 
 type GetContractMethodSignaturesUseCase interface {
@@ -50,5 +55,5 @@ type RegisterContractUseCase interface {
 }
 
 type SetContractCodeHashUseCase interface {
-	Execute(ctx context.Context, chainID string, address ethcommon.Address, hash hexutil.Bytes) error
+	Execute(ctx context.Context, chainID string, address ethcommon.Address, codeHash hexutil.Bytes) error
 }
