@@ -13,7 +13,8 @@ import (
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
 	"github.com/consensys/orchestrate/services/api/service/formatters"
 	"github.com/consensys/quorum-key-manager/pkg/client"
-	qkmtypes "github.com/consensys/quorum-key-manager/src/stores/api/types"
+	qkmstoretypes "github.com/consensys/quorum-key-manager/src/stores/api/types"
+	qkmutilstypes "github.com/consensys/quorum-key-manager/src/utils/api/types"
 	"github.com/gorilla/mux"
 )
 
@@ -267,7 +268,7 @@ func (c *AccountsController) signMessage(rw http.ResponseWriter, request *http.R
 		qkmStoreID = c.storeName
 	}
 
-	signature, err := c.keyManagerClient.SignMessage(request.Context(), qkmStoreID, address.Hex(), &qkmtypes.SignMessageRequest{
+	signature, err := c.keyManagerClient.SignMessage(request.Context(), qkmStoreID, address.Hex(), &qkmstoretypes.SignMessageRequest{
 		Message: payloadRequest.Message,
 	})
 	if err != nil {
@@ -283,7 +284,7 @@ func (c *AccountsController) signMessage(rw http.ResponseWriter, request *http.R
 // @Tags Accounts
 // @Accept json
 // @Produce text/plain
-// @Param request body api.SignTypedDataRequest{domainSeparator=qkmtypes.DomainSeparator,types=map[string]qkmtypes.Type} true "Typed data to sign"
+// @Param request body api.SignTypedDataRequest true "Typed data to sign"
 // @Param address path string true "selected account address"
 // @Success 200 {string} string "Signed payload"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
@@ -318,7 +319,7 @@ func (c *AccountsController) signTypedData(rw http.ResponseWriter, request *http
 		qkmStoreID = c.storeName
 	}
 
-	signature, err := c.keyManagerClient.SignTypedData(ctx, qkmStoreID, address.Hex(), &qkmtypes.SignTypedDataRequest{
+	signature, err := c.keyManagerClient.SignTypedData(ctx, qkmStoreID, address.Hex(), &qkmstoretypes.SignTypedDataRequest{
 		DomainSeparator: signRequest.DomainSeparator,
 		Types:           signRequest.Types,
 		Message:         signRequest.Message,
@@ -336,7 +337,7 @@ func (c *AccountsController) signTypedData(rw http.ResponseWriter, request *http
 // @Description Verifies if a typed data message has been signed by the Ethereum account passed as argument following the EIP-712 standard
 // @Tags Accounts
 // @Accept json
-// @Param request body qkmtypes.VerifyTypedDataRequest{domainSeparator=qkmtypes.DomainSeparator} true "Typed data to sign"
+// @Param request body qkmutilstypes.VerifyTypedDataRequest true "Typed data to sign"
 // @Success 204
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 401 {object} httputil.ErrorResponse "Unauthorized"
@@ -344,7 +345,7 @@ func (c *AccountsController) signTypedData(rw http.ResponseWriter, request *http
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /accounts/verify-typed-data [post]
 func (c *AccountsController) verifyTypedDataSignature(rw http.ResponseWriter, request *http.Request) {
-	verifyRequest := &qkmtypes.VerifyTypedDataRequest{}
+	verifyRequest := &qkmutilstypes.VerifyTypedDataRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, verifyRequest)
 	if err != nil {
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
@@ -364,7 +365,7 @@ func (c *AccountsController) verifyTypedDataSignature(rw http.ResponseWriter, re
 // @Description Verifies if a message has been signed by the Ethereum account passed as argument
 // @Tags Accounts
 // @Accept json
-// @Param request body qkmtypes.VerifyRequest true "signature and message to verify"
+// @Param request body qkmutilstypes.VerifyRequest true "signature and message to verify"
 // @Success 204
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 401 {object} httputil.ErrorResponse "Unauthorized"
@@ -372,7 +373,7 @@ func (c *AccountsController) verifyTypedDataSignature(rw http.ResponseWriter, re
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /accounts/verify-message [post]
 func (c *AccountsController) verifyMessageSignature(rw http.ResponseWriter, request *http.Request) {
-	verifyRequest := &qkmtypes.VerifyRequest{}
+	verifyRequest := &qkmutilstypes.VerifyRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, verifyRequest)
 	if err != nil {
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)

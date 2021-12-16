@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 
+	utilstypes "github.com/consensys/quorum-key-manager/src/utils/api/types"
+
 	"github.com/consensys/orchestrate/pkg/types/api"
 	qkmtypes "github.com/consensys/quorum-key-manager/src/stores/api/types"
 
@@ -132,7 +134,7 @@ func (c *HTTPClient) SignTypedData(ctx context.Context, address ethcommon.Addres
 	return httputil.ParseStringResponse(ctx, response)
 }
 
-func (c *HTTPClient) VerifyMessageSignature(ctx context.Context, request *qkmtypes.VerifyRequest) error {
+func (c *HTTPClient) VerifyMessageSignature(ctx context.Context, request *utilstypes.VerifyRequest) error {
 	reqURL := fmt.Sprintf("%v/accounts/verify-message", c.config.URL)
 
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, request)
@@ -144,7 +146,7 @@ func (c *HTTPClient) VerifyMessageSignature(ctx context.Context, request *qkmtyp
 	return httputil.ParseEmptyBodyResponse(ctx, response)
 }
 
-func (c *HTTPClient) VerifyTypedDataSignature(ctx context.Context, request *qkmtypes.VerifyTypedDataRequest) error {
+func (c *HTTPClient) VerifyTypedDataSignature(ctx context.Context, request *utilstypes.VerifyTypedDataRequest) error {
 	reqURL := fmt.Sprintf("%v/accounts/verify-typed-data", c.config.URL)
 
 	response, err := clientutils.PostRequest(ctx, c.client, reqURL, request)

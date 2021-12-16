@@ -278,19 +278,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/types.VerifyTypedDataRequest"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "domainSeparator": {
-                                            "$ref": "#/definitions/types.DomainSeparator"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/types.VerifyTypedDataRequest"
                         }
                     }
                 ],
@@ -544,25 +532,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/api.SignTypedDataRequest"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "domainSeparator": {
-                                            "$ref": "#/definitions/types.DomainSeparator"
-                                        },
-                                        "types": {
-                                            "type": "object",
-                                            "additionalProperties": {
-                                                "$ref": "#/definitions/types.Type"
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/api.SignTypedDataRequest"
                         }
                     },
                     {

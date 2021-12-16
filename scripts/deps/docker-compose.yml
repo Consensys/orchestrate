@@ -8,8 +8,8 @@ x-container-common: &container-common
 x-qkm-common: &qkm-common
   DB_HOST: ${DB_HOST-postgres}
   DB_PORT: ${DB_PORT-}
-  LOG_LEVEL: ${LOG_LEVEL-debug}
-  LOG_FORMAT: ${LOG_FORMAT-text}
+  LOG_LEVEL: ${LOG_LEVEL-}
+  LOG_FORMAT: ${LOG_FORMAT-}
 
 x-postgres-common: &postgres-common
   environment:
@@ -91,7 +91,7 @@ services:
 
   vault:
     <<: *container-common
-    image: consensys/quorum-hashicorp-vault-plugin:v1.1.1
+    image: consensys/quorum-hashicorp-vault-plugin:v1.1.2
     tty: true
     restart: "no"
     cap_add:
@@ -102,7 +102,7 @@ services:
     environment:
       ROOT_TOKEN_PATH: /vault/token/.root
       VAULT_ADDR: http://vault:8200
-      PLUGIN_MOUNT_PATH: orchestrate
+      PLUGIN_MOUNT_PATH: quorum
       PLUGIN_PATH: /vault/plugins
       VAULT_IS_READY: /vault/token/.ready
     entrypoint:
@@ -149,7 +149,7 @@ services:
 
   quorum-key-manager-migration:
     <<: *container-common
-    image: consensys/quorum-key-manager:v21.9.3
+    image: consensys/quorum-key-manager:v21.12.0
     environment:
       <<: *qkm-common
     restart: "no"
@@ -157,7 +157,7 @@ services:
 
   quorum-key-manager:
     <<: *container-common
-    image: consensys/quorum-key-manager:v21.9.3
+    image: consensys/quorum-key-manager:v21.12.0
     depends_on:
       - vault
       - quorum-key-manager-migration
@@ -179,8 +179,8 @@ services:
       HTTPS_SERVER_CERT: /certificates/https.crt
       AUTH_OIDC_CA_CERT: /certificates/client.crt
 #      AUTH_OIDC_ISSUER_URL: https://ggarrido.eu.auth0.com/.well-known/jwks.json
-      AUTH_TLS_CA: /ca/ca.crt
-      AUTH_API_KEY_FILE: /apikey/sample.csv
+#      AUTH_TLS_CA: /ca/ca.crt
+      AUTH_API_KEY_FILE: /apikey/orchestrate_api_keys.csv
     command: run
     healthcheck:
       test: [ "CMD", "wget", "--spider", "--proxy", "off", "https://quorum-key-manager:8081/ready" ]

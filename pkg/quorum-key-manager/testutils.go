@@ -3,6 +3,8 @@ package quorumkeymanager
 import (
 	"strings"
 
+	utilstypes "github.com/consensys/quorum-key-manager/src/utils/api/types"
+
 	"github.com/consensys/quorum-key-manager/src/stores/api/types"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -42,16 +44,16 @@ func FakeSignTypedDataRequest() *types.SignTypedDataRequest {
 	}
 }
 
-func FakeVerifyPayloadRequest() *types.VerifyRequest {
-	return &types.VerifyRequest{
+func FakeVerifyPayloadRequest() *utilstypes.VerifyRequest {
+	return &utilstypes.VerifyRequest{
 		Data:      hexutil.MustDecode(hexutil.Encode([]byte("my data to sign"))),
 		Signature: hexutil.MustDecode("0x34334af7bacf5d82bb892c838beda65331232c29e122b3485f31e14eda731dbb0ebae9d1eed72c099ff4c3b462aebf449068f717f3638a6facd0b3dddf2529a500"),
 		Address:   ethcommon.HexToAddress("0x5Cc634233E4a454d47aACd9fC68801482Fb02610"),
 	}
 }
 
-func FakeVerifyTypedDataPayloadRequest() *types.VerifyTypedDataRequest {
-	return &types.VerifyTypedDataRequest{
+func FakeVerifyTypedDataPayloadRequest() *utilstypes.VerifyTypedDataRequest {
+	return &utilstypes.VerifyTypedDataRequest{
 		TypedData: *FakeSignTypedDataRequest(),
 		Signature: hexutil.MustDecode("0x3399aeb23d6564b3a0b220447e9f1bb2057ffb82cfb766147620aa6bc84938e26941e7583d6460fea405d99da897e88cab07a7fd0991c6c2163645c45d25e4b201"),
 		Address:   ethcommon.HexToAddress("0x5Cc634233E4a454d47aACd9fC68801482Fb02610"),

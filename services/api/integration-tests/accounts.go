@@ -4,6 +4,7 @@ package integrationtests
 
 import (
 	"fmt"
+	utilstypes "github.com/consensys/quorum-key-manager/src/utils/api/types"
 	"testing"
 	"time"
 
@@ -52,7 +53,7 @@ func (s *accountsTestSuite) TestCreateAccounts() {
 		assert.Equal(s.T(), resp.StoreID, s.defaultQKMStoreID)
 		assert.Equal(s.T(), resp.TenantID, "_")
 	})
-	
+
 	s.T().Run("should fail to create account if QKM storeID does not exist", func(t *testing.T) {
 		qkmStoreID := "my-personal-storeID"
 		txRequest := testutils.FakeCreateAccountRequest()
@@ -60,7 +61,7 @@ func (s *accountsTestSuite) TestCreateAccounts() {
 
 		_, err := s.client.CreateAccount(ctx, txRequest)
 		require.Error(s.T(), err)
-		// QKM StoreID does not exists
+		// QKM StoreID does not exist
 		require.True(s.T(), errors.IsDependencyFailureError(err))
 	})
 
@@ -225,7 +226,7 @@ func (s *accountsTestSuite) TestSignMessageAndVerify() {
 	})
 
 	s.T().Run("should verify signature successfully", func(t *testing.T) {
-		verifyRequest := &qkmtypes.VerifyRequest{
+		verifyRequest := &utilstypes.VerifyRequest{
 			Data:      message,
 			Signature: hexutil.MustDecode(signedPayload),
 			Address:   ethAccRes.Address,
@@ -258,7 +259,7 @@ func (s *accountsTestSuite) TestSignTypedData() {
 	})
 
 	s.T().Run("should verify typed data signature successfully", func(t *testing.T) {
-		err := s.client.VerifyTypedDataSignature(ctx, &qkmtypes.VerifyTypedDataRequest{
+		err := s.client.VerifyTypedDataSignature(ctx, &utilstypes.VerifyTypedDataRequest{
 			TypedData: *typedDataRequest,
 			Signature: hexutil.MustDecode(signature),
 			Address:   ethAccRes.Address,

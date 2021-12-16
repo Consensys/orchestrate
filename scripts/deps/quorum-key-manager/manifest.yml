@@ -1,20 +1,29 @@
-- kind: Ethereum
-  version: 0.0.1
+- kind: Vault
+  type: hashicorp
+  name: hashicorp-quorum
+  specs:
+    mount_point: quorum
+    address: http://vault:8200
+    token_path: /vault/token/.root
+    namespace: ''
+    # client_cert: /certificates/client.crt
+    # client_key: /certificates/client.key
+    # ca_cert: /ca/ca.crt
+
+- kind: Store
+  type: key
+  name: orchestrate-keystore
+  specs:
+    vault: hashicorp-quorum
+
+- kind: Store
+  type: ethereum
   name: orchestrate-eth
   specs:
-    keystore: HashicorpKeys
-    specs:
-      mountPoint: orchestrate
-      address: http://vault:8200
-      tokenPath: "/vault/token/.vault-token"
-      namespace: ''
-- kind: Ethereum
-  version: 0.0.1
-  name: orchestrate-eth-2
+    key_store: orchestrate-keystore
+
+- kind: Store
+  type: ethereum
+  name: orchestrate-eth2
   specs:
-    keystore: HashicorpKeys
-    specs:
-      mountPoint: orchestrate
-      address: http://vault:8200
-      tokenPath: "/vault/token/.root"
-      namespace: ''
+    key_store: orchestrate-keystore

@@ -4,18 +4,16 @@ import (
 	"context"
 	"net/url"
 	"strings"
-	"time"
 
-	authutils "github.com/consensys/orchestrate/pkg/toolkit/app/auth/utils"
+	"github.com/auth0/go-jwt-middleware/v2/jwks"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/auth/utils"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 
-	"github.com/auth0/go-jwt-middleware/validate/josev2"
-	"gopkg.in/square/go-jose.v2"
-	"gopkg.in/square/go-jose.v2/jwt"
+	"github.com/auth0/go-jwt-middleware/v2/validator"
 )
 
 type Validator struct {
-	validator *josev2.Validator
+	validator *validator.Validator
 }
 
 func NewValidator(cfg *Config) (*Validator, error) {
@@ -24,24 +22,18 @@ func NewValidator(cfg *Config) (*Validator, error) {
 		return nil, err
 	}
 
-	expectedClaims := jwt.Expected{Time: time.Now()}
-	if len(cfg.Audience) == 0 {
-		expectedClaims.Audience = cfg.Audience
-	}
-
-	validator, err := josev2.New(
-		josev2.NewCachingJWKSProvider(*issuerURL, cfg.CacheTTL).KeyFunc,
-		jose.RS256,
-		josev2.WithCustomClaims(func() josev2.CustomClaims { return NewCustomClaims(cfg.OrchestrateClaims) }),
-		josev2.WithExpectedClaims(func() jwt.Expected {
-			return expectedClaims.WithTime(time.Now())
-		}),
+	v, err := validator.New(
+		jwks.NewCachingProvider(issuerURL, cfg.CacheTTL).KeyFunc,
+		validator.RS256,
+		issuerURL.String(),
+		cfg.Audience,
+		validator.WithCustomClaims(NewCustomClaims(cfg.OrchestrateClaims)),
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Validator{validator: validator}, nil
+	return &Validator{validator: v}, nil
 }
 
 func (v *Validator) ValidateToken(ctx context.Context, token string) (*entities.UserClaims, error) {
@@ -51,19 +43,21 @@ func (v *Validator) ValidateToken(ctx context.Context, token string) (*entities.
 		return nil, err
 	}
 
-	if orchestrateUserClaims := userCtx.(*josev2.UserContext).CustomClaims.(*CustomClaims).UserClaims; orchestrateUserClaims != nil {
+	claims := userCtx.(*validator.ValidatedClaims)
+
+	if orchestrateUserClaims := claims.CustomClaims.(*CustomClaims).UserClaims; orchestrateUserClaims != nil {
 		return orchestrateUserClaims, nil
 	}
 
 	// The tenant ID is the "sub" field, then is "tenant_id:username" or "tenant_id"
-	sub := userCtx.(*josev2.UserContext).Claims.Subject
-	pieces := strings.Split(sub, authutils.AuthSeparator)
+	sub := claims.RegisteredClaims.Subject
+	pieces := strings.Split(sub, utils.AuthSeparator)
 	claim := &entities.UserClaims{}
 	if len(pieces) == 0 {
 		claim.TenantID = pieces[0]
 	} else {
 		claim.Username = pieces[len(pieces)-1]
-		claim.TenantID = strings.Replace(sub, authutils.AuthSeparator+claim.Username, "", 1)
+		claim.TenantID = strings.Replace(sub, utils.AuthSeparator+claim.Username, "", 1)
 	}
 
 	return claim, nil

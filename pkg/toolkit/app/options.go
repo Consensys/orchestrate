@@ -5,6 +5,8 @@ import (
 	"math"
 	"reflect"
 
+	"github.com/prometheus/client_golang/prometheus/collectors"
+
 	"github.com/consensys/orchestrate/pkg/toolkit/app/auth"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/config/dynamic"
@@ -163,10 +165,10 @@ func MetricsOpt(appMetrics ...metrics.Prometheus) Option {
 	appMetricsRegister := func(app *App) error {
 		// Register base Process and Golang runtime metrics
 		if app.cfg.Metrics.IsActive(metricregistry.GoMetricsModule) {
-			app.metricReg.Add(prom.NewGoCollector())
+			app.metricReg.Add(collectors.NewGoCollector())
 		}
 		if app.cfg.Metrics.IsActive(metricregistry.ProcessMetricsModule) {
-			app.metricReg.Add(prom.NewProcessCollector(prom.ProcessCollectorOpts{}))
+			app.metricReg.Add(collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}))
 		}
 
 		for _, m := range appMetrics {

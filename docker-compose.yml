@@ -51,7 +51,7 @@ x-container-common: &container-common
 services:
   vault:
     <<: *container-common
-    image: consensys/quorum-hashicorp-vault-plugin:v1.1.1
+    image: consensys/quorum-hashicorp-vault-plugin:v1.1.2
     tty: true
     restart: "no"
     cap_add:
@@ -137,20 +137,28 @@ services:
       - -c
       - |
         cat <<EOF > /manifests/default.yml
-          kind: Ethereum
-          version: 0.0.1
-          name: orchestrate-eth
-          specs:
-            keystore: HashicorpKeys
+          - kind: Vault
+            type: hashicorp
+            name: hashicorp-quorum
             specs:
-              mountPoint: quorum
+              mount_point: quorum
               address: http://vault:8200
               token: DevVaultToken
               namespace: ''
+          - kind: Store
+            type: key
+            name: orchestrate-keystore
+            specs:
+              vault: hashicorp-quorum
+          - kind: Store
+            type: ethereum
+            name: orchestrate-eth
+            specs:
+              key_store: orchestrate-keystore
         EOF
 
   key-manager-migration:
-    image: consensys/quorum-key-manager:v21.9.3
+    image: consensys/quorum-key-manager:v21.12.0
     environment:
       <<: *default-variables
     command: migrate up
@@ -161,7 +169,7 @@ services:
       - postgres
 
   key-manager:
-    image: consensys/quorum-key-manager:v21.9.3
+    image: consensys/quorum-key-manager:v21.12.0
     environment:
       <<: *default-variables
       MANIFEST_PATH: ${MANIFEST_PATH-/manifests}

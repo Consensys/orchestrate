@@ -3,6 +3,8 @@ package client
 import (
 	"context"
 
+	utilstypes "github.com/consensys/quorum-key-manager/src/utils/api/types"
+
 	qkmtypes "github.com/consensys/quorum-key-manager/src/stores/api/types"
 
 	types "github.com/consensys/orchestrate/pkg/types/api"
@@ -62,8 +64,8 @@ type AccountClient interface {
 	UpdateAccount(ctx context.Context, address ethcommon.Address, request *types.UpdateAccountRequest) (*types.AccountResponse, error)
 	SignMessage(ctx context.Context, address ethcommon.Address, request *qkmtypes.SignMessageRequest) (string, error)
 	SignTypedData(ctx context.Context, address ethcommon.Address, request *qkmtypes.SignTypedDataRequest) (string, error)
-	VerifyMessageSignature(ctx context.Context, request *qkmtypes.VerifyRequest) error
-	VerifyTypedDataSignature(ctx context.Context, request *qkmtypes.VerifyTypedDataRequest) error
+	VerifyMessageSignature(ctx context.Context, request *utilstypes.VerifyRequest) error
+	VerifyTypedDataSignature(ctx context.Context, request *utilstypes.VerifyTypedDataRequest) error
 }
 
 type FaucetClient interface {

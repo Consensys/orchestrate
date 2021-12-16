@@ -42,15 +42,10 @@ func Init() {
 	})
 }
 
-// GlobalChainRegistryClient return the chain registry
 func GlobalClient() qkm.KeyManagerClient {
 	return client
 }
 
 func GlobalStoreName() string {
 	return storeNameID
-}
-
-func SetGlobalStoreName(storeName string) {
-	storeNameID = storeName
 }
