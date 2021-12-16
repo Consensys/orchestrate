@@ -73,6 +73,10 @@ func NewEnvelopeFromJob(job *entities.Job, headers map[string]string) *tx.TxEnve
 		txEnvelope.SetPriority(job.InternalData.Priority)
 	}
 
+	if job.InternalData.StoreID != "" {
+		txEnvelope.SetStoreID(job.InternalData.StoreID)
+	}
+
 	if job.Transaction.Hash != nil {
 		txEnvelope.SetTxHash(job.Transaction.Hash.String())
 	}
@@ -99,6 +103,7 @@ func NewJobFromEnvelope(envelope *tx.Envelope) *entities.Job {
 			ChainID:       envelope.GetChainID(),
 			ParentJobUUID: envelope.GetParentJobUUID(),
 			Priority:      envelope.GetPriority(),
+			StoreID:       envelope.GetStoreID(),
 		},
 		TenantID: envelope.GetHeadersValue(authutils.TenantIDHeader),
 		OwnerID:  envelope.GetHeadersValue(authutils.UsernameHeader),

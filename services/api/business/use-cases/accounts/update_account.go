@@ -42,6 +42,9 @@ func (uc *updateAccountUseCase) Execute(ctx context.Context, account *entities.A
 	if account.Alias != "" {
 		model.Alias = account.Alias
 	}
+	if account.StoreID != "" {
+		model.StoreID = account.StoreID
+	}
 
 	err = uc.db.Account().Update(ctx, model)
 	if err != nil {

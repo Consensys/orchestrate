@@ -163,6 +163,11 @@ func (m *TxEnvelope) SetPriority(priority string) *TxEnvelope {
 	return m
 }
 
+func (m *TxEnvelope) SetStoreID(storeID string) *TxEnvelope {
+	m.InternalLabels[StoreIDLabel] = storeID
+	return m
+}
+
 func (m *TxEnvelope) GetPriority() string {
 	return m.InternalLabels[PriorityLabel]
 }

@@ -5,7 +5,6 @@ import (
 	"math/big"
 
 	"github.com/consensys/orchestrate/pkg/encoding/rlp"
-	qkm "github.com/consensys/orchestrate/pkg/quorum-key-manager"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	qkmtypes "github.com/consensys/quorum-key-manager/src/stores/api/types"
 	ethcommon "github.com/ethereum/go-ethereum/common"
@@ -30,7 +29,6 @@ const signEEATransactionComponent = "use-cases.sign-eea-transaction"
 type signEEATransactionUseCase struct {
 	keyManagerClient client.KeyManagerClient
 	logger           *log.Logger
-	storeName        string
 }
 
 // NewSignEEATransactionUseCase creates a new SignEEATransactionUseCase
@@ -38,7 +36,6 @@ func NewSignEEATransactionUseCase(keyManagerClient client.KeyManagerClient) usec
 	return &signEEATransactionUseCase{
 		keyManagerClient: keyManagerClient,
 		logger:           log.NewLogger().SetComponent(signEEATransactionComponent),
-		storeName:        qkm.GlobalStoreName(),
 	}
 }
 
@@ -111,7 +108,7 @@ func (uc *signEEATransactionUseCase) signWithAccount(ctx context.Context, job *e
 		PrivacyGroupID: privateArgs.PrivacyGroupID,
 	}
 
-	signedRawStr, err := uc.keyManagerClient.SignEEATransaction(ctx, uc.storeName, job.Transaction.From.Hex(), req)
+	signedRawStr, err := uc.keyManagerClient.SignEEATransaction(ctx, job.InternalData.StoreID, job.Transaction.From.Hex(), req)
 
 	if err != nil {
 		errMsg := "failed to sign eea transaction using key manager"

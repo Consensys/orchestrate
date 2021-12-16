@@ -14,6 +14,7 @@ type Account struct {
 	CompressedPublicKey hexutil.Bytes
 	TenantID            string
 	OwnerID             string
+	StoreID             string
 	Attributes          map[string]string
 	CreatedAt           time.Time
 	UpdatedAt           time.Time

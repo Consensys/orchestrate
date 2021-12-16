@@ -23,7 +23,7 @@ import (
 )
 
 const (
-	waitForEnvelopeTimeOut = 2 * time.Second
+	waitForEnvelopeTimeOut = 3 * time.Second
 )
 
 // transactionsTestSuite is a test suite for Transaction Scheduler Transactions controller

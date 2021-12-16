@@ -40,7 +40,7 @@ type accountsCtrlTestSuite struct {
 	fundAccountUC    *mocks.MockFundAccountUseCase
 	keyManagerClient *qkmmock.MockKeyManagerClient
 	ctx              context.Context
-	userInfo		 *multitenancy.UserInfo
+	userInfo         *multitenancy.UserInfo
 	router           *mux.Router
 }
 
@@ -69,7 +69,7 @@ func (s *accountsCtrlTestSuite) FundAccount() usecases.FundAccountUseCase {
 const (
 	inputTestAddress     = "0x7e654d251da770a068413677967f6d3ea2feA9e4"
 	mixedCaseTestAddress = "0x7E654d251Da770A068413677967F6d3Ea2FeA9E4"
-	globalStoreName      = "test-store-name"
+	qkmStoreName         = "test-store-name"
 )
 
 func TestAccountController(t *testing.T) {
@@ -81,7 +81,6 @@ func (s *accountsCtrlTestSuite) SetupTest() {
 	ctrl := gomock.NewController(s.T())
 	defer ctrl.Finish()
 
-	qkm.SetGlobalStoreName(globalStoreName)
 	s.createAccountUC = mocks.NewMockCreateAccountUseCase(ctrl)
 	s.getAccountUC = mocks.NewMockGetAccountUseCase(ctrl)
 	s.searchAccountUC = mocks.NewMockSearchAccountsUseCase(ctrl)
@@ -91,7 +90,7 @@ func (s *accountsCtrlTestSuite) SetupTest() {
 	s.ctx = multitenancy.WithUserInfo(context.Background(), s.userInfo)
 	s.router = mux.NewRouter()
 
-	controller := NewAccountsController(s, s.keyManagerClient)
+	controller := NewAccountsController(s, s.keyManagerClient, qkmStoreName)
 	controller.Append(s.router)
 }
 
@@ -158,7 +157,6 @@ func (s *accountsCtrlTestSuite) TestAccountController_Import() {
 			NewRequest(http.MethodPost, "/accounts/import", bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 
-		// s.createAccountUC.EXPECT().Execute(gomock.Any(), gomock.Any(), hexutil.MustDecode("0x"+req.PrivateKey), req.Chain, s.tenants[0]).Return(accResp, nil)
 		s.createAccountUC.EXPECT().Execute(gomock.Any(), gomock.Any(), gomock.Any(), req.Chain, s.userInfo).Return(accResp, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -217,6 +215,7 @@ func (s *accountsCtrlTestSuite) TestAccountController_UpdateAccount() {
 		acc := &entities.Account{
 			Attributes: req.Attributes,
 			Alias:      req.Alias,
+			StoreID:    req.StoreID,
 			Address:    ethcommon.HexToAddress(mixedCaseTestAddress),
 		}
 
@@ -275,14 +274,14 @@ func (s *accountsCtrlTestSuite) TestAccountController_SignPayload() {
 		rw := httptest.NewRecorder()
 		payload := hexutil.MustDecode("0x1234")
 		signature := "0xsignature"
-		requestBytes, _ := json.Marshal(&qkmtypes.SignMessageRequest{Message: payload})
+		requestBytes, _ := json.Marshal(&api.SignMessageRequest{qkmtypes.SignMessageRequest{Message: payload}, acc.StoreID})
 
 		httpRequest := httptest.
 			NewRequest(http.MethodPost, fmt.Sprintf("/accounts/%v/sign-message", acc.Address), bytes.NewReader(requestBytes)).
 			WithContext(s.ctx)
 
 		s.getAccountUC.EXPECT().Execute(gomock.Any(), ethcommon.HexToAddress(mixedCaseTestAddress), s.userInfo).Return(acc, nil)
-		s.keyManagerClient.EXPECT().SignMessage(gomock.Any(), globalStoreName, mixedCaseTestAddress, &qkmtypes.SignMessageRequest{
+		s.keyManagerClient.EXPECT().SignMessage(gomock.Any(), acc.StoreID, mixedCaseTestAddress, &qkmtypes.SignMessageRequest{
 			Message: payload,
 		}).Return(signature, nil)
 

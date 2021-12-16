@@ -33,6 +33,7 @@ func New(ctx context.Context) (*app.App, error) {
 		authjwt.GlobalChecker(),
 		authkey.GlobalChecker(),
 		qkm.GlobalClient(),
+		qkm.GlobalStoreName(),
 		ethclient.GlobalClient(),
 		sarama.GlobalSyncProducer(),
 		sarama.NewKafkaTopicConfig(viper.GetViper()),

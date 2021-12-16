@@ -1,19 +1,20 @@
-kind: Ethereum
-version: 0.0.1
-name: orchestrate-eth
-specs:
-  keystore: HashicorpKeys
+- kind: Ethereum
+  version: 0.0.1
+  name: orchestrate-eth
   specs:
-    mountPoint: orchestrate
-    address: http://vault:8200
-    tokenPath: "/vault/token/.vault-token"
-    namespace: ''
-#- kind: Ethereum
-#  name: orchestrate-eth
-#  specs:
-#    keystore: AKVKeys
-#    specs:
-#      vaultName: quorumkeymanager
-#      tenantID: 17255fb0-373b-4a1a-bd47-d211ab86df81
-#      clientID: 8c925036-dd6f-4a1e-a315-5e6fab4f2f09
-#      clientSecret: 
+    keystore: HashicorpKeys
+    specs:
+      mountPoint: orchestrate
+      address: http://vault:8200
+      tokenPath: "/vault/token/.vault-token"
+      namespace: ''
+- kind: Ethereum
+  version: 0.0.1
+  name: orchestrate-eth-2
+  specs:
+    keystore: HashicorpKeys
+    specs:
+      mountPoint: orchestrate
+      address: http://vault:8200
+      tokenPath: "/vault/token/.root"
+      namespace: ''

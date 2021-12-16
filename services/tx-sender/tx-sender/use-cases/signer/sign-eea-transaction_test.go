@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/consensys/orchestrate/pkg/errors"
-	qkm "github.com/consensys/orchestrate/pkg/quorum-key-manager"
 	"github.com/consensys/orchestrate/pkg/types/testutils"
 	"github.com/consensys/orchestrate/pkg/utils"
 	qkmmock "github.com/consensys/quorum-key-manager/pkg/client/mock"
@@ -22,8 +21,6 @@ func TestSignEEATransaction_Execute(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	globalStoreName := "test-store-name"
-	qkm.SetGlobalStoreName(globalStoreName)
 	mockKeyManagerClient := qkmmock.NewMockKeyManagerClient(ctrl)
 	ctx := context.Background()
 
@@ -33,7 +30,7 @@ func TestSignEEATransaction_Execute(t *testing.T) {
 	
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		job := testutils.FakeJob()
-		mockKeyManagerClient.EXPECT().SignEEATransaction(gomock.Any(), globalStoreName, job.Transaction.From.String(), 
+		mockKeyManagerClient.EXPECT().SignEEATransaction(gomock.Any(), job.InternalData.StoreID, job.Transaction.From.String(), 
 			gomock.AssignableToTypeOf(&types.SignEEATransactionRequest{})).Return(signedRaw.String(), nil)
 
 		raw, txHash, err := usecase.Execute(ctx, job)
@@ -46,7 +43,7 @@ func TestSignEEATransaction_Execute(t *testing.T) {
 	t.Run("should execute use case successfully for deployment transactions", func(t *testing.T) {
 		job := testutils.FakeJob()
 		job.Transaction.To = nil
-		mockKeyManagerClient.EXPECT().SignEEATransaction(gomock.Any(), globalStoreName, job.Transaction.From.String(), 
+		mockKeyManagerClient.EXPECT().SignEEATransaction(gomock.Any(), job.InternalData.StoreID, job.Transaction.From.String(), 
 			gomock.AssignableToTypeOf(&types.SignEEATransactionRequest{})).Return(signedRaw.String(), nil)
 
 		raw, txHash, err := usecase.Execute(ctx, job)
@@ -72,7 +69,7 @@ func TestSignEEATransaction_Execute(t *testing.T) {
 
 	t.Run("should fail with same error if ETHSignEEATransaction fails", func(t *testing.T) {
 		job := testutils.FakeJob()
-		mockKeyManagerClient.EXPECT().SignEEATransaction(gomock.Any(), globalStoreName, job.Transaction.From.String(), gomock.Any()).
+		mockKeyManagerClient.EXPECT().SignEEATransaction(gomock.Any(), job.InternalData.StoreID, job.Transaction.From.String(), gomock.Any()).
 			Return("", errors.InvalidFormatError("error"))
 
 		raw, txHash, err := usecase.Execute(ctx, job)

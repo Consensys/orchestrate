@@ -31,5 +31,6 @@ func FakeInternalData() *entities.InternalData {
 	return &entities.InternalData{
 		ChainID:  big.NewInt(888),
 		Priority: utils.PriorityMedium,
+		StoreID:  "qkm-store-ID",
 	}
 }

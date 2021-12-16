@@ -14,6 +14,7 @@ type AccountResponse struct {
 	CompressedPublicKey hexutil.Bytes     `json:"compressedPublicKey" example:"0x048e66b3e549818ea2cb354fb70749f6c8de8fa484f7530fc447" swaggertype:"string"`
 	TenantID            string            `json:"tenantID" example:"tenantFoo"`
 	OwnerID             string            `json:"ownerID,omitempty" example:"foo"`
+	StoreID             string            `json:"storeID,omitempty" example:"myQKMStoreID"`
 	Attributes          map[string]string `json:"attributes,omitempty"`
 	CreatedAt           time.Time         `json:"createdAt" example:"2020-07-09T12:35:42.115395Z"`
 	UpdatedAt           time.Time         `json:"updatedAt,omitempty" example:"2020-07-09T12:35:42.115395Z"`

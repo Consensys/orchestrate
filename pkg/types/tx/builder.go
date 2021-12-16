@@ -948,6 +948,15 @@ func (e *Envelope) GetPriority() string {
 	return e.InternalLabels[PriorityLabel]
 }
 
+func (e *Envelope) GetStoreID() string {
+	return e.InternalLabels[StoreIDLabel]
+}
+
+func (e *Envelope) SetStoreID(storeID string) *Envelope {
+	e.InternalLabels[StoreIDLabel] = storeID
+	return e
+}
+
 func (e *Envelope) SetPriority(priority string) *Envelope {
 	e.InternalLabels[PriorityLabel] = priority
 	return e

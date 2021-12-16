@@ -55,7 +55,3 @@ func IsFinalJobStatus(status JobStatus) bool {
 		status == StatusStored ||
 		status == StatusNeverMined
 }
-
-func IsOnlyJobLogStatus(status JobStatus) bool {
-	return status == StatusWarning || status == StatusResending
-}

@@ -5,7 +5,6 @@ import (
 
 	pkgcryto "github.com/consensys/orchestrate/pkg/crypto/ethereum"
 	"github.com/consensys/orchestrate/pkg/encoding/rlp"
-	qkm "github.com/consensys/orchestrate/pkg/quorum-key-manager"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/pkg/utils"
@@ -28,7 +27,6 @@ const signQuorumPrivateTransactionComponent = "use-cases.sign-quorum-private-tra
 type signQuorumPrivateTransactionUseCase struct {
 	keyManagerClient client.KeyManagerClient
 	logger           *log.Logger
-	storeName        string
 }
 
 // NewSignQuorumPrivateTransactionUseCase creates a new signQuorumPrivateTransactionUseCase
@@ -36,7 +34,6 @@ func NewSignQuorumPrivateTransactionUseCase(keyManagerClient client.KeyManagerCl
 	return &signQuorumPrivateTransactionUseCase{
 		keyManagerClient: keyManagerClient,
 		logger:           log.NewLogger().SetComponent(signQuorumPrivateTransactionComponent),
-		storeName:        qkm.GlobalStoreName(),
 	}
 }
 
@@ -51,6 +48,7 @@ func (uc *signQuorumPrivateTransactionUseCase) Execute(ctx context.Context, job 
 	} else {
 		signedRaw, txHash, err = uc.signWithAccount(ctx, job, transaction)
 	}
+
 	if err != nil {
 		return nil, nil, errors.FromError(err).ExtendComponent(signQuorumPrivateTransactionComponent)
 	}
@@ -96,7 +94,8 @@ func (uc *signQuorumPrivateTransactionUseCase) signWithOneTimeKey(ctx context.Co
 func (uc *signQuorumPrivateTransactionUseCase) signWithAccount(ctx context.Context, job *entities.Job, tx *quorumtypes.Transaction) (
 	signedRaw hexutil.Bytes, txHash *ethcommon.Hash, err error) {
 	logger := uc.logger.WithContext(ctx)
-	signedRawStr, err := uc.keyManagerClient.SignQuorumPrivateTransaction(ctx, uc.storeName, job.Transaction.From.Hex(), &qkmtypes.SignQuorumPrivateTransactionRequest{
+
+	signedRawStr, err := uc.keyManagerClient.SignQuorumPrivateTransaction(ctx, job.InternalData.StoreID, job.Transaction.From.Hex(), &qkmtypes.SignQuorumPrivateTransactionRequest{
 		Nonce:    hexutil.Uint64(tx.Nonce()),
 		To:       tx.To(),
 		Value:    hexutil.Big(*tx.Value()),

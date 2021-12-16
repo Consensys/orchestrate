@@ -32,6 +32,7 @@ func TestApp(t *testing.T) {
 		postgres.GetManager(),
 		mockauth.NewMockChecker(ctrl), mockauth.NewMockChecker(ctrl),
 		mocks2.NewMockKeyManagerClient(ctrl),
+		"defaultStoreID",
 		ethclientmock.NewMockClient(ctrl),
 		mocks.NewSyncProducer(t, nil),
 		kCfg,

@@ -15,6 +15,7 @@ func FakeAccount() *entities.Account {
 	return &entities.Account{
 		Alias:               "MyAccount",
 		TenantID:            multitenancy.DefaultTenant,
+		StoreID:             "qkm-store-id",
 		Attributes:          make(map[string]string),
 		Address:             ethcommon.HexToAddress("0x5Cc634233E4a454d47aACd9fC68801482Fb02610"),
 		PublicKey:           hexutil.MustDecode("0x" + utils.RandHexString(12)),

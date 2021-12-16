@@ -2,12 +2,10 @@
 
 ## v21.11.0 alpha.2 (WIP)
 ### 🆕 Features
-<<<<<<< HEAD
 * Attach contract name and tag into transaction receipts when bytecode matches to one of the registered contracts.
 * Commit the offset to Kafka broker every time a message is processed 
-=======
-- Attach contract information into transaction receipts on every new contract deployment and contract events.
->>>>>>> #767 search contract by event sig hash
+* Attach contract information into transaction receipts on every new contract deployment and contract events.
+* Quorum Key Manager StoreID can be defined on every account creation.
 
 ## v21.11.0 alpha.1 (2021-12-03)
 ### 🛠 Bug fixes

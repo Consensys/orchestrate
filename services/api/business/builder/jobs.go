@@ -24,13 +24,14 @@ func newJobUseCases(
 	producer sarama.SyncProducer,
 	topicsCfg *pkgsarama.KafkaTopicConfig,
 	getChainUC usecases.GetChainUseCase,
+	qkmStoreID string,
 ) *jobUseCases {
 	startJobUC := jobs.NewStartJobUseCase(db, producer, topicsCfg, appMetrics)
 	updateChildrenUC := jobs.NewUpdateChildrenUseCase(db)
 	startNextJobUC := jobs.NewStartNextJobUseCase(db, startJobUC)
 
 	return &jobUseCases{
-		createJob:   jobs.NewCreateJobUseCase(db, getChainUC),
+		createJob:   jobs.NewCreateJobUseCase(db, getChainUC, qkmStoreID),
 		getJob:      jobs.NewGetJobUseCase(db),
 		searchJobs:  jobs.NewSearchJobsUseCase(db),
 		updateJob:   jobs.NewUpdateJobUseCase(db, updateChildrenUC, startNextJobUC, appMetrics),

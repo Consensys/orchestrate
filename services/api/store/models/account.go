@@ -16,6 +16,7 @@ type Account struct {
 	OwnerID             string
 	Attributes          map[string]string
 	// TODO add internal labels to store accountID
+	StoreID string
 
 	CreatedAt time.Time `pg:"default:now()"`
 	UpdatedAt time.Time `pg:"default:now()"`

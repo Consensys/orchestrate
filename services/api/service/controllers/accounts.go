@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	jsonutils "github.com/consensys/orchestrate/pkg/encoding/json"
-	qkm "github.com/consensys/orchestrate/pkg/quorum-key-manager"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/httputil"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/api"
@@ -24,11 +23,11 @@ type AccountsController struct {
 	storeName        string
 }
 
-func NewAccountsController(accountUCs usecases.AccountUseCases, keyManagerClient client.KeyManagerClient) *AccountsController {
+func NewAccountsController(accountUCs usecases.AccountUseCases, keyManagerClient client.KeyManagerClient, qkmStoreID string) *AccountsController {
 	return &AccountsController{
 		accountUCs,
 		keyManagerClient,
-		qkm.GlobalStoreName(),
+		qkmStoreID,
 	}
 }
 
@@ -69,7 +68,7 @@ func (c *AccountsController) create(rw http.ResponseWriter, request *http.Reques
 		return
 	}
 
-	acc, err := c.ucs.CreateAccount().Execute(ctx, formatters.FormatCreateAccountRequest(req), nil, req.Chain,
+	acc, err := c.ucs.CreateAccount().Execute(ctx, formatters.FormatCreateAccountRequest(req, c.storeName), nil, req.Chain,
 		multitenancy.UserInfoValue(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
@@ -173,7 +172,7 @@ func (c *AccountsController) importKey(rw http.ResponseWriter, request *http.Req
 		return
 	}
 
-	acc, err := c.ucs.CreateAccount().Execute(ctx, formatters.FormatImportAccountRequest(req), req.PrivateKey, req.Chain,
+	acc, err := c.ucs.CreateAccount().Execute(ctx, formatters.FormatImportAccountRequest(req, c.storeName), req.PrivateKey, req.Chain,
 		multitenancy.UserInfoValue(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
@@ -211,11 +210,11 @@ func (c *AccountsController) update(rw http.ResponseWriter, request *http.Reques
 
 	acc := formatters.FormatUpdateAccountRequest(accRequest)
 	address, err := utils.ParseHexToMixedCaseEthAddress(mux.Vars(request)["address"])
-	acc.Address = *address
 	if err != nil {
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
+	acc.Address = *address
 
 	accRes, err := c.ucs.UpdateAccount().Execute(ctx, acc, multitenancy.UserInfoValue(ctx))
 
@@ -234,7 +233,7 @@ func (c *AccountsController) update(rw http.ResponseWriter, request *http.Reques
 // @Produce text/plain
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Param request body qkmtypes.SignMessageRequest true "Payload to sign"
+// @Param request body api.SignMessageRequest true "Payload to sign"
 // @Param address path string true "selected account address"
 // @Success 200 {string} string "Signed payload"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
@@ -244,7 +243,7 @@ func (c *AccountsController) update(rw http.ResponseWriter, request *http.Reques
 // @Router /accounts/{address}/sign-message [post]
 func (c *AccountsController) signMessage(rw http.ResponseWriter, request *http.Request) {
 	ctx := request.Context()
-	payloadRequest := &qkmtypes.SignMessageRequest{}
+	payloadRequest := &api.SignMessageRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, payloadRequest)
 	if err != nil {
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
@@ -263,7 +262,12 @@ func (c *AccountsController) signMessage(rw http.ResponseWriter, request *http.R
 		return
 	}
 
-	signature, err := c.keyManagerClient.SignMessage(request.Context(), c.storeName, address.Hex(), &qkmtypes.SignMessageRequest{
+	qkmStoreID := payloadRequest.StoreID
+	if qkmStoreID == "" {
+		qkmStoreID = c.storeName
+	}
+
+	signature, err := c.keyManagerClient.SignMessage(request.Context(), qkmStoreID, address.Hex(), &qkmtypes.SignMessageRequest{
 		Message: payloadRequest.Message,
 	})
 	if err != nil {
@@ -279,7 +283,7 @@ func (c *AccountsController) signMessage(rw http.ResponseWriter, request *http.R
 // @Tags Accounts
 // @Accept json
 // @Produce text/plain
-// @Param request body qkmtypes.SignTypedDataRequest{domainSeparator=qkmtypes.DomainSeparator,types=map[string]qkmtypes.Type} true "Typed data to sign"
+// @Param request body api.SignTypedDataRequest{domainSeparator=qkmtypes.DomainSeparator,types=map[string]qkmtypes.Type} true "Typed data to sign"
 // @Param address path string true "selected account address"
 // @Success 200 {string} string "Signed payload"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
@@ -290,7 +294,7 @@ func (c *AccountsController) signMessage(rw http.ResponseWriter, request *http.R
 // @Router /accounts/{address}/sign-typed-data [post]
 func (c *AccountsController) signTypedData(rw http.ResponseWriter, request *http.Request) {
 	ctx := request.Context()
-	signRequest := &qkmtypes.SignTypedDataRequest{}
+	signRequest := &api.SignTypedDataRequest{}
 	err := jsonutils.UnmarshalBody(request.Body, signRequest)
 	if err != nil {
 		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
@@ -308,7 +312,13 @@ func (c *AccountsController) signTypedData(rw http.ResponseWriter, request *http
 		httputil.WriteError(rw, fmt.Sprintf("account %s was not found", address), http.StatusBadRequest)
 		return
 	}
-	signature, err := c.keyManagerClient.SignTypedData(ctx, c.storeName, address.Hex(), &qkmtypes.SignTypedDataRequest{
+
+	qkmStoreID := signRequest.StoreID
+	if qkmStoreID == "" {
+		qkmStoreID = c.storeName
+	}
+
+	signature, err := c.keyManagerClient.SignTypedData(ctx, qkmStoreID, address.Hex(), &qkmtypes.SignTypedDataRequest{
 		DomainSeparator: signRequest.DomainSeparator,
 		Types:           signRequest.Types,
 		Message:         signRequest.Message,

@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/consensys/orchestrate/pkg/errors"
-	qkm "github.com/consensys/orchestrate/pkg/quorum-key-manager"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/pkg/types/testutils"
 	"github.com/consensys/orchestrate/pkg/utils"
@@ -22,8 +21,6 @@ func TestSignTransaction_Execute(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	globalStoreName := "test-store-name"
-	qkm.SetGlobalStoreName(globalStoreName)
 	mockKeyManagerClient := qkmmock.NewMockKeyManagerClient(ctrl)
 	ctx := context.Background()
 
@@ -33,7 +30,7 @@ func TestSignTransaction_Execute(t *testing.T) {
 	
 	t.Run("should execute use case successfully", func(t *testing.T) {
 		job := testutils.FakeJob()
-		mockKeyManagerClient.EXPECT().SignTransaction(gomock.Any(), globalStoreName, job.Transaction.From.String(), 
+		mockKeyManagerClient.EXPECT().SignTransaction(gomock.Any(), job.InternalData.StoreID, job.Transaction.From.String(), 
 			gomock.AssignableToTypeOf(&types.SignETHTransactionRequest{})).Return(signedRaw.String(), nil)
 
 		raw, txHash, err := usecase.Execute(ctx, job)
@@ -46,7 +43,7 @@ func TestSignTransaction_Execute(t *testing.T) {
 	t.Run("should execute use case successfully for deployment transactions", func(t *testing.T) {
 		job := testutils.FakeJob()
 		job.Transaction.To = nil
-		mockKeyManagerClient.EXPECT().SignTransaction(gomock.Any(), globalStoreName, job.Transaction.From.String(), 
+		mockKeyManagerClient.EXPECT().SignTransaction(gomock.Any(), job.InternalData.StoreID, job.Transaction.From.String(), 
 			gomock.AssignableToTypeOf(&types.SignETHTransactionRequest{})).Return(signedRaw.String(), nil)
 
 		raw, txHash, err := usecase.Execute(ctx, job)
@@ -70,7 +67,7 @@ func TestSignTransaction_Execute(t *testing.T) {
 
 	t.Run("should fail with same error if ETHSignTransaction fails", func(t *testing.T) {
 		expectedErr := errors.InvalidFormatError("error")
-		mockKeyManagerClient.EXPECT().SignTransaction(gomock.Any(), globalStoreName, gomock.Any(), gomock.Any()).
+		mockKeyManagerClient.EXPECT().SignTransaction(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Return("", expectedErr)
 
 		raw, txHash, err := usecase.Execute(ctx, testutils.FakeJob())

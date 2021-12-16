@@ -51,12 +51,12 @@ type Builder struct {
 	contractsCtrl *ContractsController
 }
 
-func NewBuilder(ucs usecases.UseCases, keyManagerClient qkm.KeyManagerClient) *Builder {
+func NewBuilder(ucs usecases.UseCases, keyManagerClient qkm.KeyManagerClient, qkmStoreID string) *Builder {
 	return &Builder{
 		txCtrl:        NewTransactionsController(ucs),
 		schedulesCtrl: NewSchedulesController(ucs),
 		jobsCtrl:      NewJobsController(ucs),
-		accountsCtrl:  NewAccountsController(ucs, keyManagerClient),
+		accountsCtrl:  NewAccountsController(ucs, keyManagerClient, qkmStoreID),
 		faucetsCtrl:   NewFaucetsController(ucs),
 		chainsCtrl:    NewChainsController(ucs),
 		contractsCtrl: NewContractsController(ucs),

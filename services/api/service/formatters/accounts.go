@@ -10,24 +10,39 @@ import (
 	"github.com/consensys/orchestrate/pkg/utils"
 )
 
-func FormatCreateAccountRequest(req *api.CreateAccountRequest) *entities.Account {
-	return &entities.Account{
+func FormatCreateAccountRequest(req *api.CreateAccountRequest, defaultStoreID string) *entities.Account {
+	acc := &entities.Account{
 		Alias:      req.Alias,
 		Attributes: req.Attributes,
+		StoreID:    req.StoreID,
 	}
+
+	if acc.StoreID == "" {
+		acc.StoreID = defaultStoreID
+	}
+
+	return acc
 }
 
-func FormatImportAccountRequest(req *api.ImportAccountRequest) *entities.Account {
-	return &entities.Account{
+func FormatImportAccountRequest(req *api.ImportAccountRequest, defaultStoreID string) *entities.Account {
+	acc := &entities.Account{
 		Alias:      req.Alias,
 		Attributes: req.Attributes,
+		StoreID:    req.StoreID,
 	}
+
+	if acc.StoreID == "" {
+		acc.StoreID = defaultStoreID
+	}
+
+	return acc
 }
 
 func FormatUpdateAccountRequest(req *api.UpdateAccountRequest) *entities.Account {
 	return &entities.Account{
 		Alias:      req.Alias,
 		Attributes: req.Attributes,
+		StoreID:    req.StoreID,
 	}
 }
 
@@ -40,6 +55,7 @@ func FormatAccountResponse(iden *entities.Account) *api.AccountResponse {
 		CompressedPublicKey: iden.CompressedPublicKey,
 		TenantID:            iden.TenantID,
 		OwnerID:             iden.OwnerID,
+		StoreID:             iden.StoreID,
 		CreatedAt:           iden.CreatedAt,
 		UpdatedAt:           iden.UpdatedAt,
 	}

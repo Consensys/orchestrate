@@ -6,7 +6,6 @@ import (
 
 	pkgcryto "github.com/consensys/orchestrate/pkg/crypto/ethereum"
 	"github.com/consensys/orchestrate/pkg/encoding/rlp"
-	qkm "github.com/consensys/orchestrate/pkg/quorum-key-manager"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/pkg/utils"
@@ -29,7 +28,6 @@ const signTransactionComponent = "use-cases.sign-eth-transaction"
 type signETHTransactionUseCase struct {
 	keyManagerClient client.KeyManagerClient
 	logger           *log.Logger
-	storeName        string
 }
 
 // NewSignETHTransactionUseCase creates a new SignTransactionUseCase
@@ -37,7 +35,6 @@ func NewSignETHTransactionUseCase(keyManagerClient client.KeyManagerClient) usec
 	return &signETHTransactionUseCase{
 		keyManagerClient: keyManagerClient,
 		logger:           log.NewLogger().SetComponent(signTransactionComponent),
-		storeName:        qkm.GlobalStoreName(),
 	}
 }
 
@@ -94,7 +91,8 @@ func (uc *signETHTransactionUseCase) signWithOneTimeKey(ctx context.Context, tra
 func (uc *signETHTransactionUseCase) signWithAccount(ctx context.Context, job *entities.Job, tx *types.Transaction,
 	chainID *big.Int) (signedRaw hexutil.Bytes, txHash *ethcommon.Hash, err error) {
 	logger := uc.logger.WithContext(ctx)
-	signedRawStr, err := uc.keyManagerClient.SignTransaction(ctx, uc.storeName, job.Transaction.From.Hex(), &qkmtypes.SignETHTransactionRequest{
+
+	signedRawStr, err := uc.keyManagerClient.SignTransaction(ctx, job.InternalData.StoreID, job.Transaction.From.Hex(), &qkmtypes.SignETHTransactionRequest{
 		Nonce:           hexutil.Uint64(tx.Nonce()),
 		To:              tx.To(),
 		Data:            tx.Data(),

@@ -28,7 +28,6 @@ type createAccountUseCase struct {
 	searchUC         usecases.SearchAccountsUseCase
 	fundAccountUC    usecases.FundAccountUseCase
 	keyManagerClient client.EthClient
-	storeName        string
 	logger           *log.Logger
 }
 
@@ -40,7 +39,6 @@ func NewCreateAccountUseCase(db store.DB, searchUC usecases.SearchAccountsUseCas
 		keyManagerClient: keyManagerClient,
 		fundAccountUC:    fundAccountUC,
 		logger:           log.NewLogger().SetComponent(createAccountComponent),
-		storeName:        qkm.GlobalStoreName(),
 	}
 }
 
@@ -67,7 +65,7 @@ func (uc *createAccountUseCase) Execute(ctx context.Context, account *entities.A
 	var accountID = generateKeyID(userInfo.TenantID, account.Alias)
 	var resp *qkmtypes.EthAccountResponse
 	if privateKey != nil {
-		resp, err = uc.keyManagerClient.ImportEthAccount(ctx, uc.storeName, &qkmtypes.ImportEthAccountRequest{
+		resp, err = uc.keyManagerClient.ImportEthAccount(ctx, account.StoreID, &qkmtypes.ImportEthAccountRequest{
 			KeyID:      accountID,
 			PrivateKey: privateKey,
 			Tags: map[string]string{
@@ -76,7 +74,7 @@ func (uc *createAccountUseCase) Execute(ctx context.Context, account *entities.A
 			},
 		})
 	} else {
-		resp, err = uc.keyManagerClient.CreateEthAccount(ctx, uc.storeName, &qkmtypes.CreateEthAccountRequest{
+		resp, err = uc.keyManagerClient.CreateEthAccount(ctx, account.StoreID, &qkmtypes.CreateEthAccountRequest{
 			KeyID: accountID,
 			Tags: map[string]string{
 				qkm.TagIDAllowedTenants:  userInfo.TenantID,

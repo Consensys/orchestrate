@@ -7,6 +7,7 @@ const (
 	EnclaveKeyLabel   = "enclaveKey"
 	NextJobUUIDLabel  = "nextJobUUID"
 	PriorityLabel     = "priority"
+	StoreIDLabel      = "storeID"
 	ScheduleUUIDLabel = "scheduleUUID"
 	JobUUIDLabel      = "jobUUID"
 

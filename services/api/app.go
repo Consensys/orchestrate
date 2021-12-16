@@ -35,6 +35,7 @@ func NewAPI(
 	pgmngr postgres.Manager,
 	jwt, key auth.Checker,
 	keyManagerClient qkmclient.KeyManagerClient,
+	qkmStoreID string,
 	ec ethclient.Client,
 	syncProducer sarama.SyncProducer,
 	topicCfg *pkgsarama.KafkaTopicConfig,
@@ -52,10 +53,10 @@ func NewAPI(
 		appMetrics = metrics.NewTransactionSchedulerNopMetrics()
 	}
 
-	ucs := builder.NewUseCases(db, appMetrics, keyManagerClient, ec, syncProducer, topicCfg)
+	ucs := builder.NewUseCases(db, appMetrics, keyManagerClient, qkmStoreID, ec, syncProducer, topicCfg)
 
 	// Option of the API
-	apiHandlerOpt := app.HandlerOpt(reflect.TypeOf(&dynamic.API{}), controllers.NewBuilder(ucs, keyManagerClient))
+	apiHandlerOpt := app.HandlerOpt(reflect.TypeOf(&dynamic.API{}), controllers.NewBuilder(ucs, keyManagerClient, qkmStoreID))
 
 	// ReverseProxy Handler
 	proxyBuilder, err := pkgproxy.NewBuilder(cfg.Proxy.ServersTransport, nil)

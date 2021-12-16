@@ -1327,6 +1327,7 @@ func fakeEnvelope() *tx.Envelope {
 	_ = envelope.SetDataString("0x")
 	_ = envelope.SetChainIDString("2888")
 	_ = envelope.SetChainUUID(chainUUID)
+	_ = envelope.SetStoreID(qkmStoreName)
 	_ = envelope.SetHeadersValue(utils3.TenantIDHeader, "tenantID")
 	_ = envelope.SetPrivateFrom("A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=")
 	_ = envelope.SetPrivateFor([]string{"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=", "B1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="})

@@ -25,6 +25,7 @@ func NewUseCases(
 	db store.DB,
 	appMetrics metrics.TransactionSchedulerMetrics,
 	keyManagerClient qkmclient.EthClient,
+	qkmStoreID string,
 	ec ethclient.Client,
 	producer sarama.SyncProducer,
 	topicsCfg *pkgsarama.KafkaTopicConfig,
@@ -35,7 +36,7 @@ func NewUseCases(
 	faucetUseCases := newFaucetUseCases(db)
 	getFaucetCandidateUC := faucets.NewGetFaucetCandidateUseCase(faucetUseCases.SearchFaucets(), ec)
 	scheduleUseCases := newScheduleUseCases(db)
-	jobUseCases := newJobUseCases(db, appMetrics, producer, topicsCfg, chainUseCases.GetChain())
+	jobUseCases := newJobUseCases(db, appMetrics, producer, topicsCfg, chainUseCases.GetChain(), qkmStoreID)
 	transactionUseCases := newTransactionUseCases(db, chainUseCases.SearchChains(), getFaucetCandidateUC, 
 		scheduleUseCases, jobUseCases, contractUseCases.GetContract())
 	accountUseCases := newAccountUseCases(db, keyManagerClient, chainUseCases.SearchChains(), 

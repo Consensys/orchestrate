@@ -113,21 +113,22 @@ func (s *apiTestSuite) TestAPI_Accounts() {
 	testSuite := new(accountsTestSuite)
 	testSuite.env = s.env
 	testSuite.client = s.client
+	testSuite.defaultQKMStoreID = qkmDefaultStoreID
 	suite.Run(s.T(), testSuite)
 }
 
-// func (s *apiTestSuite) TestAPI_Jobs() {
-// 	if s.err != nil {
-// 		s.env.logger.Warn("skipping test...")
-// 		return
-// 	}
-// 
-// 	testSuite := new(jobsTestSuite)
-// 	testSuite.env = s.env
-// 	testSuite.client = s.client
-// 	testSuite.chainUUID = s.chainUUID
-// 	suite.Run(s.T(), testSuite)
-// }
+func (s *apiTestSuite) TestAPI_Jobs() {
+	if s.err != nil {
+		s.env.logger.Warn("skipping test...")
+		return
+	}
+
+	testSuite := new(jobsTestSuite)
+	testSuite.env = s.env
+	testSuite.client = s.client
+	testSuite.chainUUID = s.chainUUID
+	suite.Run(s.T(), testSuite)
+}
 
 // func (s *apiTestSuite) TestAPI_Metrics() {
 // 	if s.err != nil {

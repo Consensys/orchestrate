@@ -83,17 +83,22 @@ func (c *KafkaConsumer) Stop(ctx context.Context) error {
 }
 
 func (c *KafkaConsumer) WaitForEnvelope(id, topic string, timeout time.Duration) (*tx.Envelope, error) {
-	log.Infof("waiting for envelope %s on topic %s. Timeout %ds", id, topic, timeout/time.Millisecond)
+	log.Debugf("waiting for envelope %s on topic %s. Timeout %ds", id, topic, timeout/time.Millisecond)
 
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
-	msgKey := keyGenOf(id, topic)
-	if !c.chanRegistry.HasChan(msgKey) {
-		c.chanRegistry.Register(msgKey, make(chan *tx.Envelope, 1))
-	}
+	var ch = make(chan *tx.Envelope, 1)
+	go func(chx chan *tx.Envelope) {
+		msgKey := keyGenOf(id, topic)
+		if !c.chanRegistry.HasChan(msgKey) {
+			c.chanRegistry.Register(msgKey, make(chan *tx.Envelope, 1))
+		}
 
-	ch := c.chanRegistry.GetChan(msgKey)
+		e := <-c.chanRegistry.GetChan(msgKey)
+		chx <- e
+	}(ch)
+
 	select {
 	case e := <-ch:
 		return e, nil

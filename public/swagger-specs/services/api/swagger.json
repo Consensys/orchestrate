@@ -479,7 +479,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/types.SignMessageRequest"
+                            "$ref": "#/definitions/api.SignMessageRequest"
                         }
                     },
                     {
@@ -546,7 +546,7 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/types.SignTypedDataRequest"
+                                    "$ref": "#/definitions/api.SignTypedDataRequest"
                                 },
                                 {
                                     "type": "object",
@@ -2892,6 +2892,10 @@
                     "type": "string",
                     "example": "0x048e66b3e549818ea2cb354fb70749f6c8de8fa484f7530fc447d5fe80a1c424e4f5ae648d648c980ae7095d1efad87161d83886ca4b6c498ac22a93da5099014a"
                 },
+                "storeID": {
+                    "type": "string",
+                    "example": "myQKMStoreID"
+                },
                 "tenantID": {
                     "type": "string",
                     "example": "tenantFoo"
@@ -3049,6 +3053,10 @@
                 "chain": {
                     "type": "string",
                     "example": "besu"
+                },
+                "storeID": {
+                    "type": "string",
+                    "example": "qkmStoreID"
                 }
             }
         },
@@ -3339,6 +3347,10 @@
                 "privateKey": {
                     "type": "string",
                     "example": "0x66232652FDFFD802B7252A456DBD8F3ECC0352BBDE76C23B40AFE8AEBD714E2D"
+                },
+                "storeID": {
+                    "type": "string",
+                    "example": "qkmStoreID"
                 }
             }
         },
@@ -3670,6 +3682,57 @@
                 }
             }
         },
+        "api.SignMessageRequest": {
+            "type": "object",
+            "required": [
+                "message"
+            ],
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "0xfeade..."
+                },
+                "storeID": {
+                    "type": "string",
+                    "example": "qkmStoreID"
+                }
+            }
+        },
+        "api.SignTypedDataRequest": {
+            "type": "object",
+            "required": [
+                "domainSeparator",
+                "message",
+                "messageType",
+                "types"
+            ],
+            "properties": {
+                "domainSeparator": {
+                    "$ref": "#/definitions/types.DomainSeparator"
+                },
+                "message": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "messageType": {
+                    "type": "string",
+                    "example": "Mail"
+                },
+                "storeID": {
+                    "type": "string",
+                    "example": "qkmStoreID"
+                },
+                "types": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/types.Type"
+                        }
+                    }
+                }
+            }
+        },
         "api.TransactionParams": {
             "type": "object",
             "required": [
@@ -3893,6 +3956,10 @@
                     "additionalProperties": {
                         "type": "string"
                     }
+                },
+                "storeID": {
+                    "type": "string",
+                    "example": "qkmStoreID"
                 }
             }
         },
@@ -4310,18 +4377,6 @@
                 "version": {
                     "type": "string",
                     "example": "v1.0.0"
-                }
-            }
-        },
-        "types.SignMessageRequest": {
-            "type": "object",
-            "required": [
-                "message"
-            ],
-            "properties": {
-                "message": {
-                    "type": "string",
-                    "example": "0xfeade..."
                 }
             }
         },

@@ -85,13 +85,17 @@ Feature: Account management
     When I send "POST" request to "{{global.api}}/accounts" with json:
   """
 {
-    "alias": "{{generateAccID}}", 
+    "alias": "{{generateAccID}}",
+    "storeID": "{{global.qkmStoreID}}",
     "attributes": {
     	"scenario_id": "{{scenarioID}}"
     }
 }
       """
     Then the response code should be 200
+    And Response should have the following fields
+      | storeID               |
+      | {{global.qkmStoreID}} |
     Then I register the following response fields
       | alias            | path    |
       | generatedAccAddr | address |
@@ -118,6 +122,26 @@ Feature: Account management
       """
     Then the response code should be 202
     Then Envelopes should be in topic "tx.decoded"
+
+  Scenario: Should fail to create an account on a not existing QKM store
+    Given I register the following alias
+      | alias         | value           |
+      | generateAccID | {{random.uuid}} |
+    Given I set the headers
+      | Key         | Value                |
+      | X-API-KEY   | {{global.api-key}}   |
+      | X-TENANT-ID | {{tenant1.tenantID}} |
+    When I send "POST" request to "{{global.api}}/accounts" with json:
+  """
+{
+    "alias": "{{generateAccID}}",
+    "storeID": "not-existing",
+    "attributes": {
+    	"scenario_id": "{{scenarioID}}"
+    }
+}
+      """
+    Then the response code should be 424
 
   Scenario: Sending transaction with not existed account
     Given I register the following alias

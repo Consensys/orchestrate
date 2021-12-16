@@ -113,6 +113,12 @@ func (s *jobsTestSuite) TestStart() {
 
 		err = s.client.StartJob(ctx, job.UUID)
 		require.NoError(t, err)
+		evlp, err := s.env.consumer.WaitForEnvelope(job.ScheduleUUID, s.env.kafkaTopicConfig.Sender, waitForEnvelopeTimeOut)
+		if err != nil {
+			assert.Fail(t, err.Error())
+			return
+		}
+		assert.Equal(t, evlp.GetJobUUID(), job.UUID)
 
 		jobRetrieved, err := s.client.GetJob(ctx, job.UUID)
 		require.NoError(t, err)
@@ -128,13 +134,19 @@ func (s *jobsTestSuite) TestStart() {
 		req.Annotations = api.Annotations{
 			OneTimeKey: true,
 		}
-
+	
 		job, err := s.client.CreateJob(ctx, req)
 		require.NoError(t, err)
-
+	
 		err = s.client.StartJob(ctx, job.UUID)
 		require.NoError(t, err)
-
+		evlp, err := s.env.consumer.WaitForEnvelope(job.ScheduleUUID, s.env.kafkaTopicConfig.Sender, waitForEnvelopeTimeOut)
+		if err != nil {
+			assert.Fail(t, err.Error())
+			return
+		}
+		assert.Equal(t, evlp.GetJobUUID(), job.UUID)
+	
 		err = s.client.StartJob(ctx, job.UUID)
 		assert.True(t, errors.IsInvalidStateError(err))
 	})

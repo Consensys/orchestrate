@@ -45,7 +45,7 @@ const qkmContainerMigrateID = "quorum-key-manager-migrate"
 const hashicorpContainerID = "hashicorp"
 const networkName = "api"
 const localhost = "localhost"
-const qkmStoreName = "orchestrate-eth"
+const qkmDefaultStoreID = "orchestrate-eth"
 const hashicorpMountPath = "orchestrate"
 
 var envPGHostPort string
@@ -104,8 +104,8 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 		"--db-port=" + envPGHostPort,
 		"--kafka-url=" + kafkaExternalHostname,
 		"--key-manager-url=" + quorumKeyManagerURL,
-		"--key-manager-store-name=" + qkmStoreName,
-		"--log-level=warn",
+		"--key-manager-store-name=" + qkmDefaultStoreID,
+		"--log-level=info",
 	}
 
 	err := flgs.Parse(args)
@@ -136,7 +136,7 @@ func NewIntegrationEnvironment(ctx context.Context) (*IntegrationEnvironment, er
 	err = qkmContainer.CreateManifest("manifest.yml", &qkm.Manifest{
 		Kind:    "Ethereum",
 		Version: "0.0.1",
-		Name:    qkmStoreName,
+		Name:    qkmDefaultStoreID,
 		Specs: map[string]interface{}{
 			"keystore": "HashicorpKeys",
 			"specs": map[string]string{
@@ -294,7 +294,7 @@ func (env *IntegrationEnvironment) Start(ctx context.Context) error {
 	}
 
 	// Start Kafka consumer
-	env.consumer, err = integrationtest.NewKafkaTestConsumer(ctx, "api-group", sarama.GlobalClient(),
+	env.consumer, err = integrationtest.NewKafkaTestConsumer(ctx, "api-integration-listener-group", sarama.GlobalClient(),
 		[]string{env.kafkaTopicConfig.Sender})
 	if err != nil {
 		env.logger.WithError(err).Error("could initialize Kafka")
@@ -426,6 +426,7 @@ func newAPI(ctx context.Context, topicCfg *sarama.KafkaTopicConfig) (*app.App, e
 		pgmngr,
 		authjwt.GlobalChecker(), authkey.GlobalChecker(),
 		qkm.GlobalClient(),
+		qkm.GlobalStoreName(),
 		ethclient.GlobalClient(),
 		sarama.GlobalSyncProducer(),
 		topicCfg,

@@ -21,17 +21,19 @@ const createJobComponent = "use-cases.create-job"
 
 // createJobUseCase is a use case to create a new transaction job
 type createJobUseCase struct {
-	db         store.DB
-	getChainUC usecases.GetChainUseCase
-	logger     *log.Logger
+	db             store.DB
+	getChainUC     usecases.GetChainUseCase
+	logger         *log.Logger
+	defaultStoreID string
 }
 
 // NewCreateJobUseCase creates a new CreateJobUseCase
-func NewCreateJobUseCase(db store.DB, getChainUC usecases.GetChainUseCase) usecases.CreateJobUseCase {
+func NewCreateJobUseCase(db store.DB, getChainUC usecases.GetChainUseCase, qkmStoreID string) usecases.CreateJobUseCase {
 	return &createJobUseCase{
-		db:         db,
-		getChainUC: getChainUC,
-		logger:     log.NewLogger().SetComponent(createJobComponent),
+		db:             db,
+		getChainUC:     getChainUC,
+		logger:         log.NewLogger().SetComponent(createJobComponent),
+		defaultStoreID: qkmStoreID,
 	}
 }
 
@@ -52,7 +54,7 @@ func (uc *createJobUseCase) Execute(ctx context.Context, job *entities.Job, user
 	job.InternalData.ChainID = chainID
 
 	if job.Transaction.From != nil && job.Type != entities.EthereumRawTransaction {
-		err = uc.validateAccountAccess(ctx, job.Transaction.From, userInfo)
+		job.InternalData.StoreID, err = uc.getAccountStoreID(ctx, job.Transaction.From, userInfo)
 		if err != nil {
 			return nil, errors.FromError(err).ExtendComponent(createJobComponent)
 		}
@@ -119,17 +121,21 @@ func (uc *createJobUseCase) Execute(ctx context.Context, job *entities.Job, user
 	return parsers.NewJobEntityFromModels(jobModel), nil
 }
 
-//nolint
-func (uc *createJobUseCase) validateAccountAccess(ctx context.Context, address *ethcommon.Address, userInfo *multitenancy.UserInfo) error {
-	_, err := uc.db.Account().FindOneByAddress(ctx, address.String(), userInfo.AllowedTenants, userInfo.Username)
+// nolint
+func (uc *createJobUseCase) getAccountStoreID(ctx context.Context, address *ethcommon.Address, userInfo *multitenancy.UserInfo) (string, error) {
+	acc, err := uc.db.Account().FindOneByAddress(ctx, address.String(), userInfo.AllowedTenants, userInfo.Username)
 	if errors.IsNotFoundError(err) {
-		return errors.InvalidParameterError("failed to get account")
+		return "", errors.InvalidParameterError("failed to get account")
 	}
 	if err != nil {
-		return err
+		return "", err
+	}
+	
+	if acc.StoreID == "" {
+		return uc.defaultStoreID, nil
 	}
 
-	return nil
+	return acc.StoreID, nil
 }
 
 func (uc *createJobUseCase) getChainID(ctx context.Context, chainUUID string, userInfo *multitenancy.UserInfo) (*big.Int, error) {

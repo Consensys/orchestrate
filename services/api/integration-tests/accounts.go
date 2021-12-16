@@ -19,16 +19,17 @@ import (
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/pkg/types/testutils"
 	"github.com/consensys/orchestrate/pkg/utils"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"github.com/traefik/traefik/v2/pkg/log"
-	ethcommon "github.com/ethereum/go-ethereum/common"
 )
 
 type accountsTestSuite struct {
 	suite.Suite
-	client client.OrchestrateClient
-	env    *IntegrationEnvironment
+	client            client.OrchestrateClient
+	env               *IntegrationEnvironment
+	defaultQKMStoreID string
 }
 
 func (s *accountsTestSuite) TestCreateAccounts() {
@@ -48,7 +49,19 @@ func (s *accountsTestSuite) TestCreateAccounts() {
 		assert.Equal(s.T(), resp.Address, ethAccRes.Address)
 		assert.Equal(s.T(), resp.PublicKey, ethAccRes.PublicKey)
 		assert.Equal(s.T(), resp.Alias, txRequest.Alias)
+		assert.Equal(s.T(), resp.StoreID, s.defaultQKMStoreID)
 		assert.Equal(s.T(), resp.TenantID, "_")
+	})
+	
+	s.T().Run("should fail to create account if QKM storeID does not exist", func(t *testing.T) {
+		qkmStoreID := "my-personal-storeID"
+		txRequest := testutils.FakeCreateAccountRequest()
+		txRequest.StoreID = qkmStoreID
+
+		_, err := s.client.CreateAccount(ctx, txRequest)
+		require.Error(s.T(), err)
+		// QKM StoreID does not exists
+		require.True(s.T(), errors.IsDependencyFailureError(err))
 	})
 
 	s.T().Run("should fail to create account with same alias", func(t *testing.T) {
