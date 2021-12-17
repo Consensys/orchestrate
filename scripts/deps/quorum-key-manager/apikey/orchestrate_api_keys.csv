@@ -1,5 +1,4 @@
 ## Notes: Request headers should be "Authorization: Basic base64({user-key})"
 ## Column separator is ","
 
-admin-user,tenant1|user1,"*:*",
-guest-user,tenant2|user2,"*:secrets,*:keys,read:ethereum",
+f470213d9ae659187a19b9cb2169b4b400544f4d3f59250eda657154700da616,tenant1|user1,"*:*",

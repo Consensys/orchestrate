@@ -41,7 +41,7 @@ func (params *DeployContractParams) Validate() error {
 		return err
 	}
 
-	if params.Protocol != "" {
+	if params.Protocol != "" || params.PrivateFrom != "" {
 		return validatePrivateTxParams(params.Protocol, params.PrivateFrom, params.PrivacyGroupID, params.PrivateFor)
 	}
 
