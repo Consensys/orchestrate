@@ -281,7 +281,6 @@ jobs:
       docker_layer_caching: true    
     resource_class: xlarge
     steps:
-      - run: docker volume prune -f
       - run:
           name: Uninstall Go
           command: sudo rm -rvf /usr/local/go/
