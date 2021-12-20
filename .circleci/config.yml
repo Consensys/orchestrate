@@ -99,6 +99,7 @@ commands:
             echo 'export AUTH_API_KEY=${QA_AUTH_API_KEY}' >> $BASH_ENV
             echo 'export AUTH_JWT_ISSUER_URL=${QA_AUTH_JWT_ISSUER_URL}' >> $BASH_ENV
             echo 'export TEST_GLOBAL_DATA=${QA_TEST_GLOBAL_DATA}' >> $BASH_ENV
+            echo 'export CUCUMBER_CONCURRENCY=${QA_CUCUMBER_CONCURRENCY}' >> $BASH_ENV
 
   docker_build_e2e_dev:
     description: "Build Orchestrate E2E"
@@ -142,6 +143,25 @@ commands:
             -q
             -t orchestrate:${CIRCLE_SHA1:0:7} .
 
+  docker_build_debug_image:
+    description: "Build Orchestrate Debug"
+    steps:
+      - run:
+          name: Build Orchestrate
+          command: >-
+            DOCKER_BUILDKIT=1 docker build --build-arg VERSION=debug-nonroot
+            --label org.opencontainers.image.created=`date -u +"%Y-%m-%dT%H:%M:%SZ"`
+            --label org.opencontainers.image.url="https://consensys.net/codefi/orchestrate/"
+            --label org.opencontainers.image.source="${CIRCLE_REPOSITORY_URL}"
+            --label org.opencontainers.image.version="debug"
+            --label org.opencontainers.image.revision="${CIRCLE_SHA1:0:7}"
+            --label org.opencontainers.image.vendor="ConsenSys Software Inc."
+            --label org.opencontainers.image.title="${CIRCLE_PROJECT_REPONAME}"
+            --label org.opencontainers.image.description="Orchestrate is a blockchain Transaction Orchestration system"
+            --label org.opencontainers.image.documentation="https://docs.orchestrate.consensys.net/"
+            --label org.opencontainers.image.licenses="BUSL-1.1"
+            -q
+            -t orchestrate:${CIRCLE_SHA1:0:7}-debug .
 jobs:
   lint:
     executor:
@@ -215,14 +235,14 @@ jobs:
           version: 19.03.13
           docker_layer_caching: true
       - prepare_docker
-      - docker_build_image
+      - docker_build_debug_image
       - run:
           name: Deploy image in dev repository
           command: |
-            docker tag orchestrate:${CIRCLE_SHA1:0:7} ${DOCKER_REGISTRY_DEV_REPO}/orchestrate:${CIRCLE_SHA1:0:7}
+            docker tag orchestrate:${CIRCLE_SHA1:0:7}-debug ${DOCKER_REGISTRY_DEV_REPO}/orchestrate:${CIRCLE_SHA1:0:7}
             docker push ${DOCKER_REGISTRY_DEV_REPO}/orchestrate:${CIRCLE_SHA1:0:7}
             
-            docker tag orchestrate:${CIRCLE_SHA1:0:7} ${DOCKER_REGISTRY_DEV_REPO}/orchestrate:develop
+            docker tag orchestrate:${CIRCLE_SHA1:0:7}-debug ${DOCKER_REGISTRY_DEV_REPO}/orchestrate:develop
             docker push ${DOCKER_REGISTRY_DEV_REPO}/orchestrate:develop
 
 #  push-orchestrate-e2e-image:
@@ -261,6 +281,7 @@ jobs:
       docker_layer_caching: true    
     resource_class: xlarge
     steps:
+      - run: docker volume prune -f
       - run:
           name: Uninstall Go
           command: sudo rm -rvf /usr/local/go/
@@ -365,12 +386,16 @@ jobs:
           docker_layer_caching: true
       - prepare_docker
       - docker_build_image
+      - docker_build_debug_image
       - run:
           name: Release latest
           command: |
             docker tag orchestrate:${CIRCLE_SHA1:0:7} ${DOCKER_REGISTRY_REPO_2}/orchestrate:${CIRCLE_TAG}
             docker push ${DOCKER_REGISTRY_REPO_2}/orchestrate:${CIRCLE_TAG}
 
+            docker tag orchestrate:${CIRCLE_SHA1:0:7}-debug ${DOCKER_REGISTRY_REPO_2}/orchestrate:${CIRCLE_TAG}-debug
+            docker push ${DOCKER_REGISTRY_REPO_2}/orchestrate:${CIRCLE_TAG}-debug
+            
             docker tag orchestrate:${CIRCLE_SHA1:0:7} ${DOCKER_REGISTRY_REPO_2}/orchestrate:latest
             docker push ${DOCKER_REGISTRY_REPO_2}/orchestrate:latest
 
