@@ -1,6 +1,6 @@
 # Orchestrate Release Notes
 
-## v21.12.0 (2021-12-16)
+## v21.12.0 LTS (2021-12-16)
 ### 🆕 Features
 * Support for `username` as additional constraint to control access over resources. Impersonation would be allowed only via API-KEY.
 * Support for nested tenants in custom claims, for example tenant `tenantOne:groupOne:subGroupOne` will have
@@ -111,7 +111,7 @@
 ### ⚠ BREAKING CHANGES
 * Rename deprecated naming from application metrics `orchestrate_transaction_scheduler_*` to `orchestrate_api_*`
 
-## v21.1.0 (2021-01-25)
+## v21.1.0 LTS (2021-01-25)
 
 ### 🆕 Features
 
