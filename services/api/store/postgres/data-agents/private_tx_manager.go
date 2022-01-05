@@ -62,7 +62,7 @@ func (agent *PGPrivateTxManager) Search(ctx context.Context, chainUUID string) (
 func (agent *PGPrivateTxManager) Update(ctx context.Context, privateTxManager *models.PrivateTxManager) error {
 	query := agent.db.ModelContext(ctx, privateTxManager).Where("uuid = ?", privateTxManager.UUID)
 
-	err := pg.UpdateNotZero(ctx, query)
+	err := pg.Update(ctx, query)
 	if err != nil {
 		agent.logger.WithContext(ctx).WithError(err).Error("failed to update private tx manager")
 		return errors.FromError(err).ExtendComponent(privateTxManagerDAComponent)

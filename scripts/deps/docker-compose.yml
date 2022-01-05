@@ -91,7 +91,7 @@ services:
 
   vault:
     <<: *container-common
-    image: consensys/quorum-hashicorp-vault-plugin:v1.1.2
+    image: consensys/quorum-hashicorp-vault-plugin:v1.1.4
     tty: true
     restart: "no"
     cap_add:
@@ -122,29 +122,36 @@ services:
 
   vault-agent:
     <<: *container-common
-    image: consensys/quorum-hashicorp-vault-plugin:v1.1.2
+    image: consensys/quorum-hashicorp-vault-plugin:v1.1.4
     tty: true
     depends_on:
       - vault
     cap_add:
       - IPC_LOCK
     environment:
-      ROOT_TOKEN_PATH: /vault/token/.root
       VAULT_ADDR: http://vault:8200
+      ROOT_TOKEN_PATH: /vault/token/.root
       PLUGIN_MOUNT_PATH: orchestrate
+      VAULT_IS_READY: /vault/token/.ready
       SECRET_FILE_PATH: /vault/token/secret
       ROLE_FILE_PATH: /vault/token/role
-      VAULT_IS_READY: /vault/token/.ready
+      APP_ROLE_ID: orchestrate
+      APP_ROLE_POLICIES: '["allow_keys"]'
+      POLICY_ID: allow_keys
     volumes:
       - vault-token:/vault/token
       - ./hashicorp/agent-config.hcl:/vault/config.hcl:ro
-      - ./hashicorp/agent-init.sh:/usr/local/bin/agent-init.sh
     entrypoint:
       - sh
       - -c
       - |
 
-        agent-init.sh
+        until [ -f $${VAULT_IS_READY} ]; do
+          echo "[AGENT] waiting for vault to be ready..."
+          sleep 1
+        done
+
+        vault-agent-init.sh
         vault agent -config=/vault/config.hcl
 
   quorum-key-manager-migration:

@@ -136,7 +136,7 @@ func (agent *PGChain) Update(ctx context.Context, chain *models.Chain, tenants [
 	query = pg.WhereAllowedTenantsDefault(query, tenants)
 	query = pg.WhereAllowedOwner(query, "owner_id", ownerID)
 
-	err := pg.UpdateNotZero(ctx, query)
+	err := pg.Update(ctx, query)
 	if err != nil {
 		agent.logger.WithContext(ctx).WithError(err).Error("failed to update chain")
 		return errors.FromError(err).ExtendComponent(chainDAComponent)

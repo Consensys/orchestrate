@@ -71,7 +71,7 @@ func (agent *PGJob) Update(ctx context.Context, job *models.Job) error {
 
 	job.UpdatedAt = time.Now().UTC()
 	agent.db.ModelContext(ctx, job)
-	err := pg.Update(ctx, agent.db, job)
+	err := pg.UpdateModel(ctx, agent.db, job)
 
 	if err != nil {
 		agent.logger.WithContext(ctx).WithError(err).Error("failed to update job")

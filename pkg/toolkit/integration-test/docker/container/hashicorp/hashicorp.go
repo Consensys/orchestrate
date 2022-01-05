@@ -14,7 +14,7 @@ import (
 	"github.com/docker/go-connections/nat"
 )
 
-const defaultHashicorpVaultImage = "consensys/quorum-hashicorp-vault-plugin:v1.1.1"
+const defaultHashicorpVaultImage = "consensys/quorum-hashicorp-vault-plugin:v1.1.4"
 const defaultHostPort = "8200"
 const defaultRootToken = "myRoot"
 const defaultHost = "localhost"

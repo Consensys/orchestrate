@@ -157,8 +157,8 @@ Feature: Deploy contracts
     When I send "GET" request to "{{global.api}}/jobs/{{jobUUID}}"
     Then the response code should be 200
     And Response should have the following fields
-      | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status |
-      | MINED  | CREATED        | STARTED        | PENDING        | MINED          |
+      | status | logs[0].status | logs[1].status | logs[2].status | logs[3].status | transaction.hash |
+      | MINED  | CREATED        | STARTED        | PENDING        | MINED          | ~                |
 
   @geth
   Scenario: Deploy SimpleToken in Geth (legacy)

@@ -29,15 +29,15 @@ func InsertQuery(_ context.Context, q *orm.Query) error {
 	return nil
 }
 
-func Update(ctx context.Context, db DB, models ...interface{}) error {
-	_, err := db.ModelContext(ctx, models...).WherePK().Update()
+func UpdateModel(ctx context.Context, db DB, models ...interface{}) error {
+	_, err := db.ModelContext(ctx, models...).WherePK().UpdateNotZero()
 	if err != nil {
 		return ParsePGError(err)
 	}
 	return nil
 }
 
-func UpdateNotZero(ctx context.Context, q *orm.Query) error {
+func Update(ctx context.Context, q *orm.Query) error {
 	_, err := q.Context(ctx).UpdateNotZero()
 	if err != nil {
 		return ParsePGError(err)

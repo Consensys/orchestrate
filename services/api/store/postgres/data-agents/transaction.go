@@ -50,7 +50,7 @@ func (agent *PGTransaction) Update(ctx context.Context, txModel *models.Transact
 	}
 
 	txModel.UpdatedAt = time.Now().UTC()
-	err := pg.Update(ctx, agent.db, txModel)
+	err := pg.UpdateModel(ctx, agent.db, txModel)
 	if err != nil {
 		agent.logger.WithContext(ctx).WithError(err).Error("failed to update transaction")
 		return errors.FromError(err).ExtendComponent(txDAComponent)

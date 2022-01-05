@@ -93,7 +93,7 @@ func (agent *PGFaucet) Update(ctx context.Context, faucet *models.Faucet, tenant
 	query := agent.db.ModelContext(ctx, faucet).Where("uuid = ?", faucet.UUID)
 	query = pg.WhereAllowedTenantsDefault(query, tenants)
 
-	err := pg.UpdateNotZero(ctx, query)
+	err := pg.Update(ctx, query)
 	if err != nil {
 		agent.logger.WithContext(ctx).WithError(err).Error("failed to update faucet")
 		return errors.FromError(err).ExtendComponent(faucetDAComponent)

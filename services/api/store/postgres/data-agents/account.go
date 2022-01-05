@@ -54,7 +54,7 @@ func (agent *PGAccount) Update(ctx context.Context, account *models.Account) err
 
 	account.UpdatedAt = time.Now().UTC()
 	agent.db.ModelContext(ctx, account)
-	err := pg.Update(ctx, agent.db, account)
+	err := pg.UpdateModel(ctx, agent.db, account)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(accountDAComponent)
 	}

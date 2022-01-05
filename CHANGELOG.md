@@ -1,5 +1,9 @@
 # Orchestrate Release Notes
 
+## v21.12.1 (Unreleased)
+### 🛠 Bug fixes
+* Fixed issue where Job's, Transaction's and Account's properties are removed when values are not set in update request payload. 
+
 ## v21.12.0 LTS (2021-12-16)
 ### 🆕 Features
 * Support for `username` as additional constraint to control access over resources. Impersonation would be allowed only via API-KEY.
