@@ -2,6 +2,7 @@ version: 2.1
 
 orbs:
   go: circleci/go@1.5.0
+  codecov: codecov/codecov@3.2.2
 
 commands:
   prepare_golang:
@@ -198,7 +199,13 @@ jobs:
       - prepare_golang
       - run:
           name: Run unit tests
-          command: make run-coverage
+          command: make ci-run-coverage-unit
+      - codecov/upload:
+          file: ./build/coverage/unit.out
+          flags: unittests
+      - store_artifacts:
+          path: ./build/coverage/unit.html
+          destination: unit-coverage.html
 
   race:
     docker:
@@ -223,7 +230,13 @@ jobs:
       - prepare_golang
       - run:
           name: Integration tests
-          command: make run-integration
+          command: make run-coverage-integration
+      - codecov/upload:
+          file: ./build/coverage/integration.out
+          flags: integration
+      - store_artifacts:
+          path: ./build/coverage/integration.html
+          destination: integration-coverage.html
 
   push-orchestrate-image:
     docker:

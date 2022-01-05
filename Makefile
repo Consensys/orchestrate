@@ -22,18 +22,33 @@ networks:
 	@docker network create --driver=bridge --subnet=172.16.238.0/24 orchestrate_go_quorum || true
 	@docker network create orchestrate_geth || true
 
-# Linters
-run-coverage: ## Generate global code coverage report
-	@sh scripts/coverage.sh $(PACKAGES)
+run-unit: postgres
+	@mkdir -p build/coverage
+	@go test -cover -coverpkg=./... -covermode=count -coverprofile build/coverage/unit.out ${PACKAGES}
 
-coverage: postgres run-coverage down-postgres
-	@$(OPEN) build/coverage/coverage.html 2>/dev/null
+run-coverage-unit: run-unit
+	@sh scripts/coverage.sh build/coverage/unit.out build/coverage/unit.html
+
+coverage-unit: run-coverage-unit
+	@$(OPEN) build/coverage/unit.html 2>/dev/null
+
+ci-run-coverage-unit:
+	@mkdir -p build/coverage
+	@go test -cover -coverpkg=./... -covermode=count -coverprofile build/coverage/unit.out ${PACKAGES}
+	@sh scripts/coverage.sh build/coverage/unit.out build/coverage/unit.html
 
 race: ## Run data race detector
 	@go test -count=1 -race -tags unit -short ${PACKAGES}
 
 run-integration:
-	@go test -count=1 -v --tags integration ${INTEGRATION_TEST_PACKAGES}
+	@mkdir -p build/coverage
+	@go test -cover -coverpkg=./services/... -covermode=count -coverprofile build/coverage/integration.out -count=1 -v --tags integration ${INTEGRATION_TEST_PACKAGES}
+
+run-coverage-integration: run-integration
+	@sh scripts/coverage.sh build/coverage/integration.out build/coverage/integration.html
+
+coverage-integration: run-coverage-integration
+	@$(OPEN) build/coverage/integration.html 2>/dev/null
 
 mod-tidy: ## Run deps cleanup
 	@go mod tidy
