@@ -18,6 +18,7 @@ type Config struct {
 }
 
 type HTTP struct {
+	AccessLog    bool                             `description:"AccessLog enabled." json:"accessLog" toml:"accessLog" yaml:"accessLog" export:"true"`
 	EntryPoints  traefikstatic.EntryPoints        `description:"Entry points definition." json:"entryPoints,omitempty" toml:"entryPoints,omitempty" yaml:"entryPoints,omitempty" export:"true"`
 	HostResolver *traefiktypes.HostResolverConfig `description:"Enable CNAME Flattening." json:"hostResolver,omitempty" toml:"hostResolver,omitempty" yaml:"hostResolver,omitempty" label:"allowEmpty" export:"true"`
 }
@@ -36,6 +37,7 @@ func NewConfig(vipr *viper.Viper) *Config {
 	return &Config{
 		HTTP: &HTTP{
 			EntryPoints: NewEPsConfig(vipr),
+			AccessLog:   vipr.GetBool(accessLogEnabledKey),
 		},
 		Watcher: configwatcher.NewConfig(vipr),
 		Log:     log.NewConfig(vipr),

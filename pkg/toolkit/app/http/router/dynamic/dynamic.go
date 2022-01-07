@@ -22,7 +22,6 @@ import (
 	tlog "github.com/traefik/traefik/v2/pkg/log"
 	"github.com/traefik/traefik/v2/pkg/middlewares/requestdecorator"
 	"github.com/traefik/traefik/v2/pkg/rules"
-	traefiktypes "github.com/traefik/traefik/v2/pkg/types"
 )
 
 type Builder struct {
@@ -40,22 +39,13 @@ type Builder struct {
 	logger       *log.Logger
 }
 
-func NewBuilder(staticCfg *traefikstatic.Configuration, epLogConfigs map[string]*traefiktypes.AccessLog) *Builder {
+func NewBuilder(staticCfg *traefikstatic.Configuration) *Builder {
 	b := &Builder{
 		dashboard:    dashboard.NewBuilder(staticCfg),
 		accesslog:    accesslog.NewBuilder(),
 		epaccesslogs: make(map[string]func(http http.Handler) http.Handler),
 		reqdecorator: requestdecorator.New(staticCfg.HostResolver),
 		logger:       log.NewLogger().SetComponent("router"),
-	}
-
-	for epName, logConfig := range epLogConfigs {
-		ctx := tlog.With(context.Background(), tlog.Str("entrypoint", epName))
-		mid, _, err := b.accesslog.Build(ctx, epName, logConfig)
-		if err != nil {
-			b.logger.WithContext(ctx).WithError(err).Errorf("could not build entrypoint access log middleware")
-		}
-		b.epaccesslogs[epName] = mid
 	}
 
 	return b

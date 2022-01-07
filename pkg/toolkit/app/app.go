@@ -89,7 +89,7 @@ func New(cfg *Config, opts ...Option) (*App, error) {
 
 	reg := metricsregistry.NewMetricRegistry()
 
-	httpBuilder := httprouter.NewBuilder(cfg.HTTP.TraefikStatic(), nil)
+	httpBuilder := httprouter.NewBuilder(cfg.HTTP.TraefikStatic())
 	httpBuilder.Handler = httphandler.NewBuilder()
 	httpBuilder.Middleware = httpmid.NewBuilder()
 

@@ -85,15 +85,21 @@ func NewAPI(
 		httpcache.NewBuilder(cache, proxy.HTTPCacheRequest, proxy.HTTPCacheResponse),
 	)
 
+	var accessLogMid app.Option
+	if cfg.App.HTTP.AccessLog {
+		accessLogMid = app.LoggerMiddlewareOpt("base")
+	} else {
+		accessLogMid = app.NonOpt()
+	}
+
 	// Create app
 	return app.New(
 		cfg.App,
 		app.MultiTenancyOpt("auth", jwt, key, cfg.Multitenancy),
 		ReadinessOpt(db),
 		app.MetricsOpt(appMetrics),
-		app.LoggerMiddlewareOpt("base"),
+		accessLogMid,
 		rateLimitOpt,
-		app.SwaggerOpt("./public/swagger-specs/services/api/swagger.json", "base@logger-base"),
 		apiHandlerOpt,
 		httpCacheOpt,
 		reverseProxyOpt,

@@ -14,6 +14,9 @@ func init() {
 	viper.SetDefault(httpPortViperKey, httpPortDefault)
 	_ = viper.BindEnv(httpPortViperKey, httpPortEnv)
 
+	viper.SetDefault(accessLogEnabledKey, accessLogEnabledDefault)
+	_ = viper.BindEnv(accessLogEnabledKey, accessLogEnabledEnv)
+
 	viper.SetDefault(metricsHostnameViperKey, metricsHostnameDefault)
 	_ = viper.BindEnv(metricsHostnameViperKey, metricsHostnameEnv)
 
@@ -81,9 +84,24 @@ Environment variable: %q`, metricsPortEnv)
 	_ = viper.BindPFlag(metricsPortViperKey, f.Lookup(metricsPortFlag))
 }
 
+const (
+	accessLogEnabledFlag    = "accesslog-enabled"
+	accessLogEnabledKey     = "accesslog.enabled"
+	accessLogEnabledDefault = false
+	accessLogEnabledEnv     = "ACCESSLOG_ENABLED"
+)
+
+func accessLogEnabled(f *pflag.FlagSet) {
+	desc := fmt.Sprintf(`Enable http accesslog stout
+Environment variable: %q`, accessLogEnabledEnv)
+	f.Bool(accessLogEnabledFlag, accessLogEnabledDefault, desc)
+	_ = viper.BindPFlag(accessLogEnabledKey, f.Lookup(accessLogEnabledFlag))
+}
+
 func Flags(f *pflag.FlagSet) {
 	hostname(f)
 	port(f)
+	accessLogEnabled(f)
 }
 
 func MetricFlags(f *pflag.FlagSet) {

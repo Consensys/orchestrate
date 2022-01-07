@@ -3,6 +3,7 @@
 ## v21.12.1 (Unreleased)
 ### 🛠 Bug fixes
 * Fixed issue where Job's, Transaction's and Account's properties are removed when values are not set in update request payload. 
+* Fixed ACCESS_LOG enabling/disabling toggle feature.
 
 ## v21.12.0 LTS (2021-12-16)
 ### 🆕 Features

@@ -27,7 +27,7 @@ func TestBuilder(t *testing.T) {
 
 	builder := NewBuilder(&traefikstatic.Configuration{
 		HostResolver: &traefiktypes.HostResolverConfig{},
-	}, nil)
+	})
 	builder.Middleware = midBuilder
 	builder.Handler = handlerBuilder
 	builder.Metrics = metricsBuilder

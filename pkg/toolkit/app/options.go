@@ -16,7 +16,6 @@ import (
 	dynhandler "github.com/consensys/orchestrate/pkg/toolkit/app/http/handler/dynamic"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/handler/healthcheck"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/handler/prometheus"
-	"github.com/consensys/orchestrate/pkg/toolkit/app/http/handler/swagger"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/middleware"
 	authmid "github.com/consensys/orchestrate/pkg/toolkit/app/http/middleware/auth"
 	dynmid "github.com/consensys/orchestrate/pkg/toolkit/app/http/middleware/dynamic"
@@ -120,42 +119,6 @@ func LoggerMiddlewareOpt(midName string) Option {
 
 		return ProviderOpt(staticprovider.New(dynamic.NewMessage("logger-"+midName, cfg)))(app)
 	}
-}
-
-func SwaggerOpt(specsFile string, middlewares ...string) Option {
-	// Provider injecting dynamic middleware configuration
-	cfg := dynamic.NewConfig()
-
-	// Router to swagger
-	cfg.HTTP.Routers["swagger"] = &dynamic.Router{
-		Router: &traefikdynamic.Router{
-			EntryPoints: []string{http.DefaultHTTPAppEntryPoint},
-			Service:     "swagger",
-			Priority:    math.MaxInt32,
-			Rule:        "PathPrefix(`/swagger`)",
-			Middlewares: middlewares,
-		},
-	}
-
-	// Swagger
-	cfg.HTTP.Services["swagger"] = &dynamic.Service{
-		Swagger: &dynamic.Swagger{
-			SpecsFile: specsFile,
-		},
-	}
-
-	providerOpt := ProviderOpt(staticprovider.New(dynamic.NewMessage("swagger", cfg)))
-
-	// Option for Swagger handler
-	handlerOpt := HandlerOpt(
-		reflect.TypeOf(&dynamic.Swagger{}),
-		swagger.NewBuilder(),
-	)
-
-	return CombineOptions(
-		providerOpt,
-		handlerOpt,
-	)
 }
 
 func MetricsOpt(appMetrics ...metrics.Prometheus) Option {
@@ -307,6 +270,12 @@ func PrometheusOpt(registry *prom.Registry, middlewares ...string) Option {
 		providerOpt,
 		promRegister,
 	)
+}
+
+func NonOpt() Option {
+	return func(app *App) error {
+		return nil
+	}
 }
 
 func CombineOptions(opts ...Option) Option {

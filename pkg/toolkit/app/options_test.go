@@ -124,16 +124,6 @@ func TestLoggerOpt(t *testing.T) {
 	assert.NoError(t, err, "Creating app should not error")
 }
 
-func TestSwaggerOpt(t *testing.T) {
-	ctrlr := gomock.NewController(t)
-	defer ctrlr.Finish()
-
-	opt := SwaggerOpt("test")
-
-	_, err := New(newTestConfig(), opt)
-	assert.NoError(t, err, "Creating app should not error")
-}
-
 func TestMetricsOpt(t *testing.T) {
 	ctrlr := gomock.NewController(t)
 	defer ctrlr.Finish()
