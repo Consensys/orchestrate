@@ -5,6 +5,9 @@ ARG VERSION=nonroot
 ############################
 FROM golang:1.16.9 AS builder
 
+ARG TARGETOS
+ARG TARGETARCH
+
 RUN apt-get update && \
 	apt-get install --no-install-recommends -y \
 	ca-certificates upx-ucl
@@ -20,7 +23,7 @@ RUN go mod download
 
 COPY . .
 
-RUN GOOS=linux GOARCH=amd64 go build -o /bin/main -a -tags netgo -ldflags '-w -s -extldflags "-static"' .
+RUN GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -o /bin/main -a -tags netgo -ldflags '-w -s -extldflags "-static"' .
 RUN upx /bin/main
 
 ############################
