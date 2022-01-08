@@ -2,7 +2,7 @@ codecov:
   require_ci_to_pass: false
 
 coverage:
-  range: 20..100
+  range: 40..100
   round: down
   precision: 2
   status:
@@ -12,12 +12,41 @@ coverage:
         # Allow decreasing 2% of total coverage to avoid noise.
         threshold: 2%
         if_ci_failed: error
+        informational: true
+        flags:
+          - "unittests"
+          - "integration"
         branches:
           - main
+        paths:
+          - "src"
+          - "pkg"
+          - "cmd"
+          - "!*/mock"
+          - "!*/mocks"
+          - "!*/testutils"
+          - "!*/testdata"
+          - "!tests/*"
+          - "!*/integration-tests"
     patch:
       default:
         target: 90%
-        only_pulls: true
+        threshold: 1%
+        informational: true
+        branches:
+          - main
+        flags:
+          - "unittests"
+          - "integration"
+        paths:
+          - "src"
+          - "pkg"
+          - "cmd"
+          - "!*/mock"
+          - "!*/mocks"
+          - "!*/testutils"
+          - "!tests/*"
+          - "!*/integration-tests"
 
 # https://docs.codecov.io/docs/codecovyml-reference#section-parsers
 parsers:
@@ -28,15 +57,15 @@ parsers:
       method: no
       macro: no
       
-comment:                  # this is a top-level key
+comment:
   layout: "reach, diff, flags, files"
   behavior: default
   require_changes: no
   
 ignore:
   - tests/*
-  - services/api/integration-tests
-  - services/tx-sender/integration-tests
-  - cmd/*
-  - handlers/*
   - main.go
+  - "*/testutils"
+  - "*/mock"
+  - "*/mocks"
+  - "*/integration-tests"

@@ -1,5 +1,5 @@
 GOFILES := $(shell find . -name '*.go' -not -path "./vendor/*" | grep -v pkg/toolkit/app/http/handler/dashboard/genstatic/gen.go | grep -v pkg/http/handler/swagger/genstatic/gen.go | egrep -v "^\./\.go" | grep -v _test.go)
-PACKAGES ?= $(shell go list ./... | grep -Fv -e e2e -e examples -e genstatic -e mock )
+PACKAGES ?= $(shell go list ./... | grep -Fv -e tests -e testutils -e genstatic -e mock -e integration-test )
 INTEGRATION_TEST_PACKAGES ?= $(shell go list ./... | grep integration-tests )
 ORCH_SERVICES = tx-sender tx-listener api
 ORCH_MIGRATE = api
@@ -24,7 +24,7 @@ networks:
 
 run-unit: postgres
 	@mkdir -p build/coverage
-	@go test -cover -coverpkg=./... -covermode=count -coverprofile build/coverage/unit.out ${PACKAGES}
+	@go test -cover -coverpkg=./... -covermode=count -coverprofile build/coverage/unit.out --tags unit ${PACKAGES}
 
 run-coverage-unit: run-unit
 	@sh scripts/coverage.sh build/coverage/unit.out build/coverage/unit.html
@@ -34,15 +34,15 @@ coverage-unit: run-coverage-unit
 
 ci-run-coverage-unit:
 	@mkdir -p build/coverage
-	@go test -cover -coverpkg=./... -covermode=count -coverprofile build/coverage/unit.out ${PACKAGES}
+	@go test -cover -coverpkg=./... -covermode=set -coverprofile build/coverage/unit.out --tags unit ${PACKAGES}
 	@sh scripts/coverage.sh build/coverage/unit.out build/coverage/unit.html
 
-race: ## Run data race detector
+run-race: ## Run data race detector
 	@go test -count=1 -race -tags unit -short ${PACKAGES}
 
 run-integration:
 	@mkdir -p build/coverage
-	@go test -cover -coverpkg=./services/... -covermode=count -coverprofile build/coverage/integration.out -count=1 -v --tags integration ${INTEGRATION_TEST_PACKAGES}
+	@go test -cover -coverpkg=./... -covermode=count -coverprofile build/coverage/integration.out -count=1 -v --tags integration ${INTEGRATION_TEST_PACKAGES}
 
 run-coverage-integration: run-integration
 	@sh scripts/coverage.sh build/coverage/integration.out build/coverage/integration.html

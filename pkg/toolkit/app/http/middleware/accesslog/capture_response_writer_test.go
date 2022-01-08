@@ -1,3 +1,5 @@
+// +build unit
+
 //nolint // reason
 package accesslog
 
