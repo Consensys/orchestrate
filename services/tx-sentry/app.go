@@ -10,8 +10,8 @@ import (
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/pkg/types/formatters"
 	"github.com/consensys/orchestrate/services/tx-sentry/service/listeners"
-	"github.com/consensys/orchestrate/services/tx-sentry/service/parsers"
 	usecases "github.com/consensys/orchestrate/services/tx-sentry/tx-sentry/use-cases"
 	backoffjob "github.com/traefik/traefik/v2/pkg/job"
 )
@@ -105,7 +105,7 @@ func (sentry *TxSentry) createSessions(ctx context.Context, filters *entities.Jo
 
 	for _, jobResponse := range jobResponses {
 		jctx := multitenancy.WithUserInfo(ctx, multitenancy.NewUserInfo(jobResponse.TenantID, jobResponse.OwnerID))
-		sentry.sessionManager.Start(jctx, parsers.JobResponseToEntity(jobResponse))
+		sentry.sessionManager.Start(jctx, formatters.JobResponseToEntity(jobResponse))
 	}
 
 	return nil

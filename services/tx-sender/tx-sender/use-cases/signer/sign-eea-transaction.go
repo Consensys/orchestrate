@@ -6,13 +6,13 @@ import (
 
 	"github.com/consensys/orchestrate/pkg/encoding/rlp"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/types/formatters"
 	qkmtypes "github.com/consensys/quorum-key-manager/src/stores/api/types"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 
 	pkgcryto "github.com/consensys/orchestrate/pkg/crypto/ethereum"
 
 	"github.com/consensys/orchestrate/pkg/types/entities"
-	"github.com/consensys/orchestrate/services/tx-sender/tx-sender/parsers"
 	"github.com/ethereum/go-ethereum/crypto"
 
 	usecases "github.com/consensys/orchestrate/services/tx-sender/tx-sender/use-cases"
@@ -42,7 +42,7 @@ func NewSignEEATransactionUseCase(keyManagerClient client.KeyManagerClient) usec
 func (uc *signEEATransactionUseCase) Execute(ctx context.Context, job *entities.Job) (signedRaw hexutil.Bytes, txHash *ethcommon.Hash, err error) {
 	logger := uc.logger.WithContext(ctx).WithField("one_time_key", job.InternalData.OneTimeKey)
 
-	transaction := parsers.ETHTransactionToTransaction(job.Transaction, job.InternalData.ChainID)
+	transaction := formatters.ETHTransactionToTransaction(job.Transaction, job.InternalData.ChainID)
 	privateArgs := &entities.PrivateETHTransactionParams{
 		PrivateFrom:    job.Transaction.PrivateFrom,
 		PrivateFor:     job.Transaction.PrivateFor,

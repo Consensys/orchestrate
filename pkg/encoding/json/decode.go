@@ -11,15 +11,6 @@ import (
 	"github.com/consensys/orchestrate/pkg/errors"
 )
 
-// Unmarshal parses the JSON-encoded data and stores the result in the value pointed to by v
-func Unmarshal(data []byte, v interface{}) error {
-	err := json.Unmarshal(data, v)
-	if err != nil {
-		return errors.EncodingError(err.Error()).SetComponent(component)
-	}
-	return nil
-}
-
 func UnmarshalBody(body io.Reader, req interface{}) error {
 	dec := json.NewDecoder(body)
 	dec.DisallowUnknownFields() // Force errors if unknown fields

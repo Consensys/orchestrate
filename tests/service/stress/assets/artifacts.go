@@ -2,13 +2,13 @@ package assets
 
 import (
 	"context"
-	json2 "encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
 
-	"github.com/consensys/orchestrate/pkg/encoding/json"
+	"encoding/json"
+
 	"github.com/consensys/orchestrate/pkg/sdk/client"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	"github.com/consensys/orchestrate/pkg/types/api"
@@ -19,7 +19,7 @@ import (
 var artifactsCtxKey ctxKey = "artifacts"
 
 type Artifact struct {
-	Abi              json2.RawMessage
+	Abi              json.RawMessage
 	Bytecode         string
 	DeployedBytecode string
 }

@@ -11,7 +11,8 @@ import (
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 
-	encoding "github.com/consensys/orchestrate/pkg/encoding/json"
+	encoding "encoding/json"
+
 	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/pkg/types/ethereum"
 )

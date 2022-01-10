@@ -26,7 +26,7 @@ func FormatJobResponse(job *entities.Job) *types.JobResponse {
 		Labels:        job.Labels,
 		TenantID:      job.TenantID,
 		OwnerID:       job.OwnerID,
-		Annotations:   types.FormatInternalDataToAnnotations(job.InternalData),
+		Annotations:   FormatInternalDataToAnnotations(job.InternalData),
 		Type:          job.Type,
 		Status:        job.Status,
 		ParentJobUUID: job.InternalData.ParentJobUUID,
@@ -42,7 +42,7 @@ func FormatJobCreateRequest(request *types.CreateJobRequest) *entities.Job {
 		NextJobUUID:  request.NextJobUUID,
 		Type:         request.Type,
 		Labels:       request.Labels,
-		InternalData: types.FormatAnnotationsToInternalData(request.Annotations),
+		InternalData: FormatAnnotationsToInternalData(request.Annotations),
 		Transaction:  &request.Transaction,
 	}
 
@@ -64,7 +64,7 @@ func FormatJobUpdateRequest(request *types.UpdateJobRequest) *entities.Job {
 	}
 
 	if request.Annotations != nil {
-		job.InternalData = types.FormatAnnotationsToInternalData(*request.Annotations)
+		job.InternalData = FormatAnnotationsToInternalData(*request.Annotations)
 	}
 
 	return job
@@ -120,4 +120,22 @@ func FormatJobFilterRequest(req *http.Request) (*entities.JobFilters, error) {
 	}
 
 	return filters, nil
+}
+
+func JobResponseToEntity(jobResponse *types.JobResponse) *entities.Job {
+	// Cannot fail as the duration coming from a response is expected to be valid
+	return &entities.Job{
+		UUID:         jobResponse.UUID,
+		ChainUUID:    jobResponse.ChainUUID,
+		ScheduleUUID: jobResponse.ScheduleUUID,
+		Type:         jobResponse.Type,
+		Labels:       jobResponse.Labels,
+		TenantID:     jobResponse.TenantID,
+		OwnerID:      jobResponse.OwnerID,
+		InternalData: FormatAnnotationsToInternalData(jobResponse.Annotations),
+		Transaction:  &jobResponse.Transaction,
+		Logs:         jobResponse.Logs,
+		CreatedAt:    jobResponse.CreatedAt,
+		UpdatedAt:    jobResponse.UpdatedAt,
+	}
 }

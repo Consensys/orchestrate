@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/consensys/orchestrate/pkg/encoding/json"
+	"encoding/json"
 	ethclient "github.com/consensys/orchestrate/pkg/toolkit/ethclient/utils"
 	"github.com/stretchr/testify/assert"
 )

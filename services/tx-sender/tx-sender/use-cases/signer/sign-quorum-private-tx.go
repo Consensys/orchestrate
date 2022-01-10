@@ -7,8 +7,8 @@ import (
 	"github.com/consensys/orchestrate/pkg/encoding/rlp"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	"github.com/consensys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/pkg/types/formatters"
 	"github.com/consensys/orchestrate/pkg/utils"
-	"github.com/consensys/orchestrate/services/tx-sender/tx-sender/parsers"
 	qkmtypes "github.com/consensys/quorum-key-manager/src/stores/api/types"
 	quorumtypes "github.com/consensys/quorum/core/types"
 	ethcommon "github.com/ethereum/go-ethereum/common"
@@ -41,7 +41,7 @@ func NewSignQuorumPrivateTransactionUseCase(keyManagerClient client.KeyManagerCl
 func (uc *signQuorumPrivateTransactionUseCase) Execute(ctx context.Context, job *entities.Job) (signedRaw hexutil.Bytes, txHash *ethcommon.Hash, err error) {
 	logger := uc.logger.WithContext(ctx).WithField("one_time_key", job.InternalData.OneTimeKey)
 
-	transaction := parsers.ETHTransactionToQuorumTransaction(job.Transaction)
+	transaction := formatters.ETHTransactionToQuorumTransaction(job.Transaction)
 	transaction.SetPrivate()
 	if job.InternalData.OneTimeKey {
 		signedRaw, txHash, err = uc.signWithOneTimeKey(ctx, transaction)

@@ -1,7 +1,8 @@
 package testutils
 
 import (
-	"github.com/consensys/orchestrate/pkg/encoding/json"
+	"encoding/json"
+
 	"github.com/consensys/orchestrate/pkg/types/api"
 )
 

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"math/big"
 
-	encoding "github.com/consensys/orchestrate/pkg/encoding/json"
 	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/pkg/ethereum/types"
 	"github.com/consensys/orchestrate/pkg/toolkit/ethclient/utils"
@@ -99,7 +98,7 @@ func processTxResult(tx **ethtypes.Transaction, extra **txExtraInfo) ParseResult
 			return errors.NotFoundError("transaction not found in the body of the response")
 		}
 
-		if err := encoding.Unmarshal(raw, tx); err != nil {
+		if err := json.Unmarshal(raw, tx); err != nil {
 			return errors.FromError(err)
 		}
 
@@ -108,7 +107,7 @@ func processTxResult(tx **ethtypes.Transaction, extra **txExtraInfo) ParseResult
 		}
 
 		// Unmarshal block body information
-		if err := encoding.Unmarshal(raw, extra); err != nil {
+		if err := json.Unmarshal(raw, extra); err != nil {
 			return errors.FromError(err)
 		}
 
@@ -164,7 +163,7 @@ func processProgressResult(progress **Progress) ParseResultFunc {
 		}
 
 		var syncing bool
-		if err = encoding.Unmarshal(raw, &syncing); err == nil {
+		if err = json.Unmarshal(raw, &syncing); err == nil {
 			return nil
 		}
 

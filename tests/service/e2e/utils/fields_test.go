@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/consensys/orchestrate/pkg/encoding/json"
+	"encoding/json"
 )
 
 

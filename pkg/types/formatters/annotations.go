@@ -1,12 +1,13 @@
-package api
+package formatters
 
 import (
 	"time"
 
+	"github.com/consensys/orchestrate/pkg/types/api"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 )
 
-func FormatAnnotationsToInternalData(annotations Annotations) *entities.InternalData {
+func FormatAnnotationsToInternalData(annotations api.Annotations) *entities.InternalData {
 	internalData := &entities.InternalData{
 		OneTimeKey:        annotations.OneTimeKey,
 		Priority:          annotations.GasPricePolicy.Priority,
@@ -23,10 +24,10 @@ func FormatAnnotationsToInternalData(annotations Annotations) *entities.Internal
 	return internalData
 }
 
-func FormatInternalDataToAnnotations(data *entities.InternalData) Annotations {
-	gasPricePolicy := GasPriceParams{
+func FormatInternalDataToAnnotations(data *entities.InternalData) api.Annotations {
+	gasPricePolicy := api.GasPriceParams{
 		Priority: data.Priority,
-		RetryPolicy: RetryParams{
+		RetryPolicy: api.RetryParams{
 			Increment: data.GasPriceIncrement,
 			Limit:     data.GasPriceLimit,
 		},
@@ -36,7 +37,7 @@ func FormatInternalDataToAnnotations(data *entities.InternalData) Annotations {
 		gasPricePolicy.RetryPolicy.Interval = data.RetryInterval.String()
 	}
 
-	return Annotations{
+	return api.Annotations{
 		OneTimeKey:     data.OneTimeKey,
 		GasPricePolicy: gasPricePolicy,
 		HasBeenRetried: data.HasBeenRetried,

@@ -1,6 +1,7 @@
 package entities
 
 import (
+	"encoding/json"
 	"time"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
@@ -46,4 +47,106 @@ type ETHTransaction struct {
 	EnclaveKey      hexutil.Bytes      `json:"enclaveKey,omitempty" example:"0xd41551c714c8ec769d2edad9adc250ae955d263da161bf59142b7500eea6715eadc250ae955d263da161bf59142b7500eea6715e" swaggertype:"string"`
 	CreatedAt       time.Time          `json:"createdAt,omitempty" example:"2020-07-09T12:35:42.115395Z"`
 	UpdatedAt       time.Time          `json:"updatedAt,omitempty" example:"2020-07-09T12:35:42.115395Z"`
+}
+
+type ethTransactionJSON struct {
+	Hash            string            `json:"hash,omitempty"`
+	From            string            `json:"from,omitempty"`
+	To              string            `json:"to,omitempty"`
+	Nonce           *uint64           `json:"nonce,omitempty"`
+	Value           string            `json:"value,omitempty"`
+	Gas             *uint64           `json:"gas,omitempty"`
+	GasPrice        string            `json:"gasPrice,omitempty"`
+	GasFeeCap       string            `json:"maxFeePerGas,omitempty"`
+	GasTipCap       string            `json:"maxPriorityFeePerGas,omitempty"`
+	AccessList      []accessTupleJSON `json:"accessList,omitempty"`
+	TransactionType string            `json:"transactionType,omitempty"`
+	Data            string            `json:"data,omitempty"`
+	Raw             string            `json:"raw,omitempty"`
+	PrivateFrom     string            `json:"privateFrom,omitempty"`
+	PrivateFor      []string          `json:"privateFor,omitempty"`
+	MandatoryFor    []string          `json:"mandatoryFor,omitempty"`
+	PrivacyGroupID  string            `json:"privacyGroupId,omitempty"`
+	PrivacyFlag     int               `json:"privacyFrag,omitempty"`
+	EnclaveKey      string            `json:"enclaveKey,omitempty"`
+	CreatedAt       time.Time         `json:"createdAt,omitempty"`
+	UpdatedAt       time.Time         `json:"updatedAt,omitempty"`
+}
+
+type accessTupleJSON struct {
+	Address     string   `json:"address"       `
+	StorageKeys []string `json:"storageKeys"   `
+}
+
+func (tx *ETHTransaction) MarshalJSON() ([]byte, error) {
+	accessTuple := []accessTupleJSON{}
+	for _, accessListItem := range tx.AccessList {
+		elem := accessTupleJSON{
+			Address:     accessListItem.Address.String(),
+			StorageKeys: []string{},
+		}
+		for _, storeKey := range accessListItem.StorageKeys {
+			elem.StorageKeys = append(elem.StorageKeys, storeKey.String())
+		}
+		accessTuple = append(accessTuple, elem)
+	}
+
+	r := &ethTransactionJSON{
+		Nonce:           tx.Nonce,
+		AccessList:      accessTuple,
+		TransactionType: string(tx.TransactionType),
+		PrivateFrom:     tx.PrivateFrom,
+		PrivateFor:      tx.PrivateFor,
+		MandatoryFor:    tx.MandatoryFor,
+		PrivacyGroupID:  tx.PrivacyGroupID,
+		PrivacyFlag:     int(tx.PrivacyFlag),
+		CreatedAt:       tx.CreatedAt,
+		UpdatedAt:       tx.UpdatedAt,
+	}
+
+	if tx.Hash != nil {
+		r.Hash = tx.Hash.String()
+	}
+
+	if tx.From != nil {
+		r.From = tx.From.String()
+	}
+
+	if tx.To != nil {
+		r.To = tx.To.String()
+	}
+
+	if tx.Value != nil {
+		r.Value = tx.Value.String()
+	}
+
+	if tx.Value != nil {
+		r.Value = tx.Value.String()
+	}
+
+	if tx.GasPrice != nil {
+		r.GasPrice = tx.GasPrice.String()
+	}
+
+	if tx.GasFeeCap != nil {
+		r.GasFeeCap = tx.GasFeeCap.String()
+	}
+
+	if tx.GasTipCap != nil {
+		r.GasTipCap = tx.GasTipCap.String()
+	}
+
+	if len(tx.Data) != 0 {
+		r.Data = tx.Data.String()
+	}
+
+	if len(tx.Raw) != 0 {
+		r.Raw = tx.Raw.String()
+	}
+
+	if len(tx.EnclaveKey) != 0 {
+		r.EnclaveKey = tx.EnclaveKey.String()
+	}
+
+	return json.Marshal(r)
 }

@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/consensys/orchestrate/pkg/encoding/json"
+	"encoding/json"
+
 	"github.com/consensys/orchestrate/pkg/sdk/client"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/toolkit/ethclient/rpc"
@@ -181,7 +182,7 @@ func importTestIdentities(ctx context.Context, testData *utils3.TestData) error 
 				return err
 			}
 
-			logger.WithField("address", resp.Address).Info("account imported successfully")
+			logger.WithField("address", resp.Address.String()).Info("account imported successfully")
 		}
 	}
 

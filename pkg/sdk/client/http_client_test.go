@@ -4,12 +4,12 @@ package client
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	backoffmock "github.com/consensys/orchestrate/pkg/backoff/mock"
-	"github.com/consensys/orchestrate/pkg/encoding/json"
 	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/httputil"
 	types "github.com/consensys/orchestrate/pkg/types/api"

@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
-	"github.com/consensys/orchestrate/pkg/encoding/json"
+	pkgjson "github.com/consensys/orchestrate/pkg/encoding/json"
 	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/pkg/toolkit/ethclient/utils"
 	ethcommon "github.com/ethereum/go-ethereum/common"
@@ -118,7 +119,7 @@ func readResponseString(requestURL string, resp *http.Response) (string, error) 
 func readResponse(requestURL string, resp *http.Response, result interface{}) error {
 	log.Debugf("request to '%s' resulted with %d status code", requestURL, resp.StatusCode)
 
-	err := json.UnmarshalBody(resp.Body, result)
+	err := pkgjson.UnmarshalBody(resp.Body, result)
 
 	if err != nil {
 		return errors.DataCorruptedError("failed to parse reply from '%s' request: %s", requestURL, err)

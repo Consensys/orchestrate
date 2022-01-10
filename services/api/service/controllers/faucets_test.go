@@ -15,10 +15,10 @@ import (
 	"github.com/consensys/orchestrate/pkg/types/api"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/services/api/business/use-cases"
-	"github.com/consensys/orchestrate/services/api/service/formatters"
+	"github.com/consensys/orchestrate/pkg/types/formatters"
 	mocks2 "github.com/consensys/quorum-key-manager/pkg/client/mock"
 
-	"github.com/consensys/orchestrate/pkg/encoding/json"
+	"encoding/json"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/testutils"
 	"github.com/consensys/orchestrate/services/api/business/use-cases/mocks"

@@ -3,7 +3,6 @@ package parsers
 import (
 	"encoding/json"
 
-	pkgjson "github.com/consensys/orchestrate/pkg/encoding/json"
 	ethabi "github.com/consensys/orchestrate/pkg/ethereum/abi"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 )
@@ -11,18 +10,18 @@ import (
 // ParseJSONABI returns a decoded ABI object
 func ParseJSONABI(data string) (methods, events map[string]string, err error) {
 	var parsedFields []entities.RawABI
-	err = pkgjson.Unmarshal([]byte(data), &parsedFields)
+	err = json.Unmarshal([]byte(data), &parsedFields)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	// Retrieve raw JSONs
-	normalizedJSON, err := pkgjson.Marshal(parsedFields)
+	normalizedJSON, err := json.Marshal(parsedFields)
 	if err != nil {
 		return nil, nil, err
 	}
 	var rawFields []json.RawMessage
-	err = pkgjson.Unmarshal(normalizedJSON, &rawFields)
+	err = json.Unmarshal(normalizedJSON, &rawFields)
 	if err != nil {
 		return nil, nil, err
 	}

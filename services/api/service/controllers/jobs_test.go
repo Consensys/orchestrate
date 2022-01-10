@@ -17,10 +17,10 @@ import (
 	"github.com/consensys/orchestrate/services/api/business/use-cases"
 	"github.com/consensys/orchestrate/services/api/business/use-cases/mocks"
 
-	"github.com/consensys/orchestrate/pkg/encoding/json"
+	"encoding/json"
 	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
-	"github.com/consensys/orchestrate/services/api/service/formatters"
+	"github.com/consensys/orchestrate/pkg/types/formatters"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"

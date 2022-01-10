@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"time"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
@@ -18,4 +19,34 @@ type FaucetResponse struct {
 	Cooldown        string            `json:"cooldown,omitempty" validate:"required,isDuration" example:"10s"`
 	CreatedAt       time.Time         `json:"createdAt" example:"2020-07-09T12:35:42.115395Z"`
 	UpdatedAt       time.Time         `json:"updatedAt" example:"2020-07-09T12:35:42.115395Z"`
+}
+
+type faucetResponseJSON struct {
+	UUID            string    `json:"uuid"`
+	Name            string    `json:"name"`
+	TenantID        string    `json:"tenantID"`
+	ChainRule       string    `json:"chainRule,omitempty"`
+	CreditorAccount string    `json:"creditorAccount"`
+	MaxBalance      string    `json:"maxBalance,omitempty"`
+	Amount          string    `json:"amount,omitempty"`
+	Cooldown        string    `json:"cooldown,omitempty"`
+	CreatedAt       time.Time `json:"createdAt"`
+	UpdatedAt       time.Time `json:"updatedAt,omitempty"`
+}
+
+func (a *FaucetResponse) MarshalJSON() ([]byte, error) {
+	res := &faucetResponseJSON{
+		UUID:            a.UUID,
+		Name:            a.Name,
+		TenantID:        a.TenantID,
+		ChainRule:       a.ChainRule,
+		CreditorAccount: a.CreditorAccount.String(),
+		MaxBalance:      a.MaxBalance.String(),
+		Amount:          a.Amount.String(),
+		Cooldown:        a.Cooldown,
+		CreatedAt:       a.CreatedAt,
+		UpdatedAt:       a.UpdatedAt,
+	}
+
+	return json.Marshal(res)
 }

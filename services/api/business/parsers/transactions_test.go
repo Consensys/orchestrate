@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/consensys/orchestrate/services/api/store/models/testutils"
 
-	"github.com/consensys/orchestrate/pkg/encoding/json"
+	"encoding/json"
 )
 
 func TestParsersTransaction_NewModelFromEntity(t *testing.T) {

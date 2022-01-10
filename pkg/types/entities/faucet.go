@@ -19,3 +19,9 @@ type Faucet struct {
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
 }
+
+type FaucetRequest struct {
+	Chain       *Chain
+	Beneficiary ethcommon.Address
+	Candidates  map[string]*Faucet
+}

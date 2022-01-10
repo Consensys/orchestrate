@@ -11,7 +11,7 @@ import (
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/httputil"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/api"
-	"github.com/consensys/orchestrate/services/api/service/formatters"
+	"github.com/consensys/orchestrate/pkg/types/formatters"
 	"github.com/gorilla/mux"
 )
 

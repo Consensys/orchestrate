@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
-	encoding "github.com/consensys/orchestrate/pkg/encoding/json"
 	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	"github.com/consensys/orchestrate/pkg/toolkit/ethclient/utils"
@@ -226,12 +225,12 @@ func processBlockResult(header **ethtypes.Header, body **Body) ParseResultFunc {
 		}
 
 		// Unmarshal block header information
-		if err := encoding.Unmarshal(raw, header); err != nil {
+		if err := json.Unmarshal(raw, header); err != nil {
 			return errors.FromError(err).ExtendComponent(component)
 		}
 
 		// Unmarshal block body information
-		if err := encoding.Unmarshal(raw, body); err != nil {
+		if err := json.Unmarshal(raw, body); err != nil {
 			return errors.FromError(err).ExtendComponent(component)
 		}
 

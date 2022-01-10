@@ -1,11 +1,10 @@
-package parsers
+package formatters
 
 import (
 	"math/big"
 
-	quorumtypes "github.com/consensys/quorum/core/types"
-
 	"github.com/consensys/orchestrate/pkg/types/entities"
+	quorumtypes "github.com/consensys/quorum/core/types"
 	"github.com/ethereum/go-ethereum/core/types"
 )
 

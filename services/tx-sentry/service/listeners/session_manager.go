@@ -9,6 +9,7 @@ import (
 	orchestrateclient "github.com/consensys/orchestrate/pkg/sdk/client"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	types "github.com/consensys/orchestrate/pkg/types/api"
+	"github.com/consensys/orchestrate/pkg/types/formatters"
 	usecases "github.com/consensys/orchestrate/services/tx-sentry/tx-sentry/use-cases"
 
 	"github.com/consensys/orchestrate/pkg/types/entities"
@@ -100,7 +101,7 @@ func (manager *sessionManager) Start(ctx context.Context, job *entities.Job) {
 			logger.WithError(err).Error("job listening session unexpectedly stopped")
 		}
 
-		annotations := types.FormatInternalDataToAnnotations(job.InternalData)
+		annotations := formatters.FormatInternalDataToAnnotations(job.InternalData)
 		annotations.HasBeenRetried = true
 		_, err = manager.client.UpdateJob(ctx, job.UUID, &types.UpdateJobRequest{
 			Annotations: &annotations,

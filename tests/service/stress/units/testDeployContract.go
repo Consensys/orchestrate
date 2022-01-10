@@ -3,7 +3,8 @@ package units
 import (
 	"context"
 
-	"github.com/consensys/orchestrate/pkg/encoding/json"
+	"encoding/json"
+
 	"github.com/consensys/orchestrate/pkg/errors"
 	orchestrateclient "github.com/consensys/orchestrate/pkg/sdk/client"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"

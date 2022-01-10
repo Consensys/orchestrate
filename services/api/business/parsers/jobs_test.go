@@ -15,7 +15,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/consensys/orchestrate/services/api/store/models/testutils"
 
-	"github.com/consensys/orchestrate/pkg/encoding/json"
+	"encoding/json"
 )
 
 func TestParsersJob_NewModelFromEntity(t *testing.T) {

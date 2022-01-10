@@ -4,11 +4,11 @@ package integrationtests
 
 import (
 	"fmt"
-	"github.com/consensys/orchestrate/pkg/encoding/json"
 	http2 "net/http"
 	"testing"
 	"time"
 
+	pkgjson "github.com/consensys/orchestrate/pkg/encoding/json"
 	"github.com/consensys/orchestrate/pkg/sdk/client"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http"
 	httpmetrics "github.com/consensys/orchestrate/pkg/toolkit/app/http/metrics"
@@ -123,7 +123,7 @@ func (s *metricsTestSuite) TestZHealthCheck() {
 
 		assert.Equal(s.T(), 200, resp.StatusCode)
 		status := healthRes{}
-		err = json.UnmarshalBody(resp.Body, &status)
+		err = pkgjson.UnmarshalBody(resp.Body, &status)
 
 		assert.NoError(s.T(), err)
 		assert.Equal(s.T(), "OK", status.Database)
@@ -148,7 +148,7 @@ func (s *metricsTestSuite) TestZHealthCheck() {
 
 		assert.Equal(s.T(), 503, resp.StatusCode)
 		status := healthRes{}
-		err = json.UnmarshalBody(resp.Body, &status)
+		err = pkgjson.UnmarshalBody(resp.Body, &status)
 
 		assert.NoError(s.T(), err)
 		assert.Equal(s.T(), "OK", status.Database)
@@ -173,7 +173,7 @@ func (s *metricsTestSuite) TestZHealthCheck() {
 
 		assert.Equal(s.T(), 503, resp.StatusCode)
 		status := healthRes{}
-		err = json.UnmarshalBody(resp.Body, &status)
+		err = pkgjson.UnmarshalBody(resp.Body, &status)
 
 		assert.NoError(s.T(), err)
 		assert.NotEqual(s.T(), "OK", status.Database)

@@ -3,7 +3,6 @@ package steps
 import (
 	"bytes"
 	"context"
-	json2 "encoding/json"
 	"fmt"
 	"io/ioutil"
 	"math/rand"
@@ -26,8 +25,9 @@ import (
 	utils4 "github.com/consensys/orchestrate/pkg/utils"
 	utils3 "github.com/consensys/orchestrate/tests/utils"
 
+	"encoding/json"
+
 	"github.com/Shopify/sarama"
-	"github.com/consensys/orchestrate/pkg/encoding/json"
 	encoding "github.com/consensys/orchestrate/pkg/encoding/sarama"
 	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/pkg/ethereum/account"
@@ -640,7 +640,7 @@ func (sc *ScenarioContext) getJWT(audience string) (string, error) {
 	}
 
 	body := new(bytes.Buffer)
-	_ = json2.NewEncoder(body).Encode(map[string]interface{}{
+	_ = json.NewEncoder(body).Encode(map[string]interface{}{
 		"client_id":     clientID,
 		"client_secret": clientSecret,
 		"audience":      audience,
@@ -655,7 +655,7 @@ func (sc *ScenarioContext) getJWT(audience string) (string, error) {
 
 	acessToken := &accessTokenResponse{}
 	if resp.StatusCode == http.StatusOK {
-		err = json2.NewDecoder(resp.Body).Decode(acessToken)
+		err = json.NewDecoder(resp.Body).Decode(acessToken)
 		if err != nil {
 			return "", err
 		}

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"time"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
@@ -18,4 +19,34 @@ type AccountResponse struct {
 	Attributes          map[string]string `json:"attributes,omitempty"`
 	CreatedAt           time.Time         `json:"createdAt" example:"2020-07-09T12:35:42.115395Z"`
 	UpdatedAt           time.Time         `json:"updatedAt,omitempty" example:"2020-07-09T12:35:42.115395Z"`
+}
+
+type accountResponseJSON struct {
+	Alias               string            `json:"alias"`
+	Address             string            `json:"address"`
+	PublicKey           string            `json:"publicKey"`
+	CompressedPublicKey string            `json:"compressedPublicKey"`
+	TenantID            string            `json:"tenantID"`
+	OwnerID             string            `json:"ownerID,omitempty"`
+	StoreID             string            `json:"storeID,omitempty"`
+	Attributes          map[string]string `json:"attributes,omitempty"`
+	CreatedAt           time.Time         `json:"createdAt"`
+	UpdatedAt           time.Time         `json:"updatedAt,omitempty"`
+}
+
+func (a *AccountResponse) MarshalJSON() ([]byte, error) {
+	res := &accountResponseJSON{
+		Alias:               a.Alias,
+		PublicKey:           a.PublicKey.String(),
+		CompressedPublicKey: a.CompressedPublicKey.String(),
+		Address:             a.Address.Hex(),
+		TenantID:            a.TenantID,
+		OwnerID:             a.OwnerID,
+		StoreID:             a.StoreID,
+		Attributes:          a.Attributes,
+		CreatedAt:           a.CreatedAt,
+		UpdatedAt:           a.UpdatedAt,
+	}
+
+	return json.Marshal(res)
 }

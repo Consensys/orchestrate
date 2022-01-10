@@ -3,7 +3,8 @@ package steps
 import (
 	"context"
 
-	"github.com/consensys/orchestrate/pkg/encoding/json"
+	"encoding/json"
+
 	"github.com/consensys/orchestrate/pkg/types/api"
 	"github.com/consensys/orchestrate/tests/service/e2e/utils"
 	"github.com/consensys/quorum-key-manager/pkg/client"
