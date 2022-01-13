@@ -23,17 +23,14 @@ func NewValidator(cfg *Config) (*Validator, error) {
 		return nil, err
 	}
 
-	opts := []validator.Option{}
-	if cfg.OrchestrateClaims != "" {
-		opts = append(opts, validator.WithCustomClaims(NewCustomClaims(cfg.OrchestrateClaims)))
-	}
-
 	v, err := validator.New(
 		jwks.NewCachingProvider(issuerURL, cfg.CacheTTL).KeyFunc,
 		validator.RS256,
 		issuerURL.String(),
 		cfg.Audience,
-		opts...,
+		validator.WithCustomClaims(func() validator.CustomClaims {
+			return NewCustomClaims(cfg.OrchestrateClaims)
+		}),
 	)
 	if err != nil {
 		return nil, err

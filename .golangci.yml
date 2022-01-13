@@ -63,6 +63,7 @@ run:
     - mock
     - /scripts
     - /vendor
+    - /tests
   skip-files:
     - ".*\\.pb(\\.gw)?\\.go$"
     - pkg/toolkit/app/http/handler/dashboard/genstatic/gen.go

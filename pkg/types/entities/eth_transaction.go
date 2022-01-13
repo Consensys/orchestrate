@@ -79,22 +79,10 @@ type accessTupleJSON struct {
 }
 
 func (tx *ETHTransaction) MarshalJSON() ([]byte, error) {
-	accessTuple := []accessTupleJSON{}
-	for _, accessListItem := range tx.AccessList {
-		elem := accessTupleJSON{
-			Address:     accessListItem.Address.String(),
-			StorageKeys: []string{},
-		}
-		for _, storeKey := range accessListItem.StorageKeys {
-			elem.StorageKeys = append(elem.StorageKeys, storeKey.String())
-		}
-		accessTuple = append(accessTuple, elem)
-	}
-
 	r := &ethTransactionJSON{
 		Nonce:           tx.Nonce,
-		AccessList:      accessTuple,
 		TransactionType: string(tx.TransactionType),
+		Gas:             tx.Gas,
 		PrivateFrom:     tx.PrivateFrom,
 		PrivateFor:      tx.PrivateFor,
 		MandatoryFor:    tx.MandatoryFor,
@@ -114,10 +102,6 @@ func (tx *ETHTransaction) MarshalJSON() ([]byte, error) {
 
 	if tx.To != nil {
 		r.To = tx.To.String()
-	}
-
-	if tx.Value != nil {
-		r.Value = tx.Value.String()
 	}
 
 	if tx.Value != nil {
@@ -146,6 +130,18 @@ func (tx *ETHTransaction) MarshalJSON() ([]byte, error) {
 
 	if len(tx.EnclaveKey) != 0 {
 		r.EnclaveKey = tx.EnclaveKey.String()
+	}
+
+	r.AccessList = []accessTupleJSON{}
+	for _, accessListItem := range tx.AccessList {
+		elem := accessTupleJSON{
+			Address:     accessListItem.Address.String(),
+			StorageKeys: []string{},
+		}
+		for _, storeKey := range accessListItem.StorageKeys {
+			elem.StorageKeys = append(elem.StorageKeys, storeKey.String())
+		}
+		r.AccessList = append(r.AccessList, elem)
 	}
 
 	return json.Marshal(r)
