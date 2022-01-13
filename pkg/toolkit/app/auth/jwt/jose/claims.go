@@ -26,17 +26,18 @@ func (c *CustomClaims) UnmarshalJSON(data []byte) error {
 	}
 
 	if _, ok := res[c.userClaimPath]; ok {
-		bClaims, _ := json.Marshal(res[c.userClaimPath])
 		c.UserClaims = &entities.UserClaims{}
+		bClaims, _ := json.Marshal(res[c.userClaimPath])
 		if err := json.Unmarshal(bClaims, &c.UserClaims); err != nil {
-			return errors.New("invalid user claims")
+			return errors.New("invalid custom claims format")
 		}
+	} else {
+		return errors.New("missing custom claims data")
 	}
 
 	return nil
 }
 
 func (c *CustomClaims) Validate(_ context.Context) error {
-	// TODO: Apply validation on custom claims if needed, currently no validation is needed
 	return nil
 }

@@ -6,14 +6,16 @@
 
 ### ⚠ BREAKING CHANGES
 * The ABI of smart contracts must now be registered in the contract registry before they can be used in transactions.
-* `contractName` is now a mandatory argument of contract transactions.
-* `contractTag` is now an optional argument of contract transactions.
+    * `contractName` is now a mandatory argument of contract transactions.
+    * `contractTag` is now an optional argument of contract transactions.
+* Removed authentication fallback behaviour to token `subject` when custom claims are enabled.
 
 ### 🛠 Bug fixes
 * Fixed issue where Job's, Transaction's and Account's properties are removed when values are not set in update request payload. 
 * Fixed ACCESS_LOG enabling/disabling toggle feature.
 * Fixed lowercase ethereum addresses in response payloads.
 * Fixed issue where smart contracts using Solidity structs could not be registered in the contract registry.
+* Fixed unintended persisted claims over ongoing requests when using custom claims.
 
 ## v21.12.0 LTS (2021-12-16)
 ### 🆕 Features

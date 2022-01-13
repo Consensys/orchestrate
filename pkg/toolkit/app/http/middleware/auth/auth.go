@@ -37,14 +37,13 @@ func (b *Builder) Build(_ context.Context, _ string, configuration interface{}) 
 }
 
 type Auth struct {
-	jwt, key     auth.Checker
+	checker      auth.Checker
 	multitenancy bool
 }
 
 func New(jwt, key auth.Checker, multitenancyEnabled bool) *Auth {
 	return &Auth{
-		jwt:          jwt,
-		key:          key,
+		checker:      auth.NewCombineCheckers(key, jwt),
 		multitenancy: multitenancyEnabled,
 	}
 }
@@ -81,9 +80,7 @@ func (a *Auth) Handler(h http.Handler) http.Handler {
 			authutils.GetUsernameHeaderValue(req),
 		)
 
-		combChecker := auth.CombineCheckers(a.key, a.jwt)
-
-		userInfo, err := combChecker.Check(authCtx)
+		userInfo, err := a.checker.Check(authCtx)
 		if err != nil {
 			log.FromContext(authCtx).WithError(err).Errorf("unauthorized request")
 			a.writeUnauthorized(rw, err)

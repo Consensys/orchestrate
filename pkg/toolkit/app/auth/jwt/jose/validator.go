@@ -2,6 +2,7 @@ package jose
 
 import (
 	"context"
+	"fmt"
 	"net/url"
 	"strings"
 
@@ -22,12 +23,17 @@ func NewValidator(cfg *Config) (*Validator, error) {
 		return nil, err
 	}
 
+	opts := []validator.Option{}
+	if cfg.OrchestrateClaims != "" {
+		opts = append(opts, validator.WithCustomClaims(NewCustomClaims(cfg.OrchestrateClaims)))
+	}
+
 	v, err := validator.New(
 		jwks.NewCachingProvider(issuerURL, cfg.CacheTTL).KeyFunc,
 		validator.RS256,
 		issuerURL.String(),
 		cfg.Audience,
-		validator.WithCustomClaims(NewCustomClaims(cfg.OrchestrateClaims)),
+		opts...,
 	)
 	if err != nil {
 		return nil, err
@@ -44,15 +50,18 @@ func (v *Validator) ValidateToken(ctx context.Context, token string) (*entities.
 	}
 
 	claims := userCtx.(*validator.ValidatedClaims)
+	if claims.CustomClaims != nil {
+		if orchestrateUserClaims := claims.CustomClaims.(*CustomClaims).UserClaims; orchestrateUserClaims != nil {
+			return orchestrateUserClaims, nil
+		}
 
-	if orchestrateUserClaims := claims.CustomClaims.(*CustomClaims).UserClaims; orchestrateUserClaims != nil {
-		return orchestrateUserClaims, nil
+		return nil, fmt.Errorf("expected custom claims not found")
 	}
 
 	// The tenant ID is the "sub" field, then is "tenant_id:username" or "tenant_id"
+	claim := &entities.UserClaims{}
 	sub := claims.RegisteredClaims.Subject
 	pieces := strings.Split(sub, utils.AuthSeparator)
-	claim := &entities.UserClaims{}
 	if len(pieces) == 0 {
 		claim.TenantID = pieces[0]
 	} else {

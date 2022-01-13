@@ -30,6 +30,6 @@ func (a *combinedChecker) Check(ctx context.Context) (*multitenancy.UserInfo, er
 	return nil, nil
 }
 
-func CombineCheckers(checkers ...Checker) Checker {
+func NewCombineCheckers(checkers ...Checker) Checker {
 	return &combinedChecker{checkers: checkers}
 }
