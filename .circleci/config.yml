@@ -503,6 +503,7 @@ workflows:
           context:
             - dockerhub-quorumengineering-rw
             - dockerhub-opsquorum-dct
+            - cloudsmith-tanuki-rw
           matrix:
             parameters:
               docker-image-tag: ["orchestrate:${CIRCLE_TAG}", "orchestrate:latest"]
