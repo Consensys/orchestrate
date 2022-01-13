@@ -1,10 +1,19 @@
 # Orchestrate Release Notes
 
-## v21.12.1 (Unreleased)
+## v21.12.1 (2022-01-13)
+### 🆕 Features
+* Compatibility with all versions of Solidity <= 0.8.11.
+
+### ⚠ BREAKING CHANGES
+* The ABI of smart contracts must now be registered in the contract registry before they can be used in transactions.
+* `contractName` is now a mandatory argument of contract transactions.
+* `contractTag` is now an optional argument of contract transactions.
+
 ### 🛠 Bug fixes
 * Fixed issue where Job's, Transaction's and Account's properties are removed when values are not set in update request payload. 
 * Fixed ACCESS_LOG enabling/disabling toggle feature.
 * Fixed lowercase ethereum addresses in response payloads.
+* Fixed issue where smart contracts using Solidity structs could not be registered in the contract registry.
 
 ## v21.12.0 LTS (2021-12-16)
 ### 🆕 Features
