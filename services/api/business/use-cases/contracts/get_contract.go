@@ -2,6 +2,9 @@ package contracts
 
 import (
 	"context"
+	"strings"
+
+	"github.com/ethereum/go-ethereum/accounts/abi"
 
 	"github.com/consensys/orchestrate/services/api/store"
 	"github.com/consensys/quorum/common/hexutil"
@@ -36,40 +39,37 @@ func (uc *getContractUseCase) Execute(ctx context.Context, name, tag string) (*e
 		return nil, errors.FromError(err).ExtendComponent(getContractComponent)
 	}
 
+	parsedABI, err := abi.JSON(strings.NewReader(artifact.ABI))
+	if err != nil {
+		errMessage := "failed to parse contract abi"
+		uc.logger.WithError(err).Error(errMessage)
+		return nil, errors.DataCorruptedError(errMessage).ExtendComponent(getContractComponent)
+	}
+
 	contract := &entities.Contract{
 		Name:             name,
 		Tag:              tag,
-		ABI:              artifact.ABI,
+		RawABI:           artifact.ABI,
+		ABI:              parsedABI,
 		Bytecode:         hexutil.MustDecode(artifact.Bytecode),
 		DeployedBytecode: hexutil.MustDecode(artifact.DeployedBytecode),
 	}
 
-	contractABI, err := contract.ToABI()
-	if err != nil {
-		errMessage := "failed to get contract ABI"
-		logger.WithError(err).Error(errMessage)
-		return nil, errors.DataCorruptedError(errMessage).ExtendComponent(getMethodSignaturesComponent)
-	}
-
 	// nolint
-	for _, method := range contractABI.Methods {
-		contract.Methods = append(contract.Methods, entities.Method{
-			Signature: method.Sig(),
+	for _, method := range parsedABI.Methods {
+		contract.Methods = append(contract.Methods, entities.ABIComponent{
+			Signature: method.Sig,
 		})
 	}
 
 	// nolint
-	for _, event := range contractABI.Events {
-		contract.Events = append(contract.Events, entities.Event{
-			Signature: event.Sig(),
+	for _, event := range parsedABI.Events {
+		contract.Events = append(contract.Events, entities.ABIComponent{
+			Signature: event.Sig,
 		})
 	}
 
-	if contractABI.Constructor.Sig() == "" {
-		contract.Constructor = entities.Method{Signature: "()"}
-	} else {
-		contract.Constructor = entities.Method{Signature: contractABI.Constructor.Sig()}
-	}
+	contract.Constructor = entities.ABIComponent{Signature: parsedABI.Constructor.Sig}
 
 	logger.Debug("contract found successfully")
 	return contract, nil

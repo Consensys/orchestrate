@@ -16,8 +16,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var _ entities.Method
-var _ entities.Event
+var _ entities.ABIComponent
 
 type ContractsController struct {
 	ucs usecases.ContractUseCases
@@ -29,7 +28,6 @@ func NewContractsController(contractUCs usecases.ContractUseCases) *ContractsCon
 	}
 }
 
-// Add routes to router
 func (c *ContractsController) Append(router *mux.Router) {
 	router.Methods(http.MethodGet).Path("/contracts").HandlerFunc(c.getCatalog)
 	router.Methods(http.MethodPost).Path("/contracts").HandlerFunc(c.register)
@@ -38,7 +36,6 @@ func (c *ContractsController) Append(router *mux.Router) {
 	router.Methods(http.MethodGet).Path("/contracts/accounts/{chain_id}/{address}/events").HandlerFunc(c.getEvents)
 	router.Methods(http.MethodGet).Path("/contracts/{name}").HandlerFunc(c.getTags)
 	router.Methods(http.MethodGet).Path("/contracts/{name}/{tag}").HandlerFunc(c.getContract)
-	router.Methods(http.MethodGet).Path("/contracts/{name}/{tag}/method-signatures").HandlerFunc(c.getContractMethodSignatures)
 }
 
 // @Summary Returns a list of all registered contracts
@@ -75,7 +72,7 @@ func (c *ContractsController) getCatalog(rw http.ResponseWriter, request *http.R
 // @Security ApiKeyAuth
 // @Security JWTAuth
 // @Param request body api.RegisterContractRequest true "Contract register request"
-// @Success 200 {object} api.ContractResponse{constructor=entities.Method,methods=[]entities.Method,events=[]entities.Event} "Contract object"
+// @Success 200 {object} api.ContractResponse{constructor=entities.ABIComponent,methods=[]entities.ABIComponent,events=[]entities.ABIComponent} "Contract object"
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 401 {object} httputil.ErrorResponse "Unauthorized"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
@@ -264,7 +261,7 @@ func (c *ContractsController) getTags(rw http.ResponseWriter, request *http.Requ
 // @Security JWTAuth
 // @Param name path string true "solidity contract registered name"
 // @Param tag path string true "solidity contract registered tag"
-// @Success 200 {object} api.ContractResponse{constructor=entities.Method,methods=[]entities.Method,events=[]entities.Event} "Contract found"
+// @Success 200 {object} api.ContractResponse{constructor=entities.ABIComponent,methods=[]entities.ABIComponent,events=[]entities.ABIComponent} "Contract found"
 // @Failure 404 {object} httputil.ErrorResponse "Contract not found"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
 // @Router /contracts/{name}/{tag} [get]
@@ -279,30 +276,4 @@ func (c *ContractsController) getContract(rw http.ResponseWriter, request *http.
 	}
 
 	_ = json.NewEncoder(rw).Encode(formatters.FormatContractResponse(contract))
-}
-
-// @Summary Get method signatures of registered contract
-// @Description Get method signatures of registered contract by {name} and {tag}
-// @Tags Contracts
-// @Produce json
-// @Security ApiKeyAuth
-// @Security JWTAuth
-// @Param name path string true "solidity contract registered name"
-// @Param tag path string true "solidity contract registered tag"
-// @Success 200 {array} string "List of signatures"
-// @Failure 404 {object} httputil.ErrorResponse "Contract not found"
-// @Failure 500 {object} httputil.ErrorResponse "Internal server error"
-// @Router /contracts/{name}/{tag}/method-signatures [get]
-func (c *ContractsController) getContractMethodSignatures(rw http.ResponseWriter, request *http.Request) {
-	rw.Header().Set("Content-Type", "application/json")
-	ctx := request.Context()
-
-	filterMethod := request.URL.Query().Get("method")
-	signatures, err := c.ucs.GetContractMethodSignatures().Execute(ctx, mux.Vars(request)["name"], mux.Vars(request)["tag"], filterMethod)
-	if err != nil {
-		httputil.WriteHTTPErrorResponse(rw, err)
-		return
-	}
-
-	_ = json.NewEncoder(rw).Encode(signatures)
 }

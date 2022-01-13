@@ -86,10 +86,6 @@ func IsHash(input string) bool {
 	return true
 }
 
-func isValidMethodSig(fl validator.FieldLevel) bool {
-	return IsValidSignature(fl.Field().String())
-}
-
 func isDuration(fl validator.FieldLevel) bool {
 	_, err := convDuration(fl)
 	return err == nil
@@ -236,7 +232,6 @@ func init() {
 	_ = validate.RegisterValidation("isHash", isHash)
 	_ = validate.RegisterValidation("isDuration", isDuration)
 	_ = validate.RegisterValidation("minDuration", minDuration)
-	_ = validate.RegisterValidation("isValidMethodSig", isValidMethodSig)
 	_ = validate.RegisterValidation("isPrivateTxManagerType", isPrivateTxManagerType)
 	_ = validate.RegisterValidation("isPriority", isPriority)
 	_ = validate.RegisterValidation("isJobType", isJobType)

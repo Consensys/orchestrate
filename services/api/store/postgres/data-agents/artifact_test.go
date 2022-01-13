@@ -17,18 +17,16 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-const (
-	abi = "contractABI"
-)
-
 type artifactTestSuite struct {
 	suite.Suite
 	agents *PGAgents
 	pg     *pgTestUtils.PGTestHelper
+	abi    string
 }
 
 func TestPGArtifact(t *testing.T) {
 	s := new(artifactTestSuite)
+	s.abi = "contractABI"
 	suite.Run(t, s)
 }
 
@@ -55,7 +53,7 @@ func (s *artifactTestSuite) TestPGArtifact_Insert() {
 
 	s.T().Run("should insert model successfully", func(t *testing.T) {
 		artifact := &models.ArtifactModel{
-			ABI:              abi,
+			ABI:              s.abi,
 			Bytecode:         "0x123",
 			DeployedBytecode: "0x123",
 			Codehash:         codeHash,
@@ -82,11 +80,11 @@ func (s *artifactTestSuite) TestPGArtifact_Insert() {
 		assert.NoError(t, err)
 		assert.NotEmpty(t, artifact.ID)
 	})
-	
+
 	s.T().Run("should select instead insert duplicated model", func(t *testing.T) {
 
 		artifact := &models.ArtifactModel{
-			ABI:              abi,
+			ABI:              s.abi,
 			Bytecode:         "0x123",
 			DeployedBytecode: "0x123",
 			Codehash:         codeHash,
@@ -120,23 +118,23 @@ func (s *artifactTestSuite) TestPGArtifact_FindOneByABIAndCodeHash() {
 	ctx := context.Background()
 
 	s.T().Run("should return NotFoundError if none is found", func(t *testing.T) {
-		_, err := s.agents.Artifact().FindOneByABIAndCodeHash(ctx, abi, codeHash)
+		_, err := s.agents.Artifact().FindOneByABIAndCodeHash(ctx, s.abi, codeHash)
 		assert.True(t, errors.IsNotFoundError(err))
 	})
 
 	s.T().Run("should find successfully", func(t *testing.T) {
 		_ = s.insertArtifacts(ctx, "myContract", "tag")
 
-		artifact, err := s.agents.Artifact().FindOneByABIAndCodeHash(ctx, abi, codeHash)
+		artifact, err := s.agents.Artifact().FindOneByABIAndCodeHash(ctx, s.abi, codeHash)
 
 		assert.NoError(t, err)
 		assert.NotEmpty(t, artifact.ID)
 	})
-	
+
 	s.T().Run("should return PostgresConnectionError if select fails", func(t *testing.T) {
 		// We drop the DB to make the test fail
 		s.pg.DropTestDB(t)
-		_, err := s.agents.Artifact().FindOneByABIAndCodeHash(ctx, abi, codeHash)
+		_, err := s.agents.Artifact().FindOneByABIAndCodeHash(ctx, s.abi, codeHash)
 
 		assert.True(t, errors.IsInternalError(err))
 
@@ -179,7 +177,7 @@ func (s *artifactTestSuite) insertArtifacts(ctx context.Context, name, tag strin
 	_ = s.agents.Repository().Insert(ctx, repo)
 
 	artifact := &models.ArtifactModel{
-		ABI:              abi,
+		ABI:              s.abi,
 		Bytecode:         "0x234",
 		DeployedBytecode: "0x234",
 		Codehash:         codeHash,

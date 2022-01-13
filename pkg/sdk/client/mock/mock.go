@@ -691,21 +691,6 @@ func (mr *MockOrchestrateClientMockRecorder) GetContractEvents(ctx, address, cha
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetContractEvents", reflect.TypeOf((*MockOrchestrateClient)(nil).GetContractEvents), ctx, address, chainID, req)
 }
 
-// GetContractMethodSignatures mocks base method
-func (m *MockOrchestrateClient) GetContractMethodSignatures(ctx context.Context, name, tag, method string) ([]string, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetContractMethodSignatures", ctx, name, tag, method)
-	ret0, _ := ret[0].([]string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetContractMethodSignatures indicates an expected call of GetContractMethodSignatures
-func (mr *MockOrchestrateClientMockRecorder) GetContractMethodSignatures(ctx, name, tag, method interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetContractMethodSignatures", reflect.TypeOf((*MockOrchestrateClient)(nil).GetContractMethodSignatures), ctx, name, tag, method)
-}
-
 // MockTransactionClient is a mock of TransactionClient interface
 type MockTransactionClient struct {
 	ctrl     *gomock.Controller
@@ -1539,19 +1524,4 @@ func (m *MockContractClient) GetContractEvents(ctx context.Context, address, cha
 func (mr *MockContractClientMockRecorder) GetContractEvents(ctx, address, chainID, req interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetContractEvents", reflect.TypeOf((*MockContractClient)(nil).GetContractEvents), ctx, address, chainID, req)
-}
-
-// GetContractMethodSignatures mocks base method
-func (m *MockContractClient) GetContractMethodSignatures(ctx context.Context, name, tag, method string) ([]string, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetContractMethodSignatures", ctx, name, tag, method)
-	ret0, _ := ret[0].([]string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetContractMethodSignatures indicates an expected call of GetContractMethodSignatures
-func (mr *MockContractClientMockRecorder) GetContractMethodSignatures(ctx, name, tag, method interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetContractMethodSignatures", reflect.TypeOf((*MockContractClient)(nil).GetContractMethodSignatures), ctx, name, tag, method)
 }

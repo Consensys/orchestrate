@@ -25,7 +25,7 @@ func (sc *ScenarioContext) iRegisterTheFollowingContract(table *gherkin.PickleSt
 	// Register parseContracts on the registry
 	for _, parseContract := range parseContracts {
 		var abi interface{}
-		err := json.Unmarshal([]byte(parseContract.Contract.ABI), &abi)
+		err := json.Unmarshal([]byte(parseContract.Contract.RawABI), &abi)
 		if err != nil {
 			return err
 		}

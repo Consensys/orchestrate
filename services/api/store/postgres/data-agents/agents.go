@@ -16,7 +16,6 @@ type PGAgents struct {
 	artifact         store.ArtifactAgent
 	codeHash         store.CodeHashAgent
 	event            store.EventAgent
-	method           store.MethodAgent
 	repository       store.RepositoryAgent
 	tag              store.TagAgent
 	contract         store.ContractAgent
@@ -36,7 +35,6 @@ func New(db pg.DB) *PGAgents {
 		artifact:         NewPGArtifact(db),
 		codeHash:         NewPGCodeHash(db),
 		event:            NewPGEvent(db),
-		method:           NewPGMethod(db),
 		repository:       NewPGRepository(db),
 		tag:              NewPGTag(db),
 		contract:         NewPGContract(db),
@@ -83,10 +81,6 @@ func (a *PGAgents) CodeHash() store.CodeHashAgent {
 
 func (a *PGAgents) Event() store.EventAgent {
 	return a.event
-}
-
-func (a *PGAgents) Method() store.MethodAgent {
-	return a.method
 }
 
 func (a *PGAgents) Repository() store.RepositoryAgent {

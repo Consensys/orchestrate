@@ -826,7 +826,7 @@ func (e *Envelope) SetChainUUID(chainUUID string) *Envelope {
 type Contract struct {
 	ContractName    string `validate:"omitempty,required_with_all=ContractTag"`
 	ContractTag     string `validate:"omitempty"`
-	MethodSignature string `validate:"omitempty,isValidMethodSig"`
+	MethodSignature string `validate:"omitempty"`
 	Args            []string
 }
 

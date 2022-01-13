@@ -1,9 +1,11 @@
 package contracts
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 
-	"github.com/consensys/quorum/accounts/abi"
+	"github.com/ethereum/go-ethereum/accounts/abi"
 
 	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
@@ -33,23 +35,16 @@ func NewRegisterContractUseCase(agent store.DB) usecases.RegisterContractUseCase
 }
 
 func (uc *registerContractUseCase) Execute(ctx context.Context, contract *entities.Contract) error {
-	ctx = log.WithFields(ctx, log.Field("contract_id", contract.Short()))
+	ctx = log.WithFields(ctx, log.Field("contract_id", contract))
 	logger := uc.logger.WithContext(ctx)
 	logger.Debug("registering contract starting...")
 
-	abiRaw, err := contract.GetABICompacted()
+	abiRaw, err := getABICompacted(contract.RawABI)
 	if err != nil {
 		return errors.FromError(err).ExtendComponent(registerContractComponent)
 	}
 
-	codeHash := crypto.Keccak256Hash(contract.DeployedBytecode)
-	contractAbi, err := contract.ToABI()
-	if err != nil {
-		logger.WithError(err).Error("invalid ABI value")
-		return errors.FromError(err).ExtendComponent(registerContractComponent)
-	}
-
-	methodJSONs, eventJSONs, err := parsers.ParseJSONABI(abiRaw)
+	eventJSONs, err := parsers.ParseEvents(abiRaw)
 	if err != nil {
 		logger.WithError(err).Error("failed to parse json ABI")
 		return errors.FromError(err).ExtendComponent(registerContractComponent)
@@ -85,14 +80,7 @@ func (uc *registerContractUseCase) Execute(ctx context.Context, contract *entiti
 			return der
 		}
 
-		methods := getMethods(contractAbi, contract.DeployedBytecode, codeHash, methodJSONs)
-		if len(methods) > 0 {
-			if der := dbtx.Method().InsertMultiple(ctx, methods); der != nil {
-				return der
-			}
-		}
-
-		events := getEvents(contractAbi, contract.DeployedBytecode, codeHash, eventJSONs)
+		events := getEvents(&contract.ABI, contract.DeployedBytecode, crypto.Keccak256Hash(contract.DeployedBytecode), eventJSONs)
 		if len(events) > 0 {
 			if der := dbtx.Event().InsertMultiple(ctx, events); der != nil {
 				return der
@@ -110,23 +98,6 @@ func (uc *registerContractUseCase) Execute(ctx context.Context, contract *entiti
 	return nil
 }
 
-func getMethods(contractAbi *abi.ABI, deployedBytecode hexutil.Bytes, codeHash common.Hash, methodJSONs map[string]string) []*models.MethodModel {
-	var methods []*models.MethodModel
-	// nolint
-	for _, m := range contractAbi.Methods {
-		sel := sigHashToSelector(m.ID())
-		if deployedBytecode != nil {
-			methods = append(methods, &models.MethodModel{
-				Codehash: codeHash.Hex(),
-				Selector: sel,
-				ABI:      methodJSONs[m.Sig()],
-			})
-		}
-	}
-
-	return methods
-}
-
 func getEvents(contractAbi *abi.ABI, deployedBytecode hexutil.Bytes, codeHash common.Hash, eventJSONs map[string]string) []*models.EventModel {
 	var events []*models.EventModel
 	// nolint
@@ -135,12 +106,20 @@ func getEvents(contractAbi *abi.ABI, deployedBytecode hexutil.Bytes, codeHash co
 		if deployedBytecode != nil {
 			events = append(events, &models.EventModel{
 				Codehash:          codeHash.Hex(),
-				SigHash:           e.ID().Hex(),
+				SigHash:           e.ID.Hex(),
 				IndexedInputCount: indexedCount,
-				ABI:               eventJSONs[e.Sig()],
+				ABI:               eventJSONs[e.Sig],
 			})
 		}
 	}
 
 	return events
+}
+
+func getABICompacted(rawABI string) (string, error) {
+	buffer := new(bytes.Buffer)
+	if err := json.Compact(buffer, []byte(rawABI)); err != nil {
+		return "", err
+	}
+	return buffer.String(), nil
 }

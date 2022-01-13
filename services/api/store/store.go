@@ -26,7 +26,6 @@ type Agents interface {
 	Artifact() ArtifactAgent
 	CodeHash() CodeHashAgent
 	Event() EventAgent
-	Method() MethodAgent
 	Repository() RepositoryAgent
 	Tag() TagAgent
 	Contract() ContractAgent
@@ -44,7 +43,6 @@ type Tx interface {
 	Agents
 }
 
-// Interfaces data agents
 type TransactionRequestAgent interface {
 	Insert(ctx context.Context, txRequest *models.TransactionRequest) error
 	FindOneByIdempotencyKey(ctx context.Context, idempotencyKey string, tenantID string, ownerID string) (*models.TransactionRequest, error)
@@ -126,12 +124,6 @@ type EventAgent interface {
 	InsertMultiple(ctx context.Context, events []*models.EventModel) error
 	FindOneByAccountAndSigHash(ctx context.Context, chainID, address, sighash string, indexedInputCount uint32) (*models.EventModel, error)
 	FindDefaultBySigHash(ctx context.Context, sighash string, indexedInputCount uint32) ([]*models.EventModel, error)
-}
-
-type MethodAgent interface {
-	InsertMultiple(ctx context.Context, methods []*models.MethodModel) error
-	FindOneByAccountAndSelector(ctx context.Context, chainID, address string, selector []byte) (*models.MethodModel, error)
-	FindDefaultBySelector(ctx context.Context, selector []byte) ([]*models.MethodModel, error)
 }
 
 type RepositoryAgent interface {

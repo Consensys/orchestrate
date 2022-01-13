@@ -25,9 +25,9 @@ func FormatIndexedArg(t *abi.Type, arg ethcommon.Hash) (string, error) {
 	case abi.BoolTy:
 		switch arg.Hex()[len(arg.Hex())-1] {
 		case '1':
-			return trueStr, nil
+			return "true", nil
 		case '0':
-			return falseStr, nil
+			return "false", nil
 		default:
 			return "", errors.DataCorruptedError("%s is not a boolean", arg)
 		}

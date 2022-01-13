@@ -33,7 +33,7 @@ func RegisterNewContract(ctx context.Context, cClient client.ContractClient, art
 	}
 
 	var abi interface{}
-	err = json.Unmarshal([]byte(contract.ABI), &abi)
+	err = json.Unmarshal([]byte(contract.RawABI), &abi)
 	if err != nil {
 		errMsg := "failed to decode contract ABI"
 		logger.WithError(err).Error(errMsg)
@@ -82,10 +82,10 @@ func readContract(ctx context.Context, artifactsPath, fileName string) (*entitie
 	}
 
 	var contract = &entities.Contract{}
-	contract.ABI = string(art.Abi)
-	// Bytecode is an hexstring encoded []byte
+	contract.RawABI = string(art.Abi)
+	// Bytecode is a hexstring encoded []byte
 	contract.Bytecode = hexutil.MustDecode(art.Bytecode)
-	// Bytecode is an hexstring encoded []byte
+	// Bytecode is a hexstring encoded []byte
 	contract.DeployedBytecode = hexutil.MustDecode(art.DeployedBytecode)
 
 	return contract, nil

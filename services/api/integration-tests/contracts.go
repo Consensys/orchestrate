@@ -7,13 +7,6 @@ import (
 	"fmt"
 	"testing"
 
-	ethAbi "github.com/ethereum/go-ethereum/accounts/abi"
-	ethcommon "github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	"github.com/stretchr/testify/suite"
 	"encoding/json"
 	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/pkg/sdk/client"
@@ -21,6 +14,13 @@ import (
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/pkg/types/testutils"
 	"github.com/consensys/orchestrate/pkg/utils"
+	ethAbi "github.com/ethereum/go-ethereum/accounts/abi"
+	ethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/suite"
 )
 
 type contractsTestSuite struct {
@@ -29,7 +29,7 @@ type contractsTestSuite struct {
 	env    *IntegrationEnvironment
 }
 
-func (s *contractsTestSuite) TestContractRegistry_Register() {
+func (s *contractsTestSuite) TestRegister() {
 	ctx := context.Background()
 
 	s.T().Run("should register a contract with tag", func(t *testing.T) {
@@ -45,7 +45,7 @@ func (s *contractsTestSuite) TestContractRegistry_Register() {
 		assert.Equal(t, txRequest.Tag, resp.Tag)
 		assert.Equal(t, txRequest.DeployedBytecode, resp.DeployedBytecode)
 		assert.Equal(t, txRequest.Bytecode, resp.Bytecode)
-		assert.NotEmpty(t, resp.Constructor.Signature)
+		assert.Equal(t, "", resp.Constructor.Signature)
 		assert.NotEmpty(t, resp.Events)
 		assert.NotEmpty(t, resp.Methods)
 
@@ -89,7 +89,7 @@ func (s *contractsTestSuite) TestContractRegistry_Register() {
 	})
 }
 
-func (s *contractsTestSuite) TestContractRegistry_Get() {
+func (s *contractsTestSuite) TestGet() {
 	contractName := "contract_" + utils.RandString(5)
 	ctx := context.Background()
 	txRequest := testutils.FakeRegisterContractRequest()
@@ -133,30 +133,9 @@ func (s *contractsTestSuite) TestContractRegistry_Get() {
 		assert.NoError(t, err)
 		assert.Equal(t, string(abi), resp.ABI)
 	})
-
-	s.T().Run("should get a contract method signatures", func(t *testing.T) {
-		resp, err := s.client.GetContractMethodSignatures(ctx, txRequest.Name, txRequest.Tag, "")
-		if err != nil {
-			assert.Fail(t, err.Error())
-			return
-		}
-
-		assert.Contains(t, resp, "transferFrom(address,address,uint256)")
-		assert.Contains(t, resp, "totalSupply()")
-		assert.Contains(t, resp, "approve(address,uint256)")
-
-		resp2, err := s.client.GetContractMethodSignatures(ctx, txRequest.Name, txRequest.Tag, "balanceOf")
-		if err != nil {
-			assert.Fail(t, err.Error())
-			return
-		}
-
-		assert.Len(t, resp2, 1)
-		assert.Contains(t, resp2, "balanceOf(address)")
-	})
 }
 
-func (s *contractsTestSuite) TestContractRegistry_Search() {
+func (s *contractsTestSuite) TestSearch() {
 	contractName := "contract_" + utils.RandString(5)
 	contractTag := "contract_tag_" + utils.RandString(5)
 	ctx := context.Background()
@@ -168,7 +147,7 @@ func (s *contractsTestSuite) TestContractRegistry_Search() {
 		assert.Fail(s.T(), err.Error())
 		return
 	}
-	
+
 	codeHash := crypto.Keccak256(txRequest.DeployedBytecode)
 	abiStr, _ := json.Marshal(txRequest.ABI)
 
@@ -186,7 +165,7 @@ func (s *contractsTestSuite) TestContractRegistry_Search() {
 	})
 }
 
-func (s *contractsTestSuite) TestContractRegistry_CodeHash() {
+func (s *contractsTestSuite) TestCodeHash() {
 	ctx := context.Background()
 	contractName := "contract_" + utils.RandString(5)
 	txRequest := testutils.FakeRegisterContractRequest()
@@ -198,7 +177,7 @@ func (s *contractsTestSuite) TestContractRegistry_CodeHash() {
 
 	address := ethcommon.HexToAddress(utils.RandHexString(10))
 	address2 := ethcommon.HexToAddress(utils.RandHexString(10))
-	codeHash := hexutil.MustDecode("0x"+utils.RandHexString(20))
+	codeHash := hexutil.MustDecode("0x" + utils.RandHexString(20))
 	codeHash2 := hexutil.MustDecode("0xd63259750ca3b56efab25f0646a4d1fb659b6b643474506e1be24d81f9e55fd8")
 	chainID := "2017"
 
@@ -208,7 +187,7 @@ func (s *contractsTestSuite) TestContractRegistry_CodeHash() {
 		})
 
 		require.NoError(t, err)
-		
+
 		err = s.client.SetContractAddressCodeHash(ctx, address2.String(), chainID, &api.SetContractCodeHashRequest{
 			CodeHash: codeHash2,
 		})

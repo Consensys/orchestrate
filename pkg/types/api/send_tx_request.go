@@ -26,7 +26,7 @@ type TransactionParams struct {
 	TransactionType string                        `json:"transactionType,omitempty" validate:"omitempty,isTransactionType" example:"dynamic_fee" enums:"legacy,dynamic_fee"`
 	From            *ethcommon.Address            `json:"from" validate:"omitempty" example:"0x1abae27a0cbfb02945720425d3b80c7e097285534" swaggertype:"string"`
 	To              *ethcommon.Address            `json:"to" validate:"required" example:"0x1abae27a0cbfb02945720425d3b80c7e09728534" swaggertype:"string"`
-	MethodSignature string                        `json:"methodSignature" validate:"required,isValidMethodSig" example:"transfer(address,uint256)"`
+	MethodSignature string                        `json:"methodSignature" validate:"required" example:"transfer(address,uint256)"`
 	Args            []interface{}                 `json:"args,omitempty"`
 	OneTimeKey      bool                          `json:"oneTimeKey,omitempty" example:"true"`
 	GasPricePolicy  GasPriceParams                `json:"gasPricePolicy,omitempty"`
@@ -36,6 +36,8 @@ type TransactionParams struct {
 	MandatoryFor    []string                      `json:"mandatoryFor,omitempty" validate:"omitempty,min=1,unique,dive,base64" example:"[A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=,B1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=]"`
 	PrivacyGroupID  string                        `json:"privacyGroupId,omitempty" validate:"omitempty,base64" example:"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="`
 	PrivacyFlag     entities.PrivacyFlag          `json:"privacyFlag,omitempty" validate:"omitempty,isPrivacyFlag" example:"0"`
+	ContractName    string                        `json:"contractName" validate:"required" example:"MyContract"`
+	ContractTag     string                        `json:"contractTag,omitempty" example:"v1.1.0"`
 }
 
 func (params *TransactionParams) Validate() error {

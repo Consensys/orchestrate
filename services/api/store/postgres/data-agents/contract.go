@@ -2,6 +2,9 @@ package dataagents
 
 import (
 	"context"
+	"strings"
+
+	"github.com/ethereum/go-ethereum/accounts/abi"
 
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	pg "github.com/consensys/orchestrate/pkg/toolkit/database/postgres"
@@ -48,7 +51,7 @@ LIMIT 1
 		return nil, pg.ParsePGError(err)
 	}
 
-	return parseContract(qContract), nil
+	return parseContract(qContract)
 }
 
 func (agent *PGContract) FindOneByAddress(ctx context.Context, address string) (*entities.Contract, error) {
@@ -67,15 +70,21 @@ LIMIT 1
 		return nil, pg.ParsePGError(err)
 	}
 
-	return parseContract(qContract), nil
+	return parseContract(qContract)
 }
 
-func parseContract(qContract *contractQuery) *entities.Contract {
+func parseContract(qContract *contractQuery) (*entities.Contract, error) {
+	parsedABI, err := abi.JSON(strings.NewReader(qContract.ABI))
+	if err != nil {
+		return nil, err
+	}
+
 	return &entities.Contract{
 		Name:             qContract.Name,
 		Tag:              qContract.Tag,
-		ABI:              qContract.ABI,
+		RawABI:           qContract.ABI,
+		ABI:              parsedABI,
 		Bytecode:         hexutil.MustDecode(qContract.Bytecode),
 		DeployedBytecode: hexutil.MustDecode(qContract.DeployedBytecode),
-	}
+	}, nil
 }

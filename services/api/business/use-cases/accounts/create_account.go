@@ -31,8 +31,12 @@ type createAccountUseCase struct {
 	logger           *log.Logger
 }
 
-func NewCreateAccountUseCase(db store.DB, searchUC usecases.SearchAccountsUseCase, fundAccountUC usecases.FundAccountUseCase,
-	keyManagerClient client.EthClient) usecases.CreateAccountUseCase {
+func NewCreateAccountUseCase(
+	db store.DB,
+	searchUC usecases.SearchAccountsUseCase,
+	fundAccountUC usecases.FundAccountUseCase,
+	keyManagerClient client.EthClient,
+) usecases.CreateAccountUseCase {
 	return &createAccountUseCase{
 		db:               db,
 		searchUC:         searchUC,
@@ -82,7 +86,6 @@ func (uc *createAccountUseCase) Execute(ctx context.Context, account *entities.A
 			},
 		})
 	}
-
 	if err != nil {
 		errMsg := "failed to import/create ethereum account"
 		logger.WithError(err).Error(errMsg)

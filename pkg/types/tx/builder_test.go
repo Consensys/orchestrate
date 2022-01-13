@@ -123,7 +123,7 @@ func TestEnvelope_Validate(t *testing.T) {
 		SetContextLabelsValue("testContextKey", "testContextValue")
 
 	errs := b.Validate()
-	assert.Len(t, errs, 5)
+	assert.Len(t, errs, 4)
 }
 
 func TestEnvelope_InternalLabels(t *testing.T) {

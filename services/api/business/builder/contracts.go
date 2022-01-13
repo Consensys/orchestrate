@@ -7,30 +7,26 @@ import (
 )
 
 type contractUseCases struct {
-	GetContractsCatalogUC       usecases.GetContractsCatalogUseCase
-	getContractEvents           usecases.GetContractEventsUseCase
-	getContractMethodSignatures usecases.GetContractMethodSignaturesUseCase
-	getContractMethods          usecases.GetContractMethodsUseCase
-	getContractTags             usecases.GetContractTagsUseCase
-	setContractCodeHash         usecases.SetContractCodeHashUseCase
-	registerContractUC          usecases.RegisterContractUseCase
-	getContractUC               usecases.GetContractUseCase
-	searchContractUC            usecases.SearchContractUseCase
+	GetContractsCatalogUC usecases.GetContractsCatalogUseCase
+	getContractEvents     usecases.GetContractEventsUseCase
+	getContractTags       usecases.GetContractTagsUseCase
+	setContractCodeHash   usecases.SetContractCodeHashUseCase
+	registerContractUC    usecases.RegisterContractUseCase
+	getContractUC         usecases.GetContractUseCase
+	searchContractUC      usecases.SearchContractUseCase
 }
 
 func newContractUseCases(db store.DB) *contractUseCases {
 	getContractUC := contracts.NewGetContractUseCase(db.Artifact())
 
 	return &contractUseCases{
-		registerContractUC:          contracts.NewRegisterContractUseCase(db),
-		getContractUC:               getContractUC,
-		GetContractsCatalogUC:       contracts.NewGetCatalogUseCase(db.Repository()),
-		getContractEvents:           contracts.NewGetEventsUseCase(db.Event()),
-		getContractMethodSignatures: contracts.NewGetMethodSignaturesUseCase(getContractUC),
-		getContractMethods:          contracts.NewGetMethodsUseCase(db.Method()),
-		getContractTags:             contracts.NewGetTagsUseCase(db.Tag()),
-		setContractCodeHash:         contracts.NewSetCodeHashUseCase(db.CodeHash()),
-		searchContractUC:            contracts.NewSearchContractUseCase(db.Contract()),
+		registerContractUC:    contracts.NewRegisterContractUseCase(db),
+		getContractUC:         getContractUC,
+		GetContractsCatalogUC: contracts.NewGetCatalogUseCase(db.Repository()),
+		getContractEvents:     contracts.NewGetEventsUseCase(db.Event()),
+		getContractTags:       contracts.NewGetTagsUseCase(db.Tag()),
+		setContractCodeHash:   contracts.NewSetCodeHashUseCase(db.CodeHash()),
+		searchContractUC:      contracts.NewSearchContractUseCase(db.Contract()),
 	}
 }
 
@@ -48,14 +44,6 @@ func (u *contractUseCases) GetContractsCatalog() usecases.GetContractsCatalogUse
 
 func (u *contractUseCases) GetContractEvents() usecases.GetContractEventsUseCase {
 	return u.getContractEvents
-}
-
-func (u *contractUseCases) GetContractMethodSignatures() usecases.GetContractMethodSignaturesUseCase {
-	return u.getContractMethodSignatures
-}
-
-func (u *contractUseCases) GetContractMethods() usecases.GetContractMethodsUseCase {
-	return u.getContractMethods
 }
 
 func (u *contractUseCases) GetContractTags() usecases.GetContractTagsUseCase {

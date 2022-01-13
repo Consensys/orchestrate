@@ -162,7 +162,7 @@ func (s *sendTxSuite) TestSendTx_Success() {
 		jobUUID := txRequest.Schedule.Jobs[0].UUID
 		txData := (hexutil.Bytes)(hexutil.MustDecode("0x"))
 		txRequestModel := testutils2.FakeTxRequest(0)
-		txRequestModel.RequestHash = "75a5a83761a9ebddc2586d99c14a0d89"
+		txRequestModel.RequestHash = "64ab842d4e824ac64e0cb5585164db7f"
 
 		s.SearchChainsUC.EXPECT().Execute(gomock.Any(), &entities.ChainFilters{Names: []string{txRequest.ChainName}},
 			s.userInfo).Return(chains, nil)
@@ -191,7 +191,7 @@ func (s *sendTxSuite) TestSendTx_Success() {
 		ctx := context.Background()
 		txData := (hexutil.Bytes)(hexutil.MustDecode("0x"))
 		txRequestModel := testutils2.FakeTxRequest(0)
-		txRequestModel.RequestHash = "75a5a83761a9ebddc2586d99c14a0d89"
+		txRequestModel.RequestHash = "64ab842d4e824ac64e0cb5585164db7f"
 		chains := []*entities.Chain{testutils3.FakeChain()}
 		chains[0].UUID = "myChainUUID"
 
@@ -268,7 +268,7 @@ func (s *sendTxSuite) TestSendTx_ExpectedErrors() {
 
 		s.SearchChainsUC.EXPECT().Execute(gomock.Any(), &entities.ChainFilters{Names: []string{txRequest.ChainName}},
 			s.userInfo).Return(chains, nil)
-		s.TxRequestDA.EXPECT().FindOneByIdempotencyKey(gomock.Any(), txRequest.IdempotencyKey, s.userInfo.TenantID, 
+		s.TxRequestDA.EXPECT().FindOneByIdempotencyKey(gomock.Any(), txRequest.IdempotencyKey, s.userInfo.TenantID,
 			s.userInfo.Username).Return(nil, expectedErr)
 
 		response, err := s.usecase.Execute(ctx, txRequest, txData, s.userInfo)

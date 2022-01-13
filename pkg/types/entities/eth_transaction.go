@@ -67,7 +67,7 @@ type ethTransactionJSON struct {
 	PrivateFor      []string          `json:"privateFor,omitempty"`
 	MandatoryFor    []string          `json:"mandatoryFor,omitempty"`
 	PrivacyGroupID  string            `json:"privacyGroupId,omitempty"`
-	PrivacyFlag     int               `json:"privacyFrag,omitempty"`
+	PrivacyFlag     int               `json:"privacyFlag,omitempty"`
 	EnclaveKey      string            `json:"enclaveKey,omitempty"`
 	CreatedAt       time.Time         `json:"createdAt,omitempty"`
 	UpdatedAt       time.Time         `json:"updatedAt,omitempty"`

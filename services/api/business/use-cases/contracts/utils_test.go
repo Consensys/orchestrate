@@ -4,7 +4,10 @@ package contracts
 
 import (
 	"sort"
+	"strings"
 	"testing"
+
+	"github.com/ethereum/go-ethereum/accounts/abi"
 
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/pkg/utils"
@@ -38,22 +41,22 @@ var ERC20 = `[{
     }]`
 
 func TestGetIndexedCount(t *testing.T) {
-	var ERC20Contract = &entities.Contract{
+	parsedABI, _ := abi.JSON(strings.NewReader(ERC20))
+	ERC20Contract := &entities.Contract{
 		Name:             "ERC20",
 		Tag:              "v1.0.0",
-		ABI:              ERC20,
+		RawABI:           ERC20,
+		ABI:              parsedABI,
 		Bytecode:         hexutil.MustDecode(hexutil.Encode([]byte{1, 2})),
 		DeployedBytecode: hexutil.MustDecode(hexutil.Encode([]byte{1, 2, 3})),
 	}
-	erc20ABI, err := ERC20Contract.ToABI()
-	assert.NoError(t, err, "should not error on toABI()")
 
 	expected := map[string]uint{
 		"MinterAdded":  1,
 		"MinterAdded2": 2,
 		"Unknown":      0,
 	}
-	for i, e := range erc20ABI.Events {
+	for i, e := range ERC20Contract.ABI.Events {
 		c := getIndexedCount(&e)
 		assert.Equal(t, expected[i], c)
 	}

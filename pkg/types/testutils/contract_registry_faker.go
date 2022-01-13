@@ -9,7 +9,7 @@ import (
 func FakeRegisterContractRequest() *api.RegisterContractRequest {
 	c := FakeContract()
 	var abi interface{}
-	_ = json.Unmarshal([]byte(c.ABI), &abi)
+	_ = json.Unmarshal([]byte(c.RawABI), &abi)
 
 	return &api.RegisterContractRequest{
 		Name:             c.Name,
@@ -38,7 +38,7 @@ func FakeContractResponse() *api.ContractResponse {
 	return &api.ContractResponse{
 		Name:             c.Name,
 		Tag:              c.Tag,
-		ABI:              c.ABI,
+		ABI:              c.RawABI,
 		Bytecode:         c.Bytecode,
 		DeployedBytecode: c.DeployedBytecode,
 	}

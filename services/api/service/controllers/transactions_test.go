@@ -18,9 +18,9 @@ import (
 	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	txschedulertypes "github.com/consensys/orchestrate/pkg/types/api"
+	"github.com/consensys/orchestrate/pkg/types/formatters"
 	"github.com/consensys/orchestrate/pkg/types/testutils"
 	"github.com/consensys/orchestrate/services/api/business/use-cases/mocks"
-	"github.com/consensys/orchestrate/pkg/types/formatters"
 	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
@@ -86,7 +86,7 @@ func (s *transactionsControllerTestSuite) SetupTest() {
 	s.controller.Append(s.router)
 }
 
-func (s *transactionsControllerTestSuite) TestTransactionsController_send() {
+func (s *transactionsControllerTestSuite) TestSend() {
 	urlPath := "/transactions/send"
 	idempotencyKey := "idempotencyKey"
 
@@ -105,8 +105,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_send() {
 		testutils.FakeTxRequest()
 		txRequestEntityResp := testutils.FakeTxRequest()
 
-		txRequestEntity := formatters.FormatSendTxRequest(txRequest, idempotencyKey)
-		s.sendContractTxUseCase.EXPECT().Execute(gomock.Any(), txRequestEntity, s.userInfo).Return(txRequestEntityResp, nil)
+		s.sendContractTxUseCase.EXPECT().Execute(gomock.Any(), gomock.Any(), s.userInfo).Return(txRequestEntityResp, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
@@ -175,7 +174,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_send() {
 	})
 }
 
-func (s *transactionsControllerTestSuite) TestTransactionsController_deploy() {
+func (s *transactionsControllerTestSuite) TestDeploy() {
 	urlPath := "/transactions/deploy-contract"
 	idempotencyKey := "idempotencyKey"
 
@@ -230,7 +229,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_deploy() {
 	})
 }
 
-func (s *transactionsControllerTestSuite) TestTransactionsController_sendRaw() {
+func (s *transactionsControllerTestSuite) TestSendRaw() {
 	urlPath := "/transactions/send-raw"
 	idempotencyKey := "idempotencyKey"
 
@@ -291,7 +290,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_sendRaw() {
 	})
 }
 
-func (s *transactionsControllerTestSuite) TestTransactionsController_transfer() {
+func (s *transactionsControllerTestSuite) TestTransfer() {
 	urlPath := "/transactions/transfer"
 	idempotencyKey := "idempotencyKey"
 
@@ -352,7 +351,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_transfer() 
 	})
 }
 
-func (s *transactionsControllerTestSuite) TestTransactionsController_getOne() {
+func (s *transactionsControllerTestSuite) TestGetOne() {
 	uuid := "uuid"
 	urlPath := "/transactions/" + uuid
 
@@ -384,7 +383,7 @@ func (s *transactionsControllerTestSuite) TestTransactionsController_getOne() {
 	})
 }
 
-func (s *transactionsControllerTestSuite) TestTransactionsController_search() {
+func (s *transactionsControllerTestSuite) TestSearch() {
 	urlPath := "/transactions"
 
 	s.T().Run("should execute request successfully", func(t *testing.T) {

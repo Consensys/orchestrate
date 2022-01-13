@@ -1,13 +1,90 @@
 package testutils
 
 import (
+	"strings"
+
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/pkg/utils"
-	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
-const contractABI = ` [
+const ContractABIStruct = `[
+        {
+            "inputs": [
+                {
+                    "components": [
+                        {
+                            "internalType": "address",
+                            "name": "token",
+                            "type": "address"
+                        },
+                        {
+                            "components": [
+                                {
+                                    "internalType": "uint256",
+                                    "name": "amount",
+                                    "type": "uint256"
+                                },
+                                {
+                                    "internalType": "address",
+                                    "name": "recipient",
+                                    "type": "address"
+                                }
+                            ],
+                            "internalType": "struct MultipleTransferProxy.Recipient[]",
+                            "name": "recipients",
+                            "type": "tuple[]"
+                        }
+                    ],
+                    "internalType": "struct MultipleTransferProxy.TokenTransfer",
+                    "name": "_tokenTransfer",
+                    "type": "tuple"
+                }
+            ],
+            "name": "multipleTransfer",
+            "outputs": [
+                {
+                    "internalType": "bool",
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "_to",
+                    "type": "address"
+                },
+                {
+                    "internalType": "address",
+                    "name": "_token",
+                    "type": "address"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "_amount",
+                    "type": "uint256"
+                }
+            ],
+            "name": "singleTransfer",
+            "outputs": [
+                {
+                    "internalType": "bool",
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        }
+    ]`
+
+const contractABIERC20 = ` [
     {
       "constant": true,
       "inputs": [],
@@ -281,24 +358,24 @@ const deployedBytecode = "0x6080604052348015600f57600080fd5b50600436106028576000
 
 // FakeContract returns a new fake contract
 func FakeContract() *entities.Contract {
+	parsedABI, _ := abi.JSON(strings.NewReader(contractABIERC20))
 	return &entities.Contract{
 		Name:             utils.RandString(5),
 		Tag:              "v1.0.0",
-		ABI:              contractABI,
+		RawABI:           contractABIERC20,
+		ABI:              parsedABI,
 		Bytecode:         hexutil.MustDecode(bytecode),
-		Methods:          []entities.Method{},
+		Methods:          []entities.ABIComponent{},
 		DeployedBytecode: hexutil.MustDecode(deployedBytecode),
-		Constructor: entities.Method{
-			Signature: "()",
-		},
+		Constructor:      entities.ABIComponent{Signature: ""},
 	}
 }
 
-func FakeEventABI() *ethabi.Event {
-	return &ethabi.Event{
+func FakeEventABI() *abi.Event {
+	return &abi.Event{
 		Name:      "event" + utils.RandString(5),
 		RawName:   "fake_event",
 		Anonymous: false,
-		Inputs:    []ethabi.Argument{{Name: "input1", Indexed: true}},
+		Inputs:    []abi.Argument{{Name: "input1", Indexed: true}},
 	}
 }

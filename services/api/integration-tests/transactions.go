@@ -4,6 +4,7 @@ package integrationtests
 
 import (
 	"context"
+	"github.com/consensys/orchestrate/pkg/types/api"
 	"testing"
 	"time"
 
@@ -15,11 +16,10 @@ import (
 	"github.com/consensys/orchestrate/pkg/types/tx"
 	"github.com/consensys/orchestrate/pkg/utils"
 	"github.com/consensys/orchestrate/services/api/service/controllers"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
-	"gopkg.in/h2non/gock.v1"
-	ethcommon "github.com/ethereum/go-ethereum/common"
 )
 
 const (
@@ -29,15 +29,23 @@ const (
 // transactionsTestSuite is a test suite for Transaction Scheduler Transactions controller
 type transactionsTestSuite struct {
 	suite.Suite
-	client client.OrchestrateClient
-	env    *IntegrationEnvironment
+	client   client.OrchestrateClient
+	contract *api.ContractResponse
+	env      *IntegrationEnvironment
+}
+
+func (s *transactionsTestSuite) SetupSuite() {
+	// The registered contract for this test suite is an ERC-20 contract
+	contract, err := s.client.RegisterContract(s.env.ctx, testutils.FakeRegisterContractRequest())
+	require.NoError(s.T(), err)
+
+	s.contract = contract
 }
 
 func (s *transactionsTestSuite) TestValidation() {
 	ctx := s.env.ctx
 
 	s.T().Run("should fail if payload is invalid", func(t *testing.T) {
-		defer gock.Off()
 		txRequest := testutils.FakeSendTransactionRequest()
 		txRequest.ChainName = ""
 
@@ -57,6 +65,9 @@ func (s *transactionsTestSuite) TestValidation() {
 
 	s.T().Run("should fail if idempotency key is identical but different params", func(t *testing.T) {
 		txRequest := testutils.FakeSendTransactionRequest()
+		txRequest.Params.ContractTag = s.contract.Tag
+		txRequest.Params.ContractName = s.contract.Name
+
 		rctx := context.WithValue(ctx, clientutils.RequestHeaderKey, map[string]string{
 			controllers.IdempotencyKeyHeader: utils.RandString(16),
 		})
@@ -64,7 +75,8 @@ func (s *transactionsTestSuite) TestValidation() {
 		_, err := s.client.SendContractTransaction(rctx, txRequest)
 		assert.NoError(t, err)
 
-		txRequest.Params.MethodSignature = "differentMethodSignature()"
+		txRequest.Params.MethodSignature = "decreaseAllowance(address,uint256)"
+		txRequest.Params.Args = []interface{}{"0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18", 1}
 		_, err = s.client.SendContractTransaction(rctx, txRequest)
 		assert.True(t, errors.IsConstraintViolatedError(err))
 	})
@@ -95,9 +107,12 @@ func (s *transactionsTestSuite) TestSuccess() {
 
 	s.T().Run("should send a contract transaction successfully", func(t *testing.T) {
 		txRequest := testutils.FakeSendTransactionRequest()
-		
+
 		txRequest.Params.From = nil
 		txRequest.Params.OneTimeKey = true
+		txRequest.Params.ContractTag = s.contract.Tag
+		txRequest.Params.ContractName = s.contract.Name
+
 		IdempotencyKey := utils.RandString(16)
 		rctx := context.WithValue(ctx, clientutils.RequestHeaderKey, map[string]string{
 			controllers.IdempotencyKeyHeader: IdempotencyKey,
@@ -136,9 +151,11 @@ func (s *transactionsTestSuite) TestSuccess() {
 		assert.Equal(t, tx.JobTypeMap[entities.EthereumTransaction].String(), evlp.GetJobTypeString())
 		assert.Equal(t, evlp.PartitionKey(), "")
 	})
-	
+
 	s.T().Run("should send a tessera transaction successfully", func(t *testing.T) {
 		txRequest := testutils.FakeSendTesseraRequest()
+		txRequest.Params.ContractTag = s.contract.Tag
+		txRequest.Params.ContractName = s.contract.Name
 
 		IdempotencyKey := utils.RandString(16)
 		rctx := context.WithValue(ctx, clientutils.RequestHeaderKey, map[string]string{
@@ -180,6 +197,8 @@ func (s *transactionsTestSuite) TestSuccess() {
 
 	s.T().Run("should send an EEA transaction successfully", func(t *testing.T) {
 		txRequest := testutils.FakeSendEEARequest()
+		txRequest.Params.ContractTag = s.contract.Tag
+		txRequest.Params.ContractName = s.contract.Name
 
 		txResponse, err := s.client.SendContractTransaction(ctx, txRequest)
 		if err != nil {
@@ -339,6 +358,9 @@ func (s *transactionsTestSuite) TestSuccess() {
 
 	s.T().Run("should succeed if payloads and idempotency key are the same and return same schedule", func(t *testing.T) {
 		txRequest := testutils.FakeSendTransactionRequest()
+		txRequest.Params.ContractTag = s.contract.Tag
+		txRequest.Params.ContractName = s.contract.Name
+
 		idempotencyKey := utils.RandString(16)
 		rctx := context.WithValue(ctx, clientutils.RequestHeaderKey, map[string]string{
 			controllers.IdempotencyKeyHeader: idempotencyKey,

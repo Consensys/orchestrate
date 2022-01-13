@@ -147,7 +147,7 @@ type TxRequest struct {
 	// e.g. 1 for mainnet, 3 for Ropsten
 	Chain string `protobuf:"bytes,2,opt,name=chain,proto3" json:"chain,omitempty"`
 	// Type of a protocol that should be used
-	Method Method `protobuf:"varint,3,opt,name=method,proto3,enum=tx.Method" json:"method,omitempty"`
+	Method Method `protobuf:"varint,3,opt,name=method,proto3,enum=tx.MethodSignature" json:"method,omitempty"`
 	// Params for the transaction
 	Params *Params `protobuf:"bytes,4,opt,name=params,proto3" json:"params,omitempty"`
 	// ID of the Request in UUID RFC 4122, ISO/IEC 9834-8:2005 format
@@ -833,7 +833,7 @@ func file_pkg_types_tx_tx_proto_rawDescGZIP() []byte {
 var file_pkg_types_tx_tx_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
 var file_pkg_types_tx_tx_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_pkg_types_tx_tx_proto_goTypes = []interface{}{
-	(Method)(0),                  // 0: tx.Method
+	(Method)(0),                  // 0: tx.MethodSignature
 	(JobType)(0),                 // 1: tx.JobType
 	(*TxRequest)(nil),            // 2: tx.TxRequest
 	(*TxEnvelope)(nil),           // 3: tx.TxEnvelope
@@ -851,7 +851,7 @@ var file_pkg_types_tx_tx_proto_goTypes = []interface{}{
 }
 var file_pkg_types_tx_tx_proto_depIdxs = []int32{
 	6,  // 0: tx.TxRequest.headers:type_name -> tx.TxRequest.HeadersEntry
-	0,  // 1: tx.TxRequest.method:type_name -> tx.Method
+	0,  // 1: tx.TxRequest.method:type_name -> tx.MethodSignature
 	4,  // 2: tx.TxRequest.params:type_name -> tx.Params
 	7,  // 3: tx.TxRequest.context_labels:type_name -> tx.TxRequest.ContextLabelsEntry
 	1,  // 4: tx.TxRequest.jobType:type_name -> tx.JobType

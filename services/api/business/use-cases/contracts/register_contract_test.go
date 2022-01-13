@@ -6,11 +6,11 @@ import (
 	"context"
 	"testing"
 
-	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/assert"
 	"github.com/consensys/orchestrate/pkg/types/testutils"
 	"github.com/consensys/orchestrate/services/api/store/mocks"
 	"github.com/consensys/orchestrate/services/api/store/models"
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestRegisterContract_Execute(t *testing.T) {
@@ -22,14 +22,12 @@ func TestRegisterContract_Execute(t *testing.T) {
 	mockDBTX := mocks.NewMockTx(ctrl)
 	artifactAgent := mocks.NewMockArtifactAgent(ctrl)
 	repositoryAgent := mocks.NewMockRepositoryAgent(ctrl)
-	methodAgent := mocks.NewMockMethodAgent(ctrl)
 	eventAgent := mocks.NewMockEventAgent(ctrl)
 	tagAgent := mocks.NewMockTagAgent(ctrl)
 
 	mockDB.EXPECT().Begin().Return(mockDBTX, nil).AnyTimes()
 	mockDBTX.EXPECT().Artifact().Return(artifactAgent).AnyTimes()
 	mockDBTX.EXPECT().Repository().Return(repositoryAgent).AnyTimes()
-	mockDBTX.EXPECT().Method().Return(methodAgent).AnyTimes()
 	mockDBTX.EXPECT().Event().Return(eventAgent).AnyTimes()
 	mockDBTX.EXPECT().Tag().Return(tagAgent).AnyTimes()
 
@@ -41,7 +39,6 @@ func TestRegisterContract_Execute(t *testing.T) {
 		repositoryAgent.EXPECT().SelectOrInsert(gomock.Any(), gomock.AssignableToTypeOf(&models.RepositoryModel{})).Return(nil)
 		artifactAgent.EXPECT().SelectOrInsert(gomock.Any(), gomock.AssignableToTypeOf(&models.ArtifactModel{})).Return(nil)
 		tagAgent.EXPECT().Insert(gomock.Any(), gomock.AssignableToTypeOf(&models.TagModel{}))
-		methodAgent.EXPECT().InsertMultiple(gomock.Any(), gomock.AssignableToTypeOf([]*models.MethodModel{}))
 		eventAgent.EXPECT().InsertMultiple(gomock.Any(), gomock.AssignableToTypeOf([]*models.EventModel{}))
 		mockDBTX.EXPECT().Commit().Return(nil)
 		err := usecase.Execute(ctx, contract)

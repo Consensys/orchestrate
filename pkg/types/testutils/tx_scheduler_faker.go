@@ -16,8 +16,11 @@ func FakeSendTransactionRequest() *types.SendTransactionRequest {
 		ChainName: "ganache",
 		Params: types.TransactionParams{
 			From:            &FromAddress,
-			MethodSignature: "transfer()",
+			MethodSignature: "transfer(address,uint256)",
 			To:              FakeAddress(),
+			ContractTag:     "contractTag",
+			ContractName:    "contractName",
+			Args:            []interface{}{"0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18", 5},
 		},
 	}
 }
@@ -58,11 +61,12 @@ func FakeSendTesseraRequest() *types.SendTransactionRequest {
 		ChainName: "ganache",
 		Params: types.TransactionParams{
 			From:            &FromAddress,
-			MethodSignature: "transfer()",
+			MethodSignature: "transfer(address,uint256)",
 			To:              utils.ToPtr(ethcommon.HexToAddress("0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18")).(*ethcommon.Address),
 			Protocol:        entities.TesseraChainType,
 			PrivateFrom:     "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=",
 			PrivateFor:      []string{"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="},
+			Args:            []interface{}{"0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18", 5},
 		},
 	}
 }
@@ -72,11 +76,12 @@ func FakeSendEEARequest() *types.SendTransactionRequest {
 		ChainName: "ganache",
 		Params: types.TransactionParams{
 			From:            &FromAddress,
-			MethodSignature: "transfer()",
+			MethodSignature: "transfer(address,uint256)",
 			To:              utils.ToPtr(ethcommon.HexToAddress("0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18")).(*ethcommon.Address),
 			Protocol:        entities.EEAChainType,
 			PrivateFrom:     "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=",
 			PrivacyGroupID:  "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=",
+			Args:            []interface{}{"0x905B88EFf8Bda1543d4d6f4aA05afef143D27E18", 5},
 		},
 	}
 }

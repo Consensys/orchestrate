@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"reflect"
+	"strings"
 	"time"
 
 	"github.com/consensys/orchestrate/pkg/errors"
@@ -96,15 +97,15 @@ func (sc *ScenarioContext) iSendRequestToWithJSON(method, endpoint string, body 
 		return err
 	}
 
-	reqBody, err := sc.replace(body.Content)
+	jsonBody, err := sc.replace(body.Content)
 	if err != nil {
 		return err
 	}
 
 	sc.logger.WithField("method", method).WithField("endpoint", endpoint).
-		Debug(fmt.Sprintf("request with body %v", reqBody))
+		Debug(fmt.Sprintf("request with body %v", jsonBody))
 
-	req, err := http.NewRequest(method, endpoint, bytes.NewBuffer([]byte(reqBody)))
+	req, err := http.NewRequest(method, endpoint, strings.NewReader(jsonBody))
 	if err != nil {
 		return err
 	}

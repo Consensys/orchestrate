@@ -26,7 +26,7 @@ func newTransactionUseCases(
 	sendTxUC := transactions.NewSendTxUseCase(db, searchChainsUC, jobUCs.StartJob(), jobUCs.CreateJob(), getTransactionUC, getFaucetCandidateUC)
 
 	return &transactionUseCases{
-		sendContractTransaction: transactions.NewSendContractTxUseCase(sendTxUC),
+		sendContractTransaction: transactions.NewSendContractTxUseCase(sendTxUC, getContractUC),
 		sendDeployTransaction:   transactions.NewSendDeployTxUseCase(sendTxUC, getContractUC),
 		sendTransaction:         sendTxUC,
 		getTransaction:          getTransactionUC,

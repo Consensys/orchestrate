@@ -122,7 +122,7 @@ func (s *tagTestSuite) insertTag(ctx context.Context, contractName, tagName stri
 	_ = s.agents.Repository().Insert(ctx, repo)
 
 	artifact := &models.ArtifactModel{
-		ABI:              abi,
+		ABI:              "ContractABI",
 		Bytecode:         "Bytecode",
 		DeployedBytecode: "DeployedBytecode",
 		Codehash:         codeHash,

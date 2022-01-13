@@ -1,14 +1,8 @@
 package contracts
 
 import (
-	"github.com/consensys/quorum/accounts/abi"
+	"github.com/ethereum/go-ethereum/accounts/abi"
 )
-
-// returns the selector associated to a signature hash
-func sigHashToSelector(data []byte) (res [4]byte) {
-	copy(res[:], data)
-	return res
-}
 
 // returns the count of indexed inputs in the event
 func getIndexedCount(event *abi.Event) (indexedInputCount uint) {

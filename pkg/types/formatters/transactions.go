@@ -12,6 +12,10 @@ import (
 )
 
 func FormatSendTxRequest(sendTxRequest *types.SendTransactionRequest, idempotencyKey string) *entities.TxRequest {
+	if sendTxRequest.Params.ContractTag == "" {
+		sendTxRequest.Params.ContractTag = entities.DefaultTagValue
+	}
+
 	txRequest := &entities.TxRequest{
 		IdempotencyKey: idempotencyKey,
 		ChainName:      sendTxRequest.ChainName,
@@ -34,6 +38,8 @@ func FormatSendTxRequest(sendTxRequest *types.SendTransactionRequest, idempotenc
 			MandatoryFor:    sendTxRequest.Params.MandatoryFor,
 			PrivacyFlag:     sendTxRequest.Params.PrivacyFlag,
 			PrivacyGroupID:  sendTxRequest.Params.PrivacyGroupID,
+			ContractTag:     sendTxRequest.Params.ContractTag,
+			ContractName:    sendTxRequest.Params.ContractName,
 		},
 		InternalData: buildInternalData(
 			sendTxRequest.Params.OneTimeKey,
@@ -45,6 +51,10 @@ func FormatSendTxRequest(sendTxRequest *types.SendTransactionRequest, idempotenc
 }
 
 func FormatDeployContractRequest(deployRequest *types.DeployContractRequest, idempotencyKey string) *entities.TxRequest {
+	if deployRequest.Params.ContractTag == "" {
+		deployRequest.Params.ContractTag = entities.DefaultTagValue
+	}
+
 	txRequest := &entities.TxRequest{
 		IdempotencyKey: idempotencyKey,
 		ChainName:      deployRequest.ChainName,

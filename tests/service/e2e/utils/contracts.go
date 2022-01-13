@@ -66,7 +66,7 @@ func ParseContractCell(header, cell string, contractSpec *ContractSpec) error {
 		}
 
 		// Abi is a UTF-8 encoded string. Therefore, we can make the straightforward transition
-		contractSpec.Contract.ABI = string(a.Abi)
+		contractSpec.Contract.RawABI = string(a.Abi)
 		// Bytecode is an hexstring encoded []byte
 		contractSpec.Contract.Bytecode = hexutil.MustDecode(a.Bytecode)
 		// Bytecode is an hexstring encoded []byte

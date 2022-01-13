@@ -7,12 +7,12 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/assert"
 	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/pkg/types/testutils"
 	"github.com/consensys/orchestrate/services/api/store/mocks"
 	"github.com/consensys/orchestrate/services/api/store/models"
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGetContract_Execute(t *testing.T) {
@@ -29,7 +29,7 @@ func TestGetContract_Execute(t *testing.T) {
 			FindOneByNameAndTag(gomock.Any(), contract.Name, contract.Tag).
 			Return(&models.ArtifactModel{
 				ID:               1,
-				ABI:              contract.ABI,
+				ABI:              contract.RawABI,
 				Bytecode:         contract.Bytecode.String(),
 				DeployedBytecode: contract.DeployedBytecode.String(),
 				Codehash:         "",

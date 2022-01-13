@@ -7,9 +7,9 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/consensys/orchestrate/pkg/types/tx"
 	gherkin "github.com/cucumber/messages-go/v10"
 	"github.com/stretchr/testify/assert"
-	"github.com/consensys/orchestrate/pkg/types/tx"
 )
 
 type TestStruct struct {
@@ -183,7 +183,7 @@ func TestParseEnvelope(t *testing.T) {
 			"test",
 			[][]*gherkin.PickleStepArgument_PickleTable_PickleTableRow_PickleTableCell{
 				{
-					{Value: "Method"},
+					{Value: "MethodSignature"},
 					{Value: "From"},
 					{Value: "To"},
 					{Value: "Gas"},

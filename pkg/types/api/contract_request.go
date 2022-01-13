@@ -15,15 +15,15 @@ type RegisterContractRequest struct {
 }
 
 type ContractResponse struct {
-	Name             string            `json:"name" example:"ERC20"`
-	Tag              string            `json:"tag" example:"v1.0.0"`
-	Registry         string            `json:"registry" example:"registry.consensys.net/orchestrate"`
-	ABI              string            `json:"abi" example:"[{anonymous: false, inputs: [{indexed: false, name: account, type: address}, name: MinterAdded, type: event}]}]"`
-	Bytecode         hexutil.Bytes     `json:"bytecode,omitempty" example:"0x6080604052348015600f57600080f..." swaggertype:"string"`
-	DeployedBytecode hexutil.Bytes     `json:"deployedBytecode,omitempty" example:"0x6080604052348015600f57600080f..." swaggertype:"string"`
-	Constructor      entities.Method   `json:"constructor"`
-	Methods          []entities.Method `json:"methods"`
-	Events           []entities.Event  `json:"events"`
+	Name             string                  `json:"name" example:"ERC20"`
+	Tag              string                  `json:"tag" example:"v1.0.0"`
+	Registry         string                  `json:"registry" example:"registry.consensys.net/orchestrate"`
+	ABI              string                  `json:"abi" example:"[{anonymous: false, inputs: [{indexed: false, name: account, type: address}, name: MinterAdded, type: event}]}]"`
+	Bytecode         hexutil.Bytes           `json:"bytecode,omitempty" example:"0x6080604052348015600f57600080f..." swaggertype:"string"`
+	DeployedBytecode hexutil.Bytes           `json:"deployedBytecode,omitempty" example:"0x6080604052348015600f57600080f..." swaggertype:"string"`
+	Constructor      entities.ABIComponent   `json:"constructor"`
+	Methods          []entities.ABIComponent `json:"methods"`
+	Events           []entities.ABIComponent `json:"events"`
 }
 
 type GetContractEventsRequest struct {

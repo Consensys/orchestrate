@@ -79,34 +79,6 @@ func (mr *MockContractUseCasesMockRecorder) GetContractEvents() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetContractEvents", reflect.TypeOf((*MockContractUseCases)(nil).GetContractEvents))
 }
 
-// GetContractMethodSignatures mocks base method
-func (m *MockContractUseCases) GetContractMethodSignatures() usecases.GetContractMethodSignaturesUseCase {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetContractMethodSignatures")
-	ret0, _ := ret[0].(usecases.GetContractMethodSignaturesUseCase)
-	return ret0
-}
-
-// GetContractMethodSignatures indicates an expected call of GetContractMethodSignatures
-func (mr *MockContractUseCasesMockRecorder) GetContractMethodSignatures() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetContractMethodSignatures", reflect.TypeOf((*MockContractUseCases)(nil).GetContractMethodSignatures))
-}
-
-// GetContractMethods mocks base method
-func (m *MockContractUseCases) GetContractMethods() usecases.GetContractMethodsUseCase {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetContractMethods")
-	ret0, _ := ret[0].(usecases.GetContractMethodsUseCase)
-	return ret0
-}
-
-// GetContractMethods indicates an expected call of GetContractMethods
-func (mr *MockContractUseCasesMockRecorder) GetContractMethods() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetContractMethods", reflect.TypeOf((*MockContractUseCases)(nil).GetContractMethods))
-}
-
 // GetContractTags mocks base method
 func (m *MockContractUseCases) GetContractTags() usecases.GetContractTagsUseCase {
 	m.ctrl.T.Helper()
@@ -314,83 +286,6 @@ func (m *MockGetContractEventsUseCase) Execute(ctx context.Context, chainID stri
 func (mr *MockGetContractEventsUseCaseMockRecorder) Execute(ctx, chainID, address, codeHash, indexedInputCount interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockGetContractEventsUseCase)(nil).Execute), ctx, chainID, address, codeHash, indexedInputCount)
-}
-
-// MockGetContractMethodSignaturesUseCase is a mock of GetContractMethodSignaturesUseCase interface
-type MockGetContractMethodSignaturesUseCase struct {
-	ctrl     *gomock.Controller
-	recorder *MockGetContractMethodSignaturesUseCaseMockRecorder
-}
-
-// MockGetContractMethodSignaturesUseCaseMockRecorder is the mock recorder for MockGetContractMethodSignaturesUseCase
-type MockGetContractMethodSignaturesUseCaseMockRecorder struct {
-	mock *MockGetContractMethodSignaturesUseCase
-}
-
-// NewMockGetContractMethodSignaturesUseCase creates a new mock instance
-func NewMockGetContractMethodSignaturesUseCase(ctrl *gomock.Controller) *MockGetContractMethodSignaturesUseCase {
-	mock := &MockGetContractMethodSignaturesUseCase{ctrl: ctrl}
-	mock.recorder = &MockGetContractMethodSignaturesUseCaseMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use
-func (m *MockGetContractMethodSignaturesUseCase) EXPECT() *MockGetContractMethodSignaturesUseCaseMockRecorder {
-	return m.recorder
-}
-
-// Execute mocks base method
-func (m *MockGetContractMethodSignaturesUseCase) Execute(ctx context.Context, name, tag, methodName string) ([]string, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, name, tag, methodName)
-	ret0, _ := ret[0].([]string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Execute indicates an expected call of Execute
-func (mr *MockGetContractMethodSignaturesUseCaseMockRecorder) Execute(ctx, name, tag, methodName interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockGetContractMethodSignaturesUseCase)(nil).Execute), ctx, name, tag, methodName)
-}
-
-// MockGetContractMethodsUseCase is a mock of GetContractMethodsUseCase interface
-type MockGetContractMethodsUseCase struct {
-	ctrl     *gomock.Controller
-	recorder *MockGetContractMethodsUseCaseMockRecorder
-}
-
-// MockGetContractMethodsUseCaseMockRecorder is the mock recorder for MockGetContractMethodsUseCase
-type MockGetContractMethodsUseCaseMockRecorder struct {
-	mock *MockGetContractMethodsUseCase
-}
-
-// NewMockGetContractMethodsUseCase creates a new mock instance
-func NewMockGetContractMethodsUseCase(ctrl *gomock.Controller) *MockGetContractMethodsUseCase {
-	mock := &MockGetContractMethodsUseCase{ctrl: ctrl}
-	mock.recorder = &MockGetContractMethodsUseCaseMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use
-func (m *MockGetContractMethodsUseCase) EXPECT() *MockGetContractMethodsUseCaseMockRecorder {
-	return m.recorder
-}
-
-// Execute mocks base method
-func (m *MockGetContractMethodsUseCase) Execute(ctx context.Context, chainID string, address common.Address, selector []byte) (string, []string, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, chainID, address, selector)
-	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].([]string)
-	ret2, _ := ret[2].(error)
-	return ret0, ret1, ret2
-}
-
-// Execute indicates an expected call of Execute
-func (mr *MockGetContractMethodsUseCaseMockRecorder) Execute(ctx, chainID, address, selector interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockGetContractMethodsUseCase)(nil).Execute), ctx, chainID, address, selector)
 }
 
 // MockGetContractTagsUseCase is a mock of GetContractTagsUseCase interface

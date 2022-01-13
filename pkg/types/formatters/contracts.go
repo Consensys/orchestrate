@@ -3,6 +3,9 @@ package formatters
 import (
 	"net/http"
 	"strconv"
+	"strings"
+
+	"github.com/ethereum/go-ethereum/accounts/abi"
 
 	"encoding/json"
 
@@ -24,12 +27,18 @@ func FormatRegisterContractRequest(req *types.RegisterContractRequest) (*entitie
 		tag = entities.DefaultTagValue
 	}
 
+	parsedABI, err := abi.JSON(strings.NewReader(string(rawABI)))
+	if err != nil {
+		return nil, err
+	}
+
 	return &entities.Contract{
 		Name:             req.Name,
 		Tag:              tag,
 		Bytecode:         req.Bytecode,
 		DeployedBytecode: req.DeployedBytecode,
-		ABI:              string(rawABI),
+		RawABI:           string(rawABI),
+		ABI:              parsedABI,
 	}, nil
 }
 
@@ -89,7 +98,7 @@ func FormatContractResponse(contract *entities.Contract) *types.ContractResponse
 		Name:             contract.Name,
 		Tag:              contract.Tag,
 		Registry:         contract.Registry,
-		ABI:              contract.ABI,
+		ABI:              contract.RawABI,
 		Bytecode:         contract.Bytecode,
 		DeployedBytecode: contract.DeployedBytecode,
 		Constructor:      contract.Constructor,

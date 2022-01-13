@@ -16,7 +16,9 @@ type HTTPClient struct {
 	config *Config
 }
 
-func NewHTTPClient(h *http.Client, c *Config) OrchestrateClient {
+var _ OrchestrateClient = &HTTPClient{}
+
+func NewHTTPClient(h *http.Client, c *Config) *HTTPClient {
 	return &HTTPClient{
 		client: h,
 		config: c,

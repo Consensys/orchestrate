@@ -84,6 +84,7 @@ Feature: Private transactions
           "from": "{{account1}}",
           "to": "{{counterContractAddr}}",
           "methodSignature": "transfer(address,uint256)",
+          "contractName": "SimpleToken",
           "args": [
             "0x6009608A02a7A15fd6689D6DaD560C44E9ab61Ff",
             "0x2"
@@ -394,6 +395,7 @@ Feature: Private transactions
           "from": "{{account1}}",
           "to": "{{counterContractAddr}}",
           "methodSignature": "transfer(address,uint256)",
+          "contractName": "SimpleToken",
           "args": [
             "0x6009608A02a7A15fd6689D6DaD560C44E9ab61Ff",
             "0x2"

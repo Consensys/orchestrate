@@ -215,20 +215,6 @@ func (mr *MockAgentsMockRecorder) Event() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Event", reflect.TypeOf((*MockAgents)(nil).Event))
 }
 
-// Method mocks base method
-func (m *MockAgents) Method() store.MethodAgent {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Method")
-	ret0, _ := ret[0].(store.MethodAgent)
-	return ret0
-}
-
-// Method indicates an expected call of Method
-func (mr *MockAgentsMockRecorder) Method() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Method", reflect.TypeOf((*MockAgents)(nil).Method))
-}
-
 // Repository mocks base method
 func (m *MockAgents) Repository() store.RepositoryAgent {
 	m.ctrl.T.Helper()
@@ -475,20 +461,6 @@ func (m *MockDB) Event() store.EventAgent {
 func (mr *MockDBMockRecorder) Event() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Event", reflect.TypeOf((*MockDB)(nil).Event))
-}
-
-// Method mocks base method
-func (m *MockDB) Method() store.MethodAgent {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Method")
-	ret0, _ := ret[0].(store.MethodAgent)
-	return ret0
-}
-
-// Method indicates an expected call of Method
-func (mr *MockDBMockRecorder) Method() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Method", reflect.TypeOf((*MockDB)(nil).Method))
 }
 
 // Repository mocks base method
@@ -779,20 +751,6 @@ func (m *MockTx) Event() store.EventAgent {
 func (mr *MockTxMockRecorder) Event() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Event", reflect.TypeOf((*MockTx)(nil).Event))
-}
-
-// Method mocks base method
-func (m *MockTx) Method() store.MethodAgent {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Method")
-	ret0, _ := ret[0].(store.MethodAgent)
-	return ret0
-}
-
-// Method indicates an expected call of Method
-func (mr *MockTxMockRecorder) Method() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Method", reflect.TypeOf((*MockTx)(nil).Method))
 }
 
 // Repository mocks base method
@@ -1799,73 +1757,6 @@ func (m *MockEventAgent) FindDefaultBySigHash(ctx context.Context, sighash strin
 func (mr *MockEventAgentMockRecorder) FindDefaultBySigHash(ctx, sighash, indexedInputCount interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindDefaultBySigHash", reflect.TypeOf((*MockEventAgent)(nil).FindDefaultBySigHash), ctx, sighash, indexedInputCount)
-}
-
-// MockMethodAgent is a mock of MethodAgent interface
-type MockMethodAgent struct {
-	ctrl     *gomock.Controller
-	recorder *MockMethodAgentMockRecorder
-}
-
-// MockMethodAgentMockRecorder is the mock recorder for MockMethodAgent
-type MockMethodAgentMockRecorder struct {
-	mock *MockMethodAgent
-}
-
-// NewMockMethodAgent creates a new mock instance
-func NewMockMethodAgent(ctrl *gomock.Controller) *MockMethodAgent {
-	mock := &MockMethodAgent{ctrl: ctrl}
-	mock.recorder = &MockMethodAgentMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use
-func (m *MockMethodAgent) EXPECT() *MockMethodAgentMockRecorder {
-	return m.recorder
-}
-
-// InsertMultiple mocks base method
-func (m *MockMethodAgent) InsertMultiple(ctx context.Context, methods []*models.MethodModel) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "InsertMultiple", ctx, methods)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// InsertMultiple indicates an expected call of InsertMultiple
-func (mr *MockMethodAgentMockRecorder) InsertMultiple(ctx, methods interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertMultiple", reflect.TypeOf((*MockMethodAgent)(nil).InsertMultiple), ctx, methods)
-}
-
-// FindOneByAccountAndSelector mocks base method
-func (m *MockMethodAgent) FindOneByAccountAndSelector(ctx context.Context, chainID, address string, selector []byte) (*models.MethodModel, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindOneByAccountAndSelector", ctx, chainID, address, selector)
-	ret0, _ := ret[0].(*models.MethodModel)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// FindOneByAccountAndSelector indicates an expected call of FindOneByAccountAndSelector
-func (mr *MockMethodAgentMockRecorder) FindOneByAccountAndSelector(ctx, chainID, address, selector interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneByAccountAndSelector", reflect.TypeOf((*MockMethodAgent)(nil).FindOneByAccountAndSelector), ctx, chainID, address, selector)
-}
-
-// FindDefaultBySelector mocks base method
-func (m *MockMethodAgent) FindDefaultBySelector(ctx context.Context, selector []byte) ([]*models.MethodModel, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindDefaultBySelector", ctx, selector)
-	ret0, _ := ret[0].([]*models.MethodModel)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// FindDefaultBySelector indicates an expected call of FindDefaultBySelector
-func (mr *MockMethodAgentMockRecorder) FindDefaultBySelector(ctx, selector interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindDefaultBySelector", reflect.TypeOf((*MockMethodAgent)(nil).FindDefaultBySelector), ctx, selector)
 }
 
 // MockRepositoryAgent is a mock of RepositoryAgent interface

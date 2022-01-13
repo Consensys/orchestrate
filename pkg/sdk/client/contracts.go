@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/consensys/orchestrate/pkg/errors"
 	clientutils "github.com/consensys/orchestrate/pkg/toolkit/app/http/client-utils"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/httputil"
 	types "github.com/consensys/orchestrate/pkg/types/api"
@@ -135,28 +134,6 @@ func (c *HTTPClient) GetContractEvents(ctx context.Context, address, chainID str
 
 		defer clientutils.CloseResponse(response)
 		return httputil.ParseResponse(ctx, response, resp)
-	})
-
-	return resp, err
-}
-
-func (c *HTTPClient) GetContractMethodSignatures(ctx context.Context, name, tag, method string) ([]string, error) {
-	reqURL := fmt.Sprintf("%v/contracts/%s/%s/method-signatures", c.config.URL, name, tag)
-	var resp []string
-
-	if method != "" {
-		reqURL = reqURL + "?method=" + method
-	}
-
-	err := callWithBackOff(ctx, c.config.backOff, func() error {
-		response, err := clientutils.GetRequest(ctx, c.client, reqURL)
-		if err != nil {
-			errMessage := "error while getting contract method signatures"
-			return errors.FromError(err).SetMessage(errMessage).AppendReason(err.Error()).ExtendComponent(component)
-		}
-
-		defer clientutils.CloseResponse(response)
-		return httputil.ParseResponse(ctx, response, &resp)
 	})
 
 	return resp, err

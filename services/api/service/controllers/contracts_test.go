@@ -26,16 +26,14 @@ import (
 
 type contractsCtrlTestSuite struct {
 	suite.Suite
-	getContractsCatalog         *mocks.MockGetContractsCatalogUseCase
-	getContract                 *mocks.MockGetContractUseCase
-	getContractEvents           *mocks.MockGetContractEventsUseCase
-	getContractMethodSignatures *mocks.MockGetContractMethodSignaturesUseCase
-	getContractMethods          *mocks.MockGetContractMethodsUseCase
-	getContractTags             *mocks.MockGetContractTagsUseCase
-	setContractCodeHash         *mocks.MockSetContractCodeHashUseCase
-	registerContract            *mocks.MockRegisterContractUseCase
-	searchContract              *mocks.MockSearchContractUseCase
-	router                      *mux.Router
+	getContractsCatalog *mocks.MockGetContractsCatalogUseCase
+	getContract         *mocks.MockGetContractUseCase
+	getContractEvents   *mocks.MockGetContractEventsUseCase
+	getContractTags     *mocks.MockGetContractTagsUseCase
+	setContractCodeHash *mocks.MockSetContractCodeHashUseCase
+	registerContract    *mocks.MockRegisterContractUseCase
+	searchContract      *mocks.MockSearchContractUseCase
+	router              *mux.Router
 }
 
 var _ usecases.ContractUseCases = &contractsCtrlTestSuite{}
@@ -48,12 +46,6 @@ func (s *contractsCtrlTestSuite) GetContract() usecases.GetContractUseCase {
 }
 func (s *contractsCtrlTestSuite) GetContractEvents() usecases.GetContractEventsUseCase {
 	return s.getContractEvents
-}
-func (s *contractsCtrlTestSuite) GetContractMethodSignatures() usecases.GetContractMethodSignaturesUseCase {
-	return s.getContractMethodSignatures
-}
-func (s *contractsCtrlTestSuite) GetContractMethods() usecases.GetContractMethodsUseCase {
-	return s.getContractMethods
 }
 func (s *contractsCtrlTestSuite) GetContractTags() usecases.GetContractTagsUseCase {
 	return s.getContractTags
@@ -80,8 +72,6 @@ func (s *contractsCtrlTestSuite) SetupTest() {
 	s.getContractsCatalog = mocks.NewMockGetContractsCatalogUseCase(ctrl)
 	s.getContract = mocks.NewMockGetContractUseCase(ctrl)
 	s.getContractEvents = mocks.NewMockGetContractEventsUseCase(ctrl)
-	s.getContractMethodSignatures = mocks.NewMockGetContractMethodSignaturesUseCase(ctrl)
-	s.getContractMethods = mocks.NewMockGetContractMethodsUseCase(ctrl)
 	s.getContractTags = mocks.NewMockGetContractTagsUseCase(ctrl)
 	s.setContractCodeHash = mocks.NewMockSetContractCodeHashUseCase(ctrl)
 	s.registerContract = mocks.NewMockRegisterContractUseCase(ctrl)
@@ -328,45 +318,6 @@ func (s *contractsCtrlTestSuite) TestContractsController_GetContractsCatalog() {
 
 		s.router.ServeHTTP(rw, httpRequest)
 		expectedBody, _ := json.Marshal(catalog)
-		assert.Equal(t, string(expectedBody)+"\n", rw.Body.String())
-	})
-}
-
-func (s *contractsCtrlTestSuite) TestContractsController_GetContractMethodSignatures() {
-	ctx := context.Background()
-
-	s.T().Run("should execute get contract method signatures successfully", func(t *testing.T) {
-		rw := httptest.NewRecorder()
-		contract := testutils.FakeContract()
-		httpRequest := httptest.
-			NewRequest(http.MethodGet, fmt.Sprintf("/contracts/%s/%s/method-signatures", contract.Name, contract.Tag), nil).
-			WithContext(ctx)
-
-		methodSignatures := []string{"method1()", "method2()"}
-		s.getContractMethodSignatures.EXPECT().
-			Execute(gomock.Any(), contract.Name, contract.Tag, "").
-			Return(methodSignatures, nil)
-
-		s.router.ServeHTTP(rw, httpRequest)
-		expectedBody, _ := json.Marshal(methodSignatures)
-		assert.Equal(t, string(expectedBody)+"\n", rw.Body.String())
-	})
-
-	s.T().Run("should execute get contract method signatures with filter successfully", func(t *testing.T) {
-		rw := httptest.NewRecorder()
-		contract := testutils.FakeContract()
-		method := "method1"
-		httpRequest := httptest.
-			NewRequest(http.MethodGet, fmt.Sprintf("/contracts/%s/%s/method-signatures?method=%s", contract.Name, contract.Tag, method), nil).
-			WithContext(ctx)
-
-		methodSignatures := []string{"method1()"}
-		s.getContractMethodSignatures.EXPECT().
-			Execute(gomock.Any(), contract.Name, contract.Tag, method).
-			Return(methodSignatures, nil)
-
-		s.router.ServeHTTP(rw, httpRequest)
-		expectedBody, _ := json.Marshal(methodSignatures)
 		assert.Equal(t, string(expectedBody)+"\n", rw.Body.String())
 	})
 }

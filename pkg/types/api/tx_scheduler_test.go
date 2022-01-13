@@ -15,7 +15,9 @@ func TestTransactionParams_BasicSuccessful(t *testing.T) {
 	params := TransactionParams{
 		From:            &from,
 		To:              utils.ToPtr(ethcommon.HexToAddress("0x88a5C2d9919e46F883EB62F7b8Dd9d0CC45bc290")).(*ethcommon.Address),
-		MethodSignature: "Constructor()",
+		MethodSignature: "method()",
+		ContractTag:     "ContractTag",
+		ContractName:    "ContractName",
 	}
 
 	err := params.Validate()
@@ -25,8 +27,10 @@ func TestTransactionParams_BasicSuccessful(t *testing.T) {
 func TestTransactionParams_SuccessfulOneTimeKeyWithoutFrom(t *testing.T) {
 	params := TransactionParams{
 		To:              utils.ToPtr(ethcommon.HexToAddress("0x88a5C2d9919e46F883EB62F7b8Dd9d0CC45bc290")).(*ethcommon.Address),
-		MethodSignature: "Constructor()",
+		MethodSignature: "method()",
 		OneTimeKey:      true,
+		ContractTag:     "ContractTag",
+		ContractName:    "ContractName",
 	}
 
 	err := utils.GetValidator().Struct(params)
@@ -36,7 +40,7 @@ func TestTransactionParams_SuccessfulOneTimeKeyWithoutFrom(t *testing.T) {
 func TestTransactionParams_FailWithoutFrom(t *testing.T) {
 	params := TransactionParams{
 		To:              utils.ToPtr(ethcommon.HexToAddress("0x88a5C2d9919e46F883EB62F7b8Dd9d0CC45bc291")).(*ethcommon.Address),
-		MethodSignature: "Constructor()",
+		MethodSignature: "method()",
 	}
 
 	err := params.Validate()

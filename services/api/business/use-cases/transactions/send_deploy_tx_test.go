@@ -10,9 +10,9 @@ import (
 	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	testutils2 "github.com/consensys/orchestrate/pkg/types/testutils"
 
+	mocks2 "github.com/consensys/orchestrate/services/api/business/use-cases/mocks"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	mocks2 "github.com/consensys/orchestrate/services/api/business/use-cases/mocks"
 )
 
 func TestSendDeployTx_Execute(t *testing.T) {
@@ -24,8 +24,6 @@ func TestSendDeployTx_Execute(t *testing.T) {
 
 	ctx := context.Background()
 	txRequest := testutils2.FakeTxRequest()
-	txRequest.Params.ContractTag = "contractTag"
-	txRequest.Params.ContractName = "contractName"
 	txRequest.Params.Args = nil
 
 	userInfo := multitenancy.NewUserInfo("tenantOne", "username")
