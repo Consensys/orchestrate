@@ -3,6 +3,7 @@ version: 2.1
 orbs:
   go: circleci/go@1.5.0
   codecov: codecov/codecov@3.2.2
+  sonarcloud: sonarsource/sonarcloud@1.0.1
 
 commands:
   prepare_golang:
@@ -184,9 +185,15 @@ jobs:
       - codecov/upload:
           file: ./build/coverage/unit.out
           flags: unittests
+      - store_test_results:
+          path: ./build/coverage/unit.out
       - store_artifacts:
           path: ./build/coverage/unit.html
           destination: unit-coverage.html
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./build/coverage
 
   race:
     docker:
@@ -215,10 +222,28 @@ jobs:
       - codecov/upload:
           file: ./build/coverage/integration.out
           flags: integration
+      - store_test_results:
+          path: ./build/coverage/integration.out
       - store_artifacts:
           path: ./build/coverage/integration.html
           destination: integration-coverage.html
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./build/coverage
 
+  sonarscan:
+    docker:
+      - image: cimg/go:1.16.8
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: List coverage files
+          command: ls -la ./build/coverage
+      - sonarcloud/scan
+        
   build-docker-image:
     docker:
       - image: cimg/base:2021.12
@@ -459,19 +484,28 @@ workflows:
               only: /^v.*/
             branches:
               only: /.*/
+      - sonarscan:
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              only: /.*/
+          requires:
+            - test
+            - integration
       - run-e2e-local:
-            name: e2e
-            filters:
-              branches:
-                only: main
-              tags:
-                only: /^v.*/
-            requires:
-              - lint
-              - gobuild
-              - test
-              - race
-              - integration
+          name: e2e
+          filters:
+            branches:
+              only: main
+            tags:
+              only: /^v.*/
+          requires:
+            - lint
+            - gobuild
+            - test
+            - race
+            - integration
       - build-docker-image: # Push Dev image
           name: push-orchestrate-image
           matrix:

@@ -1,5 +1,6 @@
 codecov:
-  require_ci_to_pass: true
+  notify:
+    require_ci_to_pass: no
 
 coverage:
   range: 40..100
@@ -13,10 +14,8 @@ coverage:
         threshold: 2%
         informational: true
         flags:
-          - "unittests"
-          - "integration"
-        branches:
-          - main
+          - unittests
+          - integration
         paths:
           - "src"
           - "pkg"
@@ -31,10 +30,11 @@ coverage:
       default:
         target: 90%
         threshold: 1%
+        only_pulls: true
         informational: true
         flags:
-          - "unittests"
-          - "integration"
+          - unittests
+          - integration
         paths:
           - "src"
           - "pkg"
@@ -45,20 +45,14 @@ coverage:
           - "!tests/*"
           - "!*/integration-tests"
 
-# https://docs.codecov.io/docs/codecovyml-reference#section-parsers
-parsers:
-  gcov:
-    branch_detection:
-      conditional: yes
-      loop: yes
-      method: no
-      macro: no
-      
 comment:
-  layout: "reach, diff, flags, files"
+  layout: "reach, diff, flags"
   behavior: default
   require_changes: no
-  
+
+github_checks:
+    annotations: true
+    
 ignore:
   - tests/*
   - main.go
