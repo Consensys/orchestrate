@@ -1,8 +1,6 @@
 package dynamic
 
 import (
-	"reflect"
-
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/configwatcher/provider"
 	traefikdynamic "github.com/traefik/traefik/v2/pkg/config/dynamic"
 	"github.com/traefik/traefik/v2/pkg/log"
@@ -32,17 +30,6 @@ func FromTraefikConfig(traefikConf *traefikdynamic.Configuration) *Configuration
 	return &Configuration{
 		HTTP: FromTraefikHTTPConfig(traefikConf.HTTP),
 		TLS:  traefikConf.TLS,
-	}
-}
-
-func ToTraefikConfig(conf *Configuration) *traefikdynamic.Configuration {
-	if conf == nil {
-		return nil
-	}
-
-	return &traefikdynamic.Configuration{
-		HTTP: ToTraefikHTTPConfig(conf.HTTP),
-		TLS:  conf.TLS,
 	}
 }
 
@@ -85,39 +72,4 @@ func Merge(configurations map[string]interface{}) interface{} {
 	}
 
 	return configuration
-}
-
-// AddService Adds a service to a configurations.
-func AddService(configuration *HTTPConfiguration, serviceName string, service *Service) bool {
-	if _, ok := configuration.Services[serviceName]; !ok {
-		configuration.Services[serviceName] = service
-		return true
-	}
-
-	if configuration.Services[serviceName].ReverseProxy == nil || service.ReverseProxy == nil || !configuration.Services[serviceName].ReverseProxy.Mergeable(service.ReverseProxy) {
-		return false
-	}
-
-	configuration.Services[serviceName].ReverseProxy.LoadBalancer.Servers = append(configuration.Services[serviceName].ReverseProxy.LoadBalancer.Servers, service.ReverseProxy.LoadBalancer.Servers...)
-	return true
-}
-
-// AddRouter Adds a router to a configurations.
-func AddRouter(configuration *HTTPConfiguration, routerName string, router *Router) bool {
-	if _, ok := configuration.Routers[routerName]; !ok {
-		configuration.Routers[routerName] = router
-		return true
-	}
-
-	return reflect.DeepEqual(configuration.Routers[routerName], router)
-}
-
-// AddMiddleware Adds a middleware to a configurations.
-func AddMiddleware(configuration *HTTPConfiguration, middlewareName string, middleware *Middleware) bool {
-	if _, ok := configuration.Middlewares[middlewareName]; !ok {
-		configuration.Middlewares[middlewareName] = middleware
-		return true
-	}
-
-	return reflect.DeepEqual(configuration.Middlewares[middlewareName], middleware)
 }

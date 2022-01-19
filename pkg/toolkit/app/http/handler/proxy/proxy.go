@@ -11,6 +11,7 @@ import (
 	"net/http"
 	gohttputil "net/http/httputil"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/config/dynamic"
@@ -147,6 +148,14 @@ func New(cfg *dynamic.ReverseProxy, transport http.RoundTripper, pool gohttputil
 			// https://tools.ietf.org/html/rfc6455#page-20
 			outReq.Header["Sec-WebSocket-Key"] = outReq.Header["Sec-Websocket-Key"]
 			delete(outReq.Header, "Sec-Websocket-Key")
+
+			// Remove Traefik annotation Headers to prevent remote servers to interpretable them
+			outReq.RemoteAddr = ""
+			for k := range outReq.Header {
+				if strings.HasPrefix(k, "X-Forwarded") {
+					delete(outReq.Header, k)
+				}
+			}
 		},
 		Transport:     transport,
 		FlushInterval: time.Duration(flushInterval),

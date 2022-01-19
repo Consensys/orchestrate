@@ -43,34 +43,3 @@ func FromTraefikHTTPConfig(traefikConf *traefikdynamic.HTTPConfiguration) *HTTPC
 
 	return conf
 }
-
-func ToTraefikHTTPConfig(conf *HTTPConfiguration) *traefikdynamic.HTTPConfiguration {
-	if conf == nil {
-		return nil
-	}
-
-	traefikConf := &traefikdynamic.HTTPConfiguration{}
-
-	if len(conf.Routers) > 0 {
-		traefikConf.Routers = make(map[string]*traefikdynamic.Router)
-		for k, router := range conf.Routers {
-			traefikConf.Routers[k] = ToTraefikRouter(router)
-		}
-	}
-
-	if len(conf.Middlewares) > 0 {
-		traefikConf.Middlewares = make(map[string]*traefikdynamic.Middleware)
-		for k, middleware := range conf.Middlewares {
-			traefikConf.Middlewares[k] = ToTraefikMiddleware(middleware)
-		}
-	}
-
-	if len(conf.Services) > 0 {
-		traefikConf.Services = make(map[string]*traefikdynamic.Service)
-		for k, service := range conf.Services {
-			traefikConf.Services[k] = ToTraefikService(service)
-		}
-	}
-
-	return traefikConf
-}

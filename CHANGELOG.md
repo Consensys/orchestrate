@@ -1,5 +1,9 @@
 # Orchestrate Release Notes
 
+## v21.12.2 (Unreleased)
+### 🛠 Bug fixes
+* Fixed Chain Proxy issues caused by additional header being added to forwarded request.  
+
 ## v21.12.1 (2022-01-13)
 ### 🆕 Features
 * Compatibility with all versions of Solidity <= 0.8.11.

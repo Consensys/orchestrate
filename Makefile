@@ -139,7 +139,10 @@ topics: ## Create kafka topics
 	@bash scripts/deps/kafka/initTopics.sh
 
 gobuild: ## Build Orchestrate Go binary
-	@CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ./build/bin/orchestrate
+	@CGO_ENABLED=0 go build -o ./build/bin/orchestrate
+
+gobuild-dbg:
+	CGO_ENABLED=1 go build -gcflags=all="-N -l" -o ./build/bin/orchestrate
 
 docker-build: ## Build Orchestrate Docker image
 	@DOCKER_BUILDKIT=1 docker build -t orchestrate .

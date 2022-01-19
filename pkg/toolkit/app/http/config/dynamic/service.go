@@ -103,41 +103,6 @@ func FromTraefikService(service *traefikdynamic.Service) *Service {
 	return &Service{ReverseProxy: proxy}
 }
 
-func ToTraefikService(service *Service) *traefikdynamic.Service {
-	if service == nil {
-		return nil
-	}
-
-	if service.ReverseProxy == nil || service.ReverseProxy.LoadBalancer == nil {
-		return nil
-	}
-
-	var servers []traefikdynamic.Server
-	for _, srv := range service.ReverseProxy.LoadBalancer.Servers {
-		servers = append(servers, traefikdynamic.Server{URL: srv.URL})
-	}
-	var sticky *traefikdynamic.Sticky
-	if service.ReverseProxy.LoadBalancer.Sticky != nil && service.ReverseProxy.LoadBalancer.Sticky.Cookie != nil {
-		sticky = &traefikdynamic.Sticky{
-			Cookie: &traefikdynamic.Cookie{
-				Name:     service.ReverseProxy.LoadBalancer.Sticky.Cookie.Name,
-				HTTPOnly: service.ReverseProxy.LoadBalancer.Sticky.Cookie.HTTPOnly,
-				Secure:   service.ReverseProxy.LoadBalancer.Sticky.Cookie.Secure,
-				SameSite: service.ReverseProxy.LoadBalancer.Sticky.Cookie.SameSite,
-			},
-		}
-	}
-
-	return &traefikdynamic.Service{
-		LoadBalancer: &traefikdynamic.ServersLoadBalancer{
-			PassHostHeader:     service.ReverseProxy.PassHostHeader,
-			ResponseForwarding: service.ReverseProxy.ResponseForwarding,
-			Servers:            servers,
-			Sticky:             sticky,
-		},
-	}
-}
-
 // +k8s:deepcopy-gen=true
 
 type Swagger struct {
