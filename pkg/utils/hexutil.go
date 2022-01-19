@@ -21,6 +21,11 @@ func StringerToString(v fmt.Stringer) string {
 	return v.String()
 }
 
+func IsHexString(s string) bool {
+	_, err := hexutil.Decode(s)
+	return err == nil
+}
+
 func StringToHexBytes(v string) hexutil.Bytes {
 	if v == "" {
 		return nil
@@ -63,9 +68,4 @@ func StringToUint64(v string) *uint64 {
 	}
 
 	return nil
-}
-
-func IsHexString(s string) bool {
-	_, err := hexutil.Decode(s)
-	return err == nil
 }
