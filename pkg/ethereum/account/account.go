@@ -3,60 +3,43 @@ package account
 import (
 	"crypto/ecdsa"
 
-	"github.com/consensys/orchestrate/pkg/errors"
-	ethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 )
 
-// account is a container
-type account struct {
-	address ethcommon.Address
+// TODO: Remove this Account entity and use the one in pkg/types
+
+type Account struct {
+	Address common.Address
 	priv    *ecdsa.PrivateKey
 }
 
-// NewAccount construct an account object
-func NewAccount() Account {
-	return &account{}
-}
-
-// Generate create a keypair and set the result in the account
-func (w *account) Generate() error {
+// NewAccount create a keypair and set the result in the account
+func NewAccount() (*Account, error) {
 	prv, err := crypto.GenerateKey()
 	if err != nil {
-		return errors.CryptoOperationError(err.Error()).SetComponent(component)
+		return nil, err
 	}
-	w.priv = prv
-	pub := prv.PublicKey
-	w.address = crypto.PubkeyToAddress(pub)
-	return nil
+
+	return &Account{
+		priv:    prv,
+		Address: crypto.PubkeyToAddress(prv.PublicKey),
+	}, nil
 }
 
-// FromPrivateKey creates a new account from a given private key
-func (w *account) FromPrivateKey(priv string) error {
-	prv, err := crypto.HexToECDSA(priv)
+// NewAccountFromPrivateKey creates a new account from a given private key
+func NewAccountFromPrivateKey(priv string) (*Account, error) {
+	prv, err := crypto.HexToECDSA(priv[2:])
 	if err != nil {
-		return errors.InvalidFormatError("invalid hex private key %v...%v", priv[:5], priv[len(priv)-5:]).SetComponent(component)
+		return nil, err
 	}
-	w.priv = prv
-	pub := w.priv.PublicKey
-	w.address = crypto.PubkeyToAddress(pub)
-	return nil
+
+	return &Account{
+		priv:    prv,
+		Address: crypto.PubkeyToAddress(prv.PublicKey),
+	}, nil
 }
 
-// Priv returns the private key of account
-func (w *account) Priv() *ecdsa.PrivateKey {
-	return w.priv
-}
-
-// Address returns the address of the account
-func (w *account) Address() ethcommon.Address {
-	return w.address
-}
-
-func (w *account) SetPriv(priv *ecdsa.PrivateKey) {
-	w.priv = priv
-}
-
-func (w *account) SetAddress(addr ethcommon.Address) {
-	w.address = addr
+func (a *Account) Priv() []byte {
+	return a.priv.D.Bytes()
 }

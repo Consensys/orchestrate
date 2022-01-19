@@ -173,8 +173,7 @@ func importTestIdentities(ctx context.Context, testData *utils3.TestData) error 
 			})
 
 			if err != nil {
-				// TODO: Remove errors.IsDependencyFailureError(err) when bug fixed in QKM
-				if errors.IsAlreadyExistsError(err) || errors.IsConflictedError(err) || errors.IsDependencyFailureError(err) {
+				if errors.IsAlreadyExistsError(err) || errors.IsConflictedError(err) {
 					logger.WithError(err).WithField("priv_key", privKey.String()).Warn("imported account is duplicated")
 					continue
 				}

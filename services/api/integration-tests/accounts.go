@@ -3,7 +3,7 @@
 package integrationtests
 
 import (
-	"fmt"
+	"github.com/consensys/orchestrate/pkg/ethereum/account"
 	utilstypes "github.com/consensys/quorum-key-manager/src/utils/api/types"
 	"testing"
 	"time"
@@ -13,14 +13,12 @@ import (
 	"github.com/consensys/orchestrate/pkg/types/api"
 	qkmtypes "github.com/consensys/quorum-key-manager/src/stores/api/types"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/stretchr/testify/require"
 
 	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/pkg/types/testutils"
 	"github.com/consensys/orchestrate/pkg/utils"
-	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"github.com/traefik/traefik/v2/pkg/log"
@@ -33,7 +31,7 @@ type accountsTestSuite struct {
 	defaultQKMStoreID string
 }
 
-func (s *accountsTestSuite) TestCreateAccounts() {
+func (s *accountsTestSuite) TestCreate() {
 	ctx := s.env.ctx
 	chain := testutils.FakeChain()
 	chain.URLs = []string{s.env.blockchainNodeURL}
@@ -88,14 +86,14 @@ func (s *accountsTestSuite) TestCreateAccounts() {
 		})
 		require.NoError(s.T(), err)
 
-		privKey, address, err := createNewKey()
-		require.NoError(s.T(), err, fmt.Sprintf("invalid private key %s", privKey))
+		acc, err := account.NewAccount()
+		require.NoError(s.T(), err)
 		accountFaucet := testutils.FakeAccount()
 		accountFaucet.Alias = "MyFaucetCreditor-accounts_" + utils.RandString(5)
-		accountFaucet.Address = address
+		accountFaucet.Address = acc.Address
 
 		req := testutils.FakeImportAccountRequest()
-		req.PrivateKey = privKey
+		req.PrivateKey = acc.Priv()
 		req.Alias = accountFaucet.Alias
 		ethAccRes, err := s.client.ImportAccount(s.env.ctx, req)
 		require.NoError(s.T(), err)
@@ -138,10 +136,10 @@ func (s *accountsTestSuite) TestImport() {
 	ctx := s.env.ctx
 
 	s.T().Run("should import account successfully by querying key-manager API", func(t *testing.T) {
-		privKey, _, err := createNewKey()
-		require.NoError(s.T(), err, fmt.Sprintf("invalid private key %s", privKey))
+		acc, err := account.NewAccount()
+		require.NoError(s.T(), err)
 		txRequest := testutils.FakeImportAccountRequest()
-		txRequest.PrivateKey = privKey
+		txRequest.PrivateKey = acc.Priv()
 
 		resp, err := s.client.ImportAccount(ctx, txRequest)
 		require.NoError(s.T(), err)
@@ -151,17 +149,15 @@ func (s *accountsTestSuite) TestImport() {
 	})
 
 	s.T().Run("should fail to import same account twice", func(t *testing.T) {
-		privKey, _, err := createNewKey()
-		require.NoError(s.T(), err, fmt.Sprintf("invalid private key %s", privKey))
+		acc, err := account.NewAccount()
+		require.NoError(s.T(), err)
+
 		txRequest := testutils.FakeImportAccountRequest()
-		txRequest.PrivateKey = privKey
+		txRequest.PrivateKey = acc.Priv()
 
 		_, err = s.client.ImportAccount(ctx, txRequest)
 		require.NoError(s.T(), err)
 
-		privKey, _, err = createNewKey()
-		require.NoError(s.T(), err)
-		txRequest.PrivateKey = privKey
 		_, err = s.client.ImportAccount(ctx, txRequest)
 		require.Error(s.T(), err)
 		assert.True(s.T(), errors.IsAlreadyExistsError(err))
@@ -266,14 +262,4 @@ func (s *accountsTestSuite) TestSignTypedData() {
 		})
 		assert.NoError(s.T(), err)
 	})
-}
-
-func createNewKey() (privKey []byte, address ethcommon.Address, err error) {
-	faucetKey, err := crypto.GenerateKey()
-	if err != nil {
-		// Issue TBD
-		return nil, ethcommon.Address{}, err
-	}
-
-	return faucetKey.D.Bytes(), crypto.PubkeyToAddress(faucetKey.PublicKey), nil
 }

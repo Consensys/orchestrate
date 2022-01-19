@@ -297,11 +297,9 @@ func (sc *ScenarioContext) iHaveTheFollowingAccount(table *gherkin.PickleStepArg
 			return errors.DataError("need an alias")
 		}
 
-		w := account.NewAccount()
-		_ = w.Generate()
-		privBytes := crypto.FromECDSA(w.Priv())
-		accountMap["address"] = w.Address().String()
-		accountMap["private_key"] = hexutil.Encode(privBytes)
+		w, _ := account.NewAccount()
+		accountMap["address"] = w.Address.String()
+		accountMap["private_key"] = hexutil.Encode(w.Priv())
 		sc.aliases.Set(accountMap, sc.Pickle.Id, aliass)
 	}
 
@@ -445,14 +443,11 @@ func (sc *ScenarioContext) replace(s string) (string, error) {
 			case "uuid":
 				s = strings.Replace(s, matchedAlias[0], uuid.Must(uuid.NewV4()).String(), 1)
 			case "account":
-				w := account.NewAccount()
-				_ = w.Generate()
-				s = strings.Replace(s, matchedAlias[0], w.Address().Hex(), 1)
+				w, _ := account.NewAccount()
+				s = strings.Replace(s, matchedAlias[0], w.Address.Hex(), 1)
 			case "private_key":
-				w := account.NewAccount()
-				_ = w.Generate()
-				privBytes := crypto.FromECDSA(w.Priv())
-				s = strings.Replace(s, matchedAlias[0], hexutil.Encode(privBytes)[2:], 1)
+				w, _ := account.NewAccount()
+				s = strings.Replace(s, matchedAlias[0], hexutil.Encode(w.Priv())[2:], 1)
 			case "int":
 				s = strings.Replace(s, matchedAlias[0], fmt.Sprintf("%d", rand.Int()), 1)
 			}
