@@ -131,7 +131,7 @@ func (c *ChainsController) update(rw http.ResponseWriter, request *http.Request)
 // @Produce json
 // @Security ApiKeyAuth
 // @Security JWTAuth
-// @Param request body api.RegisterChainRequest{listener=api.RegisterListenerRequest,privateTxManager=api.PrivateTxManagerRequest} true "Chain registration request"
+// @Param request body api.RegisterChainRequest{listener=api.RegisterListenerRequest,privateTxManager=api.PrivateTxManagerRequest} true "Chain registration request."
 // @Success 200 {object} api.ChainResponse{privateTxManager=entities.PrivateTxManager}
 // @Failure 400 {object} httputil.ErrorResponse "Invalid request"
 // @Failure 500 {object} httputil.ErrorResponse "Internal server error"
