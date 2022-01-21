@@ -2,7 +2,6 @@ version: 2.1
 
 orbs:
   go: circleci/go@1.5.0
-  codecov: codecov/codecov@3.2.2
   sonarcloud: sonarsource/sonarcloud@1.0.1
 
 commands:
@@ -182,9 +181,6 @@ jobs:
       - run:
           name: Run unit tests
           command: make ci-run-coverage-unit
-      - codecov/upload:
-          file: ./build/coverage/unit.out
-          flags: unittests
       - store_test_results:
           path: ./build/coverage/unit.out
       - store_artifacts:
@@ -219,9 +215,6 @@ jobs:
       - run:
           name: Integration tests
           command: make run-coverage-integration
-      - codecov/upload:
-          file: ./build/coverage/integration.out
-          flags: integration
       - store_test_results:
           path: ./build/coverage/integration.out
       - store_artifacts:
