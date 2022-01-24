@@ -23,6 +23,7 @@ func FormatSendTxRequest(sendTxRequest *types.SendTransactionRequest, idempotenc
 		Params: &entities.ETHTransactionParams{
 			From:            sendTxRequest.Params.From,
 			To:              sendTxRequest.Params.To,
+			Nonce:           sendTxRequest.Params.Nonce,
 			Value:           sendTxRequest.Params.Value,
 			GasPrice:        sendTxRequest.Params.GasPrice,
 			Gas:             sendTxRequest.Params.Gas,
@@ -61,6 +62,7 @@ func FormatDeployContractRequest(deployRequest *types.DeployContractRequest, ide
 		Labels:         deployRequest.Labels,
 		Params: &entities.ETHTransactionParams{
 			From:            deployRequest.Params.From,
+			Nonce:           deployRequest.Params.Nonce,
 			Value:           deployRequest.Params.Value,
 			GasPrice:        deployRequest.Params.GasPrice,
 			Gas:             deployRequest.Params.Gas,
@@ -114,6 +116,7 @@ func FormatTransferRequest(transferRequest *types.TransferRequest, idempotencyKe
 		Params: &entities.ETHTransactionParams{
 			From:            &transferRequest.Params.From,
 			To:              &transferRequest.Params.To,
+			Nonce:           transferRequest.Params.Nonce,
 			GasFeeCap:       transferRequest.Params.GasFeeCap,
 			GasTipCap:       transferRequest.Params.GasTipCap,
 			AccessList:      transferRequest.Params.AccessList,

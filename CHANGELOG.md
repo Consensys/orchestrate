@@ -4,6 +4,7 @@
 ### 🛠 Bug fixes
 * Fixed Chain Proxy issues caused by additional header being added to forwarded request.  
 * Fixed wrong error code returned importing duplicate accounts
+* Fixed missing `nonce` attribute in transaction request payloads.
 
 ## v21.12.1 (2022-01-13)
 ### 🆕 Features

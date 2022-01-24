@@ -18,6 +18,7 @@ type SendTransactionRequest struct {
 // See more https://github.com/go-playground/validator/issues/608
 type TransactionParams struct {
 	Value           *hexutil.Big                  `json:"value,omitempty" validate:"omitempty" example:"0x44300E0" swaggertype:"string"`
+	Nonce           *uint64                       `json:"nonce,omitempty" example:"1"`
 	Gas             *uint64                       `json:"gas,omitempty" example:"50000"`
 	GasPrice        *hexutil.Big                  `json:"gasPrice,omitempty" validate:"omitempty" example:"0xAB208" swaggertype:"string"`
 	GasFeeCap       *hexutil.Big                  `json:"maxFeePerGas,omitempty" example:"0x4c4b40" swaggertype:"string"`

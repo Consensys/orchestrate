@@ -190,6 +190,82 @@ Feature: Nonce manager
       | 1              | 2     |
       | 1              | 1     |
 
+  @test
+  Scenario: Nonce recalibrating with transactions
+    Given I register the following alias
+      | alias | value              |
+      | to1   | {{random.account}} |
+      | to2   | {{random.account}} |
+      | to3   | {{random.account}} |
+    Then I set the headers
+      | Key         | Value                |
+      | X-API-KEY   | {{global.api-key}}   |
+      | X-TENANT-ID | {{tenant1.tenantID}} |
+    Given I register the following alias
+      | alias                 | value           |
+      | besuContractTxOneID   | {{random.uuid}} |
+      | besuContractTxTwoID   | {{random.uuid}} |
+      | besuContractTxThreeID | {{random.uuid}} |
+    Then I track the following envelopes
+      | ID                        |
+      | {{besuContractTxOneID}}   |
+      | {{besuContractTxTwoID}}   |
+      | {{besuContractTxThreeID}} |
+    When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
+      """
+      {
+        "chain": "{{chain.besu0.Name}}",
+        "params": {
+          "contractName": "SimpleToken",
+          "from": "{{account1}}",
+          "nonce": 1
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{besuContractTxOneID}}"
+        }
+      }
+      """
+    Then the response code should be 202
+    When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
+      """
+      {
+        "chain": "{{chain.besu0.Name}}",
+        "params": {
+          "contractName": "SimpleToken",
+          "from": "{{account1}}",
+          "nonce": 2
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{besuContractTxTwoID}}"
+        }
+      }
+      """
+    Then the response code should be 202
+    When I send "POST" request to "{{global.api}}/transactions/deploy-contract" with json:
+      """
+      {
+        "chain": "{{chain.besu0.Name}}",
+        "params": {
+          "contractName": "SimpleToken",
+          "from": "{{account1}}",
+          "nonce": 0
+        },
+        "labels": {
+          "scenario.id": "{{scenarioID}}",
+          "id": "{{besuContractTxThreeID}}"
+        }
+      }
+      """
+    Then the response code should be 202
+    Then Envelopes should be in topic "tx.decoded"
+    And Envelopes should have the following fields
+      | Receipt.Status | Nonce |
+      | 1              | 1     |
+      | 1              | 2     |
+      | 1              | 0     |
+
   Scenario: Chaotic nonce
     Given I register the following alias
       | alias | value              |

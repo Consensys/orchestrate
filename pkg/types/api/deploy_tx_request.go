@@ -16,6 +16,7 @@ type DeployContractRequest struct {
 
 type DeployContractParams struct {
 	Value           *hexutil.Big                  `json:"value,omitempty" validate:"omitempty" example:"0x59682f00" swaggertype:"string"`
+	Nonce           *uint64                       `json:"nonce,omitempty" example:"1"`
 	Gas             *uint64                       `json:"gas,omitempty" example:"300000"`
 	GasPrice        *hexutil.Big                  `json:"gasPrice,omitempty" validate:"omitempty" example:"0x5208" swaggertype:"string"`
 	GasFeeCap       *hexutil.Big                  `json:"maxFeePerGas,omitempty" example:"0x4c4b40" swaggertype:"string"`
