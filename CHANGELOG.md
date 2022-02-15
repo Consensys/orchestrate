@@ -5,6 +5,7 @@
 * Fixed Chain Proxy issues caused by additional header being added to forwarded request.  
 * Fixed wrong error code returned importing duplicate accounts
 * Fixed missing `nonce` attribute in transaction request payloads.
+* Fixed go-web3 panic error passing HEX as bytes.
 
 ## v21.12.1 (2022-01-13)
 ### 🆕 Features

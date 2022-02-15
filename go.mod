@@ -48,7 +48,7 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/traefik/paerser v0.1.4
 	github.com/traefik/traefik/v2 v2.5.5
-	github.com/umbracle/go-web3 v0.0.0-20220112152710-157826f66053
+	github.com/umbracle/go-web3 v0.0.0-20220214174057-1d971ac3be78
 	github.com/unrolled/secure v1.0.9
 	github.com/vulcand/oxy v1.3.0
 	github.com/yuin/gopher-lua v0.0.0-20191220021717-ab39c6098bdb // indirect
