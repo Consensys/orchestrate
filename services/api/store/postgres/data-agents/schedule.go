@@ -51,12 +51,6 @@ func (agent *PGSchedule) FindOneByUUID(ctx context.Context, scheduleUUID string,
 		}).
 		Where("schedule.uuid = ?", scheduleUUID)
 
-	if ownerID != "" {
-		query = query.Where("owner_id = ? OR owner_id IS NULL", ownerID)
-	} else {
-		query = query.Where("owner_id IS NULL")
-	}
-
 	query = pg.WhereAllowedTenants(query, "schedule.tenant_id", tenants)
 	query = pg.WhereAllowedOwner(query, "owner_id", ownerID)
 

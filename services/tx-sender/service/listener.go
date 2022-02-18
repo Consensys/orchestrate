@@ -7,6 +7,7 @@ import (
 	"github.com/cenkalti/backoff/v4"
 	"github.com/consensys/orchestrate/pkg/sdk/client"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/pkg/utils/envelope"
 	utils2 "github.com/consensys/orchestrate/services/tx-sender/tx-sender/utils"
@@ -83,7 +84,7 @@ func (listener *MessageListener) ConsumeClaim(session sarama.ConsumerGroupSessio
 
 func (listener *MessageListener) consumeClaimLoop(ctx context.Context, session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	logger := listener.logger.WithContext(ctx)
-	ctx = log.With(ctx, logger)
+	ctx = multitenancy.WithUserInfo(log.With(ctx, logger), multitenancy.NewInternalAdminUser())
 	logger.Info("started consuming claims loop")
 
 	for {
@@ -110,7 +111,7 @@ func (listener *MessageListener) consumeClaimLoop(ctx context.Context, session s
 
 			jlogger := logger.WithField("job", evlp.GetJobUUID()).WithField("schedule", evlp.GetScheduleUUID())
 			job := envelope.NewJobFromEnvelope(evlp)
-			err = listener.processEnvelope(envelope.NewContextFromEnvelope(log.With(ctx, jlogger), evlp), evlp, job)
+			err = listener.processEnvelope(ctx, evlp, job)
 
 			switch {
 			// If job exceeded number of retries, we must Notify, Update job to FAILED and Continue

@@ -1,6 +1,10 @@
 # Orchestrate Release Notes
 
-## v21.12.2 (Unreleased)
+## v21.12.2 (unreleased)
+### 🛠 Bug fixes
+* Fixed panic on tx-sender updating status of jobs with `owner_id` different than nil.
+
+## v21.12.2 (2022-02-17)
 ### 🛠 Bug fixes
 * Fixed Chain Proxy issues caused by additional header being added to forwarded request.  
 * Fixed wrong error code returned importing duplicate accounts
