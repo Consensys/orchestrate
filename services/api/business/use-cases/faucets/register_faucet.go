@@ -50,6 +50,20 @@ func (uc *registerFaucetUseCase) Execute(ctx context.Context, faucet *entities.F
 		return nil, errors.AlreadyExistsError(errMessage).ExtendComponent(registerFaucetComponent)
 	}
 
+	_, err = uc.db.Chain().FindOneByUUID(ctx, faucet.ChainRule, userInfo.AllowedTenants, userInfo.Username)
+	if errors.IsNotFoundError(err) {
+		return nil, errors.InvalidParameterError("cannot find linked chain")
+	} else if err != nil {
+		return nil, err
+	}
+
+	_, err = uc.db.Account().FindOneByAddress(ctx, faucet.CreditorAccount.String(), userInfo.AllowedTenants, userInfo.Username)
+	if errors.IsNotFoundError(err) {
+		return nil, errors.InvalidParameterError("cannot find creditor account")
+	} else if err != nil {
+		return nil, err
+	}
+
 	faucetModel := parsers.NewFaucetModelFromEntity(faucet)
 	faucetModel.TenantID = userInfo.TenantID
 	err = uc.db.Faucet().Insert(ctx, faucetModel)

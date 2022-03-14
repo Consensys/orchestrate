@@ -1,8 +1,10 @@
 # Orchestrate Release Notes
 
-## v21.12.2 (unreleased)
+## v21.12.3 (WIP)
 ### 🛠 Bug fixes
 * Fixed panic on tx-sender updating status of jobs with `owner_id` different than nil.
+* Migrated faucet DB table to use TEXT for every VARCHAR column.
+* Validate existence of `creditorAccount` and `chainRule` before creating a new Faucet
 
 ## v21.12.2 (2022-02-17)
 ### 🛠 Bug fixes

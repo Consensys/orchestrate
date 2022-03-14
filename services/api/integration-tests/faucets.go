@@ -21,8 +21,24 @@ import (
 
 type faucetsTestSuite struct {
 	suite.Suite
-	client client.OrchestrateClient
-	env    *IntegrationEnvironment
+	client  client.OrchestrateClient
+	env     *IntegrationEnvironment
+	chain   *api.ChainResponse
+	account *api.AccountResponse
+}
+
+func (s *faucetsTestSuite) SetupSuite() {
+	ctx := s.env.ctx
+
+	chainReq := testutils.FakeRegisterChainRequest()
+	chainReq.URLs = []string{s.env.blockchainNodeURL}
+
+	var err error
+	s.chain, err = s.client.RegisterChain(ctx, chainReq)
+	require.NoError(s.T(), err)
+
+	s.account, err = s.client.CreateAccount(ctx, &api.CreateAccountRequest{})
+	require.NoError(s.T(), err)
 }
 
 func (s *faucetsTestSuite) TestRegister() {
@@ -30,6 +46,8 @@ func (s *faucetsTestSuite) TestRegister() {
 
 	s.T().Run("should register faucet successfully", func(t *testing.T) {
 		req := testutils.FakeRegisterFaucetRequest()
+		req.ChainRule = s.chain.UUID
+		req.CreditorAccount = s.account.Address
 
 		resp, err := s.client.RegisterFaucet(ctx, req)
 		require.NoError(t, err)
@@ -49,8 +67,28 @@ func (s *faucetsTestSuite) TestRegister() {
 		assert.NoError(t, err)
 	})
 
+	s.T().Run("should fail to register faucet with BadRequest if account does not exists", func(t *testing.T) {
+		req := testutils.FakeRegisterFaucetRequest()
+		req.ChainRule = s.chain.UUID
+
+		_, err := s.client.RegisterFaucet(ctx, req)
+		require.Error(t, err)
+		assert.True(t, errors.IsInvalidParameterError(err))
+	})
+
+	s.T().Run("should fail to register faucet with BadRequest if account does not exists", func(t *testing.T) {
+		req := testutils.FakeRegisterFaucetRequest()
+		req.CreditorAccount = s.account.Address
+
+		_, err := s.client.RegisterFaucet(ctx, req)
+		require.Error(t, err)
+		assert.True(t, errors.IsInvalidParameterError(err))
+	})
+
 	s.T().Run("should fail to register faucet with same name and tenant", func(t *testing.T) {
 		req := testutils.FakeRegisterFaucetRequest()
+		req.ChainRule = s.chain.UUID
+		req.CreditorAccount = s.account.Address
 
 		resp, err := s.client.RegisterFaucet(ctx, req)
 		require.NoError(t, err)
@@ -64,6 +102,8 @@ func (s *faucetsTestSuite) TestRegister() {
 
 	s.T().Run("should fail to register faucet if postgres is down", func(t *testing.T) {
 		req := testutils.FakeRegisterFaucetRequest()
+		req.ChainRule = s.chain.UUID
+		req.CreditorAccount = s.account.Address
 
 		err := s.env.client.Stop(ctx, postgresContainerID)
 		assert.NoError(t, err)
@@ -79,6 +119,8 @@ func (s *faucetsTestSuite) TestRegister() {
 func (s *faucetsTestSuite) TestSearch() {
 	ctx := s.env.ctx
 	req := testutils.FakeRegisterFaucetRequest()
+	req.ChainRule = s.chain.UUID
+	req.CreditorAccount = s.account.Address
 	faucet, err := s.client.RegisterFaucet(ctx, req)
 	require.NoError(s.T(), err)
 
@@ -109,6 +151,8 @@ func (s *faucetsTestSuite) TestSearch() {
 func (s *faucetsTestSuite) TestGetOne() {
 	ctx := s.env.ctx
 	req := testutils.FakeRegisterFaucetRequest()
+	req.ChainRule = s.chain.UUID
+	req.CreditorAccount = s.account.Address
 	faucet, err := s.client.RegisterFaucet(ctx, req)
 	require.NoError(s.T(), err)
 
@@ -125,11 +169,15 @@ func (s *faucetsTestSuite) TestGetOne() {
 func (s *faucetsTestSuite) TestUpdate() {
 	ctx := s.env.ctx
 	req := testutils.FakeRegisterFaucetRequest()
+	req.ChainRule = s.chain.UUID
+	req.CreditorAccount = s.account.Address
 	faucet, err := s.client.RegisterFaucet(ctx, req)
 	require.NoError(s.T(), err)
 
 	s.T().Run("should update faucet successfully", func(t *testing.T) {
 		req := testutils.FakeUpdateFaucetRequest()
+		req.ChainRule = s.chain.UUID
+		req.CreditorAccount = s.account.Address
 
 		resp, err := s.client.UpdateFaucet(ctx, faucet.UUID, req)
 		require.NoError(t, err)
@@ -178,7 +226,7 @@ func (s *faucetsTestSuite) TestSuccess_TxsWithFaucet() {
 	faucetRequest.Cooldown = "0s"
 	faucet, err := s.client.RegisterFaucet(s.env.ctx, faucetRequest)
 	require.NoError(s.T(), err)
-	
+
 	defer func() {
 		err = s.client.DeleteChain(ctx, chainWithFaucet.UUID)
 		assert.NoError(s.T(), err)
@@ -194,11 +242,11 @@ func (s *faucetsTestSuite) TestSuccess_TxsWithFaucet() {
 		txResponse, err := s.client.SendTransferTransaction(ctx, txRequest)
 		require.NoError(t, err)
 		assert.NotEmpty(t, txResponse.UUID)
-	
+
 		txResponseGET, err := s.client.GetTxRequest(ctx, txResponse.UUID)
 		require.NoError(t, err)
 		require.Len(t, txResponseGET.Jobs, 2)
-	
+
 		faucetJob := txResponseGET.Jobs[1]
 		txJob := txResponseGET.Jobs[0]
 		assert.Equal(t, faucetJob.ChainUUID, faucet.ChainRule)
@@ -206,7 +254,7 @@ func (s *faucetsTestSuite) TestSuccess_TxsWithFaucet() {
 		assert.Equal(t, entities.EthereumTransaction, faucetJob.Type)
 		assert.Equal(t, faucetJob.Transaction.To, txJob.Transaction.From)
 		assert.Equal(t, faucetJob.Transaction.Value.String(), faucet.Amount.String())
-	
+
 		assert.NotEmpty(t, txResponseGET.UUID)
 		assert.NotEmpty(t, txJob.UUID)
 		assert.Equal(t, txJob.ChainUUID, faucet.ChainRule)
@@ -214,12 +262,12 @@ func (s *faucetsTestSuite) TestSuccess_TxsWithFaucet() {
 		assert.Equal(t, txRequest.Params.From.Hex(), txJob.Transaction.From.Hex())
 		assert.Equal(t, txRequest.Params.To.Hex(), txJob.Transaction.To.Hex())
 		assert.Equal(t, entities.EthereumTransaction, txJob.Type)
-	
+
 		fctEvlp, err := s.env.consumer.WaitForEnvelope(faucetJob.ScheduleUUID, s.env.kafkaTopicConfig.Sender, waitForEnvelopeTimeOut)
 		require.NoError(t, err)
 		assert.Equal(t, faucetJob.ScheduleUUID, fctEvlp.GetID())
 		assert.Equal(t, faucetJob.UUID, fctEvlp.GetJobUUID())
-	
+
 		jobEvlp, err := s.env.consumer.WaitForEnvelope(txJob.ScheduleUUID, s.env.kafkaTopicConfig.Sender, waitForEnvelopeTimeOut)
 		require.NoError(t, err)
 		assert.Equal(t, txJob.ScheduleUUID, jobEvlp.GetID())

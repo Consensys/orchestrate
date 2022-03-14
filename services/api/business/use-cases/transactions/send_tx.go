@@ -237,12 +237,15 @@ func (uc *sendTxUsecase) startFaucetJob(ctx context.Context, account *ethcommon.
 			Value: &faucet.Amount,
 		},
 	}
-	fctJob, err := uc.createJobUC.Execute(ctx, txJob, userInfo)
+
+	internalAdminUser := multitenancy.NewInternalAdminUser()
+	internalAdminUser.TenantID = userInfo.TenantID
+	fctJob, err := uc.createJobUC.Execute(ctx, txJob, internalAdminUser)
 	if err != nil {
 		return nil, err
 	}
 
-	err = uc.startJobUC.Execute(ctx, fctJob.UUID, userInfo)
+	err = uc.startJobUC.Execute(ctx, fctJob.UUID, internalAdminUser)
 	if err != nil {
 		return fctJob, err
 	}

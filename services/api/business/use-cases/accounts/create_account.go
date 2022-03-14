@@ -135,7 +135,6 @@ func (uc *createAccountUseCase) Execute(ctx context.Context, acc *entities.Accou
 
 func generateKeyID(tenantID, alias string) string {
 	if alias == "" {
-		fmt.Println("test!")
 		return utils.RandString(20)
 	}
 
