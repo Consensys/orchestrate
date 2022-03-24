@@ -5,13 +5,15 @@ import (
 	encoding "github.com/consensys/orchestrate/pkg/encoding/sarama"
 	"github.com/consensys/orchestrate/pkg/errors"
 	authutils "github.com/consensys/orchestrate/pkg/toolkit/app/auth/utils"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 )
 
-func SendJobMessage(job *entities.Job, kafkaProducer sarama.SyncProducer, topic string) (partition int32, offset int64, err error) {
+func SendJobMessage(job *entities.Job, kafkaProducer sarama.SyncProducer, topic string, userInfo *multitenancy.UserInfo) (partition int32, offset int64, err error) {
 	txEnvelope := NewEnvelopeFromJob(job, map[string]string{
-		authutils.TenantIDHeader: job.TenantID,
-		authutils.UsernameHeader: job.OwnerID,
+		authutils.TenantIDHeader:      userInfo.TenantID,
+		authutils.UsernameHeader:      userInfo.Username,
+		authutils.AuthorizationHeader: userInfo.AuthValue,
 	})
 
 	evlp, err := txEnvelope.Envelope()

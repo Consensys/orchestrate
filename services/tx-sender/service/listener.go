@@ -4,6 +4,9 @@ import (
 	"context"
 	"time"
 
+	authutils "github.com/consensys/orchestrate/pkg/toolkit/app/auth/utils"
+	client2 "github.com/consensys/quorum-key-manager/pkg/client"
+
 	"github.com/cenkalti/backoff/v4"
 	"github.com/consensys/orchestrate/pkg/sdk/client"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
@@ -111,15 +114,21 @@ func (listener *MessageListener) consumeClaimLoop(ctx context.Context, session s
 
 			jlogger := logger.WithField("job", evlp.GetJobUUID()).WithField("schedule", evlp.GetScheduleUUID())
 			job := envelope.NewJobFromEnvelope(evlp)
-			err = listener.processEnvelope(ctx, evlp, job)
+
+			newCtx := log.With(ctx, jlogger)
+			if evlp.Headers[authutils.AuthorizationHeader] != "" {
+				newCtx = appendAuthHeader(newCtx, evlp.Headers[authutils.AuthorizationHeader])
+			}
+
+			err = listener.processEnvelope(newCtx, evlp, job)
 
 			switch {
 			// If job exceeded number of retries, we must Notify, Update job to FAILED and Continue
 			case err != nil && errors.IsConnectionError(err):
 				txResponse := evlp.AppendError(errors.FromError(err)).TxResponse()
-				serr := listener.sendEnvelope(ctx, evlp.ID, txResponse, listener.recoverTopic, evlp.PartitionKey())
+				serr := listener.sendEnvelope(newCtx, evlp.ID, txResponse, listener.recoverTopic, evlp.PartitionKey())
 				if serr == nil {
-					serr = utils2.UpdateJobStatus(ctx, listener.jobClient, job,
+					serr = utils2.UpdateJobStatus(newCtx, listener.jobClient, job,
 						entities.StatusFailed, err.Error(), nil)
 				}
 
@@ -128,7 +137,7 @@ func (listener *MessageListener) consumeClaimLoop(ctx context.Context, session s
 					return serr
 				}
 			case err != nil:
-				curJob, serr := listener.jobClient.GetJob(ctx, job.UUID)
+				curJob, serr := listener.jobClient.GetJob(newCtx, job.UUID)
 				// IMPORTANT: Jobs can be updated in parallel to NEVER_MINED, MINED or FAILED, so that we should
 				// warning and ignore it in case job is in a final status
 				if serr == nil && entities.IsFinalJobStatus(curJob.Status) {
@@ -278,4 +287,10 @@ func resetEnvelopeTx(req *tx.Envelope) {
 	req.Nonce = nil
 	req.TxHash = nil
 	req.Raw = nil
+}
+
+func appendAuthHeader(ctx context.Context, authHeader string) context.Context {
+	return context.WithValue(ctx, client2.RequestHeaderKey, map[string]string{
+		authutils.AuthorizationHeader: authHeader,
+	})
 }

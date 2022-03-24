@@ -1,6 +1,10 @@
 # Orchestrate Release Notes
 
-## v21.12.3 (WIP)
+## v21.12.4 (2022-03-23)
+### 🛠 Bug fixes
+* Forward user's JWT token to the transaction-sender microservice
+
+## v21.12.3 (2022-03-17)
 ### 🛠 Bug fixes
 * Fixed panic on tx-sender updating status of jobs with `owner_id` different than nil.
 * Migrated faucet DB table to use TEXT for every VARCHAR column.
