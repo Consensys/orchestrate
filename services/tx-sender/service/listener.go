@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"time"
 
@@ -292,7 +291,6 @@ func resetEnvelopeTx(req *tx.Envelope) {
 }
 
 func appendAuthHeader(ctx context.Context, authHeader string) context.Context {
-	fmt.Println(authHeader)
 	return context.WithValue(ctx, client2.RequestHeaderKey, map[string]string{
 		authutils.AuthorizationHeader: authHeader,
 	})
