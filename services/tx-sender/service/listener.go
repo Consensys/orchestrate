@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"fmt"
+	"strings"
 	"time"
 
 	authutils "github.com/consensys/orchestrate/pkg/toolkit/app/auth/utils"
@@ -116,7 +118,7 @@ func (listener *MessageListener) consumeClaimLoop(ctx context.Context, session s
 			job := envelope.NewJobFromEnvelope(evlp)
 
 			newCtx := log.With(ctx, jlogger)
-			if evlp.Headers[authutils.AuthorizationHeader] != "" {
+			if evlp.Headers[authutils.AuthorizationHeader] != "" && strings.Contains(evlp.Headers[authutils.AuthorizationHeader], "Bearer") {
 				newCtx = appendAuthHeader(newCtx, evlp.Headers[authutils.AuthorizationHeader])
 			}
 
@@ -290,6 +292,7 @@ func resetEnvelopeTx(req *tx.Envelope) {
 }
 
 func appendAuthHeader(ctx context.Context, authHeader string) context.Context {
+	fmt.Println(authHeader)
 	return context.WithValue(ctx, client2.RequestHeaderKey, map[string]string{
 		authutils.AuthorizationHeader: authHeader,
 	})
