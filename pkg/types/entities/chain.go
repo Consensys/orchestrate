@@ -16,7 +16,7 @@ type Chain struct {
 	ListenerCurrentBlock      uint64
 	ListenerStartingBlock     uint64
 	ListenerBackOffDuration   string
-	ListenerExternalTxEnabled bool
+	ListenerExternalTxEnabled *bool
 	PrivateTxManager          *PrivateTxManager
 	Labels                    map[string]string
 	CreatedAt                 time.Time

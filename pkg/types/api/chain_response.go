@@ -18,7 +18,7 @@ type ChainResponse struct {
 	ListenerCurrentBlock      uint64                     `json:"listenerCurrentBlock" example:"0"`                                             // Current block.
 	ListenerStartingBlock     uint64                     `json:"listenerStartingBlock" example:"5000"`                                         // Block at which the Transaction Listener starts processing transactions
 	ListenerBackOffDuration   string                     `json:"listenerBackOffDuration" example:"5s"`                                         // Time to wait before trying to fetch a new mined block.
-	ListenerExternalTxEnabled bool                       `json:"listenerExternalTxEnabled" example:"false"`                                    // Whether the chain listens for external transactions not crafted by Orchestrate.
+	ListenerExternalTxEnabled *bool                      `json:"listenerExternalTxEnabled" example:"false"`                                    // Whether the chain listens for external transactions not crafted by Orchestrate.
 	PrivateTxManager          *entities.PrivateTxManager `json:"privateTxManager,omitempty"`
 	Labels                    map[string]string          `json:"labels,omitempty"`                                // List of custom labels.
 	CreatedAt                 time.Time                  `json:"createdAt" example:"2020-07-09T12:35:42.115395Z"` // Date and time at which the chain was registered.

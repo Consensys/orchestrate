@@ -59,5 +59,5 @@ func isEqualChain(chain1, chain2 *dynamic.Chain) bool {
 		chain1.URL == chain2.URL &&
 		chain1.Listener.Depth == chain2.Listener.Depth &&
 		chain1.Listener.Backoff == chain2.Listener.Backoff &&
-		chain1.Listener.ExternalTxEnabled == chain2.Listener.ExternalTxEnabled
+		chain1.Listener.IsExternalTxEnabled() == chain2.Listener.IsExternalTxEnabled()
 }

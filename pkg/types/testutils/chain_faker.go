@@ -5,6 +5,7 @@ import (
 
 	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/pkg/utils"
 	"github.com/gofrs/uuid"
 )
 
@@ -19,7 +20,7 @@ func FakeChain() *entities.Chain {
 		ListenerCurrentBlock:      0,
 		ListenerStartingBlock:     0,
 		ListenerBackOffDuration:   "5s",
-		ListenerExternalTxEnabled: false,
+		ListenerExternalTxEnabled: utils.ToPtr(false).(*bool),
 		PrivateTxManager:          FakePrivateTxManager(),
 	}
 }

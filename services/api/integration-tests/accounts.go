@@ -81,7 +81,6 @@ func (s *accountsTestSuite) TestCreate() {
 			URLs: []string{s.env.blockchainNodeURL},
 			Listener: api.RegisterListenerRequest{
 				FromBlock:         "latest",
-				ExternalTxEnabled: false,
 			},
 		})
 		require.NoError(s.T(), err)

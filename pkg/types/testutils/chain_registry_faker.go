@@ -7,6 +7,7 @@ import (
 	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/api"
 	"github.com/consensys/orchestrate/pkg/types/entities"
+	"github.com/consensys/orchestrate/pkg/utils"
 	"github.com/consensys/quorum-key-manager/pkg/common"
 	"github.com/gofrs/uuid"
 )
@@ -17,7 +18,7 @@ func FakeRegisterChainRequest() *api.RegisterChainRequest {
 		URLs: []string{"http://chain:8545"},
 		Listener: api.RegisterListenerRequest{
 			FromBlock:         "latest",
-			ExternalTxEnabled: false,
+			ExternalTxEnabled: utils.ToPtr(false).(*bool),
 		},
 		PrivateTxManager: &api.PrivateTxManagerRequest{
 			URL:  "http://tessera-eea:8545",
@@ -53,7 +54,7 @@ func FakeChainResponse() *api.ChainResponse {
 		ListenerCurrentBlock:      0,
 		ListenerStartingBlock:     0,
 		ListenerBackOffDuration:   "5s",
-		ListenerExternalTxEnabled: false,
+		ListenerExternalTxEnabled: utils.ToPtr(false).(*bool),
 		PrivateTxManager:          FakePrivateTxManager(),
 		CreatedAt:                 time.Now(),
 		UpdatedAt:                 time.Now(),

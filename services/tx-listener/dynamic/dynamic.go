@@ -20,7 +20,7 @@ type Listener struct {
 	CurrentBlock      uint64
 	Depth             uint64
 	Backoff           time.Duration
-	ExternalTxEnabled bool
+	ExternalTxEnabled *bool
 }
 
 type Chain struct {
@@ -38,4 +38,11 @@ func (n *Chain) SetDefault() {
 	if n.UUID == "" {
 		n.UUID = uuid.Must(uuid.NewV4()).String()
 	}
+}
+
+func (l *Listener) IsExternalTxEnabled() bool {
+	if l.ExternalTxEnabled == nil {
+		return false
+	}
+	return *l.ExternalTxEnabled
 }

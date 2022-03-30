@@ -405,11 +405,11 @@ func (s *Session) fetchReceipts(ctx context.Context, transactions ethtypes.Trans
 		case isInternalTx(jobMap, blckTx):
 			futureJobs = append(futureJobs, s.fetchReceipt(ctx, jobMap[blckTx.Hash().String()], blckTx.Hash()))
 			continue
-		case isEEAPrivTx(blckTx, s.eeaPrivPrecompiledContractAddr) && s.Chain.Listener.ExternalTxEnabled:
+		case isEEAPrivTx(blckTx, s.eeaPrivPrecompiledContractAddr) && s.Chain.Listener.IsExternalTxEnabled():
 			job := &entities.Job{ChainUUID: s.Chain.UUID, Transaction: &entities.ETHTransaction{Hash: utils.ToPtr(blckTx.Hash()).(*ethcommon.Hash)}}
 			futureJobs = append(futureJobs, s.fetchPrivateReceipt(ctx, job, blckTx.Hash()))
 			continue
-		case s.Chain.Listener.ExternalTxEnabled:
+		case s.Chain.Listener.IsExternalTxEnabled():
 			job := &entities.Job{ChainUUID: s.Chain.UUID, Transaction: &entities.ETHTransaction{Hash: utils.ToPtr(blckTx.Hash()).(*ethcommon.Hash)}}
 			futureJobs = append(futureJobs, s.fetchReceipt(ctx, job, blckTx.Hash()))
 			continue

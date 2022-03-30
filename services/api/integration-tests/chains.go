@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/consensys/orchestrate/pkg/utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -266,7 +267,7 @@ func (s *chainsTestSuite) TestUpdate() {
 		req := testutils.FakeUpdateChainRequest()
 		req.Listener.CurrentBlock = 666
 		req.Listener.Depth = 2
-		req.Listener.ExternalTxEnabled = true
+		req.Listener.ExternalTxEnabled = utils.ToPtr(true).(*bool)
 		req.Listener.BackOffDuration = "10s"
 
 		resp, err := s.client.UpdateChain(ctx, chain.UUID, req)

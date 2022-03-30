@@ -16,7 +16,7 @@ type RegisterListenerRequest struct {
 	Depth             uint64 `json:"depth,omitempty" example:"0"`                                            // Block depth after which the Transaction Listener considers a block final and processes it (default 0).
 	FromBlock         string `json:"fromBlock,omitempty" example:"latest"`                                   // Block from which the Transaction Listener should start processing transactions (default `latest`).
 	BackOffDuration   string `json:"backOffDuration,omitempty" validate:"omitempty,isDuration" example:"1s"` // Time to wait before trying to fetch a new mined block (for example `1s` or `1m`, default is `5s`).
-	ExternalTxEnabled bool   `json:"externalTxEnabled,omitempty" example:"false"`                            // Whether to listen to external transactions not crafted by Orchestrate (default `false`).
+	ExternalTxEnabled *bool  `json:"externalTxEnabled,omitempty" example:"false"`                            // Whether to listen to external transactions not crafted by Orchestrate (default `false`).
 }
 
 type UpdateChainRequest struct {
@@ -29,7 +29,7 @@ type UpdateChainRequest struct {
 type UpdateListenerRequest struct {
 	Depth             uint64 `json:"depth,omitempty" example:"0"`
 	BackOffDuration   string `json:"backOffDuration,omitempty" validate:"omitempty,isDuration" example:"1s"`
-	ExternalTxEnabled bool   `json:"externalTxEnabled,omitempty" example:"false"`
+	ExternalTxEnabled *bool  `json:"externalTxEnabled,omitempty" example:"false"`
 	CurrentBlock      uint64 `json:"currentBlock,omitempty" example:"1"`
 }
 

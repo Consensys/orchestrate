@@ -46,7 +46,6 @@ func (s *apiTestSuite) SetupSuite() {
 		URLs: []string{s.env.blockchainNodeURL},
 		Listener: api.RegisterListenerRequest{
 			FromBlock:         "latest",
-			ExternalTxEnabled: false,
 		},
 	})
 	if err != nil {

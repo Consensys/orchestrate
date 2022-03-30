@@ -18,6 +18,7 @@ import (
 	txschedulertypes "github.com/consensys/orchestrate/pkg/types/api"
 	"github.com/consensys/orchestrate/pkg/types/ethereum"
 	"github.com/consensys/orchestrate/pkg/types/testutils"
+	"github.com/consensys/orchestrate/pkg/utils"
 	mock3 "github.com/consensys/orchestrate/services/tx-listener/session/ethereum/mocks"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -230,7 +231,7 @@ func TestSession_Run(t *testing.T) {
 		cancellableCtx, cancel := context.WithCancel(ctx)
 		block := newFakeBlock(newBlockPosition, toAddress)
 		chain := newFakeChain()
-		chain.Listener.ExternalTxEnabled = true
+		chain.Listener.ExternalTxEnabled = utils.ToPtr(true).(*bool)
 		session := NewSession(chain, mockEthClient, mockClient, mockHook, mockOffsetManager, mockMetrics)
 		bckoff := &backoffmock.MockIntervalBackoff{}
 		session.bckOff = bckoff
@@ -276,7 +277,7 @@ func TestSession_Run(t *testing.T) {
 		cancellableCtx, cancel := context.WithCancel(ctx)
 		block := newFakeBlock(newBlockPosition, eeaPrivPrecompiledContractAddr)
 		chain := newFakeChain()
-		chain.Listener.ExternalTxEnabled = true
+		chain.Listener.ExternalTxEnabled = utils.ToPtr(true).(*bool)
 		session := NewSession(chain, mockEthClient, mockClient, mockHook, mockOffsetManager, mockMetrics)
 		bckoff := &backoffmock.MockIntervalBackoff{}
 		session.bckOff = bckoff
@@ -322,7 +323,7 @@ func TestSession_Run(t *testing.T) {
 		cancellableCtx, cancel := context.WithCancel(ctx)
 		block := newFakeBlock(newBlockPosition, eeaPrivPrecompiledContractAddr)
 		chain := newFakeChain()
-		chain.Listener.ExternalTxEnabled = true
+		chain.Listener.ExternalTxEnabled = utils.ToPtr(true).(*bool)
 		session := NewSession(chain, mockEthClient, mockClient, mockHook, mockOffsetManager, mockMetrics)
 		bckoff := &backoffmock.MockIntervalBackoff{}
 		session.bckOff = bckoff
@@ -498,7 +499,7 @@ func TestSession_Run(t *testing.T) {
 	t.Run("should not fail if PrivateTransactionReceipt fails", func(t *testing.T) {
 		cancellableCtx, cancel := context.WithCancel(ctx)
 		chain := newFakeChain()
-		chain.Listener.ExternalTxEnabled = true
+		chain.Listener.ExternalTxEnabled = utils.ToPtr(true).(*bool)
 		block := newFakeBlock(newBlockPosition, eeaPrivPrecompiledContractAddr)
 		session := NewSession(chain, mockEthClient, mockClient, mockHook, mockOffsetManager, mockMetrics)
 		bckoff := &backoffmock.MockIntervalBackoff{}
@@ -542,7 +543,7 @@ func TestSession_Run(t *testing.T) {
 	t.Run("should not fail if TransactionReceipt fails", func(t *testing.T) {
 		cancellableCtx, cancel := context.WithCancel(ctx)
 		chain := newFakeChain()
-		chain.Listener.ExternalTxEnabled = true
+		chain.Listener.ExternalTxEnabled = utils.ToPtr(true).(*bool)
 		block := newFakeBlock(newBlockPosition, toAddress)
 		session := NewSession(chain, mockEthClient, mockClient, mockHook, mockOffsetManager, mockMetrics)
 		bckoff := &backoffmock.MockIntervalBackoff{}
@@ -598,7 +599,7 @@ func newFakeChain() *dynamic.Chain {
 			CurrentBlock:      0,
 			Depth:             0,
 			Backoff:           backoff,
-			ExternalTxEnabled: false,
+			ExternalTxEnabled: utils.ToPtr(false).(*bool),
 		},
 		Active: true,
 	}

@@ -1,5 +1,9 @@
 # Orchestrate Release Notes
 
+## v21.12.5 (2022-03-30)
+### 🛠 Bug fixes
+* Fixed `externalTxEnabled` chain update.
+
 ## v21.12.4 (2022-03-23)
 ### 🛠 Bug fixes
 * Forward user's JWT token to the transaction-sender microservice

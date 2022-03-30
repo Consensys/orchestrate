@@ -7,13 +7,14 @@ import (
 	"testing"
 	"time"
 
+	"github.com/consensys/orchestrate/pkg/utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/consensys/orchestrate/services/tx-listener/dynamic"
 )
 
-var config1 = &dynamic.Chain{Name: "test", Listener: dynamic.Listener{Depth: 1, Backoff: time.Second, ExternalTxEnabled: false}}
-var config2 = &dynamic.Chain{Name: "test2", Listener: dynamic.Listener{Depth: 1, Backoff: time.Second, ExternalTxEnabled: false}}
-var configExternTxEnabled = &dynamic.Chain{Name: "test2", Listener: dynamic.Listener{Depth: 1, Backoff: time.Second, ExternalTxEnabled: true}}
+var config1 = &dynamic.Chain{Name: "test", Listener: dynamic.Listener{Depth: 1, Backoff: time.Second}}
+var config2 = &dynamic.Chain{Name: "test2", Listener: dynamic.Listener{Depth: 1, Backoff: time.Second}}
+var configExternTxEnabled = &dynamic.Chain{Name: "test2", Listener: dynamic.Listener{Depth: 1, Backoff: time.Second, ExternalTxEnabled: utils.ToPtr(true).(*bool)}}
 
 func TestCompareConfiguation(t *testing.T) {
 

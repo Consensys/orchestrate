@@ -206,7 +206,6 @@ func (s *faucetsTestSuite) TestSuccess_TxsWithFaucet() {
 		URLs: []string{s.env.blockchainNodeURL},
 		Listener: api.RegisterListenerRequest{
 			FromBlock:         "latest",
-			ExternalTxEnabled: false,
 		},
 	})
 	require.NoError(s.T(), err)

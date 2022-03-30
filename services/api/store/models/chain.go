@@ -17,7 +17,7 @@ type Chain struct {
 	ListenerCurrentBlock      uint64
 	ListenerStartingBlock     uint64
 	ListenerBackOffDuration   string
-	ListenerExternalTxEnabled bool
+	ListenerExternalTxEnabled *bool `pg:"default:false,notnull"`
 	PrivateTxManagers         []*PrivateTxManager
 	Labels                    map[string]string
 	CreatedAt                 time.Time `pg:"default:now()"`
