@@ -323,7 +323,7 @@ jobs:
           seconds-between-retries: 3
           timeout: 30
           description: "deployment readiness"
-          sh-command: nc -z qa.orchestrate.ops.consensys.net 443
+          sh-command: nc -z staging-v21.12.orchestrate.ops.consensys.net 443
       - run:
           name: Running e2e
           environment:
@@ -431,6 +431,11 @@ workflows:
           filters:
             branches:
               only: maintenance/v21.12
+          requires:
+            - lint
+            - test
+            - race
+            - integration
 
       - build-docker-image: # Push prod image
           name: release-tag-<< matrix.docker-image-tag >>-<< matrix.docker-image-platform >>
