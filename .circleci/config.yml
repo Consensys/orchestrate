@@ -428,37 +428,31 @@ workflows:
       - lint:
           filters:
             branches:
-              only: /.*/
-              ignore: maintenance/v21.12
+              only: maintenance/v21.12
       - gobuild:
           filters:
             branches:
-              only: /.*/
-              ignore: maintenance/v21.12
+              only: maintenance/v21.12
           requires:
-            - race
-            - test
+            - lint
       - test:
           filters:
             branches:
-              only: /.*/
-              ignore: maintenance/v21.12
+              only: maintenance/v21.12
           requires:
             - lint
       - race:
           filters:
             branches:
-              only: /.*/
-              ignore: maintenance/v21.12
+              only: maintenance/v21.12
           requires:
             - lint
       - integration:
           filters:
             branches:
-              only: /.*/
-              ignore: maintenance/v21.12
+              only: maintenance/v21.12
           requires:
-            - race
+            - lint
       - build-docker-image: # Push Dev image
           name: push-orchestrate-image-orchestrate:${CIRCLE_SHA1:0:7}
           matrix:
@@ -475,14 +469,15 @@ workflows:
             branches:
               only: maintenance/v21.12
           requires:
+            - test
+            - race
             - gobuild
+            - integration
       - wait-for-approval:
           type: approval
           filters:
             tags:
-              only: /^v.*/
-            branches:
-              ignore: maintenance/v21.12
+              only: /^t.*/
           requires:
             - test
             - race
@@ -502,9 +497,7 @@ workflows:
           docker-image-sign: true
           filters:
             tags:
-              only: /^v.*/
-            branches:
-              only: maintenance/v21.12
+              only: /^t.*/
           requires:
             - wait-for-approval
       - deploy-qa:
@@ -524,14 +517,12 @@ workflows:
       - deploy-staging:
           filters:
             tags:
-              only: /^v.*/
+              only: /^t.*/
           requires:
             - release-tag-orchestrate:${CIRCLE_TAG}-linux/amd64
       - run-stress:
           filters:
             tags:
-              only: /^v.*/
-            branches:
-              ignore: /.*/
+              only: /^t.*/
           requires:
             - deploy-staging
