@@ -390,6 +390,11 @@ jobs:
       - prepare_e2e:
           environment_values: <<parameters.environment_values>>
           orchestrate_namespace: <<parameters.orchestrate_namespace>>
+      - wait-for/sh-command:
+          seconds-between-retries: 3
+          timeout: 30
+          description: "deployment readiness"
+          sh-command: nc -z staging.orchestrate.ops.consensys.net 443
       - run:
           name: Running stress
           environment:
@@ -474,7 +479,7 @@ workflows:
             tags:
               only: /^v.*/
             branches:
-              only: maintenance/v21.12
+              ignore: maintenance/v21.12
           requires:
             - test
             - race
@@ -517,10 +522,8 @@ workflows:
           filters:
             tags:
               only: /^v.*/
-            branches:
-              only: maintenance/v21.12
           requires:
-            - run-e2e
+            - release-tag-orchestrate:${CIRCLE_TAG}-linux/amd64
       - run-stress:
           filters:
             tags:
