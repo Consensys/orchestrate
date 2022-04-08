@@ -316,6 +316,21 @@ jobs:
                 docker push "${DOCKER_IMAGE_TAG}"
              fi
 
+  deploy-qa:
+    docker:
+      - image: cimg/base:2020.01
+    steps:
+      - checkout
+      - set_remote_environment_variables
+      - run:
+          name: Deploy QA environment
+          command: >-
+            ORCHESTRATE_TAG=${CIRCLE_SHA1:0:7}
+            ORCHESTRATE_REPOSITORY=${CLOUDSMITH_DEV_REPO}/orchestrate
+            REGISTRY_USERNAME=${CLOUDSMITH_USER_RW}
+            REGISTRY_PASSWORD=${CLOUDSMITH_PASS_RW}
+            make deploy-remote-env
+
   run-e2e:
     docker:
       - image: cimg/go:1.16.8-node
@@ -327,7 +342,7 @@ jobs:
           seconds-between-retries: 3
           timeout: 30
           description: "deployment readiness"
-          sh-command: nc -z staging-v21.12.orchestrate.ops.consensys.net 443
+          sh-command: nc -z qa.orchestrate.ops.consensys.net 443
       - run:
           name: Running e2e
           environment:
@@ -436,17 +451,28 @@ workflows:
               ignore: maintenance/v21.12
           requires:
             - race
-            - test
-      - sonarscan:
+      - build-docker-image: # Push Dev image
+          name: push-orchestrate-image-orchestrate:${CIRCLE_SHA1:0:7}
+          matrix:
+            parameters:
+              docker-image-tag: [ "orchestrate:${CIRCLE_SHA1:0:7}" ]
+          context:
+            - dockerhub-quorumengineering-rw
+            - dockerhub-opsquorum-dct
+            - cloudsmith-tanuki-rw
+          docker-image-platform: linux/amd64
+          docker-distroless-version: debug-nonroot
+          docker-image-registry: ${CLOUDSMITH_DEV_REPO}
           filters:
             branches:
-              only: /.*/
               ignore: maintenance/v21.12
           requires:
             - gobuild
       - wait-for-approval:
           type: approval
           filters:
+            tags:
+              only: /^v.*/
             branches:
               only: maintenance/v21.12
           requires:
@@ -467,27 +493,39 @@ workflows:
           docker-image-registry: consensys
           docker-image-sign: true
           filters:
+            tags:
+              only: /^v.*/
             branches:
               only: maintenance/v21.12
           requires:
             - wait-for-approval
+      - deploy-qa:
+          context:
+            - cloudsmith-tanuki-rw
+          filters:
+            branches:
+              only: maintenance/v21.12
+          requires:
+            - push-orchestrate-image-orchestrate:${CIRCLE_SHA1:0:7}
+      - run-e2e:
+          filters:
+            branches:
+              only: maintenance/v21.12
+          requires:
+            - deploy-qa
       - deploy-staging:
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              only: maintenance/v21.12
+          requires:
+            - run-e2e
+      - run-stress:
           filters:
             tags:
               only: /^v.*/
             branches:
               ignore: /.*/
           requires:
-            - release-tag-orchestrate:${CIRCLE_TAG}-linux/amd64
-      - run-e2e:
-          filters:
-            branches:
-              only: maintenance/v21.12
-          requires:
             - deploy-staging
-      - run-stress:
-          filters:
-            branches:
-              only: maintenance/v21.12
-          requires:
-            - run-e2e
