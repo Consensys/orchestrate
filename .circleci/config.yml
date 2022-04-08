@@ -171,6 +171,10 @@ jobs:
   test:
     docker:
       - image: cimg/go:1.16.8
+      - image: postgres:13.4-alpine
+        environment:
+          POSTGRES_PASSWORD: "postgres"
+          DB_HOST: "postgres"
     resource_class: xlarge
     steps:
       - prepare_golang
