@@ -465,7 +465,7 @@ workflows:
           docker-image-registry: ${CLOUDSMITH_DEV_REPO}
           filters:
             branches:
-              ignore: maintenance/v21.12
+              only: maintenance/v21.12
           requires:
             - gobuild
       - wait-for-approval:
