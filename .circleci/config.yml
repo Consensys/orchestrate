@@ -105,7 +105,7 @@ commands:
                 name: Set Orchestrate Namespace
                 command: |
                   if [ "${CIRCLE_TAG}" ]; then echo 'export TAG=${CIRCLE_TAG%.*}' >> $BASH_ENV && echo 'export ORCHESTRATE_NAMESPACE=${ENVIRONMENT_VALUES}-${TAG//./-}' >> $BASH_ENV;
-                  elif [ "${CIRCLE_BRANCH}" == "main" ]; then echo 'export ORCHESTRATE_NAMESPACE=${ENVIRONMENT_VALUES}' >> $BASH_ENV;
+                  elif [ "${CIRCLE_BRANCH}" == "maintenance/v21.12" ]; then echo 'export ORCHESTRATE_NAMESPACE=${ENVIRONMENT_VALUES}' >> $BASH_ENV;
                   else echo 'export TAG=${CIRCLE_BRANCH#"maintenance/"}' >> $BASH_ENV && echo 'export ORCHESTRATE_NAMESPACE=${ENVIRONMENT_VALUES}-${TAG//./-}' >> $BASH_ENV;
                   fi
 
