@@ -478,6 +478,8 @@ workflows:
           filters:
             tags:
               only: /^t.*/
+            branches:
+              ignore: maintenance/v21.12
           requires:
             - test
             - race
@@ -498,6 +500,8 @@ workflows:
           filters:
             tags:
               only: /^t.*/
+            branches:
+              ignore: maintenance/v21.12
           requires:
             - wait-for-approval
       - deploy-qa:
@@ -518,11 +522,15 @@ workflows:
           filters:
             tags:
               only: /^t.*/
+            branches:
+              ignore: maintenance/v21.12
           requires:
             - release-tag-orchestrate:${CIRCLE_TAG}-linux/amd64
       - run-stress:
           filters:
             tags:
               only: /^t.*/
+            branches:
+              ignore: maintenance/v21.12
           requires:
             - deploy-staging
