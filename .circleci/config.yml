@@ -446,7 +446,6 @@ workflows:
             branches:
               only: maintenance/v21.12
           requires:
-            - lint
             - test
             - race
             - integration
