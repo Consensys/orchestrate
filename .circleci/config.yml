@@ -401,31 +401,45 @@ workflows:
       - lint:
           filters:
             branches:
-              only: maintenance/v21.12
+              only: /.*/
+              ignore: maintenance/v21.12
       - gobuild:
           filters:
             branches:
-              only: maintenance/v21.12
+              only: /.*/
+              ignore: maintenance/v21.12
+          requires:
+            - race
+            - test
       - test:
           filters:
             branches:
-              only: maintenance/v21.12
+              only: /.*/
+              ignore: maintenance/v21.12
+          requires:
+            - lint
       - race:
           filters:
             branches:
-              only: maintenance/v21.12
+              only: /.*/
+              ignore: maintenance/v21.12
+          requires:
+            - lint
       - integration:
           filters:
             branches:
-              only: maintenance/v21.12
+              only: /.*/
+              ignore: maintenance/v21.12
+          requires:
+            - race
+            - test
       - sonarscan:
           filters:
             branches:
-              only: maintenance/v21.12
+              only: /.*/
+              ignore: maintenance/v21.12
           requires:
-            - test
-            - race
-            - integration
+            - gobuild
       - wait-for-approval:
           type: approval
           filters:
