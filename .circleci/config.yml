@@ -90,7 +90,7 @@ commands:
           steps:
             - run:
                 name: Set Environment Values
-                command: echo 'export ENVIRONMENT_VALUES=staging' >> $BASH_ENV ;
+                command: if [ "${CIRCLE_TAG}" ]; then echo 'export ENVIRONMENT_VALUES=staging' >> $BASH_ENV ; else echo 'export ENVIRONMENT_VALUES=qa' >> $BASH_ENV; fi
       - when:
           condition: <<parameters.orchestrate_namespace>>
           steps:
@@ -104,7 +104,10 @@ commands:
             - run:
                 name: Set Orchestrate Namespace
                 command: |
-                  echo 'export TAG=v21.12' >> $BASH_ENV && echo 'export ORCHESTRATE_NAMESPACE=${ENVIRONMENT_VALUES}-${TAG//./-}' >> $BASH_ENV;
+                  if [ "${CIRCLE_TAG}" ]; then echo 'export TAG=${CIRCLE_TAG%.*}' >> $BASH_ENV && echo 'export ORCHESTRATE_NAMESPACE=${ENVIRONMENT_VALUES}-${TAG//./-}' >> $BASH_ENV;
+                  elif [ "${CIRCLE_BRANCH}" == "main" ]; then echo 'export ORCHESTRATE_NAMESPACE=${ENVIRONMENT_VALUES}' >> $BASH_ENV;
+                  else echo 'export TAG=${CIRCLE_BRANCH#"maintenance/"}' >> $BASH_ENV && echo 'export ORCHESTRATE_NAMESPACE=${ENVIRONMENT_VALUES}-${TAG//./-}' >> $BASH_ENV;
+                  fi
 
   prepare_e2e:
     description: "Orchestrate e2e environment"
