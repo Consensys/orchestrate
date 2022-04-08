@@ -479,11 +479,7 @@ workflows:
             tags:
               only: /^t.*/
             branches:
-              ignore: maintenance/v21.12
-          requires:
-            - test
-            - race
-            - integration
+              ignore: /.*/
 
       - build-docker-image: # Push prod image
           name: release-tag-<< matrix.docker-image-tag >>-<< matrix.docker-image-platform >>
@@ -501,7 +497,7 @@ workflows:
             tags:
               only: /^t.*/
             branches:
-              ignore: maintenance/v21.12
+              ignore: /.*/
           requires:
             - wait-for-approval
       - deploy-qa:
@@ -523,7 +519,7 @@ workflows:
             tags:
               only: /^t.*/
             branches:
-              ignore: maintenance/v21.12
+              ignore: /.*/
           requires:
             - release-tag-orchestrate:${CIRCLE_TAG}-linux/amd64
       - run-stress:
@@ -531,6 +527,6 @@ workflows:
             tags:
               only: /^t.*/
             branches:
-              ignore: maintenance/v21.12
+              ignore: /.*/
           requires:
             - deploy-staging
