@@ -338,6 +338,10 @@ jobs:
     docker:
       - image: cimg/go:1.16.8-node
     resource_class: large
+    parameters:
+      target:
+        type: string
+        default: "qa"
     steps:
       - prepare_golang
       - prepare_e2e
@@ -345,7 +349,7 @@ jobs:
           seconds-between-retries: 3
           timeout: 30
           description: "deployment readiness"
-          sh-command: nc -z qa.orchestrate.ops.consensys.net 443
+          sh-command: nc -z <<parameters.target>>.orchestrate.ops.consensys.net 443
       - run:
           name: Running e2e
           environment:
@@ -509,6 +513,7 @@ workflows:
           requires:
             - push-orchestrate-image-orchestrate:${CIRCLE_SHA1:0:7}
       - run-e2e:
+          target: "qa"
           filters:
             branches:
               only: maintenance/v21.12
@@ -522,6 +527,15 @@ workflows:
               ignore: /.*/
           requires:
             - release-tag-orchestrate:${CIRCLE_TAG}-linux/amd64
+      - run-e2e:
+          target: "staging"
+          filters:
+            tags:
+              only: /^t.*/
+            branches:
+              ignore: /.*/
+          requires:
+            - deploy-staging
       - run-stress:
           filters:
             tags:
