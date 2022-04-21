@@ -513,6 +513,7 @@ workflows:
           requires:
             - push-orchestrate-image-orchestrate:${CIRCLE_SHA1:0:7}
       - run-e2e:
+          name: "run qa e2e"
           target: "qa"
           filters:
             branches:
@@ -528,6 +529,7 @@ workflows:
           requires:
             - release-tag-orchestrate:${CIRCLE_TAG}-linux/amd64
       - run-e2e:
+          name: "run staging e2e"
           target: "staging"
           filters:
             tags:
