@@ -481,7 +481,7 @@ workflows:
           type: approval
           filters:
             tags:
-              only: /^t.*/
+              only: /^v.*/
             branches:
               ignore: /.*/
 
@@ -499,7 +499,7 @@ workflows:
           docker-image-sign: true
           filters:
             tags:
-              only: /^t.*/
+              only: /^v.*/
             branches:
               ignore: /.*/
           requires:
@@ -523,7 +523,7 @@ workflows:
       - deploy-staging:
           filters:
             tags:
-              only: /^t.*/
+              only: /^v.*/
             branches:
               ignore: /.*/
           requires:
@@ -533,7 +533,7 @@ workflows:
           target: "staging"
           filters:
             tags:
-              only: /^t.*/
+              only: /^v.*/
             branches:
               ignore: /.*/
           requires:
@@ -541,7 +541,7 @@ workflows:
       - run-stress:
           filters:
             tags:
-              only: /^t.*/
+              only: /^v.*/
             branches:
               ignore: /.*/
           requires:
