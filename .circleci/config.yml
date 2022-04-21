@@ -242,7 +242,7 @@ jobs:
 
   build-docker-image:
     docker:
-      - image: cimg/base:2021.12
+      - image: cimg/base:2022.04
     resource_class: xlarge
 
     parameters: # parameters are at the job level
@@ -321,7 +321,7 @@ jobs:
 
   deploy-qa:
     docker:
-      - image: cimg/base:2020.01
+      - image: cimg/base:2022.04
     steps:
       - checkout
       - set_remote_environment_variables
@@ -414,7 +414,7 @@ jobs:
 
   deploy-staging:
     docker:
-      - image: cimg/base:2020.01
+      - image: cimg/base:2022.04
     steps:
       - checkout
       - set_remote_environment_variables
