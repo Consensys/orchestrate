@@ -545,4 +545,4 @@ workflows:
             branches:
               ignore: /.*/
           requires:
-            - deploy-staging
+            - run staging e2e
