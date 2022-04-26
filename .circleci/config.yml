@@ -482,8 +482,6 @@ workflows:
           filters:
             tags:
               only: /^t.*/
-            branches:
-              only: maintenance/v21.12
 
       - build-docker-image: # Push prod image
           name: release-tag-<< matrix.docker-image-tag >>-<< matrix.docker-image-platform >>
@@ -500,8 +498,6 @@ workflows:
           filters:
             tags:
               only: /^t.*/
-            branches:
-              only: maintenance/v21.12
           requires:
             - wait-for-approval
       - deploy-qa:
@@ -534,15 +530,11 @@ workflows:
           filters:
             tags:
               only: /^t.*/
-            branches:
-              only: maintenance/v21.12
           requires:
             - deploy-staging
       - run-stress:
           filters:
             tags:
               only: /^t.*/
-            branches:
-              only: maintenance/v21.12
           requires:
             - run staging e2e
