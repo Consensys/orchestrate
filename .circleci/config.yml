@@ -481,9 +481,9 @@ workflows:
           type: approval
           filters:
             tags:
-              only: /^v.*/
+              only: /^t.*/
             branches:
-              ignore: /.*/
+              only: maintenance/v21.12
 
       - build-docker-image: # Push prod image
           name: release-tag-<< matrix.docker-image-tag >>-<< matrix.docker-image-platform >>
@@ -499,9 +499,9 @@ workflows:
           docker-image-sign: true
           filters:
             tags:
-              only: /^v.*/
+              only: /^t.*/
             branches:
-              ignore: /.*/
+              only: maintenance/v21.12
           requires:
             - wait-for-approval
       - deploy-qa:
@@ -523,9 +523,9 @@ workflows:
       - deploy-staging:
           filters:
             tags:
-              only: /^v.*/
+              only: /^t.*/
             branches:
-              ignore: /.*/
+              only: maintenance/v21.12
           requires:
             - release-tag-orchestrate:${CIRCLE_TAG}-linux/amd64
       - run-e2e:
@@ -533,16 +533,16 @@ workflows:
           target: "staging"
           filters:
             tags:
-              only: /^v.*/
+              only: /^t.*/
             branches:
-              ignore: /.*/
+              only: maintenance/v21.12
           requires:
             - deploy-staging
       - run-stress:
           filters:
             tags:
-              only: /^v.*/
+              only: /^t.*/
             branches:
-              ignore: /.*/
+              only: maintenance/v21.12
           requires:
             - run staging e2e
