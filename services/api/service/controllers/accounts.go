@@ -38,6 +38,7 @@ func (c *AccountsController) Append(router *mux.Router) {
 	router.Methods(http.MethodPost).Path("/accounts").HandlerFunc(c.create)
 	router.Methods(http.MethodPost).Path("/accounts/import").HandlerFunc(c.importKey)
 	router.Methods(http.MethodGet).Path("/accounts/{address}").HandlerFunc(c.getOne)
+	router.Methods(http.MethodDelete).Path("/accounts/{address}").HandlerFunc(c.deleteOne)
 	router.Methods(http.MethodPatch).Path("/accounts/{address}").HandlerFunc(c.update)
 	router.Methods(http.MethodPost).Path("/accounts/{address}/sign-message").HandlerFunc(c.signMessage)
 	router.Methods(http.MethodPost).Path("/accounts/{address}/sign-typed-data").HandlerFunc(c.signTypedData)
@@ -79,7 +80,7 @@ func (c *AccountsController) create(rw http.ResponseWriter, request *http.Reques
 	_ = json.NewEncoder(rw).Encode(formatters.FormatAccountResponse(acc))
 }
 
-// @Summary Fetch a account by address
+// @Summary Fetch an account by address
 // @Description Fetch a single account by address
 // @Tags Accounts
 // @Produce json
@@ -108,6 +109,37 @@ func (c *AccountsController) getOne(rw http.ResponseWriter, request *http.Reques
 	}
 
 	_ = json.NewEncoder(rw).Encode(formatters.FormatAccountResponse(acc))
+}
+
+// @Summary Delete an account by address
+// @Description Delete a single account by address
+// @Tags Accounts
+// @Produce json
+// @Security ApiKeyAuth
+// @Security JWTAuth
+// @Param address path string true "deleted account address"
+// @Success 204
+// @Failure 404 {object} httputil.ErrorResponse "Account not found"
+// @Failure 401 {object} httputil.ErrorResponse "Unauthorized"
+// @Failure 500 {object} httputil.ErrorResponse "Internal server error"
+// @Router /accounts/{address} [delete]
+func (c *AccountsController) deleteOne(rw http.ResponseWriter, request *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	ctx := request.Context()
+
+	address, err := utils.ParseHexToMixedCaseEthAddress(mux.Vars(request)["address"])
+	if err != nil {
+		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = c.ucs.DeleteAccount().Execute(ctx, *address, multitenancy.UserInfoValue(ctx))
+	if err != nil {
+		httputil.WriteHTTPErrorResponse(rw, err)
+		return
+	}
+
+	rw.WriteHeader(http.StatusNoContent)
 }
 
 // @Summary Search accounts by provided filters

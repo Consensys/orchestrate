@@ -13,6 +13,7 @@ import (
 
 type AccountUseCases interface {
 	GetAccount() GetAccountUseCase
+	DeleteAccount() DeleteAccountUseCase
 	CreateAccount() CreateAccountUseCase
 	UpdateAccount() UpdateAccountUseCase
 	SearchAccounts() SearchAccountsUseCase
@@ -20,6 +21,10 @@ type AccountUseCases interface {
 
 type GetAccountUseCase interface {
 	Execute(ctx context.Context, address ethcommon.Address, userInfo *multitenancy.UserInfo) (*entities.Account, error)
+}
+
+type DeleteAccountUseCase interface {
+	Execute(ctx context.Context, address ethcommon.Address, userInfo *multitenancy.UserInfo) error
 }
 
 type CreateAccountUseCase interface {

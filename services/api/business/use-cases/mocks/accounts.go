@@ -52,6 +52,20 @@ func (mr *MockAccountUseCasesMockRecorder) GetAccount() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccount", reflect.TypeOf((*MockAccountUseCases)(nil).GetAccount))
 }
 
+// DeleteAccount mocks base method
+func (m *MockAccountUseCases) DeleteAccount() usecases.DeleteAccountUseCase {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteAccount")
+	ret0, _ := ret[0].(usecases.DeleteAccountUseCase)
+	return ret0
+}
+
+// DeleteAccount indicates an expected call of DeleteAccount
+func (mr *MockAccountUseCasesMockRecorder) DeleteAccount() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteAccount", reflect.TypeOf((*MockAccountUseCases)(nil).DeleteAccount))
+}
+
 // CreateAccount mocks base method
 func (m *MockAccountUseCases) CreateAccount() usecases.CreateAccountUseCase {
 	m.ctrl.T.Helper()
@@ -130,6 +144,43 @@ func (m *MockGetAccountUseCase) Execute(ctx context.Context, address common.Addr
 func (mr *MockGetAccountUseCaseMockRecorder) Execute(ctx, address, userInfo interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockGetAccountUseCase)(nil).Execute), ctx, address, userInfo)
+}
+
+// MockDeleteAccountUseCase is a mock of DeleteAccountUseCase interface
+type MockDeleteAccountUseCase struct {
+	ctrl     *gomock.Controller
+	recorder *MockDeleteAccountUseCaseMockRecorder
+}
+
+// MockDeleteAccountUseCaseMockRecorder is the mock recorder for MockDeleteAccountUseCase
+type MockDeleteAccountUseCaseMockRecorder struct {
+	mock *MockDeleteAccountUseCase
+}
+
+// NewMockDeleteAccountUseCase creates a new mock instance
+func NewMockDeleteAccountUseCase(ctrl *gomock.Controller) *MockDeleteAccountUseCase {
+	mock := &MockDeleteAccountUseCase{ctrl: ctrl}
+	mock.recorder = &MockDeleteAccountUseCaseMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockDeleteAccountUseCase) EXPECT() *MockDeleteAccountUseCaseMockRecorder {
+	return m.recorder
+}
+
+// Execute mocks base method
+func (m *MockDeleteAccountUseCase) Execute(ctx context.Context, address common.Address, userInfo *multitenancy.UserInfo) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Execute", ctx, address, userInfo)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Execute indicates an expected call of Execute
+func (mr *MockDeleteAccountUseCaseMockRecorder) Execute(ctx, address, userInfo interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockDeleteAccountUseCase)(nil).Execute), ctx, address, userInfo)
 }
 
 // MockCreateAccountUseCase is a mock of CreateAccountUseCase interface
