@@ -1,5 +1,10 @@
 # Orchestrate Release Notes
 
+## v21.12.6 (WIP)
+### 🛠 Bug fixes
+* Added missing delete account endpoint into HTTP API.
+* Fixed data migration of transaction request data.
+
 ## v21.12.5 (2022-03-30)
 ### 🛠 Bug fixes
 * Fixed `externalTxEnabled` chain update.

@@ -107,3 +107,21 @@ func (agent *PGAccount) FindOneByAddress(ctx context.Context, address string, te
 
 	return account, nil
 }
+
+func (agent *PGAccount) Delete(ctx context.Context, address string, tenants []string, ownerID string) error {
+	account := &models.Account{}
+
+	query := agent.db.ModelContext(ctx, account).Where("address = ?", address)
+	query = pg.WhereAllowedTenants(query, "tenant_id", tenants)
+	query = pg.WhereAllowedOwner(query, "owner_id", ownerID)
+	err := pg.Delete(ctx, query)
+	if err != nil {
+		errMsg := "failed to delete one account by address"
+		if !errors.IsNotFoundError(err) {
+			agent.logger.WithContext(ctx).WithError(err).Error(errMsg)
+		}
+		return errors.FromError(err).SetMessage(errMsg).ExtendComponent(accountDAComponent)
+	}
+
+	return nil
+}

@@ -77,6 +77,7 @@ type AccountAgent interface {
 	Insert(ctx context.Context, account *models.Account) error
 	Update(ctx context.Context, account *models.Account) error
 	FindOneByAddress(ctx context.Context, address string, tenants []string, ownerID string) (*models.Account, error)
+	Delete(ctx context.Context, address string, tenants []string, ownerID string) error
 	Search(ctx context.Context, filters *entities.AccountFilters, tenants []string, ownerID string) ([]*models.Account, error)
 }
 
