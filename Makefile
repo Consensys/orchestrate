@@ -61,19 +61,11 @@ lint-ci: ## Check linting
 	@misspell -error $(GOFILES)
 	@golangci-lint run
 
-run-e2e: gobuild-e2e
-	@rm -f build/report/report.html
-	@docker-compose -f docker-compose.e2e.yml up -V e2e
+run-e2e:
+	go test -v -tags e2e ./tests/e2e
 
 run-stress: gobuild-e2e
 	@docker-compose -f docker-compose.e2e.yml up -V stress
-
-e2e-ci: run-e2e
-	@docker-compose -f docker-compose.e2e.yml up --build report
-
-e2e: run-e2e
-	@docker-compose -f docker-compose.e2e.yml up --build report
-	@$(OPEN) build/report/report.html 2>/dev/null
 
 deploy-remote-env:
 	@bash ./scripts/deploy-remote-env.sh
