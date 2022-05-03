@@ -1,4 +1,4 @@
-// +build unit
+// +build !unit
 // +build !race
 // +build !integration
 
@@ -150,9 +150,9 @@ func (s *eventTestSuite) TestPGEvent_FindDefaultBySigHash() {
 	ctx := context.Background()
 	s.T().Run("should find default events successfully", func(t *testing.T) {
 		s.insertEvents(ctx)
-	
+
 		defaultEvents, err := s.agents.Event().FindDefaultBySigHash(ctx, sigHash, 0)
-	
+
 		assert.NoError(t, err)
 		assert.Len(t, defaultEvents, 1)
 	})
@@ -165,11 +165,11 @@ func (s *eventTestSuite) TestPGEvent_FindDefaultBySigHash() {
 
 	s.T().Run("should return PostgresConnectionError if find fails", func(t *testing.T) {
 		s.pg.DropTestDB(t)
-	
+
 		_, err := s.agents.Event().FindDefaultBySigHash(ctx, sigHash, 0)
 		assert.Error(t, err)
 		assert.True(t, errors.IsInternalError(err))
-	
+
 		s.pg.InitTestDB(t)
 	})
 }

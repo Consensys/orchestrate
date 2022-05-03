@@ -1,4 +1,4 @@
-// +build unit
+// +build !unit
 // +build !race
 // +build !integration
 
@@ -129,7 +129,7 @@ func (s *jobTestSuite) TestPGJob_FindOneByUUID() {
 	ctx := context.Background()
 	job := testutils.FakeJobModel(0)
 	job.NextJobUUID = uuid.Must(uuid.NewV4()).String()
-	job.Logs = append(job.Logs, &models.Log{UUID: uuid.Must(uuid.NewV4()).String(), Status: entities.StatusStarted, 
+	job.Logs = append(job.Logs, &models.Log{UUID: uuid.Must(uuid.NewV4()).String(), Status: entities.StatusStarted,
 		Message: "created message"})
 	job.Schedule.TenantID = s.tenantID
 	job.Schedule.OwnerID = s.username

@@ -1,4 +1,4 @@
-// +build unit
+// +build !unit
 // +build !race
 // +build !integration
 
@@ -73,7 +73,7 @@ func (s *repositoryTestSuite) TestPGRepository_Insert() {
 		assert.NoError(t, err)
 		assert.NotEmpty(t, repo.ID)
 	})
-	
+
 	s.T().Run("should select instead of insert duplicated model repo", func(t *testing.T) {
 		repo := &models.RepositoryModel{
 			Name: "myRepository",
@@ -116,7 +116,7 @@ func (s *repositoryTestSuite) TestPGRepository_FindOneByName() {
 		assert.NoError(t, err)
 		assert.NotEmpty(t, artifact.ID)
 	})
-	
+
 	s.T().Run("should return PostgresConnectionError if select fails", func(t *testing.T) {
 		// We drop the DB to make the test fail
 		s.pg.DropTestDB(t)
