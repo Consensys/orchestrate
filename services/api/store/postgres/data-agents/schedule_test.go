@@ -1,4 +1,4 @@
-// +build unit
+// +build !unit
 // +build !race
 // +build !integration
 
@@ -28,9 +28,9 @@ type scheduleTestSuite struct {
 
 func TestPGSchedule(t *testing.T) {
 	s := new(scheduleTestSuite)
-	s.tenantID = "tenantID"
+	s.tenantID = tenantID
 	s.allowedTenants = []string{s.tenantID, "_"}
-	s.username = "username"
+	s.username = username
 	suite.Run(t, s)
 }
 

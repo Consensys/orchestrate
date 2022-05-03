@@ -174,10 +174,6 @@ jobs:
   test:
     docker:
       - image: cimg/go:1.16.8
-      - image: postgres:13.4-alpine
-        environment:
-          POSTGRES_PASSWORD: "postgres"
-          DB_HOST: "postgres"
     resource_class: xlarge
     steps:
       - prepare_golang
@@ -336,14 +332,13 @@ jobs:
 
   run-e2e:
     docker:
-      - image: cimg/go:1.16.8-node
+      - image: cimg/base:2022.04
     resource_class: large
     parameters:
       target:
         type: string
         default: "qa"
     steps:
-      - prepare_golang
       - prepare_e2e
       - wait-for/sh-command:
           seconds-between-retries: 3

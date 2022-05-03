@@ -1,4 +1,4 @@
-// +build unit
+// +build !unit
 // +build !race
 // +build !integration
 
@@ -126,7 +126,7 @@ func (s *txRequestTestSuite) TestPGTransactionRequest_FindOneByUUID() {
 	assert.Nil(s.T(), err)
 
 	s.T().Run("should find request successfully for empty tenant", func(t *testing.T) {
-		txRequestRetrieved, err := s.agents.TransactionRequest().FindOneByUUID(ctx, txRequest.Schedule.UUID, 
+		txRequestRetrieved, err := s.agents.TransactionRequest().FindOneByUUID(ctx, txRequest.Schedule.UUID,
 			s.allowedTenants, s.username)
 
 		assert.NoError(t, err)
@@ -135,7 +135,7 @@ func (s *txRequestTestSuite) TestPGTransactionRequest_FindOneByUUID() {
 	})
 
 	s.T().Run("should find request successfully for default tenant", func(t *testing.T) {
-		txRequestRetrieved, err := s.agents.TransactionRequest().FindOneByUUID(ctx, txRequest.Schedule.UUID, 
+		txRequestRetrieved, err := s.agents.TransactionRequest().FindOneByUUID(ctx, txRequest.Schedule.UUID,
 			s.allowedTenants, s.username)
 
 		assert.NoError(t, err)
@@ -144,7 +144,7 @@ func (s *txRequestTestSuite) TestPGTransactionRequest_FindOneByUUID() {
 	})
 
 	s.T().Run("should return NotFoundError if uuid is not found", func(t *testing.T) {
-		_, err := s.agents.TransactionRequest().FindOneByUUID(ctx, uuid.Must(uuid.NewV4()).String(), 
+		_, err := s.agents.TransactionRequest().FindOneByUUID(ctx, uuid.Must(uuid.NewV4()).String(),
 			s.allowedTenants, s.username)
 		assert.True(t, errors.IsNotFoundError(err))
 	})

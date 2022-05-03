@@ -1,4 +1,4 @@
-// +build unit
+// +build !unit
 // +build !race
 // +build !integration
 
@@ -34,9 +34,9 @@ func TestPGChain(t *testing.T) {
 
 func (s *chainTestSuite) SetupSuite() {
 	s.pg, _ = pgTestUtils.NewPGTestHelper(nil, migrations.Collection)
-	s.tenantID = "tenantID"
+	s.tenantID = tenantID
 	s.allowedTenants = []string{s.tenantID, "_"}
-	s.username = "username"
+	s.username = username
 	s.pg.InitTestDB(s.T())
 }
 

@@ -1,4 +1,4 @@
-// +build unit
+// +build !unit
 // +build !race
 // +build !integration
 
@@ -19,8 +19,8 @@ import (
 
 type txTestSuite struct {
 	suite.Suite
-	agents         *PGAgents
-	pg             *pgTestUtils.PGTestHelper
+	agents *PGAgents
+	pg     *pgTestUtils.PGTestHelper
 }
 
 func TestPGTx(t *testing.T) {

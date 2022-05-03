@@ -13,8 +13,8 @@ import (
 
 	qkm "github.com/consensys/orchestrate/pkg/quorum-key-manager"
 	"github.com/consensys/orchestrate/pkg/types/api"
-	"github.com/consensys/orchestrate/services/api/business/use-cases"
 	"github.com/consensys/orchestrate/pkg/types/formatters"
+	"github.com/consensys/orchestrate/services/api/business/use-cases"
 	qkmmock "github.com/consensys/quorum-key-manager/pkg/client/mock"
 	qkmtypes "github.com/consensys/quorum-key-manager/src/stores/api/types"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -38,6 +38,7 @@ type accountsCtrlTestSuite struct {
 	searchAccountUC  *mocks.MockSearchAccountsUseCase
 	updateAccountUC  *mocks.MockUpdateAccountUseCase
 	fundAccountUC    *mocks.MockFundAccountUseCase
+	deleteAccountUC  *mocks.MockDeleteAccountUseCase
 	keyManagerClient *qkmmock.MockKeyManagerClient
 	ctx              context.Context
 	userInfo         *multitenancy.UserInfo
@@ -64,6 +65,10 @@ func (s *accountsCtrlTestSuite) UpdateAccount() usecases.UpdateAccountUseCase {
 
 func (s *accountsCtrlTestSuite) FundAccount() usecases.FundAccountUseCase {
 	return s.fundAccountUC
+}
+
+func (s *accountsCtrlTestSuite) DeleteAccount() usecases.DeleteAccountUseCase {
+	return s.deleteAccountUC
 }
 
 const (
