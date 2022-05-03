@@ -183,7 +183,7 @@ jobs:
       - prepare_golang
       - run:
           name: Run unit tests
-          command: make ci-run-coverage-unit
+          command: make run-coverage-unit
       - store_test_results:
           path: ./build/coverage/unit.out
       - store_artifacts:
