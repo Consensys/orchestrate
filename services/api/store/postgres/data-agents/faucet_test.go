@@ -34,7 +34,7 @@ func TestPGFaucet(t *testing.T) {
 
 func (s *faucetTestSuite) SetupSuite() {
 	s.pg, _ = pgTestUtils.NewPGTestHelper(nil, migrations.Collection)
-	s.tenantID = "tenantID"
+	s.tenantID = tenantID
 	s.allowedTenants = []string{s.tenantID, "_"}
 	s.pg.InitTestDB(s.T())
 }

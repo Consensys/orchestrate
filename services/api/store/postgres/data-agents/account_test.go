@@ -19,6 +19,9 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
+const tenantID = "tenantID"
+const username = "username"
+
 type accountTestSuite struct {
 	suite.Suite
 	agents         *PGAgents
@@ -35,9 +38,9 @@ func TestPGAccount(t *testing.T) {
 
 func (s *accountTestSuite) SetupSuite() {
 	s.pg, _ = pgTestUtils.NewPGTestHelper(nil, migrations.Collection)
-	s.tenantID = "tenantID"
+	s.tenantID = tenantID
 	s.allowedTenants = []string{s.tenantID, "_"}
-	s.username = "username"
+	s.username = username
 	s.pg.InitTestDB(s.T())
 }
 

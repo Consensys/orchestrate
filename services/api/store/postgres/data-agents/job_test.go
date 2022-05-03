@@ -34,9 +34,9 @@ type jobTestSuite struct {
 
 func TestPGJob(t *testing.T) {
 	s := new(jobTestSuite)
-	s.tenantID = "tenant"
+	s.tenantID = tenantID
 	s.allowedTenants = []string{s.tenantID, "_"}
-	s.username = "username"
+	s.username = username
 	suite.Run(t, s)
 }
 

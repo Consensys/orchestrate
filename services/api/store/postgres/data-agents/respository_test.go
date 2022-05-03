@@ -120,7 +120,7 @@ func (s *repositoryTestSuite) TestPGRepository_FindOneByName() {
 	s.T().Run("should return PostgresConnectionError if select fails", func(t *testing.T) {
 		// We drop the DB to make the test fail
 		s.pg.DropTestDB(t)
-		_, err := s.agents.Repository().FindOne(ctx,  "respository")
+		_, err := s.agents.Repository().FindOne(ctx, "repository")
 
 		assert.True(t, errors.IsInternalError(err))
 

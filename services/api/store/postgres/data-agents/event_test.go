@@ -18,10 +18,10 @@ import (
 )
 
 const (
-	sigHash = "0x12312412"
+	sigHash  = "0x12312412"
 	codeHash = "0x12324124"
-	chainID = "2017"
-	address = "0x1234"
+	chainID  = "2017"
+	address  = "0x1234"
 )
 
 type eventTestSuite struct {
