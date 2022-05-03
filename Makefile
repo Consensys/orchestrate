@@ -22,7 +22,7 @@ networks:
 	@docker network create --driver=bridge --subnet=172.16.238.0/24 orchestrate_go_quorum || true
 	@docker network create orchestrate_geth || true
 
-run-unit: postgres
+run-unit:
 	@mkdir -p build/coverage
 	@go test -cover -coverpkg=./... -covermode=count -coverprofile build/coverage/unit.out --tags unit ${PACKAGES}
 
@@ -68,7 +68,7 @@ run-e2e: gobuild-e2e
 run-stress: gobuild-e2e
 	@docker-compose -f docker-compose.e2e.yml up -V stress
 
-e2e-ci: run-e2e 
+e2e-ci: run-e2e
 	@docker-compose -f docker-compose.e2e.yml up --build report
 
 e2e: run-e2e
@@ -217,12 +217,6 @@ stop-besu:
 
 down-besu:
 	@docker-compose -f scripts/besu/docker-compose.yml down --volumes --timeout 0
-
-postgres:
-	@docker-compose -f scripts/deps/docker-compose.yml up -d postgres-unit
-
-down-postgres:
-	@docker-compose -f scripts/deps/docker-compose.yml rm --force -s -v postgres-unit
 
 up: networks deps-persistent go-quorum besu geth deps-kafka quorum-key-manager bootstrap-deps orchestrate ## Start Orchestrate and deps
 
