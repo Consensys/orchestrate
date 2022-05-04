@@ -37,9 +37,7 @@ func (uc *searchContractUseCase) Execute(ctx context.Context, codehash hexutil.B
 	case codehash != nil:
 		contract, err = uc.agent.FindOneByCodeHash(ctx, codehash.String())
 	}
-
 	if err != nil {
-		uc.logger.WithError(err).Error("no contract found")
 		return nil, errors.FromError(err).ExtendComponent(searchContractComponent)
 	}
 
