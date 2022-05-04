@@ -332,7 +332,7 @@ jobs:
 
   run-e2e:
     docker:
-      - image: cimg/go:1.16.8-node
+      - image: cimg/base:2022.04
     resource_class: large
     parameters:
       target:
