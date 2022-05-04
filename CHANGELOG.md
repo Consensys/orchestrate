@@ -1,9 +1,10 @@
 # Orchestrate Release Notes
 
-## v21.12.6 (WIP)
+## v21.12.6 (2022-05-04)
 ### 🛠 Bug fixes
 * Added missing delete account endpoint into HTTP API.
 * Fixed data migration of transaction request data.
+* Remove unnecessary and verbose logging.
 
 ## v21.12.5 (2022-03-30)
 ### 🛠 Bug fixes
