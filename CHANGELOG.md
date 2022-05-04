@@ -5,6 +5,7 @@
 * Added missing delete account endpoint into HTTP API.
 * Fixed data migration of transaction request data.
 * Remove unnecessary and verbose logging.
+* Update block number only after fetching 3 blocks
 
 ## v21.12.5 (2022-03-30)
 ### 🛠 Bug fixes
