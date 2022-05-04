@@ -297,7 +297,11 @@ func (s *Session) callHook(ctx context.Context, block *fetchedBlock) error {
 		return err
 	}
 
-	return s.offsets.SetLastBlockNumber(ctx, s.Chain, block.block.NumberU64())
+	if block.block.NumberU64()%3 == 0 {
+		return s.offsets.SetLastBlockNumber(ctx, s.Chain, block.block.NumberU64())
+	}
+
+	return nil
 }
 
 func (s *Session) fetchBlock(ctx context.Context, blockPosition uint64) *Future {
