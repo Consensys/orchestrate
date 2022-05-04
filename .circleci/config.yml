@@ -339,7 +339,6 @@ jobs:
         type: string
         default: "qa"
     steps:
-      - prepare_golang
       - prepare_e2e
       - wait-for/sh-command:
           seconds-between-retries: 3
