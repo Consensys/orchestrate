@@ -80,6 +80,6 @@ func (uc *updateChainUseCase) Execute(ctx context.Context, chain *entities.Chain
 		return nil, errors.FromError(err).ExtendComponent(updateChainComponent)
 	}
 
-	logger.Info("chain updated successfully")
+	logger.Debug("chain updated successfully")
 	return chainUpdated, nil
 }

@@ -309,7 +309,9 @@ func (s *Session) fetchBlock(ctx context.Context, blockPosition uint64) *Future 
 		)
 		if err != nil {
 			errMessage := "failed to fetch block"
-			s.logger.WithError(err).WithField("block_number", blockPosition).Error(errMessage)
+			if !errors.IsNotFoundError(err) {
+				s.logger.WithError(err).WithField("block_number", blockPosition).Error(errMessage)
+			}
 			return nil, errors.ConnectionError(errMessage)
 		}
 

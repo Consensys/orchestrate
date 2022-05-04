@@ -277,11 +277,8 @@ signalLoop:
 		case sig := <-signals:
 			switch sig {
 			case syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT:
-				app.logger.WithField("sig", sig.String()).Info("signal intercepted")
+				app.logger.WithField("sig", sig.String()).Debug("signal intercepted")
 				break signalLoop
-			case syscall.SIGPIPE:
-				// Ignore random broken pipe
-				app.logger.WithField("sig", sig.String()).Info("signal intercepted (ignored)")
 			}
 		case err = <-app.Errors():
 			if err != nil && err != context.Canceled && err != nethttp.ErrServerClosed {
