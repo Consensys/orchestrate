@@ -84,8 +84,7 @@ func (d *txSenderDaemon) Run(ctx context.Context) error {
 		d.config.ProxyURL, d.config.NonceMaxRecovery)
 
 	// Create service layer listener
-	listener := service.NewMessageListener(useCases, d.jobClient, d.producer, d.config.RecoverTopic, d.config.SenderTopic,
-		d.config.BckOff)
+	listener := service.NewMessageListener(useCases, d.jobClient, d.producer, d.config.RecoverTopic, d.config.BckOff)
 
 	ctx, d.cancel = context.WithCancel(ctx)
 	gr := &multierror.Group{}

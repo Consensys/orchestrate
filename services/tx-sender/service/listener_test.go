@@ -1,3 +1,4 @@
+//go:build unit
 // +build unit
 
 package service
@@ -81,12 +82,11 @@ func (s *messageListenerCtrlTestSuite) SetupTest() {
 	s.sendTesseraPrivate = mocks.NewMockSendTesseraPrivateTxUseCase(ctrl)
 	s.sendTesseraMarking = mocks.NewMockSendTesseraMarkingTxUseCase(ctrl)
 	s.apiClient = mock3.NewMockOrchestrateClient(ctrl)
-	s.senderTopic = "sender-topic"
 	s.recoverTopic = "recover-topic"
 	s.producer = mock.NewMockSyncProducer()
 
 	bckoff := backoff.WithMaxRetries(backoff.NewConstantBackOff(time.Millisecond*100), 2)
-	s.listener = NewMessageListener(s, s.apiClient, s.producer, s.recoverTopic, s.senderTopic, bckoff)
+	s.listener = NewMessageListener(s, s.apiClient, s.producer, s.recoverTopic, bckoff)
 }
 
 func (s *messageListenerCtrlTestSuite) TestMessageListener_PublicEthereum() {

@@ -68,6 +68,16 @@ run-e2e: gobuild-e2e
 run-stress: gobuild-e2e
 	@docker-compose -f docker-compose.e2e.yml up -V stress
 
+e2e: run-e2e
+	@docker-compose -f docker-compose.e2e.yml up --build report
+	@$(OPEN) build/report/report.html 2>/dev/null
+
+e2e-ci: gobuild-e2e
+	@docker network create orchestrate
+	@set -Eeu
+	@docker-compose -f docker-compose.e2e.yml up -V e2e
+	@docker-compose -f docker-compose.e2e.yml up --build report
+
 deploy-remote-env:
 	@bash ./scripts/deploy-remote-env.sh
 
@@ -177,7 +187,7 @@ quorum-key-manager:
 	@bash scripts/deps/quorum-key-manager/wait_for_token.sh
 	@docker-compose -f scripts/deps/docker-compose.yml up --build -d quorum-key-manager
 
-deps-persistent: deps-vault deps-postgres deps-redis
+deps-persistent: networks deps-vault deps-postgres deps-redis
 
 deps: networks deps-persistent deps-kafka quorum-key-manager
 

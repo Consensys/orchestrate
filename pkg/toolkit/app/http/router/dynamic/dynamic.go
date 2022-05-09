@@ -216,7 +216,6 @@ func (b *Builder) buildMiddleware(ctx context.Context, routerName string, rtInfo
 
 		// In case a services is missing one of the middleware configurationg we skip it usage and warning
 		if infos.Middlewares[midName] == nil {
-			logger.Warn("missing in dynamic configuration")
 			continue
 		}
 

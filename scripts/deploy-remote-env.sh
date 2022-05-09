@@ -7,28 +7,23 @@ TOKEN_HEADER="Circle-Token: ${CIRCLECI_TOKEN}"
 
 #Pass parameters to the Circle CI pipeline
 PARAMETERS=""
-[ "$ORCHESTRATE_NAMESPACE" ] && export PARAMETERS=$PARAMETERS,\"orchestrate_namespace\":\"$ORCHESTRATE_NAMESPACE\"
-[ "$ORCHESTRATE_TAG" ] && export PARAMETERS=$PARAMETERS,\"orchestrate_tag\":\"$ORCHESTRATE_TAG\"
-[ "$ORCHESTRATE_REPOSITORY" ] && export PARAMETERS=$PARAMETERS,\"orchestrate_repository\":\"$ORCHESTRATE_REPOSITORY\"
-[ "$REGISTRY_URL" ] && export PARAMETERS=$PARAMETERS,\"registry_url\":\"$REGISTRY_URL\"
-[ "$REGISTRY_USERNAME" ] && export PARAMETERS=$PARAMETERS,\"registry_username\":\"$REGISTRY_USERNAME\"
-[ "$REGISTRY_PASSWORD" ] && export PARAMETERS=$PARAMETERS,\"registry_password\":\"$REGISTRY_PASSWORD\"
-[ "$ENVIRONMENT_VALUES" ] && export PARAMETERS=$PARAMETERS,\"environment_values\":\"$ENVIRONMENT_VALUES\"
+[ "$ORCHESTRATE_NAMESPACE" ] && export PARAMETERS=$PARAMETERS,\"orchestrate-namespace\":\"$ORCHESTRATE_NAMESPACE\"
+[ "$ORCHESTRATE_TAG" ] && export PARAMETERS=$PARAMETERS,\"orchestrate-tag\":\"$ORCHESTRATE_TAG\"
 [ "$PARAMETERS" ] && PARAMETERS=${PARAMETERS:1}
 
-echo "Pipeline parameters: $PARAMETERS"
+echo "Deploying helm charts version $KUBERNETES_BRANCH with parameters: $PARAMETERS"
 
 #Create CircleCI pipeline
-RESPONSE=$(curl -s --request POST --header "${TOKEN_HEADER}" --header "Content-Type: application/json" --data '{"branch":"'${BRANCH-master}'","parameters":{'${PARAMETERS}'}}' https://circleci.com/api/v2/project/github/ConsenSys/orchestrate-kubernetes/pipeline)
+RESPONSE=$(curl -s --request POST --header "${TOKEN_HEADER}" --header "Content-Type: application/json" --data '{"branch":"'${KUBERNETES_BRANCH-master}'","parameters":{'${PARAMETERS}'}}' https://circleci.com/api/v2/project/github/ConsenSys/orchestrate-kubernetes/pipeline)
 echo $RESPONSE
 ID=$(echo $RESPONSE | jq '.id' -r)
 NUMBER=$(echo $RESPONSE | jq '.number' -r)
 
 echo "Circle CI pipeline created: $ID"
 
-#Timeout after 4*450 seconds = 30min
+#Timeout after 4*150 seconds = 10min
 SLEEP=4
-RETRY=450
+RETRY=150
 
 for i in $(seq 1 1 $RETRY); do
   sleep $SLEEP

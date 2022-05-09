@@ -32,7 +32,6 @@ const (
 type MessageListener struct {
 	useCases     usecases.UseCases
 	recoverTopic string
-	crafterTopic string
 	retryBackOff backoff.BackOff
 	producer     sarama.SyncProducer
 	jobClient    client.JobClient
@@ -44,13 +43,12 @@ type MessageListener struct {
 func NewMessageListener(useCases usecases.UseCases,
 	jobClient client.JobClient,
 	producer sarama.SyncProducer,
-	recoverTopic, crafterTopic string,
+	recoverTopic string,
 	bck backoff.BackOff,
 ) *MessageListener {
 	return &MessageListener{
 		useCases:     useCases,
 		recoverTopic: recoverTopic,
-		crafterTopic: crafterTopic,
 		producer:     producer,
 		retryBackOff: bck,
 		jobClient:    jobClient,

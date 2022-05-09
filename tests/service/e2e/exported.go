@@ -47,7 +47,7 @@ func Start(ctx context.Context) error {
 	logger.WithField("data", rawTestData).Debug("test data")
 	err := json.Unmarshal([]byte(rawTestData), &testData)
 	if err != nil {
-		logger.WithError(err).Error("failed to ")
+		logger.WithError(err).WithField("test_data", rawTestData).Error("failed to unmarshal test data")
 		return err
 	}
 
@@ -79,7 +79,7 @@ func Start(ctx context.Context) error {
 
 		err := broker.Consume(cctx, topics, cg)
 		if err != nil {
-			log.FromContext(cctx).WithError(err).Error("error on consumer")
+			log.FromContext(cctx).WithField("topics", topics).WithError(err).Error("error on consumer")
 		}
 
 		cancel()
