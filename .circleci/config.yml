@@ -182,11 +182,11 @@ jobs:
       - run:
           name: Build and push image
           no_output_timeout: 90m
-          environment:
-            DOCKER_IMAGE_PLATFORM: << parameters.docker-image-platform >>
-            DOCKER_IMAGE_VERSION: << parameters.docker-distroless-version >>
-            DOCKER_IMAGE_REF: << parameters.docker-image-registry >>/<< parameters.docker-image-tag >>
           command: |
+            export DOCKER_IMAGE_PLATFORM="<< parameters.docker-image-platform >>"
+            export DOCKER_IMAGE_VERSION="<< parameters.docker-distroless-version >>"
+            export DOCKER_IMAGE_REF="<< parameters.docker-image-registry >>/<< parameters.docker-image-tag >>"
+            
             TARGETOS="$(echo "${DOCKER_IMAGE_PLATFORM}" | cut -d '/' -f 1)"
             TARGETARCH="$(echo "${DOCKER_IMAGE_PLATFORM}" | cut -d '/' -f 2)"
 
@@ -246,8 +246,7 @@ jobs:
             KAFKA_TLS_INSECURE_SKIP_VERIFY: true
             KAFKA_SASL_ENABLED: true
             KAFKA_SASL_MECHANISM: PLAIN
-          command: printenv
-      #            make e2e-ci
+          command: make e2e-ci
       - store_artifacts:
           path: ./build/report/report.html
           destination: report.html
@@ -295,10 +294,10 @@ jobs:
       - checkout
       - run:
           name: Deploy staging environment
-          environment:
-            ORCHESTRATE_TAG: << parameters.docker-image-tag >>
-            ORCHESTRATE_NAMESPACE: << parameters.orchestrate-namespace >>
-          command: make deploy-remote-env
+          command: >-
+            ORCHESTRATE_TAG="<< parameters.docker-image-tag >>"
+            ORCHESTRATE_NAMESPACE="<< parameters.orchestrate-namespace >>"
+            make deploy-remote-env
 
   tag-docker-image:
     docker:
@@ -347,13 +346,13 @@ jobs:
       - run:
           name: Build, push and sign images
           no_output_timeout: 90m
-          environment:
-            DOCKER_IMAGE_SIGN: << parameters.docker-image-sign >>
-            DOCKER_IMAGE_PLATFORM: << parameters.docker-image-platform >>
-            DOCKER_IMAGE_VERSION: << parameters.docker-distroless-version >>
-            DOCKER_IMAGE_SOURCE_REF: << parameters.docker-image-source-registry >>/<< parameters.docker-image-source-tag >>
-            DOCKER_IMAGE_DESTINATION_REF: << parameters.docker-image-destination-registry >>/<< parameters.docker-image-destination-tag >>
           command: |
+            export DOCKER_IMAGE_SIGN="<< parameters.docker-image-sign >>"
+            export DOCKER_IMAGE_PLATFORM="<< parameters.docker-image-platform >>"
+            export DOCKER_IMAGE_VERSION="<< parameters.docker-distroless-version >>"
+            export DOCKER_IMAGE_SOURCE_REF="<< parameters.docker-image-source-registry >>/<< parameters.docker-image-source-tag >>"
+            export DOCKER_IMAGE_DESTINATION_REF="<< parameters.docker-image-destination-registry >>/<< parameters.docker-image-destination-tag >>"
+            
             TARGETOS="$(echo "${DOCKER_IMAGE_PLATFORM}" | cut -d '/' -f 1)"
             TARGETARCH="$(echo "${DOCKER_IMAGE_PLATFORM}" | cut -d '/' -f 2)"
 
