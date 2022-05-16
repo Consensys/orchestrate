@@ -98,6 +98,10 @@ func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *etht
 
 		err = hk.decodeReceipt(receiptLogCtx, c, txResponse.Receipt)
 		if err != nil {
+			if errors.IsConnectionError(err) {
+				return err
+			}
+
 			txResponse.Errors = []*ierror.Error{errors.FromError(err)}
 		}
 

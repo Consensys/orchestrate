@@ -283,9 +283,8 @@ func (s *Session) callHooks(ctx context.Context) {
 
 		if err != nil {
 			s.errors <- err
-		} else {
-			s.metrics.BlockCounter().With(s.metricsLabels...).Add(1)
 		}
+		s.metrics.BlockCounter().With(s.metricsLabels...).Add(1)
 	}
 
 	s.logger.Debug("call hooks loop has been stopped")
