@@ -120,11 +120,11 @@ func (s *Session) Run(ctx context.Context) error {
 		},
 		s.bckOff,
 		func(err error, duration time.Duration) {
-			s.logger.WithError(err).Warnf("error in session listener, rebooting in %v...", duration)
+			s.logger.WithError(err).Warnf("error in chain session listener, retrying in %v...", duration)
 		},
 	)
 
-	s.logger.WithError(err).Info("listener session exited")
+	s.logger.WithError(err).Info("listener chain session exited")
 	return err
 }
 
@@ -478,6 +478,9 @@ func (s *Session) fetchReceipt(ctx context.Context, job *entities.Job, txHash et
 			SetBlockNumber(receipt.GetBlockNumber()).
 			SetTxIndex(receipt.TxIndex)
 
+		job.Receipt.ContractName = job.Transaction.ContractName
+		job.Receipt.ContractTag = job.Transaction.ContractTag
+
 		return job, nil
 	})
 }
@@ -512,6 +515,9 @@ func (s *Session) fetchPrivateReceipt(ctx context.Context, job *entities.Job, tx
 			SetBlockNumber(receipt.GetBlockNumber()).
 			SetTxHash(txHash).
 			SetTxIndex(receipt.TxIndex)
+
+		job.Receipt.ContractName = job.Transaction.ContractName
+		job.Receipt.ContractTag = job.Transaction.ContractTag
 
 		return job, nil
 	})

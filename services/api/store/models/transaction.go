@@ -26,6 +26,8 @@ type Transaction struct {
 	PrivateFor     []string `pg:",array"`
 	MandatoryFor   []string `pg:",array"`
 	PrivacyGroupID string
+	ContractName   string
+	ContractTag    string
 	PrivacyFlag    int
 	EnclaveKey     string    `pg:"alias:enclave_key"`
 	CreatedAt      time.Time `pg:"default:now()"`

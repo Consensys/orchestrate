@@ -71,7 +71,7 @@ func (m *Manager) Run(ctx context.Context) error {
 func (m *Manager) run(ctx context.Context) {
 	defer func() {
 		m.wg.Wait()
-		m.logger.Infof("service stopped")
+		m.logger.Info("service stopped")
 	}()
 
 	utils.InParallel(

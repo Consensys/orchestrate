@@ -75,7 +75,7 @@ services:
       ARTIFACTS_PATH: "/artifacts"
       STRESS_CONCURRENCY: "15"
       STRESS_ITERATIONS: "100"
-      STRESS_TIMEOUT: "10m"
+      STRESS_TIMEOUT: "5m"
       TEST_GLOBAL_DATA: ${TEST_GLOBAL_DATA-}
       KAFKA_CONSUMER_GROUP_NAME: ${KAFKA_CONSUMER_GROUP_NAME-stress}
     restart: "no"

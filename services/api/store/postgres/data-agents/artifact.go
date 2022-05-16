@@ -2,6 +2,7 @@ package dataagents
 
 import (
 	"context"
+	"strings"
 
 	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
@@ -71,8 +72,8 @@ func (agent *PGArtifact) FindOneByNameAndTag(ctx context.Context, name, tag stri
 		Column("artifact_model.id", "abi", "bytecode", "deployed_bytecode").
 		Join("JOIN tags AS t ON t.artifact_id = artifact_model.id").
 		Join("JOIN repositories AS registry ON registry.id = t.repository_id").
-		Where("LOWER(t.name) = LOWER(?)", tag).
-		Where("LOWER(registry.name) = LOWER(?)", name)
+		Where("LOWER(t.name) = ?", strings.ToLower(tag)).
+		Where("LOWER(registry.name) = ?", strings.ToLower(name))
 
 	err := pg.SelectOne(ctx, query)
 	if err != nil {

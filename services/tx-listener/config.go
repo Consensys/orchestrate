@@ -7,6 +7,7 @@ import (
 	authkey "github.com/consensys/orchestrate/pkg/toolkit/app/auth/key"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	metricregistry "github.com/consensys/orchestrate/pkg/toolkit/app/metrics/registry"
+	"github.com/consensys/orchestrate/pkg/toolkit/cache/ristretto"
 	tcpmetrics "github.com/consensys/orchestrate/pkg/toolkit/tcp/metrics"
 	provider "github.com/consensys/orchestrate/services/tx-listener/providers/chain-registry"
 	txsentry "github.com/consensys/orchestrate/services/tx-sentry"
@@ -36,4 +37,5 @@ func Flags(f *pflag.FlagSet) {
 	txsentry.Flags(f)
 	provider.Flags(f)
 	orchestrateclient.Flags(f)
+	ristretto.Flags(f)
 }

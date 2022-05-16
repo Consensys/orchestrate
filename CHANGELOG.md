@@ -1,5 +1,10 @@
 # Orchestrate Release Notes
 
+## v21.12.7 (WIP)
+### 🛠 Bug fixes
+* Reduced `tx-listener` service demands on `api` by usage of an optional in-memory cache. This is an optional feature
+which can be enabled using `API_CACHE_TTL` environment variable.
+
 ## v21.12.6 (2022-05-04)
 ### 🛠 Bug fixes
 * Added missing delete account endpoint into HTTP API.

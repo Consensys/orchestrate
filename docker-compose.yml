@@ -3,26 +3,20 @@ version: "3.7"
 x-default-variables: &default-variables
   API_URL: ${API_URL-http://api:8081}
   API_METRICS_URL: ${API_METRICS_URL-http://api:8082}
-  KEY_MANAGER_URL: ${KEY_MANAGER_URL-http://key-manager:8080}
-  KEY_MANAGER_METRICS_URL: ${KEY_MANAGER_URL-http://key-manager:8081}
-  KEY_MANAGER_STORE_NAME: ${KEY_MANAGER_STORE_NAME-orchestrate-eth}
+  TX_SENDER_METRICS_URL: ${TX_SENDER_METRICS_URL-http://tx-sender:8082}
+  TX_LISTENER_METRICS_URL: ${TX_LISTENER_METRICS_URL-http://tx-listener:8082}
+  KEY_MANAGER_URL: ${KEY_MANAGER_URL-https://quorum-key-manager:8080}
+  KEY_MANAGER_METRICS_URL: ${KEY_MANAGER_URL-https://quorum-key-manager:8081}
+  KEY_MANAGER_STORE_NAME: ${KEY_MANAGER_STORE_NAME-}
   KEY_MANAGER_TLS_SKIP_VERIFY: ${KEY_MANAGER_TLS_SKIP_VERIFY-}
   KEY_MANAGER_API_KEY: ${KEY_MANAGER_API_KEY-}
   KEY_MANAGER_CLIENT_TLS_CERT: ${KEY_MANAGER_CLIENT_TLS_CERT-}
   KEY_MANAGER_CLIENT_TLS_KEY: ${KEY_MANAGER_CLIENT_TLS_KEY-}
-  TX_SENDER_METRICS_URL: ${TX_SENDER_METRICS_URL-http://tx-sender:8082}
-  TX_LISTENER_METRICS_URL: ${TX_LISTENER_METRICS_URL-http://tx-listener:8082}
   ETH_CLIENT_RETRY_MAX_ELAPSED_TIME: 5s
-  ACCESSLOG_ENABLED: ${ACCESSLOG_ENABLED-false}
-  LOG_LEVEL: ${LOG_LEVEL-}
+  LOG_LEVEL: ${LOG_LEVEL-debug}
   LOG_FORMAT: ${LOG_FORMAT-}
   LOG_TIMESTAMP: ${LOG_TIMESTAMP-true}
-  NONCE_MANAGER_TYPE: ${NONCE_MANAGER_TYPE-in-memory}
   MULTI_TENANCY_ENABLED: ${MULTI_TENANCY_ENABLED-false}
-  AUTH_API_KEY: ${AUTH_API_KEY-}
-  AUTH_JWT_ISSUER_URL: ${AUTH_JWT_ISSUER_URL-}
-  AUTH_JWT_AUDIENCE: ${AUTH_JWT_AUDIENCE-}
-  AUTH_JWT_ORCHESTRATE_CLAIMS: ${AUTH_JWT_ORCHESTRATE_CLAIMS-}
   KAFKA_URL: ${KAFKA_URL-kafka:29092}
   KAFKA_SASL_ENABLED: ${KAFKA_SASL_ENABLED-false}
   KAFKA_SASL_MECHANISM: ${KAFKA_SASL_MECHANISM-PLAIN}
@@ -31,6 +25,16 @@ x-default-variables: &default-variables
   KAFKA_TLS_ENABLED: ${KAFKA_TLS_ENABLED-false}
   KAFKA_TLS_INSECURE_SKIP_VERIFY: ${KAFKA_TLS_INSECURE_SKIP_VERIFY-false}
   KAFKA_NUM_CONSUMERS: ${KAFKA_NUM_CONSUMERS-}
+  METRICS_MODULES: ${METRICS_MODULES-}
+
+x-container-common: &container-common
+  restart: ${CONTAINER_RESTART-on-failure}
+  image: consensys/orchestrate:v21.12.0
+  networks:
+    - orchestrate
+    - deps
+
+x-db-common: &db-common
   DB_TLS_SSLMODE: ${DB_TLS_SSLMODE-}
   DB_TLS_CERT: ${DB_TLS_CERT-}
   DB_TLS_KEY: ${DB_TLS_KEY-}
@@ -40,14 +44,32 @@ x-default-variables: &default-variables
   DB_DATABASE: ${DB_DATABASE-}
   DB_POOLSIZE: ${DB_POOLSIZE-}
   DB_POOL_TIMEOUT: ${DB_POOL_TIMEOUT-}
-  METRICS_MODULES: ${METRICS_MODULES-}
 
-x-container-common: &container-common
-  restart: ${CONTAINER_RESTART-on-failure}
-  image: consensys/orchestrate:v21.12.0
-  networks:
-    - orchestrate
-    - deps
+x-api-common: &api-common
+  PROXY_MAXIDLECONNSPERHOST: ${PROXY_MAXIDLECONNSPERHOST-}
+  PROXY_CACHE_TTL: ${PROXY_CACHE_TTL-}
+  AUTH_API_KEY: ${AUTH_API_KEY-}
+  AUTH_JWT_ISSUER_URL: ${AUTH_JWT_ISSUER_URL-}
+  AUTH_JWT_AUDIENCE: ${AUTH_JWT_AUDIENCE-}
+  AUTH_JWT_ORCHESTRATE_CLAIMS: ${AUTH_JWT_ORCHESTRATE_CLAIMS-}
+  ACCESSLOG_ENABLED: ${ACCESSLOG_ENABLED-false}
+
+x-tx-listener-common: &tx-listener-common
+  API_CACHE_TTL: ${API_CACHE_TTL-}
+
+x-tx-sender-common: &tx-sender-common
+  NONCE_MANAGER_TYPE: ${NONCE_MANAGER_TYPE-redis}
+  REDIS_HOST: ${REDIS_HOST-redis}
+  REDIS_PORT: ${REDIS_PORT-6379}
+  REDIS_PASSWORD: ${REDIS_PASSWORD-}
+  REDIS_DATABASE: ${REDIS_DATABASE-}
+  REDIS_TLS_ENABLE: ${REDIS_TLS_ENABLE-}
+  REDIS_TLS_CERT: ${REDIS_TLS_CERT-}
+  REDIS_TLS_KEY: ${REDIS_TLS_KEY-}
+  REDIS_TLS_CA: ${REDIS_TLS_CA-}
+  REDIS_EXPIRATION: ${REDIS_EXPIRATION-}
+  REDIS_TLS_SKIP_VERIFY: ${REDIS_TLS_SKIP_VERIFY-}
+
 
 services:
   vault:
@@ -76,7 +98,7 @@ services:
       timeout: 3s
       retries: 10
       start_period: 5s
-      
+
   zookeeper:
     image: confluentinc/cp-zookeeper:5.4.3
     ports:
@@ -128,7 +150,7 @@ services:
       timeout: 1s
       retries: 5
     restart: "on-failure"
-  
+
   key-manager-init:
     image: gcr.io/distroless/static:debug
     volumes:
@@ -162,6 +184,7 @@ services:
     image: consensys/quorum-key-manager:v21.12.0
     environment:
       <<: *default-variables
+      <<: *db-common
     command: migrate up
     restart: "on-failure"
     networks:
@@ -173,6 +196,7 @@ services:
     image: consensys/quorum-key-manager:v21.12.0
     environment:
       <<: *default-variables
+      <<: *db-common
       MANIFEST_PATH: ${MANIFEST_PATH-/manifests}
     ports:
       - 8080:8080
@@ -193,6 +217,8 @@ services:
     <<: *container-common
     environment:
       <<: *default-variables
+      <<: *db-common
+
     restart: "on-failure"
     depends_on:
       - postgres
@@ -202,6 +228,7 @@ services:
     <<: *container-common
     environment:
       <<: *default-variables
+      <<: *db-common
     restart: "on-failure"
     depends_on:
       - api-migration-init
@@ -215,6 +242,8 @@ services:
       - 8032:8082
     environment:
       <<: *default-variables
+      <<: *db-common
+      <<: *api-common
     depends_on:
       - api-migration
       - key-manager
@@ -230,6 +259,7 @@ services:
       - 8062:8082
     environment:
       <<: *default-variables
+      <<: *tx-sender-common
     restart: "on-failure"
     depends_on:
       - api
@@ -243,6 +273,7 @@ services:
     <<: *container-common
     environment:
       <<: *default-variables
+      <<: *tx-listener-common
     restart: "on-failure"
     depends_on:
       - api

@@ -2,6 +2,7 @@ package dataagents
 
 import (
 	"context"
+	"strings"
 
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 
@@ -41,8 +42,8 @@ func (agent *PGTag) FindAllByName(ctx context.Context, name string) ([]string, e
 	var tags []string
 	query := agent.db.ModelContext(ctx, (*models.TagModel)(nil)).
 		Column("tag_model.name").
-		Join("JOIN repositories AS registry ON registry.id = tag_model.repository_id").
-		Where("lower(registry.name) = lower(?)", name).
+		Join("JOIN repositories AS repo ON repo.id = tag_model.repository_id").
+		Where("lower(repo.name) = ?", strings.ToLower(name)).
 		OrderExpr("lower(tag_model.name)")
 
 	err := pg.SelectColumn(ctx, query, &tags)

@@ -12,8 +12,8 @@ import (
 	"time"
 
 	mockhandler "github.com/consensys/orchestrate/pkg/toolkit/app/http/handler/mock"
-	"github.com/consensys/orchestrate/pkg/toolkit/app/http/middleware/httpcache/mocks"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	mocks2 "github.com/consensys/orchestrate/pkg/toolkit/cache/mocks"
 	"github.com/consensys/orchestrate/pkg/utils"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -27,7 +27,7 @@ func TestHTTPCache_SetCacheValueSuccessful(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockHandler := mockhandler.NewMockHandler(ctrl)
-	cManager := mocks.NewMockCacheManager(ctrl)
+	cManager := mocks2.NewMockManager(ctrl)
 
 	httpCache := newHTTPCache(cManager, testCacheRequest, testCacheResponse, keySuffix, log.NewLogger())
 	h := httpCache.Handler(mockHandler)
@@ -38,7 +38,7 @@ func TestHTTPCache_SetCacheValueSuccessful(t *testing.T) {
 	cacheKey := fmt.Sprintf("%s-%s", keySuffix, generatedKey)
 	cManager.EXPECT().Get(gomock.Any(), cacheKey).Return(nil, false)
 	cManager.EXPECT().Set(gomock.Any(), cacheKey, gomock.Any())
-	cManager.EXPECT().TTL()
+	cManager.EXPECT().TTL().Return(time.Second)
 	mockHandler.EXPECT().ServeHTTP(gomock.AssignableToTypeOf(&httptest.ResponseRecorder{}), req)
 
 	h.ServeHTTP(rw, req)
@@ -51,7 +51,7 @@ func TestHTTPCache_SetCacheValueOnlyOnceOnConcurrentCalls(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockHandler := mockhandler.NewMockHandler(ctrl)
-	cManager := mocks.NewMockCacheManager(ctrl)
+	cManager := mocks2.NewMockManager(ctrl)
 
 	httpCache := newHTTPCache(cManager, testCacheRequest, testCacheResponse, keySuffix, log.NewLogger())
 	h := httpCache.Handler(mockHandler)
@@ -67,7 +67,7 @@ func TestHTTPCache_SetCacheValueOnlyOnceOnConcurrentCalls(t *testing.T) {
 		cManager.EXPECT().Get(gomock.Any(), cacheKey).Return(nil, false),
 		cManager.EXPECT().Get(gomock.Any(), cacheKey).Return(bres, true),
 	)
-	cManager.EXPECT().TTL().Times(2)
+	cManager.EXPECT().TTL().Return(time.Second).Times(2)
 	mockHandler.EXPECT().ServeHTTP(gomock.AssignableToTypeOf(&httptest.ResponseRecorder{}), req).Times(1)
 	cManager.EXPECT().Set(gomock.Any(), cacheKey, gomock.Any()).Times(1)
 
@@ -86,7 +86,7 @@ func TestHTTPCache_GetCacheValueSuccessful(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockHandler := mockhandler.NewMockHandler(ctrl)
-	cManager := mocks.NewMockCacheManager(ctrl)
+	cManager := mocks2.NewMockManager(ctrl)
 
 	httpCache := newHTTPCache(cManager, testCacheRequest, testCacheResponse, keySuffix, log.NewLogger())
 	h := httpCache.Handler(mockHandler)
@@ -97,7 +97,7 @@ func TestHTTPCache_GetCacheValueSuccessful(t *testing.T) {
 	res := newResponse([]byte(`responseBody`), http.Header{}, 200)
 	bres, _ := res.toBytes()
 	cacheKey := fmt.Sprintf("%s-%s", keySuffix, generatedKey)
-	cManager.EXPECT().TTL()
+	cManager.EXPECT().TTL().Return(time.Second)
 	cManager.EXPECT().Get(gomock.Any(), cacheKey).Return(bres, true)
 
 	h.ServeHTTP(rw, req)

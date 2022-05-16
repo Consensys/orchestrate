@@ -7,6 +7,7 @@ import (
 
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/middleware/httpcache"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/middleware/ratelimit"
+	ristretto2 "github.com/consensys/orchestrate/pkg/toolkit/cache/ristretto"
 	"github.com/consensys/orchestrate/services/api/proxy"
 	"github.com/dgraph-io/ristretto"
 
@@ -40,7 +41,6 @@ func NewAPI(
 	syncProducer sarama.SyncProducer,
 	topicCfg *pkgsarama.KafkaTopicConfig,
 ) (*app.App, error) {
-	// Create Message agents
 	db, err := multi.Build(context.Background(), cfg.Store, pgmngr)
 	if err != nil {
 		return nil, err
@@ -82,7 +82,7 @@ func NewAPI(
 	// HTTPCache Middleware
 	httpCacheOpt := app.MiddlewareOpt(
 		reflect.TypeOf(&dynamic.HTTPCache{}),
-		httpcache.NewBuilder(cache, proxy.HTTPCacheRequest, proxy.HTTPCacheResponse),
+		httpcache.NewBuilder(ristretto2.NewCacheManager(httpcache.Component, cache, cfg.Proxy.ProxyCacheTTL), proxy.HTTPCacheRequest, proxy.HTTPCacheResponse),
 	)
 
 	var accessLogMid app.Option

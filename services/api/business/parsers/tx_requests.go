@@ -72,6 +72,8 @@ func newEthTransactionFromParams(params *entities.ETHTransactionParams, txData [
 		TransactionType: txType,
 		Raw:             params.Raw,
 		Data:            txData,
+		ContractName:    params.ContractName,
+		ContractTag:     params.ContractTag,
 		PrivateFrom:     params.PrivateFrom,
 		PrivateFor:      params.PrivateFor,
 		MandatoryFor:    params.MandatoryFor,

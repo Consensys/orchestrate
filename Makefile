@@ -64,6 +64,10 @@ lint-ci: ## Check linting
 run-e2e: gobuild-e2e
 	@rm -f build/report/report.html
 	@docker-compose -f docker-compose.e2e.yml up -V e2e
+	@docker-compose -f docker-compose.e2e.yml up --build report
+
+e2e: run-e2e
+	@$(OPEN) build/report/report.html 2>/dev/null
 
 run-stress: gobuild-e2e
 	@docker-compose -f docker-compose.e2e.yml up -V stress

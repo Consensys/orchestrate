@@ -26,6 +26,8 @@ func NewTransactionModelFromEntities(tx *entities.ETHTransaction) *models.Transa
 		PrivateFor:     tx.PrivateFor,
 		MandatoryFor:   tx.MandatoryFor,
 		PrivacyGroupID: tx.PrivacyGroupID,
+		ContractName:   tx.ContractName,
+		ContractTag:    tx.ContractTag,
 		PrivacyFlag:    int(tx.PrivacyFlag),
 		EnclaveKey:     utils.StringerToString(tx.EnclaveKey),
 		CreatedAt:      tx.CreatedAt,
@@ -54,6 +56,8 @@ func NewTransactionEntityFromModels(tx *models.Transaction) *entities.ETHTransac
 		PrivateFor:      tx.PrivateFor,
 		MandatoryFor:    tx.MandatoryFor,
 		PrivacyGroupID:  tx.PrivacyGroupID,
+		ContractName:    tx.ContractName,
+		ContractTag:     tx.ContractTag,
 		PrivacyFlag:     entities.PrivacyFlag(tx.PrivacyFlag),
 		EnclaveKey:      utils.StringToHexBytes(tx.EnclaveKey),
 		Raw:             utils.StringToHexBytes(tx.Raw),
@@ -80,5 +84,7 @@ func UpdateTransactionModelFromEntities(txModel *models.Transaction, tx *entitie
 	txModel.PrivateFor = tx.PrivateFor
 	txModel.MandatoryFor = tx.MandatoryFor
 	txModel.PrivacyGroupID = tx.PrivacyGroupID
+	txModel.ContractName = tx.ContractName
+	txModel.ContractTag = tx.ContractTag
 	txModel.EnclaveKey = utils.StringerToString(tx.EnclaveKey)
 }

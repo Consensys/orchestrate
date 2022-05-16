@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
+	"github.com/consensys/orchestrate/pkg/toolkit/cache"
 	"github.com/consensys/orchestrate/pkg/toolkit/workerpool"
 	"github.com/consensys/orchestrate/pkg/types/api"
 	"github.com/consensys/orchestrate/pkg/types/entities"
@@ -38,6 +39,7 @@ type Hook struct {
 	ec       ethclient.MultiClient
 	producer sarama.SyncProducer
 	client   sdk.OrchestrateClient
+	cache    cache.Manager
 	logger   *log.Logger
 }
 
@@ -46,12 +48,14 @@ func NewHook(
 	ec ethclient.MultiClient,
 	producer sarama.SyncProducer,
 	client sdk.OrchestrateClient,
+	cMngr cache.Manager,
 ) *Hook {
 	return &Hook{
 		conf:     conf,
 		ec:       ec,
 		producer: producer,
 		client:   client,
+		cache:    cMngr,
 		logger:   log.NewLogger().SetComponent(component),
 	}
 }
@@ -155,6 +159,7 @@ func (hk *Hook) AfterNewBlock(ctx context.Context, c *dynamic.Chain, block *etht
 func (hk *Hook) decodeReceipt(ctx context.Context, c *dynamic.Chain, receipt *types.Receipt) error {
 	hk.logger.WithContext(ctx).Debug("decoding receipt...")
 	var contractAddress *ethcommon.Address
+
 	for _, l := range receipt.GetLogs() {
 		if len(l.GetTopics()) == 0 {
 			// This scenario is not supposed to happen
@@ -166,15 +171,21 @@ func (hk *Hook) decodeReceipt(ctx context.Context, c *dynamic.Chain, receipt *ty
 
 		logger.Debug("decoding receipt logs")
 		sigHash := hexutil.MustDecode(l.Topics[0])
-		eventResp, err := hk.client.GetContractEvents(
-			ctx,
-			l.GetAddress(),
-			c.ChainID,
-			&api.GetContractEventsRequest{
-				SigHash:           sigHash,
-				IndexedInputCount: uint32(len(l.Topics) - 1),
-			},
-		)
+
+		var eventResp = &api.GetContractEventsBySignHashResponse{}
+		cKey := fmt.Sprintf("GetContractEvents/%s/%s/%s/%d", l.GetAddress(), c.ChainID, l.Topics[0], uint32(len(l.Topics)-1))
+
+		err := hk.GetOrCallAndSet(ctx, cKey, eventResp, func() (interface{}, error) {
+			return hk.client.GetContractEvents(
+				ctx,
+				l.GetAddress(),
+				c.ChainID,
+				&api.GetContractEventsRequest{
+					SigHash:           sigHash,
+					IndexedInputCount: uint32(len(l.Topics) - 1),
+				},
+			)
+		})
 
 		if err != nil {
 			if errors.IsNotFoundError(err) {
@@ -239,18 +250,24 @@ func (hk *Hook) decodeReceipt(ctx context.Context, c *dynamic.Chain, receipt *ty
 			Debug("log decoded")
 	}
 
+	// It will only execute in cae of external txs
 	if receipt.ContractName == "" && contractAddress != nil {
 		logger := hk.logger.WithContext(ctx)
-		eventContract, err := hk.client.SearchContract(ctx, &api.SearchContractRequest{
-			Address: contractAddress,
+		var eventContract = &api.ContractResponse{}
+		cKey := "SearchContract/" + contractAddress.String()
+
+		err := hk.GetOrCallAndSet(ctx, cKey, eventContract, func() (interface{}, error) {
+			return hk.client.SearchContract(ctx, &api.SearchContractRequest{
+				Address: contractAddress,
+			})
 		})
 
 		if err != nil && !errors.IsNotFoundError(err) {
-			logger.WithError(err).Error("failed to search contract by sign hash")
+			logger.WithError(err).Error("failed to search event contract by address")
 			return err
 		}
 
-		if err == nil {
+		if eventContract.Name != "" {
 			receipt.ContractName = eventContract.Name
 			receipt.ContractTag = eventContract.Tag
 
@@ -293,25 +310,41 @@ func (hk *Hook) registerDeployedContract(ctx context.Context, c *dynamic.Chain, 
 		return err
 	}
 
+	codeHash := crypto.Keccak256Hash(code)
 	err = hk.client.SetContractAddressCodeHash(ctx, receipt.ContractAddress, c.ChainID,
 		&api.SetContractCodeHashRequest{
-			CodeHash: crypto.Keccak256Hash(code).Bytes(),
+			CodeHash: codeHash.Bytes(),
 		})
 	if err != nil {
 		logger.WithError(err).Error("failed to register contract")
 		return err
 	}
 
-	contract, err := hk.client.SearchContract(ctx, &api.SearchContractRequest{
-		CodeHash: crypto.Keccak256Hash(code).Bytes(),
-	})
-	if err != nil && !errors.IsNotFoundError(err) {
-		logger.WithError(err).Error("failed to search contract by code hash")
-		return err
-	}
-	if contract != nil {
-		receipt.ContractName = contract.Name
-		receipt.ContractTag = contract.Tag
+	// Only external txs
+	if receipt.ContractName == "" {
+		var deployedContract = &api.ContractResponse{}
+		cKey := "SearchContract/" + codeHash.String()
+
+		err := hk.GetOrCallAndSet(ctx, cKey, deployedContract, func() (interface{}, error) {
+			return hk.client.SearchContract(ctx, &api.SearchContractRequest{
+				CodeHash: codeHash.Bytes(),
+			})
+		})
+
+		if err != nil && !errors.IsNotFoundError(err) {
+			logger.WithError(err).Error("failed to search event contract by address")
+			return err
+		}
+
+		if deployedContract.Name != "" {
+			receipt.ContractName = deployedContract.Name
+			receipt.ContractTag = deployedContract.Tag
+
+			logger.WithField("contract_address", receipt.ContractAddress).
+				WithField("contract_name", deployedContract.Name).
+				WithField("contract_tag", deployedContract.Tag).
+				Debug("source contract has been identified")
+		}
 	}
 
 	logger.WithField("name", receipt.ContractName).
@@ -352,4 +385,34 @@ func (hk *Hook) prepareMsg(pb proto.Message, topic, key string) (*sarama.Produce
 
 func (hk *Hook) produce(msgs []*sarama.ProducerMessage) error {
 	return hk.producer.SendMessages(msgs)
+}
+
+func (hk *Hook) GetOrCallAndSet(ctx context.Context, cKey string, result interface{}, clientCall func() (interface{}, error)) error {
+	if bData, ok := hk.cache.Get(ctx, cKey); ok {
+		err := json.Unmarshal(bData, result)
+		if err != nil {
+			hk.cache.Delete(ctx, cKey)
+			return err
+		}
+		return nil
+	}
+
+	cResult, err := clientCall()
+	if err != nil {
+		return err
+	}
+
+	bData, err := json.Marshal(cResult)
+	if err != nil {
+		return err
+	}
+
+	hk.cache.Set(ctx, cKey, bData)
+
+	err = json.Unmarshal(bData, result)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

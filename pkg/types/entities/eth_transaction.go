@@ -37,6 +37,8 @@ type ETHTransaction struct {
 	GasTipCap       *hexutil.Big       `json:"maxPriorityFeePerGas,omitempty" example:"0x59682f00" swaggertype:"string"`
 	AccessList      types.AccessList   `json:"accessList,omitempty" swaggertype:"array,object"`
 	TransactionType TransactionType    `json:"transactionType,omitempty" example:"dynamic_fee" enums:"legacy,dynamic_fee"`
+	ContractName    string             `json:"contractName,omitempty" example:"ERC721"`
+	ContractTag     string             `json:"contractTag,omitempty" example:"latest"`
 	Data            hexutil.Bytes      `json:"data,omitempty" validate:"omitempty" example:"0xfe378324abcde723" swaggertype:"string"`
 	Raw             hexutil.Bytes      `json:"raw,omitempty" validate:"omitempty" example:"0xfe378324abcde723" swaggertype:"string"`
 	PrivateFrom     string             `json:"privateFrom,omitempty" validate:"omitempty,base64" example:"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo="`
@@ -61,6 +63,8 @@ type ethTransactionJSON struct {
 	GasTipCap       string            `json:"maxPriorityFeePerGas,omitempty"`
 	AccessList      []accessTupleJSON `json:"accessList,omitempty"`
 	TransactionType string            `json:"transactionType,omitempty"`
+	ContractName    string            `json:"contractName,omitempty"`
+	ContractTag     string            `json:"contractTag,omitempty"`
 	Data            string            `json:"data,omitempty"`
 	Raw             string            `json:"raw,omitempty"`
 	PrivateFrom     string            `json:"privateFrom,omitempty"`
@@ -87,6 +91,8 @@ func (tx *ETHTransaction) MarshalJSON() ([]byte, error) {
 		PrivateFor:      tx.PrivateFor,
 		MandatoryFor:    tx.MandatoryFor,
 		PrivacyGroupID:  tx.PrivacyGroupID,
+		ContractName:    tx.ContractName,
+		ContractTag:     tx.ContractTag,
 		PrivacyFlag:     int(tx.PrivacyFlag),
 		CreatedAt:       tx.CreatedAt,
 		UpdatedAt:       tx.UpdatedAt,

@@ -27,9 +27,13 @@ func RegisterNewChain(ctx context.Context, client orchestrateclient.OrchestrateC
 	logger := log.FromContext(ctx).WithField("name", chainName).WithField("urls", chainData.URLs)
 	logger.WithContext(ctx).Debug("registering new chain")
 
+	externalTxEnabled := true
 	c, err := client.RegisterChain(ctx, &api.RegisterChainRequest{
 		Name: chainName,
 		URLs: chainData.URLs,
+		Listener: api.RegisterListenerRequest{
+			ExternalTxEnabled: &externalTxEnabled,
+		},
 	})
 	if err != nil {
 		logger.WithError(err).Error("failed to register chain")

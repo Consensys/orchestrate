@@ -62,7 +62,8 @@ func NewService(cfg *Config,
 		producer: producer,
 		items: []*workLoadItem{
 			{cfg.Iterations, cfg.Concurrency, "BatchDeployContract", units.BatchDeployContractTest},
-			{cfg.Iterations, cfg.Concurrency, "BatchPrivateTxsTest", units.BatchPrivateTxsTest},
+			// {cfg.Iterations, cfg.Concurrency, "SendContractTxsTest", units.SendContractTxsTest},
+			// {cfg.Iterations, cfg.Concurrency, "BatchPrivateTxsTest", units.BatchPrivateTxsTest},
 		},
 	}
 }

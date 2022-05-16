@@ -1,6 +1,6 @@
-package units
+package utils
 
-func constructorArgs(contractName string) []interface{} {
+func ConstructorArgs(contractName string) []interface{} {
 	switch contractName {
 	case "ERC20", "ERC721":
 		return []interface{}{"Name", "Symbol"}

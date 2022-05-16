@@ -12,23 +12,23 @@ import (
 
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/config/dynamic"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
-	"github.com/dgraph-io/ristretto"
+	"github.com/consensys/orchestrate/pkg/toolkit/cache"
 )
 
-const component = "http.cache"
+const Component = "http.cache"
 
 type CacheRequest func(ctx context.Context, req *http.Request) (isCached bool, key string, ttl time.Duration, err error)
 type CacheResponse func(ctx context.Context, res *http.Response) bool
 
 type Builder struct {
-	cache    *ristretto.Cache
+	cache    cache.Manager
 	cacheReq CacheRequest
 	cacheRes CacheResponse
 }
 
-func NewBuilder(cache *ristretto.Cache, cacheReq CacheRequest, cacheRes CacheResponse) *Builder {
+func NewBuilder(cMngr cache.Manager, cacheReq CacheRequest, cacheRes CacheResponse) *Builder {
 	return &Builder{
-		cache:    cache,
+		cache:    cMngr,
 		cacheReq: cacheReq,
 		cacheRes: cacheRes,
 	}
@@ -40,16 +40,15 @@ func (b *Builder) Build(_ context.Context, _ string, configuration interface{}) 
 		return nil, nil, fmt.Errorf("invalid configuration type (expected %T but got %T)", cfg, configuration)
 	}
 
-	cManager := newManager(b.cache, cfg.TTL)
-	logger := log.NewLogger().SetComponent(component)
+	logger := log.NewLogger().SetComponent(Component)
 	logger.Debug("middleware built successfully")
 
-	m := newHTTPCache(cManager, b.cacheReq, b.cacheRes, cfg.KeySuffix, logger)
+	m := newHTTPCache(b.cache, b.cacheReq, b.cacheRes, cfg.KeySuffix, logger)
 	return m.Handler, nil, nil
 }
 
 type HTTPCache struct {
-	cManager CacheManager
+	cManager cache.Manager
 	cacheReq CacheRequest
 	cacheRes CacheResponse
 	cSuffix  string
@@ -58,7 +57,7 @@ type HTTPCache struct {
 	logger   *log.Logger
 }
 
-func newHTTPCache(cManager CacheManager, cacheReq CacheRequest, cacheRes CacheResponse, cSuffix string, logger *log.Logger) *HTTPCache {
+func newHTTPCache(cManager cache.Manager, cacheReq CacheRequest, cacheRes CacheResponse, cSuffix string, logger *log.Logger) *HTTPCache {
 	return &HTTPCache{
 		cManager: cManager,
 		cacheReq: cacheReq,
@@ -127,7 +126,7 @@ func (cm *HTTPCache) Handler(h http.Handler) http.Handler {
 			}
 
 			// In case we have a customize TTL
-			if ttl != 0 {
+			if ttl != time.Duration(0) {
 				logger = logger.WithField("ttl", ttl.String())
 				cm.cManager.SetWithTTL(req.Context(), cacheKey, b, ttl)
 			} else {

@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	txscheduler "github.com/consensys/orchestrate/pkg/sdk/client"
+	"github.com/consensys/orchestrate/pkg/toolkit/cache/ristretto"
 
 	broker "github.com/consensys/orchestrate/pkg/broker/sarama"
 	ethclient "github.com/consensys/orchestrate/pkg/toolkit/ethclient/rpc"
@@ -24,6 +25,7 @@ func initComponent(ctx context.Context) {
 		func() { broker.InitSyncProducer(ctx) },
 		// Initialize transaction scheduler client
 		func() { txscheduler.Init() },
+		func() { ristretto.Init(ctx) },
 	)
 }
 
@@ -37,6 +39,7 @@ func Init(ctx context.Context) {
 			ethclient.GlobalClient(),
 			broker.GlobalSyncProducer(),
 			txscheduler.GlobalClient(),
+			ristretto.GlobalClient(),
 		)
 	})
 }

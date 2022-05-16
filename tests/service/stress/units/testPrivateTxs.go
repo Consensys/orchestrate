@@ -36,7 +36,7 @@ func BatchPrivateTxsTest(ctx context.Context, cfg *WorkloadConfig, client orches
 		Params: api.DeployContractParams{
 			From:         &account,
 			ContractName: contractName,
-			Args:         constructorArgs(contractName),
+			Args:         utils2.ConstructorArgs(contractName),
 			PrivateFrom:  privateFrom,
 			Protocol:     entities.EEAChainType,
 		},

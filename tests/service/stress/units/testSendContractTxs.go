@@ -2,7 +2,6 @@ package units
 
 import (
 	"context"
-
 	"encoding/json"
 
 	"github.com/consensys/orchestrate/pkg/errors"
@@ -14,23 +13,27 @@ import (
 	utils2 "github.com/consensys/orchestrate/tests/service/stress/utils"
 	utils3 "github.com/consensys/orchestrate/tests/utils"
 	"github.com/consensys/orchestrate/tests/utils/chanregistry"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 )
 
-func BatchDeployContractTest(ctx context.Context, cfg *WorkloadConfig, client orchestrateclient.OrchestrateClient, chanReg *chanregistry.ChanRegistry) error {
-	logger := log.WithContext(ctx).SetComponent("stress-test.deploy-contract")
+func SendContractTxsTest(ctx context.Context, cfg *WorkloadConfig, client orchestrateclient.OrchestrateClient, chanReg *chanregistry.ChanRegistry) error {
+	logger := log.WithContext(ctx).SetComponent("stress-test.send-contract-txs")
 	nAccount := utils.RandInt(len(cfg.accounts))
-	nArtifact := utils.RandInt(len(cfg.artifacts))
 	nChain := utils.RandInt(len(cfg.chains))
 	idempotency := utils.RandString(30)
 	evlp := tx.NewEnvelope()
 	t := utils2.NewEnvelopeTracker(chanReg, evlp, idempotency)
 
-	req := &api.DeployContractRequest{
+	// @TODO Read values from configuration or from context
+	toAddr := ethcommon.HexToAddress("0xFf80849F797a5feBC96F1737dc78135a79DaF83E")
+	req := &api.SendTransactionRequest{
 		ChainName: cfg.chains[nChain].Name,
-		Params: api.DeployContractParams{
-			From:         &cfg.accounts[nAccount],
-			ContractName: cfg.artifacts[nArtifact],
-			Args:         utils2.ConstructorArgs(cfg.artifacts[nArtifact]),
+		Params: api.TransactionParams{
+			From:            &cfg.accounts[nAccount],
+			To:              &toAddr,
+			ContractName:    "Counter",
+			MethodSignature: "increment(uint256)",
+			Args:            []interface{}{utils.RandInt(100)},
 		},
 		Labels: map[string]string{
 			"id": idempotency,
@@ -39,13 +42,13 @@ func BatchDeployContractTest(ctx context.Context, cfg *WorkloadConfig, client or
 	sReq, _ := json.Marshal(req)
 
 	logger = logger.WithField("chain", req.ChainName).WithField("idem", idempotency)
-	_, err := client.SendDeployTransaction(ctx, req)
+	_, err := client.SendContractTransaction(ctx, req)
 
 	if err != nil {
 		if !errors.IsConnectionError(err) {
 			logger = logger.WithField("req", string(sReq))
 		}
-		logger.WithError(err).Error("failed to send transaction")
+		logger.WithError(err).Error("failed to send contract transaction")
 		return err
 	}
 

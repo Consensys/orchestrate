@@ -32,7 +32,9 @@ func NewApp(ctx context.Context) (*app.App, error) {
 	config := app.NewConfig(viper.GetViper())
 
 	utils.InParallel(
-		func() { kafkahook.Init(ctx) },
+		func() {
+			kafkahook.Init(ctx)
+		},
 		func() {
 			viper.Set(utils.RetryMaxIntervalViperKey, 30*time.Second)
 			viper.Set(utils.RetryMaxElapsedTimeViperKey, 1*time.Hour)
