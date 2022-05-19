@@ -28,38 +28,58 @@ commands:
             echo Login into << parameters.docker-image-registry >>
             echo << parameters.docker-password >> | docker login << parameters.docker-image-registry >> -u << parameters.docker-user >> --password-stdin
 
-  prepare_docker_buildx:
-    description: "Docker buildx setup"
+  build_and_push:
+    description: "Builds and push image"
     parameters:
-      qemu-user-static-version:
-        default: 6.1.0-8
-        description: The version of qemu-user-static to use.
+      docker-image-platform:
         type: string
-      version:
-        default: 0.7.1
-        description: The version of buildx to install.
+        default: linux/amd64
+      docker-distroless-version:
+        type: string
+        default: nonroot
+      docker-image-registry:
+        type: string
+      docker-password:
+        type: string
+      docker-user:
+        type: string
+      docker-image-tag:
         type: string
     steps:
       - run:
-          name: Install Docker buildx
+          name: Build and push image
           command: |
-            mkdir -p ~/.docker/cli-plugins
-            wget "https://github.com/docker/buildx/releases/download/v<< parameters.version >>/buildx-v<< parameters.version >>.linux-amd64" -O ~/.docker/cli-plugins/docker-buildx
-            chmod a+x ~/.docker/cli-plugins/docker-buildx
-      - run:
-          name: Start multiarch/qemu-user-static container
-          command: |
-            docker run --rm --privileged multiarch/qemu-user-static:<< parameters.qemu-user-static-version >> --reset -p yes
-      - run:
-          name: Create docker-multiarch builder
-          command: |
-            docker context create docker-multiarch
-            DOCKER_CONTEXT=$(docker buildx create --use docker-multiarch --platform linux/amd64,linux/arm64)
-            docker buildx inspect --builder ${DOCKER_CONTEXT} --bootstrap
-            docker buildx use ${DOCKER_CONTEXT}
-      - run:
-          command: docker buildx install
-          name: Initialize Docker buildx
+            export DOCKER_IMAGE_PLATFORM="<< parameters.docker-image-platform >>"
+            export DOCKER_IMAGE_VERSION="<< parameters.docker-distroless-version >>"
+            export DOCKER_IMAGE_REF="<< parameters.docker-image-registry >>/<< parameters.docker-image-tag >>"
+
+            TARGETOS="$(echo "${DOCKER_IMAGE_PLATFORM}" | cut -d '/' -f 1)"
+            TARGETARCH="$(echo "${DOCKER_IMAGE_PLATFORM}" | cut -d '/' -f 2)"
+
+            if [ $TARGETARCH == "amd64" ]; then
+              DOCKER_IMAGE_TAG="${DOCKER_IMAGE_REF}"
+            else
+              DOCKER_IMAGE_TAG="${DOCKER_IMAGE_REF}.${TARGETARCH}"
+            fi
+
+            echo "Building image ${DOCKER_IMAGE_TAG} for {os:${TARGETOS}, arch:$TARGETARCH}..."
+            DOCKER_BUILDKIT=0 docker build --build-arg VERSION=${DOCKER_IMAGE_VERSION} \
+             --label org.opencontainers.image.created=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
+             --label org.opencontainers.image.url="https://consensys.net/codefi/orchestrate/" \
+             --label org.opencontainers.image.source="${CIRCLE_REPOSITORY_URL}" \
+             --label org.opencontainers.image.version="${CIRCLE-TAG-branch}" \
+             --label org.opencontainers.image.revision="${CIRCLE_SHA1:0:7}" \
+             --label org.opencontainers.image.vendor="ConsenSys Software Inc." \
+             --label org.opencontainers.image.title="${CIRCLE_PROJECT_REPONAME}" \
+             --label org.opencontainers.image.description="Orchestrate is a blockchain Transaction Orchestration system" \
+             --label org.opencontainers.image.documentation="https://docs.orchestrate.consensys.net/" \
+             --label org.opencontainers.image.licenses="BUSL-1.1" \
+             --tag ${DOCKER_IMAGE_TAG} \
+             .
+
+            echo "Pushing image ${DOCKER_IMAGE_TAG} for {os:${TARGETOS}, arch:$TARGETARCH}..."
+            docker push "${DOCKER_IMAGE_TAG}"
+
 
 jobs:
   lint:
@@ -155,9 +175,6 @@ jobs:
       - image: cimg/base:2022.04
     resource_class: xlarge
     parameters:
-      docker-image-platform:
-        type: string
-        default: linux/amd64
       docker-distroless-version:
         type: string
         default: nonroot
@@ -172,50 +189,51 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker:
-          version: 19.03.13
+          version: 20.10.14
           docker_layer_caching: true
       - prepare_docker:
           docker-user: << parameters.docker-user >>
           docker-password: << parameters.docker-password >>
           docker-image-registry: << parameters.docker-image-registry >>
-      - prepare_docker_buildx
-      - run:
-          name: Build and push image
-          no_output_timeout: 90m
-          command: |
-            export DOCKER_IMAGE_PLATFORM="<< parameters.docker-image-platform >>"
-            export DOCKER_IMAGE_VERSION="<< parameters.docker-distroless-version >>"
-            export DOCKER_IMAGE_REF="<< parameters.docker-image-registry >>/<< parameters.docker-image-tag >>"
-            
-            TARGETOS="$(echo "${DOCKER_IMAGE_PLATFORM}" | cut -d '/' -f 1)"
-            TARGETARCH="$(echo "${DOCKER_IMAGE_PLATFORM}" | cut -d '/' -f 2)"
+      - build_and_push:
+          docker-image-platform: linux/amd64
+          docker-distroless-version: << parameters.docker-distroless-version >>
+          docker-image-registry: << parameters.docker-image-registry >>
+          docker-password: << parameters.docker-password >>
+          docker-user: << parameters.docker-user >>
+          docker-image-tag: << parameters.docker-image-tag >>
 
-            if [ $TARGETOS != "linux" ]; then
-              echo "Targeted OS not supported $TARGETOS"
-              exit 1
-            fi
 
-            if [ $TARGETARCH == "amd64" ]; then
-              DOCKER_IMAGE_TAG="${DOCKER_IMAGE_REF}"
-            else
-              DOCKER_IMAGE_TAG="${DOCKER_IMAGE_REF}.${TARGETARCH}"
-            fi
+  build-docker-arm-image:
+    machine:
+      image: 'ubuntu-2004:202101-01'
+    resource_class: arm.large
+    parameters:
+      docker-distroless-version:
+        type: string
+        default: nonroot
+      docker-image-registry:
+        type: string
+      docker-password:
+        type: string
+      docker-user:
+        type: string
+      docker-image-tag:
+        type: string
+    steps:
+      - checkout
+      - prepare_docker:
+          docker-user: << parameters.docker-user >>
+          docker-password: << parameters.docker-password >>
+          docker-image-registry: << parameters.docker-image-registry >>
+      - build_and_push:
+          docker-image-platform: linux/arm64
+          docker-distroless-version: << parameters.docker-distroless-version >>
+          docker-image-registry: << parameters.docker-image-registry >>
+          docker-password: << parameters.docker-password >>
+          docker-user: << parameters.docker-user >>
+          docker-image-tag: << parameters.docker-image-tag >>
 
-            echo "Building image ${DOCKER_IMAGE_TAG} for {os:${TARGETOS}, arch:$TARGETARCH}..."
-            DOCKER_BUILDKIT=1 docker build --build-arg VERSION=${DOCKER_IMAGE_VERSION} \
-             --label org.opencontainers.image.created=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
-             --label org.opencontainers.image.url="https://consensys.net/codefi/orchestrate/" \
-             --label org.opencontainers.image.source="${CIRCLE_REPOSITORY_URL}" \
-             --label org.opencontainers.image.version="${CIRCLE-TAG-branch}" \
-             --label org.opencontainers.image.revision="${CIRCLE_SHA1:0:7}" \
-             --label org.opencontainers.image.vendor="ConsenSys Software Inc." \
-             --label org.opencontainers.image.title="${CIRCLE_PROJECT_REPONAME}" \
-             --label org.opencontainers.image.description="Orchestrate is a blockchain Transaction Orchestration system" \
-             --label org.opencontainers.image.documentation="https://docs.orchestrate.consensys.net/" \
-             --label org.opencontainers.image.licenses="BUSL-1.1" \
-             --platform ${DOCKER_IMAGE_PLATFORM} \
-             --push -t ${DOCKER_IMAGE_TAG} \
-             .
 
   run-e2e:
     machine:
@@ -271,7 +289,7 @@ jobs:
           seconds-between-retries: 3
           timeout: 30
           description: "deployment readiness"
-          sh-command: nc -z staging.orchestrate.ops.consensys.net 443
+          sh-command: nc -z ${READINESS_URL} 443
       - run:
           name: Running stress
           environment:
@@ -281,6 +299,28 @@ jobs:
             STRESS_TIMEOUT: <<parameters.stress_timeout>>
             KAFKA_CONSUMER_GROUP_NAME: "stress"
           command: ./build/bin/test stress
+
+  run-performance:
+    docker:
+      - image: cimg/go:1.16.8
+    resource_class: large
+    steps:
+      - prepare_golang
+      - wait-for/sh-command:
+          seconds-between-retries: 3
+          timeout: 30
+          description: "deployment readiness"
+          sh-command: nc -z ${READINESS_URL} 443
+      - run:
+          name: Install gettext (envsubst)
+          command: sudo apt-get update && sudo apt-get install gettext-base
+      - run:
+          name: Running performance test
+          command: make vegeta
+
+      - store_artifacts:
+          path: ./build/vegeta/plot.html
+          destination: vegeta-plot.html
 
   deploy:
     docker:
@@ -293,7 +333,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Deploy staging environment
+          name: Deploy << parameters.orchestrate-namespace >> environment
           command: >-
             ORCHESTRATE_TAG="<< parameters.docker-image-tag >>"
             ORCHESTRATE_NAMESPACE="<< parameters.orchestrate-namespace >>"
@@ -332,7 +372,7 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker:
-          version: 19.03.13
+          version: 20.10.14
           docker_layer_caching: true
       - prepare_docker:
           docker-user: << parameters.docker-source-user >>
@@ -342,7 +382,6 @@ jobs:
           docker-user: << parameters.docker-destination-user >>
           docker-password: << parameters.docker-destination-password >>
           docker-image-registry: << parameters.docker-image-destination-registry >>
-      - prepare_docker_buildx
       - run:
           name: Build, push and sign images
           no_output_timeout: 90m
@@ -352,14 +391,9 @@ jobs:
             export DOCKER_IMAGE_VERSION="<< parameters.docker-distroless-version >>"
             export DOCKER_IMAGE_SOURCE_REF="<< parameters.docker-image-source-registry >>/<< parameters.docker-image-source-tag >>"
             export DOCKER_IMAGE_DESTINATION_REF="<< parameters.docker-image-destination-registry >>/<< parameters.docker-image-destination-tag >>"
-            
+
             TARGETOS="$(echo "${DOCKER_IMAGE_PLATFORM}" | cut -d '/' -f 1)"
             TARGETARCH="$(echo "${DOCKER_IMAGE_PLATFORM}" | cut -d '/' -f 2)"
-
-            if [ $TARGETOS != "linux" ]; then
-              echo "Targeted OS not supported $TARGETOS"
-              exit 1
-            fi
 
             DOCKER_IMAGE_SOURCE_TAG="${DOCKER_IMAGE_SOURCE_REF}"
 
@@ -403,9 +437,6 @@ workflows:
             tags:
               ignore:
                 - /^v.*/
-            branches:
-              ignore:
-                - main
       - gobuild:
           requires:
             - lint
@@ -424,10 +455,7 @@ workflows:
             - race
             - integration
       - build-docker-image: # Push Develop image
-          name: push-orchestrate-dev-image-<< matrix.docker-image-platform >>
-          matrix:
-            parameters:
-              docker-image-platform: [ "linux/amd64", "linux/arm64" ]
+          name: push-orchestrate-dev-image
           context:
             - cloudsmith-tanuki-rw
           docker-image-tag: orchestrate:${CIRCLE_SHA1:0:7}
@@ -437,7 +465,21 @@ workflows:
           docker-password: ${CLOUDSMITH_PASS_RW}
           filters:
             branches:
-              only: main
+              only: maintenancev21.12
+            tags:
+              only: /^v.*/
+      - build-docker-arm-image: # Push Develop arm image
+          name: push-orchestrate-dev-arm-image
+          context:
+            - cloudsmith-tanuki-rw
+          docker-image-tag: orchestrate:${CIRCLE_SHA1:0:7}
+          docker-distroless-version: debug-nonroot
+          docker-image-registry: ${CLOUDSMITH_DEV_REPO}
+          docker-user: ${CLOUDSMITH_USER_RW}
+          docker-password: ${CLOUDSMITH_PASS_RW}
+          filters:
+            branches:
+              only: maintenancev21.12
             tags:
               only: /^v.*/
       - deploy:
@@ -448,10 +490,10 @@ workflows:
           docker-image-tag: ${CIRCLE_SHA1:0:7}
           orchestrate-namespace: qa
           requires:
-            - push-orchestrate-dev-image-linux/amd64
+            - push-orchestrate-dev-image
           filters:
             branches:
-              only: main
+              only: maintenancev21.12
       - deploy:
           name: deploy-staging
           context:
@@ -460,21 +502,23 @@ workflows:
           docker-image-tag: ${CIRCLE_SHA1:0:7}
           orchestrate-namespace: staging
           requires:
-            - push-orchestrate-dev-image-linux/amd64
+            - push-orchestrate-dev-image
           filters:
+            branches:
+              ignore: /.*/
             tags:
               only: /^v.*/
       - run-e2e:
           name: run-qa-e2e
           context:
-            - tanuki-orchestrate-staging
+            - tanuki-orchestrate-qa
           requires:
             - deploy-qa
       - tag-docker-image: # Tag develop image
           name: tag-develop
           context:
             - cloudsmith-tanuki-rw
-          docker-image-source-tag: ${CIRCLE_SHA1:0:7}
+          docker-image-source-tag: orchestrate:${CIRCLE_SHA1:0:7}
           docker-image-destination-tag: orchestrate:develop
           docker-image-source-registry: ${CLOUDSMITH_DEV_REPO}
           docker-image-destination-registry: ${CLOUDSMITH_DEV_REPO}
@@ -490,10 +534,42 @@ workflows:
             - tanuki-orchestrate-staging
           requires:
             - deploy-staging
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+      - run-stress:
+          name: run-staging-stress
+          context:
+            - tanuki-orchestrate-staging
+          requires:
+            - run-staging-e2e
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+      - run-performance:
+          name: run-staging-performance
+          context:
+            - tanuki-orchestrate-staging
+          requires:
+            - run-staging-e2e
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
       - wait-for-approval:
           type: approval
           requires:
             - run-staging-e2e
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
       - tag-docker-image: # Tag prod image
           name: release-<< matrix.docker-image-destination-tag >>-<< matrix.docker-image-platform >>
           context:
@@ -513,3 +589,8 @@ workflows:
           docker-image-sign: true
           requires:
             - wait-for-approval
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/

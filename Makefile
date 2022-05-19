@@ -10,9 +10,16 @@ DEPS_KAFKA = zookeeper kafka
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
 	OPEN = xdg-open
+	VEGETA_BIN_URL = https://github.com/tsenart/vegeta/releases/download/v12.8.4/vegeta_12.8.4_darwin_amd64.tar.gz
 endif
 ifeq ($(UNAME_S),Darwin)
 	OPEN = open
+	VEGETA_BIN_URL = https://github.com/tsenart/vegeta/releases/download/v12.8.4/vegeta_12.8.4_linux_amd64.tar.gz
+endif
+
+ifneq (,$(wildcard ./.env))
+    include .env
+    export
 endif
 
 .PHONY: all run-coverage coverage fmt fmt-check vet lint misspell-check misspell race tools help
@@ -69,8 +76,8 @@ run-e2e: gobuild-e2e
 e2e: run-e2e
 	@$(OPEN) build/report/report.html 2>/dev/null
 
-run-stress: gobuild-e2e
-	@docker-compose -f docker-compose.e2e.yml up -V stress
+run-stress: gobuild-stress
+	@./build/bin/test stress
 
 e2e: run-e2e
 	@docker-compose -f docker-compose.e2e.yml up --build report
@@ -111,10 +118,14 @@ lint-tools: ## Install linting tools
 	@GO111MODULE=on go get github.com/client9/misspell/cmd/misspell@v0.3.4
 	@curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $$(go env GOPATH)/bin v1.27.0
 
-tools: lint-tools ## Install test tools
-	@GO111MODULE=on go get github.com/golang/mock/mockgen@v1.4.3
-	@GO111MODULE=on go get github.com/swaggo/swag/cmd/swag@v1.7.0
-	@GO111MODULE=on go get github.com/tsenart/vegeta
+get-vegeta:
+	@curl -sSfL $(VEGETA_BIN_URL) -o vegeta.tar.gz
+	@tar -xvf vegeta.tar.gz vegeta
+	@chmod +x vegeta
+
+tools: lint-tools get-vegeta## Install test tools
+	go install github.com/golang/mock/mockgen@v1.4.3
+	go install github.com/swaggo/swag/cmd/swag@v1.7.8
 
 # Help
 help: ## Display this help screen
@@ -162,6 +173,9 @@ bootstrap-deps: bootstrap ## Wait for dependencies to be ready
 
 gobuild-e2e: ## Build Orchestrate e2e Docker image
 	@CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ./build/bin/test ./tests/cmd
+
+gobuild-stress: ## Build Orchestrate stress binary
+	@CGO_ENABLED=0 go build -o ./build/bin/test ./tests/stress/cmd
 
 orchestrate: gobuild ## Start Orchestrate
 	@docker-compose -f docker-compose.dev.yml up --force-recreate --build -d $(ORCH_SERVICES)
@@ -297,10 +311,11 @@ nginx:
 down-nginx:
 	@docker-compose -f scripts/deps/docker-compose-tools.yml rm --force -s -v nginx nginx-prometheus-exporter
 
-vegeta:
+vegeta: get-vegeta
 	@mkdir -p build/vegeta
-	@cat scripts/vegeta/test | vegeta attack -format=http -duration=30s -rate=200/s | tee build/vegeta/results.bin | vegeta report
+	@envsubst < scripts/vegeta/test | vegeta attack -format=http -duration=30s -rate=200/s | tee build/vegeta/results.bin | vegeta report
 	@vegeta report -type=json build/vegeta/results.bin > build/vegeta/metrics.json
 	@cat build/vegeta/results.bin | vegeta plot > build/vegeta/plot.html
 	@cat build/vegeta/results.bin | vegeta report -type="hist[0,100ms,200ms,300ms,500ms]"
-	@$(OPEN) build/vegeta/plot.html 2>/dev/null
+	@set +e
+	@$(OPEN) build/vegeta/plot.html || true 2>/dev/null
