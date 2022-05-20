@@ -10,11 +10,11 @@ DEPS_KAFKA = zookeeper kafka
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
 	OPEN = xdg-open
-	VEGETA_BIN_URL = https://github.com/tsenart/vegeta/releases/download/v12.8.4/vegeta_12.8.4_darwin_amd64.tar.gz
+	VEGETA_BIN_URL = https://github.com/tsenart/vegeta/releases/download/v12.8.4/vegeta_12.8.4_linux_amd64.tar.gz
 endif
 ifeq ($(UNAME_S),Darwin)
 	OPEN = open
-	VEGETA_BIN_URL = https://github.com/tsenart/vegeta/releases/download/v12.8.4/vegeta_12.8.4_linux_amd64.tar.gz
+	VEGETA_BIN_URL = https://github.com/tsenart/vegeta/releases/download/v12.8.4/vegeta_12.8.4_darwin_amd64.tar.gz
 endif
 
 ifneq (,$(wildcard ./.env))
@@ -119,9 +119,9 @@ lint-tools: ## Install linting tools
 	@curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $$(go env GOPATH)/bin v1.27.0
 
 get-vegeta:
-	@curl -sSfL $(VEGETA_BIN_URL) -o vegeta.tar.gz
-	@tar -xvf vegeta.tar.gz vegeta
-	@chmod +x vegeta
+	@curl -sSfL $(VEGETA_BIN_URL) -o /tmp/vegeta.tar.gz
+	@tar -xvf /tmp/vegeta.tar.gz -C ${GOBIN} vegeta
+	@chmod +x ${GOBIN}/vegeta
 
 tools: lint-tools get-vegeta## Install test tools
 	go install github.com/golang/mock/mockgen@v1.4.3

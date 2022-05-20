@@ -465,7 +465,7 @@ workflows:
           docker-password: ${CLOUDSMITH_PASS_RW}
           filters:
             branches:
-              only: maintenancev21.12
+              only: main
             tags:
               only: /^v.*/
       - build-docker-arm-image: # Push Develop arm image
@@ -479,7 +479,7 @@ workflows:
           docker-password: ${CLOUDSMITH_PASS_RW}
           filters:
             branches:
-              only: maintenancev21.12
+              only: main
             tags:
               only: /^v.*/
       - deploy:
@@ -493,7 +493,7 @@ workflows:
             - push-orchestrate-dev-image
           filters:
             branches:
-              only: maintenancev21.12
+              only: main
       - deploy:
           name: deploy-staging
           context:
