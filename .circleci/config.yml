@@ -581,7 +581,7 @@ workflows:
               docker-image-platform: [ "linux/amd64", "linux/arm64" ]
           docker-image-source-tag: orchestrate:${CIRCLE_SHA1:0:7}
           docker-image-source-registry: ${CLOUDSMITH_DEV_REPO}
-          docker-image-destination-registry: consensys
+          docker-image-destination-registry: docker.io
           docker-source-user: ${CLOUDSMITH_USER_RW}
           docker-source-password: ${CLOUDSMITH_PASS_RW}
           docker-destination-user: ${DOCKER_USER_RW}
