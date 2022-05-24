@@ -220,7 +220,6 @@ func processBlockResult(header **ethtypes.Header, body **Body) ParseResultFunc {
 		}
 
 		if len(raw) == 0 {
-			// Block was not found
 			return errors.NotFoundError("block not found")
 		}
 

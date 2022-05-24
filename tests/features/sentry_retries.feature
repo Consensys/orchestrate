@@ -179,7 +179,7 @@ Feature: Send transactions using tx-sentry
       | txTwoUUID | uuid |
     When I send "PUT" request to "{{global.api}}/jobs/{{txTwoUUID}}/start"
     Then the response code should be 202
-    Then I sleep "5s"
+    Then I sleep "10s"
     When I send "GET" request to "{{global.api}}/schedules/{{scheduleUUID}}"
     Then the response code should be 200
     And Response should have the following fields

@@ -6,10 +6,12 @@ import (
 
 	"github.com/consensys/orchestrate/pkg/errors"
 	orchestrateclient "github.com/consensys/orchestrate/pkg/sdk/client"
+	clientutils "github.com/consensys/orchestrate/pkg/toolkit/app/http/client-utils"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	"github.com/consensys/orchestrate/pkg/types/api"
 	"github.com/consensys/orchestrate/pkg/types/tx"
 	"github.com/consensys/orchestrate/pkg/utils"
+	"github.com/consensys/orchestrate/services/api/service/controllers"
 	utils2 "github.com/consensys/orchestrate/tests/service/stress/utils"
 	utils3 "github.com/consensys/orchestrate/tests/utils"
 	"github.com/consensys/orchestrate/tests/utils/chanregistry"
@@ -25,7 +27,7 @@ func SendContractTxsTest(ctx context.Context, cfg *WorkloadConfig, client orches
 	t := utils2.NewEnvelopeTracker(chanReg, evlp, idempotency)
 
 	// @TODO Read values from configuration or from context
-	toAddr := ethcommon.HexToAddress("0xFf80849F797a5feBC96F1737dc78135a79DaF83E")
+	toAddr := ethcommon.HexToAddress("0xa4470694BC2133f9cA7Ab71D3aC55870c560abfC")
 	req := &api.SendTransactionRequest{
 		ChainName: cfg.chains[nChain].Name,
 		Params: api.TransactionParams{
@@ -42,7 +44,9 @@ func SendContractTxsTest(ctx context.Context, cfg *WorkloadConfig, client orches
 	sReq, _ := json.Marshal(req)
 
 	logger = logger.WithField("chain", req.ChainName).WithField("idem", idempotency)
-	_, err := client.SendContractTransaction(ctx, req)
+	_, err := client.SendContractTransaction(context.WithValue(ctx, clientutils.RequestHeaderKey, map[string]string{
+		controllers.IdempotencyKeyHeader: idempotency,
+	}), req)
 
 	if err != nil {
 		if !errors.IsConnectionError(err) {

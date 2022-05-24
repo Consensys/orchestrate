@@ -17,11 +17,6 @@ ifeq ($(UNAME_S),Darwin)
 	VEGETA_BIN_URL = https://github.com/tsenart/vegeta/releases/download/v12.8.4/vegeta_12.8.4_darwin_amd64.tar.gz
 endif
 
-ifneq (,$(wildcard ./.env))
-    include .env
-    export
-endif
-
 .PHONY: all run-coverage coverage fmt fmt-check vet lint misspell-check misspell race tools help
 
 networks:
@@ -77,7 +72,7 @@ e2e: run-e2e
 	@$(OPEN) build/report/report.html 2>/dev/null
 
 run-stress: gobuild-stress
-	@./build/bin/test stress
+	@docker-compose -f docker-compose.e2e.yml up -V stress
 
 e2e: run-e2e
 	@docker-compose -f docker-compose.e2e.yml up --build report
@@ -92,8 +87,6 @@ e2e-ci: gobuild-e2e
 deploy-remote-env:
 	@bash ./scripts/deploy-remote-env.sh
 
-stress: run-stress
-	@exit $(docker inspect orchestrate_stress_1 --format='{{.State.ExitCode}}')
 
 stress-ci:
 	@docker-compose -f docker-compose.dev.yml up stress
@@ -172,10 +165,10 @@ bootstrap-deps: bootstrap ## Wait for dependencies to be ready
 	@bash scripts/bootstrap-deps.sh
 
 gobuild-e2e: ## Build Orchestrate e2e Docker image
-	@CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ./build/bin/test ./tests/cmd
+	@CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ./build/bin/e2e ./tests/cmd
 
 gobuild-stress: ## Build Orchestrate stress binary
-	@CGO_ENABLED=0 go build -o ./build/bin/test ./tests/stress/cmd
+	@CGO_ENABLED=0 go build -o ./build/bin/stress ./tests/cmd
 
 orchestrate: gobuild ## Start Orchestrate
 	@docker-compose -f docker-compose.dev.yml up --force-recreate --build -d $(ORCH_SERVICES)

@@ -30,7 +30,7 @@ x-default-variables: &default-variables
 
 x-container-common: &container-common
   image: golang:1.16.9
-  restart: ${CONTAINER_RESTART-on-failure}
+#  restart: ${CONTAINER_RESTART-on-failure}
   entrypoint: /bin/main
   tty: true
   networks:
@@ -136,13 +136,21 @@ services:
     <<: *container-common
     ports:
       - 8082:8082
+#      - 2345:2345
     environment:
       <<: *default-variables
       <<: *tx-listener-common
+#    volumes:
+#      - ./build/bin/orchestrate:/bin/main:ro
+#      - /usr/local/bin/dlv:/usr/bin/dlv
     depends_on:
       - api
     command: tx-listener run
-
+#    entrypoint:
+#      - sh
+#      - -c
+#      - |
+#        dlv --listen=:2345 --headless=true --api-version=2 --accept-multiclient exec /bin/main tx-listener run
 networks:
   orchestrate:
     external:

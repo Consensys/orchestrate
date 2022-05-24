@@ -298,7 +298,7 @@ jobs:
             STRESS_ITERATIONS: <<parameters.stress_iteration>>
             STRESS_TIMEOUT: <<parameters.stress_timeout>>
             KAFKA_CONSUMER_GROUP_NAME: "stress"
-          command: ./build/bin/test stress
+          command: make stress-ci
 
   run-performance:
     docker:

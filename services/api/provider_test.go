@@ -235,7 +235,7 @@ func TestNewChainsProxyConfig(t *testing.T) {
 	}
 
 	for i, test := range testSet {
-		cfg := proxy.NewProxyConfig(test.chains, nil)
+		cfg := proxy.NewProxyConfig(test.chains, nil, true)
 		expectedCfg := test.expectedCfg(dynamic.NewConfig())
 		assert.Equal(t, expectedCfg, cfg, "Chain-registry - Store (%d/%d): expected %v but got %v", i+1, len(testSet), expectedCfg, cfg)
 	}

@@ -60,7 +60,7 @@ func HTTPCacheRequest(ctx context.Context, req *http.Request) (c bool, k string,
 
 	cacheKey := fmt.Sprintf("%s(%s)", msg.Method, string(msg.Params))
 	if msg.Method == "eth_getBlockByNumber" && strings.Contains(string(msg.Params), "latest") {
-		return true, cacheKey, time.Second, nil
+		return false, "", 0, nil
 	}
 
 	return true, cacheKey, 0, nil

@@ -103,7 +103,7 @@ func NewAPI(
 		apiHandlerOpt,
 		httpCacheOpt,
 		reverseProxyOpt,
-		app.ProviderOpt(NewProvider(ucs.SearchChains(), time.Second, cfg.Proxy.ProxyCacheTTL)),
+		app.ProviderOpt(NewProvider(ucs.SearchChains(), time.Second, cfg.Proxy.ProxyCacheTTL, cfg.App.HTTP.AccessLog)),
 	)
 }
 

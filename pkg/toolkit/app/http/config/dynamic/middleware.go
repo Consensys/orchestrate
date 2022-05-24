@@ -44,10 +44,6 @@ func FromTraefikMiddleware(middleware *traefikdynamic.Middleware) *Middleware {
 	}
 }
 
-func ToTraefikMiddleware(middleware *Middleware) *traefikdynamic.Middleware {
-	return middleware.Middleware
-}
-
 // +k8s:deepcopy-gen=true
 
 type Auth struct{}

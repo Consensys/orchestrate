@@ -81,7 +81,7 @@ func (sentry *TxSentry) listen(ctx context.Context) error {
 		case t := <-ticker.C:
 			lastCheckedAt := t.Add(-sentry.config.RefreshInterval)
 			sentry.logger.WithField("updated_after", lastCheckedAt.Format("2006-01-02 15:04:05")).
-				Debug("fetching new pending jobs")
+				Trace("fetching new pending jobs")
 
 			jobFilters.UpdatedAfter = lastCheckedAt
 			err := sentry.createSessions(ctx, jobFilters)

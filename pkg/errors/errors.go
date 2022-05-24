@@ -320,7 +320,7 @@ func EthereumError(format string, a ...interface{}) *ierror.Error {
 	return Errorf(Ethereum, format, a...)
 }
 
-// IsEthereumError indicate whether an error is an Etehreum error
+// IsEthereumError indicate whether an error is an Ethereum error
 func IsEthereumError(err error) bool {
 	return isErrorClass(FromError(err).GetCode(), Ethereum)
 }

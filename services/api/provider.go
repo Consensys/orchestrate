@@ -20,10 +20,10 @@ const (
 	InternalProvider = "internal"
 )
 
-func NewProvider(searchChains usecases.SearchChainsUseCase, refresh time.Duration, proxyCacheTTL *time.Duration) provider.Provider {
+func NewProvider(searchChains usecases.SearchChainsUseCase, refresh time.Duration, proxyCacheTTL *time.Duration, accessLog bool) provider.Provider {
 	prvdr := aggregator.New()
 	prvdr.AddProvider(NewInternalProvider())
-	prvdr.AddProvider(proxy.NewChainsProxyProvider(searchChains, refresh, proxyCacheTTL))
+	prvdr.AddProvider(proxy.NewChainsProxyProvider(searchChains, refresh, proxyCacheTTL, accessLog))
 	return prvdr
 
 }

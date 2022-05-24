@@ -58,12 +58,12 @@ func (manager *sessionManager) Start(ctx context.Context, job *entities.Job) {
 	ctx = log.With(ctx, logger)
 
 	if manager.hasSession(job.UUID) {
-		logger.Debug("job session already exists, skipping session creation")
+		logger.Trace("job session already exists, skipping session creation")
 		return
 	}
 
 	if job.InternalData.RetryInterval == 0 {
-		logger.Debug("job session has retry strategy disabled")
+		logger.Trace("job session does not have any retry strategy")
 		return
 	}
 

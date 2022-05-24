@@ -7,6 +7,7 @@ import (
 
 	"github.com/consensys/orchestrate/pkg/backoff"
 	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/sdk/client"
 	"github.com/consensys/orchestrate/pkg/toolkit/app"
 	ethclient "github.com/consensys/orchestrate/pkg/toolkit/ethclient/rpc"
 	"github.com/sirupsen/logrus"
@@ -121,6 +122,7 @@ func initComponents(ctx context.Context) {
 		// Initialize Engine
 		func() {
 			engine.Init(ctx)
+			client.Init()
 		},
 		func() {
 			broker.InitSyncProducer(ctx)

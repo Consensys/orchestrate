@@ -30,7 +30,7 @@ func TestHTTPCacheRequest_Valid(t *testing.T) {
 	assert.Equal(t, "eth_getTransactionReceipt([\"0x7d231ca6a5fc03f5365b3d62dcfe372ed5c13ac7014d016b52ed72094919556c\"])", k)
 }
 
-func TestHTTPCacheRequest_ValidWithCustomTTL(t *testing.T) {
+func TestHTTPCacheRequest_IgnoreLatestBlock(t *testing.T) {
 	msg := ethclient.JSONRpcMessage{
 		Method: "eth_getBlockByNumber",
 	}
@@ -39,11 +39,9 @@ func TestHTTPCacheRequest_ValidWithCustomTTL(t *testing.T) {
 	body, _ := json.Marshal(msg)
 	req := httptest.NewRequest(http.MethodPost, "http://localhost", bytes.NewReader(body))
 
-	c, k, ttl, err := HTTPCacheRequest(req.Context(), req)
+	c, _,_, err := HTTPCacheRequest(req.Context(), req)
 	assert.NoError(t, err)
-	assert.True(t, c)
-	assert.Equal(t, time.Second, ttl)
-	assert.Equal(t, "eth_getBlockByNumber([\"latest\"])", k)
+	assert.False(t, c)
 }
 
 func TestHTTPCacheRequest_IgnoreReqType(t *testing.T) {

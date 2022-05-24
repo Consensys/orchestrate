@@ -52,18 +52,19 @@ linters:
 
 issues:
   max-same-issues: 10
+  exclude-use-default: true
 
 run:
   deadline: 20m
   skip-dirs:
     - .gocache
-    - /pkg/go-ethereum
-    - /build
-    - /public
+    - pkg/go-ethereum
+    - build
+    - public
     - mock
-    - /scripts
-    - /vendor
-    - /tests
+    - scripts
+    - vendor
+    - tests
   skip-files:
     - ".*\\.pb(\\.gw)?\\.go$"
     - pkg/toolkit/app/http/handler/dashboard/genstatic/gen.go

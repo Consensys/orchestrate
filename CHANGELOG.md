@@ -1,9 +1,13 @@
 # Orchestrate Release Notes
 
-## v21.12.7 (WIP)
+## v21.12.7 (2022-05-24)
 ### 🛠 Bug fixes
-* Reduced `tx-listener` service demands on `api` by usage of an optional in-memory cache. This is an optional feature
-which can be enabled using `API_CACHE_TTL` environment variable.
+* Stop printing chain-proxy access logs errors when `ACCESSLOG_ENABLED=false`.  
+
+### 🛠 Enhancements
+* Reduced `tx-listener` services request to `orchestrate-api` can be reduced by usage of an 
+optional in-memory cache. To be enabled set a duration using `API_CACHE_TTL` environment variable.
+* Reduced database I/O usage by ~60%.
 
 ## v21.12.6 (2022-05-04)
 ### 🛠 Bug fixes

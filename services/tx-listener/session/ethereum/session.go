@@ -35,6 +35,11 @@ type Session struct {
 	bckOff        backoff.BackOff
 	metrics       metrics.ListenerMetrics
 	metricsLabels []string
+
+	pendingJobMap           map[string]*entities.Job
+	pendingJobMapMutex      *sync.RWMutex
+	pendingJobLastCheckedAt time.Time
+
 	// Listening session
 	trigger                        chan struct{}
 	blockPosition                  uint64
@@ -55,13 +60,15 @@ func NewSession(
 	m metrics.ListenerMetrics,
 ) *Session {
 	return &Session{
-		Chain:   chain,
-		ec:      ec,
-		client:  client,
-		hook:    callHook,
-		offsets: offsets,
-		bckOff:  backoff.NewConstantBackOff(2 * time.Second),
-		metrics: m,
+		Chain:              chain,
+		ec:                 ec,
+		client:             client,
+		hook:               callHook,
+		offsets:            offsets,
+		bckOff:             backoff.NewConstantBackOff(2 * time.Second),
+		metrics:            m,
+		pendingJobMap:      make(map[string]*entities.Job),
+		pendingJobMapMutex: &sync.RWMutex{},
 		metricsLabels: []string{
 			"chain_uuid", chain.UUID,
 		},
@@ -227,8 +234,7 @@ listeningLoop:
 	for {
 		select {
 		case <-ctx.Done():
-			s.logger.WithField("block_stop", s.blockPosition).
-				Debug("stopping fetch block listener")
+			s.logger.WithField("block_stop", s.blockPosition).Debug("stopping fetch block listener")
 			break listeningLoop
 		case <-s.trigger:
 			if (s.currentChainTip > 0) && s.blockPosition <= s.currentChainTip {
@@ -241,6 +247,7 @@ listeningLoop:
 				if err != nil {
 					s.errors <- err
 				} else if tip > s.currentChainTip {
+					s.logger.WithField("number", tip).Info("fetch chain tip")
 					s.currentChainTip = tip
 					s.trig()
 				}
@@ -305,39 +312,57 @@ func (s *Session) callHook(ctx context.Context, block *fetchedBlock) error {
 
 func (s *Session) fetchBlock(ctx context.Context, blockPosition uint64) *Future {
 	return NewFuture(func() (interface{}, error) {
-		blck, err := s.ec.BlockByNumber(
-			ctx,
-			s.Chain.URL,
-			big.NewInt(int64(blockPosition)),
+		block := &fetchedBlock{}
+		err := backoff.RetryNotify(
+			func() error {
+				blck, err := s.ec.BlockByNumber(
+					ctx,
+					s.Chain.URL,
+					big.NewInt(int64(blockPosition)),
+				)
+
+				if err != nil {
+					// Retry on not found block
+					if errors.IsInvalidParameterError(err) {
+						return err
+					}
+
+					return backoff.Permanent(err)
+				}
+
+				block.block = blck
+				return nil
+			},
+			backoff.WithMaxRetries(backoff.NewConstantBackOff(time.Second), 3),
+			func(err error, duration time.Duration) {
+				s.logger.WithError(err).WithField("block", blockPosition).Warnf("error fetching block, retrying in %v...", duration)
+			},
 		)
+
 		if err != nil {
-			errMessage := "failed to fetch block"
-			if !errors.IsNotFoundError(err) {
-				s.logger.WithError(err).WithField("block_number", blockPosition).Error(errMessage)
-			}
-			return nil, errors.ConnectionError(errMessage)
+			errMsg := "failed to fetch block"
+			s.logger.WithField("block", blockPosition).WithError(err).Error(errMsg)
+			return nil, errors.ConnectionError(errMsg)
 		}
 
-		block := &fetchedBlock{block: blck}
-
-		for _, tx := range blck.Transactions() {
+		for _, tx := range block.block.Transactions() {
 			s.logger.WithField("tx_hash", tx.Hash().String()).
-				WithField("block_number", blck.NumberU64()).Debug("found transaction in block")
+				WithField("block_number", block.block.NumberU64()).Trace("found transaction in block")
 		}
 
-		jobMap, err := s.fetchJobs(ctx, blck.Transactions())
+		jobMap, err := s.matchPendingJobs(ctx, block.block.Transactions())
 		if err != nil {
 			return nil, err
 		}
 
 		// TODO: pass batch variable by environment variable
 		batch := 20
-		for i := 0; i < blck.Transactions().Len(); i += batch {
+		for i := 0; i < block.block.Transactions().Len(); i += batch {
 			j := i + batch
-			if j > blck.Transactions().Len() {
-				j = blck.Transactions().Len()
+			if j > block.block.Transactions().Len() {
+				j = block.block.Transactions().Len()
 			}
-			jobs, err := awaitReceipts(s.fetchReceipts(ctx, blck.Transactions()[i:j], jobMap))
+			jobs, err := awaitReceipts(s.fetchReceipts(ctx, block.block.Transactions()[i:j], jobMap))
 			if err != nil {
 				return nil, err
 			}
@@ -348,56 +373,121 @@ func (s *Session) fetchBlock(ctx context.Context, blockPosition uint64) *Future 
 	})
 }
 
-func (s *Session) fetchJobs(ctx context.Context, transactions ethtypes.Transactions) (map[string]*entities.Job, error) {
-	jobMap := make(map[string]*entities.Job)
+func (s *Session) matchPendingJobs(ctx context.Context, transactions ethtypes.Transactions) (map[string]*entities.Job, error) {
+	s.pendingJobMapMutex.Lock()
+	defer s.pendingJobMapMutex.Unlock()
 
+	jobMap := make(map[string]*entities.Job)
 	if len(transactions) == 0 {
 		return jobMap, nil
 	}
 
-	for i := 0; i < transactions.Len(); i += MaxTxHashesLength {
-		size := i + MaxTxHashesLength
-		if size > transactions.Len() {
-			size = transactions.Len()
-		}
-		currTransactions := transactions[i:size]
-		var txHashes []string
-		for _, t := range currTransactions {
-			txHashes = append(txHashes, t.Hash().String())
-		}
+	err := s.updatePendingJobs(ctx)
+	if err != nil {
+		return nil, err
+	}
 
-		// By design, we will receive 0 or 1 job per tx_hash in the filter because we filter by status PENDING
-		jobResponses, err := s.client.SearchJob(ctx, &entities.JobFilters{
-			TxHashes:  txHashes,
-			ChainUUID: s.Chain.UUID,
-			Status:    entities.StatusPending,
-		})
-		if err != nil {
-			s.logger.WithError(err).Error("failed to search jobs")
-			return nil, err
-		}
-
-		for _, jobResponse := range jobResponses {
-			s.logger.WithField("tx_hash", jobResponse.Transaction.Hash).
-				WithField("job", jobResponse.UUID).Debug("transaction was matched to a job")
-
-			// Filter by the jobs belonging to same session CHAIN_UUID
-			jobMap[jobResponse.Transaction.Hash.String()] = &entities.Job{
-				UUID:         jobResponse.UUID,
-				ChainUUID:    jobResponse.ChainUUID,
-				ScheduleUUID: jobResponse.ScheduleUUID,
-				TenantID:     jobResponse.TenantID,
-				OwnerID:      jobResponse.OwnerID,
-				Type:         jobResponse.Type,
-				Labels:       jobResponse.Labels,
-				Transaction:  &jobResponse.Transaction,
-				CreatedAt:    jobResponse.CreatedAt,
-			}
+	for idx := range transactions {
+		txHash := transactions[idx].Hash().String()
+		if job, ok := s.pendingJobMap[txHash]; ok {
+			jobMap[txHash] = job
+			delete(s.pendingJobMap, txHash)
 		}
 	}
 
 	return jobMap, nil
 }
+
+func (s *Session) updatePendingJobs(ctx context.Context) error {
+	// Initial job creation fetching all pending jobs
+	jobFilters := &entities.JobFilters{
+		Status:    entities.StatusPending,
+		ChainUUID: s.Chain.UUID,
+	}
+
+	if !s.pendingJobLastCheckedAt.IsZero() {
+		jobFilters.UpdatedAfter = s.pendingJobLastCheckedAt
+	}
+
+	s.pendingJobLastCheckedAt = time.Now()
+
+	s.logger.WithField("updated_after", jobFilters.UpdatedAfter.Format("2006-01-02 15:04:05")).
+		Trace("fetching new pending jobs")
+	// We get all the pending jobs updated_after the last tick
+	jobResponses, err := s.client.SearchJob(ctx, jobFilters)
+	if err != nil {
+		s.logger.WithError(err).Error("failed to fetch pending jobs")
+		return err
+	}
+
+	for _, jobResponse := range jobResponses {
+		// Filter by the jobs belonging to same session CHAIN_UUID
+		s.pendingJobMap[jobResponse.Transaction.Hash.String()] = &entities.Job{
+			UUID:         jobResponse.UUID,
+			ChainUUID:    jobResponse.ChainUUID,
+			ScheduleUUID: jobResponse.ScheduleUUID,
+			TenantID:     jobResponse.TenantID,
+			OwnerID:      jobResponse.OwnerID,
+			Type:         jobResponse.Type,
+			Labels:       jobResponse.Labels,
+			Transaction:  &jobResponse.Transaction,
+			CreatedAt:    jobResponse.CreatedAt,
+		}
+	}
+
+	return nil
+}
+
+// func (s *Session) fetchJobs(ctx context.Context, transactions ethtypes.Transactions) (map[string]*entities.Job, error) {
+// 	jobMap := make(map[string]*entities.Job)
+//
+// 	if len(transactions) == 0 {
+// 		return jobMap, nil
+// 	}
+//
+// 	for i := 0; i < transactions.Len(); i += MaxTxHashesLength {
+// 		size := i + MaxTxHashesLength
+// 		if size > transactions.Len() {
+// 			size = transactions.Len()
+// 		}
+// 		currTransactions := transactions[i:size]
+// 		var txHashes []string
+// 		for _, t := range currTransactions {
+// 			txHashes = append(txHashes, t.Hash().String())
+// 		}
+//
+// 		// By design, we will receive 0 or 1 job per tx_hash in the filter because we filter by status PENDING
+// 		jobResponses, err := s.client.SearchJob(ctx, &entities.JobFilters{
+// 			TxHashes:  txHashes,
+// 			ChainUUID: s.Chain.UUID,
+// 			Status:    entities.StatusPending,
+// 		})
+// 		if err != nil {
+// 			s.logger.WithError(err).Error("failed to search jobs")
+// 			return nil, err
+// 		}
+//
+// 		for _, jobResponse := range jobResponses {
+// 			s.logger.WithField("tx_hash", jobResponse.Transaction.Hash).
+// 				WithField("job", jobResponse.UUID).Debug("transaction was matched to a job")
+//
+// 			// Filter by the jobs belonging to same session CHAIN_UUID
+// 			jobMap[jobResponse.Transaction.Hash.String()] = &entities.Job{
+// 				UUID:         jobResponse.UUID,
+// 				ChainUUID:    jobResponse.ChainUUID,
+// 				ScheduleUUID: jobResponse.ScheduleUUID,
+// 				TenantID:     jobResponse.TenantID,
+// 				OwnerID:      jobResponse.OwnerID,
+// 				Type:         jobResponse.Type,
+// 				Labels:       jobResponse.Labels,
+// 				Transaction:  &jobResponse.Transaction,
+// 				CreatedAt:    jobResponse.CreatedAt,
+// 			}
+// 		}
+// 	}
+//
+// 	return jobMap, nil
+// }
 
 func (s *Session) fetchReceipts(ctx context.Context, transactions ethtypes.Transactions, jobMap map[string]*entities.Job) []*Future {
 	var futureJobs []*Future

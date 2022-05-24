@@ -11,7 +11,7 @@ import (
 const (
 	sentryRefreshIntervalFlag     = "tx-sentry-refresh-interval"
 	sentryRefreshIntervalViperKey = "tx-sentry.refresh-interval"
-	sentryRefreshIntervalDefault  = 1 * time.Second
+	sentryRefreshIntervalDefault  = 5 * time.Second
 	sentryRefreshIntervalEnv      = "TX_SENTRY_REFRESH_INTERVAL"
 )
 

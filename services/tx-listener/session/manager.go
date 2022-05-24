@@ -161,21 +161,23 @@ func (m *Manager) runSession(ctx context.Context, chain *dynamic.Chain) {
 		logger.Info("listener session started")
 		err := sess.session.Run(ctx)
 		m.removeSession(chain.UUID)
-		if err != nil {
+		if err != nil && ctx.Err() == nil {
 			logger.WithError(err).Error("failed to remove session")
 		}
-		m.logger.Info("session stopped")
+		m.logger.WithField("chain", chain.UUID).Info("session stopped")
 		m.wg.Done()
 	}()
 }
 
 func (m *Manager) stopSession(ctx context.Context, chain *dynamic.Chain) {
 	logger := m.logger.WithContext(ctx)
-	sess, ok := m.getSession(chain.UUID)
-	if ok {
-		logger.Debug("stopping session")
+	if sess, ok := m.getSession(chain.UUID); ok {
+		logger.WithField("chain", chain.UUID).Debug("stopping session")
 		sess.cancel()
+		return
 	}
+
+	logger.WithField("chain", chain.UUID).Warn("trying to stop a not exiting session")
 }
 
 func (m *Manager) addSession(key string, sess *cancelableSession) {

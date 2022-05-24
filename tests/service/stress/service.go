@@ -62,7 +62,7 @@ func NewService(cfg *Config,
 		producer: producer,
 		items: []*workLoadItem{
 			{cfg.Iterations, cfg.Concurrency, "BatchDeployContract", units.BatchDeployContractTest},
-			// {cfg.Iterations, cfg.Concurrency, "SendContractTxsTest", units.SendContractTxsTest},
+			{cfg.Iterations, cfg.Concurrency, "SendContractTxsTest", units.SendContractTxsTest},
 			// {cfg.Iterations, cfg.Concurrency, "BatchPrivateTxsTest", units.BatchPrivateTxsTest},
 		},
 	}
@@ -135,8 +135,8 @@ func (c *WorkLoadService) preRun(ctx context.Context) (context.Context, error) {
 	for idx := 0; idx < nBesuNodes; idx++ {
 		besuNode := c.cfg.gData.Nodes.Besu[idx]
 		chainName := fmt.Sprintf("besu_%d-%s", idx, utils2.RandString(5))
-		var cUUID string
-		ctx, cUUID, err = assets.RegisterNewChain(ctx, c.client, c.ec, proxyHost, chainName, &besuNode)
+		// var cUUID string
+		ctx, _, err = assets.RegisterNewChain(ctx, c.client, c.ec, proxyHost, chainName, &besuNode)
 		if err != nil {
 			return ctx, err
 		}
@@ -149,13 +149,13 @@ func (c *WorkLoadService) preRun(ctx context.Context) (context.Context, error) {
 			}
 		}
 
-		for jdx := 0; jdx < nPrivGroupPerChain; jdx++ {
-			ctx, err = assets.CreatePrivateGroup(ctx, c.ec, utils2.GetProxyURL(proxyHost, cUUID), besuNode.PrivateAddress,
-				utils2.RandShuffle(privNodeAddress))
-			if err != nil {
-				return ctx, err
-			}
-		}
+		// for jdx := 0; jdx < nPrivGroupPerChain; jdx++ {
+		// 	ctx, err = assets.CreatePrivateGroup(ctx, c.ec, utils2.GetProxyURL(proxyHost, cUUID), besuNode.PrivateAddress,
+		// 		utils2.RandShuffle(privNodeAddress))
+		// 	if err != nil {
+		// 		return ctx, err
+		// 	}
+		// }
 	}
 
 	return ctx, nil

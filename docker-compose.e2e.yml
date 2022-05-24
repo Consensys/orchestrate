@@ -29,24 +29,35 @@ x-container-common: &container-common
     - orchestrate
   tty: true
 
+x-e2e-variables: &e2e-variables
+  CUCUMBER_OUTPUTPATH: "/report/output/report.json"
+  CUCUMBER_PATHS: "/features"
+  ARTIFACTS_PATH: "/artifacts"
+  CUCUMBER_FORMAT: "cucumber"
+  CUCUMBER_CONCURRENCY: ${CUCUMBER_CONCURRENCY-}
+  CUCUMBER_TAGS: ${CUCUMBER_TAGS-}
+  TEST_GLOBAL_DATA: ${TEST_GLOBAL_DATA-}
+  CUCUMBER_STEPS_TIMEOUT: ${CUCUMBER_STEPS_TIMEOUT-30s}
+  KAFKA_CONSUMER_GROUP_NAME: ${KAFKA_CONSUMER_GROUP_NAME-e2e}
+
+x-stress-variables: &stress-variables
+  ARTIFACTS_PATH: "/artifacts"
+  STRESS_CONCURRENCY: ${STRESS_CONCURRENCY-30}
+  STRESS_ITERATIONS: ${STRESS_ITERATIONS-500}
+  STRESS_TIMEOUT: ${STRESS_TIMEOUT-15m}
+  TEST_GLOBAL_DATA: ${TEST_GLOBAL_DATA-}
+  KAFKA_CONSUMER_GROUP_NAME: ${KAFKA_CONSUMER_GROUP_NAME-stress}
+
 services:
   e2e:
     <<: *container-common
     environment:
       <<: *default-variables
-      CUCUMBER_OUTPUTPATH: "/report/output/report.json"
-      CUCUMBER_PATHS: "/features"
-      ARTIFACTS_PATH: "/artifacts"
-      CUCUMBER_FORMAT: "cucumber"
-      CUCUMBER_CONCURRENCY: ${CUCUMBER_CONCURRENCY-}
-      CUCUMBER_TAGS: ${CUCUMBER_TAGS-}
-      TEST_GLOBAL_DATA: ${TEST_GLOBAL_DATA-}
-      CUCUMBER_STEPS_TIMEOUT: ${CUCUMBER_STEPS_TIMEOUT-30s}
-      KAFKA_CONSUMER_GROUP_NAME: ${KAFKA_CONSUMER_GROUP_NAME-e2e}
+      <<: *e2e-variables
     restart: "no"
     command: e2e
     volumes:
-      - ./build/bin/test:/bin/main
+      - ./build/bin/e2e:/bin/main
       - ./build/report:/report/output
       - ./tests/features:/features
       - ./tests/artifacts:/artifacts
@@ -72,16 +83,11 @@ services:
     <<: *container-common
     environment:
       <<: *default-variables
-      ARTIFACTS_PATH: "/artifacts"
-      STRESS_CONCURRENCY: "15"
-      STRESS_ITERATIONS: "100"
-      STRESS_TIMEOUT: "5m"
-      TEST_GLOBAL_DATA: ${TEST_GLOBAL_DATA-}
-      KAFKA_CONSUMER_GROUP_NAME: ${KAFKA_CONSUMER_GROUP_NAME-stress}
+      <<: *stress-variables
     restart: "no"
     command: stress
     volumes:
-      - ./build/bin/test:/bin/main
+      - ./build/bin/stress:/bin/main
       - ./tests/artifacts:/artifacts
 
 networks:
