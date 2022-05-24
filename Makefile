@@ -80,7 +80,6 @@ e2e: run-e2e
 
 e2e-ci: gobuild-e2e
 	@docker network create orchestrate
-	@set -Eeu
 	@docker-compose -f docker-compose.e2e.yml up -V e2e
 	@docker-compose -f docker-compose.e2e.yml up --build report
 
@@ -88,8 +87,9 @@ deploy-remote-env:
 	@bash ./scripts/deploy-remote-env.sh
 
 
-stress-ci:
-	@docker-compose -f docker-compose.dev.yml up stress
+stress-ci: gobuild-stress
+	@docker network create orchestrate
+	@docker-compose -f docker-compose.e2e.yml up -V stress
 	@exit $(docker inspect orchestrate_stress_1 --format='{{.State.ExitCode}}')
 
 clean: protobuf gen-swagger gen-mocks mod-tidy lint coverage ## Run all clean-up tasks
@@ -111,12 +111,12 @@ lint-tools: ## Install linting tools
 	@GO111MODULE=on go get github.com/client9/misspell/cmd/misspell@v0.3.4
 	@curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $$(go env GOPATH)/bin v1.27.0
 
-get-vegeta:
+vegeta-tools:
 	@curl -sSfL $(VEGETA_BIN_URL) -o /tmp/vegeta.tar.gz
-	@tar -xvf /tmp/vegeta.tar.gz -C ${GOBIN} vegeta
-	@chmod +x ${GOBIN}/vegeta
+	@tar -xvf /tmp/vegeta.tar.gz -C /usr/local/bin/
+	@chmod +x /usr/local/bin/vegeta
 
-tools: lint-tools get-vegeta## Install test tools
+tools: lint-tools vegeta-tools## Install test tools
 	go install github.com/golang/mock/mockgen@v1.4.3
 	go install github.com/swaggo/swag/cmd/swag@v1.7.8
 
@@ -168,7 +168,7 @@ gobuild-e2e: ## Build Orchestrate e2e Docker image
 	@CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ./build/bin/e2e ./tests/cmd
 
 gobuild-stress: ## Build Orchestrate stress binary
-	@CGO_ENABLED=0 go build -o ./build/bin/stress ./tests/cmd
+	@CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ./build/bin/stress ./tests/cmd
 
 orchestrate: gobuild ## Start Orchestrate
 	@docker-compose -f docker-compose.dev.yml up --force-recreate --build -d $(ORCH_SERVICES)
@@ -304,7 +304,7 @@ nginx:
 down-nginx:
 	@docker-compose -f scripts/deps/docker-compose-tools.yml rm --force -s -v nginx nginx-prometheus-exporter
 
-vegeta: get-vegeta
+vegeta:
 	@mkdir -p build/vegeta
 	@envsubst < scripts/vegeta/test | vegeta attack -format=http -duration=30s -rate=200/s | tee build/vegeta/results.bin | vegeta report
 	@vegeta report -type=json build/vegeta/results.bin > build/vegeta/metrics.json

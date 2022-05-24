@@ -26,7 +26,10 @@ commands:
           name: Docker login
           command: |
             echo Login into << parameters.docker-image-registry >>
-            echo << parameters.docker-password >> | docker login << parameters.docker-image-registry >> -u << parameters.docker-user >> --password-stdin
+            [[ "<< parameters.docker-image-registry >>" == "consensys" ]] \
+            && echo << parameters.docker-password >> | docker login docker.io -u << parameters.docker-user >> --password-stdin \
+            || echo << parameters.docker-password >> | docker login << parameters.docker-image-registry >> -u << parameters.docker-user >> --password-stdin
+            
 
   build_and_push:
     description: "Builds and push image"
@@ -270,9 +273,9 @@ jobs:
           destination: report.html
 
   run-stress:
-    docker:
-      - image: cimg/go:1.16.8
-    resource_class: large
+    machine:
+      image: ubuntu-2004:202010-01
+    resource_class: xlarge
     parameters:
       stress_concurrency:
         type: string
@@ -284,6 +287,11 @@ jobs:
         type: string
         default: "10m"
     steps:
+      - run:
+          name: Uninstall Go
+          command: sudo rm -rvf /usr/local/go/
+      - go/install:
+          version: 1.16.8
       - prepare_golang
       - wait-for/sh-command:
           seconds-between-retries: 3
@@ -315,9 +323,11 @@ jobs:
           name: Install gettext (envsubst)
           command: sudo apt-get update && sudo apt-get install gettext-base
       - run:
+          name: Install vegeta
+          command: make vegeta-tools
+      - run:
           name: Running performance test
           command: make vegeta
-
       - store_artifacts:
           path: ./build/vegeta/plot.html
           destination: vegeta-plot.html
@@ -409,6 +419,9 @@ jobs:
             echo "Pulling docker image ${DOCKER_IMAGE_SOURCE_TAG}..."
             docker pull "${DOCKER_IMAGE_SOURCE_TAG}"
 
+            echo "Tagging source image ${DOCKER_IMAGE_SOURCE_TAG} to destination registry ${DOCKER_IMAGE_DESTINATION_TAG}..."
+            docker tag "${DOCKER_IMAGE_SOURCE_TAG}" "${DOCKER_IMAGE_DESTINATION_TAG}"
+            
             if [ $DOCKER_IMAGE_SIGN == "true" ]; then
                 mkdir -p $HOME/.docker/trust/private
                 echo $DCT_KEY | base64 --decode > $HOME/.docker/trust/private/$DCT_HASH.key
@@ -418,12 +431,9 @@ jobs:
                 echo "Waiting for few seconds for image to become available..."
                 sleep 10
 
-                echo "Signing docker image ${DOCKER_IMAGE_SOURCE_TAG}..."
-                docker trust sign --local "${DOCKER_IMAGE_SOURCE_TAG}"
+                echo "Signing docker image ${DOCKER_IMAGE_DESTINATION_TAG}..."
+                docker trust sign --local "${DOCKER_IMAGE_DESTINATION_TAG}"
             fi
-
-            echo "Tagging source image ${DOCKER_IMAGE_SOURCE_TAG} to destination registry ${DOCKER_IMAGE_DESTINATION_TAG}..."
-            docker tag "${DOCKER_IMAGE_SOURCE_TAG}" "${DOCKER_IMAGE_DESTINATION_TAG}"
 
             echo "Pushing docker image ${DOCKER_IMAGE_DESTINATION_TAG}..."
             docker push "${DOCKER_IMAGE_DESTINATION_TAG}"
@@ -581,7 +591,7 @@ workflows:
               docker-image-platform: [ "linux/amd64", "linux/arm64" ]
           docker-image-source-tag: orchestrate:${CIRCLE_SHA1:0:7}
           docker-image-source-registry: ${CLOUDSMITH_DEV_REPO}
-          docker-image-destination-registry: docker.io
+          docker-image-destination-registry: consensys
           docker-source-user: ${CLOUDSMITH_USER_RW}
           docker-source-password: ${CLOUDSMITH_PASS_RW}
           docker-destination-user: ${DOCKER_USER_RW}
