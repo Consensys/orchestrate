@@ -113,8 +113,7 @@ lint-tools: ## Install linting tools
 
 vegeta-tools:
 	@curl -sSfL $(VEGETA_BIN_URL) -o /tmp/vegeta.tar.gz
-	@tar -xvf /tmp/vegeta.tar.gz -C /usr/local/bin/
-	@chmod +x /usr/local/bin/vegeta
+	@sudo tar -xvf /tmp/vegeta.tar.gz -C /usr/local/bin/ vegeta
 
 tools: lint-tools vegeta-tools## Install test tools
 	go install github.com/golang/mock/mockgen@v1.4.3

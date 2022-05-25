@@ -29,7 +29,7 @@ commands:
             [[ "<< parameters.docker-image-registry >>" == "consensys" ]] \
             && echo << parameters.docker-password >> | docker login docker.io -u << parameters.docker-user >> --password-stdin \
             || echo << parameters.docker-password >> | docker login << parameters.docker-image-registry >> -u << parameters.docker-user >> --password-stdin
-            
+
 
   build_and_push:
     description: "Builds and push image"
@@ -421,7 +421,7 @@ jobs:
 
             echo "Tagging source image ${DOCKER_IMAGE_SOURCE_TAG} to destination registry ${DOCKER_IMAGE_DESTINATION_TAG}..."
             docker tag "${DOCKER_IMAGE_SOURCE_TAG}" "${DOCKER_IMAGE_DESTINATION_TAG}"
-            
+
             if [ $DOCKER_IMAGE_SIGN == "true" ]; then
                 mkdir -p $HOME/.docker/trust/private
                 echo $DCT_KEY | base64 --decode > $HOME/.docker/trust/private/$DCT_HASH.key
@@ -448,17 +448,22 @@ workflows:
               ignore:
                 - /^v.*/
       - gobuild:
-          requires:
-            - lint
+          filters:
+            tags:
+              ignore:
+                - /^v.*/
       - test:
           requires:
             - gobuild
+            - lint
       - race:
           requires:
             - gobuild
+            - lint
       - integration:
           requires:
             - gobuild
+            - lint
       - sonarscan:
           requires:
             - test
