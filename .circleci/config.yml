@@ -306,7 +306,13 @@ jobs:
             STRESS_ITERATIONS: <<parameters.stress_iteration>>
             STRESS_TIMEOUT: <<parameters.stress_timeout>>
             KAFKA_CONSUMER_GROUP_NAME: "stress"
-          command: make stress-ci
+          command: |
+            if [ -z ${KAFKA_SASL_USER} ]; then
+              # Hardcoded value of $ConnectionString for Azure EventHub SASL users
+              export KAFKA_SASL_USER="\$ConnectionString"
+            fi
+            make stress-ci
+            exit $(docker inspect orchestrate_stress_1 --format='{{.State.ExitCode}}')
 
   run-performance:
     docker:
@@ -609,3 +615,12 @@ workflows:
               only: /^v.*/
             branches:
               ignore: /.*/
+  nightly-performance:
+    when:
+      and:
+        - equal: [ scheduled_pipeline, << pipeline.trigger_source >> ]
+        - equal: [ "orchestrate_nightly_performance", << pipeline.schedule.name >> ]
+    jobs:
+      - run-performance:
+          context:
+            - tanuki-orchestrate-staging

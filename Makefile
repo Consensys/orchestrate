@@ -74,10 +74,6 @@ e2e: run-e2e
 run-stress: gobuild-stress
 	@docker-compose -f docker-compose.e2e.yml up -V stress
 
-e2e: run-e2e
-	@docker-compose -f docker-compose.e2e.yml up --build report
-	@$(OPEN) build/report/report.html 2>/dev/null
-
 e2e-ci: gobuild-e2e
 	@docker network create orchestrate
 	@docker-compose -f docker-compose.e2e.yml up -V e2e
@@ -86,11 +82,9 @@ e2e-ci: gobuild-e2e
 deploy-remote-env:
 	@bash ./scripts/deploy-remote-env.sh
 
-
 stress-ci: gobuild-stress
 	@docker network create orchestrate
 	@docker-compose -f docker-compose.e2e.yml up -V stress
-	@exit $(docker inspect orchestrate_stress_1 --format='{{.State.ExitCode}}')
 
 clean: protobuf gen-swagger gen-mocks mod-tidy lint coverage ## Run all clean-up tasks
 
