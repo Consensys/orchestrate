@@ -23,11 +23,11 @@ func NewXAPIKeyHeadersTransport(apiKey string) Middleware {
 }
 
 func (t *XAPIKeyHeadersTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	if authutils.GetAuthorizationHeader(req) == "" && t.apiKey != "" {
+		authutils.AddAPIKeyHeaderValue(req, t.apiKey)
+	}
 	userInfo := multitenancy.UserInfoValue(req.Context())
-	if userInfo == nil {
-		authutils.AddAPIKeyHeaderValue(req, t.apiKey)
-	} else if userInfo.AuthMode != multitenancy.AuthMethodJWT && t.apiKey != "" {
-		authutils.AddAPIKeyHeaderValue(req, t.apiKey)
+	if userInfo != nil {
 		if userInfo.TenantID != "" && userInfo.TenantID != multitenancy.WildcardTenant {
 			authutils.AddTenantIDHeaderValue(req, userInfo.TenantID)
 		}

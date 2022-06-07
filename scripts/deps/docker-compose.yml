@@ -7,6 +7,7 @@ x-container-common: &container-common
 
 x-qkm-common: &qkm-common
   DB_HOST: ${DB_HOST-postgres}
+  DB_PASSWORD: ${DB_HOST-postgres}
   DB_PORT: ${DB_PORT-}
   LOG_LEVEL: ${LOG_LEVEL-}
   LOG_FORMAT: ${LOG_FORMAT-}
@@ -156,7 +157,7 @@ services:
 
   quorum-key-manager-migration:
     <<: *container-common
-    image: consensys/quorum-key-manager:v21.12.0
+    image: consensys/quorum-key-manager:v21.12.4
     environment:
       <<: *qkm-common
     restart: "no"
@@ -164,7 +165,7 @@ services:
 
   quorum-key-manager:
     <<: *container-common
-    image: consensys/quorum-key-manager:v21.12.0
+    image: consensys/quorum-key-manager:v21.12.4
     depends_on:
       - vault
       - quorum-key-manager-migration
@@ -184,8 +185,8 @@ services:
       HTTPS_ENABLED: "true"
       HTTPS_SERVER_KEY: /certificates/https.key
       HTTPS_SERVER_CERT: /certificates/https.crt
-      AUTH_OIDC_CA_CERT: /certificates/client.crt
-#      AUTH_OIDC_ISSUER_URL:
+#      AUTH_OIDC_ISSUER_URL: https://consensys.eu.auth0.com/
+#      AUTH_OIDC_CUSTOM_CLAIMS: https://api.orchestrate.network
 #      AUTH_TLS_CA: /ca/ca.crt
       AUTH_API_KEY_FILE: /apikey/orchestrate_api_keys.csv
     command: run

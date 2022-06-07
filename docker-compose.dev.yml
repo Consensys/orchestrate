@@ -25,6 +25,7 @@ x-default-variables: &default-variables
   KAFKA_TLS_ENABLED: ${KAFKA_TLS_ENABLED-false}
   KAFKA_TLS_INSECURE_SKIP_VERIFY: ${KAFKA_TLS_INSECURE_SKIP_VERIFY-false}
   KAFKA_NUM_CONSUMERS: ${KAFKA_NUM_CONSUMERS-}
+  AUTH_API_KEY: ${AUTH_API_KEY-}
   METRICS_MODULES: ${METRICS_MODULES-}
   TOPIC_TX_SENDER: ${TOPIC_TX_SENDER-}
 
@@ -53,7 +54,6 @@ x-api-common: &api-common
   DB_DATABASE: ${DB_DATABASE-}
   DB_POOLSIZE: ${DB_POOLSIZE-}
   DB_POOL_TIMEOUT: ${DB_POOL_TIMEOUT-}
-  AUTH_API_KEY: ${AUTH_API_KEY-}
   AUTH_JWT_ISSUER_URL: ${AUTH_JWT_ISSUER_URL-}
   AUTH_JWT_AUDIENCE: ${AUTH_JWT_AUDIENCE-}
   AUTH_JWT_ORCHESTRATE_CLAIMS: ${AUTH_JWT_ORCHESTRATE_CLAIMS-}
@@ -106,7 +106,7 @@ services:
     volumes:
       - ./build/bin/orchestrate:/bin/main:ro
       - ./scripts/deps/certificates:/certificates
-    #      - /go/bin/dlv:/usr/local/bin/dlv
+    #      - /usr/local/bin/dlv:/usr/local/bin/dlv
     depends_on:
       - api-migration
     command: api run
@@ -122,15 +122,22 @@ services:
     <<: *container-common
     ports:
       - 8062:8082
+#      - 2345:2345
     environment:
       <<: *default-variables
       <<: *tx-sender-common
     volumes:
       - ./build/bin/orchestrate:/bin/main
       - ./scripts/deps/certificates:/certificates
+#      - /usr/local/bin/dlv:/usr/local/bin/dlv
     depends_on:
       - api
     command: tx-sender run
+#    entrypoint:
+#      - sh
+#      - -c
+#      - |
+#        dlv --listen=:2345 --headless=true --api-version=2 --accept-multiclient exec /bin/main tx-sender run
 
   tx-listener:
     <<: *container-common

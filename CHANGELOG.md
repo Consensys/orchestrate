@@ -3,6 +3,7 @@
 ## v21.12.7 (2022-05-24)
 ### 🛠 Bug fixes
 * Stop printing chain-proxy access logs errors when `ACCESSLOG_ENABLED=false`.  
+* Fixed issue in `tx-sender` forwarding jwt when `KEY_MANAGER_API_KEY` is set.
 
 ### 🛠 Enhancements
 * Reduced `tx-listener` services request to `orchestrate-api` can be reduced by usage of an 

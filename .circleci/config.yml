@@ -547,8 +547,8 @@ workflows:
           docker-source-password: ${CLOUDSMITH_PASS_RW}
           docker-destination-user: ${CLOUDSMITH_USER_RW}
           docker-destination-password: ${CLOUDSMITH_PASS_RW}
-          requires:
-            - run-qa-e2e
+#          requires:
+#            - run-qa-e2e
       - run-e2e:
           name: run-staging-e2e
           context:

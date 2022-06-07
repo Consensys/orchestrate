@@ -2,14 +2,12 @@ package service
 
 import (
 	"context"
-	"strings"
+	"encoding/json"
 	"time"
-
-	authutils "github.com/consensys/orchestrate/pkg/toolkit/app/auth/utils"
-	client2 "github.com/consensys/quorum-key-manager/pkg/client"
 
 	"github.com/cenkalti/backoff/v4"
 	"github.com/consensys/orchestrate/pkg/sdk/client"
+	authutils "github.com/consensys/orchestrate/pkg/toolkit/app/auth/utils"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/entities"
@@ -115,8 +113,10 @@ func (listener *MessageListener) consumeClaimLoop(ctx context.Context, session s
 			job := envelope.NewJobFromEnvelope(evlp)
 
 			newCtx := log.With(ctx, jlogger)
-			if evlp.Headers[authutils.AuthorizationHeader] != "" && strings.Contains(evlp.Headers[authutils.AuthorizationHeader], "Bearer") {
-				newCtx = appendAuthHeader(newCtx, evlp.Headers[authutils.AuthorizationHeader])
+			if evlp.Headers[authutils.UserInfoHeader] != "" {
+				userInfo := &multitenancy.UserInfo{}
+				_ = json.Unmarshal([]byte(evlp.Headers[authutils.UserInfoHeader]), &userInfo)
+				newCtx = multitenancy.WithUserInfo(newCtx, userInfo)
 			}
 
 			err = listener.processEnvelope(newCtx, evlp, job)
@@ -286,10 +286,4 @@ func resetEnvelopeTx(req *tx.Envelope) {
 	req.Nonce = nil
 	req.TxHash = nil
 	req.Raw = nil
-}
-
-func appendAuthHeader(ctx context.Context, authHeader string) context.Context {
-	return context.WithValue(ctx, client2.RequestHeaderKey, map[string]string{
-		authutils.AuthorizationHeader: authHeader,
-	})
 }

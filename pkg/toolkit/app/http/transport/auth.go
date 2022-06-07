@@ -11,11 +11,11 @@ type AuthHeadersTransport struct {
 	T    http.RoundTripper
 }
 
-func NewAuthHeadersTransport(jwt string) Middleware {
+func NewAuthHeadersTransport(authValue string) Middleware {
 	return func(nxt http.RoundTripper) http.RoundTripper {
 		return &AuthHeadersTransport{
 			T:    nxt,
-			auth: jwt,
+			auth: authValue,
 		}
 	}
 }

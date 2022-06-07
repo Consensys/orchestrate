@@ -1,6 +1,8 @@
 package envelope
 
 import (
+	"encoding/json"
+
 	"github.com/Shopify/sarama"
 	encoding "github.com/consensys/orchestrate/pkg/encoding/sarama"
 	"github.com/consensys/orchestrate/pkg/errors"
@@ -10,10 +12,9 @@ import (
 )
 
 func SendJobMessage(job *entities.Job, kafkaProducer sarama.SyncProducer, topic string, userInfo *multitenancy.UserInfo) (partition int32, offset int64, err error) {
+	bUserInfo, _ := json.Marshal(userInfo)
 	txEnvelope := NewEnvelopeFromJob(job, map[string]string{
-		authutils.TenantIDHeader:      userInfo.TenantID,
-		authutils.UsernameHeader:      userInfo.Username,
-		authutils.AuthorizationHeader: userInfo.AuthValue,
+		authutils.UserInfoHeader: string(bUserInfo),
 	})
 
 	evlp, err := txEnvelope.Envelope()

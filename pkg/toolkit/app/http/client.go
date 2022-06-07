@@ -18,18 +18,16 @@ func NewClient(cfg *Config) *http.Client {
 	/** Execution flow
 	1. Attach Authentication Headers, if they are part of context
 	2. Attach X-API-KEY header, only if Authentication was not set before
-	2. Attach Authorization header, only if Authentication was not set before
-	3. Retry on 429 responses
+	3. Attach Authorization header, only if Authentication was not set before
+	4. Retry on 429 responses
 	*/
 	middlewares := []transport.Middleware{}
 	if cfg.Authorization != "" {
 		middlewares = append(middlewares, transport.NewAuthHeadersTransport(cfg.Authorization))
 	}
-
 	if cfg.AuthHeaderForward {
 		middlewares = append(middlewares, transport.NewContextAuthHeadersTransport())
 	}
-
 	if cfg.XAPIKey != "" {
 		middlewares = append(middlewares, transport.NewXAPIKeyHeadersTransport(cfg.XAPIKey))
 	}
