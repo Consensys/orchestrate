@@ -1,5 +1,19 @@
 version: 2.1
 
+parameters:
+  GHA_Event:
+    type: string
+    default: ""
+  GHA_Actor:
+    type: string
+    default: ""
+  GHA_Action:
+    type: string
+    default: ""
+  GHA_Meta:
+    type: string
+    default: ""
+
 orbs:
   go: circleci/go@1.5.0
   sonarcloud: sonarsource/sonarcloud@1.0.1
@@ -622,6 +636,14 @@ workflows:
       and:
         - equal: [ scheduled_pipeline, << pipeline.trigger_source >> ]
         - equal: [ "orchestrate_nightly_performance", << pipeline.schedule.name >> ]
+    jobs:
+      - run-performance:
+          context:
+            - tanuki-orchestrate-staging
+
+  manual-performance:
+    when:
+      equal: [ "workflow_dispatch", << pipeline.parameters.GHA_Event >> ]
     jobs:
       - run-performance:
           context:
