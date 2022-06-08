@@ -1,0 +1,15 @@
+name: Trigger performance tests
+
+on:
+  workflow_dispatch:
+    branches: [ maintenance/* ]
+
+jobs:
+  trigger-circleci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run performance tests from GHA
+        id: GHA-1
+        uses: CircleCI-Public/trigger-circleci-pipeline-action@v1.0.4
+        env:
+          CCI_TOKEN: ${{ secrets.CCI_TOKEN }}
