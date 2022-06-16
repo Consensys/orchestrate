@@ -6,6 +6,7 @@ import (
 	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/services/api/store"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
 //go:generate mockgen -source=jobs.go -destination=mocks/jobs.go -package=mocks
@@ -19,6 +20,7 @@ type JobUseCases interface {
 	StartJob() StartJobUseCase
 	ResendJobTx() ResendJobTxUseCase
 	UpdateJob() UpdateJobUseCase
+	RetryTx() RetryJobTxUseCase
 	SearchJobs() SearchJobsUseCase
 }
 
@@ -54,4 +56,8 @@ type UpdateChildrenUseCase interface {
 
 type ResendJobTxUseCase interface {
 	Execute(ctx context.Context, jobUUID string, userInfo *multitenancy.UserInfo) error
+}
+
+type RetryJobTxUseCase interface {
+	Execute(ctx context.Context, jobUUID string, gasIncrement float64, data hexutil.Bytes, userInfo *multitenancy.UserInfo) error
 }
