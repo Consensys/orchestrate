@@ -14,6 +14,7 @@ type jobUseCases struct {
 	getJob      usecases.GetJobUseCase
 	startJob    usecases.StartJobUseCase
 	resendJobTx usecases.ResendJobTxUseCase
+	retryTx     usecases.RetryJobTxUseCase
 	updateJob   usecases.UpdateJobUseCase
 	searchJobs  usecases.SearchJobsUseCase
 }
@@ -29,14 +30,16 @@ func newJobUseCases(
 	startJobUC := jobs.NewStartJobUseCase(db, producer, topicsCfg, appMetrics)
 	updateChildrenUC := jobs.NewUpdateChildrenUseCase(db)
 	startNextJobUC := jobs.NewStartNextJobUseCase(db, startJobUC)
+	createJobUC := jobs.NewCreateJobUseCase(db, getChainUC, qkmStoreID)
 
 	return &jobUseCases{
-		createJob:   jobs.NewCreateJobUseCase(db, getChainUC, qkmStoreID),
+		createJob:   createJobUC,
 		getJob:      jobs.NewGetJobUseCase(db),
 		searchJobs:  jobs.NewSearchJobsUseCase(db),
 		updateJob:   jobs.NewUpdateJobUseCase(db, updateChildrenUC, startNextJobUC, appMetrics),
 		startJob:    startJobUC,
 		resendJobTx: jobs.NewResendJobTxUseCase(db, producer, topicsCfg),
+		retryTx:     jobs.NewRetryJobTxUseCase(db, createJobUC, startJobUC),
 	}
 }
 
@@ -62,4 +65,8 @@ func (u *jobUseCases) ResendJobTx() usecases.ResendJobTxUseCase {
 
 func (u *jobUseCases) UpdateJob() usecases.UpdateJobUseCase {
 	return u.updateJob
+}
+
+func (u *jobUseCases) RetryTx() usecases.RetryJobTxUseCase {
+	return u.retryTx
 }

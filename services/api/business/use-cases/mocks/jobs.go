@@ -10,6 +10,7 @@ import (
 	entities "github.com/consensys/orchestrate/pkg/types/entities"
 	usecases "github.com/consensys/orchestrate/services/api/business/use-cases"
 	store "github.com/consensys/orchestrate/services/api/store"
+	hexutil "github.com/ethereum/go-ethereum/common/hexutil"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )
@@ -105,6 +106,20 @@ func (m *MockJobUseCases) UpdateJob() usecases.UpdateJobUseCase {
 func (mr *MockJobUseCasesMockRecorder) UpdateJob() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateJob", reflect.TypeOf((*MockJobUseCases)(nil).UpdateJob))
+}
+
+// RetryTx mocks base method
+func (m *MockJobUseCases) RetryTx() usecases.RetryJobTxUseCase {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RetryTx")
+	ret0, _ := ret[0].(usecases.RetryJobTxUseCase)
+	return ret0
+}
+
+// RetryTx indicates an expected call of RetryTx
+func (mr *MockJobUseCasesMockRecorder) RetryTx() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RetryTx", reflect.TypeOf((*MockJobUseCases)(nil).RetryTx))
 }
 
 // SearchJobs mocks base method
@@ -447,4 +462,41 @@ func (m *MockResendJobTxUseCase) Execute(ctx context.Context, jobUUID string, us
 func (mr *MockResendJobTxUseCaseMockRecorder) Execute(ctx, jobUUID, userInfo interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockResendJobTxUseCase)(nil).Execute), ctx, jobUUID, userInfo)
+}
+
+// MockRetryJobTxUseCase is a mock of RetryJobTxUseCase interface
+type MockRetryJobTxUseCase struct {
+	ctrl     *gomock.Controller
+	recorder *MockRetryJobTxUseCaseMockRecorder
+}
+
+// MockRetryJobTxUseCaseMockRecorder is the mock recorder for MockRetryJobTxUseCase
+type MockRetryJobTxUseCaseMockRecorder struct {
+	mock *MockRetryJobTxUseCase
+}
+
+// NewMockRetryJobTxUseCase creates a new mock instance
+func NewMockRetryJobTxUseCase(ctrl *gomock.Controller) *MockRetryJobTxUseCase {
+	mock := &MockRetryJobTxUseCase{ctrl: ctrl}
+	mock.recorder = &MockRetryJobTxUseCaseMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockRetryJobTxUseCase) EXPECT() *MockRetryJobTxUseCaseMockRecorder {
+	return m.recorder
+}
+
+// Execute mocks base method
+func (m *MockRetryJobTxUseCase) Execute(ctx context.Context, jobUUID string, gasIncrement float64, data hexutil.Bytes, userInfo *multitenancy.UserInfo) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Execute", ctx, jobUUID, gasIncrement, data, userInfo)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Execute indicates an expected call of Execute
+func (mr *MockRetryJobTxUseCaseMockRecorder) Execute(ctx, jobUUID, gasIncrement, data, userInfo interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockRetryJobTxUseCase)(nil).Execute), ctx, jobUUID, gasIncrement, data, userInfo)
 }

@@ -5,6 +5,7 @@ package controllers
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -17,7 +18,6 @@ import (
 	"github.com/consensys/orchestrate/services/api/business/use-cases"
 	"github.com/consensys/orchestrate/services/api/business/use-cases/mocks"
 
-	"encoding/json"
 	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/types/formatters"
@@ -37,6 +37,7 @@ type jobsCtrlTestSuite struct {
 	startNextJobUC *mocks.MockStartNextJobUseCase
 	updateJobUC    *mocks.MockUpdateJobUseCase
 	searchJobUC    *mocks.MockSearchJobsUseCase
+	RetryTxUC      *mocks.MockRetryJobTxUseCase
 	ctx            context.Context
 	userInfo       *multitenancy.UserInfo
 	router         *mux.Router
@@ -70,6 +71,10 @@ func (s jobsCtrlTestSuite) UpdateJob() usecases.UpdateJobUseCase {
 
 func (s jobsCtrlTestSuite) SearchJobs() usecases.SearchJobsUseCase {
 	return s.searchJobUC
+}
+
+func (s jobsCtrlTestSuite) RetryTx() usecases.RetryJobTxUseCase {
+	return s.RetryTxUC
 }
 
 func TestJobsController(t *testing.T) {

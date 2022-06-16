@@ -94,3 +94,41 @@ func (c *HTTPClient) GetTxRequest(ctx context.Context, txRequestUUID string) (*t
 
 	return resp, err
 }
+
+func (c *HTTPClient) CallOffTransaction(ctx context.Context, txRequestUUID string) (*types.TransactionResponse, error) {
+	reqURL := fmt.Sprintf("%v/transactions/%v/call-off", c.config.URL, txRequestUUID)
+	resp := &types.TransactionResponse{}
+
+	err := callWithBackOff(ctx, c.config.backOff, func() error {
+		response, err := clientutils.PutRequest(ctx, c.client, reqURL, nil)
+		if err != nil {
+			return err
+		}
+
+		defer clientutils.CloseResponse(response)
+		return httputil.ParseResponse(ctx, response, resp)
+	})
+
+	return resp, err
+}
+
+func (c *HTTPClient) SpeedUpTransaction(ctx context.Context, txRequestUUID string, boost *float64) (*types.TransactionResponse, error) {
+	reqURL := fmt.Sprintf("%v/transactions/%v/speed-up", c.config.URL, txRequestUUID)
+	if boost != nil {
+		reqURL += fmt.Sprintf("?boost=%f", *boost)
+	}
+
+	resp := &types.TransactionResponse{}
+
+	err := callWithBackOff(ctx, c.config.backOff, func() error {
+		response, err := clientutils.PutRequest(ctx, c.client, reqURL, nil)
+		if err != nil {
+			return err
+		}
+
+		defer clientutils.CloseResponse(response)
+		return httputil.ParseResponse(ctx, response, resp)
+	})
+
+	return resp, err
+}

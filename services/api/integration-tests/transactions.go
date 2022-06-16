@@ -4,13 +4,13 @@ package integrationtests
 
 import (
 	"context"
-	"github.com/consensys/orchestrate/pkg/types/api"
 	"testing"
 	"time"
 
 	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/pkg/sdk/client"
 	clientutils "github.com/consensys/orchestrate/pkg/toolkit/app/http/client-utils"
+	"github.com/consensys/orchestrate/pkg/types/api"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/pkg/types/testutils"
 	"github.com/consensys/orchestrate/pkg/types/tx"
@@ -390,5 +390,101 @@ func (s *transactionsTestSuite) TestSuccess() {
 		job := txResponse.Jobs[0]
 		assert.Equal(t, idempotencyKey, txResponse.IdempotencyKey)
 		assert.Equal(t, entities.StatusFailed, job.Status)
+	})
+}
+
+func (s *transactionsTestSuite) TestSendCallOffTransaction() {
+	ctx := s.env.ctx
+	contractReq := testutils.FakeRegisterContractRequest()
+	_, err := s.client.RegisterContract(ctx, contractReq)
+	require.NoError(s.T(), err)
+
+	txAccRequest := testutils.FakeCreateAccountRequest()
+	ethAccRes, err := s.client.CreateAccount(ctx, txAccRequest)
+	require.NoError(s.T(), err)
+
+	txDeployRequest := testutils.FakeDeployContractRequest()
+	txDeployRequest.Params.From = &ethAccRes.Address
+	txDeployRequest.Params.ContractName = contractReq.Name
+	txResponse, err := s.client.SendDeployTransaction(ctx, txDeployRequest)
+	require.NoError(s.T(), err)
+
+	_, err = s.env.consumer.WaitForEnvelope(txResponse.UUID, s.env.kafkaTopicConfig.Sender, waitForEnvelopeTimeOut)
+	if err != nil {
+		assert.Fail(s.T(), err.Error())
+		return
+	}
+	// Emulate an update done by tx-sender after sending tx to blockchain
+	fakeTx := testutils.FakeETHTransaction()
+	fakeTx.GasFeeCap = utils.BigIntStringToHex("10000")
+	fakeTx.From = nil
+	_, err = s.client.UpdateJob(ctx, txResponse.Jobs[0].UUID, &api.UpdateJobRequest{
+		Transaction: fakeTx,
+		Status:      entities.StatusPending,
+	})
+	require.NoError(s.T(), err)
+
+	s.T().Run("should send a call off transaction successfully", func(t *testing.T) {
+		txResponse, err = s.client.CallOffTransaction(ctx, txResponse.UUID)
+		require.NoError(t, err)
+
+		require.True(t, len(txResponse.Jobs) > 1)
+		parentJob := txResponse.Jobs[len(txResponse.Jobs)-2]
+		callOffJob := txResponse.Jobs[len(txResponse.Jobs)-1]
+
+		evlp, err := s.env.consumer.WaitForEnvelope(callOffJob.ScheduleUUID, s.env.kafkaTopicConfig.Sender, waitForEnvelopeTimeOut)
+		require.NoError(s.T(), err)
+
+		assert.Equal(t, callOffJob.ParentJobUUID, parentJob.UUID)
+		assert.Empty(t, callOffJob.Transaction.Data)
+		assert.Equal(t, "0x2af8", callOffJob.Transaction.GasFeeCap.String())
+		assert.Equal(t, callOffJob.UUID, evlp.GetJobUUID())
+	})
+}
+
+func (s *transactionsTestSuite) TestSendSpeedUpTransaction() {
+	ctx := s.env.ctx
+	contractReq := testutils.FakeRegisterContractRequest()
+	_, err := s.client.RegisterContract(ctx, contractReq)
+	require.NoError(s.T(), err)
+
+	txAccRequest := testutils.FakeCreateAccountRequest()
+	ethAccRes, err := s.client.CreateAccount(ctx, txAccRequest)
+	require.NoError(s.T(), err)
+
+	txDeployRequest := testutils.FakeDeployContractRequest()
+	txDeployRequest.Params.From = &ethAccRes.Address
+	txDeployRequest.Params.ContractName = contractReq.Name
+	txResponse, err := s.client.SendDeployTransaction(ctx, txDeployRequest)
+	require.NoError(s.T(), err)
+
+	_, err = s.env.consumer.WaitForEnvelope(txResponse.UUID, s.env.kafkaTopicConfig.Sender, waitForEnvelopeTimeOut)
+	require.NoError(s.T(), err)
+
+	// Emulate an update done by tx-sender after sending tx to blockchain
+	fakeTx := testutils.FakeETHTransaction()
+	fakeTx.GasFeeCap = utils.BigIntStringToHex("10000")
+	fakeTx.From = nil
+	_, err = s.client.UpdateJob(ctx, txResponse.Jobs[0].UUID, &api.UpdateJobRequest{
+		Transaction: fakeTx,
+		Status:      entities.StatusPending,
+	})
+	require.NoError(s.T(), err)
+
+	s.T().Run("should send a speed up transaction successfully", func(t *testing.T) {
+		txResponse, err = s.client.SpeedUpTransaction(ctx, txResponse.UUID, utils.ToPtr(0.1).(*float64))
+		require.NoError(t, err)
+
+		require.True(t, len(txResponse.Jobs) > 1)
+		parentJob := txResponse.Jobs[len(txResponse.Jobs)-2]
+		speedUpJob := txResponse.Jobs[len(txResponse.Jobs)-1]
+
+		evlp, err := s.env.consumer.WaitForEnvelope(speedUpJob.ScheduleUUID, s.env.kafkaTopicConfig.Sender, waitForEnvelopeTimeOut)
+		require.NoError(s.T(), err)
+
+		assert.Equal(t, speedUpJob.ParentJobUUID, parentJob.UUID)
+		assert.Equal(t, speedUpJob.Transaction.Data, parentJob.Transaction.Data)
+		assert.Equal(t, "0x2af8", speedUpJob.Transaction.GasFeeCap.String())
+		assert.Equal(t, speedUpJob.UUID, evlp.GetJobUUID())
 	})
 }

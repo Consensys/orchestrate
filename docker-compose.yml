@@ -181,7 +181,7 @@ services:
         EOF
 
   key-manager-migration:
-    image: consensys/quorum-key-manager:v21.12.0
+    image: consensys/quorum-key-manager:v21.12.5
     environment:
       <<: *default-variables
       <<: *db-common
@@ -193,7 +193,7 @@ services:
       - postgres
 
   key-manager:
-    image: consensys/quorum-key-manager:v21.12.0
+    image: consensys/quorum-key-manager:v21.12.5
     environment:
       <<: *default-variables
       <<: *db-common

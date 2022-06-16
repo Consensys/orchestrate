@@ -19,6 +19,8 @@ type TransactionUseCases interface {
 	SendTransaction() SendTxUseCase
 	GetTransaction() GetTxUseCase
 	SearchTransactions() SearchTransactionsUseCase
+	SpeedUp() SpeedUpTxUseCase
+	CallOff() CallOffTxUseCase
 }
 
 type GetTxUseCase interface {
@@ -38,4 +40,12 @@ type SendContractTxUseCase interface {
 
 type SendTxUseCase interface {
 	Execute(ctx context.Context, txRequest *entities.TxRequest, txData hexutil.Bytes, userInfo *multitenancy.UserInfo) (*entities.TxRequest, error)
+}
+
+type SpeedUpTxUseCase interface {
+	Execute(ctx context.Context, scheduleUUID string, gasIncrement float64, userInfo *multitenancy.UserInfo) (*entities.TxRequest, error)
+}
+
+type CallOffTxUseCase interface {
+	Execute(ctx context.Context, scheduleUUID string, userInfo *multitenancy.UserInfo) (*entities.TxRequest, error)
 }

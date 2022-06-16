@@ -5,6 +5,7 @@ package controllers
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -14,7 +15,6 @@ import (
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/services/api/business/use-cases"
 
-	"encoding/json"
 	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	txschedulertypes "github.com/consensys/orchestrate/pkg/types/api"
@@ -35,7 +35,9 @@ type transactionsControllerTestSuite struct {
 	sendDeployTxUseCase   *mocks.MockSendDeployTxUseCase
 	sendTxUseCase         *mocks.MockSendTxUseCase
 	getTxUseCase          *mocks.MockGetTxUseCase
-	searchTxsUsecase      *mocks.MockSearchTransactionsUseCase
+	speedUpTxUseCase      *mocks.MockSpeedUpTxUseCase
+	callOffTxUseCase      *mocks.MockCallOffTxUseCase
+	searchTxsUseCase      *mocks.MockSearchTransactionsUseCase
 	ctx                   context.Context
 	userInfo              *multitenancy.UserInfo
 	defaultRetryInterval  time.Duration
@@ -58,7 +60,15 @@ func (s *transactionsControllerTestSuite) GetTransaction() usecases.GetTxUseCase
 }
 
 func (s *transactionsControllerTestSuite) SearchTransactions() usecases.SearchTransactionsUseCase {
-	return s.searchTxsUsecase
+	return s.searchTxsUseCase
+}
+
+func (s *transactionsControllerTestSuite) SpeedUp() usecases.SpeedUpTxUseCase {
+	return s.speedUpTxUseCase
+}
+
+func (s *transactionsControllerTestSuite) CallOff() usecases.CallOffTxUseCase {
+	return s.callOffTxUseCase
 }
 
 var _ usecases.TransactionUseCases = &transactionsControllerTestSuite{}
@@ -76,7 +86,7 @@ func (s *transactionsControllerTestSuite) SetupTest() {
 	s.sendDeployTxUseCase = mocks.NewMockSendDeployTxUseCase(ctrl)
 	s.sendTxUseCase = mocks.NewMockSendTxUseCase(ctrl)
 	s.getTxUseCase = mocks.NewMockGetTxUseCase(ctrl)
-	s.searchTxsUsecase = mocks.NewMockSearchTransactionsUseCase(ctrl)
+	s.searchTxsUseCase = mocks.NewMockSearchTransactionsUseCase(ctrl)
 	s.defaultRetryInterval = time.Second * 2
 	s.userInfo = multitenancy.NewUserInfo("tenantOne", "username")
 	s.ctx = multitenancy.WithUserInfo(context.Background(), s.userInfo)
@@ -394,7 +404,7 @@ func (s *transactionsControllerTestSuite) TestSearch() {
 			IdempotencyKeys: []string{"mykey", "mykey1"},
 		}
 
-		s.searchTxsUsecase.EXPECT().Execute(gomock.Any(), expectedFilers, s.userInfo).
+		s.searchTxsUseCase.EXPECT().Execute(gomock.Any(), expectedFilers, s.userInfo).
 			Return([]*entities.TxRequest{txRequest}, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
@@ -420,7 +430,7 @@ func (s *transactionsControllerTestSuite) TestSearch() {
 			IdempotencyKeys: []string{"mykey", "mykey1"},
 		}
 
-		s.searchTxsUsecase.EXPECT().Execute(gomock.Any(), expectedFilers, s.userInfo).
+		s.searchTxsUseCase.EXPECT().Execute(gomock.Any(), expectedFilers, s.userInfo).
 			Return(nil, fmt.Errorf(""))
 
 		s.router.ServeHTTP(rw, httpRequest)
