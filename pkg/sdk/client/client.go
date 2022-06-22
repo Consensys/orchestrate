@@ -35,6 +35,7 @@ type TransactionClient interface {
 	GetTxRequest(ctx context.Context, txRequestUUID string) (*types.TransactionResponse, error)
 	CallOffTransaction(ctx context.Context, txRequestUUID string) (*types.TransactionResponse, error)
 	SpeedUpTransaction(ctx context.Context, txRequestUUID string, increment *float64) (*types.TransactionResponse, error)
+	SearchTransaction(ctx context.Context, filters *entities.TransactionRequestFilters) (*types.TransactionSearchResponse, error)
 }
 
 type ScheduleClient interface {
@@ -60,7 +61,7 @@ type MetricClient interface {
 
 type AccountClient interface {
 	CreateAccount(ctx context.Context, request *types.CreateAccountRequest) (*types.AccountResponse, error)
-	SearchAccounts(ctx context.Context, filters *entities.AccountFilters) ([]*types.AccountResponse, error)
+	SearchAccounts(ctx context.Context, filters *entities.AccountFilters) (*types.AccountSearchResponse, error)
 	GetAccount(ctx context.Context, address ethcommon.Address) (*types.AccountResponse, error)
 	ImportAccount(ctx context.Context, request *types.ImportAccountRequest) (*types.AccountResponse, error)
 	UpdateAccount(ctx context.Context, address ethcommon.Address, request *types.UpdateAccountRequest) (*types.AccountResponse, error)

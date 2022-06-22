@@ -145,6 +145,21 @@ func (mr *MockOrchestrateClientMockRecorder) SpeedUpTransaction(ctx, txRequestUU
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SpeedUpTransaction", reflect.TypeOf((*MockOrchestrateClient)(nil).SpeedUpTransaction), ctx, txRequestUUID, increment)
 }
 
+// SearchTransaction mocks base method
+func (m *MockOrchestrateClient) SearchTransaction(ctx context.Context, filters *entities.TransactionRequestFilters) (*api.TransactionSearchResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SearchTransaction", ctx, filters)
+	ret0, _ := ret[0].(*api.TransactionSearchResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SearchTransaction indicates an expected call of SearchTransaction
+func (mr *MockOrchestrateClientMockRecorder) SearchTransaction(ctx, filters interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchTransaction", reflect.TypeOf((*MockOrchestrateClient)(nil).SearchTransaction), ctx, filters)
+}
+
 // GetSchedule mocks base method
 func (m *MockOrchestrateClient) GetSchedule(ctx context.Context, scheduleUUID string) (*api.ScheduleResponse, error) {
 	m.ctrl.T.Helper()
@@ -338,10 +353,10 @@ func (mr *MockOrchestrateClientMockRecorder) CreateAccount(ctx, request interfac
 }
 
 // SearchAccounts mocks base method
-func (m *MockOrchestrateClient) SearchAccounts(ctx context.Context, filters *entities.AccountFilters) ([]*api.AccountResponse, error) {
+func (m *MockOrchestrateClient) SearchAccounts(ctx context.Context, filters *entities.AccountFilters) (*api.AccountSearchResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SearchAccounts", ctx, filters)
-	ret0, _ := ret[0].([]*api.AccountResponse)
+	ret0, _ := ret[0].(*api.AccountSearchResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -849,6 +864,21 @@ func (mr *MockTransactionClientMockRecorder) SpeedUpTransaction(ctx, txRequestUU
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SpeedUpTransaction", reflect.TypeOf((*MockTransactionClient)(nil).SpeedUpTransaction), ctx, txRequestUUID, increment)
 }
 
+// SearchTransaction mocks base method
+func (m *MockTransactionClient) SearchTransaction(ctx context.Context, filters *entities.TransactionRequestFilters) (*api.TransactionSearchResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SearchTransaction", ctx, filters)
+	ret0, _ := ret[0].(*api.TransactionSearchResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SearchTransaction indicates an expected call of SearchTransaction
+func (mr *MockTransactionClientMockRecorder) SearchTransaction(ctx, filters interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchTransaction", reflect.TypeOf((*MockTransactionClient)(nil).SearchTransaction), ctx, filters)
+}
+
 // MockScheduleClient is a mock of ScheduleClient interface
 type MockScheduleClient struct {
 	ctrl     *gomock.Controller
@@ -1134,10 +1164,10 @@ func (mr *MockAccountClientMockRecorder) CreateAccount(ctx, request interface{})
 }
 
 // SearchAccounts mocks base method
-func (m *MockAccountClient) SearchAccounts(ctx context.Context, filters *entities.AccountFilters) ([]*api.AccountResponse, error) {
+func (m *MockAccountClient) SearchAccounts(ctx context.Context, filters *entities.AccountFilters) (*api.AccountSearchResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SearchAccounts", ctx, filters)
-	ret0, _ := ret[0].([]*api.AccountResponse)
+	ret0, _ := ret[0].(*api.AccountSearchResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

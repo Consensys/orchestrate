@@ -488,3 +488,86 @@ func (s *transactionsTestSuite) TestSendSpeedUpTransaction() {
 		assert.Equal(t, speedUpJob.UUID, evlp.GetJobUUID())
 	})
 }
+
+func (s *transactionsTestSuite) TestSearch() {
+	ctx := s.env.ctx
+
+	s.T().Run("should create transaction and search for it by idempotency_key successfully", func(t *testing.T) {
+		txRequest := testutils.FakeSendTransactionRequest()
+
+		txRequest.Params.From = nil
+		txRequest.Params.OneTimeKey = true
+		txRequest.Params.ContractTag = s.contract.Tag
+		txRequest.Params.ContractName = s.contract.Name
+
+		IdempotencyKey := utils.RandString(16)
+		rctx := context.WithValue(ctx, clientutils.RequestHeaderKey, map[string]string{
+			controllers.IdempotencyKeyHeader: IdempotencyKey,
+		})
+		txResponse, err := s.client.SendContractTransaction(rctx, txRequest)
+		require.NoError(s.T(), err)
+
+		searchResponse, err := s.client.SearchTransaction(ctx, &entities.TransactionRequestFilters{
+			IdempotencyKeys: []string{txResponse.IdempotencyKey},
+		})
+		require.NoError(s.T(), err)
+		assert.Len(s.T(), searchResponse.Transactions, 1 )
+		assert.Equal(s.T(), searchResponse.Transactions[0].IdempotencyKey, txResponse.IdempotencyKey)
+	})
+
+	s.T().Run("should create transactions and search with limit and page successfully", func(t *testing.T) {
+
+		txRequests := [25]*api.SendTransactionRequest{}
+		transactions := [25]*api.TransactionResponse{}
+		idempotencyKeys :=[]string{}
+		var err error
+
+		for i,_ := range txRequests{
+			txRequests[i]  = testutils.FakeSendTransactionRequest()
+			txRequests[i].Params.From = nil
+			txRequests[i].Params.OneTimeKey = true
+			txRequests[i].Params.ContractTag = s.contract.Tag
+			txRequests[i].Params.ContractName = s.contract.Name
+
+			IdempotencyKey := utils.RandString(16)
+			rctx := context.WithValue(ctx, clientutils.RequestHeaderKey, map[string]string{
+				controllers.IdempotencyKeyHeader: IdempotencyKey,
+			})
+			idempotencyKeys = append(idempotencyKeys, IdempotencyKey)
+			transactions[i], err = s.client.SendContractTransaction(rctx, txRequests[i])
+			require.NoError(s.T(), err)
+		}
+
+		resp, err := s.client.SearchTransaction(ctx, &entities.TransactionRequestFilters{
+			IdempotencyKeys: idempotencyKeys,
+			Pagination: entities.PaginationFilters{Limit: 25},
+		})
+		require.NoError(s.T(), err)
+
+		assert.Len(s.T(), resp.Transactions, 25)
+		assert.Equal(s.T(), resp.Transactions[0].ChainName, transactions[0].ChainName)
+
+
+		resp, err = s.client.SearchTransaction(ctx, &entities.TransactionRequestFilters{
+			IdempotencyKeys: idempotencyKeys,
+			Pagination: entities.PaginationFilters{Limit: 5, Page: 1},
+		})
+
+		assert.Len(s.T(), resp.Transactions, 5)
+		assert.Equal(s.T(), resp.HasMore, true)
+
+		resp, err = s.client.SearchTransaction(ctx, &entities.TransactionRequestFilters{
+			IdempotencyKeys: idempotencyKeys,
+			Pagination: entities.PaginationFilters{Limit: 5, Page: 2},
+		})
+
+		assert.Len(s.T(), resp.Transactions, 5)
+		assert.Equal(s.T(), resp.HasMore, true)
+
+		resp, err = s.client.SearchTransaction(ctx, &entities.TransactionRequestFilters{
+			IdempotencyKeys: idempotencyKeys,
+			Pagination: entities.PaginationFilters{Limit: 5, Page: 4},
+		})
+		assert.Equal(s.T(), resp.HasMore, false)
+	})
+}

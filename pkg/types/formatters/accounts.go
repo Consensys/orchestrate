@@ -69,6 +69,13 @@ func FormatAccountFilterRequest(req *http.Request) (*entities.AccountFilters, er
 		filters.Aliases = strings.Split(qAliases, ",")
 	}
 
+	pagination, err := utils.FilterIntegerValueWithKey(req)
+	if err != nil {
+		return filters, err
+	}
+
+	filters.Pagination = *pagination
+
 	if err := utils.GetValidator().Struct(filters); err != nil {
 		return nil, err
 	}

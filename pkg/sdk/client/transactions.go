@@ -3,6 +3,10 @@ package client
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"strings"
+
+	"github.com/consensys/orchestrate/pkg/types/entities"
 
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/httputil"
 	types "github.com/consensys/orchestrate/pkg/types/api"
@@ -118,6 +122,57 @@ func (c *HTTPClient) SpeedUpTransaction(ctx context.Context, txRequestUUID strin
 		reqURL += fmt.Sprintf("?boost=%f", *boost)
 	}
 
+	resp := &types.TransactionResponse{}
+
+	err := callWithBackOff(ctx, c.config.backOff, func() error {
+		response, err := clientutils.PutRequest(ctx, c.client, reqURL, nil)
+		if err != nil {
+			return err
+		}
+
+		defer clientutils.CloseResponse(response)
+		return httputil.ParseResponse(ctx, response, resp)
+	})
+
+	return resp, err
+}
+
+func (c *HTTPClient) SearchTransaction(ctx context.Context, filters *entities.TransactionRequestFilters) (*types.TransactionSearchResponse, error) {
+	reqURL := fmt.Sprintf("%v/transactions", c.config.URL)
+	var resp *types.TransactionSearchResponse
+
+	var qParams []string
+	if len(filters.IdempotencyKeys) > 0 {
+		qParams = append(qParams, "idempotency_keys="+strings.Join(filters.IdempotencyKeys, ","))
+	}
+
+	if filters.Pagination.Limit > 0 {
+		qParams = append(qParams, "limit="+strconv.Itoa(filters.Pagination.Limit))
+	}
+
+	if filters.Pagination.Page > 0 {
+		qParams = append(qParams, "page="+strconv.Itoa(filters.Pagination.Page))
+	}
+
+	if len(qParams) > 0 {
+		reqURL = reqURL + "?" + strings.Join(qParams, "&")
+	}
+
+	response, err := clientutils.GetRequest(ctx, c.client, reqURL)
+	if err != nil {
+		return nil, err
+	}
+
+	defer clientutils.CloseResponse(response)
+	if err := httputil.ParseResponse(ctx, response, &resp); err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+func (c *HTTPClient) ResumeTransaction(ctx context.Context, txRequestUUID string) (*types.TransactionResponse, error) {
+	reqURL := fmt.Sprintf("%v/transactions/%v/resume", c.config.URL, txRequestUUID)
 	resp := &types.TransactionResponse{}
 
 	err := callWithBackOff(ctx, c.config.backOff, func() error {

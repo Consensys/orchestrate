@@ -12,8 +12,14 @@ type JobFilters struct {
 	WithLogs      bool      `validate:"omitempty"`
 }
 
+type PaginationFilters struct {
+	Limit int `validate:"omitempty"`
+	Page  int `validate:"omitempty"`
+}
+
 type TransactionRequestFilters struct {
-	IdempotencyKeys []string `validate:"omitempty,unique"`
+	IdempotencyKeys []string          `validate:"omitempty,unique"`
+	Pagination      PaginationFilters `validate:"omitempty"`
 }
 
 type FaucetFilters struct {
@@ -23,8 +29,9 @@ type FaucetFilters struct {
 }
 
 type AccountFilters struct {
-	Aliases  []string `validate:"omitempty,unique"`
-	TenantID string   `validate:"omitempty"`
+	Aliases    []string          `validate:"omitempty,unique"`
+	TenantID   string            `validate:"omitempty"`
+	Pagination PaginationFilters `validate:"omitempty"`
 }
 
 type ChainFilters struct {
