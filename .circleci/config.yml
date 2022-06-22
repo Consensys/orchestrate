@@ -16,7 +16,6 @@ parameters:
 
 orbs:
   go: circleci/go@1.5.0
-  sonarcloud: sonarsource/sonarcloud@1.0.1
   wait-for: cobli/wait-for@1.0.0
 
 commands:
@@ -174,18 +173,6 @@ jobs:
           root: .
           paths:
             - ./build/coverage
-
-  sonarscan:
-    docker:
-      - image: cimg/go:1.16.8
-    steps:
-      - checkout
-      - attach_workspace:
-          at: .
-      - run:
-          name: List coverage files
-          command: ls -la ./build/coverage
-      - sonarcloud/scan
 
   build-docker-image:
     docker:
@@ -484,11 +471,6 @@ workflows:
           requires:
             - gobuild
             - lint
-      - sonarscan:
-          requires:
-            - test
-            - race
-            - integration
       - build-docker-image: # Push Develop image
           name: push-orchestrate-dev-image
           context:

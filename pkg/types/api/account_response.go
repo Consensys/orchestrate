@@ -4,9 +4,13 @@ import (
 	"encoding/json"
 	"time"
 
+	"github.com/consensys/orchestrate/pkg/types/entities"
+
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 )
+
+const DefaultAccountPageSize = 25
 
 type AccountResponse struct {
 	Alias               string            `json:"alias" example:"personal-account"`
@@ -19,6 +23,11 @@ type AccountResponse struct {
 	Attributes          map[string]string `json:"attributes,omitempty"`
 	CreatedAt           time.Time         `json:"createdAt" example:"2020-07-09T12:35:42.115395Z"`
 	UpdatedAt           time.Time         `json:"updatedAt,omitempty" example:"2020-07-09T12:35:42.115395Z"`
+}
+
+type AccountSearchResponse struct {
+	Accounts []*AccountResponse `json:"accounts"`
+	HasMore  bool               `json:"hasMore"`
 }
 
 type accountResponseJSON struct {
@@ -49,4 +58,19 @@ func (a *AccountResponse) MarshalJSON() ([]byte, error) {
 	}
 
 	return json.Marshal(res)
+}
+
+func NewAccountResponse(acc *entities.Account) *AccountResponse {
+	return &AccountResponse{
+		Alias:               acc.Alias,
+		Attributes:          acc.Attributes,
+		Address:             acc.Address,
+		PublicKey:           acc.PublicKey,
+		CompressedPublicKey: acc.CompressedPublicKey,
+		TenantID:            acc.TenantID,
+		OwnerID:             acc.OwnerID,
+		StoreID:             acc.StoreID,
+		CreatedAt:           acc.CreatedAt,
+		UpdatedAt:           acc.UpdatedAt,
+	}
 }

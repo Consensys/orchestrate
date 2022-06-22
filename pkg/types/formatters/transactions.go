@@ -5,6 +5,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/consensys/orchestrate/pkg/errors"
+
 	types "github.com/consensys/orchestrate/pkg/types/api"
 	"github.com/consensys/orchestrate/pkg/types/entities"
 
@@ -153,8 +155,15 @@ func FormatTransactionsFilterRequest(req *http.Request) (*entities.TransactionRe
 		filters.IdempotencyKeys = strings.Split(qIdempotencyKeys, ",")
 	}
 
+	pagination, err := utils.FilterIntegerValueWithKey(req)
+	if err != nil {
+		return filters, err
+	}
+
+	filters.Pagination = *pagination
+
 	if err := utils.GetValidator().Struct(filters); err != nil {
-		return nil, err
+		return nil, errors.InvalidFormatError(err.Error())
 	}
 
 	return filters, nil

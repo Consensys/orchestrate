@@ -142,27 +142,37 @@ func (c *AccountsController) deleteOne(rw http.ResponseWriter, request *http.Req
 	rw.WriteHeader(http.StatusNoContent)
 }
 
-// @Summary Search accounts by provided filters
-// @Description Get a list of filtered accounts
-// @Tags Accounts
-// @Accept json
-// @Produce json
-// @Security ApiKeyAuth
-// @Security JWTAuth
-// @Param aliases query []string false "List of account aliases" collectionFormat(csv)
-// @Success 200 {array} api.AccountResponse "List of identities found"
-// @Failure 400 {object} httputil.ErrorResponse "Invalid filter in the request"
-// @Failure 401 {object} httputil.ErrorResponse "Unauthorized"
-// @Failure 500 {object} httputil.ErrorResponse "Internal server error"
-// @Router /accounts [get]
+// @Summary      Search accounts by provided filters
+// @Description  Get a list of filtered accounts
+// @Tags         Accounts
+// @Accept       json
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Security     JWTAuth
+// @Param        aliases  query     []string             false  "List of account aliases"  collectionFormat(csv)
+// @Param		 limit	  query     int					 false  "Maximum response size"
+// @Param		 page	  query     int					 false  "Page within the entire responses set"
+// @Success      200      {array}   api.AccountResponse  "List of identities found"
+// @Failure      400      {object}  infra.ErrorResponse  "Invalid filter in the request"
+// @Failure      401      {object}  infra.ErrorResponse  "Unauthorized"
+// @Failure      500      {object}  infra.ErrorResponse  "Internal server error"
+// @Router       /accounts [get]
 func (c *AccountsController) search(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	ctx := request.Context()
 
+	var err error
 	filters, err := formatters.FormatAccountFilterRequest(request)
 	if err != nil {
-		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
+		httputil.WriteHTTPErrorResponse(rw, err)
 		return
+	}
+
+	// increase Limit to test more items available
+	if filters.Pagination.Limit > 0 {
+		filters.Pagination.Limit++
+	} else {
+		filters.Pagination.Limit = api.DefaultAccountPageSize + 1
 	}
 
 	accs, err := c.ucs.SearchAccounts().Execute(ctx, filters, multitenancy.UserInfoValue(ctx))
@@ -171,10 +181,22 @@ func (c *AccountsController) search(rw http.ResponseWriter, request *http.Reques
 		return
 	}
 
-	response := []*api.AccountResponse{}
-	for _, iden := range accs {
-		response = append(response, formatters.FormatAccountResponse(iden))
+	// signal when more items are available
+	hasMore := len(accs) == filters.Pagination.Limit
+
+	response := &api.AccountSearchResponse{
+		HasMore: hasMore}
+
+	if response.HasMore {
+		accs = accs[:filters.Pagination.Limit-1]
 	}
+
+	var resAccounts []*api.AccountResponse
+	for _, acc := range accs {
+		resAccounts = append(resAccounts, api.NewAccountResponse(acc))
+	}
+
+	response.Accounts = resAccounts
 
 	_ = json.NewEncoder(rw).Encode(response)
 }

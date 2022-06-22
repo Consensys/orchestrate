@@ -5,8 +5,9 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/consensys/orchestrate/pkg/errors"
+
 	"github.com/consensys/orchestrate/pkg/types/api"
-	"github.com/consensys/quorum-key-manager/pkg/errors"
 
 	jsonutils "github.com/consensys/orchestrate/pkg/encoding/json"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/httputil"
@@ -241,38 +242,59 @@ func (c *TransactionsController) getOne(rw http.ResponseWriter, request *http.Re
 	_ = json.NewEncoder(rw).Encode(formatters.FormatTxResponse(txRequest))
 }
 
-// @Summary Search transaction requests by provided filters
-// @Description Get a list of filtered transaction requests
-// @Tags Transactions
-// @Accept json
-// @Produce json
-// @Security ApiKeyAuth
-// @Security JWTAuth
-// @Param idempotency_keys query []string false "List of idempotency keys" collectionFormat(csv)
-// @Success 200 {array} api.TransactionResponse "List of transaction requests found"
-// @Failure 400 {object} httputil.ErrorResponse "Invalid filter in the request"
-// @Failure 500 {object} httputil.ErrorResponse "Internal server error"
-// @Router /transactions [get]
+// @Summary      Search transaction requests by provided filters
+// @Description  Get a list of filtered transaction requests
+// @Tags         Transactions
+// @Accept       json
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Security     JWTAuth
+// @Param        idempotency_keys  query     []string                 false  "List of idempotency keys"  collectionFormat(csv)
+// @Param		 limit	  query     int					 false  "Maximum response size"
+// @Param		 page	  query     int					 false  "Page within the entire responses set"
+// @Success      200               {array}   api.TransactionResponse  "List of transaction requests found"
+// @Failure      400               {object}  infra.ErrorResponse      "Invalid filter in the request"
+// @Failure      500               {object}  infra.ErrorResponse      "Internal server error"
+// @Router       /transactions [get]
 func (c *TransactionsController) search(rw http.ResponseWriter, request *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	ctx := request.Context()
 
 	filters, err := formatters.FormatTransactionsFilterRequest(request)
 	if err != nil {
-		httputil.WriteError(rw, err.Error(), http.StatusBadRequest)
+		httputil.WriteHTTPErrorResponse(rw, err)
 		return
 	}
 
-	txRequests, err := c.ucs.SearchTransactions().Execute(ctx, filters, multitenancy.UserInfoValue(ctx))
+	// increase Limit to test more items available
+	if filters.Pagination.Limit > 0 {
+		filters.Pagination.Limit++
+	} else {
+		filters.Pagination.Limit = api.DefaultTransactionPageSize + 1
+	}
+
+	txs, err := c.ucs.SearchTransactions().Execute(ctx, filters, multitenancy.UserInfoValue(ctx))
 	if err != nil {
 		httputil.WriteHTTPErrorResponse(rw, err)
 		return
 	}
 
-	response := []*api.TransactionResponse{}
-	for _, txRequest := range txRequests {
-		response = append(response, formatters.FormatTxResponse(txRequest))
+	// signal when more items are available
+	hasMore := len(txs) == filters.Pagination.Limit
+
+	response := &api.TransactionSearchResponse{
+		HasMore: hasMore}
+
+	if response.HasMore {
+		txs = txs[:filters.Pagination.Limit-1]
 	}
+
+	var resTxs []*api.TransactionResponse
+	for _, tx := range txs {
+		resTxs = append(resTxs, formatters.FormatTxResponse(tx))
+	}
+
+	response.Transactions = resTxs
 
 	_ = json.NewEncoder(rw).Encode(response)
 }

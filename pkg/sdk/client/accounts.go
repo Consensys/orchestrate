@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	utilstypes "github.com/consensys/quorum-key-manager/src/utils/api/types"
@@ -84,13 +85,21 @@ func (c *HTTPClient) UpdateAccount(ctx context.Context, address ethcommon.Addres
 	return resp, nil
 }
 
-func (c *HTTPClient) SearchAccounts(ctx context.Context, filters *entities.AccountFilters) ([]*api.AccountResponse, error) {
+func (c *HTTPClient) SearchAccounts(ctx context.Context, filters *entities.AccountFilters) (*api.AccountSearchResponse, error) {
 	reqURL := fmt.Sprintf("%v/accounts", c.config.URL)
-	var resp []*api.AccountResponse
+	var resp *api.AccountSearchResponse
 
 	var qParams []string
 	if len(filters.Aliases) > 0 {
 		qParams = append(qParams, "aliases="+strings.Join(filters.Aliases, ","))
+	}
+
+	if filters.Pagination.Limit > 0 {
+		qParams = append(qParams, "limit="+strconv.Itoa(filters.Pagination.Limit))
+	}
+
+	if filters.Pagination.Page > 0 {
+		qParams = append(qParams, "page="+strconv.Itoa(filters.Pagination.Page))
 	}
 
 	if len(qParams) > 0 {

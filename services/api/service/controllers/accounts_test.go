@@ -259,16 +259,62 @@ func (s *accountsCtrlTestSuite) TestAccountController_SearchIdentity() {
 
 		filter := &entities.AccountFilters{
 			Aliases: aliases,
+			Pagination: entities.PaginationFilters{Limit: api.DefaultAccountPageSize + 1 },
 		}
 
 		s.searchAccountUC.EXPECT().Execute(gomock.Any(), filter, s.userInfo).Return([]*entities.Account{accResp}, nil)
 
 		s.router.ServeHTTP(rw, httpRequest)
 
-		response := formatters.FormatAccountResponse(accResp)
-		expectedBody, _ := json.Marshal([]*api.AccountResponse{response})
+		response := api.AccountSearchResponse{}
+		resAccounts := api.NewAccountResponse(accResp)
+		response.Accounts = []*api.AccountResponse{resAccounts}
+		expectedBody, _ := json.Marshal(response)
 		assert.Equal(t, string(expectedBody)+"\n", rw.Body.String())
 		assert.Equal(t, http.StatusOK, rw.Code)
+	})
+}
+
+func (s *accountsCtrlTestSuite) TestAccountController_SearchWithPage() {
+	s.T().Run("should execute search account request with page successfully", func(t *testing.T) {
+		accResp0 := testutils.FakeAccount()
+		accResp1 := testutils.FakeAccount()
+		accResp2 := testutils.FakeAccount()
+		accResp3 := testutils.FakeAccount()
+
+		accounts := []*entities.Account{accResp0, accResp1, accResp2, accResp3}
+		rw := httptest.NewRecorder()
+
+		httpRequest := httptest.
+			NewRequest(http.MethodGet, "/accounts?page=1", nil).
+			WithContext(s.ctx)
+
+		filter := &entities.AccountFilters{
+			Pagination: entities.PaginationFilters{Limit: api.DefaultAccountPageSize + 1, Page: 1},
+		}
+
+		s.searchAccountUC.EXPECT().Execute(gomock.Any(), filter, s.userInfo).Return(accounts, nil)
+
+		s.router.ServeHTTP(rw, httpRequest)
+
+		response0 := api.NewAccountResponse(accResp0)
+		response1 := api.NewAccountResponse(accResp1)
+		response2 := api.NewAccountResponse(accResp2)
+		response3 := api.NewAccountResponse(accResp3)
+		resAccounts := []*api.AccountResponse{response0, response1, response2, response3}
+		response := &api.AccountSearchResponse{}
+		response.Accounts = resAccounts
+		expectedBody, _ := json.Marshal(response)
+		assert.Equal(t, string(expectedBody)+"\n", rw.Body.String())
+		assert.Equal(t, http.StatusOK, rw.Code)
+	})
+
+	s.T().Run("should fail with 400 if filter page is malformed", func(t *testing.T) {
+		rw := httptest.NewRecorder()
+		httpRequest := httptest.NewRequest(http.MethodGet, "/accounts?page=-1", nil).WithContext(s.ctx)
+
+		s.router.ServeHTTP(rw, httpRequest)
+		assert.Equal(t, http.StatusBadRequest, rw.Code)
 	})
 }
 
@@ -334,5 +380,60 @@ func (s *accountsCtrlTestSuite) TestAccountController_VerifyTypedDataSignature()
 		s.router.ServeHTTP(rw, httpRequest)
 
 		assert.Equal(t, http.StatusNoContent, rw.Code)
+	})
+}
+
+func (s *transactionsControllerTestSuite) TestSearchAccountsWithLimitAndPage() {
+	urlPath := "/transactions"
+
+	s.T().Run("should execute request successfully", func(t *testing.T) {
+		rw := httptest.NewRecorder()
+		httpRequest := httptest.NewRequest(http.MethodGet, urlPath+"?limit=10&page=10", nil).WithContext(s.ctx)
+		txRequest := testutils.FakeTransferTxRequest()
+		expectedFilers := &entities.TransactionRequestFilters{
+			Pagination: entities.PaginationFilters{Limit: 11, Page: 10},
+		}
+
+		s.searchTxsUseCase.EXPECT().Execute(gomock.Any(), expectedFilers, s.userInfo).
+			Return([]*entities.TxRequest{txRequest}, nil)
+
+		s.router.ServeHTTP(rw, httpRequest)
+
+		response := &api.TransactionSearchResponse{}
+		respTxs := []*api.TransactionResponse{formatters.FormatTxResponse(txRequest)}
+		response.Transactions = respTxs
+		expectedBody, _ := json.Marshal(response)
+		assert.Equal(t, string(expectedBody)+"\n", rw.Body.String())
+		assert.Equal(t, http.StatusOK, rw.Code)
+	})
+
+	s.T().Run("should fail with 400 if filer page is malformed", func(t *testing.T) {
+		rw := httptest.NewRecorder()
+		httpRequest := httptest.NewRequest(http.MethodGet, urlPath+"?limit=10&page=toto", nil).WithContext(s.ctx)
+
+		s.router.ServeHTTP(rw, httpRequest)
+		assert.Equal(t, http.StatusBadRequest, rw.Code)
+	})
+
+	s.T().Run("should fail with 400 if filter limit is malformed", func(t *testing.T) {
+		rw := httptest.NewRecorder()
+		httpRequest := httptest.NewRequest(http.MethodGet, urlPath+"?limit=-10&page=10", nil).WithContext(s.ctx)
+
+		s.router.ServeHTTP(rw, httpRequest)
+		assert.Equal(t, http.StatusBadRequest, rw.Code)
+	})
+
+	s.T().Run("should fail with 500 if use case fails", func(t *testing.T) {
+		rw := httptest.NewRecorder()
+		httpRequest := httptest.NewRequest(http.MethodGet, urlPath+"?limit=10&page=10", nil).WithContext(s.ctx)
+		expectedFilers := &entities.TransactionRequestFilters{
+			Pagination: entities.PaginationFilters{Limit: 11, Page: 10},
+		}
+
+		s.searchTxsUseCase.EXPECT().Execute(gomock.Any(), expectedFilers, s.userInfo).
+			Return(nil, fmt.Errorf(""))
+
+		s.router.ServeHTTP(rw, httpRequest)
+		assert.Equal(t, http.StatusInternalServerError, rw.Code)
 	})
 }

@@ -176,11 +176,113 @@ func (s *accountsTestSuite) TestSearch() {
 		})
 		require.NoError(s.T(), err)
 
-		assert.Len(s.T(), resp, 1)
-		assert.Equal(s.T(), resp[0].Address, ethAccRes.Address)
-		assert.Equal(s.T(), resp[0].PublicKey, ethAccRes.PublicKey)
-		assert.Equal(s.T(), resp[0].Alias, txRequest.Alias)
-		assert.Equal(s.T(), resp[0].TenantID, "_")
+		assert.Len(s.T(), resp.Accounts, 1)
+		assert.Equal(s.T(), resp.Accounts[0].Address, ethAccRes.Address)
+		assert.Equal(s.T(), resp.Accounts[0].PublicKey, ethAccRes.PublicKey)
+		assert.Equal(s.T(), resp.Accounts[0].Alias, txRequest.Alias)
+		assert.Equal(s.T(), resp.Accounts[0].TenantID, "_")
+	})
+
+	s.T().Run("should create account and search with limit and page successfully", func(t *testing.T) {
+		txRequest0 := testutils.FakeCreateAccountRequest()
+
+		ethAccRes0, err := s.client.CreateAccount(ctx, txRequest0)
+		require.NoError(s.T(), err)
+		txRequest1 := testutils.FakeCreateAccountRequest()
+
+		ethAccRes1, err := s.client.CreateAccount(ctx, txRequest1)
+		resp, err := s.client.SearchAccounts(ctx, &entities.AccountFilters{
+			Aliases: []string{txRequest0.Alias, txRequest1.Alias},
+			Pagination: entities.PaginationFilters{Limit: 1},
+		})
+		require.NoError(s.T(), err)
+
+		assert.Len(s.T(), resp.Accounts, 1)
+		assert.Equal(s.T(), resp.Accounts[0].Address, ethAccRes0.Address)
+		assert.Equal(s.T(), resp.Accounts[0].PublicKey, ethAccRes0.PublicKey)
+		assert.Equal(s.T(), resp.Accounts[0].Alias, txRequest0.Alias)
+		assert.Equal(s.T(), resp.Accounts[0].TenantID, "_")
+
+		resp, err = s.client.SearchAccounts(ctx, &entities.AccountFilters{
+			Aliases: []string{txRequest0.Alias, txRequest1.Alias},
+			Pagination: entities.PaginationFilters{Limit: 2},
+		})
+		require.NoError(s.T(), err)
+
+		assert.Len(s.T(), resp.Accounts, 2)
+		assert.Equal(s.T(), resp.Accounts[1].Address, ethAccRes1.Address)
+		assert.Equal(s.T(), resp.Accounts[1].PublicKey, ethAccRes1.PublicKey)
+		assert.Equal(s.T(), resp.Accounts[1].Alias, txRequest1.Alias)
+		assert.Equal(s.T(), resp.Accounts[1].TenantID, "_")
+	})
+
+	s.T().Run("should create accounts and search with limit and page successfully", func(t *testing.T) {
+
+		txRequests := [25]*api.CreateAccountRequest{}
+		ethAccounts := [25]*api.AccountResponse{}
+		var aliases []string
+		var err error
+
+		for i,_ := range txRequests{
+			txRequests[i]  = testutils.FakeCreateAccountRequest()
+			ethAccounts[i], err = s.client.CreateAccount(ctx, txRequests[i])
+			require.NoError(s.T(), err)
+			aliases = append(aliases, txRequests[i].Alias)
+		}
+
+		resp, err := s.client.SearchAccounts(ctx, &entities.AccountFilters{
+			Aliases: aliases,
+			Pagination: entities.PaginationFilters{Limit: 25},
+		})
+		require.NoError(s.T(), err)
+
+		assert.Len(s.T(), resp.Accounts, 25)
+		assert.Equal(s.T(), resp.Accounts[0].Address, ethAccounts[0].Address)
+		assert.Equal(s.T(), resp.Accounts[0].PublicKey, ethAccounts[0].PublicKey)
+		assert.Equal(s.T(), resp.Accounts[0].Alias, txRequests[0].Alias)
+		assert.Equal(s.T(), resp.Accounts[0].TenantID, "_")
+
+		resp, err = s.client.SearchAccounts(ctx, &entities.AccountFilters{
+			Aliases: []string{txRequests[0].Alias, txRequests[1].Alias},
+			Pagination: entities.PaginationFilters{Limit: 2},
+		})
+		require.NoError(s.T(), err)
+
+		assert.Len(s.T(), resp.Accounts, 2)
+		assert.Equal(s.T(), resp.Accounts[1].Address, ethAccounts[1].Address)
+		assert.Equal(s.T(), resp.Accounts[1].PublicKey, ethAccounts[1].PublicKey)
+		assert.Equal(s.T(), resp.Accounts[1].Alias, txRequests[1].Alias)
+		assert.Equal(s.T(), resp.Accounts[1].TenantID, "_")
+
+		resp, err = s.client.SearchAccounts(ctx, &entities.AccountFilters{
+			Aliases: aliases,
+			Pagination: entities.PaginationFilters{Limit: 5, Page: 1},
+		})
+
+		assert.Len(s.T(), resp.Accounts, 5)
+		assert.Equal(s.T(), resp.Accounts[4].Address, ethAccounts[9].Address)
+		assert.Equal(s.T(), resp.Accounts[4].PublicKey, ethAccounts[9].PublicKey)
+		assert.Equal(s.T(), resp.Accounts[4].Alias, txRequests[9].Alias)
+		assert.Equal(s.T(), resp.HasMore, true)
+		assert.Equal(s.T(), resp.Accounts[4].TenantID, "_")
+
+		resp, err = s.client.SearchAccounts(ctx, &entities.AccountFilters{
+			Aliases: aliases,
+			Pagination: entities.PaginationFilters{Limit: 5, Page: 2},
+		})
+
+		assert.Len(s.T(), resp.Accounts, 5)
+		assert.Equal(s.T(), resp.Accounts[4].Address, ethAccounts[14].Address)
+		assert.Equal(s.T(), resp.Accounts[4].PublicKey, ethAccounts[14].PublicKey)
+		assert.Equal(s.T(), resp.Accounts[4].Alias, txRequests[14].Alias)
+		assert.Equal(s.T(), resp.HasMore, true)
+		assert.Equal(s.T(), resp.Accounts[4].TenantID, "_")
+
+		resp, err = s.client.SearchAccounts(ctx, &entities.AccountFilters{
+			Aliases: aliases,
+			Pagination: entities.PaginationFilters{Limit: 5, Page: 4},
+		})
+		assert.Equal(s.T(), resp.HasMore, false)
 	})
 }
 

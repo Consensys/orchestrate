@@ -3,6 +3,8 @@ package dataagents
 import (
 	"context"
 
+	"github.com/consensys/orchestrate/pkg/types/api"
+
 	"github.com/consensys/orchestrate/pkg/types/entities"
 	"github.com/consensys/orchestrate/services/api/store"
 
@@ -89,6 +91,18 @@ func (agent *PGTransactionRequest) Search(ctx context.Context, filters *entities
 
 	if len(filters.IdempotencyKeys) > 0 {
 		query = query.Where("transaction_request.idempotency_key in (?)", gopg.In(filters.IdempotencyKeys))
+	}
+
+	if filters.Pagination.Limit > 0 {
+		query = query.Limit(filters.Pagination.Limit)
+	}
+
+	if filters.Pagination.Page > 0 {
+		if filters.Pagination.Limit > 0 && filters.Pagination.Limit < api.DefaultTransactionPageSize {
+			query = query.Offset(filters.Pagination.Page * (filters.Pagination.Limit - 1))
+		} else {
+			query = query.Offset(filters.Pagination.Page * api.DefaultTransactionPageSize)
+		}
 	}
 
 	query = pg.WhereAllowedTenants(query, "schedule.tenant_id", tenants)

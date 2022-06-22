@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/consensys/orchestrate/pkg/types/api"
+
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	pg "github.com/consensys/orchestrate/pkg/toolkit/database/postgres"
 	"github.com/consensys/orchestrate/services/api/store"
@@ -71,6 +73,18 @@ func (agent *PGAccount) Search(ctx context.Context, filters *entities.AccountFil
 	}
 	if filters.TenantID != "" {
 		query = query.Where("tenant_id = ?", filters.TenantID)
+	}
+
+	if filters.Pagination.Limit > 0 {
+		query = query.Limit(filters.Pagination.Limit)
+	}
+
+	if filters.Pagination.Page > 0 {
+		if filters.Pagination.Limit > 0 && filters.Pagination.Limit < api.DefaultAccountPageSize {
+			query = query.Offset(filters.Pagination.Page * (filters.Pagination.Limit - 1))
+		} else {
+			query = query.Offset(filters.Pagination.Page * api.DefaultAccountPageSize)
+		}
 	}
 
 	query = pg.WhereAllowedTenants(query, "tenant_id", tenants).Order("id ASC")
