@@ -1,10 +1,6 @@
 [![Website](https://img.shields.io/website?label=documentation&url=https%3A%2F%2Fdocs.orchestrate.consensys.net%2F)](https://docs.orchestrate.consensys.net/)
 [![Website](https://img.shields.io/website?url=https%3A%2F%2Fconsensys.net%2Forchestrate%2F)](https://consensys.net/quorum/)
-
-[![CircleCI](https://img.shields.io/circleci/build/gh/ConsenSys/orchestrate?token=7062612dcd5a98913aa1b330ae48b6a527be52eb)](https://circleci.com/gh/ConsenSys/orchestrate)
 [![Go Report Card](https://goreportcard.com/badge/github.com/ConsenSys/orchestrate)](https://goreportcard.com/report/github.com/ConsenSys/orchestrate)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ConsenSys_orchestrate&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=ConsenSys_orchestrate)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=ConsenSys_orchestrate&metric=coverage)](https://sonarcloud.io/summary/new_code?id=ConsenSys_orchestrate)
 
 # Orchestrate
 
