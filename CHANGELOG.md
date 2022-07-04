@@ -1,9 +1,10 @@
 # Orchestrate Release Notes
 
-## v21.12.8 (2022-06-17)
+## v21.12.8 (2022-07-04)
 ### 🆕 Features
-New available endpoint /transaction/{TX_UUID}/speed-up to retry transaction with a defined gas increment.
-New available endpoint /transaction/{TX_UUID}/call-off resend a transaction with same nonce,empty data and 10% more gas than previous job.
+* New available endpoint /transaction/{TX_UUID}/speed-up to retry transaction with a defined gas increment.
+* New available endpoint /transaction/{TX_UUID}/call-off resend a transaction with same nonce,empty data and 10% more gas than previous job.
+* Support account and transaction pagination
 
 ## v21.12.7 (2022-05-24)
 ### 🛠 Bug fixes
