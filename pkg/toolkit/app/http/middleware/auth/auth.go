@@ -74,7 +74,7 @@ func (a *Auth) Handler(h http.Handler) http.Handler {
 			authutils.GetTenantIDHeaderValue(req),
 		)
 
-		// Extract TenantID from HTTP headers
+		// Extract Username from HTTP headers
 		authCtx = authutils.WithUsername(
 			authCtx,
 			authutils.GetUsernameHeaderValue(req),
