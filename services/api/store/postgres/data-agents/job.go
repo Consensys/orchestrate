@@ -165,7 +165,9 @@ func (agent *PGJob) Search(ctx context.Context, filters *entities.JobFilters, te
 	}
 
 	query = pg.WhereAllowedTenants(query, "schedule.tenant_id", tenants).Order("id ASC")
-	query = pg.WhereAllowedOwner(query, "schedule.owner_id", ownerID)
+	if ownerID != "" {
+		query = pg.WhereAllowedOwner(query, "schedule.owner_id", ownerID)
+	}
 
 	err := pg.Select(ctx, query)
 	if err != nil {
