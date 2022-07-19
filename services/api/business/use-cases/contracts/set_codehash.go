@@ -27,7 +27,7 @@ func NewSetCodeHashUseCase(agent store.CodeHashAgent) usecases.SetContractCodeHa
 }
 
 func (uc *setCodeHashUseCase) Execute(ctx context.Context, chainID string, address ethcommon.Address, codeHash hexutil.Bytes) error {
-	ctx = log.WithFields(ctx, log.Field("chain_id", chainID), log.Field("address", chainID))
+	ctx = log.WithFields(ctx, log.Field("chain_id", chainID), log.Field("address", address.Hex()))
 	logger := uc.logger.WithContext(ctx)
 	logger.Debug("setting code-hash is starting ...")
 
