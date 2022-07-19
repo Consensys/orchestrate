@@ -161,7 +161,7 @@ func New(cfg *dynamic.ReverseProxy, transport http.RoundTripper, pool gohttputil
 		FlushInterval: time.Duration(flushInterval),
 		// ModifyResponse: respModifier,
 		ModifyResponse: func(rw *http.Response) error {
-			rw.Header.Set("X-Backend-Server", rw.Request.URL.String())
+			rw.Header.Set("X-Backend-Server", rw.Request.URL.Redacted())
 			if rw.StatusCode >= 300 {
 				body, _ := ioutil.ReadAll(rw.Body)
 				rw.Body = ioutil.NopCloser(bytes.NewBuffer(body))
@@ -196,7 +196,7 @@ func New(cfg *dynamic.ReverseProxy, transport http.RoundTripper, pool gohttputil
 
 			log.FromContext(req.Context()).Debugf("'%d %s' caused by: %v", statusCode, statusText(statusCode), err)
 
-			w.Header().Set("X-Backend-Server", req.URL.String())
+			w.Header().Set("X-Backend-Server", req.URL.Redacted())
 			w.WriteHeader(statusCode)
 			_, werr := w.Write([]byte(statusText(statusCode)))
 			if werr != nil {
