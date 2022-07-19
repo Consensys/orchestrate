@@ -34,10 +34,14 @@ func NewJobEntitiesFromTxRequest(txRequest *entities.TxRequest, chainUUID string
 			entities.TesseraPrivateTransaction, chainUUID)
 
 		markingTx := &entities.ETHTransaction{
+			To:	      nil,
 			From:         nil,
 			PrivateFor:   txRequest.Params.PrivateFor,
 			MandatoryFor: txRequest.Params.MandatoryFor,
 			PrivacyFlag:  txRequest.Params.PrivacyFlag,
+		}
+		if txRequest.Params.To != nil {
+			markingTx.To = txRequest.Params.To
 		}
 		if txRequest.Params.From != nil {
 			markingTx.From = txRequest.Params.From
