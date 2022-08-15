@@ -475,11 +475,12 @@ workflows:
           name: push-orchestrate-dev-image
           context:
             - cloudsmith-tanuki-rw
+            - cloudsmith-protocols
           docker-image-tag: orchestrate:${CIRCLE_SHA1:0:7}
           docker-distroless-version: debug-nonroot
           docker-image-registry: ${CLOUDSMITH_DEV_REPO}
-          docker-user: ${CLOUDSMITH_USER_RW}
-          docker-password: ${CLOUDSMITH_PASS_RW}
+          docker-user: ${CLOUDSMITH_USER}
+          docker-password: ${CLOUDSMITH_API_KEY}
           filters:
             branches:
               only: main
@@ -489,11 +490,12 @@ workflows:
           name: push-orchestrate-dev-arm-image
           context:
             - cloudsmith-tanuki-rw
+            - cloudsmith-protocols
           docker-image-tag: orchestrate:${CIRCLE_SHA1:0:7}
           docker-distroless-version: debug-nonroot
           docker-image-registry: ${CLOUDSMITH_DEV_REPO}
-          docker-user: ${CLOUDSMITH_USER_RW}
-          docker-password: ${CLOUDSMITH_PASS_RW}
+          docker-user: ${CLOUDSMITH_USER}
+          docker-password: ${CLOUDSMITH_API_KEY}
           filters:
             branches:
               only: main
@@ -503,6 +505,7 @@ workflows:
           name: deploy-qa
           context:
             - cloudsmith-tanuki-rw
+            - cloudsmith-protocols
             - tanuki-orchestrate-qa
           docker-image-tag: ${CIRCLE_SHA1:0:7}
           orchestrate-namespace: qa
@@ -515,6 +518,7 @@ workflows:
           name: deploy-staging
           context:
             - cloudsmith-tanuki-rw
+            - cloudsmith-protocols
             - tanuki-orchestrate-staging
           docker-image-tag: ${CIRCLE_SHA1:0:7}
           orchestrate-namespace: staging
@@ -535,14 +539,15 @@ workflows:
           name: tag-develop
           context:
             - cloudsmith-tanuki-rw
+            - cloudsmith-protocols
           docker-image-source-tag: orchestrate:${CIRCLE_SHA1:0:7}
           docker-image-destination-tag: orchestrate:develop
           docker-image-source-registry: ${CLOUDSMITH_DEV_REPO}
           docker-image-destination-registry: ${CLOUDSMITH_DEV_REPO}
-          docker-source-user: ${CLOUDSMITH_USER_RW}
-          docker-source-password: ${CLOUDSMITH_PASS_RW}
-          docker-destination-user: ${CLOUDSMITH_USER_RW}
-          docker-destination-password: ${CLOUDSMITH_PASS_RW}
+          docker-source-user: ${CLOUDSMITH_USER}
+          docker-source-password: ${CLOUDSMITH_API_KEY}
+          docker-destination-user: ${CLOUDSMITH_USER}
+          docker-destination-password: ${CLOUDSMITH_API_KEY}
           requires:
             - run-qa-e2e
       - run-e2e:
@@ -593,6 +598,7 @@ workflows:
           name: release-<< matrix.docker-image-destination-tag >>-<< matrix.docker-image-platform >>
           context:
             - cloudsmith-tanuki-rw
+            - cloudsmith-protocols
             - dockerhub-opsquorum-dct
           matrix:
             parameters:
@@ -601,8 +607,8 @@ workflows:
           docker-image-source-tag: orchestrate:${CIRCLE_SHA1:0:7}
           docker-image-source-registry: ${CLOUDSMITH_DEV_REPO}
           docker-image-destination-registry: consensys
-          docker-source-user: ${CLOUDSMITH_USER_RW}
-          docker-source-password: ${CLOUDSMITH_PASS_RW}
+          docker-source-user: ${CLOUDSMITH_USER}
+          docker-source-password: ${CLOUDSMITH_API_KEY}
           docker-destination-user: ${DOCKER_USER_RW}
           docker-destination-password: ${DOCKER_PASSWORD_RW}
           docker-image-sign: true
