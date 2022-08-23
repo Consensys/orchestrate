@@ -40,11 +40,5 @@ func (checker *JWT) Check(ctx context.Context) (*multitenancy.UserInfo, error) {
 		return nil, err
 	}
 
-	// Impersonate username
-	err = userInfo.ImpersonateUsername(authutils.UsernameFromContext(ctx))
-	if err != nil {
-		return nil, err
-	}
-
 	return userInfo, nil
 }
