@@ -8,7 +8,7 @@ require (
 	github.com/alicebob/miniredis v2.5.0+incompatible
 	github.com/auth0/go-jwt-middleware/v2 v2.0.0-beta.1
 	github.com/c0va23/go-proxyprotocol v0.9.1
-	github.com/cenkalti/backoff/v4 v4.1.1
+	github.com/cenkalti/backoff/v4 v4.2.0
 	github.com/consensys/quorum v2.7.0+incompatible
 	github.com/consensys/quorum-key-manager v0.0.0-20211216092116-3e1719d4b69d
 	github.com/cucumber/godog v0.11.0
