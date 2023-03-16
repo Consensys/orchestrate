@@ -1729,8 +1729,6 @@ github.com/uber/jaeger-lib v2.2.0+incompatible h1:MxZXOiR2JuoANZ3J6DE/U0kSFv/eJ/
 github.com/uber/jaeger-lib v2.2.0+incompatible/go.mod h1:ComeNDZlWwrWnDv8aPp0Ba6+uUTzImX/AauajbLI56U=
 github.com/umbracle/fastrlp v0.0.0-20211229195328-c1416904ae17 h1:ZZy8Rj2SqGcZn1hTcoLdwFBROzrf5KiuRwhp8G4nnfA=
 github.com/umbracle/fastrlp v0.0.0-20211229195328-c1416904ae17/go.mod h1:c8J0h9aULj2i3umrfyestM6jCq0LK0U6ly6bWy96nd4=
-github.com/umbracle/go-web3 v0.0.0-20220112152710-157826f66053 h1:v3b+fqK2FshV/8BxtJU0LtDdiLCTtYFsPO0ESMUQLd4=
-github.com/umbracle/go-web3 v0.0.0-20220112152710-157826f66053/go.mod h1:XouY0bKm7B3vw01FkykeyVgSYWa7tDdzp+CE6SXC/1w=
 github.com/umbracle/go-web3 v0.0.0-20220214174057-1d971ac3be78 h1:Yotri/fgkwnrcsHlkmBVQXoBx1BWGyHU6vWOT2bw6W0=
 github.com/umbracle/go-web3 v0.0.0-20220214174057-1d971ac3be78/go.mod h1:XouY0bKm7B3vw01FkykeyVgSYWa7tDdzp+CE6SXC/1w=
 github.com/unrolled/render v1.0.2 h1:dGS3EmChQP3yOi1YeFNO/Dx+MbWZhdvhQJTXochM5bs=
@@ -2356,8 +2354,9 @@ google.golang.org/protobuf v1.23.1-0.20200526195155-81db48ad09cc/go.mod h1:EGpAD
 google.golang.org/protobuf v1.24.0/go.mod h1:r/3tXBNzIEhYS9I1OUVjXDlt8tc493IdKGjtUeSXeh4=
 google.golang.org/protobuf v1.25.0/go.mod h1:9JNX74DMeImyA3h4bdi1ymwjUzf21/xIlbajtzgsN7c=
 google.golang.org/protobuf v1.26.0-rc.1/go.mod h1:jlhhOSvTdKEhbULTjvd4ARK9grFBp09yW+WbY/TyQbw=
-google.golang.org/protobuf v1.26.0 h1:bxAC2xTBsZGibn2RTntX0oH50xLsqy1OxA9tTL3p/lk=
 google.golang.org/protobuf v1.26.0/go.mod h1:9q0QmTI4eRPtz6boOQmLYwt+qCgq0jsYwAQnmE0givc=
+google.golang.org/protobuf v1.30.0 h1:kPPoIgf3TsEvrm0PFe15JQ+570QVxYzEvvHqChK+cng=
+google.golang.org/protobuf v1.30.0/go.mod h1:HV8QOd/L58Z+nl8r43ehVNZIU/HEI6OcFqwMG9pJV4I=
 gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0 h1:FVCohIoYO7IJoDDVpV2pdq7SgrMH6wHnuTyrdrxJNoY=
 gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0/go.mod h1:OdE7CF6DbADk7lN8LIKRzRJTTZXIjtWgA5THM5lhBAw=
 gopkg.in/DataDog/dd-trace-go.v1 v1.19.0 h1:aFSFd6oDMdvPYiToGqTv7/ERA6QrPhGaXSuueRCaM88=
