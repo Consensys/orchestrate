@@ -53,7 +53,7 @@ require (
 	github.com/vulcand/oxy v1.3.0
 	github.com/yuin/gopher-lua v0.0.0-20191220021717-ab39c6098bdb // indirect
 	golang.org/x/crypto v0.0.0-20211209193657-4570a0811e8b
-	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2
+	golang.org/x/net v0.7.0
 	golang.org/x/time v0.0.0-20210611083556-38a9dc6acbc6
 	google.golang.org/protobuf v1.26.0
 	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0 // indirect
