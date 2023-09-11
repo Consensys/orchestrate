@@ -37,7 +37,7 @@ require (
 	github.com/nmvalera/striped-mutex v0.1.0
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/oxtoacart/bpool v0.0.0-20190530202638-03653db5a59c
-	github.com/prometheus/client_golang v1.11.0
+	github.com/prometheus/client_golang v1.11.1
 	github.com/prometheus/client_model v0.2.0
 	github.com/prometheus/common v0.26.0
 	github.com/rs/cors v1.7.0
