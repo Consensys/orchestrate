@@ -6,7 +6,7 @@ require (
 	github.com/Shopify/sarama v1.27.2
 	github.com/alicebob/gopher-json v0.0.0-20180125190556-5a6b3ba71ee6 // indirect
 	github.com/alicebob/miniredis v2.5.0+incompatible
-	github.com/auth0/go-jwt-middleware/v2 v2.0.0-beta.1
+	github.com/auth0/go-jwt-middleware/v2 v2.1.0
 	github.com/c0va23/go-proxyprotocol v0.9.1
 	github.com/cenkalti/backoff/v4 v4.1.1
 	github.com/consensys/quorum v2.7.0+incompatible
@@ -45,14 +45,14 @@ require (
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.8.1
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.8.1
 	github.com/traefik/paerser v0.1.4
 	github.com/traefik/traefik/v2 v2.5.5
 	github.com/umbracle/go-web3 v0.0.0-20220214174057-1d971ac3be78
 	github.com/unrolled/secure v1.13.0
 	github.com/vulcand/oxy v1.3.0
 	github.com/yuin/gopher-lua v0.0.0-20191220021717-ab39c6098bdb // indirect
-	golang.org/x/crypto v0.0.0-20211209193657-4570a0811e8b
+	golang.org/x/crypto v0.0.0-20220518034528-6f7dac969898
 	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2
 	golang.org/x/time v0.0.0-20210611083556-38a9dc6acbc6
 	google.golang.org/protobuf v1.26.0
