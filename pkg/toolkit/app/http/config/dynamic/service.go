@@ -42,6 +42,8 @@ func (p *ReverseProxy) SetDefaults() {
 	}
 
 	if p.PassHostHeader == nil {
+		//FIXME CUSTOM HEADER change to false for custom header
+		//p.PassHostHeader = utils.Bool(false)
 		p.PassHostHeader = utils.Bool(true)
 	}
 }

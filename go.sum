@@ -1729,8 +1729,6 @@ github.com/uber/jaeger-lib v2.2.0+incompatible h1:MxZXOiR2JuoANZ3J6DE/U0kSFv/eJ/
 github.com/uber/jaeger-lib v2.2.0+incompatible/go.mod h1:ComeNDZlWwrWnDv8aPp0Ba6+uUTzImX/AauajbLI56U=
 github.com/umbracle/fastrlp v0.0.0-20211229195328-c1416904ae17 h1:ZZy8Rj2SqGcZn1hTcoLdwFBROzrf5KiuRwhp8G4nnfA=
 github.com/umbracle/fastrlp v0.0.0-20211229195328-c1416904ae17/go.mod h1:c8J0h9aULj2i3umrfyestM6jCq0LK0U6ly6bWy96nd4=
-github.com/umbracle/go-web3 v0.0.0-20220112152710-157826f66053 h1:v3b+fqK2FshV/8BxtJU0LtDdiLCTtYFsPO0ESMUQLd4=
-github.com/umbracle/go-web3 v0.0.0-20220112152710-157826f66053/go.mod h1:XouY0bKm7B3vw01FkykeyVgSYWa7tDdzp+CE6SXC/1w=
 github.com/umbracle/go-web3 v0.0.0-20220214174057-1d971ac3be78 h1:Yotri/fgkwnrcsHlkmBVQXoBx1BWGyHU6vWOT2bw6W0=
 github.com/umbracle/go-web3 v0.0.0-20220214174057-1d971ac3be78/go.mod h1:XouY0bKm7B3vw01FkykeyVgSYWa7tDdzp+CE6SXC/1w=
 github.com/unrolled/render v1.0.2 h1:dGS3EmChQP3yOi1YeFNO/Dx+MbWZhdvhQJTXochM5bs=
