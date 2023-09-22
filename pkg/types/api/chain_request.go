@@ -5,6 +5,7 @@ import (
 )
 
 type RegisterChainRequest struct {
+	//FIXME CUSTOM HEADER
 	Name             string                   `json:"name" validate:"required" example:"mainnet"`                                                                                             // Name of the chain. Must be unique.
 	URLs             []string                 `json:"urls" pg:"urls,array" validate:"required,min=1,unique,dive,url" example:"https://mainnet.infura.io/v3/a73136601e6f4924a0baa4ed880b535e"` // List of URLs of Ethereum nodes to connect to.
 	Listener         RegisterListenerRequest  `json:"listener,omitempty"`

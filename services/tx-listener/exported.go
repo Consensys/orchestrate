@@ -50,6 +50,7 @@ func NewApp(ctx context.Context) (*app.App, error) {
 	registryprovider.Init(client)
 	registryoffset.Init(client)
 
+	//FIXME CUSTOM HEADER
 	return New(
 		config,
 		registryprovider.GlobalProvider(),

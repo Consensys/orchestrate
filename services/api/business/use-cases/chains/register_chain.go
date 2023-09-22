@@ -53,7 +53,7 @@ func (uc *registerChainUseCase) Execute(ctx context.Context, chain *entities.Cha
 		logger.Error(errMessage)
 		return nil, errors.AlreadyExistsError(errMessage).ExtendComponent(registerChainComponent)
 	}
-
+	//FIXME CUSTOM HEADER
 	chainID, err := uc.getChainID(ctx, chain.URLs)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(registerChainComponent)
@@ -100,6 +100,9 @@ func (uc *registerChainUseCase) Execute(ctx context.Context, chain *entities.Cha
 }
 
 func (uc *registerChainUseCase) getChainID(ctx context.Context, uris []string) (*big.Int, error) {
+
+	//FIXME CUSTOM HEADER
+
 	var prevChainID *big.Int
 	for i, uri := range uris {
 		chainID, err := uc.ethClient.Network(ctx, uri)

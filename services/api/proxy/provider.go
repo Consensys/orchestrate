@@ -51,6 +51,7 @@ func NewProxyConfig(chains []*entities.Chain, proxyCacheTTL *time.Duration, acce
 
 		middlewares = append(middlewares, "auth@multitenancy", multitenancyMid, "strip-path@internal")
 
+		//FIXME CUSTOM HEADER
 		cfg.HTTP.Middlewares[multitenancyMid] = &dynamic.Middleware{
 			MultiTenancy: &dynamic.MultiTenancy{
 				Tenant:  chain.TenantID,
