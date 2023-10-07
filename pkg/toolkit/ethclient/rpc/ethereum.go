@@ -7,6 +7,7 @@ import (
 
 	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/pkg/ethereum/types"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/transport"
 	"github.com/consensys/orchestrate/pkg/toolkit/ethclient/utils"
 	proto "github.com/consensys/orchestrate/pkg/types/ethereum"
 	eth "github.com/ethereum/go-ethereum"
@@ -200,6 +201,23 @@ func (ec *Client) SyncProgress(ctx context.Context, endpoint string) (*eth.SyncP
 // SendRawPrivateTransaction send a raw transaction to an Ethereum node supporting EEA extension
 func (ec *Client) Network(ctx context.Context, endpoint string) (*big.Int, error) {
 	var version string
+	if err := ec.Call(ctx, endpoint, utils.ProcessResult(&version), "net_version"); err != nil {
+		return nil, err
+	}
+
+	chain, ok := big.NewInt(0).SetString(version, 10)
+	if !ok {
+		return nil, errors.EncodingError("invalid network id %q", version)
+	}
+
+	return chain, nil
+}
+
+func (ec *Client) NetworkWithHeader(ctx context.Context, endpoint string, middleware transport.Middleware) (*big.Int, error) {
+	var version string
+
+	ec.client.Transport = middleware(ec.client.Transport)
+	//FIXME CUSTOM HEADER debug here.
 	if err := ec.Call(ctx, endpoint, utils.ProcessResult(&version), "net_version"); err != nil {
 		return nil, err
 	}

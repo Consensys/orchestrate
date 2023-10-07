@@ -28,6 +28,7 @@ func FormatChainResponse(chain *entities.Chain) *types.ChainResponse {
 		ListenerExternalTxEnabled: chain.ListenerExternalTxEnabled,
 		PrivateTxManager:          chain.PrivateTxManager,
 		Labels:                    chain.Labels,
+		Headers:                   chain.Headers,
 		CreatedAt:                 chain.CreatedAt,
 		UpdatedAt:                 chain.UpdatedAt,
 	}
@@ -41,6 +42,7 @@ func FormatRegisterChainRequest(request *types.RegisterChainRequest, fromLatest 
 		ListenerBackOffDuration:   request.Listener.BackOffDuration,
 		ListenerExternalTxEnabled: request.Listener.ExternalTxEnabled,
 		Labels:                    request.Labels,
+		Headers:                   request.Headers,
 	}
 
 	if request.Listener.BackOffDuration == "" {
@@ -70,9 +72,10 @@ func FormatRegisterChainRequest(request *types.RegisterChainRequest, fromLatest 
 
 func FormatUpdateChainRequest(request *types.UpdateChainRequest, uuid string) *entities.Chain {
 	chain := &entities.Chain{
-		UUID:   uuid,
-		Name:   request.Name,
-		Labels: request.Labels,
+		UUID:    uuid,
+		Name:    request.Name,
+		Labels:  request.Labels,
+		Headers: request.Headers,
 	}
 
 	if request.Listener != nil {

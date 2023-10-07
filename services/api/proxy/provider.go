@@ -6,6 +6,7 @@ import (
 	"math"
 	"time"
 
+	headers "github.com/consensys/orchestrate/pkg/toolkit/app/auth/utils"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/config/dynamic"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/http/configwatcher/provider"
@@ -51,7 +52,30 @@ func NewProxyConfig(chains []*entities.Chain, proxyCacheTTL *time.Duration, acce
 
 		middlewares = append(middlewares, "auth@multitenancy", multitenancyMid, "strip-path@internal")
 
-		//FIXME CUSTOM HEADER
+		// Clean up Orchestrate auth headers and attach only chain specific ones
+		proxyHeaders := map[string]string{
+			//FIXME CUSTOM HEADER double check here.
+			headers.APIKeyHeader:        "",
+			headers.TenantIDHeader:      "",
+			headers.AuthorizationHeader: "",
+		}
+
+		for k, v := range chain.Headers {
+			proxyHeaders[k] = v
+		}
+
+		proxyHeaderMid := fmt.Sprintf("proxy-headers-%v", chain.UUID)
+		cfg.HTTP.Middlewares[proxyHeaderMid] = &dynamic.Middleware{
+			Headers: &dynamic.Headers{
+				IsProxy: true,
+				Custom: &dynamic.CustomHeaders{
+					RequestHeaders: proxyHeaders,
+				},
+			},
+		}
+
+		middlewares = append(middlewares, "auth@multitenancy", multitenancyMid, "strip-path@internal", proxyHeaderMid)
+
 		cfg.HTTP.Middlewares[multitenancyMid] = &dynamic.Middleware{
 			MultiTenancy: &dynamic.MultiTenancy{
 				Tenant:  chain.TenantID,

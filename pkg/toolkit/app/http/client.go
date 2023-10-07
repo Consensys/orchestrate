@@ -33,6 +33,7 @@ func NewClient(cfg *Config) *http.Client {
 	}
 
 	middlewares = append(middlewares, transport.NewRetry429Transport())
+	// middlewares = append(middlewares, transport.NewCustomHeadersTransport(cfg.CustomHeaders...))
 
 	t := &http.Transport{
 		Proxy:                 http.ProxyFromEnvironment,

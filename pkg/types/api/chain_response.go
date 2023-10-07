@@ -20,6 +20,7 @@ type ChainResponse struct {
 	ListenerBackOffDuration   string                     `json:"listenerBackOffDuration" example:"5s"`                                         // Time to wait before trying to fetch a new mined block.
 	ListenerExternalTxEnabled *bool                      `json:"listenerExternalTxEnabled" example:"false"`                                    // Whether the chain listens for external transactions not crafted by Orchestrate.
 	PrivateTxManager          *entities.PrivateTxManager `json:"privateTxManager,omitempty"`
+	Headers                   map[string]string          `json:"headers,omitempty" validate:"omitempty"`          // Set of HTTP headers attached to every request to the node
 	Labels                    map[string]string          `json:"labels,omitempty"`                                // List of custom labels.
 	CreatedAt                 time.Time                  `json:"createdAt" example:"2020-07-09T12:35:42.115395Z"` // Date and time at which the chain was registered.
 	UpdatedAt                 time.Time                  `json:"updatedAt" example:"2020-07-09T12:35:42.115395Z"` // Date and time at which the chain details were updated.

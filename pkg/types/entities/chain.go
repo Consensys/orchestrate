@@ -17,9 +17,9 @@ type Chain struct {
 	ListenerStartingBlock     uint64
 	ListenerBackOffDuration   string
 	ListenerExternalTxEnabled *bool
-	//FIXME CUSTOM HEADER
-	PrivateTxManager *PrivateTxManager
-	Labels           map[string]string
-	CreatedAt        time.Time
-	UpdatedAt        time.Time
+	PrivateTxManager          *PrivateTxManager
+	Headers                   map[string]string
+	Labels                    map[string]string
+	CreatedAt                 time.Time
+	UpdatedAt                 time.Time
 }

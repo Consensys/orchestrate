@@ -36,8 +36,13 @@ func New(
 		return nil, err
 	}
 
-	appli.RegisterDaemon(listener)
-	appli.RegisterDaemon(sentry)
+	if listener != nil {
+		appli.RegisterDaemon(listener)
+	}
+
+	if sentry != nil {
+		appli.RegisterDaemon(sentry)
+	}
 
 	return appli, nil
 }

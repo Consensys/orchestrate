@@ -23,6 +23,7 @@ func NewXAPIKeyHeadersTransport(apiKey string) Middleware {
 }
 
 func (t *XAPIKeyHeadersTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	//FIXME CUSTOM HEADER double check this line, it may work to remove the GetAuthorizationHeader(req) == "" condition
 	if authutils.GetAuthorizationHeader(req) == "" && t.apiKey != "" {
 		authutils.AddAPIKeyHeaderValue(req, t.apiKey)
 	}

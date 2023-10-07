@@ -44,15 +44,10 @@ func (b *Builder) Build(ctx context.Context, name string, configuration interfac
 	m := New(cfg.Custom)
 
 	if cfg.IsProxy {
-		//FIXME CUSTOM HEADER
-		chain.Append(m.HandlerForRequestOnly)
-		respModifiers = append(respModifiers, m.ModifyResponseHeaders)
-	} else {
-		chain.Append(m.Handler)
+		return m.HandlerForRequestOnly, httputil.CombineResponseModifiers(append(respModifiers, m.ModifyResponseHeaders)...), nil
 	}
 
-	//FIXME CUSTOM HEADER
-	return chain.Then, httputil.CombineResponseModifiers(respModifiers...), nil
+	return m.Handler, httputil.CombineResponseModifiers(respModifiers...), nil
 }
 
 type Headers struct {
