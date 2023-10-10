@@ -213,21 +213,8 @@ func (ec *Client) Network(ctx context.Context, endpoint string) (*big.Int, error
 	return chain, nil
 }
 
-func (ec *Client) NetworkWithHeader(ctx context.Context, endpoint string, middleware transport.Middleware) (*big.Int, error) {
-	var version string
-
+func (ec *Client) AddMiddleware(middleware transport.Middleware) {
 	ec.client.Transport = middleware(ec.client.Transport)
-	//FIXME CUSTOM HEADER debug here.
-	if err := ec.Call(ctx, endpoint, utils.ProcessResult(&version), "net_version"); err != nil {
-		return nil, err
-	}
-
-	chain, ok := big.NewInt(0).SetString(version, 10)
-	if !ok {
-		return nil, errors.EncodingError("invalid network id %q", version)
-	}
-
-	return chain, nil
 }
 
 // State Access

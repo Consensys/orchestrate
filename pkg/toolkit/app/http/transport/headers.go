@@ -11,10 +11,19 @@ type customHeadersTransport struct {
 
 func NewCustomHeadersTransport(headers map[string]string) Middleware {
 	return func(nxt http.RoundTripper) http.RoundTripper {
-		return &customHeadersTransport{
-			T:       nxt,
-			headers: headers,
+
+		switch m := nxt.(type) {
+		//if the next round tripper is already a customHeadersTransport, just update the headers
+		case *customHeadersTransport:
+			m.headers = headers
+			return m
+		default:
+			return &customHeadersTransport{
+				T:       nxt,
+				headers: headers,
+			}
 		}
+
 	}
 }
 

@@ -109,11 +109,10 @@ func (uc *registerChainUseCase) getChainID(ctx context.Context, uris []string, h
 		var err error
 
 		if headers != nil {
-			chainID, err = uc.ethClient.NetworkWithHeader(ctx, uri, transport.NewCustomHeadersTransport(headers))
-		} else {
-			chainID, err = uc.ethClient.Network(ctx, uri)
+			uc.ethClient.AddMiddleware(transport.NewCustomHeadersTransport(headers))
 		}
 
+		chainID, err = uc.ethClient.Network(ctx, uri)
 		if err != nil {
 			errMessage := "failed to fetch chain id"
 			uc.logger.WithContext(ctx).WithField("url", uri).WithError(err).Error(errMessage)

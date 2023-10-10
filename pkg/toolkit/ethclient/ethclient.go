@@ -155,9 +155,8 @@ type GasPricer interface {
 
 // ChainSyncReader is a service to access to the node's current sync status
 type ChainSyncReader interface {
+	AddMiddleware(middleware transport.Middleware)
 	Network(ctx context.Context, url string) (*big.Int, error)
-	//FIXME CUSTOM HEADER implement me
-	NetworkWithHeader(ctx context.Context, url string, middleware transport.Middleware) (*big.Int, error)
 	SyncProgress(ctx context.Context, url string) (*eth.SyncProgress, error)
 }
 
