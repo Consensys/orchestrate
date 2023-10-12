@@ -176,7 +176,6 @@ type MultiClient interface {
 	Call(ctx context.Context, endpoint string, processResult func(result json.RawMessage) error, method string, args ...interface{}) error
 }
 
-// FIXME CUSTOM HEADER
 type Client interface {
 	TransactionSender
 	ChainLedgerReader

@@ -23,7 +23,6 @@ func NewXAPIKeyHeadersTransport(apiKey string) Middleware {
 }
 
 func (t *XAPIKeyHeadersTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-
 	if authutils.GetAuthorizationHeader(req) == "" && t.apiKey != "" {
 		authutils.AddAPIKeyHeaderValue(req, t.apiKey)
 	}
