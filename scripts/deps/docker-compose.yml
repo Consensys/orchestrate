@@ -19,7 +19,7 @@ x-postgres-common: &postgres-common
 services:
   zookeeper:
     <<: *container-common
-    image: confluentinc/cp-zookeeper:7.2.5.arm64
+    image: confluentinc/cp-zookeeper:7.2.5
     ports:
       - ${ZOOKEEPER_EXTERNAL_PORT-2181}:2181
     environment:
@@ -28,7 +28,7 @@ services:
 
   kafka:
     <<: *container-common
-    image: confluentinc/cp-kafka:7.2.5.arm64
+    image: confluentinc/cp-kafka:7.2.5
     depends_on:
       - zookeeper
     ports:
@@ -104,7 +104,7 @@ services:
 
   vault:
     <<: *container-common
-    image: consensys/quorum-hashicorp-vault-plugin:v1.1.5.arm64
+    image: consensys/quorum-hashicorp-vault-plugin:v1.1.5
     tty: true
     restart: "no"
     cap_add:
@@ -143,7 +143,7 @@ services:
 
   vault-agent:
     <<: *container-common
-    image: consensys/quorum-hashicorp-vault-plugin:v1.1.5.arm64
+    image: consensys/quorum-hashicorp-vault-plugin:v1.1.5
     tty: true
     depends_on:
       - vault
@@ -177,7 +177,7 @@ services:
 
   quorum-key-manager-migration:
     <<: *container-common
-    image: consensys/quorum-key-manager:v21.12.5.arm64
+    image: consensys/quorum-key-manager:v21.12.5
     environment:
       <<: *qkm-common
     restart: "no"
@@ -185,7 +185,7 @@ services:
 
   quorum-key-manager:
     <<: *container-common
-    image: consensys/quorum-key-manager:v21.12.5.arm64
+    image: consensys/quorum-key-manager:v21.12.5
     depends_on:
       - vault
       - quorum-key-manager-migration
