@@ -8,6 +8,7 @@ import (
 	context "context"
 	json "encoding/json"
 	types "github.com/consensys/orchestrate/pkg/ethereum/types"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/transport"
 	rpc "github.com/consensys/orchestrate/pkg/toolkit/ethclient/rpc"
 	ethereum "github.com/consensys/orchestrate/pkg/types/ethereum"
 	ethereum0 "github.com/ethereum/go-ethereum"
@@ -839,6 +840,10 @@ func NewMockMultiClient(ctrl *gomock.Controller) *MockMultiClient {
 	return mock
 }
 
+func (m *MockMultiClient) AddMiddleware(middleware transport.Middleware) {
+
+}
+
 // EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockMultiClient) EXPECT() *MockMultiClientMockRecorder {
 	return m.recorder
@@ -1405,6 +1410,9 @@ func NewMockClient(ctrl *gomock.Controller) *MockClient {
 	mock := &MockClient{ctrl: ctrl}
 	mock.recorder = &MockClientMockRecorder{mock}
 	return mock
+}
+
+func (m *MockClient) AddMiddleware(middleware transport.Middleware) {
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use
