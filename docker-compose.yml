@@ -5,8 +5,8 @@ x-default-variables: &default-variables
   API_METRICS_URL: ${API_METRICS_URL-http://api:8082}
   TX_SENDER_METRICS_URL: ${TX_SENDER_METRICS_URL-http://tx-sender:8082}
   TX_LISTENER_METRICS_URL: ${TX_LISTENER_METRICS_URL-http://tx-listener:8082}
-  KEY_MANAGER_URL: ${KEY_MANAGER_URL-http://key-manager:8080}
-  KEY_MANAGER_METRICS_URL: ${KEY_MANAGER_URL-http://key-manager:8081}
+  KEY_MANAGER_URL: ${KEY_MANAGER_URL-https://quorum-key-manager:8080}
+  KEY_MANAGER_METRICS_URL: ${KEY_MANAGER_URL-https://quorum-key-manager:8081}
   KEY_MANAGER_STORE_NAME: ${KEY_MANAGER_STORE_NAME-}
   KEY_MANAGER_TLS_SKIP_VERIFY: ${KEY_MANAGER_TLS_SKIP_VERIFY-}
   KEY_MANAGER_API_KEY: ${KEY_MANAGER_API_KEY-}
@@ -29,7 +29,7 @@ x-default-variables: &default-variables
 
 x-container-common: &container-common
   restart: ${CONTAINER_RESTART-on-failure}
-  image: consensys/orchestrate:v21.12.9
+  image: consensys/orchestrate:v21.12.7
   networks:
     - orchestrate
     - deps
@@ -44,7 +44,6 @@ x-db-common: &db-common
   DB_DATABASE: ${DB_DATABASE-}
   DB_POOLSIZE: ${DB_POOLSIZE-}
   DB_POOL_TIMEOUT: ${DB_POOL_TIMEOUT-}
-  DB_PASSWORD: postgres
 
 x-api-common: &api-common
   PROXY_MAXIDLECONNSPERHOST: ${PROXY_MAXIDLECONNSPERHOST-}
@@ -71,10 +70,11 @@ x-tx-sender-common: &tx-sender-common
   REDIS_EXPIRATION: ${REDIS_EXPIRATION-}
   REDIS_TLS_SKIP_VERIFY: ${REDIS_TLS_SKIP_VERIFY-}
 
+
 services:
   vault:
     <<: *container-common
-    image: consensys/quorum-hashicorp-vault-plugin:v1.1.5
+    image: consensys/quorum-hashicorp-vault-plugin:v1.1.4
     tty: true
     restart: "no"
     cap_add:
@@ -93,22 +93,14 @@ services:
     ports:
       - 8200:8200
     healthcheck:
-      test:
-        [
-          "CMD",
-          "wget",
-          "--spider",
-          "--proxy",
-          "off",
-          "http://vault:8200/v1/sys/health?standbyok=true",
-        ]
+      test: [ "CMD", "wget", "--spider", "--proxy", "off", "http://vault:8200/v1/sys/health?standbyok=true" ]
       interval: 10s
       timeout: 3s
       retries: 10
       start_period: 5s
 
   zookeeper:
-    image: confluentinc/cp-zookeeper:7.2.5
+    image: confluentinc/cp-zookeeper:5.4.3
     ports:
       - ${ZOOKEEPER_EXTERNAL_PORT-2181}:2181
     restart: "on-failure"
@@ -119,7 +111,7 @@ services:
       ZOOKEEPER_TICK_TIME: ${ZOOKEEPER_TICK_TIME-2000}
 
   kafka:
-    image: confluentinc/cp-kafka:7.2.5
+    image: confluentinc/cp-kafka:5.4.3
     depends_on:
       - zookeeper
     ports:
@@ -136,8 +128,7 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
     healthcheck:
-      test:
-        ["CMD", "kafka-topics", "--list", "--bootstrap-server", "kafka:9092"]
+      test: ["CMD", "kafka-topics", "--list", "--bootstrap-server", "kafka:9092"]
       interval: 3s
       timeout: 3s
       retries: 10
@@ -154,7 +145,7 @@ services:
     networks:
       - deps
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 1s
       timeout: 1s
       retries: 5
