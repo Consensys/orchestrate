@@ -418,8 +418,6 @@ func newAPI(ctx context.Context, topicCfg *sarama.KafkaTopicConfig) (*app.App, e
 	interceptedHTTPClient := httputils.NewClient(httputils.NewDefaultConfig())
 	gock.InterceptClient(interceptedHTTPClient)
 
-	//FIXME CUSTOM HEADER
-
 	pgmngr := postgres.GetManager()
 	txSchedulerConfig := api.NewConfig(viper.GetViper())
 

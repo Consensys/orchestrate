@@ -41,7 +41,6 @@ func New(ctx context.Context) (*app.App, error) {
 			Info("consumer client ready")
 	}
 
-	//FIXME CUSTOM HEADER
 	return NewTxSender(
 		config,
 		consumerGroups,

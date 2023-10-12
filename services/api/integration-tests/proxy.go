@@ -35,8 +35,6 @@ func (s *proxyTestSuite) TestProxy() {
 		chain, err := s.client.RegisterChain(ctx, req)
 		require.NoError(t, err)
 
-		//FIXME CUSTOM HEADER
-
 		err = backoff.RetryNotify(
 			func() error {
 				_, der := ethclient.GlobalClient().Network(ctx, utils.GetProxyURL(s.env.baseURL, chain.UUID))

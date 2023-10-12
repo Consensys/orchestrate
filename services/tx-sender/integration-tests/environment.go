@@ -239,7 +239,6 @@ func newTxSender(ctx context.Context, txSenderConfig *txsender.Config, redisCli 
 
 	txSenderConfig.NonceMaxRecovery = maxRecoveryDefault
 
-	//FIXME CUSTOM HEADER
 	return txsender.NewTxSender(txSenderConfig, []sarama2.ConsumerGroup{sarama.GlobalConsumerGroup()}, sarama.GlobalSyncProducer(),
 		qkmClient, apiClient, ec, redisCli)
 }
