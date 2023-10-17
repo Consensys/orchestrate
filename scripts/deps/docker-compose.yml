@@ -205,9 +205,9 @@ services:
       HTTPS_ENABLED: "true"
       HTTPS_SERVER_KEY: /certificates/https.key
       HTTPS_SERVER_CERT: /certificates/https.crt
-      #      AUTH_OIDC_ISSUER_URL: https://consensys.eu.auth0.com/
-      #      AUTH_OIDC_CUSTOM_CLAIMS: https://api.orchestrate.network
-      #      AUTH_TLS_CA: /ca/ca.crt
+#      AUTH_OIDC_ISSUER_URL: https://consensys.eu.auth0.com/
+#      AUTH_OIDC_CUSTOM_CLAIMS: https://api.orchestrate.network
+#      AUTH_TLS_CA: /ca/ca.crt
       AUTH_API_KEY_FILE: /apikey/orchestrate_api_keys.csv
     command: run
     healthcheck:
