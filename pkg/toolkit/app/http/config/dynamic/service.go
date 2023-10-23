@@ -42,7 +42,7 @@ func (p *ReverseProxy) SetDefaults() {
 	}
 
 	if p.PassHostHeader == nil {
-		p.PassHostHeader = utils.Bool(true)
+		p.PassHostHeader = utils.Bool(false)
 	}
 }
 

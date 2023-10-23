@@ -6,6 +6,7 @@ import (
 	"math/big"
 
 	"github.com/consensys/orchestrate/pkg/ethereum/types"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/transport"
 	"github.com/consensys/orchestrate/pkg/toolkit/ethclient/rpc"
 	proto "github.com/consensys/orchestrate/pkg/types/ethereum"
 	eth "github.com/ethereum/go-ethereum"
@@ -154,6 +155,7 @@ type GasPricer interface {
 
 // ChainSyncReader is a service to access to the node's current sync status
 type ChainSyncReader interface {
+	AddMiddleware(middleware transport.Middleware)
 	Network(ctx context.Context, url string) (*big.Int, error)
 	SyncProgress(ctx context.Context, url string) (*eth.SyncProgress, error)
 }

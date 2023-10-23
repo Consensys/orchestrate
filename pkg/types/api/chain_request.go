@@ -9,6 +9,7 @@ type RegisterChainRequest struct {
 	URLs             []string                 `json:"urls" pg:"urls,array" validate:"required,min=1,unique,dive,url" example:"https://mainnet.infura.io/v3/a73136601e6f4924a0baa4ed880b535e"` // List of URLs of Ethereum nodes to connect to.
 	Listener         RegisterListenerRequest  `json:"listener,omitempty"`
 	PrivateTxManager *PrivateTxManagerRequest `json:"privateTxManager,omitempty"`
+	Headers          map[string]string        `json:"headers,omitempty" validate:"omitempty"`
 	Labels           map[string]string        `json:"labels,omitempty"` // List of custom labels. Useful for adding custom information to the chain.
 }
 
@@ -24,6 +25,7 @@ type UpdateChainRequest struct {
 	Listener         *UpdateListenerRequest   `json:"listener,omitempty"`
 	PrivateTxManager *PrivateTxManagerRequest `json:"privateTxManager,omitempty"`
 	Labels           map[string]string        `json:"labels,omitempty"`
+	Headers          map[string]string        `json:"headers,omitempty" validate:"omitempty"`
 }
 
 type UpdateListenerRequest struct {

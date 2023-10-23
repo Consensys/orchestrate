@@ -5,6 +5,7 @@ import (
 	"math/big"
 
 	"github.com/consensys/orchestrate/pkg/errors"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/transport"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/log"
 	"github.com/consensys/orchestrate/pkg/toolkit/app/multitenancy"
 	"github.com/consensys/orchestrate/pkg/toolkit/database"
@@ -54,7 +55,7 @@ func (uc *registerChainUseCase) Execute(ctx context.Context, chain *entities.Cha
 		return nil, errors.AlreadyExistsError(errMessage).ExtendComponent(registerChainComponent)
 	}
 
-	chainID, err := uc.getChainID(ctx, chain.URLs)
+	chainID, err := uc.getChainID(ctx, chain.URLs, chain.Headers)
 	if err != nil {
 		return nil, errors.FromError(err).ExtendComponent(registerChainComponent)
 	}
@@ -99,10 +100,19 @@ func (uc *registerChainUseCase) Execute(ctx context.Context, chain *entities.Cha
 	return parsers.NewChainFromModel(chainModel), nil
 }
 
-func (uc *registerChainUseCase) getChainID(ctx context.Context, uris []string) (*big.Int, error) {
+func (uc *registerChainUseCase) getChainID(ctx context.Context, uris []string, headers map[string]string) (*big.Int, error) {
+
 	var prevChainID *big.Int
 	for i, uri := range uris {
-		chainID, err := uc.ethClient.Network(ctx, uri)
+
+		var chainID *big.Int
+		var err error
+
+		if headers != nil {
+			uc.ethClient.AddMiddleware(transport.NewCustomHeadersTransport(headers))
+		}
+
+		chainID, err = uc.ethClient.Network(ctx, uri)
 		if err != nil {
 			errMessage := "failed to fetch chain id"
 			uc.logger.WithContext(ctx).WithField("url", uri).WithError(err).Error(errMessage)

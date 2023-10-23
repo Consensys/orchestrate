@@ -20,6 +20,7 @@ type Chain struct {
 	ListenerExternalTxEnabled *bool `pg:"default:false,notnull"`
 	PrivateTxManagers         []*PrivateTxManager
 	Labels                    map[string]string
+	Headers                   map[string]string
 	CreatedAt                 time.Time `pg:"default:now()"`
 	UpdatedAt                 time.Time `pg:"default:now()"`
 }

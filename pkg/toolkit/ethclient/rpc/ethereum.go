@@ -7,6 +7,7 @@ import (
 
 	"github.com/consensys/orchestrate/pkg/errors"
 	"github.com/consensys/orchestrate/pkg/ethereum/types"
+	"github.com/consensys/orchestrate/pkg/toolkit/app/http/transport"
 	"github.com/consensys/orchestrate/pkg/toolkit/ethclient/utils"
 	proto "github.com/consensys/orchestrate/pkg/types/ethereum"
 	eth "github.com/ethereum/go-ethereum"
@@ -210,6 +211,10 @@ func (ec *Client) Network(ctx context.Context, endpoint string) (*big.Int, error
 	}
 
 	return chain, nil
+}
+
+func (ec *Client) AddMiddleware(middleware transport.Middleware) {
+	ec.client.Transport = middleware(ec.client.Transport)
 }
 
 // State Access

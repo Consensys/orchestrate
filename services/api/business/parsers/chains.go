@@ -22,6 +22,7 @@ func NewChainFromModel(chainModel *models.Chain) *entities.Chain {
 		ListenerBackOffDuration:   chainModel.ListenerBackOffDuration,
 		ListenerExternalTxEnabled: chainModel.ListenerExternalTxEnabled,
 		Labels:                    chainModel.Labels,
+		Headers:                   chainModel.Headers,
 		CreatedAt:                 chainModel.CreatedAt,
 		UpdatedAt:                 chainModel.UpdatedAt,
 	}
@@ -56,6 +57,7 @@ func NewChainModelFromEntity(chain *entities.Chain) *models.Chain {
 		ListenerBackOffDuration:   chain.ListenerBackOffDuration,
 		ListenerExternalTxEnabled: chain.ListenerExternalTxEnabled,
 		Labels:                    chain.Labels,
+		Headers:                   chain.Headers,
 		CreatedAt:                 chain.CreatedAt,
 		UpdatedAt:                 chain.UpdatedAt,
 	}
