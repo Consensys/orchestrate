@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"strings"
 	"time"
 
@@ -56,37 +57,37 @@ func (c *HTTPClient) SearchJob(ctx context.Context, filters *entities.JobFilters
 	reqURL := fmt.Sprintf("%v/jobs", c.config.URL)
 	var resp []*types.JobResponse
 
-	var qParams []string
+	qParams := url.Values{}
 	if len(filters.TxHashes) > 0 {
-		qParams = append(qParams, "tx_hashes="+strings.Join(filters.TxHashes, ","))
+		qParams.Add("tx_hashes", strings.Join(filters.TxHashes, ","))
 	}
 
 	if filters.ChainUUID != "" {
-		qParams = append(qParams, "chain_uuid="+filters.ChainUUID)
+		qParams.Add("chain_uuid", filters.ChainUUID)
 	}
 
 	if filters.Status != "" {
-		qParams = append(qParams, "status="+string(filters.Status))
+		qParams.Add("status", string(filters.Status))
 	}
 
 	if !filters.UpdatedAfter.IsZero() {
-		qParams = append(qParams, "updated_after="+filters.UpdatedAfter.Format(time.RFC3339))
+		qParams.Add("updated_after", filters.UpdatedAfter.Format(time.RFC3339))
 	}
 
 	if filters.OnlyParents {
-		qParams = append(qParams, "only_parents=true")
+		qParams.Add("only_parents", "true")
 	}
 
 	if filters.ParentJobUUID != "" {
-		qParams = append(qParams, "parent_job_uuid="+filters.ParentJobUUID)
+		qParams.Add("parent_job_uuid", filters.ParentJobUUID)
 	}
 
 	if filters.WithLogs {
-		qParams = append(qParams, "with_logs=true")
+		qParams.Add("with_logs", "true")
 	}
 
 	if len(qParams) > 0 {
-		reqURL = reqURL + "?" + strings.Join(qParams, "&")
+		reqURL = reqURL + "?" + qParams.Encode()
 	}
 
 	err := callWithBackOff(ctx, c.config.backOff, func() error {
